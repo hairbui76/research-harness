@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Harness Literature Review"
+  short_description: "Auditable discovery, snowballing, and baselines"
+  default_prompt: "Use $my-literature-review to plan an auditable literature review and return research candidates without accepting scientific claims automatically."
