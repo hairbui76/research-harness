@@ -28,14 +28,39 @@ __all__ = ["CLAUDE", "claude_args", "claude_auth"]
 _NOT_LOGGED_IN = re.compile(
     r"not logged[ _-]?in|please run /login|\"loggedIn\"\s*:\s*false", re.IGNORECASE
 )
-_LOGGED_IN = re.compile(r"\"loggedIn\"\s*:\s*true|\"authenticated\"\s*:\s*true", re.IGNORECASE)
+
+
+def _status_object(stdout: str) -> object | None:
+    """The first complete `{...}` object in stdout, or `None` if there is none.
+
+    `claude auth status` prints its object after whatever the build decided to say first --
+    a version banner, an update notice -- and `json.loads` over the whole stream fails on
+    that. Scanning for the object keeps a genuine subscription login readable instead of
+    letting a banner push it onto the text path, which cannot tell one login from another.
+    """
+    decoder = json.JSONDecoder()
+    start = stdout.find("{")
+    while start != -1:
+        parsed: object
+        try:
+            parsed, _ = decoder.raw_decode(stdout, start)
+        except ValueError:
+            start = stdout.find("{", start + 1)
+            continue
+        return parsed
+    return None
 
 
 def claude_auth(outcome: ProbeOutcome) -> tuple[AuthStatus, str]:
-    try:
-        payload = json.loads(outcome.stdout)
-    except ValueError:
-        payload = None
+    """`ok` only for a parsed `authMethod` of `claude.ai`; unreadable output is `unknown`.
+
+    The text path can see that *some* login exists and can never see which kind, and only a
+    Claude.ai subscription is routable here (spec §12) -- an API-key or console login is
+    metered access wearing the same words. So it may report `missing` on an explicit refusal
+    and otherwise `unknown`; it may never report `ok`, because "logged in" is not evidence
+    of the one login this definition accepts.
+    """
+    payload = _status_object(outcome.stdout)
     if isinstance(payload, dict) and isinstance(payload.get("loggedIn"), bool):
         if not payload["loggedIn"]:
             return "missing", "run `claude auth login`"
@@ -46,8 +71,6 @@ def claude_auth(outcome: ProbeOutcome) -> tuple[AuthStatus, str]:
             f"logged in without a Claude.ai subscription (authMethod {method}): "
             "run `claude auth login` with a Claude.ai account"
         )
-    if _LOGGED_IN.search(outcome.text):
-        return "ok", ""
     if _NOT_LOGGED_IN.search(outcome.text):
         return "missing", "run `claude auth login`"
     return "unknown", "run `claude auth status`"

@@ -159,6 +159,28 @@ def test_claude_auth_status_reads_the_json_and_falls_back_to_text() -> None:
     )
 
 
+def test_claude_auth_reads_the_json_behind_a_banner_and_never_guesses_ok() -> None:
+    """A banner must not downgrade a real subscription, and text must not promote a login.
+
+    `claude auth status` prints its object after whatever the CLI decided to say first.
+    Parsing only the whole stream would fail on that and fall to a text match — which can
+    see "logged in" and can never see *how*, and only a Claude.ai login is routable here.
+    """
+    banner = "Claude Code 2.1.259\nChecking credentials…\n"
+
+    def status(stdout: str) -> tuple[str, str]:
+        return claude_auth(ProbeOutcome(argv=("x",), exit_code=0, stdout=stdout, stderr=""))
+
+    assert status(banner + json.dumps({"loggedIn": True, "authMethod": "claude.ai"})) == ("ok", "")
+    verdict, guidance = status(banner + json.dumps({"loggedIn": True, "authMethod": "console"}))
+    assert verdict == "missing" and "console" in guidance
+    assert status(banner + json.dumps({"loggedIn": False, "authMethod": None}))[0] == "missing"
+
+    for unparseable in ('Logged in\n"loggedIn": true', '"authenticated": true', "Logged in."):
+        assert status(unparseable)[0] == "unknown", "text alone never proves a subscription"
+    assert status('Logged in\n"loggedIn": true')[1] == "run `claude auth status`"
+
+
 def test_claude_non_subscription_login_is_not_routable() -> None:
     status, guidance = claude_auth(outcome("claude-auth-status-console.json"))
     assert status == "missing", "a console login is metered; it is not a Claude.ai subscription"
