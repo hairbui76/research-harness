@@ -1,0 +1,73 @@
+{
+  "anchors": [
+    {
+      "citation_keys": [
+        "traffic2024"
+      ],
+      "claim": "C0001",
+      "file": "main.tex",
+      "line_start": 14,
+      "sentence": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap.",
+      "stale": "fresh",
+      "status": "valid"
+    },
+    {
+      "citation_keys": [
+        "traffic2024"
+      ],
+      "claim": "C0001",
+      "file": "main.tex",
+      "line_start": 17,
+      "sentence": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol.",
+      "stale": "fresh",
+      "status": "valid"
+    },
+    {
+      "citation_keys": [
+        "missing2023"
+      ],
+      "claim": "C0002",
+      "file": "main.tex",
+      "line_start": 20,
+      "sentence": "Prior surveys, e.g. the review of, report no comparable figure for the same setting.",
+      "stale": "fresh",
+      "status": "valid"
+    }
+  ],
+  "count": 3,
+  "verdicts": [
+    {
+      "anchor": "main.tex#sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+      "claim": "C0001",
+      "file": "main.tex",
+      "line_end": 15,
+      "line_start": 14,
+      "reason": "sentence unchanged at the recorded span",
+      "relocated_to": null,
+      "similarity": 1.0,
+      "status": "valid"
+    },
+    {
+      "anchor": "main.tex#sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+      "claim": "C0001",
+      "file": "main.tex",
+      "line_end": 18,
+      "line_start": 17,
+      "reason": "sentence unchanged at the recorded span",
+      "relocated_to": null,
+      "similarity": 1.0,
+      "status": "valid"
+    },
+    {
+      "anchor": "main.tex#sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+      "claim": "C0002",
+      "file": "main.tex",
+      "line_end": 21,
+      "line_start": 20,
+      "reason": "sentence unchanged at the recorded span",
+      "relocated_to": null,
+      "similarity": 1.0,
+      "status": "valid"
+    }
+  ]
+}

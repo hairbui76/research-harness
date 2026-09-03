@@ -1,0 +1,498 @@
+{
+  "artifact": "A0001-1",
+  "blocks": [
+    {
+      "bbox": [
+        54.0,
+        52.81,
+        477.2,
+        76.22
+      ],
+      "id": "B0001",
+      "kind": "section",
+      "order": 0,
+      "page": 1,
+      "section_path": [
+        "Deep Representations for Encrypted Network Traffic"
+      ],
+      "text": "Deep Representations for Encrypted Network Traffic"
+    },
+    {
+      "bbox": [
+        54.0,
+        92.69,
+        241.84,
+        106.43
+      ],
+      "id": "B0002",
+      "kind": "paragraph",
+      "order": 1,
+      "page": 1,
+      "section_path": [
+        "Deep Representations for Encrypted Network Traffic"
+      ],
+      "text": "A. Researcher, B. Collaborator, C. Advisor"
+    },
+    {
+      "bbox": [
+        54.0,
+        117.8,
+        102.67,
+        134.32
+      ],
+      "id": "B0003",
+      "kind": "section",
+      "order": 2,
+      "page": 1,
+      "section_path": [
+        "Abstract"
+      ],
+      "text": "Abstract"
+    },
+    {
+      "bbox": [
+        54.0,
+        140.73,
+        552.0,
+        194.07
+      ],
+      "id": "B0004",
+      "kind": "paragraph",
+      "order": 3,
+      "page": 1,
+      "section_path": [
+        "Abstract"
+      ],
+      "text": "Encrypted network traffic hides payload content from classical signature detectors, so modern intrusion detection relies on flow level features. We study whether a pretrained sequence model learns representations of traffic that transfer across capture conditions, and we report detection quality on a public benchmark under a fixed evaluation protocol."
+    },
+    {
+      "bbox": [
+        54.0,
+        211.44,
+        134.0,
+        227.96
+      ],
+      "id": "B0005",
+      "kind": "section",
+      "order": 4,
+      "page": 1,
+      "section_path": [
+        "1 Introduction"
+      ],
+      "text": "1 Introduction"
+    },
+    {
+      "bbox": [
+        54.0,
+        234.37,
+        554.82,
+        287.71
+      ],
+      "id": "B0006",
+      "kind": "paragraph",
+      "order": 5,
+      "page": 1,
+      "section_path": [
+        "1 Introduction"
+      ],
+      "text": "Network intrusion detection systems must decide, from headers and timing alone, whether a flow is benign. Payload inspection is unavailable once transport encryption is in use, and hand engineered features age badly as protocols change. Representation learning offers an alternative: train once on unlabelled captures, then fine tune on a small labelled corpus."
+    },
+    {
+      "bbox": [
+        54.0,
+        295.17,
+        556.48,
+        335.31
+      ],
+      "id": "B0007",
+      "kind": "paragraph",
+      "order": 6,
+      "page": 1,
+      "section_path": [
+        "1 Introduction"
+      ],
+      "text": "This paper asks a narrow question. Given the same benchmark, the same split, and the same budget, does a pretrained model beat a tuned tree ensemble? We describe the tokenization scheme, the evaluation protocol, and the limitations that follow from studying a single capture environment."
+    },
+    {
+      "bbox": [
+        54.0,
+        53.16,
+        106.67,
+        69.68
+      ],
+      "id": "B0008",
+      "kind": "section",
+      "order": 7,
+      "page": 2,
+      "section_path": [
+        "2 Method"
+      ],
+      "text": "2 Method"
+    },
+    {
+      "bbox": [
+        54.0,
+        76.09,
+        556.98,
+        116.23
+      ],
+      "id": "B0009",
+      "kind": "paragraph",
+      "order": 8,
+      "page": 2,
+      "section_path": [
+        "2 Method"
+      ],
+      "text": "Our model consumes a flow as an ordered sequence of packet descriptors. Each descriptor carries direction, inter arrival time bucket, and payload length bucket. The encoder is a twelve layer transformer trained with a masked descriptor objective on unlabelled captures."
+    },
+    {
+      "bbox": [
+        54.0,
+        128.67,
+        139.58,
+        143.82
+      ],
+      "id": "B0010",
+      "kind": "section",
+      "order": 9,
+      "page": 2,
+      "section_path": [
+        "2 Method",
+        "2.1 Tokenization"
+      ],
+      "text": "2.1 Tokenization"
+    },
+    {
+      "bbox": [
+        54.0,
+        149.21,
+        540.36,
+        189.35
+      ],
+      "id": "B0011",
+      "kind": "paragraph",
+      "order": 10,
+      "page": 2,
+      "section_path": [
+        "2 Method",
+        "2.1 Tokenization"
+      ],
+      "text": "Tokenization maps each packet descriptor to one of 4096 discrete tokens. Continuous quantities are bucketed with quantile boundaries estimated on the pretraining corpus, which keeps the vocabulary stable when the capture rate changes. The loss is the usual masked cross entropy with weight decay:"
+    },
+    {
+      "bbox": [
+        54.0,
+        200.81,
+        324.76,
+        214.55
+      ],
+      "id": "B0012",
+      "kind": "equation",
+      "order": 11,
+      "page": 2,
+      "section_path": [
+        "2 Method",
+        "2.1 Tokenization"
+      ],
+      "text": "L(theta) = - sum_i y_i log p_i(x; theta) + lambda ||theta||^2 (1)"
+    },
+    {
+      "bbox": [
+        54.0,
+        230.01,
+        549.27,
+        256.95
+      ],
+      "id": "B0013",
+      "kind": "paragraph",
+      "order": 12,
+      "page": 2,
+      "section_path": [
+        "2 Method",
+        "2.1 Tokenization"
+      ],
+      "text": "Bucket boundaries are frozen after pretraining so that a fine tuned checkpoint and its pretrained parent agree on the meaning of every token."
+    },
+    {
+      "bbox": [
+        54.0,
+        53.16,
+        136.03,
+        69.68
+      ],
+      "id": "B0014",
+      "kind": "section",
+      "order": 13,
+      "page": 3,
+      "section_path": [
+        "3 Experiments"
+      ],
+      "text": "3 Experiments"
+    },
+    {
+      "bbox": [
+        54.0,
+        76.09,
+        517.55,
+        103.03
+      ],
+      "id": "B0015",
+      "kind": "paragraph",
+      "order": 14,
+      "page": 3,
+      "section_path": [
+        "3 Experiments"
+      ],
+      "text": "We evaluate detection quality under a single fixed protocol: one training split, one validation split for early stopping, and one held out test split that is never inspected during development."
+    },
+    {
+      "bbox": [
+        54.0,
+        115.47,
+        112.08,
+        130.62
+      ],
+      "id": "B0016",
+      "kind": "section",
+      "order": 15,
+      "page": 3,
+      "section_path": [
+        "3 Experiments",
+        "3.1 Dataset"
+      ],
+      "text": "3.1 Dataset"
+    },
+    {
+      "bbox": [
+        54.0,
+        136.01,
+        551.44,
+        189.35
+      ],
+      "id": "B0017",
+      "kind": "paragraph",
+      "order": 16,
+      "page": 3,
+      "section_path": [
+        "3 Experiments",
+        "3.1 Dataset"
+      ],
+      "text": "All experiments use CICIDS2017, a labelled capture of benign and attack traffic released with DOI 10.1000/xyz123 and mirrored as arXiv:2401.12345. We keep the official day boundaries, discard flows shorter than three packets, and report macro averaged scores over the five attack families that remain after filtering. The resulting corpus contains 1.2 million flows."
+    },
+    {
+      "bbox": [
+        54.0,
+        196.81,
+        507.51,
+        223.75
+      ],
+      "id": "B0018",
+      "kind": "paragraph",
+      "order": 17,
+      "page": 3,
+      "section_path": [
+        "3 Experiments",
+        "3.1 Dataset"
+      ],
+      "text": "Class imbalance is severe: benign flows outnumber attack flows by roughly forty to one, so accuracy is uninformative and we report F1 and precision instead."
+    },
+    {
+      "bbox": [
+        54.0,
+        723.94,
+        357.88,
+        734.24
+      ],
+      "id": "B0019",
+      "kind": "footnote",
+      "order": 18,
+      "page": 3,
+      "section_path": [
+        "3 Experiments",
+        "3.1 Dataset"
+      ],
+      "text": "1 The CICIDS2017 archive is distributed by its original authors and is not redistributed here."
+    },
+    {
+      "bbox": [
+        54.0,
+        53.16,
+        107.35,
+        69.68
+      ],
+      "id": "B0020",
+      "kind": "section",
+      "order": 19,
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text": "4 Results"
+    },
+    {
+      "bbox": [
+        54.0,
+        76.09,
+        549.81,
+        116.23
+      ],
+      "id": "B0021",
+      "kind": "paragraph",
+      "order": 20,
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text": "Table 1 reports detection quality for the pretrained model and two baselines under the protocol of Section 3. The pretrained encoder improves F1 by 2.57 points over the strongest baseline, and the gain is concentrated in the two rarest attack families."
+    },
+    {
+      "bbox": [
+        94.0,
+        156.32,
+        474.0,
+        224.32
+      ],
+      "id": "B0022",
+      "kind": "table",
+      "order": 21,
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text": "Model | Dataset | F1 | Precision\nTrafficLM | CICIDS2017 | 94.32 | 93.10\nFlowBERT | CICIDS2017 | 91.75 | 90.44\nBaselineRF | CICIDS2017 | 88.10 | 87.02"
+    },
+    {
+      "bbox": [
+        54.0,
+        232.65,
+        296.09,
+        245.01
+      ],
+      "id": "B0023",
+      "kind": "figure_caption",
+      "order": 22,
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text": "Figure 1: Confusion matrix for TrafficLM on the held-out split."
+    },
+    {
+      "bbox": [
+        54.0,
+        253.45,
+        528.1,
+        280.39
+      ],
+      "id": "B0024",
+      "kind": "paragraph",
+      "order": 23,
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text": "Errors concentrate on short lived flows, where the descriptor sequence is too brief for the encoder to use its context window."
+    },
+    {
+      "bbox": [
+        54.0,
+        53.16,
+        128.02,
+        69.68
+      ],
+      "id": "B0025",
+      "kind": "section",
+      "order": 24,
+      "page": 5,
+      "section_path": [
+        "5 Limitations"
+      ],
+      "text": "5 Limitations"
+    },
+    {
+      "bbox": [
+        54.0,
+        76.09,
+        538.66,
+        116.23
+      ],
+      "id": "B0026",
+      "kind": "paragraph",
+      "order": 25,
+      "page": 5,
+      "section_path": [
+        "5 Limitations"
+      ],
+      "text": "Every result here concerns encrypted traffic captured in one environment over one week. We do not claim transfer to other networks, and we did not evaluate adversarial evasion. Reported gains are within benchmark noise for the two largest attack families."
+    },
+    {
+      "bbox": [
+        54.0,
+        135.6,
+        118.69,
+        152.12
+      ],
+      "id": "B0027",
+      "kind": "section",
+      "order": 26,
+      "page": 5,
+      "section_path": [
+        "References"
+      ],
+      "text": "References"
+    },
+    {
+      "bbox": [
+        54.0,
+        160.07,
+        514.47,
+        185.66
+      ],
+      "id": "B0028",
+      "kind": "reference",
+      "order": 27,
+      "page": 5,
+      "section_path": [
+        "References"
+      ],
+      "text": "[1] A. Author and B. Coauthor. Learning traffic representations. In Proceedings of the Example Conference on Networking, pages 11-24, 2023."
+    },
+    {
+      "bbox": [
+        54.0,
+        191.15,
+        522.87,
+        204.2
+      ],
+      "id": "B0029",
+      "kind": "reference",
+      "order": 28,
+      "page": 5,
+      "section_path": [
+        "References"
+      ],
+      "text": "[2] C. Researcher. A survey of encrypted traffic classification. Journal of Example Studies, 41(3):188-207, 2022."
+    },
+    {
+      "bbox": [
+        54.0,
+        209.69,
+        469.06,
+        222.74
+      ],
+      "id": "B0030",
+      "kind": "reference",
+      "order": 29,
+      "page": 5,
+      "section_path": [
+        "References"
+      ],
+      "text": "[3] D. Scientist and E. Engineer. A labelled dataset for intrusion detection. arXiv:2312.00001, 2024."
+    }
+  ],
+  "file_hash": "sha256:2fe74d81589898bba093deb236fa1bc19f595f7d9d36c15c26cb29bfe2c1184b",
+  "mime_type": "application/pdf",
+  "page_count": 5,
+  "version": "V0001-1",
+  "work": "W0001"
+}

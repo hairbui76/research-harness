@@ -1,0 +1,4 @@
+# pnpm 11 keeps install settings here. esbuild is the only dependency allowed to run a
+# post-install script: Vite's bundler unpacks its native binary there.
+allowBuilds:
+  esbuild: true

@@ -1,0 +1,96 @@
+{
+  "anchor_status": "valid",
+  "artifact": "A0001-1",
+  "candidate_id": "cand_44c1f007fc0db0b2",
+  "evidence": {
+    "content": {
+      "exact_text": "94.32",
+      "field": "metric_result",
+      "labels": [],
+      "negative_state": null,
+      "numeric": {
+        "condition": {
+          "split": "held-out"
+        },
+        "dataset": "CICIDS2017",
+        "metric": "F1",
+        "parsed": 94.32,
+        "raw": "94.32",
+        "source_column": "F1",
+        "source_row": "TrafficLM",
+        "source_table": "Table 1",
+        "unit": "percent"
+      }
+    },
+    "created_at": "2026-09-03T01:13:53.846468Z",
+    "decisions": [],
+    "evidence_type": "experimental_result",
+    "id": "E0000",
+    "origin": "source_observed",
+    "provenance": {
+      "actor": "scripted/scripted-1",
+      "note": null,
+      "run_id": "run_20260903T011353Z_0caa083f",
+      "source": "model",
+      "template_version": "1.0.0",
+      "workflow": "interrogate"
+    },
+    "qualification": null,
+    "review_tier": 2,
+    "schema_version": 1,
+    "source": {
+      "artifact": "A0001-1",
+      "bbox": {
+        "x0": 94.0,
+        "x1": 474.0,
+        "y0": 156.32,
+        "y1": 224.32
+      },
+      "block": "B0022",
+      "char_end": 63,
+      "char_start": 58,
+      "file_hash": "sha256:2fe74d81589898bba093deb236fa1bc19f595f7d9d36c15c26cb29bfe2c1184b",
+      "page": 4,
+      "section_path": [
+        "4 Results"
+      ],
+      "text_hash": "sha256:d1d23371223a99b8a547be751fd03cf881754c4d0b28f674586ef2bee88d99da",
+      "version": "V0001-1",
+      "work": "W0001"
+    },
+    "stale": "fresh",
+    "strength": "direct",
+    "updated_at": "2026-09-03T01:13:54.097039Z",
+    "verification": {
+      "accepted_by": null,
+      "extractor": "scripted/scripted-1",
+      "rationale": "read the span and the blocks around it",
+      "review_action": null,
+      "reviewed_at": null,
+      "status": "verified",
+      "verdict": "supported",
+      "verifier": "scripted/scripted-1"
+    }
+  },
+  "extraction": {
+    "model": "scripted-1",
+    "provider": "scripted",
+    "rationale": "Row TrafficLM, column F1 of Table 1.",
+    "request_fingerprint": "ab3db0e2341cf023f5ff73d8efd3ede3a39f35bb97bbad0b60295870f54eab98",
+    "response_schema_fingerprint": "b9b83baf6a1b4d7af9420a6596579907aa8c0c31f5530a24aaae8ae7f4709a14",
+    "run_id": "run_20260903T011353Z_0caa083f",
+    "template_version": "1.0.0"
+  },
+  "field": "metric_result",
+  "review_action": null,
+  "status": "verified",
+  "verdict": "supported",
+  "verification": {
+    "discrepancies": [],
+    "quoted_support": "94.32",
+    "rationale": "read the span and the blocks around it",
+    "verdict": "supported"
+  },
+  "verifier": "scripted/scripted-1",
+  "work": "W0001"
+}

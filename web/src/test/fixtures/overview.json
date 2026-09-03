@@ -1,0 +1,69 @@
+{
+  "actor": "human",
+  "attention": [
+    {
+      "count": 2,
+      "items": [
+        {
+          "detail": "the verifier reported partially_supported",
+          "id": "cand_b09aa84fc5dee7c0",
+          "label": "method_summary · W0001",
+          "priority": 3
+        },
+        {
+          "detail": "verified supported, tier 1, anchor valid",
+          "id": "cand_4590b9b1f474d343",
+          "label": "dataset · W0001",
+          "priority": 4
+        }
+      ],
+      "kind": "review_items",
+      "label": "2 review items",
+      "route": "/review"
+    },
+    {
+      "count": 0,
+      "items": [],
+      "kind": "conflicts",
+      "label": "0 conflicts",
+      "route": "/conflicts"
+    },
+    {
+      "count": 0,
+      "items": [],
+      "kind": "stale",
+      "label": "0 stale objects",
+      "route": "/stale"
+    },
+    {
+      "count": 0,
+      "items": [],
+      "kind": "unsupported_manuscript_claims",
+      "label": "0 unsupported manuscript claims",
+      "route": "/manuscript"
+    }
+  ],
+  "claim_health": [
+    {
+      "count": 1,
+      "key": "supported"
+    }
+  ],
+  "conflicts": [],
+  "counts": {
+    "accepted_evidence": 1,
+    "artifacts": 1,
+    "claims": 1,
+    "decisions": 0,
+    "manuscript_anchors": 0,
+    "matrices": 0,
+    "questions": 0,
+    "works": 1
+  },
+  "next_decision_id": "D0001",
+  "open_questions": [],
+  "principal": "human",
+  "project": "gate-p11",
+  "review_policy": "strict",
+  "workspace": "/tmp/research-harness-web-fixtures-5gmycnt2/cockpit"
+}

@@ -1,0 +1,464 @@
+{
+  "anchored_sentences": 3,
+  "findings": [
+    {
+      "anchor": {
+        "char_end": 373,
+        "char_start": 244,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.124792Z",
+        "file": "main.tex",
+        "line_end": 15,
+        "line_start": 14,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap.",
+        "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.124794Z"
+      },
+      "kind": "over_strong_wording",
+      "location": {
+        "char_end": 373,
+        "char_start": 244,
+        "file": "main.tex",
+        "line_end": 15,
+        "line_start": 14
+      },
+      "message": "main.tex:14: sentence reads L4 universal_or_absence via 'no prior work', 'every', but C0001 allows only L2 corpus_pattern; the defensible wording is 'most systems in the reviewed corpus'",
+      "related": [
+        "C0001"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchor": {
+        "char_end": 373,
+        "char_start": 244,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.124792Z",
+        "file": "main.tex",
+        "line_end": 15,
+        "line_start": 14,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap.",
+        "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.124794Z"
+      },
+      "kind": "citation_mismatch",
+      "location": {
+        "char_end": 373,
+        "char_start": 244,
+        "file": "main.tex",
+        "line_end": 15,
+        "line_start": 14
+      },
+      "message": "main.tex:14: citation 'traffic2024' cannot be traced to a corpus work: bibliography entry 'traffic2024' is not registered as a corpus work, so no evidence can be traced to it",
+      "related": [
+        "C0001"
+      ],
+      "severity": "error"
+    },
+    {
+      "anchor": {
+        "char_end": 484,
+        "char_start": 375,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.200852Z",
+        "file": "main.tex",
+        "line_end": 18,
+        "line_start": 17,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol.",
+        "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.200853Z"
+      },
+      "kind": "citation_mismatch",
+      "location": {
+        "char_end": 484,
+        "char_start": 375,
+        "file": "main.tex",
+        "line_end": 18,
+        "line_start": 17
+      },
+      "message": "main.tex:17: citation 'traffic2024' cannot be traced to a corpus work: bibliography entry 'traffic2024' is not registered as a corpus work, so no evidence can be traced to it",
+      "related": [
+        "C0001"
+      ],
+      "severity": "error"
+    },
+    {
+      "anchor": {
+        "char_end": 484,
+        "char_start": 375,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.200852Z",
+        "file": "main.tex",
+        "line_end": 18,
+        "line_start": 17,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol.",
+        "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.200853Z"
+      },
+      "kind": "unsupported_numeric",
+      "location": {
+        "char_end": 484,
+        "char_start": 375,
+        "file": "main.tex",
+        "line_end": 18,
+        "line_start": 17
+      },
+      "message": "main.tex:17: the value '94.32' is not backed by source-observed evidence: no accepted, source-observed evidence of C0001 measures 94.32",
+      "related": [
+        "C0001"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchor": {
+        "char_end": 634,
+        "char_start": 530,
+        "citation_keys": [
+          "missing2023"
+        ],
+        "claim": "C0002",
+        "created_at": "2026-09-03T01:13:55.276465Z",
+        "file": "main.tex",
+        "line_end": 21,
+        "line_start": 20,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Prior surveys, e.g. the review of, report no comparable figure for the same setting.",
+        "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.276466Z"
+      },
+      "kind": "citation_mismatch",
+      "location": {
+        "char_end": 634,
+        "char_start": 530,
+        "file": "main.tex",
+        "line_end": 21,
+        "line_start": 20
+      },
+      "message": "main.tex:20: citation key 'missing2023' is not defined in the bibliography",
+      "related": [],
+      "severity": "error"
+    },
+    {
+      "anchor": {
+        "char_end": 634,
+        "char_start": 530,
+        "citation_keys": [
+          "missing2023"
+        ],
+        "claim": "C0002",
+        "created_at": "2026-09-03T01:13:55.276465Z",
+        "file": "main.tex",
+        "line_end": 21,
+        "line_start": 20,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Prior surveys, e.g. the review of, report no comparable figure for the same setting.",
+        "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.276466Z"
+      },
+      "kind": "stale_claim",
+      "location": {
+        "char_end": 634,
+        "char_start": 530,
+        "file": "main.tex",
+        "line_end": 21,
+        "line_start": 20
+      },
+      "message": "main.tex:20: C0002 needs review before this sentence ships: the claim status is contested",
+      "related": [
+        "C0002"
+      ],
+      "severity": "warning"
+    },
+    {
+      "anchor": null,
+      "kind": "unregistered_claim",
+      "location": {
+        "char_end": 710,
+        "char_start": 636,
+        "file": "main.tex",
+        "line_end": 23,
+        "line_start": 23
+      },
+      "message": "main.tex:23: substantive sentence is attached to no Claim: 'Our sweep shows that detection quality degrades as the offered load grows.'",
+      "related": [],
+      "severity": "warning"
+    }
+  ],
+  "revalidations": [
+    {
+      "anchor": {
+        "char_end": 373,
+        "char_start": 244,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.124792Z",
+        "file": "main.tex",
+        "line_end": 15,
+        "line_start": 14,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap.",
+        "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.124794Z"
+      },
+      "reason": "sentence unchanged at the recorded span",
+      "relocated": null,
+      "similarity": 1.0,
+      "status": "valid"
+    },
+    {
+      "anchor": {
+        "char_end": 484,
+        "char_start": 375,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "claim": "C0001",
+        "created_at": "2026-09-03T01:13:55.200852Z",
+        "file": "main.tex",
+        "line_end": 18,
+        "line_start": 17,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol.",
+        "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.200853Z"
+      },
+      "reason": "sentence unchanged at the recorded span",
+      "relocated": null,
+      "similarity": 1.0,
+      "status": "valid"
+    },
+    {
+      "anchor": {
+        "char_end": 634,
+        "char_start": 530,
+        "citation_keys": [
+          "missing2023"
+        ],
+        "claim": "C0002",
+        "created_at": "2026-09-03T01:13:55.276465Z",
+        "file": "main.tex",
+        "line_end": 21,
+        "line_start": 20,
+        "provenance": {
+          "actor": "human",
+          "note": null,
+          "run_id": null,
+          "source": "human",
+          "template_version": null,
+          "workflow": "manuscript"
+        },
+        "schema_version": 1,
+        "sentence": "Prior surveys, e.g. the review of, report no comparable figure for the same setting.",
+        "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+        "stale": "fresh",
+        "status": "valid",
+        "updated_at": "2026-09-03T01:13:55.276466Z"
+      },
+      "reason": "sentence unchanged at the recorded span",
+      "relocated": null,
+      "similarity": 1.0,
+      "status": "valid"
+    }
+  ],
+  "sentences_checked": 4,
+  "trace": [
+    {
+      "anchor_key": "main.tex#sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+      "claim": "C0001",
+      "evidence": [],
+      "sentence": {
+        "char_end": 373,
+        "char_start": 244,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "file": "main.tex",
+        "fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+        "in_environment": null,
+        "line_end": 15,
+        "line_start": 14,
+        "normalized_text": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap.",
+        "protected_spans": [
+          {
+            "char_end": 128,
+            "char_start": 109,
+            "kind": "citation",
+            "text": "\\citep{traffic2024}"
+          }
+        ],
+        "section_path": [
+          "Introduction"
+        ],
+        "text": "Every encrypted traffic classifier fails under sustained load, and no prior work\nreports the size of the gap \\citep{traffic2024}."
+      },
+      "spans": []
+    },
+    {
+      "anchor_key": "main.tex#sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+      "claim": "C0001",
+      "evidence": [],
+      "sentence": {
+        "char_end": 484,
+        "char_start": 375,
+        "citation_keys": [
+          "traffic2024"
+        ],
+        "file": "main.tex",
+        "fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+        "in_environment": null,
+        "line_end": 18,
+        "line_start": 17,
+        "normalized_text": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol.",
+        "protected_spans": [
+          {
+            "char_end": 46,
+            "char_start": 41,
+            "kind": "number_with_unit",
+            "text": "94.32"
+          },
+          {
+            "char_end": 108,
+            "char_start": 89,
+            "kind": "citation",
+            "text": "\\citep{traffic2024}"
+          }
+        ],
+        "section_path": [
+          "Introduction"
+        ],
+        "text": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out\nprotocol \\citep{traffic2024}."
+      },
+      "spans": []
+    },
+    {
+      "anchor_key": "main.tex#sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+      "claim": "C0002",
+      "evidence": [],
+      "sentence": {
+        "char_end": 634,
+        "char_start": 530,
+        "citation_keys": [
+          "missing2023"
+        ],
+        "file": "main.tex",
+        "fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+        "in_environment": null,
+        "line_end": 21,
+        "line_start": 20,
+        "normalized_text": "Prior surveys, e.g. the review of, report no comparable figure for the same setting.",
+        "protected_spans": [
+          {
+            "char_end": 53,
+            "char_start": 34,
+            "kind": "citation",
+            "text": "\\citet{missing2023}"
+          }
+        ],
+        "section_path": [
+          "Introduction"
+        ],
+        "text": "Prior surveys, e.g. the review of \\citet{missing2023}, report no comparable figure\nfor the same setting."
+      },
+      "spans": []
+    }
+  ],
+  "unanchored_substantive": 1
+}

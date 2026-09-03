@@ -1,0 +1,158 @@
+{
+  "count": 3,
+  "counts": {
+    "ambiguous": 1,
+    "conflict": 0,
+    "high_risk": 1,
+    "routine": 1,
+    "stale": 0
+  },
+  "items": [
+    {
+      "accepted_conflict": null,
+      "anchor_status": "valid",
+      "artifact": "A0001-1",
+      "candidate_id": "cand_44c1f007fc0db0b2",
+      "category": "high_risk",
+      "competing": [],
+      "conflicts": [],
+      "evidence_type": "experimental_result",
+      "exact_text": "94.32",
+      "field": "metric_result",
+      "negative_state": null,
+      "numeric": {
+        "condition": {
+          "split": "held-out"
+        },
+        "dataset": "CICIDS2017",
+        "metric": "F1",
+        "parsed": 94.32,
+        "raw": "94.32",
+        "source_column": "F1",
+        "source_row": "TrafficLM",
+        "source_table": "Table 1",
+        "unit": "percent"
+      },
+      "origin": "source_observed",
+      "previously_rejected": false,
+      "priority": 1,
+      "proposed_changes": [],
+      "provider_conflict": null,
+      "reasons": [
+        "tier 2: an interpretive judgement needs deep review",
+        "numeric evidence: F1 carries unit, dataset, and condition"
+      ],
+      "review_action": null,
+      "source_context": {
+        "bbox": [
+          94.0,
+          156.32,
+          474.0,
+          224.32
+        ],
+        "block_text": "Model | Dataset | F1 | Precision\nTrafficLM | CICIDS2017 | 94.32 | 93.10\nFlowBERT | CICIDS2017 | 91.75 | 90.44\nBaselineRF | CICIDS2017 | 88.10 | 87.02",
+        "exact_text": "94.32",
+        "neighbors": [
+          "Table 1 reports detection quality for the pretrained model and two baselines under the protocol of Section 3. The pretrained encoder improves F1 by 2.57 points over the strongest baseline, and the gain is concentrated in the two rarest attack families.",
+          "Figure 1: Confusion matrix for TrafficLM on the held-out split.\nFigure 1: Confusion matrix for TrafficLM on the held-out split."
+        ],
+        "page": 4,
+        "section_path": [
+          "4 Results"
+        ]
+      },
+      "tier": 2,
+      "verdict": "supported",
+      "work": "W0001"
+    },
+    {
+      "accepted_conflict": null,
+      "anchor_status": "valid",
+      "artifact": "A0001-1",
+      "candidate_id": "cand_b09aa84fc5dee7c0",
+      "category": "ambiguous",
+      "competing": [],
+      "conflicts": [],
+      "evidence_type": "method_description",
+      "exact_text": "The encoder is a twelve layer transformer",
+      "field": "method_summary",
+      "negative_state": null,
+      "numeric": null,
+      "origin": "source_observed",
+      "previously_rejected": false,
+      "priority": 3,
+      "proposed_changes": [],
+      "provider_conflict": null,
+      "reasons": [
+        "the verifier reported partially_supported"
+      ],
+      "review_action": null,
+      "source_context": {
+        "bbox": [
+          54.0,
+          76.09,
+          556.98,
+          116.23
+        ],
+        "block_text": "Our model consumes a flow as an ordered sequence of packet descriptors. Each descriptor carries direction, inter arrival time bucket, and payload length bucket. The encoder is a twelve layer transformer trained with a masked descriptor objective on unlabelled captures.",
+        "exact_text": "The encoder is a twelve layer transformer",
+        "neighbors": [
+          "2 Method",
+          "2.1 Tokenization"
+        ],
+        "page": 2,
+        "section_path": [
+          "2 Method"
+        ]
+      },
+      "tier": 1,
+      "verdict": "partially_supported",
+      "work": "W0001"
+    },
+    {
+      "accepted_conflict": null,
+      "anchor_status": "valid",
+      "artifact": "A0001-1",
+      "candidate_id": "cand_4590b9b1f474d343",
+      "category": "routine",
+      "competing": [],
+      "conflicts": [],
+      "evidence_type": "dataset_description",
+      "exact_text": "All experiments use CICIDS2017",
+      "field": "dataset",
+      "negative_state": null,
+      "numeric": null,
+      "origin": "source_observed",
+      "previously_rejected": false,
+      "priority": 4,
+      "proposed_changes": [],
+      "provider_conflict": null,
+      "reasons": [
+        "verified supported, tier 1, anchor valid"
+      ],
+      "review_action": null,
+      "source_context": {
+        "bbox": [
+          54.0,
+          136.01,
+          551.44,
+          189.35
+        ],
+        "block_text": "All experiments use CICIDS2017, a labelled capture of benign and attack traffic released with DOI 10.1000/xyz123 and mirrored as arXiv:2401.12345. We keep the official day boundaries, discard flows shorter than three packets, and report macro averaged scores over the five attack families that remain after filtering. The resulting corpus contains 1.2 million flows.",
+        "exact_text": "All experiments use CICIDS2017",
+        "neighbors": [
+          "3.1 Dataset",
+          "Class imbalance is severe: benign flows outnumber attack flows by roughly forty to one, so accuracy is uninformative and we report F1 and precision instead."
+        ],
+        "page": 3,
+        "section_path": [
+          "3 Experiments",
+          "3.1 Dataset"
+        ]
+      },
+      "tier": 1,
+      "verdict": "supported",
+      "work": "W0001"
+    }
+  ]
+}

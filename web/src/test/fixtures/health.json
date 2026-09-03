@@ -1,0 +1,8 @@
+{
+  "capabilities": 66,
+  "ok": true,
+  "project": "gate-p11",
+  "review_policy": "strict",
+  "version": "0.1.0",
+  "workspace": "/tmp/research-harness-web-fixtures-5gmycnt2/cockpit"
+}
