@@ -1,0 +1,5 @@
+# source: live codex 0.150.1 on 2026-09-03; sanitized
+{"type":"thread.started","thread_id":"sess-x"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"sess-x","type":"agent_message","text":"{\"confidence\":1,\"evidence_ids\":[\"work:live\"],\"rationale\":\"The source explicitly states a mean throughput of 1.4 Gbps for the proposed detector on the CIC-IDS2017 corpus, measured over five runs.\",\"supported\":true}"}}
+{"type":"turn.completed","usage":{"input_tokens":13623,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":63,"reasoning_output_tokens":0}}

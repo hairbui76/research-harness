@@ -60,6 +60,9 @@ _ID_TOKEN = re.compile(
     r'_(?=[A-Za-z0-9-]*\d)[A-Za-z0-9-]{6,}(?!"\s*:)'
 )
 _HOME = re.compile(r'/(?:home|Users)/[^/\s"]+')
+# A key that names a filesystem location (`cwd`, `messaging_socket_path`, ...): the value
+# is a workstation path (a temp dir, a socket under /run/user/<uid>) and is replaced whole.
+_PATH_VALUE = re.compile(r'"(cwd|[A-Za-z0-9_]*_path)"\s*:\s*"[^"]*"')
 _VERSION_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
 
 
@@ -105,9 +108,9 @@ def _sanitize(line: str) -> str:
     evidence of the wire format, so key order, spacing and duplicate keys must survive
     exactly as the runtime wrote them. `redact` is the engine's own scrubber (e-mails,
     `Bearer`, `sk-`/`gh*_`/`xox*` tokens, long opaque tokens, this workstation's home) and
-    goes first; the two id passes then replace values only, never a key.
+    goes first; the path pass and the two id passes then replace values only, never a key.
     """
-    cleaned = _HOME.sub("~", redact(line))
+    cleaned = _PATH_VALUE.sub(r'"\1":"<path>"', _HOME.sub("~", redact(line)))
     return _ID_TOKEN.sub("sess-x", _ID_VALUE.sub(r'"\1":"sess-x"', cleaned))
 
 
@@ -177,7 +180,8 @@ _FAKE_CLAUDE = (
     '{"type":"system","subtype":"init",'
     '"session_id":"9f1c2d3e-0000-4000-8000-abcdefabcdef",'
     '"uuid":"3b7f0a11-1111-4111-8111-222222222222",'
-    '"cwd":"/Users/nobody/repo","account":{"email":"nobody@example.invalid"},"tools":[]}'
+    '"cwd":"/Users/nobody/repo","account":{"email":"nobody@example.invalid"},"tools":[],'
+    '"messaging_socket_path":"/run/user/4242/cc-socks/999999.sock"}'
 )
 _FAKE_TOKEN = (
     '{"type":"debug","headers":'
@@ -190,6 +194,7 @@ _MUST_NOT_SURVIVE = (
     "9f1c2d3e-0000-4000-8000-abcdefabcdef",
     "3b7f0a11-1111-4111-8111-222222222222",
     "/Users/nobody",
+    "/run/user/4242",
     "nobody@example.invalid",
     "sk-ant-api03-FAKEFAKEFAKEFAKEFAKEFAKEFAKE",
     "resp_01FAKEfake0000",
@@ -223,7 +228,7 @@ def test_the_sanitizer_keeps_the_event_shape_and_drops_every_identifier() -> Non
     codex, claude = json.loads(_sanitize(_FAKE_CODEX)), json.loads(_sanitize(_FAKE_CLAUDE))
     assert codex["thread_id"] == "sess-x"
     assert claude["session_id"] == "sess-x" and claude["uuid"] == "sess-x"
-    assert claude["cwd"] == "~/repo"
+    assert claude["cwd"] == "<path>" and claude["messaging_socket_path"] == "<path>"
     assert claude["account"]["email"] == "<email>"
     token = json.loads(_sanitize(_FAKE_TOKEN))["headers"]["Authorization"]
     assert token == "Bearer <redacted>"
