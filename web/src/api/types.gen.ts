@@ -156,6 +156,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/manuscript/builds/{build_id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Manuscript Build Pdf
+         * @description The PDF of one build, inline. `latest` and `last-good` are accepted as ids.
+         *
+         *     A failed build has no PDF of its own; the response is then the last good one, which
+         *     is what the preview keeps showing while the diagnostics describe the source as it
+         *     is now. A workspace that has never compiled answers 404 rather than an empty file.
+         */
+        get: operations["manuscript_build_pdf_manuscript_builds__build_id__pdf_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/objects/{object_id}": {
         parameters: {
             query?: never;
@@ -236,6 +260,101 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/runs/{run_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run Events
+         * @description Stream one run's deltas and its terminal status (v1.1 plan SS0.4).
+         *
+         *     A read: `read` permission, like every other run route, and the same principal
+         *     resolution. Watching an answer arrive is not authority to have asked for it.
+         */
+        get: operations["run_events_runs__run_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{session_id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Attachment Bytes
+         * @description Attach a file to a session. The one non-capability write, and session-only.
+         *
+         *     The body is the raw file, `Content-Type` is its media type, and `?filename=` is
+         *     display metadata: only its basename is kept and it never selects a path. The bytes
+         *     become a `selected -> validating -> ready` attachment (or a `failed` one carrying
+         *     the reason), and no corpus object is created — `attachment.save_to_corpus` is the
+         *     only thing that does that.
+         */
+        post: operations["add_attachment_bytes_sessions__session_id__attachments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{session_id}/attachments/{attachment_id}/bytes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Attachment Bytes
+         * @description The attachment's original bytes, inline, exactly as they were stored.
+         *
+         *     Read-only and byte-identical: an attachment's bytes are immutable once stored, so
+         *     there is no route that rewrites them.
+         */
+        get: operations["attachment_bytes_sessions__session_id__attachments__attachment_id__bytes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{session_id}/attachments/{attachment_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Attachment Preview
+         * @description A PNG projection of one page: a thumbnail for an image, a render for a PDF.
+         *
+         *     The file lives under `.research/cache/attachments/` and is rendered on demand, so
+         *     deleting the cache costs a re-render and never an attachment (Product 8.2).
+         */
+        get: operations["attachment_preview_sessions__session_id__attachments__attachment_id__preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -305,6 +424,47 @@ export interface components {
             size_bytes: number;
             /** Version */
             version: string;
+        };
+        /**
+         * AttachmentView
+         * @description One session attachment as every transport sees it.
+         */
+        AttachmentView: {
+            /** Artifact */
+            artifact?: string | null;
+            /** Content Hash */
+            content_hash?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Failure Reason */
+            failure_reason?: string | null;
+            /** Filename */
+            filename: string;
+            /** Id */
+            id: string;
+            /** Media Type */
+            media_type: string;
+            /** Page Count */
+            page_count?: number | null;
+            /** Session */
+            session: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** State */
+            state: string;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Version */
+            version?: string | null;
+            /**
+             * Visibility
+             * @default private
+             */
+            visibility: string;
+            /** Work */
+            work?: string | null;
         };
         /**
          * AttentionGroup
@@ -1166,6 +1326,37 @@ export interface operations {
             };
         };
     };
+    manuscript_build_pdf_manuscript_builds__build_id__pdf_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                build_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     obj_objects__object_id__get: {
         parameters: {
             query?: never;
@@ -1266,6 +1457,143 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_events_runs__run_id__events_get: {
+        parameters: {
+            query?: {
+                /** @description Replay deltas from this index; 0 replays the whole answer. */
+                after?: number;
+            };
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_attachment_bytes_sessions__session_id__attachments_post: {
+        parameters: {
+            query?: {
+                /** @description Display name for the attachment. Metadata only; never a path. */
+                filename?: string | null;
+                /** @description Researcher-supplied description or alt text, kept apart from reading. */
+                description?: string | null;
+            };
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attachment_bytes_sessions__session_id__attachments__attachment_id__bytes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    attachment_preview_sessions__session_id__attachments__attachment_id__preview_get: {
+        parameters: {
+            query?: {
+                /** @description 1-based page of the preview to render. */
+                page?: number;
+            };
+            header?: never;
+            path: {
+                session_id: string;
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

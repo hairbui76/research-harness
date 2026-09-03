@@ -9,7 +9,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.124792Z",
+        "created_at": "2026-09-03T11:19:48.437786Z",
         "file": "main.tex",
         "line_end": 15,
         "line_start": 14,
@@ -26,7 +26,7 @@
         "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.124794Z"
+        "updated_at": "2026-09-03T11:19:48.437787Z"
       },
       "kind": "over_strong_wording",
       "location": {
@@ -50,7 +50,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.124792Z",
+        "created_at": "2026-09-03T11:19:48.437786Z",
         "file": "main.tex",
         "line_end": 15,
         "line_start": 14,
@@ -67,7 +67,7 @@
         "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.124794Z"
+        "updated_at": "2026-09-03T11:19:48.437787Z"
       },
       "kind": "citation_mismatch",
       "location": {
@@ -91,7 +91,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.200852Z",
+        "created_at": "2026-09-03T11:19:48.450504Z",
         "file": "main.tex",
         "line_end": 18,
         "line_start": 17,
@@ -108,7 +108,7 @@
         "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.200853Z"
+        "updated_at": "2026-09-03T11:19:48.450505Z"
       },
       "kind": "citation_mismatch",
       "location": {
@@ -132,7 +132,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.200852Z",
+        "created_at": "2026-09-03T11:19:48.450504Z",
         "file": "main.tex",
         "line_end": 18,
         "line_start": 17,
@@ -149,7 +149,7 @@
         "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.200853Z"
+        "updated_at": "2026-09-03T11:19:48.450505Z"
       },
       "kind": "unsupported_numeric",
       "location": {
@@ -173,7 +173,7 @@
           "missing2023"
         ],
         "claim": "C0002",
-        "created_at": "2026-09-03T01:13:55.276465Z",
+        "created_at": "2026-09-03T11:19:48.464708Z",
         "file": "main.tex",
         "line_end": 21,
         "line_start": 20,
@@ -190,7 +190,7 @@
         "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.276466Z"
+        "updated_at": "2026-09-03T11:19:48.464709Z"
       },
       "kind": "citation_mismatch",
       "location": {
@@ -212,7 +212,7 @@
           "missing2023"
         ],
         "claim": "C0002",
-        "created_at": "2026-09-03T01:13:55.276465Z",
+        "created_at": "2026-09-03T11:19:48.464708Z",
         "file": "main.tex",
         "line_end": 21,
         "line_start": 20,
@@ -229,7 +229,7 @@
         "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.276466Z"
+        "updated_at": "2026-09-03T11:19:48.464709Z"
       },
       "kind": "stale_claim",
       "location": {
@@ -269,7 +269,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.124792Z",
+        "created_at": "2026-09-03T11:19:48.437786Z",
         "file": "main.tex",
         "line_end": 15,
         "line_start": 14,
@@ -286,7 +286,7 @@
         "sentence_fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.124794Z"
+        "updated_at": "2026-09-03T11:19:48.437787Z"
       },
       "reason": "sentence unchanged at the recorded span",
       "relocated": null,
@@ -301,7 +301,7 @@
           "traffic2024"
         ],
         "claim": "C0001",
-        "created_at": "2026-09-03T01:13:55.200852Z",
+        "created_at": "2026-09-03T11:19:48.450504Z",
         "file": "main.tex",
         "line_end": 18,
         "line_start": 17,
@@ -318,7 +318,7 @@
         "sentence_fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.200853Z"
+        "updated_at": "2026-09-03T11:19:48.450505Z"
       },
       "reason": "sentence unchanged at the recorded span",
       "relocated": null,
@@ -333,7 +333,7 @@
           "missing2023"
         ],
         "claim": "C0002",
-        "created_at": "2026-09-03T01:13:55.276465Z",
+        "created_at": "2026-09-03T11:19:48.464708Z",
         "file": "main.tex",
         "line_end": 21,
         "line_start": 20,
@@ -350,7 +350,7 @@
         "sentence_fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
         "stale": "fresh",
         "status": "valid",
-        "updated_at": "2026-09-03T01:13:55.276466Z"
+        "updated_at": "2026-09-03T11:19:48.464709Z"
       },
       "reason": "sentence unchanged at the recorded span",
       "relocated": null,

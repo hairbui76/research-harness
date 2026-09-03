@@ -9,6 +9,11 @@
 /** Every capability this build of the daemon exposes. A typo is a compile error. */
 export type CapabilityName =
   | "anchor.list"
+  | "attachment.add"
+  | "attachment.check_send"
+  | "attachment.remove"
+  | "attachment.resolve_identity"
+  | "attachment.save_to_corpus"
   | "citation.verify"
   | "claim.audit"
   | "claim.create"
@@ -20,6 +25,7 @@ export type CapabilityName =
   | "claim.supersede"
   | "claim.unrelate"
   | "claim.update_coverage"
+  | "context.preview"
   | "corpus.ingest"
   | "corpus.screen"
   | "corpus.search"
@@ -31,12 +37,26 @@ export type CapabilityName =
   | "evidence.list"
   | "evidence.reject"
   | "evidence.verify"
+  | "graph.autocomplete"
+  | "graph.neighbors"
+  | "graph.provenance"
+  | "graph.query"
+  | "graph.resolve"
+  | "graph.status"
   | "manuscript.anchors"
+  | "manuscript.apply_suggestion"
   | "manuscript.attach_claim"
   | "manuscript.audit"
+  | "manuscript.build"
+  | "manuscript.compile"
   | "manuscript.draft"
+  | "manuscript.files"
+  | "manuscript.read_file"
   | "manuscript.revalidate"
+  | "manuscript.suggest"
+  | "manuscript.synctex"
   | "manuscript.trace"
+  | "manuscript.write_file"
   | "note.add"
   | "note.discard"
   | "note.promote"
@@ -59,7 +79,19 @@ export type CapabilityName =
   | "review.split"
   | "run.cancel"
   | "run.status"
+  | "search_run.get"
+  | "search_run.list"
   | "search_run.record"
+  | "session.create"
+  | "session.get"
+  | "session.list"
+  | "session.promote"
+  | "session.rename"
+  | "session.retry"
+  | "session.search"
+  | "session.send"
+  | "session.stop"
+  | "session.summarize"
   | "state.index"
   | "state.rebuild"
   | "state.stale"
@@ -93,6 +125,41 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     longRunning: false,
     summary: "Every manuscript sentence bound to a Claim.",
     semantics: "reads canonical state; changes nothing",
+  },
+  "attachment.add": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Attach a file to a session as working material.",
+    semantics: "copies bytes into a session; creates no Work, Version, Artifact, or Evidence",
+  },
+  "attachment.check_send": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Whether each attachment may go to the selected model, and why not.",
+    semantics: "reads attachment records and provider capabilities; changes nothing",
+  },
+  "attachment.remove": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Delete a session attachment, its bytes, and its previews.",
+    semantics: "removes session-only working material; the corpus is not touched",
+  },
+  "attachment.resolve_identity": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "What one attachment would become in the corpus, without saving it.",
+    semantics: "resolves corpus identity for a file; writes nothing",
+  },
+  "attachment.save_to_corpus": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Promote a session attachment into the corpus under a resolved identity.",
+    semantics: "creates or links Work/Version/Artifact identity and parses the file; accepts no Evidence or Claim",
   },
   "citation.verify": {
     permission: "read",
@@ -171,6 +238,13 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     summary: "Record the search coverage a Claim's scope rests on.",
     semantics: "writes the deterministic discovery funnel onto a Claim; the audit reads it and no model contributes to it",
   },
+  "context.preview": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Assemble the context a message would send, without sending it.",
+    semantics: "reads what would be packed and what would be refused; sends nothing",
+  },
   "corpus.ingest": {
     permission: "mutate",
     humanOnly: true,
@@ -248,12 +322,61 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     summary: "Re-read the source for staged candidates; returns a run id.",
     semantics: "writes verification verdicts onto staged candidates; accepts nothing",
   },
+  "graph.autocomplete": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Complete a partially typed reference for the composer.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
+  "graph.neighbors": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "One- or two-hop neighbourhood of a node, in either direction.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
+  "graph.provenance": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Shortest path from a node to its source, e.g. Claim to Artifact anchor.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
+  "graph.query": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Nodes matching a structured kind/authority/visibility/link filter.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
+  "graph.resolve": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Resolve an `@` reference or `rh://` deep link against canonical state.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
+  "graph.status": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Whether the graph index exists, how big it is, and when it was built.",
+    semantics: "reads a disposable projection; changes no canonical object and grants no authority of its own",
+  },
   "manuscript.anchors": {
     permission: "read",
     humanOnly: false,
     longRunning: false,
     summary: "Every stored anchor, with its verdict against the manuscript on disk.",
     semantics: "reads anchors and computes their verdicts; records none of them",
+  },
+  "manuscript.apply_suggestion": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Apply a reviewed candidate diff to the manuscript source.",
+    semantics: "writes owned manuscript source from an audited candidate and records the source mutation; refuses a changed protected span, a failed audit, and a stale hash",
   },
   "manuscript.attach_claim": {
     permission: "mutate",
@@ -269,12 +392,40 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     summary: "Audit the manuscript against the accepted research graph.",
     semantics: "reports findings; repairs nothing and writes nothing",
   },
+  "manuscript.build": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "One build: compiler diagnostics and scientific audit findings.",
+    semantics: "reads a recorded build and audits the manuscript; changes nothing",
+  },
+  "manuscript.compile": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Run the configured local LaTeX engine once, bounded and confined.",
+    semantics: "runs a local process over owned source and writes only disposable build outputs; no manuscript file is changed",
+  },
   "manuscript.draft": {
     permission: "stage",
     humanOnly: false,
     longRunning: false,
     summary: "Draft a section from named accepted Claims, into staging.",
     semantics: "writes a draft candidate under .research/staging; the manuscript is untouched",
+  },
+  "manuscript.files": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Every source file of the manuscript a researcher can open.",
+    semantics: "reads owned manuscript source; changes nothing",
+  },
+  "manuscript.read_file": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "One manuscript file with the hash a later save must present.",
+    semantics: "reads one owned source file; changes nothing",
   },
   "manuscript.revalidate": {
     permission: "mutate",
@@ -283,12 +434,33 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     summary: "Re-find every stored anchor and record what the manuscript now says.",
     semantics: "records anchor relocation and staleness; a reworded sentence goes stale rather than being reattached, and it requires a human actor",
   },
+  "manuscript.suggest": {
+    permission: "stage",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Stage a model rewrite of one span as a reviewable candidate diff.",
+    semantics: "writes a candidate under .research/staging with its protected-span, semantic, and Claim-wording verdicts; the manuscript is untouched",
+  },
+  "manuscript.synctex": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Source-to-PDF and PDF-to-source navigation for one build.",
+    semantics: "reads the compiler's SyncTeX map; changes nothing",
+  },
   "manuscript.trace": {
     permission: "read",
     humanOnly: false,
     longRunning: false,
     summary: "One sentence, by file and line, down to its Claim and source spans.",
     semantics: "reads the traceability chain; changes nothing",
+  },
+  "manuscript.write_file": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Save one manuscript file, refusing an outside change.",
+    semantics: "writes the researcher's own manuscript source under a hash check; refuses when the file changed outside the harness",
   },
   "note.add": {
     permission: "mutate",
@@ -444,12 +616,96 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     summary: "The durable record of one long-running workflow run.",
     semantics: "reads regenerable run state; changes nothing",
   },
+  "search_run.get": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "One discovery run with its candidates and the metadata they propose.",
+    semantics: "reads a recorded SearchRun and derives the metadata its candidates offer; proposes nothing to the corpus and changes nothing",
+  },
+  "search_run.list": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Recorded discovery runs with their funnel counts, newest first.",
+    semantics: "reads canonical state; changes nothing",
+  },
   "search_run.record": {
     permission: "mutate",
     humanOnly: true,
     longRunning: false,
     summary: "Persist a reproducible discovery operation.",
     semantics: "records what was searched, where, and when; adds nothing to the corpus",
+  },
+  "session.create": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Open a durable, private conversation session.",
+    semantics: "writes private working context; creates no accepted scientific state",
+  },
+  "session.get": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "One session's transcript, attachments, and recorded receipts.",
+    semantics: "reads durable private working context; changes nothing",
+  },
+  "session.list": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Every conversation session in this project.",
+    semantics: "reads durable private working context; changes nothing",
+  },
+  "session.promote": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Promote an excerpt to a note, question, claim, or decision candidate.",
+    semantics: "copies an excerpt into reviewable state with provenance to the session and message; the message is untouched, review is not bypassed, and evidence from prose is refused",
+  },
+  "session.rename": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Retitle a session; its ids and transcript are untouched.",
+    semantics: "writes private working context; creates no accepted scientific state",
+  },
+  "session.retry": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: true,
+    summary: "Answer again as a new attempt, keeping the failed one.",
+    semantics: "adds a new model attempt; the failed attempt's record is kept",
+  },
+  "session.search": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Sessions whose title or messages contain a query.",
+    semantics: "reads durable private working context; changes nothing",
+  },
+  "session.send": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: true,
+    summary: "Send a message and stream the answer into a durable run.",
+    semantics: "appends to a private transcript and records what the model was shown; creates no accepted scientific state",
+  },
+  "session.stop": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Stop a streaming answer, keeping what already arrived.",
+    semantics: "cancels a run and marks the partial answer incomplete",
+  },
+  "session.summarize": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Regenerate a session's derived summary from its transcript.",
+    semantics: "rewrites a derived summary of private working context; a summary never outranks the transcript, and neither outranks accepted state",
   },
   "state.index": {
     permission: "read",

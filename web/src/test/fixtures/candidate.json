@@ -22,7 +22,7 @@
         "unit": "percent"
       }
     },
-    "created_at": "2026-09-03T01:13:53.846468Z",
+    "created_at": "2026-09-03T11:19:47.925595Z",
     "decisions": [],
     "evidence_type": "experimental_result",
     "id": "E0000",
@@ -30,7 +30,7 @@
     "provenance": {
       "actor": "scripted/scripted-1",
       "note": null,
-      "run_id": "run_20260903T011353Z_0caa083f",
+      "run_id": "run_20260903T111947Z_7bf05667",
       "source": "model",
       "template_version": "1.0.0",
       "workflow": "interrogate"
@@ -60,7 +60,7 @@
     },
     "stale": "fresh",
     "strength": "direct",
-    "updated_at": "2026-09-03T01:13:54.097039Z",
+    "updated_at": "2026-09-03T11:19:48.006799Z",
     "verification": {
       "accepted_by": null,
       "extractor": "scripted/scripted-1",
@@ -76,9 +76,9 @@
     "model": "scripted-1",
     "provider": "scripted",
     "rationale": "Row TrafficLM, column F1 of Table 1.",
-    "request_fingerprint": "ab3db0e2341cf023f5ff73d8efd3ede3a39f35bb97bbad0b60295870f54eab98",
+    "request_fingerprint": "d9917e06fd82b28f0eef460f8a51cf5fdb8cd1389b809d607ce6aed6292addf6",
     "response_schema_fingerprint": "b9b83baf6a1b4d7af9420a6596579907aa8c0c31f5530a24aaae8ae7f4709a14",
-    "run_id": "run_20260903T011353Z_0caa083f",
+    "run_id": "run_20260903T111947Z_7bf05667",
     "template_version": "1.0.0"
   },
   "field": "metric_result",

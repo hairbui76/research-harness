@@ -142,6 +142,150 @@
         "title": "ArtifactSummary",
         "type": "object"
       },
+      "AttachmentView": {
+        "additionalProperties": false,
+        "description": "One session attachment as every transport sees it.",
+        "properties": {
+          "artifact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact"
+          },
+          "content_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Hash"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "page_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Count"
+          },
+          "session": {
+            "title": "Session",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "visibility": {
+            "default": "private",
+            "title": "Visibility",
+            "type": "string"
+          },
+          "work": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work"
+          }
+        },
+        "required": [
+          "id",
+          "session",
+          "state",
+          "filename",
+          "media_type",
+          "size_bytes"
+        ],
+        "title": "AttachmentView",
+        "type": "object"
+      },
       "AttentionGroup": {
         "additionalProperties": false,
         "description": "One attention surface of Product 26: its size, where it lives, and its top items.",
@@ -1686,6 +1830,44 @@
         "summary": "Index"
       }
     },
+    "/manuscript/builds/{build_id}/pdf": {
+      "get": {
+        "description": "The PDF of one build, inline. `latest` and `last-good` are accepted as ids.\n\nA failed build has no PDF of its own; the response is then the last good one, which\nis what the preview keeps showing while the diagnostics describe the source as it\nis now. A workspace that has never compiled answers 404 rather than an empty file.",
+        "operationId": "manuscript_build_pdf_manuscript_builds__build_id__pdf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "build_id",
+            "required": true,
+            "schema": {
+              "title": "Build Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Manuscript Build Pdf"
+      }
+    },
     "/objects/{object_id}": {
       "get": {
         "description": "One canonical object, read through the repository's typed accessors.",
@@ -1823,6 +2005,242 @@
           }
         },
         "summary": "Cancel"
+      }
+    },
+    "/runs/{run_id}/events": {
+      "get": {
+        "description": "Stream one run's deltas and its terminal status (v1.1 plan SS0.4).\n\nA read: `read` permission, like every other run route, and the same principal\nresolution. Watching an answer arrive is not authority to have asked for it.",
+        "operationId": "run_events_runs__run_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Replay deltas from this index; 0 replays the whole answer.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Replay deltas from this index; 0 replays the whole answer.",
+              "minimum": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Run Events Runs  Run Id  Events Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Events"
+      }
+    },
+    "/sessions/{session_id}/attachments": {
+      "post": {
+        "description": "Attach a file to a session. The one non-capability write, and session-only.\n\nThe body is the raw file, `Content-Type` is its media type, and `?filename=` is\ndisplay metadata: only its basename is kept and it never selects a path. The bytes\nbecome a `selected -> validating -> ready` attachment (or a `failed` one carrying\nthe reason), and no corpus object is created — `attachment.save_to_corpus` is the\nonly thing that does that.",
+        "operationId": "add_attachment_bytes_sessions__session_id__attachments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Display name for the attachment. Metadata only; never a path.",
+            "in": "query",
+            "name": "filename",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Display name for the attachment. Metadata only; never a path.",
+              "title": "Filename"
+            }
+          },
+          {
+            "description": "Researcher-supplied description or alt text, kept apart from reading.",
+            "in": "query",
+            "name": "description",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Researcher-supplied description or alt text, kept apart from reading.",
+              "title": "Description"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Attachment Bytes"
+      }
+    },
+    "/sessions/{session_id}/attachments/{attachment_id}/bytes": {
+      "get": {
+        "description": "The attachment's original bytes, inline, exactly as they were stored.\n\nRead-only and byte-identical: an attachment's bytes are immutable once stored, so\nthere is no route that rewrites them.",
+        "operationId": "attachment_bytes_sessions__session_id__attachments__attachment_id__bytes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Attachment Bytes"
+      }
+    },
+    "/sessions/{session_id}/attachments/{attachment_id}/preview": {
+      "get": {
+        "description": "A PNG projection of one page: a thumbnail for an image, a render for a PDF.\n\nThe file lives under `.research/cache/attachments/` and is rendered on demand, so\ndeleting the cache costs a re-render and never an attachment (Product 8.2).",
+        "operationId": "attachment_preview_sessions__session_id__attachments__attachment_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "attachment_id",
+            "required": true,
+            "schema": {
+              "title": "Attachment Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "1-based page of the preview to render.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "1-based page of the preview to render.",
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Attachment Preview"
       }
     }
   }
