@@ -448,6 +448,8 @@ class ResearchEventType(StrEnum):
     MATRIX_BUILT = "matrix.built"
     MANUSCRIPT_ANCHOR_REVALIDATED = "manuscript.anchor_revalidated"
     MANUSCRIPT_AUDITED = "manuscript.audited"
+    MANUSCRIPT_SOURCE_WRITTEN = "manuscript.source_written"
+    """A reviewed candidate diff was applied to owned manuscript source (LaTeX spec 4)."""
     OBJECTS_MARKED_STALE = "state.marked_stale"
     WORK_METADATA_UPDATED = "work.metadata_updated"
     CLAIM_COVERAGE_RECORDED = "claim.coverage_recorded"

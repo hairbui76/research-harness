@@ -229,3 +229,16 @@ working; nothing here renames or removes anything.
   is logged and reported as zero rows rather than failing a rebuild whose canonical files
   projected cleanly (ADR-006). `dump_projection` is unaffected: the graph has its own
   `MetaData` and its own database at `.research/graph/research-graph.db`.
+- `ResearchEventType.MANUSCRIPT_SOURCE_WRITTEN` (`manuscript.source_written`), appended when
+  a reviewed candidate diff is applied to owned manuscript source
+  (`manuscript.apply_suggestion`). It is the only event the manuscript layer writes for a
+  file change, and it records **no** object digest: `manuscript/*.tex` is the researcher's
+  file, not a canonical object `verify_consistency` reconciles, so a digest here would make
+  the consistency check report an object it cannot find. A researcher's own save
+  (`manuscript.write_file`) appends nothing — the semantic log records changes to accepted
+  scientific state, not keystrokes in an editor (Product 19.3).
+- No canonical schema changed for the Phase 21 manuscript workspace. `BuildView`,
+  `ManuscriptTree`, and `SynctexView` (`manuscript/workspace.py`) and `SuggestionCandidate`,
+  `DiffHunk`, `DiffLine`, `AnchorImpact`, and `AppliedSuggestion` (`manuscript/suggest.py`)
+  are capability response models and staged-candidate records under `.research/`, not
+  domain objects: they carry no `id`, live outside `domain/`, and are regenerable.

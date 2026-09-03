@@ -38,6 +38,27 @@ NEW_CAPABILITIES: dict[str, dict[str, Any]] = {
     "question.list": {},
     "state.index": {},
     "work.list": {},
+    # Phase 20. All six `graph.*` reads answer on a workspace whose index has never been
+    # built - emptily, and saying so - because `.research/` is disposable and a client
+    # that lost it must still get the same answer on both transports (graph spec 8).
+    "graph.autocomplete": {"prefix": "C"},
+    "graph.neighbors": {"id": "C0001"},
+    "graph.provenance": {"id": "C0001"},
+    "graph.query": {},
+    "graph.resolve": {"reference": "@C0001"},
+    "graph.status": {},
+    # Phase 21. Three manuscript reads that answer on a workspace with no LaTeX project and
+    # no build: an empty tree, a build view that says the audit could not run, and a SyncTeX
+    # lookup that says there is no map. "Nothing here yet" has to be the same answer on both
+    # transports, because that is the answer a client meets first (LaTeX spec 6, 9).
+    "manuscript.files": {},
+    "manuscript.build": {},
+    "manuscript.synctex": {"file": "main.tex", "line": 1},
+    # Phase 18. Listing and searching sessions are reads a host may make; a fresh
+    # workspace answers both with nothing, and the nothing has to match on both
+    # transports too.
+    "session.list": {},
+    "session.search": {"query": "latency"},
 }
 
 #: The mutations added for the clients. A host is refused all of them, identically.
@@ -52,6 +73,33 @@ NEW_MUTATIONS: dict[str, dict[str, Any]] = {
     "review.request_more": {"candidate_id": "cand_0000000000000000", "note": "x"},
     "review.split": {"candidate_id": "cand_0000000000000000", "interpretation": "a reading"},
     "work.update_metadata": {"work": "W0001"},
+    # Phase 19. Attaching bytes and promoting them are researcher acts on both transports:
+    # a host may read `attachment.check_send` and `attachment.resolve_identity` and must
+    # ask a person to attach or to save anything to the corpus (Product 24, 29).
+    "attachment.add": {"session": "CS0001", "path": "missing.pdf"},
+    "attachment.remove": {"session": "CS0001", "attachment": "SA0001"},
+    "attachment.save_to_corpus": {"session": "CS0001", "attachment": "SA0001"},
+    # Phase 21. Saving a manuscript file, running a compiler, and applying a candidate diff
+    # are researcher acts: source ownership is the researcher's (LaTeX spec 4). A host may
+    # read the manuscript and stage a `manuscript.suggest` candidate, and asks a person to
+    # apply it.
+    "manuscript.write_file": {
+        "path": "main.tex",
+        "content": "x",
+        "expected_hash": f"sha256:{'0' * 64}",
+    },
+    "manuscript.compile": {},
+    "manuscript.apply_suggestion": {"candidate_id": "run_20260101T000000Z_deadbeef"},
+    # Phase 18. Conversation is the researcher's private working context (Product 39):
+    # a host may read a transcript and may not write one, stop one, summarize one, or
+    # promote out of one, on either transport.
+    "session.create": {"title": "from a host"},
+    "session.rename": {"session": "CS0001", "title": "renamed"},
+    "session.summarize": {"session": "CS0001"},
+    "session.send": {"session": "CS0001", "text": "hello"},
+    "session.stop": {"run_id": "run_20260101T000000Z_deadbeef"},
+    "session.retry": {"message": "M0001"},
+    "session.promote": {"session": "CS0001", "message": "M0001", "target": "note"},
 }
 
 ALL_NEW = sorted(
@@ -61,6 +109,14 @@ ALL_NEW = sorted(
         "review.candidate",
         "manuscript.anchors",
         "manuscript.trace",
+        "attachment.check_send",
+        "attachment.resolve_identity",
+        "manuscript.read_file",
+        "manuscript.suggest",
+        # Both need a session that already exists, so they are discovered here and
+        # exercised in `tests/contract/capabilities/test_conversation.py`.
+        "session.get",
+        "context.preview",
     }
 )
 

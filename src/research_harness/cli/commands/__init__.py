@@ -12,11 +12,13 @@ from types import ModuleType
 import typer
 
 from research_harness.cli.commands import (
+    attachment,
     claim,
     corpus,
     demo,
     discover,
     evidence,
+    graph,
     init,
     manuscript,
     privacy,
@@ -24,6 +26,7 @@ from research_harness.cli.commands import (
     research,
     search,
     serve,
+    session,
 )
 
 __all__ = ["COMMAND_MODULES", "register_all"]
@@ -40,6 +43,9 @@ COMMAND_MODULES: tuple[ModuleType, ...] = (
     search,
     discover,
     manuscript,
+    graph,
+    attachment,
+    session,
     privacy,
     serve,
 )

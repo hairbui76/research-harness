@@ -91,6 +91,9 @@ from research_harness.protocol.dto import (
     WorkSummary,
     error_body,
 )
+from research_harness.server.routes_attachments import register_attachment_routes
+from research_harness.server.routes_manuscript import register_manuscript_routes
+from research_harness.server.routes_sessions import register_session_routes
 from research_harness.workspace.repository import ObjectNotFoundError, WorkspaceRepository
 
 __all__ = [
@@ -278,6 +281,9 @@ def create_app(
         caller.authorize("overview", Permission.READ, human_only=False)
         return _overview(catalog, root, caller)
 
+    register_manuscript_routes(app, root)
+    register_attachment_routes(app, root)
+    register_session_routes(app, root)
     _serve_bundle(app)
     _allow_dev_origins(app)
     return app

@@ -42,6 +42,22 @@ EXPECTED_ROUTES: set[tuple[str, frozenset[str]]] = {
     ("/index", frozenset({"GET"})),
     ("/blocks/{artifact_id}", frozenset({"GET"})),
     ("/overview", frozenset({"GET"})),
+    # Phase 19 added the attachment surface. The POST is the *one* documented write that is
+    # not a capability call (v1.1 plan §0.4): it writes session-only bytes through the same
+    # `AttachmentService.add` that `attachment.add` calls, is authorised as that capability
+    # is, and can create no Work, Artifact, Evidence, or Claim. The two GETs are byte reads.
+    ("/sessions/{session_id}/attachments", frozenset({"POST"})),
+    ("/sessions/{session_id}/attachments/{attachment_id}/bytes", frozenset({"GET"})),
+    ("/sessions/{session_id}/attachments/{attachment_id}/preview", frozenset({"GET"})),
+    # Phase 21 adds one read: a PDF cannot be carried in JSON, so the compiled build is
+    # streamed the way artifact bytes are. `latest` and `last-good` are accepted as build
+    # ids. There is deliberately no route that writes a manuscript file - saving is
+    # `manuscript.write_file` and applying a diff is `manuscript.apply_suggestion`.
+    ("/manuscript/builds/{build_id}/pdf", frozenset({"GET"})),
+    # Phase 18 adds the run event stream. It is a GET and a *read* of what `session.send`
+    # already persisted, so the daemon still publishes no route that appends to a
+    # transcript: sending is the capability, and watching it arrive is a read.
+    ("/runs/{run_id}/events", frozenset({"GET"})),
 }
 
 
@@ -202,7 +218,12 @@ def test_long_running_capabilities_declare_a_run_id_instead_of_a_result(
     assert {spec.name for spec in long_running} >= {"work.interrogate", "evidence.verify"}
     for spec in long_running:
         assert "run_id" in spec.response_model.model_fields
-        assert spec.permission is Permission.STAGE
+        # Proposal work a host may start is `stage`. Phase 18 adds a long call that is not
+        # proposal work at all — a conversation send writes the researcher's own private
+        # transcript — so it is `mutate` and human-only. Either way the answer is a durable
+        # run id rather than a held connection, which is what ADR-009 is about.
+        assert spec.permission in {Permission.STAGE, Permission.MUTATE}
+        assert spec.permission is Permission.STAGE or spec.descriptor().human_only
 
 
 def test_an_unknown_run_is_a_404(client: TestClient) -> None:

@@ -28,12 +28,32 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from research_harness.capabilities.attachments import (
+    ATTACHMENT_CAPABILITIES,
+    ATTACHMENT_CAPABILITY_HANDLERS,
+    attachment_specs,
+)
 from research_harness.capabilities.context import CapabilityContext, actor_provenance
+from research_harness.capabilities.conversation import (
+    CONVERSATION_CAPABILITIES,
+    CONVERSATION_CAPABILITY_HANDLERS,
+    conversation_specs,
+)
 from research_harness.capabilities.dto import (
     CapabilityRequest,
     IngestLocalPdfRequest,
     MutationResult,
     ParseWorkRequest,
+)
+from research_harness.capabilities.graph import (
+    GRAPH_CAPABILITIES,
+    GRAPH_CAPABILITY_HANDLERS,
+    graph_specs,
+)
+from research_harness.capabilities.manuscript_workspace import (
+    MANUSCRIPT_WORKSPACE_CAPABILITIES,
+    MANUSCRIPT_WORKSPACE_HANDLERS,
+    manuscript_workspace_specs,
 )
 from research_harness.capabilities.permissions import Permission
 from research_harness.capabilities.reads import (
@@ -1805,6 +1825,10 @@ EXTRA_CAPABILITY_HANDLERS: Mapping[str, Callable[[CapabilityContext, Any], Any]]
         "citation.verify": verify_citations,
         "state.rebuild": rebuild_state,
         "state.stale": get_state_stale,
+        **MANUSCRIPT_WORKSPACE_HANDLERS,
+        **CONVERSATION_CAPABILITY_HANDLERS,
+        **ATTACHMENT_CAPABILITY_HANDLERS,
+        **GRAPH_CAPABILITY_HANDLERS,
         **READ_CAPABILITY_HANDLERS,
     }
 )
@@ -2361,9 +2385,16 @@ def _claim_relation_specs() -> list[CapabilitySpec]:
     ]
 
 
+def _attachment_specs() -> list[CapabilitySpec]:
+    """The `attachment.*` capabilities; the service reads PDFs and images (design §2, §6)."""
+    return attachment_specs()
+
+
 #: Each section names the capabilities it contributes, so a missing package turns into
 #: planned names rather than an import error at daemon start.
 _SECTIONS: tuple[tuple[tuple[str, ...], Callable[[], list[CapabilitySpec]]], ...] = (
+    (GRAPH_CAPABILITIES, graph_specs),
+    (ATTACHMENT_CAPABILITIES, _attachment_specs),
     (
         (
             "work.get",
@@ -2409,6 +2440,8 @@ _SECTIONS: tuple[tuple[tuple[str, ...], Callable[[], list[CapabilitySpec]]], ...
         ),
         _manuscript_specs,
     ),
+    (MANUSCRIPT_WORKSPACE_CAPABILITIES, manuscript_workspace_specs),
+    (CONVERSATION_CAPABILITIES, conversation_specs),
     (("state.rebuild", "state.stale"), _state_specs),
     (
         ("claim.relate", "claim.unrelate", "claim.supersede", "claim.update_coverage"),
