@@ -1,0 +1,52 @@
+"""Command modules for the `research` CLI.
+
+Each module exposes ``register(app: typer.Typer) -> None`` and is listed in
+:data:`COMMAND_MODULES`; adding a command family is one import and one line, and no
+module here reaches past `capabilities/` to change canonical state.
+"""
+
+from __future__ import annotations
+
+from types import ModuleType
+
+import typer
+
+from research_harness.cli.commands import (
+    claim,
+    corpus,
+    discover,
+    evidence,
+    init,
+    manuscript,
+    privacy,
+    rebuild,
+    research,
+    search,
+    serve,
+)
+
+__all__ = ["COMMAND_MODULES", "register_all"]
+
+#: Registered in order; later families (`review`, `claim`, `manuscript`, ...) are added here.
+COMMAND_MODULES: tuple[ModuleType, ...] = (
+    init,
+    corpus,
+    rebuild,
+    evidence,
+    claim,
+    research,
+    search,
+    discover,
+    manuscript,
+    privacy,
+    serve,
+)
+
+
+def register_all(app: typer.Typer) -> None:
+    """Register every command family on ``app``."""
+    for module in COMMAND_MODULES:
+        register = getattr(module, "register", None)
+        if register is None:  # pragma: no cover - guarded by the module contract
+            raise TypeError(f"{module.__name__} does not expose register(app)")
+        register(app)
