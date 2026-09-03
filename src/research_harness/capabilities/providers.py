@@ -13,7 +13,12 @@ Two properties are deliberate:
 * **No network, no credential.** The catalog is built the way `egress_report` is built:
   from the adapters' own capability factories and the *names* of the environment variables
   a key would come from. `available` is a boolean and `unavailable_reason` is a sentence;
-  no field of this module can hold a key (Product 34).
+  no field of this module can hold a key (Product 34). One entry kind is not answerable
+  from configuration alone: a `local_cli` entry borrows the CLI's own login, so whether it
+  can be called is a fact about this workstation. For those, and only those, the catalog
+  reads the cached local detection probes (`--version`, login status, `--help`) — local
+  processes that carry no research content and read no credential. Nothing here opens a
+  network connection.
 * **`default` is the router's answer, not a preference.** It marks the entry
   `ModelRouter.select` would return for an unconstrained call — the first the policy allows,
   in priority order — so a client that shows a default shows the one that would actually be
@@ -95,8 +100,9 @@ class ProviderModelView(BaseModel):
 
     vision: bool
     available: bool
-    """Whether it could be called now: allowed by the policy, and either local or holding
-    a credential. Never determined by contacting anything."""
+    """Whether it could be called now: allowed by the policy, and then either local, or
+    holding a credential, or — for a `local_cli` entry — installed, logged in and provably
+    bounded according to the cached detection probes. Never determined over the network."""
 
     unavailable_reason: str | None = None
     default: bool = False
@@ -225,8 +231,9 @@ def provider_specs() -> list[CapabilitySpec]:
             summary="Every configured model, with what it accepts and whether it is available.",
             permission=Permission.READ,
             scientific_semantics=(
-                "reads configuration and the project's egress disclosure; contacts nothing, "
-                "reveals no credential, and changes no state"
+                "reads configuration and the project's egress disclosure; for configured "
+                "local CLIs it reads the cached local detection probes; sends no research "
+                "content, reveals no credential, and changes no state"
             ),
             request_model=ListProvidersRequest,
             response_model=ProviderCatalog,

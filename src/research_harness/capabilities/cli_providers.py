@@ -23,7 +23,12 @@ from research_harness.capabilities.dto import CapabilityRequest
 from research_harness.capabilities.permissions import Permission
 from research_harness.capabilities.registry import CapabilitySpec
 from research_harness.domain.errors import AuthorityError, CapabilityError
-from research_harness.privacy.policy import EgressDeniedError, load_policy
+from research_harness.privacy.policy import (
+    EgressDeniedError,
+    EgressPolicy,
+    check_egress,
+    load_policy,
+)
 from research_harness.privacy.traces import trace_writer_for
 from research_harness.providers.cli.detection import scan
 from research_harness.providers.cli.errors import redact
@@ -40,6 +45,7 @@ from research_harness.providers.models.router import (
     RouterConfig,
     RouterProviderConfig,
     build_router,
+    entry_capabilities,
 )
 
 __all__ = [
@@ -227,10 +233,22 @@ def cli_availability(
     return reason is None, reason
 
 
+def _policy_reason(policy: EgressPolicy, entry: RouterProviderConfig) -> str | None:
+    """Why this project forbids talking to the entry's runtime, or `None` when it may.
+
+    The same judgement `provider.list` makes, from the same declaration, so the settings
+    screen and the model selector never disagree about one entry (spec §11, Product 34).
+    """
+    check = check_egress(policy, entry_capabilities(entry).egress, kind="model")
+    return None if check.allowed else check.reason
+
+
 def _view(
-    entry: RouterProviderConfig, statuses: Mapping[str, CliRuntimeStatus]
+    entry: RouterProviderConfig,
+    statuses: Mapping[str, CliRuntimeStatus],
+    policy: EgressPolicy,
 ) -> ConfiguredCliProviderView:
-    available, reason = cli_availability(entry, statuses, None)
+    available, reason = cli_availability(entry, statuses, _policy_reason(policy, entry))
     return ConfiguredCliProviderView(
         name=entry.name,
         runtime=entry.runtime or "",
@@ -257,7 +275,8 @@ def scan_cli_runtimes(ctx: CapabilityContext, request: ScanCliRuntimesRequest) -
     """Fresh, bounded, fault-isolated detection of every supported runtime (spec §10)."""
     statuses = _statuses(fresh=request.rescan)
     ordered = tuple(statuses[item.id] for item in RUNTIMES.values())
-    configured = tuple(_view(entry, statuses) for entry in _cli_entries(ctx))
+    policy = load_policy(ctx.repo)
+    configured = tuple(_view(entry, statuses, policy) for entry in _cli_entries(ctx))
     scanned_at = max((item.scanned_at for item in ordered), default=datetime.now(UTC))
     return CliScanReport(
         scanned_at=scanned_at, count=len(ordered), runtimes=ordered, configured=configured
@@ -316,7 +335,8 @@ def configure_cli_provider(
     RouterConfig.model_validate({"providers": replaced})  # a bad list never reaches the file
     ctx.repo.update_providers(replaced)
     stored = next(item for item in _cli_entries(ctx) if item.name == request.name)
-    return CliProviderConfigured(entry=_view(stored, {definition.id: status}), created=created)
+    view = _view(stored, {definition.id: status}, load_policy(ctx.repo))
+    return CliProviderConfigured(entry=view, created=created)
 
 
 def remove_cli_provider(
@@ -370,6 +390,15 @@ def test_cli_provider(
     if refusal is not None:
         return CliProviderTestReport(
             **base, ok=False, message=refusal.message, diagnostic="privacy_refused"
+        )
+    if not router.entries:
+        # `build_router` drops a disabled entry, and an empty table refuses nothing, so this
+        # is the only place the "configured but switched off" case can be answered.
+        return CliProviderTestReport(
+            **base,
+            ok=False,
+            message=f"{entry.name} is disabled in research.yaml",
+            diagnostic="unavailable",
         )
 
     nonce = f"provider.cli.test-{os.urandom(4).hex()}"
