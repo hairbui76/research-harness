@@ -46,7 +46,7 @@ pythonpath = ["src"]
 target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
-extend-exclude = ["deepseek-harness", "open-design", "skills"]
+extend-exclude = ["deepseek-harness", "docs/superpowers", "open-design", "skills"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "N", "SIM", "RUF"]
