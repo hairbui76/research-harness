@@ -2,20 +2,6 @@
   "count": 2,
   "models": [
     {
-      "id": "fast",
-      "label": "fast/gpt-5.4-mini",
-      "provider": "openai",
-      "egress_class": "external",
-      "input_media": [
-        "text/plain"
-      ],
-      "context_tokens": 272000,
-      "vision": false,
-      "available": true,
-      "unavailable_reason": null,
-      "default": false
-    },
-    {
       "id": "codex-sub",
       "label": "codex-sub/gpt-5.5",
       "provider": "local_cli",
@@ -28,6 +14,20 @@
       "available": true,
       "unavailable_reason": null,
       "default": true
+    },
+    {
+      "id": "fast",
+      "label": "fast/gpt-5.4-mini",
+      "provider": "openai",
+      "egress_class": "external",
+      "input_media": [
+        "text/plain"
+      ],
+      "context_tokens": 272000,
+      "vision": false,
+      "available": true,
+      "unavailable_reason": null,
+      "default": false
     }
   ]
 }
