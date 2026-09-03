@@ -22,7 +22,7 @@ Task-oriented pages for using the harness.
 | [The ResearchGraph](guide/graph.md) | `research graph`, stable references, `rh://` deep links, rebuild, budgets |
 | [The manuscript workspace](guide/manuscript.md) | files, real local compilation, SyncTeX, candidate diffs |
 | [Strict review](guide/review.md) | tiers, inbox order, review actions, batch conditions, conflicts, what a model may not do |
-| [Providers](guide/providers.md) | configuring OpenAI/Anthropic/local/scripted, env vars, egress policy, `research egress`, traces, cost |
+| [Providers](guide/providers.md) | configuring OpenAI/Anthropic/local/scripted, subscription-backed local CLIs, env vars, egress policy, `research egress`, traces, cost |
 | [Agent hosts over MCP](guide/mcp.md) | `research mcp`, Claude Desktop and Claude Code config, ChatGPT-compatible hosts, tool names, resources |
 | [The local HTTP daemon](guide/http.md) | `research serve`, the token, the routes, the error codes |
 | [The Web cockpit](guide/web.md) | the root pnpm workspace, starting the browser UI, themes and density |
@@ -45,10 +45,12 @@ Generated reference, regenerated from the code rather than written by hand:
 | [PRODUCT.md](../PRODUCT.md) | the product specification; the source of every rule the code enforces |
 | [ROADMAP.md](../ROADMAP.md) | the phased implementation plan and the acceptance requirements per task |
 
-### Design specifications for the conversation-first track
+### Design specifications for the v1.1 track
 
-These documents record the conversation-first workspace design; the track that implements
-them is planned in [the v1.1 implementation plan](plans/v1.1-implementation-plan.md).
+These documents record the conversation-first workspace design and the follow-on that routes
+work through a CLI the researcher is already logged in to. The conversation-first track is
+planned in [the v1.1 implementation plan](plans/v1.1-implementation-plan.md), the follow-on in
+[the subscription-backed CLI providers plan](superpowers/plans/2026-09-04-subscription-local-cli-providers.md).
 
 | document | what it defines |
 |---|---|
@@ -58,6 +60,7 @@ them is planned in [the v1.1 implementation plan](plans/v1.1-implementation-plan
 | [Research attachments](superpowers/specs/2026-09-03-research-attachments-design.md) | session-only intake, previews, compatibility, and explicit `Save to corpus` |
 | [LaTeX manuscript workspace](superpowers/specs/2026-09-03-latex-manuscript-workspace-design.md) | KaTeX chat rendering, owned source, real local compilation, PDF preview, and audit |
 | [ResearchGraph index](superpowers/specs/2026-09-03-research-graph-index-design.md) | rebuildable node/edge projection, stable refs, traversal, and context packs |
+| [Subscription-backed local CLI providers](superpowers/specs/2026-09-03-subscription-local-cli-providers-design.md) | declarative runtime registry, bounded subprocess engine, egress invariant, the four capabilities |
 
 ## Architecture
 
@@ -92,6 +95,7 @@ suggests violating one, the ADR and `PRODUCT.md` change explicitly.
 | [ADR-027](decisions/ADR-027-researchgraph-is-a-disposable-labelled-projection.md) | ResearchGraph is a disposable projection, with authority and visibility on every node and edge |
 | [ADR-028](decisions/ADR-028-bounded-compilation-and-candidate-only-manuscript-edits.md) | Manuscript compilation is a bounded local process, and model edits are candidate diffs |
 | [ADR-029](decisions/ADR-029-one-local-design-system-owns-presentation.md) | One local Design System package owns presentation, and owns nothing else |
+| [ADR-030](decisions/ADR-030-cli-backed-providers-are-bounded-external-workers.md) | CLI-backed providers are bounded external workers behind the neutral provider boundary |
 
 ## Plans and reports
 
@@ -101,6 +105,7 @@ suggests violating one, the ADR and `PRODUCT.md` change explicitly.
 | [Performance budgets](plans/performance-budgets.md) | measured personal-scale timings and the proposed budgets (`benchmarks/`, `tests/perf/`) |
 | [Skill audit](plans/skill-audit.md) | every asset under `skills/`, classified, and where the in-scope ones landed |
 | [v1.1 implementation plan](plans/v1.1-implementation-plan.md) | the shared contracts, waves, and task briefs the conversation-first track executed |
+| [Subscription-backed CLI providers plan](superpowers/plans/2026-09-04-subscription-local-cli-providers.md) | the runtime registry, bounded engine, capabilities, and surfaces the follow-on track executed |
 | [Dogfood session, 2026-09-03](plans/dogfood-2026-09-03.md) | running the harness on a real review; `docs/dogfood/structured-traffic/` is the resulting workspace |
 | [Dogfood session, v1.1](plans/dogfood-2026-09-03-v1.1.md) | the conversation-first loop end to end: chat, attachments, graph, a real LaTeX compile |
 

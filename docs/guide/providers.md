@@ -36,15 +36,17 @@ Every field of an entry:
 | field | default | meaning |
 |---|---|---|
 | `name` | required | the label `--provider` selects, and a routing tag |
-| `kind` | required | `openai`, `anthropic`, or `local_openai_compatible` |
-| `model` | required | the model id sent to the endpoint |
-| `base_url` | the adapter default | endpoint override, e.g. a local server |
+| `kind` | required | `openai`, `anthropic`, `local_openai_compatible`, or `local_cli` |
+| `runtime` | required for `local_cli` | `kind: local_cli` only: the runtime id (`codex`, `claude`, …); forbidden for every other kind |
+| `model` | required | the model id sent to the endpoint; `default` on a `local_cli` entry means the CLI's own configured model |
+| `base_url` | the adapter default | endpoint override, e.g. a local server; refused for `local_cli` |
 | `priority` | `100` | lower is preferred |
 | `roles` | any role | restrict the entry to named roles |
 | `tags` | `[]` | extra labels `--provider` can also select by |
-| `api_key_env` | the adapter default | the environment variable holding the key |
+| `api_key_env` | the adapter default | the environment variable holding the key; refused for `local_cli`, which uses the CLI's own login |
 | `timeout_seconds` | adapter default | request timeout |
 | `capabilities` | adapter defaults | per-model overrides: `structured_output`, `max_context_tokens`, `reasoning_levels`, `vision` |
+| `reasoning` | the runtime's own default | `kind: local_cli` only: one of the runtime definition's own effort names, listed under `reasoning_choices` by `providers scan --json` |
 | `enabled` | `true` | `false` leaves the entry configured but unrouted |
 
 Adapter defaults:
@@ -54,6 +56,7 @@ Adapter defaults:
 | `openai` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | source text + identifiers to `api.openai.com`; the call asks the provider not to store the response |
 | `anthropic` | `https://api.anthropic.com` | `ANTHROPIC_API_KEY` | source text + identifiers to `api.anthropic.com` |
 | `local_openai_compatible` | `http://localhost:11434/v1` | `LOCAL_MODEL_API_KEY` | nothing leaves the workstation |
+| `local_cli` | — | — | source text + identifiers to the CLI vendor (declared per runtime; `unknown.external` when undisclosed) |
 
 The roles a workflow asks for are `evidence_extractor`, `evidence_verifier`,
 `claim_auditor`, `skeptic`, `synthesizer`, and `writer`.
@@ -96,6 +99,118 @@ error: no model providers configured: add a `providers:` list to research.yaml, 
 $ research interrogate W0001 --provider nope
 error: no provider named 'nope' in research.yaml (have: fast, local)
 ```
+
+## Subscription-backed local CLIs
+
+If you are already logged in to Codex CLI or Claude Code, the harness can route research
+work through that CLI. Cursor Agent, Amp, DeepSeek Harness, OpenCode, and Pi are detected
+and reported alongside them, but are not routable in this release (*Bounded mode*, below).
+No API key enters Research Harness; the CLI's own login is used — and only a *subscription*
+login counts. Codex must report a ChatGPT login and Claude Code an `authMethod` of
+`claude.ai`; an API-key login is metered and talks to a different host, so it is reported as
+not logged in, with the command that fixes it.
+
+A CLI provider is **not local**. The process starts here; the model is the vendor's.
+Research content and object IDs leave the workstation exactly as they do for an HTTP
+provider, and `privacy.external_models: disabled` refuses a CLI provider before it is
+started (ADR-030).
+
+```console
+$ research providers scan
+A local CLI starts on this workstation, but the model it talks to is the vendor's: research content and object IDs leave the machine when a CLI provider is used.
+
+codex              0.150.1        logged in          bounded mode ok        verified
+    models (live): default, gpt-5.5, gpt-5.4, gpt-5.4-mini
+claude             2.1.259        logged in          bounded mode ok        verified
+    models (fallback): default, sonnet, opus, haiku, claude-opus-5, claude-sonnet-5 …
+cursor-agent       1.4.0          logged in          no bounded mode        warning — cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode
+    cursor-agent: headless Cursor Agent runs only with --force (approval bypass); no deny-tools flag is documented
+    models (live): default, auto, sonnet-4, gpt-5
+amp                not installed
+    amp is not installed: no 'amp' on PATH
+deepseek-harness   not installed
+    deepseek-harness is not installed: no 'dsh' on PATH
+opencode           not installed
+    opencode is not installed: no 'opencode-cli' on PATH
+pi                 not installed
+    pi is not installed: no 'pi' on PATH
+
+$ research providers add codex --name codex-sub --model gpt-5.5 --priority 10
+added codex-sub (codex/gpt-5.5, priority 10) in research.yaml
+select it with --provider codex-sub
+
+$ research providers test codex-sub
+egress: codex-sub sends research content to chatgpt.com through Codex CLI
+codex-sub (codex/gpt-5.5, 0.150.1): ok
+  Codex CLI answered through the subscription login in 2140 ms
+
+$ research interrogate W0001 --provider codex-sub
+```
+
+Once an entry exists, every later scan repeats it under a `configured in research.yaml`
+block with its priority and whether it is routable right now.
+
+The entry `add` writes:
+
+```yaml
+providers:
+  - name: codex-sub
+    kind: local_cli
+    runtime: codex          # codex | claude | cursor-agent | amp | deepseek-harness | opencode | pi
+    model: gpt-5.5          # or `default` for the CLI's own configured model
+    priority: 10
+    reasoning: high         # optional; the runtime's own effort name
+    timeout_seconds: 300    # optional
+    enabled: true
+```
+
+`runtime` is required and `base_url`/`api_key_env` are refused for `kind: local_cli`.
+`reasoning` is the runtime's own effort name, not a harness word: Codex takes `low`,
+`medium`, `high`, `xhigh` and receives them as `-c model_reasoning_effort="…"`; Claude Code
+takes those and `max`, and receives them as `--effort`. The names come from the runtime
+definition, not from a probe, so the text scan does not print them: read them from
+`reasoning_choices` in `providers scan --json`, or from the Web tab's selector.
+
+**Bounded mode.** A runtime is routable only when the installed version proves a no-tools,
+read-only posture. Codex runs `codex exec --json --skip-git-repo-check --ephemeral
+--ignore-user-config --ignore-rules --sandbox read-only -c approval_policy="never"`, with
+the response schema handed over as a file (`--output-schema`); Claude Code runs `claude -p
+--tools "" --permission-mode dontAsk --permission-prompts none --strict-mcp-config
+--disable-slash-commands --no-session-persistence --restricted`, where `--restricted`
+removes the command- and code-running tools outright, ignores your user, project, and local
+settings files, and refuses `bypassPermissions`. Both run in an empty temporary directory,
+with every API-key, token, and cloud-credential variable removed from the environment, so a
+subscription login cannot quietly become metered access. The other five runtimes are
+detected and listed but not routable in this release. Cursor Agent, Amp, DeepSeek Harness,
+and Pi report `no bounded mode` — Cursor Agent and Amp run headless only with an approval
+bypass, and DeepSeek Harness's profile and Pi's RPC session execute tools of their own —
+while OpenCode's environment-injected deny table is unproven until a version is verified, so
+it reports `bounded mode unproven`. `add` refuses all five. A tool call during a bounded run
+cancels the process and fails the request (`bounded_authority_violation`); there is no
+prompt-only fallback.
+
+**What a scan reports.** Installed state and version; login, as `logged in`, `not logged in`,
+or `login unverified`; bounded mode, as `bounded mode ok`, `no bounded mode`, or
+`bounded mode unproven`; compatibility; and the models the CLI itself lists (`live`) or the
+shipped hints (`fallback`). Compatibility is `verified` for a version with recorded fixtures,
+`warning` for an untested newer one, `unknown` when the version string cannot be read, and
+`blocked` for a version known to be incompatible or below a declared floor. Of those four
+only `blocked` stops a runtime being routed: bounded mode is a separate gate, answered for
+the build that is actually installed, so an unrecognised version is a warning, not a
+refusal. A runtime
+that cannot be routed ends its line with the one reason that stops it — the same sentence
+`add` refuses with and the Web cockpit shows. A scan edits nothing and sends no research
+content: it runs the CLI's own `--version`, login-status, help, and model-list commands with
+short timeouts, and the result is cached for 30 seconds so a selector stays responsive
+(`--rescan` bypasses the cache). The Web cockpit's *Settings → Models & providers → Local
+CLIs* tab renders the same report from the same capabilities.
+
+**Traces and errors.** A CLI call is traced like any other under `.research/traces/`. An
+ordinary `--provider codex-sub` call adds the runtime id, protocol family, transport, model,
+and the redacted executable path; the version is on a `research providers test` trace only,
+because answering a request never probes for one. Errors name the runtime, model, and version
+— `version unknown` when none was probed — and a next action (run `codex login`); they never
+contain a token, a credential path, or the raw process output.
 
 ## The scripted provider
 
