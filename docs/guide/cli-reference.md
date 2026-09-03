@@ -2048,7 +2048,41 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ --help          Show this message and exit.                                          │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────────────╮
-│ list  Every configured model, with what it accepts and whether it can be called.     │
+│ list    Every configured model, with what it accepts and whether it can be called.   │
+│ scan    Detect the supported local CLIs: installed, version, login, bounded mode,    │
+│         models.                                                                      │
+│ add     Add (or update) a subscription-backed CLI provider entry in research.yaml.   │
+│ test    Run one minimal schema-validated request through a configured CLI provider.  │
+│ remove  Remove a subscription-backed CLI provider entry from research.yaml.          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research providers add`
+
+```text
+
+ Usage: research providers add [OPTIONS] {runtime}
+
+ Add (or update) a subscription-backed CLI provider entry in research.yaml.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    runtime      <str>  Runtime id: codex, claude, cursor-agent, amp,               │
+│                          deepseek-harness, opencode, pi.                             │
+│                          [required]                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ *  --name               <str>    The entry name `--provider` selects. [required]     │
+│    --workspace  -w      <path>   Workspace root; defaults to the nearest             │
+│                                  research.yaml above the current directory.          │
+│                                  [env var: RESEARCH_WORKSPACE]                       │
+│    --model              <str>    Model id from `providers scan`, or `default`.       │
+│                                  [default: default]                                  │
+│    --priority           <int>    Lower is preferred. [default: 100]                  │
+│    --reasoning          <str>    The runtime's own effort name.                      │
+│    --timeout            <float>  Request timeout in seconds.                         │
+│    --role               <str>    Restrict to a role; repeatable.                     │
+│    --json                        Print the result as JSON instead of text.           │
+│    --help                        Show this message and exit.                         │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -2060,6 +2094,64 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 
  Every configured model, with what it accepts and whether it can be called.
 
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research providers remove`
+
+```text
+
+ Usage: research providers remove [OPTIONS] {name}
+
+ Remove a subscription-backed CLI provider entry from research.yaml.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    name      <str>  A local_cli entry name from research.yaml. [required]          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research providers scan`
+
+```text
+
+ Usage: research providers scan [OPTIONS]
+
+ Detect the supported local CLIs: installed, version, login, bounded mode, models.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --rescan                     Bypass the short in-memory cache.                       │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research providers test`
+
+```text
+
+ Usage: research providers test [OPTIONS] {name}
+
+ Run one minimal schema-validated request through a configured CLI provider.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    name      <str>  A local_cli entry name from research.yaml. [required]          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ────────────────────────────────────────────────────────────────────────────╮
 │ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
 │                              above the current directory.                            │

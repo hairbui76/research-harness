@@ -267,11 +267,29 @@ def _provider_checks(repo: WorkspaceRepository) -> list[DoctorCheck]:
         DoctorCheck("providers", True, f"{len(config.providers)} configured in research.yaml")
     ]
     for entry in config.providers:
-        variable = entry.api_key_env or MODEL_KEY_ENV_VARS[entry.kind]
+        enabled = "" if entry.enabled else ", disabled"
+        if entry.kind == "local_cli" and entry.runtime is not None:
+            # A subscription-backed CLI reads no key variable: what it needs is the
+            # executable, a login, and a bounded mode, so `providers scan`'s own row is
+            # what `doctor` prints (CLI providers spec §17). The scan is the cached one.
+            from research_harness.cli.commands.provider import _state
+            from research_harness.providers.cli.detection import scan
+            from research_harness.providers.cli.registry import RUNTIMES
+
+            status = scan([RUNTIMES[entry.runtime]])[0]
+            lines.append(
+                DoctorCheck(
+                    f"  {entry.name}",
+                    True,
+                    f"local_cli:{entry.runtime}/{entry.model}, {_state(status)}{enabled}",
+                    note=not status.routable and entry.enabled,
+                )
+            )
+            continue
+        variable = entry.api_key_env or MODEL_KEY_ENV_VARS.get(entry.kind, "")
         # The *name* of the variable and a boolean, never a value (Product 34).
         present = bool(os.environ.get(variable, "").strip())
         state = "set" if present else "unset"
-        enabled = "" if entry.enabled else ", disabled"
         lines.append(
             DoctorCheck(
                 f"  {entry.name}",
