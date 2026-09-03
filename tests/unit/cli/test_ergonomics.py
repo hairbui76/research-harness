@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -183,7 +184,12 @@ def test_the_json_payload_says_how_many_it_actually_carries(project: Path) -> No
 def test_review_candidate_help_no_longer_promises_a_gate_it_does_not_have(
     project: Path,
 ) -> None:
-    output = run("review", "candidate", "--help").stdout
+    # Typer renders help through rich. On a narrow terminal the sentence wraps across the
+    # box-drawn lines and colour escapes can split a phrase, so the assertion is on the
+    # prose: a wide terminal for this one call, and escapes stripped before collapsing.
+    result = runner.invoke(app, ["review", "candidate", "--help"], env={"TERMINAL_WIDTH": "200"})
+    assert result.exit_code == 0, result.output
+    output = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
     collapsed = " ".join(output.split())
 
     assert "accepts any tier" in collapsed
