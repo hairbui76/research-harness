@@ -1,0 +1,4 @@
+# source: apps/daemon/src/runtimes/claude-stream.ts@9bb4a7d (amp); sanitized
+{"type":"system","subtype":"init","session_id":"thread-x","model":"amp-smart","tools":[]}
+{"type":"assistant","message":{"id":"msg-1","role":"assistant","model":"amp-smart","content":[{"type":"text","text":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}],"stop_reason":"end_turn","usage":{"input_tokens":1200,"output_tokens":95,"cache_read_input_tokens":400,"cache_creation_input_tokens":0}},"session_id":"thread-x"}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":1410,"num_turns":1,"result":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}","session_id":"thread-x","usage":{"input_tokens":1200,"output_tokens":95,"cache_read_input_tokens":400,"cache_creation_input_tokens":0}}

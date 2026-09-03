@@ -1,0 +1,8 @@
+# source: apps/daemon/src/agent-protocol/dsh-profile/types.ts@9bb4a7d; sanitized
+{"v":1,"type":"ready","runtime":"open-design","protocol_version":1,"plugin_version":"0.1.1","capabilities":{"session_resume":true,"session_cancel":true,"structured_events":true}}
+{"v":1,"type":"session","request_id":"req-1","session_id":"sess-x","resumed":false}
+{"v":1,"type":"thinking","request_id":"req-1","content":"checking"}
+{"v":1,"type":"text","request_id":"req-1","content":"{\"supported\": true, \"confidence\": 0.82, "}
+{"v":1,"type":"text","request_id":"req-1","content":"\"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}
+{"v":1,"type":"usage","request_id":"req-1","provider":"deepseek","model":"deepseek-v3","input_tokens":1200,"output_tokens":95,"cache_read_tokens":400}
+{"v":1,"type":"result","request_id":"req-1","status":"completed","session_id":"sess-x","output":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}","stop_reason":"end_turn","resume_rejected":false}

@@ -1,0 +1,3 @@
+# source: apps/daemon/src/runtimes/json-event-stream.ts@9bb4a7d (cursor-agent); sanitized
+{"type":"system","subtype":"init","session_id":"sess-x","model":"sonnet-4"}
+{"type":"tool_call","subtype":"started","call_id":"call-1","tool_call":{"shellToolCall":{"args":{"command":"ls"}}}}

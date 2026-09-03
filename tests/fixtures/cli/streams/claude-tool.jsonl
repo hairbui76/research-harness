@@ -1,0 +1,3 @@
+# source: apps/daemon/src/runtimes/claude-stream.ts@9bb4a7d; sanitized
+{"type":"system","subtype":"init","session_id":"sess-x","model":"claude-opus-5","tools":["Bash"]}
+{"type":"assistant","message":{"id":"msg-1","role":"assistant","model":"claude-opus-5","content":[{"type":"tool_use","id":"toolu-1","name":"Bash","input":{"command":"ls"}}],"stop_reason":"tool_use","usage":{"input_tokens":10,"output_tokens":5}},"session_id":"sess-x"}

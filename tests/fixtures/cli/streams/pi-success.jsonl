@@ -1,0 +1,8 @@
+# source: apps/daemon/tests/pi-rpc.test.ts@9bb4a7d; sanitized
+{"type":"agent_start"}
+{"type":"turn_start"}
+{"type":"message_update","assistantMessageEvent":{"type":"text_delta","contentIndex":0,"delta":"{\"supported\": true, \"confidence\": 0.82, "}}
+{"type":"message_update","assistantMessageEvent":{"type":"text_delta","contentIndex":0,"delta":"\"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}}
+{"type":"message_end"}
+{"type":"turn_end","message":{"role":"assistant","stopReason":"stop","model":"anthropic/claude-sonnet-4-5","usage":{"input":1200,"output":95,"cacheRead":400,"cacheWrite":0,"totalTokens":1295}}}
+{"type":"agent_end"}

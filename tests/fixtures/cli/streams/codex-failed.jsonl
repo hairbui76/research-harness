@@ -1,0 +1,5 @@
+# source: apps/daemon/src/runtimes/json-event-stream.ts@9bb4a7d (codex); sanitized
+{"type":"thread.started","thread_id":"thread-x"}
+{"type":"turn.started"}
+{"type":"error","message":"The model `gpt-nope` does not exist or you do not have access to it."}
+{"type":"turn.failed","error":{"message":"The model `gpt-nope` does not exist or you do not have access to it."}}

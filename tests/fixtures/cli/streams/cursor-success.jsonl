@@ -1,0 +1,6 @@
+# source: apps/daemon/src/runtimes/json-event-stream.ts@9bb4a7d (cursor-agent); sanitized
+{"type":"system","subtype":"init","session_id":"sess-x","model":"sonnet-4","cwd":"/tmp/rh-cli-x"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"{\"supported\": true, "}]},"timestamp_ms":1}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"\"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}]},"timestamp_ms":2}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}]},"model_call_id":"call-1"}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":1200,"result":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}","usage":{"inputTokens":1200,"outputTokens":95,"cacheReadTokens":400,"cacheWriteTokens":0}}

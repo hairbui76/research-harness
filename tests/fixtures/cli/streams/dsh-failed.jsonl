@@ -1,0 +1,4 @@
+# source: apps/daemon/src/agent-protocol/dsh-profile/types.ts@9bb4a7d; sanitized
+{"v":1,"type":"ready","runtime":"open-design","protocol_version":1,"plugin_version":"0.1.1","capabilities":{"session_resume":true,"session_cancel":true,"structured_events":true}}
+{"v":1,"type":"session","request_id":"req-1","session_id":"sess-x","resumed":false}
+{"v":1,"type":"result","request_id":"req-1","status":"failed","session_id":"sess-x","resume_rejected":false,"error":{"code":"provider_error","message":"rate limit exceeded"}}

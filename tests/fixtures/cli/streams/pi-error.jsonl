@@ -1,0 +1,5 @@
+# source: apps/daemon/src/agent-protocol/pi-rpc/events.ts@9bb4a7d; sanitized
+{"type":"agent_start"}
+{"type":"turn_start"}
+{"type":"turn_end","message":{"role":"assistant","stopReason":"error","errorMessage":"401 unauthorized: not logged in"}}
+{"type":"agent_end"}
