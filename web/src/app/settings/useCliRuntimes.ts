@@ -33,13 +33,9 @@ function message(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause);
 }
 
-export function useCliRuntimes(
-  client: HarnessClient,
-  options: { enabled?: boolean } = {},
-): CliRuntimesApi {
-  const enabled = options.enabled ?? true;
+export function useCliRuntimes(client: HarnessClient): CliRuntimesApi {
   const [report, setReport] = useState<CliScanReport | null>(null);
-  const [loading, setLoading] = useState(enabled);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [lastTest, setLastTest] = useState<Record<string, CliProviderTestReport>>({});
@@ -73,8 +69,8 @@ export function useCliRuntimes(
   );
 
   useEffect(() => {
-    if (enabled) void load(false);
-  }, [enabled, load]);
+    void load(false);
+  }, [load]);
 
   /**
    * One write, then a fresh scan. The write's own failure is the caller's to report — the

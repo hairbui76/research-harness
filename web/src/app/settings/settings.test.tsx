@@ -36,6 +36,25 @@ function open(daemon: ReturnType<typeof fakeDaemon>, token: string | null = 'loc
 /** The daemon's answer for a window connected without the local token (PRODUCT §29). */
 const AS_HOST = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
 
+/**
+ * The scan a researcher gets after uninstalling a CLI that `research.yaml` still routes to.
+ *
+ * Both halves are exported daemon answers: the runtime rows come from the scan where
+ * nothing is installed, the entry from the scan where codex was. Joining them is what
+ * `capabilities/cli_providers.py` does itself — it re-reads `research.yaml` independently
+ * of what detection found, and stamps the entry with the runtime's own reason — so this is
+ * a real shape, not an invented one.
+ */
+const scanOrphan = (() => {
+  const row = scanEmpty.runtimes.find((item) => item.runtime === 'codex');
+  const entry = scan.configured[0];
+  if (!row || !entry) throw new Error('the exported fixtures no longer carry a codex entry');
+  return {
+    ...scanEmpty,
+    configured: [{ ...entry, available: false, unavailable_reason: row.unavailable_reason }],
+  };
+})();
+
 async function providersTab() {
   await userEvent.click(screen.getByRole('tab', { name: 'Models & providers' }));
   return screen.getByRole('tabpanel', { name: 'Models & providers' });
@@ -215,14 +234,20 @@ describe('the Local CLIs tab', () => {
     });
   });
 
-  it('tests a configured entry and renders the daemon report', async () => {
+  it('tests a configured entry and renders the daemon report into a region that was already there', async () => {
     const daemon = fakeDaemon({ capabilities: answers() });
     open(daemon);
     await providersTab();
     const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    // The live region is on screen before the verdict, so the verdict is an update to a
+    // region assistive technology is already watching, not a region that appears with text
+    // already in it — which is not reliably announced.
+    const verdict = within(codex).getByRole('status');
+    expect(verdict).toBeEmptyDOMElement();
+
     await userEvent.click(within(codex).getByRole('button', { name: 'Test' }));
-    expect(await within(codex).findByRole('status')).toHaveTextContent(
-      'Codex CLI answered through the subscription login in 2140 ms',
+    await waitFor(() =>
+      expect(verdict).toHaveTextContent('Codex CLI answered through the subscription login in 2140 ms'),
     );
     expect(daemon.capabilityCalls().find((call) => call.name === 'provider.cli.test')?.request).toEqual({
       name: 'codex-sub',
@@ -255,6 +280,52 @@ describe('the Local CLIs tab', () => {
     );
     expect(daemon.capabilityCalls().find((call) => call.name === 'provider.cli.remove')?.request).toEqual({
       name: 'codex-sub',
+    });
+  });
+
+  it('keeps a configured entry visible, and removable, when its runtime is gone', async () => {
+    const daemon = fakeDaemon({ capabilities: answers({ 'provider.cli.scan': scanOrphan }) });
+    open(daemon);
+    await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+
+    // research.yaml still routes to it, so the researcher is told so and can act on it.
+    expect(
+      within(codex).getByText('Configured as codex-sub (gpt-5.5, priority 10) — unavailable'),
+    ).toBeInTheDocument();
+    // The daemon's reason, verbatim, and said once: the entry's reason and the runtime's
+    // are the same sentence here, and a card must not print it twice.
+    expect(
+      within(codex).getAllByText('codex is not installed on this workstation'),
+    ).toHaveLength(1);
+
+    // Nothing to test through a CLI that is not there; everything to remove.
+    expect(within(codex).getByRole('button', { name: 'Test' })).toBeDisabled();
+    const remove = within(codex).getByRole('button', { name: 'Remove' });
+    expect(remove).toBeEnabled();
+    await userEvent.click(remove);
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.remove')).toBe(true),
+    );
+    expect(daemon.capabilityCalls().find((call) => call.name === 'provider.cli.remove')?.request).toEqual({
+      name: 'codex-sub',
+    });
+  });
+
+  it('omits the priority rather than sending a null when the field is cleared', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    await userEvent.clear(within(codex).getByLabelText('Priority'));
+    await userEvent.click(within(codex).getByRole('button', { name: 'Update provider' }));
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.configure')).toBe(true),
+    );
+    expect(daemon.capabilityCalls().find((call) => call.name === 'provider.cli.configure')?.request).toEqual({
+      name: 'codex-sub',
+      runtime: 'codex',
+      model: 'gpt-5.5',
     });
   });
 

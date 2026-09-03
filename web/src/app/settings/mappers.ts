@@ -54,7 +54,9 @@ export function runtimeBadges(status: CliRuntimeStatus): RuntimeBadges {
           ? { tone: 'error', label: `Incompatible ${version}` }
           : status.compatibility === 'warning'
             ? { tone: 'warning', label: `Untested ${version}` }
-            : { tone: 'neutral', label: `Untested ${version}` };
+            : // `unknown` is the daemon reaching no verdict on this version, which is not
+              // the same thing as reaching a poor one.
+              { tone: 'neutral', label: `Unverified ${version}` };
 
   return { login, bounded, compatibility };
 }

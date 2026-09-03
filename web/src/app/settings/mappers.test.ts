@@ -58,6 +58,18 @@ describe('runtime badges', () => {
       label: 'Version unknown',
     });
   });
+
+  it('separates a version the daemon could not classify from one it tested and doubted', () => {
+    // `unknown` is "no verdict"; `warning` is "a verdict, and it is not good". They must
+    // not read as the same word.
+    expect(
+      runtimeBadges({ ...runtime('opencode'), compatibility: 'unknown' }).compatibility,
+    ).toEqual({ tone: 'neutral', label: 'Unverified 1.18.0' });
+    expect(runtimeBadges(runtime('opencode')).compatibility).toEqual({
+      tone: 'warning',
+      label: 'Untested 1.18.0',
+    });
+  });
 });
 
 describe('grouping', () => {

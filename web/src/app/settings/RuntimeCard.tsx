@@ -66,21 +66,38 @@ export function RuntimeCard({
   const [name, setName] = useState(configured?.name ?? defaultEntryName(status.runtime));
   const [model, setModel] = useState(configured?.model ?? 'default');
   const [reasoning, setReasoning] = useState<string>(configured?.reasoning ?? '');
-  const [priority, setPriority] = useState(configured?.priority ?? 10);
+  // Held as the field's own text, so that a half-typed or cleared value stays on screen
+  // exactly as the researcher left it instead of being coerced to a number behind them.
+  const [priority, setPriority] = useState(String(configured?.priority ?? 10));
 
   const modelReasoning = status.models.find((item) => item.id === model)?.reasoning ?? [];
   const reasoningChoices = modelReasoning.length > 0 ? modelReasoning : status.reasoning_choices;
   // A reasoning effort the chosen model does not offer is not sent; the runtime's own
   // default is what an empty choice means.
   const reasoningValue = reasoningChoices.includes(reasoning) ? reasoning : '';
+  // An empty or unparseable priority is not a priority of zero: the field is simply not
+  // sent, and the daemon applies its own default.
+  const priorityNumber = Number(priority);
+  const hasPriority = priority.trim() !== '' && Number.isFinite(priorityNumber);
   const working = busy !== null;
+
+  // Why the *entry* is unusable, when that is not already on screen as why the *runtime*
+  // is. The daemon stamps an entry with the runtime's own reason when the runtime is the
+  // problem, and with a different sentence (a policy refusal) when it is not; printing the
+  // same sentence twice would only bury the case where the two differ.
+  const entryReason =
+    configured && !configured.available && configured.unavailable_reason
+      ? configured.unavailable_reason === status.unavailable_reason
+        ? null
+        : configured.unavailable_reason
+      : null;
 
   async function submit() {
     const request: CliProviderConfigureRequest = {
       name,
       runtime: status.runtime,
       model,
-      priority,
+      ...(hasPriority ? { priority: priorityNumber } : {}),
       ...(reasoningValue ? { reasoning: reasoningValue } : {}),
     };
     try {
@@ -140,18 +157,28 @@ export function RuntimeCard({
       ) : null}
 
       {status.available ? (
+        <p className="rh-runtime-card__egress">{egressSentence(status)}</p>
+      ) : null}
+
+      {/*
+        Outside the installed guard on purpose. `report.configured` is read from
+        research.yaml independently of what detection found, so an entry whose CLI has been
+        uninstalled still routes — and a settings screen that hid it would leave the
+        researcher with a provider they cannot see and cannot remove.
+      */}
+      {configured ? (
+        <p className="rh-runtime-card__configured">
+          {`Configured as ${configured.name} (${configured.model}, priority ${configured.priority}) — ` +
+            (configured.available ? 'available' : 'unavailable')}
+        </p>
+      ) : null}
+
+      {entryReason !== null ? (
+        <p className="rh-runtime-card__reason">{entryReason}</p>
+      ) : null}
+
+      {status.available ? (
         <>
-          <p className="rh-runtime-card__egress">{egressSentence(status)}</p>
-
-          {configured ? (
-            <p className="rh-runtime-card__configured">
-              {`Configured as ${configured.name} (${configured.model}, priority ${configured.priority}) — ` +
-                (configured.available
-                  ? 'available'
-                  : `unavailable: ${configured.unavailable_reason ?? 'no reason given'}`)}
-            </p>
-          ) : null}
-
           <div className="rh-runtime-card__form">
             <Select
               label="Model"
@@ -188,12 +215,17 @@ export function RuntimeCard({
               label="Priority"
               type="number"
               value={priority}
-              onChange={(event) => setPriority(Number(event.target.value))}
+              onChange={(event) => setPriority(event.target.value)}
               disabled={!canMutate || working}
             />
           </div>
 
-          <div className="rh-runtime-card__actions">
+        </>
+      ) : null}
+
+      {status.available || configured ? (
+        <div className="rh-runtime-card__actions">
+          {status.available ? (
             <Button
               variant="primary"
               size="sm"
@@ -203,44 +235,58 @@ export function RuntimeCard({
             >
               {configured ? 'Update provider' : 'Add provider'}
             </Button>
-            {configured ? (
-              <>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={!canMutate || working}
-                  onClick={() => void act(() => onTest(configured.name))}
-                >
-                  Test
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  disabled={!canMutate || working}
-                  onClick={() => void act(() => onRemove(configured.name))}
-                >
-                  Remove
-                </Button>
-              </>
-            ) : null}
-          </div>
-
-          {!canMutate && mutationBlockedReason !== null ? (
-            <p className="rh-runtime-card__blocked">{mutationBlockedReason}</p>
           ) : null}
-
-          {lastTest ? (
-            <p
-              role="status"
-              className={`rh-runtime-card__test rh-runtime-card__test--${lastTest.ok ? 'ok' : 'failed'}`}
-            >
-              {lastTest.message}
-              {lastTest.diagnostic ? (
-                <code className="rh-runtime-card__diagnostic">{lastTest.diagnostic}</code>
-              ) : null}
-            </p>
+          {configured ? (
+            <>
+              {/* A test spends a real request through the CLI, so it needs the same green
+                  gates the daemon requires before it would route to it. */}
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={!canMutate || working || !status.routable}
+                {...(status.unavailable_reason !== null ? { 'aria-describedby': reasonId } : {})}
+                onClick={() => void act(() => onTest(configured.name))}
+              >
+                Test
+              </Button>
+              {/* Removing an entry only edits research.yaml, so it is always offered: a
+                  researcher must be able to take out a provider that stopped working. */}
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={!canMutate || working}
+                onClick={() => void act(() => onRemove(configured.name))}
+              >
+                Remove
+              </Button>
+            </>
           ) : null}
-        </>
+        </div>
+      ) : null}
+
+      {!canMutate && mutationBlockedReason !== null && (status.available || configured) ? (
+        <p className="rh-runtime-card__blocked">{mutationBlockedReason}</p>
+      ) : null}
+
+      {/*
+        Mounted before there is anything to say, so a verdict is an update to a live region
+        assistive technology already watches rather than a region that appears with its text
+        already in place, which is not reliably announced.
+      */}
+      {configured ? (
+        <p
+          role="status"
+          className={
+            lastTest
+              ? `rh-runtime-card__test rh-runtime-card__test--${lastTest.ok ? 'ok' : 'failed'}`
+              : 'rh-runtime-card__test'
+          }
+        >
+          {lastTest ? lastTest.message : null}
+          {lastTest?.diagnostic ? (
+            <code className="rh-runtime-card__diagnostic">{lastTest.diagnostic}</code>
+          ) : null}
+        </p>
       ) : null}
     </article>
   );
