@@ -1,0 +1,43 @@
+schema_version: 1
+id: C0004
+created_at: '2026-09-02T21:47:59.138628Z'
+updated_at: '2026-09-02T21:47:59.138630Z'
+provenance:
+  source: human
+  actor: human
+  workflow: claim
+  run_id: null
+  template_version: null
+  note: null
+statement: Pre-training on raw datagrams removes the need for hand-designed statistical features.
+type: descriptive
+semantics:
+  subject: pre-training on raw datagrams
+  predicate: removes the need for
+  object: hand-designed statistical features
+  qualifier: {}
+scope:
+  level: individual
+  corpus: structured-traffic dogfood corpus (5 works)
+  publication_until: 2025-08
+relations:
+- evidence: E0002
+  relation: supports
+  aspect: null
+  note: null
+coverage:
+  relevant_works: 0
+  examined_works: 0
+  unresolved_works: 0
+  overturn_risk: unknown
+  search_runs: []
+  cutoff: null
+assessment:
+  requested_strength: individual
+  allowed_strength: individual
+  status: unverified
+  maximum_defensible_wording: null
+  audited_at: null
+decisions: []
+derived_from: []
+stale: fresh

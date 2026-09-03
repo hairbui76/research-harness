@@ -1,0 +1,2071 @@
+schema_version: 1
+id: SR0001
+created_at: '2026-09-02T21:15:07.123534Z'
+updated_at: '2026-09-02T21:17:32.042791Z'
+provenance:
+  source: human
+  actor: human
+  workflow: discovery
+  run_id: null
+  template_version: null
+  note: null
+question: pre-trained transformer encrypted traffic classification
+research_question: null
+sources:
+- arxiv
+- openalex
+queries:
+- pre-trained transformer encrypted traffic classification
+filters:
+  max_results: '25'
+  max_pages: '1'
+results:
+  discovered: 25
+  screened: 5
+  included: 4
+executed_at: '2026-09-02T21:15:07.123472Z'
+cutoff: null
+cursors:
+- source: arxiv
+  query: pre-trained transformer encrypted traffic classification
+  last_cursor: null
+  pages_fetched: 1
+  exhausted: true
+- source: openalex
+  query: pre-trained transformer encrypted traffic classification
+  last_cursor: IlsxMTkuNDQ3MzIsIDE2OTEzNjY0MDAwMDAsICdodHRwczovL29wZW5hbGV4Lm9yZy9XNDM4NTYzNjk4MCddIg==
+  pages_fetched: 1
+  exhausted: false
+failures: []
+unresolved_identities: []
+unavailable_full_text: []
+candidates:
+- key: doi:10.1145/3485447.3512217
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.100783Z'
+    updated_at: '2026-09-02T21:15:07.113043Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4224315052
+    metadata:
+      title:
+        value: 'ET-BERT: A Contextualized Datagram Representation with Pre-training Transformers for Encrypted Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Xinjie Lin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Gang Xiong
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Gaopeng Gou
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhen Li
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Junzheng Shi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jing Yu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2022'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Proceedings of the ACM Web Conference 2022
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1145/3485447.3512217
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '2202.06335'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4224315052
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: same_work
+    matched_work: W0001
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 1
+  screening: included
+  exclusion_reason: null
+  screened_by: human
+  screened_at: '2026-09-02T21:17:05.148095Z'
+  identity: same_work
+  matched_work: W0001
+  full_text_available: true
+- key: doi:10.1016/j.comnet.2024.110973
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.101130Z'
+    updated_at: '2026-09-02T21:15:07.113431Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4405183220
+    metadata:
+      title:
+        value: 'EAPT: An encrypted traffic classification model via adversarial pre-trained transformers'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Mingming Zhan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jin Yang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Dongqing Jia
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Guohong Fu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Computer Networks
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1016/j.comnet.2024.110973
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4405183220
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 2
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.23919/ituk50268.2020.9303204
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.101208Z'
+    updated_at: '2026-09-02T21:15:07.113803Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3114936184
+    metadata:
+      title:
+        value: 'PERT: Payload Encoding Representation from Transformer for Encrypted Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Hong Ye He
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhi Guo Yang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xiang Ning Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.23919/ituk50268.2020.9303204
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3114936184
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 3
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1609/aaai.v37i4.25674
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.101437Z'
+    updated_at: '2026-09-02T21:15:07.114186Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4382239858
+    metadata:
+      title:
+        value: 'Yet Another Traffic Classifier: A Masked Autoencoder Based Traffic Transformer with Multi-Level Flow Representation'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Ruijie Zhao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mingwei Zhan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xianwen Deng
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yanhao Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yijun Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Guan Gui
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhi Xue
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Proceedings of the AAAI Conference on Artificial Intelligence
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1609/aaai.v37i4.25674
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4382239858
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 4
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1145/3543507.3583227
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.101677Z'
+    updated_at: '2026-09-02T21:15:07.114690Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4367047070
+    metadata:
+      title:
+        value: 'TFE-GNN: A Temporal Fusion Encoder Using Graph Neural Networks for Fine-grained Encrypted Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Haozhen Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Le Yu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xi Xiao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qing Li
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Francesco Mercaldo
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xiapu Luo
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qixu Liu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1145/3543507.3583227
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4367047070
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 5
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1609/aaai.v39i15.33748
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.101871Z'
+    updated_at: '2026-09-02T21:15:07.115115Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4409347215
+    metadata:
+      title:
+        value: 'MIETT: Multi-Instance Encrypted Traffic Transformer for Encrypted Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Xu-Yang Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Lu Han
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: De‐Chuan Zhan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Han-Jia Ye
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Proceedings of the AAAI Conference on Artificial Intelligence
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1609/aaai.v39i15.33748
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4409347215
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 6
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/electronics12030516
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.102158Z'
+    updated_at: '2026-09-02T21:15:07.115457Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4317435061
+    metadata:
+      title:
+        value: 'BFCN: A Novel Classification Method of Encrypted Traffic Based on BERT and CNN'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Zhaolei Shi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Nurbol Luktarhan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yangyang Song
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Gaoqi Tian
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Electronics
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/electronics12030516
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4317435061
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 7
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/s21248231
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.102411Z'
+    updated_at: '2026-09-02T21:15:07.115813Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4200466539
+    metadata:
+      title:
+        value: 'CBD: A Deep-Learning-Based Scheme for Encrypted Traffic Classification with a General Pre-Training Method'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Xinyi Hu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Chunxiang Gu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yihang Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Fushan Wei
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2021'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Sensors
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/s21248231
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4200466539
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 8
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.32604/iasc.2023.036701
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.102623Z'
+    updated_at: '2026-09-02T21:15:07.116175Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4368228190
+    metadata:
+      title:
+        value: 'MTC: A Multi-Task Model for Encrypted Network Traffic Classification Based on Transformer and 1D-CNN'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Kaiyue Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jian Gao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xinyan Lei
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Intelligent Automation & Soft Computing
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.32604/iasc.2023.036701
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4368228190
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 9
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.36724/2072-8735-2020-14-11-64-71
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.102732Z'
+    updated_at: '2026-09-02T21:15:07.116545Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3119943161
+    metadata:
+      title:
+        value: Generative transformer framework for network traffic generation and classification
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Radion F. Bikmukhamedo
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Factory5"
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Adel F. Nadeev
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: T-Comm - Телекоммуникации и Транспорт
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.36724/2072-8735-2020-14-11-64-71
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3119943161
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 10
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.14722/ndss.2024.23081
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.102994Z'
+    updated_at: '2026-09-02T21:15:07.116947Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4386694208
+    metadata:
+      title:
+        value: Low-Quality Training Data Only? A Robust Framework for Detecting Encrypted Malicious Network Traffic
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Yuqi Qing
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qilei Yin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xinhao Deng
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yihao Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhuotao Liu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Kun Sun
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ke Xu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jia Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qi Li
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.14722/ndss.2024.23081
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '2309.04798'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4386694208
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 11
+  screening: included
+  exclusion_reason: null
+  screened_by: human
+  screened_at: '2026-09-02T21:17:32.042690Z'
+  identity: distinct_work
+  matched_work: W0004
+  full_text_available: true
+- key: doi:10.1016/j.eswa.2022.118299
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.103302Z'
+    updated_at: '2026-09-02T21:15:07.117475Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4288760578
+    metadata:
+      title:
+        value: Crypto-ransomware detection using machine learning models in file-sharing network scenarios with encrypted traffic
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Eduardo Berrueta
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: D. Morató
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Eduardo Magaña
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mikel Izal
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2022'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Expert Systems with Applications
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1016/j.eswa.2022.118299
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4288760578
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 12
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1609/aaai.v39i1.32091
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.103604Z'
+    updated_at: '2026-09-02T21:15:07.117754Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4409369257
+    metadata:
+      title:
+        value: 'Revolutionizing Encrypted Traffic Classification with MH-Net: A Multi-View Heterogeneous Graph Model'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Haozhen Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Haodong Yue
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xi Xiao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Le Yu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qin Li
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhen Ling
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ye Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Proceedings of the AAAI Conference on Artificial Intelligence
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1609/aaai.v39i1.32091
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4409369257
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 13
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1186/s42492-023-00140-9
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.103817Z'
+    updated_at: '2026-09-02T21:15:07.118088Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4383710235
+    metadata:
+      title:
+        value: 'Vision transformer architecture and applications in digital health: a tutorial and survey'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Khalid Al-hammuri
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Fayez Gebali
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Awos Kanan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ilamparithi Thirumarai Chelvan
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Visual Computing for Industry Biomedicine and Art
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1186/s42492-023-00140-9
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4383710235
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 14
+  screening: excluded
+  exclusion_reason: 'out of scope: vision transformers in digital health, not network traffic'
+  screened_by: human
+  screened_at: '2026-09-02T21:17:07.541364Z'
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/iccc56324.2022.10065869
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.103964Z'
+    updated_at: '2026-09-02T21:15:07.118455Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4328011352
+    metadata:
+      title:
+        value: 'TCMal: A Hybrid Deep Learning Model for Encrypted Malicious Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Mingxing Li
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xuyan Song
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jingling Zhao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Baojiang Cui
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2022'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1109/iccc56324.2022.10065869
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4328011352
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 15
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.3390/app14073073
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.104181Z'
+    updated_at: '2026-09-02T21:15:07.118864Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4394567468
+    metadata:
+      title:
+        value: Fast and Accurate Multi-Task Learning for Encrypted Network Traffic Classification
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Jee-Tae Park
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Chang-Yui Shin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ui-Jun Baek
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Myung‐Sup Kim
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Applied Sciences
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/app14073073
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4394567468
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 16
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/tnsm.2023.3246794
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.104379Z'
+    updated_at: '2026-09-02T21:15:07.119281Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4321380758
+    metadata:
+      title:
+        value: Improving Performance, Reliability, and Feasibility in Multimodal Multitask Traffic Classification with XAI
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Alfredo Nascita
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Antonio Montieri
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Giuseppe Aceto
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Domenico Ciuonzo
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Valerio Persico
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Antonio Pescapè
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Transactions on Network and Service Management
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/tnsm.2023.3246794
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4321380758
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 17
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/electronics12183899
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.104610Z'
+    updated_at: '2026-09-02T21:15:07.119760Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4386838013
+    metadata:
+      title:
+        value: Enhancing Ransomware Attack Detection Using Transfer Learning and Deep Learning Ensemble Models on Cloud-Encrypted Data
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Amardeep Singh
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zohaib Mushtaq
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Hamad Ali Abosaq
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Salim Nasar Faraj Mursal
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Muhammad Irfan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Grzegorz Nowakowski
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Electronics
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/electronics12183899
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4386838013
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 18
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1145/3718958.3750498
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.104909Z'
+    updated_at: '2026-09-02T21:15:07.120143Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4413757098
+    metadata:
+      title:
+        value: 'The Sweet Danger of Sugar: Debunking Representation Learning for Encrypted Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Yuqi Zhao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Giovanni Dettori
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Matteo Boffa
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Luca Vassio
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Marco Mellia
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1145/3718958.3750498
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '2507.16438'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4413757098
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 19
+  screening: included
+  exclusion_reason: null
+  screened_by: human
+  screened_at: '2026-09-02T21:17:29.628270Z'
+  identity: distinct_work
+  matched_work: W0003
+  full_text_available: true
+- key: doi:10.1145/3607199.3607206
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.105134Z'
+    updated_at: '2026-09-02T21:15:07.120583Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4387298163
+    metadata:
+      title:
+        value: 'Flow-MAE: Leveraging Masked AutoEncoder for Accurate, Efficient and Robust Malicious Traffic Classification'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Zijun Hang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yuliang Lu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yongjie Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yi Xie
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1145/3607199.3607206
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4387298163
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 20
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/s24103078
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.105245Z'
+    updated_at: '2026-09-02T21:15:07.120860Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4396856040
+    metadata:
+      title:
+        value: Multi-Task Scenario Encrypted Traffic Classification and Parameter Analysis
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Guanyu Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yijun Gu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Sensors
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/s24103078
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4396856040
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 21
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/s21155047
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.105487Z'
+    updated_at: '2026-09-02T21:15:07.121173Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3185746581
+    metadata:
+      title:
+        value: 'DDosTC: A Transformer-Based Network Attack Detection Hybrid Mechanism in SDN'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Haomin Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Wei Li
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2021'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Sensors
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/s21155047
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3185746581
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 22
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.48550/arxiv.2304.09513
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.105726Z'
+    updated_at: '2026-09-02T21:15:07.121500Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4366556210
+    metadata:
+      title:
+        value: 'NetGPT: Generative Pretrained Transformer for Network Traffic'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Xuying Meng
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Chungang Lin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yequan Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yujun Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: arXiv (Cornell University)
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.48550/arxiv.2304.09513
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '2304.09513'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4366556210
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 23
+  screening: included
+  exclusion_reason: null
+  screened_by: human
+  screened_at: '2026-09-02T21:17:26.751444Z'
+  identity: distinct_work
+  matched_work: W0002
+  full_text_available: true
+- key: doi:10.3390/app13106251
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.106002Z'
+    updated_at: '2026-09-02T21:15:07.121765Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4377091294
+    metadata:
+      title:
+        value: Intrusion Detection Model Based on Improved Transformer
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Yi Liu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Lanjian Wu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Applied Sciences
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/app13106251
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4377091294
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 24
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1145/3613960
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:15:07.106274Z'
+    updated_at: '2026-09-02T21:15:07.122210Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4385636980
+    metadata:
+      title:
+        value: 'TLS-MHSA: An Efficient Detection Model for Encrypted Malicious Traffic based on Multi-Head Self-Attention Mechanism'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Jinfu Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Luo Song
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Saihua Cai
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Haodi Xie
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Shang Yin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Bilal Ahmad
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2023'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: ACM Transactions on Privacy and Security
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1145/3613960
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4385636980
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: pre-trained transformer encrypted traffic classification
+  sources:
+  - openalex
+  ranks:
+    openalex: 25
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+unresolved_keys: []
+full_text_unavailable_keys:
+- doi:10.1016/j.comnet.2024.110973
+- doi:10.23919/ituk50268.2020.9303204
+- doi:10.1109/iccc56324.2022.10065869
+reproduces: null

@@ -1,0 +1,67 @@
+schema_version: 1
+id: C0003
+created_at: '2026-09-02T21:42:43.376803Z'
+updated_at: '2026-09-02T21:43:59.198072Z'
+provenance:
+  source: human
+  actor: human
+  workflow: claim
+  run_id: null
+  template_version: null
+  note: null
+statement: Evaluation of transformer- and LLM-based network traffic classification rests on a small set of ageing public benchmark datasets of the ISCX/USTC/CIC-IDS family.
+type: prevalence
+semantics:
+  subject: evaluation of transformer- and LLM-based traffic classification
+  predicate: rests on
+  object: ageing public benchmark datasets of the ISCX/USTC/CIC-IDS family
+  qualifier: {}
+scope:
+  level: field_generalization
+  corpus: structured-traffic dogfood corpus (5 works)
+  publication_until: 2025-08
+relations:
+- evidence: E0014
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0015
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0033
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0035
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0018
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0013
+  relation: contradicts
+  aspect: null
+  note: null
+- evidence: E0017
+  relation: contradicts
+  aspect: null
+  note: null
+coverage:
+  relevant_works: 0
+  examined_works: 0
+  unresolved_works: 0
+  overturn_risk: unknown
+  search_runs: []
+  cutoff: null
+assessment:
+  requested_strength: field_generalization
+  allowed_strength: observed_subset
+  status: qualified
+  maximum_defensible_wording: among the papers examined
+  audited_at: '2026-09-02T21:43:59.198049Z'
+decisions: []
+derived_from: []
+stale: fresh

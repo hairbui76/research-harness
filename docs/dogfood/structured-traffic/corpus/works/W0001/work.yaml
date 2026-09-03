@@ -1,0 +1,40 @@
+schema_version: 1
+id: W0001
+created_at: '2026-09-02T21:14:17.031994Z'
+updated_at: '2026-09-02T21:14:17.031997Z'
+provenance:
+  source: human
+  actor: human
+  workflow: ingest
+  run_id: null
+  template_version: null
+  note: null
+title: 'ET-BERT: A Contextualized Datagram Representation with Pre-training Transformers for Encrypted Traffic Classification'
+authors:
+- anced traffic data for accurate classification
+- which is challenging
+- "ORVH\x10GRPDLQ"
+- but indispensable to achieve network security
+- network man
+year: 2022
+venue: null
+identifiers:
+  doi:
+    value: 10.1145/3485447.3512217
+    source: system
+    confidence: 0.9
+    note: page1:regex
+  arxiv:
+    value: 2202.06335v2
+    source: system
+    confidence: 0.9
+    note: page1:regex
+  dblp: null
+  semantic_scholar: null
+  openalex: null
+screening: discovered
+exclusion_reason: null
+versions:
+- V0001-1
+artifacts:
+- A0001-1

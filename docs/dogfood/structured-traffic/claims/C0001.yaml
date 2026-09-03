@@ -1,0 +1,59 @@
+schema_version: 1
+id: C0001
+created_at: '2026-09-02T21:42:24.117269Z'
+updated_at: '2026-09-02T21:44:37.229650Z'
+provenance:
+  source: human
+  actor: human
+  workflow: claim
+  run_id: null
+  template_version: null
+  note: null
+statement: Systems that apply pre-trained transformer models to network traffic adopt mutually incompatible tokenisation schemes, so their learned representations are not interchangeable.
+type: prevalence
+semantics:
+  subject: pre-trained transformer models for network traffic
+  predicate: adopt
+  object: mutually incompatible tokenisation schemes
+  qualifier: {}
+scope:
+  level: field_generalization
+  corpus: structured-traffic dogfood corpus (5 works)
+  publication_until: 2025-08
+relations:
+- evidence: E0030
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0032
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0023
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0025
+  relation: supports
+  aspect: null
+  note: null
+- evidence: E0028
+  relation: qualifies
+  aspect: null
+  note: null
+coverage:
+  relevant_works: 0
+  examined_works: 0
+  unresolved_works: 0
+  overturn_risk: unknown
+  search_runs: []
+  cutoff: null
+assessment:
+  requested_strength: field_generalization
+  allowed_strength: observed_subset
+  status: qualified
+  maximum_defensible_wording: among the papers examined
+  audited_at: '2026-09-02T21:44:37.229637Z'
+decisions: []
+derived_from: []
+stale: fresh

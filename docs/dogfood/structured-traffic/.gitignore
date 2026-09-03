@@ -1,0 +1,3 @@
+# Regenerable machine state: SQLite projection, indexes, caches, staging, traces.
+# Canonical scientific state lives outside it and is meant to be committed.
+.research/

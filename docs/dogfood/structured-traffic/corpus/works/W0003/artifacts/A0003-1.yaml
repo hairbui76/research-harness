@@ -1,0 +1,19 @@
+schema_version: 1
+id: A0003-1
+created_at: '2026-09-02T21:17:29.268147Z'
+updated_at: '2026-09-02T21:17:29.268148Z'
+provenance:
+  source: human
+  actor: human
+  workflow: ingest
+  run_id: null
+  template_version: null
+  note: null
+work: W0003
+version: V0003-1
+kind: pdf
+file_hash: sha256:c377e34b718ee04c35a2350c5155d546e82aa0f310f84739a55b379d171ce26e
+original_filename: 2507.16438.pdf
+mime_type: application/pdf
+size_bytes: 1136797
+ingested_at: '2026-09-02T21:17:29.268137Z'

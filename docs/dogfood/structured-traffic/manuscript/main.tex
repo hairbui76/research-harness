@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage{cite}
+\begin{document}
+
+\section{Related work}
+\subsection{Representation and evaluation of structured traffic}
+
+Among the systems examined here, tokenisation is not a shared substrate: ET-BERT tokenises raw datagram bytes with a bi-gram vocabulary, NetGPT serialises bytes to hexadecimal and applies WordPiece, and Pcap-Encoder tokenises parsed protocol header fields, so no two of these systems produce interchangeable representations \cite{lin2022etbert,meng2023netgpt,sugar2025debunking}.
+
+Every system in this corpus records, in its own text, a limit on how far its representation is expected to generalise, whether to unseen encryption, to evolving malware, or to the biases of the underlying language model \cite{lin2022etbert,meng2023netgpt,rapier2024lowquality,llmnids2025survey}.
+
+All transformer-based traffic classifiers are evaluated on ageing public benchmarks of the ISCX/USTC/CIC-IDS family, and none of them collects new data \cite{lin2022etbert,meng2023netgpt}.
+
+Pre-training on raw datagrams removes the need for hand-designed statistical features \cite{rapier2024lowquality}.
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}

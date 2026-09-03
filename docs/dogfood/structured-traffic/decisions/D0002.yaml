@@ -1,0 +1,20 @@
+schema_version: 1
+id: D0002
+created_at: '2026-09-02T21:45:06.069901Z'
+updated_at: '2026-09-02T21:45:06.070008Z'
+provenance:
+  source: human
+  actor: human
+  workflow: claim
+  run_id: null
+  template_version: null
+  note: null
+type: epistemic_override
+status: accepted
+title: epistemic override on C0002
+rationale: 'Overruling the L1 ceiling for this corpus only. The auditor lowered to L1 solely because claim.coverage reads 0 relevant works; that is a plumbing gap, not a finding: research coverage C0003 with the same search record counted 5 relevant of 5 examined. All five works in this corpus state a generalisation or validity limitation in their own text (E0005, E0006, E0022, E0012, E0029), which is what a corpus_pattern claim asserts. The wording stays bounded to this corpus and cutoff; it is NOT a field-level claim.'
+claim: C0002
+auditor_recommendation: observed_subset
+researcher_selected: corpus_pattern
+taxonomy_terms: []
+supersedes: null

@@ -1,0 +1,2317 @@
+schema_version: 1
+id: SR0003
+created_at: '2026-09-02T21:16:16.129231Z'
+updated_at: '2026-09-02T21:17:34.177302Z'
+provenance:
+  source: human
+  actor: human
+  workflow: discovery
+  run_id: null
+  template_version: null
+  note: null
+question: large language models for network intrusion detection
+research_question: null
+sources:
+- arxiv
+- openalex
+queries:
+- large language models for network intrusion detection
+filters:
+  max_results: '25'
+  max_pages: '1'
+results:
+  discovered: 26
+  screened: 3
+  included: 1
+executed_at: '2026-09-02T21:16:16.129209Z'
+cutoff: null
+cursors:
+- source: arxiv
+  query: large language models for network intrusion detection
+  last_cursor: null
+  pages_fetched: 1
+  exhausted: true
+- source: openalex
+  query: large language models for network intrusion detection
+  last_cursor: Ils0MDcuMTYwNjgsIDE2NTc3NTY4MDAwMDAsICdodHRwczovL29wZW5hbGV4Lm9yZy9XMjc0NzY4MDc1MSddIg==
+  pages_fetched: 1
+  exhausted: false
+failures: []
+unresolved_identities: []
+unavailable_full_text: []
+candidates:
+- key: arxiv:2507.04752
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:14.175519Z'
+    updated_at: '2026-09-02T21:16:16.022727Z'
+    provenance:
+      source: external_metadata
+      actor: arxiv
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record 2507.04752v1
+    metadata:
+      title:
+        value: 'Large Language Models for Network Intrusion Detection Systems: Foundations, Implementations, and Future Directions'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Shuo Yang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xinran Zheng
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xinchen Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jinfeng Xu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jinze Li
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Donglin Xie
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Weicai Long
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Edith C. H. Ngai
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi: null
+        arxiv:
+          value: 2507.04752v1
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - arxiv
+  ranks:
+    arxiv: 1
+  screening: included
+  exclusion_reason: null
+  screened_by: human
+  screened_at: '2026-09-02T21:17:34.177237Z'
+  identity: distinct_work
+  matched_work: W0005
+  full_text_available: true
+- key: doi:10.1109/access.2019.2895334
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.008722Z'
+    updated_at: '2026-09-02T21:16:16.023160Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2926701059
+    metadata:
+      title:
+        value: Deep Learning Approach for Intelligent Intrusion Detection System
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: R. Vinayakumar
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mamoun Alazab
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: K. P. Soman
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Prabaharan Poornachandran
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ameer Al-Nemrat
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Sitalakshmi Venkatraman
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2019.2895334
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2926701059
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 1
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1186/s42400-019-0038-7
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.009173Z'
+    updated_at: '2026-09-02T21:16:16.023543Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2958285686
+    metadata:
+      title:
+        value: 'Survey of intrusion detection systems: techniques, datasets and challenges'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Ansam Khraisat
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Iqbal Gondal
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Peter Vamplew
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Joarder Kamruzzaman
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Cybersecurity
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1186/s42400-019-0038-7
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2958285686
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 2
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/tvt.2024.3402366
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.009366Z'
+    updated_at: '2026-09-02T21:16:16.023993Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4397000731
+    metadata:
+      title:
+        value: 'IoV-BERT-IDS: Hybrid Network Intrusion Detection System in IoV Using Large Language Models'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Mengyi Fu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Pan Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Minyao Liu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ze Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Xiaokang Zhou
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Transactions on Vehicular Technology
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/tvt.2024.3402366
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4397000731
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 3
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1002/ett.4150
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.009724Z'
+    updated_at: '2026-09-02T21:16:16.024498Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3093410479
+    metadata:
+      title:
+        value: 'Network intrusion detection system: A systematic study of machine learning and deep learning approaches'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Zeeshan Ahmad
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Adnan Shahid Khan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Cheah Wai Shiang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Johari Abdullah
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Farhan Ahmad
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Transactions on Emerging Telecommunications Technologies
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1002/ett.4150
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3093410479
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 4
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.6028/nist.sp.800-94
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.010012Z'
+    updated_at: '2026-09-02T21:16:16.024798Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2678934292
+    metadata:
+      title:
+        value: Guide to Intrusion Detection and Prevention Systems (IDPS)
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Karen Scarfone
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Peter Mell
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2007'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.6028/nist.sp.800-94
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2678934292
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 5
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.48550/arxiv.2107.03374
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.010389Z'
+    updated_at: '2026-09-02T21:16:16.025261Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3177813494
+    metadata:
+      title:
+        value: Evaluating Large Language Models Trained on Code
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Mark Chen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jerry Tworek
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Heewoo Jun
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Qiming Yuan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Henrique Pondé de Oliveira Pinto
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jared Kaplan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Harrison Edwards
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yuri Burda
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Nicholas Joseph
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Greg Brockman
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Alex Ray
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Raul Puri
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Gretchen Krueger
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Michael Petrov
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Heidy Khlaaf
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Girish Sastry
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Pamela Mishkin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Brooke Chan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Scott Gray
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Nick Ryder
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mikhail Pavlov
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Alethea Power
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Łukasz Kaiser
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mohammad Bavarian
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Clemens Winter
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Philippe Tillet
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Felipe Petroski Such
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Dave Cummings
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Matthias Plappert
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Fotios Chantzis
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Elizabeth A. Barnes
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ariel Herbert-Voss
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: William H. Guss
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Alex Nichol
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Alex Paino
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Nikolas Tezak
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jie Tang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: I. Babuschkin
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Suchir Balaji
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Shantanu Jain
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: William S. Saunders
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Christopher Hesse
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Andrew N. Carr
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jan Leike
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Joshua Achiam
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Vedant Misra
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Evan Morikawa
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Alec Radford
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Matthew M. Knight
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Miles Brundage
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mira Murati
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Katie Mayer
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Peter Welinder
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Bob McGrew
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Dario Amodei
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Sam McCandlish
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ilya Sutskever
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Wojciech Zaremba
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2021'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: arXiv (Cornell University)
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.48550/arxiv.2107.03374
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '2107.03374'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3177813494
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 6
+  screening: excluded
+  exclusion_reason: 'out of scope: code-generation LLM evaluation, unrelated to intrusion detection'
+  screened_by: human
+  screened_at: '2026-09-02T21:17:11.314155Z'
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/bdcat63179.2024.00021
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.011839Z'
+    updated_at: '2026-09-02T21:16:16.025603Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4409261757
+    metadata:
+      title:
+        value: Towards Explainable Network Intrusion Detection using Large Language Models
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Paul R. B. Houssel
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Priyanka Singh
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Siamak Layeghy
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Marius Portmann
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1109/bdcat63179.2024.00021
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4409261757
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 7
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.3390/app9204396
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012070Z'
+    updated_at: '2026-09-02T21:16:16.025965Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2980576170
+    metadata:
+      title:
+        value: 'Machine Learning and Deep Learning Methods for Intrusion Detection Systems: A Survey'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Hongyu Liu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Bo Lang
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Applied Sciences
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/app9204396
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2980576170
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 8
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1016/j.eswa.2025.128089
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012338Z'
+    updated_at: '2026-09-02T21:16:16.026482Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4410255674
+    metadata:
+      title:
+        value: 'XG-NID: Dual-modality network intrusion detection using a heterogeneous graph neural network and large language model'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Yasir Ali Farrukh
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Syed Wali
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Irfan Khan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Nathaniel D. Bastian
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Expert Systems with Applications
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1016/j.eswa.2025.128089
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4410255674
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 9
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1109/access.2020.2973730
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012432Z'
+    updated_at: '2026-09-02T21:16:16.026843Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3005805195
+    metadata:
+      title:
+        value: Network Intrusion Detection Combined Hybrid Sampling With Deep Hierarchical Network
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Kaiyuan Jiang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Wenya Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Aili Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Haibin Wu
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2020.2973730
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3005805195
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 10
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/globecom52923.2024.10901312
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012651Z'
+    updated_at: '2026-09-02T21:16:16.027332Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4408324654
+    metadata:
+      title:
+        value: 'Large Language Models in Wireless Application Design: In-Context Learning-enhanced Automatic Network Intrusion Detection'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Han Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Akram Bin Sediq
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Ali Afana
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Melike Erol‐Kantarci
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2024'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue: null
+      identifiers:
+        doi:
+          value: 10.1109/globecom52923.2024.10901312
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4408324654
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 11
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1007/978-981-96-1758-6_26
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012842Z'
+    updated_at: '2026-09-02T21:16:16.027613Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4411311023
+    metadata:
+      title:
+        value: Large Language Model-Based Network Intrusion Detection
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Dhruv Davey
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Kayvan Karim
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Hani Ragab Hassen
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Hadj Batatia
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Lecture notes in networks and systems
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1007/978-981-96-1758-6_26
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4411311023
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 12
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1109/access.2019.2904620
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.012910Z'
+    updated_at: '2026-09-02T21:16:16.027988Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2921453769
+    metadata:
+      title:
+        value: An Intrusion Detection Model Based on Feature Reduction and Convolutional Neural Networks
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Yihan Xiao
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Cheng Xing
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Taining Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zhongkai Zhao
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2019.2904620
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2921453769
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 13
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/info9070149
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.013140Z'
+    updated_at: '2026-09-02T21:16:16.028269Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2808779485
+    metadata:
+      title:
+        value: Effective Intrusion Detection System Using XGBoost
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Sukhpreet Singh Dhaliwal
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Abdullah-Al Nahid
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Hassan Abbas
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2018'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Information
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/info9070149
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2808779485
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 14
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/access.2019.2899721
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.013395Z'
+    updated_at: '2026-09-02T21:16:16.028656Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2913330314
+    metadata:
+      title:
+        value: 'TSDL: A Two-Stage Deep Learning Model for Efficient Network Intrusion Detection'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Farrukh Aslam Khan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Abdu Gumaei
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Abdelouahid Derhab
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Amir Hussain
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2019.2899721
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2913330314
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 15
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/access.2022.3206425
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.013638Z'
+    updated_at: '2026-09-02T21:16:16.029041Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4295788744
+    metadata:
+      title:
+        value: 'CNN-LSTM: Hybrid Deep Neural Network for Network Intrusion Detection System'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Asmaa Halbouni
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Teddy Surya Gunawan
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mohamed Hadi Habaebi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Murad Halbouni
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mira Kartiwi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Robiah Ahmad
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2022'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2022.3206425
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4295788744
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 16
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1155/2016/4731953
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.013907Z'
+    updated_at: '2026-09-02T21:16:16.029386Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2525336835
+    metadata:
+      title:
+        value: 'WSN-DS: A Dataset for Intrusion Detection Systems in Wireless Sensor Networks'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Iman Almomani
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Bassam Kasasbeh
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Mousa Al-Akhras
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2016'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Journal of Sensors
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1155/2016/4731953
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2525336835
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 17
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/access.2020.2972627
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.014178Z'
+    updated_at: '2026-09-02T21:16:16.029716Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3005630930
+    metadata:
+      title:
+        value: 'BAT: Deep Learning Methods on Network Intrusion Detection Using NSL-KDD Dataset'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Tongtong Su
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Huazhi Sun
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Jinqi Zhu
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Sheng Wang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yabo Li
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2020.2972627
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3005630930
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 18
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1109/access.2020.2982418
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.014435Z'
+    updated_at: '2026-09-02T21:16:16.029981Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3012981875
+    metadata:
+      title:
+        value: Network Intrusion Detection Based on PSO-Xgboost Model
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Hui Jiang
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Zheng He
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Gang Ye
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Huyin Zhang
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: IEEE Access
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1109/access.2020.2982418
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3012981875
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 19
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1016/j.inffus.2025.103347
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.014616Z'
+    updated_at: '2026-09-02T21:16:16.030337Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4410857897
+    metadata:
+      title:
+        value: 'Transformers and large language models for efficient intrusion detection systems: A comprehensive survey'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Hamza Kheddar
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Information Fusion
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1016/j.inffus.2025.103347
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4410857897
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 20
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: false
+- key: doi:10.1186/s40537-019-0197-0
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.014680Z'
+    updated_at: '2026-09-02T21:16:16.030604Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2954996726
+    metadata:
+      title:
+        value: A survey on Image Data Augmentation for Deep Learning
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Connor Shorten
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Taghi M. Khoshgoftaar
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2019'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Journal Of Big Data
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1186/s40537-019-0197-0
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2954996726
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 21
+  screening: excluded
+  exclusion_reason: 'out of scope: image data augmentation survey, no traffic representation'
+  screened_by: human
+  screened_at: '2026-09-02T21:17:09.258319Z'
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/bdcc9020023
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.014948Z'
+    updated_at: '2026-09-02T21:16:16.031118Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W4406875947
+    metadata:
+      title:
+        value: 'Labeling Network Intrusion Detection System (NIDS) Rules with MITRE ATT&CK Techniques: Machine Learning vs. Large Language Models'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Nir Daniel
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Florian Klaus Kaiser
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Shay Giladi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Sapir Sharabi
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Raz Moyal
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Shalev Shpolyansky
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Andres Murillo
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Aviad Elyashar
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Rami Puzis
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2025'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Big Data and Cognitive Computing
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/bdcc9020023
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W4406875947
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 22
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/pr9050834
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.015167Z'
+    updated_at: '2026-09-02T21:16:16.031489Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3160455160
+    metadata:
+      title:
+        value: 'HCRNNIDS: Hybrid Convolutional Recurrent Neural Network-Based Network Intrusion Detection System'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Muhammad Ashfaq Khan
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2021'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Processes
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/pr9050834
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3160455160
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 23
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.3390/sym12050754
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.015470Z'
+    updated_at: '2026-09-02T21:16:16.031847Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W3017881119
+    metadata:
+      title:
+        value: 'IntruDTree: A Machine Learning Based Cyber Security Intrusion Detection Model'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Iqbal H. Sarker
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Yoosef B. Abushark
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Fawaz Alsolami
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Asif Irshad Khan
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2020'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Symmetry
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.3390/sym12050754
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W3017881119
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 24
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+- key: doi:10.1007/s11042-022-13428-4
+  candidate:
+    schema_version: 1
+    created_at: '2026-09-02T21:16:16.015749Z'
+    updated_at: '2026-09-02T21:16:16.032219Z'
+    provenance:
+      source: external_metadata
+      actor: openalex
+      workflow: null
+      run_id: null
+      template_version: null
+      note: record W2747680751
+    metadata:
+      title:
+        value: 'Natural language processing: state of the art, current trends and challenges'
+        source: external_metadata
+        confidence: null
+        note: null
+      authors:
+      - value: Diksha Khurana
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Aditya Koli
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Kiran Khatter
+        source: external_metadata
+        confidence: null
+        note: null
+      - value: Sukhdev Singh
+        source: external_metadata
+        confidence: null
+        note: null
+      year:
+        value: '2022'
+        source: external_metadata
+        confidence: null
+        note: null
+      venue:
+        value: Multimedia Tools and Applications
+        source: external_metadata
+        confidence: null
+        note: null
+      identifiers:
+        doi:
+          value: 10.1007/s11042-022-13428-4
+          source: external_metadata
+          confidence: null
+          note: null
+        arxiv:
+          value: '1708.05148'
+          source: external_metadata
+          confidence: null
+          note: null
+        dblp: null
+        semantic_scholar: null
+        openalex:
+          value: W2747680751
+          source: external_metadata
+          confidence: null
+          note: null
+    candidate_file_hash: null
+    original_filename: null
+    resolution: distinct_work
+    matched_work: null
+    matched_version: null
+    matched_artifact: null
+    screening: discovered
+    exclusion_reason: null
+    source_query: large language models for network intrusion detection
+  sources:
+  - openalex
+  ranks:
+    openalex: 25
+  screening: discovered
+  exclusion_reason: null
+  screened_by: null
+  screened_at: null
+  identity: distinct_work
+  matched_work: null
+  full_text_available: true
+unresolved_keys: []
+full_text_unavailable_keys:
+- doi:10.1109/tvt.2024.3402366
+- doi:10.1109/bdcat63179.2024.00021
+- doi:10.1016/j.eswa.2025.128089
+- doi:10.1109/globecom52923.2024.10901312
+- doi:10.1007/978-981-96-1758-6_26
+- doi:10.1016/j.inffus.2025.103347
+reproduces: null
