@@ -134,33 +134,34 @@ CLI, Web, VS Code, Claude, and ChatGPT are clients of the same core capabilities
 ## 6. High-Level Architecture
 
 ```text
-                         Agent Hosts / Clients
-       ┌────────────┬────────────┬────────────┬───────────────┐
-       │ CLI        │ Web        │ VS Code    │ Claude/ChatGPT│
-       └──────┬─────┴──────┬─────┴──────┬─────┴──────┬────────┘
-              │            │            │            │
-              └────────────┴──── Research Protocol API ───────┘
-                                   │
-                     MCP + local HTTP/JSON-RPC + SDK
-                                   │
-                          Workflow Runtime
-                  DAGs · checkpoints · permissions
-                     invalidation · review gates
-                                   │
-                ┌──────────────────┼──────────────────┐
-                │                  │                  │
-          Research Domain     Retrieval Layer     Providers
-                │                  │                  │
-       Work/Evidence/Claim   FTS/vector/graph   Models/Search/
-       Decision/RQ/Manuscript                  Parsers/Metadata
-                │
-                ▼
-        Canonical Scientific State
-        YAML/JSONL/Markdown + Git
-                │
-                ▼
-          Regenerable Projections
-        SQLite · FTS · vector · cache
+                           Agent Hosts / Clients
+         ┌────────────┬────────────┬────────────┬───────────────┐
+         │ CLI        │ Web        │ VS Code    │ Claude/ChatGPT│
+         └──────┬─────┴──────┬─────┴──────┬─────┴──────┬────────┘
+                └─────────────┴──── Research Protocol API ──────┘
+                                      │
+                        MCP + local HTTP/JSON-RPC + SDK
+                                      │
+             ┌────────────────────────┼────────────────────────┐
+             │                        │                        │
+     Conversation Services      Workflow Runtime          Providers
+     sessions · attachments     DAGs · checkpoints        Models/Search/
+     context assembler          permissions · review      Parsers/Metadata
+             │                        │
+             └──────────────┬─────────┘
+                            │
+                 Research Domain Services
+        Work · Evidence · Claim · Decision · RQ · Manuscript
+                            │
+          ┌─────────────────┼─────────────────────┐
+          │                 │                     │
+  Canonical Scientific  Durable Private       Local LaTeX
+  State + Git           Conversations         Compilation
+          │                 │                     │
+          └─────────────────┴──────────┬──────────┘
+                                      ▼
+                         Regenerable Projections
+                  SQLite · FTS · vectors · ResearchGraph
 ```
 
 The recommended product shape is **one local research core with replaceable clients and providers**.
@@ -189,6 +190,13 @@ The core should define these first-class entities:
 - `ResearchNote` — low-authority capture that can later be promoted to a Claim, Question, or Decision.
 - `ResearchEvent` — semantic state-changing event.
 
+Working-context entities are durable but have lower authority than accepted scientific objects:
+
+- `ConversationSession` — a private/local research conversation and its lifecycle.
+- `Message` — an append-oriented user, assistant, tool, or system content record.
+- `SessionAttachment` — session working material that is not a corpus Artifact until explicitly promoted.
+- `ContextPack` — the exact, policy-filtered set of context supplied to one model call.
+
 ### 7.2 Stable IDs
 
 Recommended prefixes:
@@ -204,6 +212,10 @@ Recommended prefixes:
 - `D####` — Decision
 - `SR####` — Search Run
 - `S####` — Synthesis
+- `CS####` — Conversation Session
+- `M####` — Message
+- `SA####` — Session Attachment
+- `CP####` — Context Pack
 
 IDs must be stable across rebuilds of machine indexes.
 
@@ -236,6 +248,11 @@ my-research-project/
 ├── matrices/
 ├── notes/
 ├── searches/
+├── conversations/
+│   └── CS0001/
+│       ├── messages.jsonl
+│       ├── attachments/
+│       └── summary.md
 ├── manuscript/
 │   ├── main.tex
 │   ├── references.bib
@@ -253,6 +270,8 @@ my-research-project/
 ### 8.2 Authority rule
 
 Canonical files have scientific authority. `.research/` does not.
+
+Conversation transcripts and their original session attachments are durable, private working records, but they are not accepted scientific state. They are local and excluded from Git publication by default unless the researcher explicitly exports or shares them. Derived conversation summaries and cross-session retrieval indexes may be regenerated and never outrank the transcript or accepted Evidence, Claims, and Decisions.
 
 The semantic event log is a Git-visible audit companion to canonical state, not a second scientific authority and not the only source from which accepted state must be replayed. If an event and its canonical mutation disagree, the workspace is inconsistent and must fail closed pending recovery or repair.
 
@@ -573,14 +592,19 @@ Research Harness should not use “vector RAG” as its primary architecture.
 
 ### 15.1 Recommended indexes
 
-Use four complementary projections:
+Use five complementary projections:
 
 1. **SQLite structured projection** — metadata, relationships, statuses, joins.
 2. **FTS5 lexical index** — exact terminology and fast full-text search.
 3. **Local vector index** — semantic similarity and terminology mismatch retrieval.
 4. **Citation graph adjacency tables** — references, citations, work lineage, evidence independence.
+5. **ResearchGraph projection** — unified typed nodes and edges for stable references, bidirectional navigation, provenance paths, dependency traversal, and context assembly.
 
 No external distributed search infrastructure is needed for a personal workstation.
+
+ResearchGraph uses SQLite node, edge, and adjacency structures alongside FTS5 and local vectors. It projects Project, Session, Message, Attachment, Work, Version, Artifact, document structure, Evidence, Claim, Question, Decision, Synthesis, and manuscript objects. Deterministic edges such as `contains`, `version_of`, `artifact_of`, `cites`, `attached_to`, `anchored_at`, and `mentioned_in` are rebuildable. Scientific edges such as `supports`, `contradicts`, `qualifies`, `derived_from`, and `depends_on` retain their candidate/accepted authority and provenance.
+
+User-facing references such as `@W0017`, `@E0482`, and `@C0041` resolve through stable domain identity rather than disposable database rows. Deep links may address exact local targets, for example `rh://artifact/A0017-3?page=6&block=B0081`. Exact warm reference lookup should target under 100 ms and one- or two-hop local traversal under 250 ms on the personal-scale benchmark corpus.
 
 ### 15.2 Query planning
 
@@ -618,6 +642,8 @@ Use task-specific units:
 - Claim
 
 A retrieval chunk is an implementation artifact, not a research object.
+
+Context assembly is a graph-aware retrieval operation. It returns a token- and privacy-bounded `ContextPack` with stable identities, authority labels, provenance paths, and omission reasons. Accepted scientific state ranks above conversation history; private session nodes are excluded whenever provider egress policy forbids them.
 
 ---
 
@@ -1016,7 +1042,19 @@ The UI should show source context, candidate values, competing interpretations, 
 
 ## 26. Web Cockpit
 
-The Web application should be a research cockpit, not primarily a chat window.
+The Web application should be a **conversation-first research workspace**. Conversation is the fastest entry point, while accepted scientific state and full research pages remain the authority and depth surfaces.
+
+The default route uses three panes:
+
+- **Left:** project switcher, session history/search, settings, and research navigation.
+- **Centre:** conversation, Markdown/KaTeX rendering, composer, model controls, attachments, `@` references, and `Context used`.
+- **Right:** a collapsible inspector for Context, Evidence, Claims, Review Inbox, Conflicts, and Stale objects.
+
+Corpus, Claims, Questions, Synthesis, Taxonomy, Manuscript, Review Inbox, Conflicts, and Stale remain available as full pages. Conversation does not replace evidence review, source inspection, matrices, or manuscript editing.
+
+All Web surfaces use one Research Harness Design System package. It provides semantic tokens, dark/light themes, accessible primitives, research-specific presentation components, and workspace composition. Dark is the default; light is selectable. The package owns presentation only: it does not call the daemon, invoke models, or mutate research state.
+
+The visual language is warm-neutral, dense, and editorial. AI/action accent is distinct from accepted/candidate/qualified/contested/stale/private scientific status. Runtime fonts, icons, styles, and components must work locally without CDN requests. Status is never communicated through colour alone, and WCAG 2.2 AA is the accessibility baseline.
 
 Recommended navigation:
 
@@ -1054,6 +1092,8 @@ Open questions
 ```
 
 Evidence review should show the exact source beside the proposed decision.
+
+Conversation output is working context. Explicit actions promote a selection to a Note, Question, Claim candidate, or Decision candidate. Evidence promotion requires a source and exact anchor. No message becomes accepted scientific state automatically.
 
 ---
 
@@ -1160,6 +1200,10 @@ section purpose
 ```
 
 The writer must not invent unsupported scientific facts to improve prose.
+
+The Web Manuscript page should provide a file tree, source editor, real PDF preview produced by a local LaTeX compiler, and a collapsible scientific-audit inspector. The researcher owns the source and every edit/save is explicit. A compile failure shows file/line diagnostics and keeps the last successful PDF visible as stale. Source-to-PDF and PDF-to-source navigation should use SyncTeX when available and degrade honestly when it is not.
+
+Conversation rendering is a separate presentation path: chat messages support Markdown plus inline/display mathematics through KaTeX. KaTeX rendering must never be presented as proof that a complete manuscript compiles.
 
 ### 30.1 Claim traceability
 
@@ -1399,6 +1443,9 @@ Use a parser abstraction so the implementation can evolve. Start with a robust P
 ### Web
 
 - **React + TypeScript** frontend.
+- A first-class **Research Harness Design System** package in the pnpm workspace for semantic tokens, dark/light themes, strict TypeScript primitives, research presentation components, and layout composition.
+- Dark theme by default with optional light theme; local runtime fonts/icons and no Design System CDN dependency.
+- Keep KaTeX, PDF.js, source-editor engines, and SyncTeX/compiler integrations behind Web adapters rather than primitive component dependencies.
 - Run against the local FastAPI daemon.
 - A desktop shell such as Tauri can be added later if packaging becomes important; do not make it a core dependency initially.
 
@@ -1495,6 +1542,12 @@ This preserves human control without making overrides invisible.
 
 ## 39. Research Session Model
 
+A research session is a durable, private conversation bound to one project. Its transcript is shared with the model as working context subject to the active context window, token budget, model capability, and egress policy. Relevant excerpts or summaries from earlier sessions may be retrieved automatically, but accepted Evidence, Claims, Decisions, and anchors have higher authority than chat memory.
+
+Each model call records a `ContextPack` and exposes a human-readable `Context used` receipt. The receipt names included and omitted messages, sessions, attachments, Evidence, Claims, and corpus blocks with reasons. Cross-session indexes and summaries are rebuildable projections; transcripts remain durable source records.
+
+All attached files, including PDFs, are session-only by default. `Save to corpus` is an explicit promotion that resolves Work/Version/Artifact identity and runs normal ingestion. It never creates accepted Evidence or Claims automatically.
+
 A productive daily loop should look like:
 
 ```text
@@ -1553,6 +1606,20 @@ The first usable product should be intentionally narrow but architecturally comp
 - manuscript claim attachment and citation audit for LaTeX;
 - semantic event log and stale dependency propagation.
 
+### Next experience milestone
+
+After the core v1.0 boundary, the next coherent product milestone is the conversation-first research workspace:
+
+- persistent local sessions with current- and cross-session context;
+- three-pane conversation UI and full research pages;
+- visible `Context used` receipts and explicit promotion actions;
+- session-only image/PDF attachments with `Save to corpus`;
+- Markdown and KaTeX chat rendering;
+- unified rebuildable ResearchGraph references and traversal;
+- a real LaTeX source/editor/compiler/PDF/audit workspace.
+
+These capabilities must preserve all existing authority, review, provenance, rebuildability, privacy, and provider-neutrality rules. Detailed sequencing belongs in `ROADMAP.md` and the design specifications under `docs/superpowers/specs/`.
+
 ### Should-have soon after
 
 - external paper discovery;
@@ -1595,6 +1662,10 @@ Research Harness is successful when a researcher can:
 10. detect unsupported or citation-mismatched manuscript prose before submission;
 11. review model output in batches instead of repeatedly answering interruptive approval questions;
 12. preserve research state independently of any Claude, ChatGPT, Web, or editor conversation.
+13. reopen durable local research conversations and see exactly which context each model response used;
+14. attach a PDF or image without changing the corpus, then explicitly save the chosen file through Work/Version/Artifact identity;
+15. resolve and traverse stable `@` references quickly across sessions, sources, Evidence, Claims, and manuscript anchors;
+16. render mathematical discussion in chat and compile owned LaTeX source into a real, auditable PDF.
 
 ---
 
@@ -1637,6 +1708,21 @@ Interrupting a multi-file canonical mutation leaves either the complete prior st
 
 ### L. Style-pass semantic preservation
 A humanization or venue-style pass that changes a protected span or strengthens/weakens a proposition is prevented from replacing accepted manuscript text until semantic audit and human review succeed.
+
+### M. Conversation authority and context receipt
+A reopened session retains its transcript; the model receives policy-allowed current and relevant prior context; accepted scientific state outranks conflicting chat; and `Context used` records every included or omitted class with a reason.
+
+### N. Attachment promotion boundary
+Dragging an image or PDF creates only a session attachment. `Save to corpus` explicitly resolves Work/Version/Artifact identity, survives partial failure without losing the session copy, and does not accept Evidence automatically.
+
+### O. ResearchGraph rebuild and reference resolution
+After deleting `.research/`, rebuilding resolves the same stable `@` references and scientific relations from durable sources. Candidate edges remain candidate, privacy filters remain enforced, and exact/two-hop lookups meet the measured workstation budgets.
+
+### P. LaTeX rendering and source ownership
+Chat renders Markdown mathematics, while the Manuscript page compiles user-owned source through a real local LaTeX toolchain, preserves the last good PDF on failure, reports file/line errors, and applies model suggestions only as explicit reviewed diffs.
+
+### Q. Shared Design System integrity
+Conversation, research, and manuscript surfaces consume one local Design System package. Dark/light themes preserve semantic meaning and WCAG 2.2 AA accessibility; keyboard interactions work; runtime assets require no CDN; and page code cannot silently fork primitive or raw theme definitions.
 
 ---
 
@@ -1698,6 +1784,13 @@ The following decisions should be treated as the baseline unless future evidence
 21. Treat canonical snapshots as scientific authority and the semantic event log as an **atomic audit companion**, with journaled recovery for accepted-state mutations.
 22. Treat imported skills as **audited plugin/contract inputs**, never trusted Research Core code by default.
 23. Keep humanization and other style transforms **candidate-only**, protected by semantic diff, manuscript audit, and human acceptance.
+24. Make the Web client a **conversation-first three-pane research workspace** while retaining full research pages.
+25. Keep conversation transcripts **durable, private/local working context** that never outranks accepted scientific state.
+26. Make all session attachments, including PDFs, **session-only by default** and require explicit **Save to corpus** promotion.
+27. Use a unified, rebuildable **ResearchGraph** over SQLite/FTS/local vectors for stable references, provenance traversal, and context assembly; do not make it canonical authority.
+28. Render chat mathematics with **KaTeX**, but require **real local LaTeX compilation and PDF output** for the manuscript workspace.
+29. Keep `deepseek-harness/` as a **reference submodule only**, with no Research Harness runtime dependency.
+30. Use one first-class **Research Harness Design System** package across Web surfaces, with dark default/light optional themes, local runtime assets, accessible typed components, and presentation-only boundaries.
 
 ---
 

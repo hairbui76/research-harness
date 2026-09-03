@@ -1369,11 +1369,155 @@ Document:
 
 ---
 
-# Post-v1.0 Roadmap
+# Next Product Track — v1.1 Conversation-first Research Workspace
+
+This track turns the proven research core into the primary daily workspace described in the approved design specifications under `docs/superpowers/specs/`. The phase descriptions below define outcomes and gates only. A separate implementation plan must not be written or executed until the researcher reviews the written design specifications and explicitly asks to proceed.
+
+## Cross-cutting Foundation — Research Harness Design System
+
+**Outcome:** Every conversation, research, and manuscript surface composes one local production Design System rather than accumulating page-specific UI rules.
+
+**Relative effort:** Medium–Large
+
+### Product scope
+
+- convert `design/` from a Warmline prototype bundle into a strict TypeScript package in the pnpm workspace;
+- establish semantic tokens with dark default and optional light themes;
+- replace CDN fonts/icons with local runtime assets or system fallbacks;
+- implement accessible primitives, pane/layout foundations, and research-specific presentation components;
+- provide comfortable/compact density and reduced-motion behaviour;
+- add component interaction, accessibility, contrast, and dark/light visual-regression gates;
+- migrate routes incrementally before removing replaced Web CSS and prototype assets.
+
+### Boundary requirements
+
+- Components receive typed view models and callbacks; they never call the daemon or implement research mutations.
+- KaTeX, PDF.js, editor engines, compilation, and SyncTeX remain Web/application adapters.
+- Scientific authority is conveyed with text/icon as well as colour and remains independent of AI/action accent.
+- DeepSeek Harness and the source Warmline UI kit are references, not runtime dependencies.
+- Obsolete marketing/helpdesk/generator artifacts are removed only after useful foundations have verified production replacements.
+
+**Gate DS:** the package builds and is consumed locally by representative conversation, full research, and manuscript compositions; dark/light and compact/comfortable modes pass accessibility and visual checks; runtime makes no Design System CDN requests; and application screens do not duplicate migrated primitives or theme definitions.
+
+# Phase 18 — Conversation Workspace Foundation
+
+**Outcome:** A persistent three-pane research conversation becomes the default Web experience without turning chat into scientific authority.
+
+**Relative effort:** Large
+
+### Product scope
+
+- left project/session/navigation rail, central conversation/composer, and collapsible research inspector;
+- compose the shared Design System shell, primitives, themes, density, and research status components;
+- durable private/local sessions, append-oriented messages, summaries, search, rename, and resume;
+- current-session context plus relevance-selected excerpts/summaries from prior sessions;
+- graph-aware, token-bounded, privacy-filtered `ContextPack` assembly;
+- visible `Context used` receipts with included/omitted reasons;
+- Markdown and KaTeX rendering in chat;
+- explicit promotion to Note, Question, Claim candidate, and Decision candidate;
+- keyboard, focus, responsive, and non-colour status requirements.
+
+### Boundary requirements
+
+- Accepted Evidence, Claims, Decisions, and source anchors outrank chat memory.
+- Conversation records are durable but private and excluded from Git publication by default.
+- Evidence promotion requires a source and resolvable anchor.
+- The DeepSeek Harness submodule is interaction reference only and is not imported at runtime.
+
+**Gate P18:** reopen and continue a session; inspect exactly what context a response used; demonstrate cross-session retrieval with privacy filtering; demonstrate that conflicting accepted scientific state outranks chat; and promote an excerpt without bypassing review.
+
+---
+
+# Phase 19 — Research Attachments
+
+**Outcome:** Images, PDFs, and supported files can participate safely in conversation and be explicitly promoted into the scientific corpus.
+
+**Relative effort:** Medium–Large
+
+### Product scope
+
+- drag/drop and picker intake with per-item validation and failure states;
+- durable session-only attachment storage for every file type, including PDFs;
+- image thumbnails, gallery, zoom, and download;
+- PDF cards, page preview/navigation, and download;
+- selected-model capability checks and egress checks before send;
+- preservation of composer draft and successful items when one item fails;
+- `Save to corpus` from composer, transcript, viewer, and inspector;
+- Work/Version/Artifact identity resolution, hashing, deduplication, and normal ingest/parsing after confirmation.
+
+### Boundary requirements
+
+- Attaching a file does not create a corpus Artifact.
+- `Save to corpus` does not accept Evidence or Claims.
+- Unsupported files are never silently omitted from a model request.
+- A failed promotion leaves the original session attachment intact and retryable.
+
+**Gate P19:** attach and preview an image and PDF without corpus mutation; send with a compatible model and inspect `Context used`; block an incompatible send without losing the draft; promote a PDF through identity resolution; and recover cleanly from a failed promotion.
+
+---
+
+# Phase 20 — Unified ResearchGraph Index
+
+**Outcome:** Stable `@` references, fast local graph traversal, and provenance-bearing context assembly work across conversation, corpus, scientific state, and manuscript objects.
+
+**Relative effort:** Large
+
+### Product scope
+
+- typed node/edge/adjacency projection in local SQLite;
+- projection of Project, Session, Message, Attachment, Work, Version, Artifact, document structure, Evidence, Claim, Question, Decision, Synthesis, and manuscript objects;
+- deterministic structural edges plus authority-labelled scientific edges;
+- stable `@W####`, `@E####`, `@C####`, and namespaced working/manuscript references;
+- validated `rh://` deep links to exact source locations;
+- composer autocomplete and two-way inspector traversal;
+- exact, one-hop, two-hop, structured, FTS, vector, provenance, citation, and dependency query modes;
+- incremental fingerprint/event updates and deterministic full rebuild;
+- graph-aware context packs with authority and privacy filtering.
+
+### Boundary requirements
+
+- ResearchGraph is a disposable projection, never canonical scientific authority.
+- Model-proposed scientific edges remain candidate until reviewed.
+- Deleting `.research/` cannot change stable references or accepted relations.
+- Code-symbol graph concepts remain a later plugin with a separate namespace.
+
+**Gate P20:** rebuild the graph from durable sources and resolve the same stable references; traverse Claim ↔ Evidence ↔ Artifact anchor; preserve candidate/accepted labels; enforce session privacy during traversal; and meet warm targets of under 100 ms for exact refs and under 250 ms for one- or two-hop queries on the agreed benchmark.
+
+---
+
+# Phase 21 — LaTeX Manuscript Workspace
+
+**Outcome:** Research Harness provides owned LaTeX source editing, actual local PDF compilation, and scientific audit in one workspace.
+
+**Relative effort:** Large
+
+### Product scope
+
+- manuscript file tree, source editor, PDF preview, and collapsible audit inspector;
+- explicit read/edit/save semantics with external-change conflict detection;
+- bounded local LaTeX toolchain invocation with timeout and structured diagnostics;
+- real PDF output, build provenance, and retained last-good PDF after failure;
+- file/line compiler errors distinct from scientific audit findings;
+- source↔PDF navigation through SyncTeX when available;
+- conversation references to files, selections, diagnostics, Claims, and anchors;
+- model/humanizer suggestions as protected, reviewable candidate diffs only.
+
+### Boundary requirements
+
+- KaTeX chat rendering is not manuscript compilation.
+- The compiler cannot silently rewrite user source or receive implicit network/shell authority.
+- A successful compile does not imply scientific audit success.
+- Applying a model suggestion is an explicit user-owned source mutation.
+
+**Gate P21 / v1.1 conversation-first milestone:** compile a real project and inspect its PDF; retain the last good PDF on a new compile failure; navigate source/PDF when mapping exists; distinguish compiler and scientific errors; and apply a model suggestion only through an explicit reviewed diff.
+
+---
+
+# Later Post-v1.0 Extensions
 
 These items stay deliberately outside the v1.0 critical path.
 
-## v1.1 — Systematic Review Plugin
+## v1.2 — Systematic Review Plugin
 
 Add:
 - PRISMA-oriented screening/reporting;
@@ -1385,7 +1529,7 @@ Add:
 
 The systematic-review plugin consumes existing SearchRun/coverage primitives; it must not force PRISMA concepts into the generic core.
 
-## v1.2 — Reviewer / Calibration Extensions
+## v1.3 — Reviewer / Calibration Extensions
 
 After the skill audit, consider:
 - bounded domain reviewer role;
@@ -1396,7 +1540,7 @@ After the skill audit, consider:
 
 These remain **review extensions**, not authorities that can mutate accepted scientific state automatically.
 
-## v1.3 — Packaging and Desktop Experience
+## v1.4 — Packaging and Desktop Experience
 
 Only after Web + daemon usage is stable:
 - Tauri desktop shell;
@@ -1444,6 +1588,26 @@ Do not introduce collaboration architecture into v1.0 schemas unless a concrete 
 | Academic-writing plugin |  |  |  |  | ✓ |
 | VS Code client |  |  |  |  | ✓ |
 
+## Conversation-first track matrix
+
+| Capability | DS | P18 | P19 | P20 | P21 |
+|---|---:|---:|---:|---:|---:|
+| Shared typed Design System package | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Dark default / light optional themes | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Accessible primitives and pane composition | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Three-pane conversation workspace |  | ✓ | ✓ | ✓ | ✓ |
+| Durable private sessions |  | ✓ | ✓ | ✓ | ✓ |
+| Cross-session retrieval / `Context used` |  | ✓ | ✓ | ✓ | ✓ |
+| Markdown + KaTeX chat rendering |  | ✓ | ✓ | ✓ | ✓ |
+| Session-only image/PDF attachments |  |  | ✓ | ✓ | ✓ |
+| Explicit `Save to corpus` |  |  | ✓ | ✓ | ✓ |
+| Unified ResearchGraph projection |  |  |  | ✓ | ✓ |
+| Stable `@` refs and `rh://` deep links |  |  |  | ✓ | ✓ |
+| Graph-aware context packs |  |  |  | ✓ | ✓ |
+| LaTeX source/editor/PDF workspace |  |  |  |  | ✓ |
+| Real local compilation / SyncTeX |  |  |  |  | ✓ |
+| Candidate-only model manuscript diffs |  |  |  |  | ✓ |
+
 ---
 
 # 4. Critical Path and Parallel Work
@@ -1466,6 +1630,19 @@ Safe parallelization after interfaces stabilize:
 - P11 Web work can begin after P10 DTO/capability contracts stabilize; it should not invent new backend semantics.
 - P12 discovery providers can be implemented in parallel with Web after SearchRun schemas are locked.
 - P16 VS Code can begin after P9 manuscript anchors and P10 protocol DTOs are stable.
+- P18 must lock session identity, privacy, and `ContextPack` contracts before dependent conversation features.
+- P19 attachment presentation/intake and P20 projection/query work can proceed in parallel after those P18 contracts stabilize.
+- P21 can begin its isolated compiler/editor work after source ownership is locked, then integrate P20 references and the P18 inspector/context contracts.
+
+The conversation-first dependency path is:
+
+```text
+DS Design System Foundation
+   └── P18 Conversation Foundation
+          ├── P19 Research Attachments
+          └── P20 ResearchGraph
+                 └── P21 LaTeX Workspace
+```
 
 Do not parallelize two tasks that both redefine canonical schemas or scientific transition rules.
 
@@ -1676,6 +1853,14 @@ When implementation starts, execute in this order:
 16. Phase 15 — structured-traffic dogfood
 17. Phase 16 — VS Code
 18. Phase 17 — hardening             → v1.0
+19. Review and explicitly approve the written conversation-first design specifications
+20. Establish the Research Harness Design System foundation
+21. Phase 18 — conversation workspace foundation
+22. Phase 19 — research attachments
+23. Phase 20 — unified ResearchGraph index
+24. Phase 21 — LaTeX manuscript workspace → v1.1 conversation-first milestone
 ```
 
 The first implementation milestone worth protecting at all costs is **v0.1 Evidence Loop**. If that loop is trustworthy, every later interface has a sound scientific substrate. If it is not trustworthy, Web/Claude/ChatGPT integrations only make unreliable state easier to access.
+
+No Phase 18–21 implementation starts from this roadmap alone. The next authorised action after this documentation update is researcher review of the written design; a separate implementation plan and coding require a later explicit instruction.

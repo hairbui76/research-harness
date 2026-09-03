@@ -39,6 +39,19 @@ Generated reference, regenerated from the code rather than written by hand:
 | [PRODUCT.md](../PRODUCT.md) | the product specification; the source of every rule the code enforces |
 | [ROADMAP.md](../ROADMAP.md) | the phased implementation plan and the acceptance requirements per task |
 
+### Design specifications awaiting implementation planning
+
+These documents record the conversation-first workspace design. They do not by themselves authorise implementation.
+
+| document | what it defines |
+|---|---|
+| [Research workspace experience](superpowers/specs/2026-09-03-research-workspace-experience-design.md) | the approved product shape, authority boundaries, subsystem split, and privacy model |
+| [Research Harness Design System](superpowers/specs/2026-09-03-research-harness-design-system-design.md) | the production package boundary, dark/light themes, component layers, accessibility, migration, and cleanup |
+| [Conversation workspace](superpowers/specs/2026-09-03-conversation-workspace-design.md) | sessions, three-pane UI, context assembly, promotion, and `Context used` |
+| [Research attachments](superpowers/specs/2026-09-03-research-attachments-design.md) | session-only intake, previews, compatibility, and explicit `Save to corpus` |
+| [LaTeX manuscript workspace](superpowers/specs/2026-09-03-latex-manuscript-workspace-design.md) | KaTeX chat rendering, owned source, real local compilation, PDF preview, and audit |
+| [ResearchGraph index](superpowers/specs/2026-09-03-research-graph-index-design.md) | rebuildable node/edge projection, stable refs, traversal, and context packs |
+
 ## Architecture
 
 | document | what it is |
