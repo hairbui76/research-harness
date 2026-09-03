@@ -1,0 +1,33 @@
+/*
+ * The frame around CodeMirror. The editor's own surfaces are themed in `EditorView.theme`
+ * (CodeMirror injects its styles itself); what is left here is the box it sits in and the
+ * notice that says why it cannot be typed into.
+ */
+
+.rh-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-primary);
+}
+
+.rh-editor__host {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* A read-only source says why in words, above the text it applies to: a locked surface
+   with no reason is indistinguishable from a broken one. */
+.rh-editor__notice {
+  margin: 0;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-feedback-info-border);
+  background: var(--rh-feedback-info-bg);
+  color: var(--rh-feedback-info-fg);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+}

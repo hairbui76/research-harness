@@ -113,6 +113,9 @@ importers:
       '@codemirror/view':
         specifier: 6.43.10
         version: 6.43.10
+      '@lezer/highlight':
+        specifier: 1.2.3
+        version: 1.2.3
       '@research-harness/design':
         specifier: workspace:*
         version: link:../design

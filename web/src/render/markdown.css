@@ -1,0 +1,235 @@
+/*
+ * Message body styling.
+ *
+ * Every value here is a `--rh-*` semantic token from `@research-harness/design`; there is
+ * no literal colour, and no remote font or stylesheet (KaTeX's own CSS and its fonts are
+ * imported from the `katex` package by `markdown.tsx`, so they are bundled as local
+ * assets). The rules stay at one class of specificity so a Design System component can
+ * still frame this content.
+ */
+
+.rh-md {
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-lh);
+  overflow-wrap: anywhere;
+}
+
+.rh-md > :first-child {
+  margin-top: 0;
+}
+
+.rh-md > :last-child {
+  margin-bottom: 0;
+}
+
+.rh-md p,
+.rh-md ul,
+.rh-md ol,
+.rh-md blockquote,
+.rh-md pre {
+  margin: 0 0 var(--rh-space-3);
+}
+
+.rh-md h1,
+.rh-md h2,
+.rh-md h3,
+.rh-md h4,
+.rh-md h5,
+.rh-md h6 {
+  margin: var(--rh-space-5) 0 var(--rh-space-2);
+  color: var(--rh-text-primary);
+  font-weight: var(--rh-type-h3-weight);
+  line-height: var(--rh-type-h3-lh);
+}
+
+.rh-md h1 {
+  font-size: calc(var(--rh-type-h2-size) * var(--rh-density-font-scale));
+}
+
+.rh-md h2 {
+  font-size: calc(var(--rh-type-h3-size) * var(--rh-density-font-scale));
+}
+
+.rh-md h3,
+.rh-md h4,
+.rh-md h5,
+.rh-md h6 {
+  font-size: calc(var(--rh-type-h4-size) * var(--rh-density-font-scale));
+}
+
+.rh-md ul,
+.rh-md ol {
+  padding-left: var(--rh-space-5);
+}
+
+.rh-md li + li {
+  margin-top: var(--rh-space-1);
+}
+
+.rh-md li > p {
+  margin-bottom: var(--rh-space-1);
+}
+
+.rh-md blockquote {
+  padding: var(--rh-space-1) var(--rh-space-3);
+  border-left: 2px solid var(--rh-border-strong);
+  color: var(--rh-text-secondary);
+}
+
+.rh-md hr {
+  height: 0;
+  margin: var(--rh-space-4) 0;
+  border: 0;
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+/* Links -------------------------------------------------------------------------------
+   Underlined, never colour alone: colour is the second channel here (DS spec §6). */
+
+.rh-md__link {
+  color: var(--rh-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rh-md__link:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+  border-radius: var(--rh-radius-control);
+}
+
+/* A workspace reference reads as an object, not as a web address. */
+.rh-md__link--deep {
+  color: var(--rh-accent-text);
+  text-decoration-style: dotted;
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+/* Code --------------------------------------------------------------------------------- */
+
+.rh-md code {
+  padding: 1px var(--rh-space-1);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-subtle);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+.rh-md__code {
+  position: relative;
+  margin: 0 0 var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+  overflow: hidden;
+}
+
+.rh-md__code pre {
+  margin: 0;
+  padding: var(--rh-space-3);
+  overflow-x: auto;
+}
+
+.rh-md__code code {
+  padding: 0;
+  background: none;
+  line-height: var(--rh-type-mono-lh);
+  white-space: pre;
+}
+
+/* Tables ------------------------------------------------------------------------------
+   A wide table scrolls in its own box; the transcript column never grows to fit it. */
+
+.rh-md__table-scroll {
+  max-width: 100%;
+  margin: 0 0 var(--rh-space-3);
+  overflow-x: auto;
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+}
+
+.rh-md__table-scroll:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-md table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+}
+
+.rh-md th,
+.rh-md td {
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rh-md th {
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-secondary);
+  font-weight: var(--rh-type-ui-weight);
+  white-space: nowrap;
+}
+
+.rh-md tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Images ------------------------------------------------------------------------------- */
+
+.rh-md__image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--rh-radius-card);
+}
+
+.rh-md__remote-image {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rh-space-1);
+  padding: 1px var(--rh-space-2);
+  border: var(--rh-border-width) dashed var(--rh-border-default);
+  border-radius: var(--rh-radius-control);
+  color: var(--rh-text-secondary);
+  text-decoration: underline;
+}
+
+.rh-md__note {
+  color: var(--rh-text-muted);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+}
+
+/* Mathematics -------------------------------------------------------------------------
+   KaTeX ships its own layout CSS; only the surrounding behaviour belongs here. Display
+   maths scrolls rather than overflowing the message, and a wide expression never widens
+   the transcript. */
+
+.rh-md .katex {
+  font-size: 1.05em;
+}
+
+.rh-md .katex-display {
+  margin: var(--rh-space-3) 0;
+  padding-bottom: var(--rh-space-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* One expression KaTeX refused. The text is the source that failed; the marker says so
+   in words as well as in colour, and `aria-label` carries the same sentence. */
+.rh-md__math-error {
+  padding: 0 var(--rh-space-1);
+  border: var(--rh-border-width) dashed var(--rh-feedback-error-border);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-feedback-error-bg);
+  color: var(--rh-feedback-error-fg);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  white-space: pre-wrap;
+}

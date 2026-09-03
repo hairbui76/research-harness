@@ -1,0 +1,81 @@
+/*
+ * The PDF page and what is drawn over it.
+ *
+ * The page itself is the one surface that stays near-white in both themes — a preview must
+ * look like the paper it will be printed on — which is what `--rh-surface-paper` and the
+ * `--rh-text-on-paper*` inks are for. Everything else comes from the same semantic tokens
+ * as the rest of the cockpit; there is no literal colour here.
+ */
+
+.rh-pdf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  align-items: flex-start;
+}
+
+.rh-pdf__frame {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  border: var(--rh-border-width) solid var(--rh-border-on-paper);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-paper);
+  overflow: hidden;
+}
+
+.rh-pdf__canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* pdf.js positions each run absolutely inside this layer; it is transparent, selectable
+   text sitting exactly over the drawn glyphs. */
+.rh-pdf__text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.25;
+  line-height: 1;
+  text-align: initial;
+  transform-origin: 0 0;
+  forced-color-adjust: none;
+}
+
+.rh-pdf__text-layer > span {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+}
+
+/* A rectangle the caller gave in PDF coordinates: a SyncTeX target, an accepted anchor,
+   or a search hit. Colour is never the only signal — each carries a `data-kind` and, when
+   the caller names it, an accessible label. */
+.rh-pdf__highlight {
+  position: absolute;
+  pointer-events: none;
+  border: var(--rh-border-width) solid var(--rh-accent-border);
+  border-radius: 2px;
+  background: var(--rh-accent-subtle);
+  mix-blend-mode: multiply;
+}
+
+.rh-pdf__highlight[data-kind='anchor'] {
+  border-color: var(--rh-status-accepted-border);
+  background: var(--rh-status-accepted-bg);
+}
+
+.rh-pdf__highlight[data-kind='match'] {
+  border-color: var(--rh-feedback-warning-border);
+  background: var(--rh-feedback-warning-bg);
+}
+
+.rh-pdf__fallback {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+}
