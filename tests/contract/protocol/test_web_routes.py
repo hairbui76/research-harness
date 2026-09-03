@@ -140,6 +140,14 @@ WEB_RESPONSE_TYPES = {
     "GraphProvenanceStepView": "graph.provenance",
     "GraphProvenanceView": "graph.provenance",
     "GraphStatusView": "graph.status",
+    # subscription-backed CLI providers
+    "CliModelView": "provider.cli.scan",
+    "CliRuntimeStatus": "provider.cli.scan",
+    "ConfiguredCliProviderView": "provider.cli.scan",
+    "CliScanReport": "provider.cli.scan",
+    "CliProviderConfigured": "provider.cli.configure",
+    "CliProviderRemoved": "provider.cli.remove",
+    "CliProviderTestReport": "provider.cli.test",
 }
 
 #: The request each cockpit control posts, exactly as `web/src/api/client.ts` builds it.

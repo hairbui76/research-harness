@@ -30,6 +30,11 @@ import type {
   ClaimList,
   ClaimSummary,
   ClaimSupport,
+  CliProviderConfigureRequest,
+  CliProviderConfigured,
+  CliProviderRemoved,
+  CliProviderTestReport,
+  CliScanReport,
   ComparisonView,
   ConflictResolution,
   ContextPackView,
@@ -772,6 +777,28 @@ export class HarnessClient {
    */
   providers(): Promise<ProviderCatalog> {
     return this.conversationCall<ProviderCatalog>('provider.list', {});
+  }
+
+  // -- subscription-backed CLI providers (provider.cli.*) ----------------------
+
+  /** Detect the supported local CLIs. A read; `rescan` bypasses the daemon's short cache. */
+  providerCliScan(rescan = false): Promise<CliScanReport> {
+    return this.call<CliScanReport>('provider.cli.scan', { rescan });
+  }
+
+  /** Add or update one `local_cli` entry in research.yaml. Researcher-only. */
+  providerCliConfigure(request: CliProviderConfigureRequest): Promise<CliProviderConfigured> {
+    return this.call<CliProviderConfigured>('provider.cli.configure', request as unknown as Json);
+  }
+
+  /** Remove one `local_cli` entry. Researcher-only. */
+  providerCliRemove(name: string): Promise<CliProviderRemoved> {
+    return this.call<CliProviderRemoved>('provider.cli.remove', { name });
+  }
+
+  /** One minimal validated request through a configured entry; external egress, researcher-only. */
+  providerCliTest(name: string): Promise<CliProviderTestReport> {
+    return this.call<CliProviderTestReport>('provider.cli.test', { name });
   }
 
   /** One session attachment's bytes, read with the token header like artifact bytes. */

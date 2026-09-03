@@ -1,0 +1,16 @@
+{
+  "entry": {
+    "name": "codex-sub",
+    "runtime": "codex",
+    "model": "gpt-5.5",
+    "priority": 10,
+    "enabled": true,
+    "reasoning": null,
+    "timeout_seconds": null,
+    "roles": null,
+    "available": true,
+    "unavailable_reason": null
+  },
+  "created": true,
+  "file": "research.yaml"
+}

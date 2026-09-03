@@ -19408,6 +19408,714 @@
       "summary": "Record the research object a captured note became."
     },
     {
+      "human_only": true,
+      "long_running": false,
+      "name": "provider.cli.configure",
+      "permission": "admin",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`provider.cli.configure`: add or update one `local_cli` entry in `research.yaml`.",
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "model": {
+            "default": "default",
+            "minLength": 1,
+            "title": "Model",
+            "type": "string"
+          },
+          "name": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "priority": {
+            "default": 100,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reasoning"
+          },
+          "roles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Roles"
+          },
+          "runtime": {
+            "title": "Runtime",
+            "type": "string"
+          },
+          "timeout_seconds": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Timeout Seconds"
+          }
+        },
+        "required": [
+          "name",
+          "runtime"
+        ],
+        "title": "ConfigureCliProviderRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "$defs": {
+          "ConfiguredCliProviderView": {
+            "additionalProperties": false,
+            "description": "One `local_cli` entry of `research.yaml`, with today's verdict on it.",
+            "properties": {
+              "available": {
+                "title": "Available",
+                "type": "boolean"
+              },
+              "enabled": {
+                "title": "Enabled",
+                "type": "boolean"
+              },
+              "model": {
+                "title": "Model",
+                "type": "string"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "priority": {
+                "title": "Priority",
+                "type": "integer"
+              },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
+              },
+              "roles": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Roles"
+              },
+              "runtime": {
+                "title": "Runtime",
+                "type": "string"
+              },
+              "timeout_seconds": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Timeout Seconds"
+              },
+              "unavailable_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unavailable Reason"
+              }
+            },
+            "required": [
+              "name",
+              "runtime",
+              "model",
+              "priority",
+              "enabled",
+              "available"
+            ],
+            "title": "ConfiguredCliProviderView",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The entry as it now stands in `research.yaml`, and whether it is new.",
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "boolean"
+          },
+          "entry": {
+            "$ref": "#/$defs/ConfiguredCliProviderView"
+          },
+          "file": {
+            "default": "research.yaml",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entry",
+          "created"
+        ],
+        "title": "CliProviderConfigured",
+        "type": "object"
+      },
+      "scientific_semantics": "changes provider configuration only; writes no research object and no event",
+      "summary": "Add or update one subscription-backed CLI provider entry in research.yaml."
+    },
+    {
+      "human_only": true,
+      "long_running": false,
+      "name": "provider.cli.remove",
+      "permission": "admin",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`provider.cli.remove`: drop one `local_cli` entry by name.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "RemoveCliProviderRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "additionalProperties": false,
+        "description": "Which entry was removed, and from which file.",
+        "properties": {
+          "file": {
+            "default": "research.yaml",
+            "title": "File",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "CliProviderRemoved",
+        "type": "object"
+      },
+      "scientific_semantics": "changes provider configuration only; writes no research object and no event",
+      "summary": "Remove one subscription-backed CLI provider entry from research.yaml."
+    },
+    {
+      "human_only": false,
+      "long_running": false,
+      "name": "provider.cli.scan",
+      "permission": "read",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`provider.cli.scan`: every supported runtime, fresh or from the short cache.",
+        "properties": {
+          "rescan": {
+            "default": false,
+            "title": "Rescan",
+            "type": "boolean"
+          }
+        },
+        "title": "ScanCliRuntimesRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "$defs": {
+          "CliModelView": {
+            "additionalProperties": false,
+            "description": "One model choice as a scan reports it.",
+            "properties": {
+              "context_tokens": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Context Tokens"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "reasoning": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Reasoning",
+                "type": "array"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "title": "CliModelView",
+            "type": "object"
+          },
+          "CliRuntimeStatus": {
+            "additionalProperties": false,
+            "description": "What one scan found for one runtime (spec §10). Never carries a secret.",
+            "properties": {
+              "auth_guidance": {
+                "title": "Auth Guidance",
+                "type": "string"
+              },
+              "auth_status": {
+                "enum": [
+                  "ok",
+                  "missing",
+                  "unknown"
+                ],
+                "title": "Auth Status",
+                "type": "string"
+              },
+              "available": {
+                "title": "Available",
+                "type": "boolean"
+              },
+              "bounded_mode": {
+                "enum": [
+                  "safe",
+                  "unsupported",
+                  "unknown"
+                ],
+                "title": "Bounded Mode",
+                "type": "string"
+              },
+              "compatibility": {
+                "enum": [
+                  "verified",
+                  "warning",
+                  "blocked",
+                  "unknown"
+                ],
+                "title": "Compatibility",
+                "type": "string"
+              },
+              "diagnostics": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Diagnostics",
+                "type": "array"
+              },
+              "egress_host": {
+                "title": "Egress Host",
+                "type": "string"
+              },
+              "egress_kind": {
+                "enum": [
+                  "external",
+                  "unknown_external"
+                ],
+                "title": "Egress Kind",
+                "type": "string"
+              },
+              "executable": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Executable"
+              },
+              "model_source": {
+                "enum": [
+                  "live",
+                  "fallback"
+                ],
+                "title": "Model Source",
+                "type": "string"
+              },
+              "models": {
+                "items": {
+                  "$ref": "#/$defs/CliModelView"
+                },
+                "title": "Models",
+                "type": "array"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "reasoning_choices": {
+                "items": {
+                  "type": "string"
+                },
+                "title": "Reasoning Choices",
+                "type": "array"
+              },
+              "routable": {
+                "description": "Installed, not known to be logged out, provably bounded, not a blocked version.",
+                "readOnly": true,
+                "title": "Routable",
+                "type": "boolean"
+              },
+              "runtime": {
+                "title": "Runtime",
+                "type": "string"
+              },
+              "scanned_at": {
+                "format": "date-time",
+                "title": "Scanned At",
+                "type": "string"
+              },
+              "unavailable_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The first failing gate, as `unavailable_reason()` phrases it; `None` when routable.",
+                "readOnly": true,
+                "title": "Unavailable Reason"
+              },
+              "version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Version"
+              }
+            },
+            "required": [
+              "runtime",
+              "name",
+              "available",
+              "executable",
+              "version",
+              "auth_status",
+              "auth_guidance",
+              "bounded_mode",
+              "compatibility",
+              "models",
+              "model_source",
+              "reasoning_choices",
+              "egress_kind",
+              "egress_host",
+              "diagnostics",
+              "scanned_at",
+              "routable",
+              "unavailable_reason"
+            ],
+            "title": "CliRuntimeStatus",
+            "type": "object"
+          },
+          "ConfiguredCliProviderView": {
+            "additionalProperties": false,
+            "description": "One `local_cli` entry of `research.yaml`, with today's verdict on it.",
+            "properties": {
+              "available": {
+                "title": "Available",
+                "type": "boolean"
+              },
+              "enabled": {
+                "title": "Enabled",
+                "type": "boolean"
+              },
+              "model": {
+                "title": "Model",
+                "type": "string"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string"
+              },
+              "priority": {
+                "title": "Priority",
+                "type": "integer"
+              },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
+              },
+              "roles": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Roles"
+              },
+              "runtime": {
+                "title": "Runtime",
+                "type": "string"
+              },
+              "timeout_seconds": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Timeout Seconds"
+              },
+              "unavailable_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unavailable Reason"
+              }
+            },
+            "required": [
+              "name",
+              "runtime",
+              "model",
+              "priority",
+              "enabled",
+              "available"
+            ],
+            "title": "ConfiguredCliProviderView",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "What one scan found, and what this project has already configured.",
+        "properties": {
+          "configured": {
+            "items": {
+              "$ref": "#/$defs/ConfiguredCliProviderView"
+            },
+            "title": "Configured",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "notice": {
+            "default": "A local CLI starts on this workstation, but the model it talks to is the vendor's: research content and object IDs leave the machine when a CLI provider is used.",
+            "title": "Notice",
+            "type": "string"
+          },
+          "runtimes": {
+            "items": {
+              "$ref": "#/$defs/CliRuntimeStatus"
+            },
+            "title": "Runtimes",
+            "type": "array"
+          },
+          "scanned_at": {
+            "format": "date-time",
+            "title": "Scanned At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scanned_at",
+          "count",
+          "runtimes",
+          "configured"
+        ],
+        "title": "CliScanReport",
+        "type": "object"
+      },
+      "scientific_semantics": "runs local version/login/help probes; edits nothing and sends no research content",
+      "summary": "Detect the supported local CLIs: installed, version, login, bounded mode, models."
+    },
+    {
+      "human_only": true,
+      "long_running": false,
+      "name": "provider.cli.test",
+      "permission": "read",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`provider.cli.test`: one minimal request through a configured entry.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TestCliProviderRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "additionalProperties": false,
+        "description": "What the test call learned: the destination, the verdict, and why.\n\nNo field can hold a secret: `message` is redacted before it is stored, and the only\nother strings are the entry's own configuration.",
+        "properties": {
+          "diagnostic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Diagnostic"
+          },
+          "egress_host": {
+            "title": "Egress Host",
+            "type": "string"
+          },
+          "egress_kind": {
+            "enum": [
+              "external",
+              "unknown_external"
+            ],
+            "title": "Egress Kind",
+            "type": "string"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Latency Ms"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "runtime": {
+            "title": "Runtime",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "name",
+          "runtime",
+          "model",
+          "version",
+          "egress_host",
+          "egress_kind",
+          "ok",
+          "message"
+        ],
+        "title": "CliProviderTestReport",
+        "type": "object"
+      },
+      "scientific_semantics": "sends one test prompt off the workstation under the privacy policy; stages nothing",
+      "summary": "Run one minimal schema-validated request through a configured CLI provider."
+    },
+    {
       "human_only": false,
       "long_running": false,
       "name": "provider.list",

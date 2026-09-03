@@ -1499,3 +1499,109 @@ export interface GraphProvenanceRequest {
   to_kind?: GraphNodeKind;
   visibility?: GraphVisibilityName[];
 }
+
+// ---------------------------------------------------------------------------
+// subscription-backed CLI providers (provider.cli.*)
+// ---------------------------------------------------------------------------
+//
+// Hand-declared like the sections above: `provider.cli.*` answers through
+// `POST /capabilities/<name>`. They mirror `capabilities/cli_providers.py` and
+// `providers/cli/types.py` field for field; the contract test pins every field name to
+// the schema the daemon publishes.
+
+export type CliAuthStatus = 'ok' | 'missing' | 'unknown';
+export type CliBoundedMode = 'safe' | 'unsupported' | 'unknown';
+export type CliCompatibility = 'verified' | 'warning' | 'blocked' | 'unknown';
+export type CliEgressKind = 'external' | 'unknown_external';
+
+export interface CliModelView {
+  id: string;
+  label: string;
+  reasoning?: string[];
+  context_tokens?: number | null;
+}
+
+/** One runtime as `provider.cli.scan` found it. Never carries a secret. */
+export interface CliRuntimeStatus {
+  runtime: string;
+  name: string;
+  available: boolean;
+  executable: string | null;
+  version: string | null;
+  auth_status: CliAuthStatus;
+  auth_guidance: string;
+  bounded_mode: CliBoundedMode;
+  compatibility: CliCompatibility;
+  models: CliModelView[];
+  model_source: 'live' | 'fallback';
+  reasoning_choices: string[];
+  egress_kind: CliEgressKind;
+  egress_host: string;
+  diagnostics: string[];
+  scanned_at: string;
+  /**
+   * The daemon's own verdict, serialized: `types.py::CliRuntimeStatus` publishes both as
+   * computed fields, so the cockpit renders the gates rather than re-deriving them.
+   * `routable` is installed and logged in and provably bounded and not a blocked version;
+   * `unavailable_reason` names the first failing gate, and is `null` when routable.
+   */
+  routable: boolean;
+  unavailable_reason: string | null;
+}
+
+export interface ConfiguredCliProviderView {
+  name: string;
+  runtime: string;
+  model: string;
+  priority: number;
+  enabled: boolean;
+  reasoning?: string | null;
+  timeout_seconds?: number | null;
+  roles?: string[] | null;
+  available: boolean;
+  unavailable_reason?: string | null;
+}
+
+export interface CliScanReport {
+  scanned_at: string;
+  count: number;
+  runtimes: CliRuntimeStatus[];
+  configured: ConfiguredCliProviderView[];
+  notice: string;
+}
+
+/** `provider.cli.configure`'s request, exactly as the settings screen posts it. */
+export interface CliProviderConfigureRequest {
+  name: string;
+  runtime: string;
+  model?: string;
+  priority?: number;
+  reasoning?: string | null;
+  timeout_seconds?: number | null;
+  roles?: string[] | null;
+  enabled?: boolean;
+}
+
+export interface CliProviderConfigured {
+  entry: ConfiguredCliProviderView;
+  created: boolean;
+  file: string;
+}
+
+export interface CliProviderRemoved {
+  name: string;
+  file: string;
+}
+
+export interface CliProviderTestReport {
+  name: string;
+  runtime: string;
+  model: string;
+  version: string | null;
+  egress_host: string;
+  egress_kind: CliEgressKind;
+  ok: boolean;
+  latency_ms?: number | null;
+  message: string;
+  diagnostic?: string | null;
+}
