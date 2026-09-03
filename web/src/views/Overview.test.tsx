@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { OverviewPage } from './Overview';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 describe('the overview', () => {
   it('states the project and its size the way Product 26 asks', async () => {
@@ -22,7 +22,7 @@ describe('the overview', () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
-    const rendered = Array.from(container.querySelectorAll('.attention > li > a')).map(
+    const rendered = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map(
       (node) => node.textContent,
     );
     expect(rendered).toEqual(FIXTURES.overview.attention.map((group) => group.label));
@@ -32,7 +32,9 @@ describe('the overview', () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
-    expect(container.querySelector('.attention > li')?.className).toBe('has-work');
+    // "Has work" is an attribute rather than a class since the migration to the Design
+    // System: the group's own state, styled from `[data-work]`, and read here the same way.
+    expect(container.querySelector('.rh-web-attention > li')?.hasAttribute('data-work')).toBe(true);
   });
 
   it('shows claim health as counts and nothing that looks like model confidence', async () => {
@@ -42,5 +44,12 @@ describe('the overview', () => {
     expect(screen.getByText('supported')).toBeInTheDocument();
     expect(container.textContent?.toLowerCase()).not.toContain('confidence');
     expect(container.textContent).not.toMatch(/\d+(\.\d+)?%/);
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 });

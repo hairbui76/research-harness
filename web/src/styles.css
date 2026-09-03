@@ -1,173 +1,313 @@
-/* A reading surface, not a dashboard: long text has to stay legible beside a PDF page. */
-:root {
-  --ink: #16181d;
-  --muted: #5d6470;
-  --line: #dcdfe5;
-  --paper: #fbfbfc;
-  --panel: #ffffff;
-  --accent: #1f4f8b;
-  --warn: #8a4b00;
-  --stop: #8c1d18;
-  --highlight: rgba(255, 214, 0, 0.38);
-  color-scheme: light;
+/*
+ * What is left of the cockpit's own stylesheet after the migration to
+ * `@research-harness/design`.
+ *
+ * Everything a Design System primitive or token now covers is gone: the palette, the
+ * typography, the shell grid, buttons, inputs, badges, panels, the token bar, the error
+ * and empty states. `main.tsx` imports `@research-harness/design/styles.css` before this
+ * file, so the rules below sit on top of the package's base layer and read its semantic
+ * tokens (`--rh-*`) only — there is no colour literal here, and `check-tokens.mjs` fails
+ * the lint if one comes back.
+ *
+ * What stays is application layout that is not a primitive: the document has to be full
+ * height for the shell to fill it, research pages need a dense data table and a
+ * definition list, and the review screen needs a two-pane frame with a source quote in
+ * it. Each rule below is here because no package component owns it.
+ */
+
+/* The shell measures itself against the viewport, so the document must have a height. */
+html,
+body,
+#root {
+  block-size: 100%;
 }
 
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-code, pre, textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-
-.shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-
-nav {
-  border-right: 1px solid var(--line);
-  background: var(--panel);
-  padding: 1rem 0.75rem;
+#root {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  min-block-size: 0;
 }
-nav .brand { display: flex; flex-direction: column; gap: 0.15rem; padding: 0 0.5rem; }
-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
-nav a {
+
+/* Layout primitives used across the research pages ---------------------------------- */
+
+/* A vertical run of cards, panels and paragraphs. */
+.rh-web-stack {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+  min-width: 0;
+}
+
+.rh-web-stack--tight {
+  gap: var(--rh-space-2);
+}
+
+/* A wrapping row of controls or chips. */
+.rh-web-row {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 0.35rem 0.5rem;
-  border-radius: 5px;
-  color: inherit;
-  text-decoration: none;
-}
-nav a:hover { background: #eef1f6; }
-nav a.active { background: #e4ecf7; color: var(--accent); font-weight: 600; }
-nav footer { margin-top: auto; padding: 0 0.5rem; }
-
-.badge {
-  background: var(--accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0 0.45rem;
-  font-size: 12px;
-  line-height: 1.5;
+  gap: var(--rh-space-2);
+  min-width: 0;
 }
 
-.principal { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
-.principal.human { color: var(--accent); }
-.principal.host { color: var(--warn); }
-
-main { padding: 1.25rem 1.5rem 3rem; max-width: 100%; overflow-x: hidden; }
-
-h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
-h2 { font-size: 1.05rem; margin: 0; }
-h3 { font-size: 0.95rem; margin: 0.75rem 0 0.25rem; }
-
-.muted { color: var(--muted); }
-.empty { font-style: italic; }
-.notice { color: var(--accent); }
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
-  margin: 0.85rem 0;
+.rh-web-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
 }
-.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
 
-.field { display: grid; grid-template-columns: 190px 1fr; gap: 0.5rem; padding: 0.15rem 0; }
-.field-label { color: var(--muted); }
-
-.tag {
-  display: inline-block;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 0.5rem;
-  font-size: 12px;
-  margin-right: 0.35rem;
+.rh-web-list--tight {
+  gap: var(--rh-space-1);
 }
-.tag-conflict, .tag-error, .tag-contested, .tag-unsupported { border-color: var(--stop); color: var(--stop); }
-.tag-high_risk, .tag-stale, .tag-warning, .tag-qualified { border-color: var(--warn); color: var(--warn); }
-.tag-supported, .tag-valid { border-color: var(--accent); color: var(--accent); }
 
-table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 14px; }
-th, td { border-bottom: 1px solid var(--line); text-align: left; padding: 0.35rem 0.5rem; vertical-align: top; }
-th { color: var(--muted); font-weight: 600; }
-
-blockquote {
-  margin: 0.4rem 0;
-  padding: 0.35rem 0.7rem;
-  border-left: 3px solid var(--line);
-  background: #f5f6f9;
+.rh-web-list--rules > li + li {
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  padding-block-start: var(--rh-space-3);
 }
-.exact-text { font-size: 1rem; }
 
-button {
-  font: inherit;
-  padding: 0.3rem 0.7rem;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #fff;
-  border-radius: 5px;
-  cursor: pointer;
+/* The Overview's attention groups: what needs a researcher, in the daemon's own order. */
+.rh-web-attention > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
 }
-button:disabled { opacity: 0.45; cursor: not-allowed; }
-button.secondary { background: transparent; color: var(--accent); }
 
-.actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0; }
+.rh-web-attention > li > p {
+  margin: 0;
+}
 
-input, select, textarea {
-  font: inherit;
-  padding: 0.3rem 0.45rem;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: #fff;
+.rh-web-attention > li[data-work] .rh-web-attention__item {
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-web-attention__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* Claim health: a count and the word it counts, never a percentage. */
+.rh-web-tally {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-6);
+}
+
+.rh-web-tally > li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+}
+
+.rh-web-tally__count {
+  font-size: var(--rh-type-h2-size);
+  font-weight: var(--rh-type-h2-weight);
+}
+
+/* A form that asks for the sentence a decision is recorded with. */
+.rh-web-prompt {
+  padding-block-start: var(--rh-space-3);
+  border-top: var(--rh-border-width) dashed var(--rh-border-subtle);
+}
+
+/* A field that sits on one line with the button that submits it. */
+.rh-web-inline-field {
+  inline-size: min(20rem, 100%);
+}
+
+.rh-web-json {
+  min-block-size: 18rem;
+  font-family: var(--rh-font-mono);
+}
+
+/* A definition row: the name the daemon uses, and the value it reported. */
+.rh-web-field {
+  display: grid;
+  grid-template-columns: minmax(9rem, 14rem) 1fr;
+  gap: var(--rh-space-3);
+  padding-block: var(--rh-space-1);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .rh-web-field {
+    grid-template-columns: 1fr;
+    gap: var(--rh-space-1);
+  }
+}
+
+.rh-web-field > dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rh-web-fields {
+  margin: 0;
+}
+
+/* Data tables ----------------------------------------------------------------------- */
+
+/*
+ * A research table. It scrolls inside the package's `ScrollArea`, which becomes a named,
+ * keyboard-reachable region once it actually overflows (WCAG 2.2), and sits inside a
+ * `data-density="compact"` wrapper so its rows read as a queue rather than as prose.
+ */
+.rh-web-table {
+  border-collapse: collapse;
   width: 100%;
-  max-width: 44rem;
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
 }
-label { display: block; color: var(--muted); font-size: 13px; margin-top: 0.5rem; }
 
-.prompt { margin: 0.75rem 0; border-top: 1px dashed var(--line); padding-top: 0.5rem; }
-
-.error { color: var(--stop); }
-.error ul, ul.error { margin: 0.3rem 0; padding-left: 1.2rem; }
-
-.token-bar {
-  border: 1px solid var(--warn);
-  background: #fff8ee;
-  border-radius: 8px;
-  padding: 0.6rem 0.9rem;
-  margin-bottom: 1rem;
+.rh-web-table th,
+.rh-web-table td {
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  padding: var(--rh-space-1) var(--rh-density-pad);
+  text-align: start;
+  vertical-align: top;
 }
-.token-bar form { display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap; }
-.token-bar input { max-width: 24rem; }
 
-.attention { list-style: none; margin: 0; padding: 0; }
-.attention > li { padding: 0.3rem 0; }
-.attention > li.clear { color: var(--muted); }
-.attention > li.has-work > a { font-weight: 600; }
-.attention-items { margin: 0.2rem 0 0.4rem 1rem; }
-.tally { list-style: none; display: flex; gap: 1.25rem; margin: 0; padding: 0; }
-.tally .count { font-size: 1.3rem; font-weight: 600; }
+.rh-web-table th {
+  color: var(--rh-text-muted);
+  font-weight: var(--rh-type-label-weight);
+  white-space: nowrap;
+}
 
-.queue { list-style: none; margin: 0; padding: 0; }
-.queue-row { border-bottom: 1px solid var(--line); padding: 0.5rem 0; }
-.queue-row .field-name { font-weight: 600; }
+.rh-web-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
 
-.review-screen { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1fr); gap: 1.25rem; align-items: start; }
-@media (max-width: 1100px) { .review-screen { grid-template-columns: 1fr; } }
+/* Source text ----------------------------------------------------------------------- */
 
-.source-pane header { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
-.page-frame { position: relative; display: inline-block; border: 1px solid var(--line); background: #fff; max-width: 100%; }
-.page-frame canvas { display: block; max-width: 100%; height: auto; }
-.span-highlight { position: absolute; background: var(--highlight); outline: 2px solid #b58b00; pointer-events: none; }
-.source-text .block-text mark { background: var(--highlight); }
+/*
+ * A quoted span from a source document. Serif at reading size, because it is the one
+ * thing on a review screen a researcher reads rather than scans.
+ */
+.rh-web-quote {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: 2px solid var(--rh-border-strong);
+  font-family: var(--rh-font-serif);
+  color: var(--rh-text-primary);
+  overflow-wrap: anywhere;
+}
 
-.json-editor textarea { min-height: 18rem; max-width: none; }
+/* The exact accepted span, marked inside the block it sits in. */
+.rh-web-quote mark {
+  background: var(--rh-surface-selected);
+  color: var(--rh-text-primary);
+  border-radius: var(--rh-radius-control);
+  padding-inline: 2px;
+}
 
-.diff td, .diff th { font-size: 13px; }
+/* The review screen ----------------------------------------------------------------- */
+
+/*
+ * Source beside decision. The two panes are a `PaneGroup`, so the split is draggable and
+ * keyboard-resizable; this only gives the group a height to divide and, below the
+ * breakpoint, lets it stack. `flex-basis` is overridden with `!important` because the
+ * pane's percentage is an inline style the package writes as the researcher drags.
+ */
+.rh-web-review {
+  block-size: 100%;
+  min-block-size: 34rem;
+}
+
+.rh-web-review-pane {
+  block-size: 100%;
+  overflow: auto;
+  padding: var(--rh-space-1) var(--rh-space-3) var(--rh-space-4) 0;
+}
+
+.rh-web-review-pane--end {
+  padding-inline: var(--rh-space-3) 0;
+}
+
+@media (max-width: 1100px) {
+  .rh-web-review {
+    block-size: auto;
+  }
+
+  .rh-web-review .rh-pane-group {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .rh-web-review .rh-pane {
+    flex-basis: auto !important;
+    overflow: visible;
+  }
+
+  .rh-web-review .rh-pane-handle {
+    display: none;
+  }
+
+  .rh-web-review-pane {
+    block-size: auto;
+    overflow: visible;
+    padding-inline: 0;
+  }
+}
+
+/* The field a queue row leads with: what this candidate answers. */
+.rh-web-queue__field {
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-web-source__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rh-space-2);
+}
+
+/* The shell's own slots ------------------------------------------------------------- */
+
+/* The rail fills the shell's rail column; the wrapper exists to route its links. */
+.rh-web-rail {
+  display: flex;
+  min-block-size: 0;
+  block-size: 100%;
+}
+
+/*
+ * Where a route renders. `FullPageWorkspace` sizes itself to 100% of its container, so
+ * the route gets its own box under the token bar rather than fighting it for height.
+ */
+.rh-web-route {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-width: 0;
+}
+
+.rh-web-route > * {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-width: 0;
+}
+
+.rh-web-token-bar {
+  flex: none;
+  padding: var(--rh-space-3) var(--rh-space-5) 0;
+}
+
+.rh-web-token-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--rh-space-2);
+  margin-block-start: var(--rh-space-2);
+}
+
+.rh-web-token-field {
+  inline-size: min(22rem, 100%);
+}

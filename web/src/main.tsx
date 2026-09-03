@@ -1,6 +1,17 @@
+/**
+ * The cockpit's entry point.
+ *
+ * `@research-harness/design/styles.css` is imported before any application CSS, so the
+ * package's token layer, themes and base rules are in force and `styles.css` only adds
+ * what is genuinely application layout. `ThemeProvider` writes `data-theme` /
+ * `data-density` onto the document element — dark is the default (plan §0.6) — and
+ * `ToastProvider` gives every surface one place to report that a mutation landed.
+ */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider, ToastProvider } from '@research-harness/design';
+import '@research-harness/design/styles.css';
 import { App } from './app/App';
 import { SessionProvider } from './app/session';
 import './styles.css';
@@ -10,10 +21,14 @@ if (!root) throw new Error('index.html has no #root');
 
 createRoot(root).render(
   <StrictMode>
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <SessionProvider>
-        <App />
-      </SessionProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="dark" defaultDensity="comfortable">
+      <ToastProvider>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <SessionProvider>
+            <App />
+          </SessionProvider>
+        </BrowserRouter>
+      </ToastProvider>
+    </ThemeProvider>
   </StrictMode>,
 );

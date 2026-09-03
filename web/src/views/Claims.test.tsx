@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ClaimDetailPage, ClaimsPage } from './Claims';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 const CLAIM = 'C0001';
 
@@ -171,5 +171,12 @@ describe('the claim detail', () => {
     );
     expect(screen.getByRole('button', { name: 'Accept the override' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Relate' })).toBeDisabled();
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderDetail();
+
+    await waitFor(() => expect(screen.getByText('Requested strength')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 });

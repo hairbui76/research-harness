@@ -4,19 +4,10 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    // `dist`/`node_modules` are build output; the rest is the legacy Warmline prototype
-    // bundle, which stays in place as a design reference until W5 deletes it (see the
-    // v1.1 implementation plan). It is not TypeScript and is never imported by `src`.
-    ignores: [
-      'dist',
-      'node_modules',
-      'legacy',
-      '_ds_bundle.js',
-      'components/**',
-      'ui_kits/**',
-      'guidelines/**',
-      'templates/**',
-    ],
+    // Build output only. The legacy Warmline prototype bundle it also used to exclude is
+    // gone: its useful foundations have production replacements under `src`, and the Web
+    // client is on the package (v1.1 plan, W5; DS spec §9.9).
+    ignores: ['dist', 'node_modules'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

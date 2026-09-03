@@ -6,9 +6,11 @@
  * would pass against an API that no longer exists.
  */
 import type { ReactElement } from 'react';
+import axe from 'axe-core';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
+import { ThemeProvider, ToastProvider } from '@research-harness/design';
 import { HarnessClient } from '../api/client';
 import { SessionProvider } from '../app/session';
 
@@ -119,7 +121,14 @@ export interface RenderOptions {
   path?: string;
 }
 
-/** Render one view inside the session and the router, against a fake daemon. */
+/**
+ * Render one view inside the session and the router, against a fake daemon.
+ *
+ * The two Design System providers are the same ones `main.tsx` mounts: `ThemeProvider`
+ * (with `storageKey={null}`, so a test never writes an appearance preference into the
+ * shared jsdom `localStorage`) and `ToastProvider`, which every mutation surface reports
+ * through.
+ */
 export function renderView(ui: ReactElement, options: RenderOptions) {
   const client = new HarnessClient({
     baseUrl: 'http://daemon.test',
@@ -129,15 +138,58 @@ export function renderView(ui: ReactElement, options: RenderOptions) {
   const route = options.route ?? '/';
   const path = options.path ?? route;
   return render(
-    <MemoryRouter
-      initialEntries={[route]}
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
-      <SessionProvider client={client}>
-        <Routes>
-          <Route path={path} element={ui} />
-        </Routes>
-      </SessionProvider>
-    </MemoryRouter>,
+    <ThemeProvider defaultTheme="dark" storageKey={null}>
+      <ToastProvider>
+        <MemoryRouter
+          initialEntries={[route]}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <SessionProvider client={client}>
+            <Routes>
+              <Route path={path} element={ui} />
+            </Routes>
+          </SessionProvider>
+        </MemoryRouter>
+      </ToastProvider>
+    </ThemeProvider>,
   );
+}
+
+/**
+ * The accessibility gate every migrated view runs (DS spec §6, §12.5).
+ *
+ * The rules that need a layout engine or a whole document are off: jsdom computes no
+ * geometry, so `color-contrast` cannot run here — the Design System verifies contrast
+ * against the token values instead (`design/scripts/check-contrast.mjs`) — and page-level
+ * landmark rules do not apply to a view rendered without its shell.
+ */
+const DISABLED_RULES = [
+  'color-contrast',
+  'region',
+  'page-has-heading-one',
+  'landmark-one-main',
+  'html-has-lang',
+  'document-title',
+  'bypass',
+];
+
+/** Fails with the offending rule ids and target selectors when anything is violated. */
+export async function expectNoAxeViolations(
+  target: Element | Document = document.body,
+  extraDisabledRules: readonly string[] = [],
+): Promise<void> {
+  const rules: axe.RuleObject = {};
+  for (const rule of [...DISABLED_RULES, ...extraDisabledRules]) rules[rule] = { enabled: false };
+  const results = await axe.run(target as axe.ElementContext, { rules });
+  if (results.violations.length > 0) {
+    const summary = results.violations
+      .map(
+        (violation) =>
+          `${violation.id}: ${violation.help} -> ${violation.nodes
+            .map((node) => node.target.join(' '))
+            .join(', ')}`,
+      )
+      .join('\n');
+    throw new Error(`Expected no accessibility violations, found:\n${summary}`);
+  }
 }

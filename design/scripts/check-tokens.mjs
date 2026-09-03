@@ -13,9 +13,8 @@
  *
  *     stroke: #65b5ff; /* raw-colour-ok: chart series 2, fixed across themes *\/
  *
- * The same rule is applied to `web/src`, where it currently reports warnings: the Web
- * client migrates route by route, and the migration task turns those warnings into
- * failures once the last route is on the package.
+ * The same rule is applied to `web/src`, and it fails there too: every cockpit route is on
+ * the package, so a literal in the Web client is the same fork it would be here.
  *
  * The second, smaller check enforces the no-CDN rule: nothing under `design/src` may
  * reference a remote stylesheet, font or image.
@@ -123,17 +122,12 @@ const design = scan(designSrc, { checkRemoteAssets: true });
 print(`design/src (${design.files.length} files)`, designSrc, design.violations, 'violation(s)');
 
 const web = scan(webSrc, { checkRemoteAssets: false });
-print(`web/src (${web.files.length} files)`, webSrc, web.violations, 'warning(s)');
-if (web.violations.length > 0) {
-  console.log(
-    '\ncheck-tokens: web/src findings are warnings until its routes finish migrating to\n' +
-      '@research-harness/design; the migration task flips them to failures.',
-  );
-}
+print(`web/src (${web.files.length} files)`, webSrc, web.violations, 'violation(s)');
 
-if (design.violations.length > 0) {
+const total = design.violations.length + web.violations.length;
+if (total > 0) {
   console.error(
-    `\ncheck-tokens: ${design.violations.length} violation(s) under design/src. ` +
+    `\ncheck-tokens: ${total} violation(s) under design/src and web/src. ` +
       'Use a semantic token, or annotate the line with /* raw-colour-ok: <reason> */.',
   );
   process.exit(1);

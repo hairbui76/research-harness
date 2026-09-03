@@ -1,11 +1,12 @@
 /**
  * Taxonomy: the project's approved terms, and the Decision behind each one.
  *
- * A taxonomy is a researcher-approved classification, not a universal fact (Product 32),
+ * A taxonomy is a researcher-approved classification, not a universal fact (PRODUCT §32),
  * so every term shows the Decision that authorised it. Revising one marks the matrices and
  * claims that used it stale rather than rewriting them (ADR-008).
  */
-import { Empty, ErrorBox, Loading, Panel } from '../components/Feedback';
+import { FullPageWorkspace } from '@research-harness/design';
+import { DataTable, Empty, ErrorBox, Loading, Panel } from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
@@ -20,32 +21,36 @@ export function TaxonomyPage() {
   }
 
   return (
-    <div className="taxonomy">
-      <h1>Taxonomy</h1>
-      {state.data.taxonomies.map((taxonomy) => (
-        <Panel key={taxonomy.name} title={taxonomy.name}>
-          <table>
-            <thead>
-              <tr>
-                <th>Term</th>
-                <th>Parent</th>
-                <th>Definition</th>
-                <th>Decision</th>
-              </tr>
-            </thead>
-            <tbody>
+    <FullPageWorkspace
+      title="Taxonomy"
+      description="Every term is a researcher-approved classification, with the Decision that authorised it."
+    >
+      <div className="rh-web-stack">
+        {state.data.taxonomies.map((taxonomy) => (
+          <Panel key={taxonomy.name} title={taxonomy.name}>
+            <DataTable
+              label={`${taxonomy.name} terms`}
+              head={
+                <tr>
+                  <th scope="col">Term</th>
+                  <th scope="col">Parent</th>
+                  <th scope="col">Definition</th>
+                  <th scope="col">Decision</th>
+                </tr>
+              }
+            >
               {taxonomy.terms.map((term) => (
                 <tr key={String(term.term)}>
-                  <td>{String(term.term)}</td>
+                  <th scope="row">{String(term.term)}</th>
                   <td>{term.parent ? String(term.parent) : '—'}</td>
                   <td>{term.definition ? String(term.definition) : '—'}</td>
-                  <td>{term.decision ? String(term.decision) : '—'}</td>
+                  <td>{term.decision ? <code>{String(term.decision)}</code> : '—'}</td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        </Panel>
-      ))}
-    </div>
+            </DataTable>
+          </Panel>
+        ))}
+      </div>
+    </FullPageWorkspace>
   );
 }

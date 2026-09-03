@@ -6,13 +6,35 @@
  * the number with the provenance a number needs, the verifier's verdict and rationale, the
  * competing candidates, and the positions in any conflict. Then the six review actions.
  *
+ * The two halves are a `PaneGroup`, so the split is draggable and keyboard-resizable and
+ * neither half can push the other off the screen. Below 1100px they stack, and the source
+ * is still first.
+ *
  * Nothing on this screen is computed here. The category, the reasons, the verdict, and the
  * eligibility all come from the daemon; the page renders them.
  */
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import type { JsonObject, ReviewItem } from '../api/dto';
-import { Empty, ErrorBox, Field, Loading, Panel, Tag } from '../components/Feedback';
+import {
+  EvidenceCard,
+  FullPageWorkspace,
+  Pane,
+  PaneGroup,
+  PaneHandle,
+} from '@research-harness/design';
+import type { EvidenceModel } from '@research-harness/design';
+import { useParams } from 'react-router-dom';
+import type { CandidateView, JsonObject, ReviewItem } from '../api/dto';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Field,
+  Fields,
+  Loading,
+  Panel,
+  StatusBadge,
+} from '../components/Feedback';
+import { ObjectRef } from '../components/ObjectRef';
 import { ReviewActions } from '../components/ReviewActions';
 import { SourcePane } from '../components/SourcePane';
 import { useSession } from '../app/session';
@@ -44,6 +66,7 @@ export function EvidenceReviewPage() {
   const evidence = candidate.evidence as JsonObject;
   const source = (evidence.source ?? {}) as JsonObject;
   const content = (evidence.content ?? {}) as JsonObject;
+  const blockId = (source.block as string) ?? null;
   const context = item?.source_context ?? {
     page: (source.page as number | null) ?? null,
     section_path: (source.section_path as string[]) ?? [],
@@ -54,157 +77,220 @@ export function EvidenceReviewPage() {
   };
 
   return (
-    <div className="review-screen">
-      <SourcePane
-        artifact={candidate.artifact}
-        context={context}
-        blocks={blocks}
-        blockId={(source.block as string) ?? null}
-      />
-
-      <div className="decision-pane">
-        <Panel
-          title={`${candidate.field} · ${candidate.work}`}
-          action={item ? <Tag kind={item.category}>{item.category.replace('_', ' ')}</Tag> : null}
-        >
-          <blockquote className="exact-text">{String(content.exact_text ?? '')}</blockquote>
-          <Field label="Field">{candidate.field}</Field>
-          <Field label="Origin">{String(evidence.origin ?? '')}</Field>
-          <Field label="Evidence type">{String(evidence.evidence_type ?? '')}</Field>
-          <Field label="Strength">{String(evidence.strength ?? '')}</Field>
-          <Field label="Anchor">
-            {candidate.anchor_status} · block {String(source.block ?? '?')} · page{' '}
-            {String(source.page ?? '?')}
-          </Field>
+    <FullPageWorkspace
+      className="rh-web-review"
+      title={`${candidate.field} · ${candidate.work}`}
+      description="A staged proposal, beside the page it was read off. Nothing here is accepted state."
+      toolbar={
+        <>
+          <StatusBadge status="candidate" size="md" />
           {item ? (
-            <Field label="Why it is here">{item.reasons.join('; ') || 'routine'}</Field>
+            <StatusBadge status={item.category} size="md">
+              {item.category.replace('_', ' ')}
+            </StatusBadge>
           ) : null}
-        </Panel>
+        </>
+      }
+    >
+      <PaneGroup direction="horizontal" defaultSizes={[50, 50]}>
+        <Pane minSize={25}>
+          <div className="rh-web-review-pane">
+            <SourcePane
+              artifact={candidate.artifact}
+              context={context}
+              blocks={blocks}
+              blockId={blockId}
+            />
+          </div>
+        </Pane>
+        <PaneHandle label="Resize the source pane" />
+        <Pane minSize={25}>
+          <div className="rh-web-review-pane rh-web-review-pane--end rh-web-stack">
+            <EvidenceCard evidence={proposedEvidence(candidate, evidence, content, source)} />
 
-        {content.numeric ? <NumericPanel numeric={content.numeric as JsonObject} /> : null}
-        {content.negative_state ? (
-          <Panel title="Absence">
-            <Field label="State">{String(content.negative_state)}</Field>
-            <p className="muted">
-              Absence is a state, not a finding: only an audited decision turns `not_reported`
-              into `absent` (Product 11).
-            </p>
-          </Panel>
-        ) : null}
+            <Panel title="Proposal">
+              <Fields>
+                <Field label="Anchor">
+                  <StatusBadge status={candidate.anchor_status} /> block{' '}
+                  <code>{String(source.block ?? '?')}</code> · page {String(source.page ?? '?')}
+                </Field>
+                {item ? (
+                  <Field label="Why it is here">{item.reasons.join('; ') || 'routine'}</Field>
+                ) : null}
+                <Field label="Work">
+                  <ObjectRef
+                    id={candidate.work}
+                    kind="work"
+                    to={`/corpus/${candidate.work}`}
+                  />
+                </Field>
+              </Fields>
+            </Panel>
 
-        <Panel title="Verification">
-          {candidate.verification ? (
-            <>
-              <Field label="Verdict">{candidate.verdict ?? 'unverified'}</Field>
-              <Field label="Verifier">{candidate.verifier ?? 'none'}</Field>
-              <Field label="Rationale">
-                {String((candidate.verification as JsonObject).rationale ?? '')}
-              </Field>
-              <Field label="Quoted support">
-                {String((candidate.verification as JsonObject).quoted_support ?? '—')}
-              </Field>
-            </>
-          ) : (
-            <Empty>Not verified yet — accepting it makes you its verifier.</Empty>
-          )}
-        </Panel>
+            {content.numeric ? <NumericPanel numeric={content.numeric as JsonObject} /> : null}
+            {content.negative_state ? (
+              <Panel title="Absence">
+                <Fields>
+                  <Field label="State">{String(content.negative_state)}</Field>
+                </Fields>
+                <p className="rh-text-secondary">
+                  Absence is a state, not a finding: only an audited decision turns
+                  `not_reported` into `absent` (PRODUCT §11).
+                </p>
+              </Panel>
+            ) : null}
 
-        {item && item.competing.length > 0 ? (
-          <Panel title="Competing candidates">
-            <ul>
-              {item.competing.map((id) => (
-                <li key={id}>
-                  <Link to={`/review/${id}`}>{id}</Link>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        ) : null}
+            <Panel title="Verification">
+              {candidate.verification ? (
+                <Fields>
+                  <Field label="Verdict">{candidate.verdict ?? 'unverified'}</Field>
+                  <Field label="Verifier">{candidate.verifier ?? 'none'}</Field>
+                  <Field label="Rationale">
+                    {String((candidate.verification as JsonObject).rationale ?? '')}
+                  </Field>
+                  <Field label="Quoted support">
+                    {String((candidate.verification as JsonObject).quoted_support ?? '—')}
+                  </Field>
+                </Fields>
+              ) : (
+                <Empty>Not verified yet — accepting it makes you its verifier.</Empty>
+              )}
+            </Panel>
 
-        {item && item.conflicts.length > 0 ? (
-          <Panel title="Conflict">
-            {item.conflicts.map((conflict) => (
-              <div key={conflict.conflict_id} className="conflict">
-                <p>{conflict.summary}</p>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Position</th>
-                      <th>Decision</th>
-                      <th>Rationale</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {conflict.positions.map((position) => (
-                      <tr key={position.label}>
-                        <td>{position.label}</td>
-                        <td>
-                          <code>{JSON.stringify(position.decision)}</code>
-                        </td>
-                        <td>{position.rationale ?? '—'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
-              </div>
-            ))}
-          </Panel>
-        ) : null}
+            {item && item.competing.length > 0 ? (
+              <Panel title="Competing candidates">
+                <ul className="rh-web-list rh-web-list--tight">
+                  {item.competing.map((id) => (
+                    <li key={id}>
+                      <ObjectRef id={id} kind="evidence" to={`/review/${id}`} authority="candidate" />
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+            ) : null}
 
-        <Panel title="Decide">
-          {outcome ? <p className="notice">Candidate {outcome}.</p> : null}
-          <ReviewActions
-            candidate={candidate}
-            hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
-            onReviewed={(what) => setOutcome(what)}
-          />
-        </Panel>
-      </div>
-    </div>
+            {item && item.conflicts.length > 0 ? (
+              <Panel title="Conflict">
+                {item.conflicts.map((conflict) => (
+                  <div key={conflict.conflict_id} className="rh-web-stack rh-web-stack--tight">
+                    <p>{conflict.summary}</p>
+                    <DataTable
+                      label={`Positions in ${conflict.conflict_id}`}
+                      head={
+                        <tr>
+                          <th scope="col">Position</th>
+                          <th scope="col">Decision</th>
+                          <th scope="col">Rationale</th>
+                        </tr>
+                      }
+                    >
+                      {conflict.positions.map((position) => (
+                        <tr key={position.label}>
+                          <th scope="row">{position.label}</th>
+                          <td>
+                            <code>{JSON.stringify(position.decision)}</code>
+                          </td>
+                          <td>{position.rationale ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </DataTable>
+                    <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
+                  </div>
+                ))}
+              </Panel>
+            ) : null}
+
+            <Panel title="Decide">
+              {outcome ? <p className="rh-text-secondary">Candidate {outcome}.</p> : null}
+              <ReviewActions
+                candidate={candidate}
+                hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
+                onReviewed={(what) => setOutcome(what)}
+              />
+            </Panel>
+          </div>
+        </Pane>
+      </PaneGroup>
+    </FullPageWorkspace>
   );
+}
+
+/**
+ * The staged candidate as the Design System's evidence view model.
+ *
+ * `authority` is `candidate` and cannot be anything else here: this object is a proposal
+ * in `.research/staging`, and only a review decision moves it into accepted state
+ * (ADR-003). The numeric block is deliberately left off the card — the Number panel below
+ * carries the metric, unit, dataset, condition and table cell a number must travel with
+ * (PRODUCT §12), and a two-field summary beside it would only invite reading the shorter one.
+ */
+function proposedEvidence(
+  candidate: CandidateView,
+  evidence: JsonObject,
+  content: JsonObject,
+  source: JsonObject,
+): EvidenceModel {
+  return {
+    id: candidate.candidate_id,
+    workId: candidate.work,
+    workLabel: candidate.work,
+    quote: String(content.exact_text ?? ''),
+    field: candidate.field,
+    evidenceType: String(evidence.evidence_type ?? ''),
+    strength: String(evidence.strength ?? ''),
+    origin: String(evidence.origin ?? ''),
+    authority: 'candidate',
+    anchor: {
+      artifactId: candidate.artifact,
+      stale: candidate.anchor_status !== 'valid',
+      ...(typeof source.page === 'number' ? { page: source.page } : {}),
+      ...(typeof source.block === 'string' ? { block: source.block } : {}),
+    },
+  };
 }
 
 function NumericPanel({ numeric }: { numeric: JsonObject }) {
   return (
     <Panel title="Number">
-      <Field label="Value">{String(numeric.raw ?? '')}</Field>
-      <Field label="Metric">{String(numeric.metric ?? '—')}</Field>
-      <Field label="Unit">{String(numeric.unit ?? '—')}</Field>
-      <Field label="Dataset">{String(numeric.dataset ?? '—')}</Field>
-      <Field label="Condition">{JSON.stringify(numeric.condition ?? {})}</Field>
-      <Field label="Table">
-        {String(numeric.source_table ?? '—')} · row {String(numeric.source_row ?? '—')} · column{' '}
-        {String(numeric.source_column ?? '—')}
-      </Field>
+      <Fields>
+        <Field label="Value">{String(numeric.raw ?? '')}</Field>
+        <Field label="Metric">{String(numeric.metric ?? '—')}</Field>
+        <Field label="Unit">{String(numeric.unit ?? '—')}</Field>
+        <Field label="Dataset">{String(numeric.dataset ?? '—')}</Field>
+        <Field label="Condition">{JSON.stringify(numeric.condition ?? {})}</Field>
+        <Field label="Table">
+          {String(numeric.source_table ?? '—')} · row {String(numeric.source_row ?? '—')} · column{' '}
+          {String(numeric.source_column ?? '—')}
+        </Field>
+      </Fields>
     </Panel>
   );
 }
 
-/** The diff Product 25 asks for: what accepting each side would change. */
+/** The diff PRODUCT §25 asks for: what accepting each side would change. */
 export function ProposedChanges({ changes }: { changes: JsonObject[] }) {
   if (!changes.length) return null;
   return (
-    <table className="diff">
-      <thead>
+    <DataTable
+      label="What accepting each side would change"
+      head={
         <tr>
-          <th>Position</th>
-          <th>Field</th>
-          <th>From</th>
-          <th>To</th>
+          <th scope="col">Position</th>
+          <th scope="col">Field</th>
+          <th scope="col">From</th>
+          <th scope="col">To</th>
         </tr>
-      </thead>
-      <tbody>
-        {changes.map((change, index) => (
-          <tr key={index}>
-            <td>{String(change.position ?? '')}</td>
-            <td>{String(change.field ?? '')}</td>
-            <td>{String(change.from ?? '—')}</td>
-            <td>{String(change.to ?? '—')}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      }
+    >
+      {changes.map((change, index) => (
+        <tr key={index}>
+          <th scope="row">{String(change.position ?? '')}</th>
+          <td>{String(change.field ?? '')}</td>
+          <td>{String(change.from ?? '—')}</td>
+          <td>{String(change.to ?? '—')}</td>
+        </tr>
+      ))}
+    </DataTable>
   );
 }
 

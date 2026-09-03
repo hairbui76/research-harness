@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { ManuscriptAuditFinding } from '../api/dto';
 import { ManuscriptPage, whereOf } from './Manuscript';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 const FINDINGS = FIXTURES.manuscriptAudit.findings as unknown as ManuscriptAuditFinding[];
 
@@ -147,5 +147,12 @@ describe('revalidating', () => {
     expect(daemon.capabilityCalls().map((call) => call.name)).not.toContain(
       'manuscript.revalidate',
     );
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderManuscript();
+
+    await waitFor(() => expect(screen.getByText(/Anchors \(3\)/)).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 });

@@ -7,6 +7,7 @@
  * here: the rule lives in `review.edit`, never in this component.
  */
 import { useMemo, useState } from 'react';
+import { Button, ErrorNotice, Textarea } from '@research-harness/design';
 import { EDIT_CANDIDATE_PROPERTY, EDIT_CANDIDATE_SCHEMA } from '../api/capabilities.gen';
 import type { Json } from '../api/dto';
 import { resolve, validate } from '../api/schema';
@@ -29,7 +30,14 @@ export interface JsonEditorProps {
   submitLabel?: string;
 }
 
-export function JsonEditor({ value, onSubmit, onCancel, busy, disabled, submitLabel }: JsonEditorProps) {
+export function JsonEditor({
+  value,
+  onSubmit,
+  onCancel,
+  busy,
+  disabled,
+  submitLabel,
+}: JsonEditorProps) {
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
   const [issues, setIssues] = useState<SchemaIssue[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -50,32 +58,47 @@ export function JsonEditor({ value, onSubmit, onCancel, busy, disabled, submitLa
   }
 
   return (
-    <div className="json-editor">
-      <label htmlFor="evidence-json">Evidence (JSON)</label>
-      <textarea
+    <div className="rh-web-stack rh-web-stack--tight">
+      <Textarea
         id="evidence-json"
+        label="Evidence (JSON)"
+        className="rh-web-json"
         spellCheck={false}
         rows={18}
         value={text}
         onChange={(event) => setText(event.target.value)}
+        {...(parseError ? { error: parseError } : {})}
       />
-      {parseError ? <p className="error" role="alert">{parseError}</p> : null}
       {issues.length > 0 ? (
-        <ul className="error" role="alert">
-          {issues.map((issue) => (
-            <li key={`${issue.path}:${issue.message}`}>
-              <code>{issue.path}</code> {issue.message}
-            </li>
-          ))}
-        </ul>
+        <ErrorNotice
+          kind="blocked"
+          title="The edit does not match the daemon's schema"
+          description="Fix these and the edit can be posted; the daemon checks the object again."
+          safety={{ draft: 'safe' }}
+        >
+          <ul>
+            {issues.map((issue) => (
+              <li key={`${issue.path}:${issue.message}`}>
+                <code>{issue.path}</code> {issue.message}
+              </li>
+            ))}
+          </ul>
+        </ErrorNotice>
       ) : null}
-      <div className="actions">
-        <button type="button" onClick={submit} disabled={disabled || busy}>
+      <div className="rh-web-row">
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          onClick={submit}
+          disabled={disabled || busy}
+          loading={busy === true}
+        >
           {submitLabel ?? 'Accept the edit'}
-        </button>
-        <button type="button" className="secondary" onClick={onCancel} disabled={busy}>
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

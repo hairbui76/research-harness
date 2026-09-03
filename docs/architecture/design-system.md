@@ -137,10 +137,10 @@ rather than setting a background colour on its own.
    stroke: #65b5ff; /* raw-colour-ok: chart series 2, fixed across themes */
    ```
 
-   The same rule is applied to `web/src`, where findings currently print as **warnings**.
-   The Web client migrates route by route; the migration task turns those warnings into
-   failures once the last route is on the package. The script also enforces the no-CDN rule
-   inside `design/src`: a remote `@import` or `url()` is a failure.
+   The same rule is applied to `web/src`, and since the migration finished it **fails**
+   there too: every cockpit route is on the package, so a literal in the Web client forks
+   the theme exactly as one here would. The script also enforces the no-CDN rule inside
+   `design/src`: a remote `@import` or `url()` is a failure.
 3. **`scripts/check-contrast.mjs`** — the WCAG 2.2 gate. It parses the palette, the shared
    semantic tokens and both themes, resolves every `var()` chain to a literal, and computes
    a ratio for each pair the system declares: primary/secondary/muted text and links on
@@ -177,32 +177,79 @@ manuscript and conversation surfaces need them, ship from the package rather tha
 
 ## Migrating the existing Web routes
 
-The Web client currently styles itself from a single hand-written `web/src/styles.css` with
-its own `--ink` / `--line` / `--accent` variables and a light-only palette. Migration is
-incremental so research screens stay usable throughout, and follows the order in DS spec §9:
+The Web client used to style itself from a single hand-written `web/src/styles.css` with its
+own `--ink` / `--line` / `--accent` variables and a light-only palette. Migration followed
+the order of DS spec §9, and all five steps are done:
 
-1. **Foundation** (done). Package, tokens, both themes, density, the primitives, and the two
-   lint gates.
-2. **Shell.** `web/src/main.tsx` imports `@research-harness/design/styles.css`;
-   `web/src/app/Layout.tsx` composes the Design System shell, and the theme and density
-   preferences are read from local storage and written to `data-theme` / `data-density` on
-   the document element.
-3. **Route by route**, in this order — the busiest screens first, so the shared components
-   are exercised early: `EvidenceReview`, `ReviewInbox`, `Overview`, `Claims`, `Corpus`,
-   `Conflicts`, `Stale`, `Questions`, `Synthesis`, `Taxonomy`, `Manuscript`. Each route
-   swaps its local markup for package primitives, deletes the rules it no longer needs from
-   `web/src/styles.css`, and keeps its existing tests green.
-4. **Flip the lint.** When `web/src` reports no raw-colour warnings, `check-tokens.mjs`
-   starts failing on them, and `web/src/styles.css` is reduced to layout that is genuinely
-   application-specific.
-5. **Delete the source bundle.** The Warmline prototype (`design/readme.md`,
-   `design/tokens/`, `design/components/`, `design/ui_kits/`, `design/guidelines/`,
-   `design/templates/`, `design/styles.css` and the generated bundle/manifest/thumbnail
-   artefacts) is a design input, not a runtime dependency. It is removed once its useful
-   foundations — the warm-neutral palette, the typography roles, the spacing and radius
-   discipline, the semantic-token idea and the three-pane composition — have production
-   replacements that pass these gates.
+1. **Foundation.** Package, tokens, both themes, density, the primitives, and the two lint
+   gates.
+2. **Shell.** `web/src/main.tsx` imports `@research-harness/design/styles.css` before any
+   application CSS and wraps the client in `ThemeProvider` (dark default) and
+   `ToastProvider`; `web/src/app/Layout.tsx` composes `AppShell` + `ProjectRail`.
+3. **Route by route.** Every route composes package primitives and research components.
+4. **The lint flipped.** `check-tokens.mjs` fails on a raw palette value under `web/src`,
+   and `web/src/styles.css` is down to layout that is genuinely application-specific.
+5. **The source bundle is gone.** The Warmline prototype has been deleted; its useful
+   foundations live under `design/src`.
 
-Two things must not happen during the migration. A route must not keep a private copy of a
-primitive that the package now provides, and a route must not reintroduce a raw palette
-value to "match" a screen that has not migrated yet. Both are what the lint is for.
+Two things must not happen now that it is finished. A route must not keep a private copy of
+a primitive that the package provides, and a route must not reintroduce a raw palette value.
+Both are what the lint is for.
+
+## Migration status
+
+**State: complete for the v1.0 cockpit surfaces.** `pnpm --filter research-harness-web
+typecheck | lint | test | build` and `pnpm --filter @research-harness/design lint | test |
+build` all pass, and `web/dist` contains no `https://` reference to a font, icon or
+stylesheet.
+
+### What the Web client consumes
+
+| Surface | Package components it composes |
+|---|---|
+| Shell (`app/Layout.tsx`) | `AppShell`, `ProjectRail`, `ThemeProvider`, `ToastProvider` |
+| Settings (`app/SettingsDialog.tsx`) | `Dialog`, `Select` |
+| Token bar (`app/TokenBar.tsx`) | `ErrorNotice`, `Input`, `Button` |
+| Shared feedback (`components/Feedback.tsx`) | `AsyncState`, `ErrorNotice`, `Card`, `Badge`, `AuthorityBadge`, `ScrollArea` |
+| References (`components/ObjectRef.tsx`) | `EntityRef` |
+| Review actions (`components/ReviewActions.tsx`) | `ReviewDecisionBar`, `Dialog`, `Textarea`, `Button`, `useToast` |
+| Source pane (`components/SourcePane.tsx`) | `SourceAnchor` (over the `web/src/pdf` adapter) |
+| Every page | `FullPageWorkspace` |
+| Review screen | `PaneGroup` / `Pane` / `PaneHandle`, `EvidenceCard` |
+| Claims | `ClaimCard`, `ProvenancePath`, `Select`, `Input`, `Textarea` |
+| Corpus | `EvidenceCard` |
+
+### Deletions
+
+`design/readme.md`, `design/SKILL.md`, `design/thumbnail.html`, `design/.thumbnail`,
+`design/_ds_bundle.js`, `design/_ds_manifest.json`, `design/_adherence.oxlintrc.json`,
+`design/styles.css` (the legacy root stylesheet, not `design/src/styles.css`),
+`design/tokens/`, `design/components/`, `design/guidelines/`, `design/templates/` and
+`design/ui_kits/` are removed, and `design/eslint.config.js` ignores only build output.
+Nothing under `design/src`, `design/tests`, `design/specimens`, `design/scripts`, `web/` or
+`vscode/` referenced any of them.
+
+`web/src/styles.css` no longer holds a palette, a type scale, a shell grid, or a rule for a
+button, an input, a badge, a panel, an error or an empty state — the package owns all of
+them. What is left is application layout: the document height the shell measures against,
+the shell's own slots, a compact research table, a definition row, a source quote, and the
+review screen's pane frame. Every value in it is an `--rh-*` token.
+
+### Known gaps
+
+- **`ConflictNotice` is not used by the Conflicts page.** Its view model names two sides —
+  accepted state, and what a conversation remembered — and a v1.0 conflict record is *N*
+  symmetric provider positions with no accepted side. Rendering one through the other would
+  print "Accepted — sent to the model" over a position nobody has accepted. The page uses
+  `Card` + `Badge status="contested"` + a positions table instead. `ConflictNotice` belongs
+  to W1's conversation surface, which is the case it was designed for.
+- **Authority is mapped, not read.** The Design System speaks the v1.1 `AuthorityLabel`
+  vocabulary; a v1.0 Claim carries an assessment `status` instead. `authorityOf()` in
+  `web/src/components/Feedback.tsx` is the single place the two meet, and the daemon's own
+  word is always rendered beside the badge. When the ResearchGraph carries `authority` on
+  every node (G1/G2), that function becomes a pass-through.
+- **`EntityRef` resolution is assumed.** Every reference the cockpit renders came out of a
+  daemon listing, so it is passed as `resolved`. W3 wires `graph.resolve` and the real
+  state — unresolved, stale, private, broken — flows through instead.
+- **The conversation, attachment and manuscript-workspace components are unused here.**
+  W1, W2 and W4 mount them; nothing in the v1.0 routes needed them.

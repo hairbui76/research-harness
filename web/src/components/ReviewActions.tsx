@@ -1,9 +1,12 @@
 /**
- * The six review actions of Product 24.3, and nothing else.
+ * The six review actions of PRODUCT §24.3, and nothing else.
  *
- * Each button is one candidate-keyed `review.*` call carrying the staging id and whatever
- * the researcher typed — never the `Evidence` object the daemon just handed us. That is
- * what settles the queue: the handler allocates the evidence id and marks the candidate
+ * The bar is the Design System's `ReviewDecisionBar`: it renders the decisions this host
+ * offers, reports the one chosen, and prints the reason when none may be recorded. It
+ * knows nothing about what a decision means — this component maps each `ReviewDecision`
+ * onto one candidate-keyed `review.*` call carrying the staging id and whatever the
+ * researcher typed, never the `Evidence` object the daemon just handed us. That is what
+ * settles the queue: the handler allocates the evidence id and marks the candidate
  * reviewed in the same transaction, so a decided proposal leaves the inbox without a
  * second call.
  *
@@ -14,14 +17,26 @@
  * (`evidence/service.py::resolve_conflict`). Accepting a conflicted proposal through
  * `review.accept` would write the Evidence and leave the disagreement open on the Conflicts
  * screen forever. Which call to make is transport routing; the choice being recorded is the
- * researcher's, and a conflict is never resolved by a heuristic (Product 25).
+ * researcher's, and a conflict is never resolved by a heuristic (PRODUCT §25).
  *
  * None of them decides anything else. Whether a candidate *may* be accepted is settled by
  * the review gate behind these capabilities (ADR-003, ADR-007), and a refusal is rendered as
  * it came back. Without the local token every control is disabled with the reason attached,
- * because an agent host reads and proposes and the researcher accepts (Product 29).
+ * because an agent host reads and proposes and the researcher accepts (PRODUCT §29).
  */
 import { useState } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogHeader,
+  ErrorNotice,
+  REVIEW_DECISIONS,
+  ReviewDecisionBar,
+  Textarea,
+  useToast,
+} from '@research-harness/design';
+import type { ReviewDecision } from '@research-harness/design';
 import type { CandidateView, Json } from '../api/dto';
 import { useSession } from '../app/session';
 import { JsonEditor } from './JsonEditor';
@@ -36,156 +51,167 @@ export interface ReviewActionsProps {
   onReviewed: (summary: string) => void;
 }
 
-type Prompt = 'accept' | 'qualify' | 'reject' | 'defer' | 'more' | 'edit' | null;
+/** The five decisions that ask for a sentence before they are recorded. */
+type Prompt = Exclude<ReviewDecision, 'edit'>;
 
 export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: ReviewActionsProps) {
   const { client, canMutate, mutationBlockedReason, refresh } = useSession();
-  const [prompt, setPrompt] = useState<Prompt>(null);
+  const { toast } = useToast();
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<ReviewDecision | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  async function run(what: string, action: () => Promise<unknown>) {
-    setBusy(true);
+  async function run(decision: ReviewDecision, what: string, action: () => Promise<unknown>) {
+    setBusy(decision);
     setError(null);
     try {
       await action();
       setPrompt(null);
+      setEditing(false);
       setText('');
       refresh();
       onReviewed(what);
+      toast({ tone: 'success', title: `Candidate ${what}.` });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
     }
   }
 
-  const disabled = !canMutate || busy;
-  const why = mutationBlockedReason ?? undefined;
+  /** What a decision does when it is chosen: open the editor, ask for a sentence, or run. */
+  function decide(decision: ReviewDecision) {
+    if (decision === 'edit') {
+      setEditing(true);
+      return;
+    }
+    if (decision === 'accept' && !hasOpenConflict) {
+      void run('accept', 'accepted', () => client.acceptCandidate(candidate.candidate_id));
+      return;
+    }
+    setPrompt(decision);
+    setText('');
+  }
+
+  function submitPrompt(decision: Prompt) {
+    const note = text.trim();
+    if (!note) return;
+    if (decision === 'accept') {
+      void run(decision, 'accepted', () =>
+        client.resolveCandidate(candidate.candidate_id, 'accept', note),
+      );
+    } else if (decision === 'qualify') {
+      void run(decision, 'accepted with a qualification', () =>
+        client.qualifyCandidate(candidate.candidate_id, note),
+      );
+    } else if (decision === 'reject') {
+      void run(decision, 'rejected', () =>
+        hasOpenConflict
+          ? client.resolveCandidate(candidate.candidate_id, 'reject', note)
+          : client.rejectCandidate(candidate.candidate_id, note),
+      );
+    } else if (decision === 'defer') {
+      void run(decision, 'deferred', () =>
+        hasOpenConflict
+          ? client.resolveCandidate(candidate.candidate_id, 'defer', note)
+          : client.deferCandidate(candidate.candidate_id, note),
+      );
+    } else {
+      void run(decision, 'asked for more evidence', () =>
+        client.requestMoreEvidence(candidate.candidate_id, note),
+      );
+    }
+  }
+
+  const blockedReason = canMutate ? undefined : (mutationBlockedReason ?? undefined);
 
   return (
-    <div className="review-actions">
-      <div className="actions">
-        <button
-          type="button"
-          disabled={disabled}
-          title={why}
-          onClick={() =>
-            hasOpenConflict
-              ? setPrompt('accept')
-              : run('accepted', () => client.acceptCandidate(candidate.candidate_id))
-          }
-        >
-          Accept
-        </button>
-        <button type="button" disabled={disabled} title={why} onClick={() => setPrompt('qualify')}>
-          Accept with qualification
-        </button>
-        <button type="button" disabled={disabled} title={why} onClick={() => setPrompt('edit')}>
-          Edit
-        </button>
-        <button type="button" disabled={disabled} title={why} onClick={() => setPrompt('reject')}>
-          Reject
-        </button>
-        <button type="button" disabled={disabled} title={why} onClick={() => setPrompt('defer')}>
-          Defer
-        </button>
-        <button type="button" disabled={disabled} title={why} onClick={() => setPrompt('more')}>
-          Request more evidence
-        </button>
-      </div>
+    <div className="rh-web-stack rh-web-stack--tight">
+      <ReviewDecisionBar
+        available={REVIEW_DECISIONS}
+        onDecide={decide}
+        data-testid={blockedReason ? 'mutation-blocked' : undefined}
+        {...(blockedReason === undefined ? {} : { disabledReason: blockedReason })}
+        {...(busy === undefined ? {} : { busy })}
+      />
 
-      {!canMutate ? (
-        <p className="muted" data-testid="mutation-blocked">
-          {mutationBlockedReason}
-        </p>
+      {editing ? (
+        <Dialog open onOpenChange={(open) => setEditing(open)} size="lg">
+          <DialogHeader>Edit the proposed evidence</DialogHeader>
+          <DialogBody>
+            <JsonEditor
+              value={candidate.evidence as Json}
+              busy={busy === 'edit'}
+              disabled={!canMutate || busy !== undefined}
+              onCancel={() => setEditing(false)}
+              onSubmit={(edited) =>
+                run('edit', 'accepted the edit', () =>
+                  client.editCandidate(candidate.candidate_id, edited),
+                )
+              }
+            />
+          </DialogBody>
+        </Dialog>
       ) : null}
 
-      {prompt === 'edit' ? (
-        <JsonEditor
-          value={candidate.evidence as Json}
-          busy={busy}
-          disabled={disabled}
-          onCancel={() => setPrompt(null)}
-          onSubmit={(edited) =>
-            run('accepted the edit', () => client.editCandidate(candidate.candidate_id, edited))
-          }
-        />
-      ) : null}
-
-      {prompt && prompt !== 'edit' ? (
+      {prompt ? (
         <form
-          className="prompt"
+          className="rh-web-prompt rh-web-stack rh-web-stack--tight"
           onSubmit={(event) => {
             event.preventDefault();
-            if (!text.trim()) return;
-            if (prompt === 'accept') {
-              void run('accepted', () =>
-                client.resolveCandidate(candidate.candidate_id, 'accept', text),
-              );
-            } else if (prompt === 'qualify') {
-              void run('accepted with a qualification', () =>
-                client.qualifyCandidate(candidate.candidate_id, text),
-              );
-            } else if (prompt === 'reject') {
-              void run('rejected', () =>
-                hasOpenConflict
-                  ? client.resolveCandidate(candidate.candidate_id, 'reject', text)
-                  : client.rejectCandidate(candidate.candidate_id, text),
-              );
-            } else if (prompt === 'defer') {
-              void run('deferred', () =>
-                hasOpenConflict
-                  ? client.resolveCandidate(candidate.candidate_id, 'defer', text)
-                  : client.deferCandidate(candidate.candidate_id, text),
-              );
-            } else {
-              void run('asked for more evidence', () =>
-                client.requestMoreEvidence(candidate.candidate_id, text),
-              );
-            }
+            submitPrompt(prompt);
           }}
         >
-          <label htmlFor="review-note">{PROMPT_LABELS[prompt]}</label>
-          <textarea
+          <Textarea
             id="review-note"
+            label={PROMPT_LABELS[prompt]}
             rows={3}
             value={text}
             onChange={(event) => setText(event.target.value)}
           />
-          <div className="actions">
-            <button type="submit" disabled={disabled || !text.trim()}>
+          <div className="rh-web-row">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={!canMutate || busy !== undefined || !text.trim()}
+            >
               {PROMPT_SUBMIT[prompt]}
-            </button>
-            <button type="button" className="secondary" onClick={() => setPrompt(null)}>
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setPrompt(null)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       ) : null}
 
       {error ? (
-        <p className="error" role="alert">
-          {error}
-        </p>
+        <ErrorNotice
+          kind="retryable"
+          title="The daemon refused that decision"
+          description={error}
+          safety={{ draft: 'safe', source: 'safe' }}
+          onDismiss={() => setError(null)}
+        />
       ) : null}
     </div>
   );
 }
 
-const PROMPT_LABELS: Record<Exclude<Prompt, null | 'edit'>, string> = {
+const PROMPT_LABELS: Record<Prompt, string> = {
   accept: 'Why this side of the conflict is the one to accept',
   qualify: 'Qualification recorded with the acceptance',
   reject: 'Why this candidate is refused',
   defer: 'Why this is being put aside',
-  more: 'What further evidence is needed',
+  request_more_evidence: 'What further evidence is needed',
 };
 
-const PROMPT_SUBMIT: Record<Exclude<Prompt, null | 'edit'>, string> = {
+const PROMPT_SUBMIT: Record<Prompt, string> = {
   accept: 'Accept and close the conflict',
   qualify: 'Accept with qualification',
   reject: 'Reject',
   defer: 'Defer',
-  more: 'Capture the request as a note',
+  request_more_evidence: 'Capture the request as a note',
 };

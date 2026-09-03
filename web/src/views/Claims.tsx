@@ -3,17 +3,40 @@
  *
  * The list shows what each claim asks for and what the audit allows — the two numbers that
  * matter, side by side, because the failure this product is built against is a claim that
- * quietly says more than its evidence supports (Product 10.2, 42 G).
+ * quietly says more than its evidence supports (PRODUCT §10.2, §42 G).
  *
- * The detail page adds the evidence behind it (each link opening the span it was accepted
- * from), the coverage the audit recorded, the maximum defensible wording, the decision
- * history, and what has gone stale under it. Audit and Override are capability calls; the
- * ceiling they produce is the daemon's, never this page's.
+ * The detail page adds the evidence behind it (each relation drawn as the Claim → Evidence
+ * → Work chain it is, and each link opening the span it was accepted from), the coverage
+ * the audit recorded, the maximum defensible wording, the decision history, and what has
+ * gone stale under it. Audit and Override are capability calls; the ceiling they produce is
+ * the daemon's, never this page's.
  */
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  Button,
+  ClaimCard,
+  FullPageWorkspace,
+  Input,
+  ProvenancePath,
+  Select,
+  Textarea,
+  useToast,
+} from '@research-harness/design';
+import type { ClaimModel } from '@research-harness/design';
 import type { ClaimSummary, JsonObject } from '../api/dto';
-import { Empty, ErrorBox, Field, Loading, Panel, Tag } from '../components/Feedback';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Field,
+  Fields,
+  Loading,
+  Panel,
+  StatusBadge,
+  authorityOf,
+} from '../components/Feedback';
+import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
@@ -44,50 +67,55 @@ export function ClaimsPage() {
   if (!state.data || state.data.length === 0) return <Empty>No claims registered.</Empty>;
 
   return (
-    <div className="claims">
-      <h1>Claims</h1>
-      <Panel title={`${state.data.length} registered`}>
-        <table>
-          <thead>
-            <tr>
-              <th>Claim</th>
-              <th>Status</th>
-              <th>Requested</th>
-              <th>Allowed</th>
-              <th>Evidence</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.data.map((claim: ClaimSummary) => (
-              <tr key={claim.id}>
-                <td>
-                  <Link to={`/claims/${claim.id}`}>{claim.id}</Link>
-                  <div className="muted">{claim.statement}</div>
-                </td>
-                <td>
-                  <Tag kind={claim.status}>{claim.status}</Tag>
-                  {claim.stale === 'stale' ? <Tag kind="stale">stale</Tag> : null}
-                </td>
-                <td>{claim.requested_strength}</td>
-                <td>{claim.allowed_strength}</td>
-                <td className="muted">
-                  {claim.supporting} supporting · {claim.qualifying} qualifying ·{' '}
-                  {claim.contradicting} contradicting
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Panel>
-    </div>
+    <FullPageWorkspace
+      title="Claims"
+      description={`${state.data.length} registered. What each claim asks for, beside what its evidence allows.`}
+    >
+      <DataTable
+        label="Registered claims"
+        head={
+          <tr>
+            <th scope="col">Claim</th>
+            <th scope="col">Status</th>
+            <th scope="col">Requested</th>
+            <th scope="col">Allowed</th>
+            <th scope="col">Evidence</th>
+          </tr>
+        }
+      >
+        {state.data.map((claim: ClaimSummary) => (
+          <tr key={claim.id}>
+            <th scope="row">
+              <ObjectRef
+                id={claim.id}
+                kind="claim"
+                to={`/claims/${claim.id}`}
+                authority={authorityOf(claim.status, claim.stale === 'stale')}
+              />
+              <div className="rh-text-secondary">{claim.statement}</div>
+            </th>
+            <td>
+              <StatusBadge status={claim.status} />
+              {claim.stale === 'stale' ? <StatusBadge status="stale" /> : null}
+            </td>
+            <td>{claim.requested_strength}</td>
+            <td>{claim.allowed_strength}</td>
+            <td className="rh-text-secondary">
+              {claim.supporting} supporting · {claim.qualifying} qualifying ·{' '}
+              {claim.contradicting} contradicting
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+    </FullPageWorkspace>
   );
 }
 
 export function ClaimDetailPage() {
   const { claimId = '' } = useParams();
   const { client, canMutate, mutationBlockedReason, refresh, overview } = useSession();
+  const { toast } = useToast();
   const actor = overview?.actor ?? null;
-  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -113,16 +141,36 @@ export function ClaimDetailPage() {
   const claim = state.data.object.object as JsonObject;
   const assessment = (claim.assessment ?? {}) as JsonObject;
   const coverage = (claim.coverage ?? {}) as JsonObject;
+  const scope = (claim.scope ?? {}) as JsonObject;
   const support = state.data.support;
   const decisions = state.data.decisions;
   const anchors = state.data.anchors.filter((anchor) => anchor.claim === claimId);
+  const stale = String(claim.stale ?? 'fresh') === 'stale';
+
+  const model: ClaimModel = {
+    id: claimId,
+    text: String(claim.statement ?? ''),
+    claimType: String(claim.type ?? 'unrecorded'),
+    scope: String(scope.level ?? assessment.allowed_strength ?? 'unrecorded'),
+    status: String(assessment.status ?? 'unverified'),
+    authority: authorityOf(String(assessment.status ?? 'unverified'), stale),
+    stale,
+    support: {
+      supports: support.supporting.length,
+      contradicts: support.contradicting.length,
+      qualifies: support.qualifying.length,
+    },
+    ...(assessment.maximum_defensible_wording
+      ? { wordingCeiling: String(assessment.maximum_defensible_wording) }
+      : {}),
+  };
 
   async function run(what: string, action: () => Promise<unknown>) {
     setBusy(true);
     setError(null);
     try {
       await action();
-      setNotice(what);
+      toast({ tone: 'success', title: what });
       state.reload();
       refresh();
     } catch (cause) {
@@ -133,148 +181,214 @@ export function ClaimDetailPage() {
   }
 
   return (
-    <div className="claim-detail">
-      <h1>{claimId}</h1>
-      <p className="statement">{String(claim.statement ?? '')}</p>
+    <FullPageWorkspace
+      title={claimId}
+      description={String(claim.statement ?? '')}
+      toolbar={<StatusBadge status={assessment.status ? String(assessment.status) : 'unverified'} size="md" />}
+    >
+      <div className="rh-web-stack">
+        <ClaimCard claim={model} />
 
-      <Panel title="Scope">
-        <Field label="Status">{String(assessment.status ?? '')}</Field>
-        <Field label="Requested strength">{String(assessment.requested_strength ?? '')}</Field>
-        <Field label="Allowed strength">{String(assessment.allowed_strength ?? '')}</Field>
-        <Field label="Maximum defensible wording">
-          {String(assessment.maximum_defensible_wording ?? '— not audited yet')}
-        </Field>
-        {/*
-          The funnel `claim.update_coverage` recorded and `claim.audit` reads, rendered as
-          it was written. Nothing here is recomputed: coverage is what separates "we found
-          no work that…" from "no work exists" (Product 18), and only a recorded search run
-          can say which one this is.
-        */}
-        <Field label="Coverage">
-          {String(coverage.examined_works ?? 0)} of {String(coverage.relevant_works ?? 0)} relevant
-          works examined
-          {coverage.unresolved_works ? ` · ${String(coverage.unresolved_works)} unresolved` : ''}
-          {` · overturn risk ${String(coverage.overturn_risk ?? 'unknown')}`}
-        </Field>
-        <Field label="Search runs">
-          {(coverage.search_runs as string[] | undefined)?.join(', ') || '— none recorded'}
-          {coverage.cutoff ? ` · up to ${String(coverage.cutoff)}` : ''}
-        </Field>
-        <Field label="Freshness">{String(claim.stale ?? 'fresh')}</Field>
-      </Panel>
+        <Panel title="Scope">
+          <Fields>
+            <Field label="Status">{String(assessment.status ?? '')}</Field>
+            <Field label="Requested strength">{String(assessment.requested_strength ?? '')}</Field>
+            <Field label="Allowed strength">{String(assessment.allowed_strength ?? '')}</Field>
+            {/*
+              The funnel `claim.update_coverage` recorded and `claim.audit` reads, rendered as
+              it was written. Nothing here is recomputed: coverage is what separates "we found
+              no work that…" from "no work exists" (PRODUCT §18), and only a recorded search
+              run can say which one this is.
+            */}
+            <Field label="Coverage">
+              {String(coverage.examined_works ?? 0)} of {String(coverage.relevant_works ?? 0)}{' '}
+              relevant works examined
+              {coverage.unresolved_works ? ` · ${String(coverage.unresolved_works)} unresolved` : ''}
+              {` · overturn risk ${String(coverage.overturn_risk ?? 'unknown')}`}
+            </Field>
+            <Field label="Search runs">
+              {(coverage.search_runs as string[] | undefined)?.join(', ') || '— none recorded'}
+              {coverage.cutoff ? ` · up to ${String(coverage.cutoff)}` : ''}
+            </Field>
+            <Field label="Freshness">{String(claim.stale ?? 'fresh')}</Field>
+          </Fields>
+        </Panel>
 
-      <Panel title="Evidence">
-        <RelationList title="Supporting" links={support.supporting} />
-        <RelationList title="Qualifying" links={support.qualifying} />
-        <RelationList title="Contradicting" links={support.contradicting} />
-        {support.other.length ? <RelationList title="Context" links={support.other} /> : null}
-      </Panel>
+        <Panel title="Evidence">
+          <RelationList claimId={claimId} title="Supporting" links={support.supporting} />
+          <RelationList claimId={claimId} title="Qualifying" links={support.qualifying} />
+          <RelationList claimId={claimId} title="Contradicting" links={support.contradicting} />
+          {support.other.length ? (
+            <RelationList claimId={claimId} title="Context" links={support.other} />
+          ) : null}
+        </Panel>
 
-      <Panel title="Decision history">
-        {decisions.length ? (
-          <ul>
-            {decisions.map((decision) => (
-              <li key={decision.id}>
-                <strong>{decision.id}</strong> · {decision.type} · {decision.status}
-                <div className="muted">{decision.rationale}</div>
-                {decision.auditor_recommendation ? (
-                  <div className="muted">
-                    auditor said {decision.auditor_recommendation}; researcher chose{' '}
-                    {decision.researcher_selected}
-                  </div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Empty>No decision has been recorded against this claim.</Empty>
-        )}
-      </Panel>
+        <Panel title="Decision history">
+          {decisions.length ? (
+            <ul className="rh-web-list rh-web-list--rules">
+              {decisions.map((decision) => (
+                <li key={decision.id}>
+                  <p className="rh-web-row">
+                    <code>{decision.id}</code>
+                    <StatusBadge status={decision.status} />
+                    <span className="rh-text-secondary">{decision.type}</span>
+                  </p>
+                  <p className="rh-text-secondary">{decision.rationale}</p>
+                  {decision.auditor_recommendation ? (
+                    <p className="rh-text-secondary">
+                      auditor said {decision.auditor_recommendation}; researcher chose{' '}
+                      {decision.researcher_selected}
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Empty>No decision has been recorded against this claim.</Empty>
+          )}
+        </Panel>
 
-      <Panel title="Manuscript">
-        {anchors.length ? (
-          <ul>
-            {anchors.map((anchor) => (
-              <li key={`${anchor.file}:${anchor.line_start}`}>
-                <code>
-                  {anchor.file}:{anchor.line_start}
-                </code>{' '}
-                <Tag kind={anchor.status}>{anchor.status}</Tag>
-                <div className="muted">{anchor.sentence}</div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Empty>No manuscript sentence rests on this claim.</Empty>
-        )}
-      </Panel>
+        <Panel title="Manuscript">
+          {anchors.length ? (
+            <ul className="rh-web-list rh-web-list--rules">
+              {anchors.map((anchor) => (
+                <li key={`${anchor.file}:${anchor.line_start}`}>
+                  <p className="rh-web-row">
+                    <code>
+                      {anchor.file}:{anchor.line_start}
+                    </code>
+                    <StatusBadge status={anchor.status} />
+                    {anchor.stale === 'stale' ? <StatusBadge status="stale" /> : null}
+                  </p>
+                  <p className="rh-text-secondary">{anchor.sentence}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Empty>No manuscript sentence rests on this claim.</Empty>
+          )}
+        </Panel>
 
-      <Panel title="Act">
-        {notice ? <p className="notice">{notice}</p> : null}
-        {!canMutate ? <p className="muted">{mutationBlockedReason}</p> : null}
-        {error ? (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <AuditForm
-          disabled={!canMutate || busy}
-          current={{
-            status: String(assessment.status ?? 'unverified'),
-            allowed: String(assessment.allowed_strength ?? 'individual'),
-            wording: String(assessment.maximum_defensible_wording ?? ''),
-          }}
-          onSubmit={(audit) =>
-            run('Audit recorded.', () => client.auditClaim(claimId, audit))
-          }
-        />
-        <OverrideForm
-          disabled={!canMutate || busy}
-          recommendation={String(assessment.allowed_strength ?? 'individual')}
-          onSubmit={(override) =>
-            run('Override accepted and applied.', () =>
-              client.overrideClaimStrength(claimId, { ...override, actor: actor ?? undefined }),
-            )
-          }
-        />
-        <RelateForm
-          disabled={!canMutate || busy}
-          onSubmit={(evidence, relation) =>
-            run('Evidence related.', () => client.relateEvidence(claimId, evidence, relation))
-          }
-        />
-      </Panel>
-    </div>
+        <Panel title="Act">
+          {!canMutate ? <p className="rh-text-secondary">{mutationBlockedReason}</p> : null}
+          {error ? <ErrorBox error={error} /> : null}
+          <AuditForm
+            disabled={!canMutate || busy}
+            current={{
+              status: String(assessment.status ?? 'unverified'),
+              allowed: String(assessment.allowed_strength ?? 'individual'),
+              wording: String(assessment.maximum_defensible_wording ?? ''),
+            }}
+            onSubmit={(audit) => run('Audit recorded.', () => client.auditClaim(claimId, audit))}
+          />
+          <OverrideForm
+            disabled={!canMutate || busy}
+            recommendation={String(assessment.allowed_strength ?? 'individual')}
+            onSubmit={(override) =>
+              run('Override accepted and applied.', () =>
+                client.overrideClaimStrength(claimId, { ...override, actor: actor ?? undefined }),
+              )
+            }
+          />
+          <RelateForm
+            disabled={!canMutate || busy}
+            onSubmit={(evidence, relation) =>
+              run('Evidence related.', () => client.relateEvidence(claimId, evidence, relation))
+            }
+          />
+        </Panel>
+      </div>
+    </FullPageWorkspace>
   );
 }
 
+/**
+ * One group of claim–evidence edges, each drawn as the chain it is.
+ *
+ * `ProvenancePath` is the Claim → Evidence → Work navigation of DS spec §5.2: the edge
+ * label between two steps is the daemon's own relation word, and every step opens the
+ * object it names. The quote under it is the span the evidence was accepted from.
+ */
 function RelationList({
+  claimId,
   title,
   links,
 }: {
+  claimId: string;
   title: string;
-  links: { evidence: string; exact_text: string | null; work: string | null; note: string | null }[];
+  links: {
+    evidence: string;
+    relation?: string;
+    exact_text: string | null;
+    work: string | null;
+    note: string | null;
+    status?: string | null;
+  }[];
 }) {
+  const navigate = useNavigate();
   return (
-    <div className="relations">
-      <h3>
+    <section className="rh-web-stack rh-web-stack--tight">
+      <h3 className="rh-text-h4">
         {title} ({links.length})
       </h3>
       {links.length === 0 ? (
         <Empty>None.</Empty>
       ) : (
-        <ul>
+        <ul className="rh-web-list rh-web-list--tight">
           {links.map((link) => (
-            <li key={`${title}:${link.evidence}`}>
-              <Link to={`/evidence/${link.evidence}`}>{link.evidence}</Link>
-              {link.work ? <span className="muted"> · {link.work}</span> : null}
-              {link.exact_text ? <blockquote>{link.exact_text}</blockquote> : null}
-              {link.note ? <p className="muted">{link.note}</p> : null}
+            <li key={`${title}:${link.evidence}`} className="rh-web-stack rh-web-stack--tight">
+              <ProvenancePath
+                label={`${claimId} ${link.relation ?? 'related'} ${link.evidence}`}
+                onOpen={(entity) => {
+                  if (entity.href) navigate(entity.href);
+                }}
+                path={{
+                  steps: [
+                    {
+                      ref: {
+                        id: claimId,
+                        kind: 'claim',
+                        resolution: 'resolved',
+                        href: `/claims/${claimId}`,
+                      },
+                    },
+                    {
+                      relation: link.relation ?? 'related',
+                      // No authority badge on the chip: the relation list already sits
+                      // under "Accepted evidence", and a badge inside the link would put
+                      // the word into the link's own name.
+                      ref: {
+                        id: link.evidence,
+                        kind: 'evidence',
+                        resolution: link.status === null ? 'unresolved' : 'resolved',
+                        href: `/evidence/${link.evidence}`,
+                      },
+                    },
+                    ...(link.work
+                      ? [
+                          {
+                            relation: 'read from',
+                            ref: {
+                              id: link.work,
+                              kind: 'work' as const,
+                              resolution: 'resolved' as const,
+                              href: `/corpus/${link.work}`,
+                            },
+                          },
+                        ]
+                      : []),
+                  ],
+                }}
+              />
+              {link.exact_text ? (
+                <blockquote className="rh-web-quote">{link.exact_text}</blockquote>
+              ) : null}
+              {link.note ? <p className="rh-text-secondary">{link.note}</p> : null}
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -292,39 +406,49 @@ function AuditForm({
   const [wording, setWording] = useState(current.wording);
   return (
     <form
-      className="prompt"
+      className="rh-web-stack rh-web-stack--tight rh-web-prompt"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit({ status, allowedStrength: allowed, wording: wording || undefined });
       }}
     >
-      <h3>Audit</h3>
-      <label htmlFor="audit-status">Status the evidence supports</label>
-      <select id="audit-status" value={status} onChange={(e) => setStatus(e.target.value)}>
+      <h3 className="rh-text-h4">Audit</h3>
+      <Select
+        id="audit-status"
+        label="Status the evidence supports"
+        value={status}
+        onChange={(event) => setStatus(event.target.value)}
+      >
         {CLAIM_STATUSES.map((value) => (
           <option key={value} value={value}>
             {value}
           </option>
         ))}
-      </select>
-      <label htmlFor="audit-allowed">Allowed strength</label>
-      <select id="audit-allowed" value={allowed} onChange={(e) => setAllowed(e.target.value)}>
+      </Select>
+      <Select
+        id="audit-allowed"
+        label="Allowed strength"
+        value={allowed}
+        onChange={(event) => setAllowed(event.target.value)}
+      >
         {SCOPES.map((value) => (
           <option key={value} value={value}>
             {value}
           </option>
         ))}
-      </select>
-      <label htmlFor="audit-wording">Maximum defensible wording</label>
-      <input
+      </Select>
+      <Input
         id="audit-wording"
+        label="Maximum defensible wording"
         value={wording}
-        onChange={(e) => setWording(e.target.value)}
         placeholder="what this claim may say, at most"
+        onChange={(event) => setWording(event.target.value)}
       />
-      <button type="submit" disabled={disabled}>
-        Record the audit
-      </button>
+      <div className="rh-web-row">
+        <Button type="submit" variant="primary" size="sm" disabled={disabled}>
+          Record the audit
+        </Button>
+      </div>
     </form>
   );
 }
@@ -346,36 +470,47 @@ function OverrideForm({
   const [rationale, setRationale] = useState('');
   return (
     <form
-      className="prompt"
+      className="rh-web-stack rh-web-stack--tight rh-web-prompt"
       onSubmit={(event) => {
         event.preventDefault();
         if (!rationale.trim()) return;
         onSubmit({ selected, auditorRecommendation: recommendation, rationale });
       }}
     >
-      <h3>Override the auditor</h3>
-      <p className="muted">
+      <h3 className="rh-text-h4">Override the auditor</h3>
+      <p className="rh-text-secondary">
         An override is a Decision before it is a claim edit: the recommendation it overrules,
-        the scope you chose, and your reason are all recorded (Product 38).
+        the scope you chose, and your reason are all recorded (PRODUCT §38).
       </p>
-      <label htmlFor="override-scope">Scope you are choosing instead of {recommendation}</label>
-      <select id="override-scope" value={selected} onChange={(e) => setSelected(e.target.value)}>
+      <Select
+        id="override-scope"
+        label={`Scope you are choosing instead of ${recommendation}`}
+        value={selected}
+        onChange={(event) => setSelected(event.target.value)}
+      >
         {SCOPES.map((value) => (
           <option key={value} value={value}>
             {value}
           </option>
         ))}
-      </select>
-      <label htmlFor="override-rationale">Rationale</label>
-      <textarea
+      </Select>
+      <Textarea
         id="override-rationale"
+        label="Rationale"
         rows={3}
         value={rationale}
-        onChange={(e) => setRationale(e.target.value)}
+        onChange={(event) => setRationale(event.target.value)}
       />
-      <button type="submit" disabled={disabled || !rationale.trim()}>
-        Accept the override
-      </button>
+      <div className="rh-web-row">
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          disabled={disabled || !rationale.trim()}
+        >
+          Accept the override
+        </Button>
+      </div>
     </form>
   );
 }
@@ -391,23 +526,27 @@ function RelateForm({
   const [relation, setRelation] = useState('supports');
   return (
     <form
-      className="prompt"
+      className="rh-web-stack rh-web-stack--tight rh-web-prompt"
       onSubmit={(event) => {
         event.preventDefault();
         if (!evidence.trim()) return;
         onSubmit(evidence.trim(), relation);
       }}
     >
-      <h3>Relate evidence</h3>
-      <label htmlFor="relate-evidence">Evidence id</label>
-      <input
+      <h3 className="rh-text-h4">Relate evidence</h3>
+      <Input
         id="relate-evidence"
+        label="Evidence id"
         value={evidence}
-        onChange={(e) => setEvidence(e.target.value)}
         placeholder="E0001"
+        onChange={(event) => setEvidence(event.target.value)}
       />
-      <label htmlFor="relate-relation">Relation</label>
-      <select id="relate-relation" value={relation} onChange={(e) => setRelation(e.target.value)}>
+      <Select
+        id="relate-relation"
+        label="Relation"
+        value={relation}
+        onChange={(event) => setRelation(event.target.value)}
+      >
         {[
           'supports',
           'qualifies',
@@ -420,10 +559,12 @@ function RelateForm({
             {value}
           </option>
         ))}
-      </select>
-      <button type="submit" disabled={disabled || !evidence.trim()}>
-        Relate
-      </button>
+      </Select>
+      <div className="rh-web-row">
+        <Button type="submit" variant="primary" size="sm" disabled={disabled || !evidence.trim()}>
+          Relate
+        </Button>
+      </div>
     </form>
   );
 }

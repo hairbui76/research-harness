@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import type { ReviewItem } from '../api/dto';
 import { CATEGORY_ORDER, ReviewInboxPage, groupByCategory } from './ReviewInbox';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 const QUEUE = FIXTURES.reviewInbox as unknown as { items: ReviewItem[]; count: number };
 
@@ -78,5 +78,18 @@ describe('the review inbox view', () => {
     await waitFor(() =>
       expect(screen.getByText('Nothing is waiting for review.')).toBeInTheDocument(),
     );
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const daemon = fakeDaemon({ capabilities: { 'review.inbox': QUEUE } });
+
+    const { container } = renderView(<ReviewInboxPage />, {
+      daemon,
+      route: '/review',
+      path: '/review',
+    });
+
+    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 });

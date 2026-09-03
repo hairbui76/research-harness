@@ -3,7 +3,7 @@
  *
  * A file with no stored parse cannot have an anchor replayed against it, which is why
  * "parsed" is on the list rather than buried: it is the difference between a source you can
- * open at a span and one you cannot (Product 16, 42 D).
+ * open at a span and one you cannot (PRODUCT §16, §42 D).
  *
  * Not here, and deliberately: the `work.update_metadata` proposals a discovery run turns up
  * (`discovery/search_runs.py::MetadataEnrichment`). Nothing in the capability surface reads
@@ -12,8 +12,21 @@
  * one would mean recomputing the funnel client-side, which is exactly what P10 forbids.
  * A read capability over recorded runs and their enrichments would close it.
  */
-import { Link, useParams } from 'react-router-dom';
-import { Empty, ErrorBox, Field, Loading, Panel, Tag } from '../components/Feedback';
+import { useParams } from 'react-router-dom';
+import { EvidenceCard, FullPageWorkspace, Icon } from '@research-harness/design';
+import type { EvidenceModel } from '@research-harness/design';
+import type { EvidenceSummary } from '../api/dto';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Field,
+  Fields,
+  Loading,
+  Panel,
+  StatusBadge,
+} from '../components/Feedback';
+import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
@@ -27,40 +40,52 @@ export function CorpusPage() {
   if (!state.data || state.data.length === 0) return <Empty>The corpus is empty.</Empty>;
 
   return (
-    <div className="corpus">
-      <h1>Corpus</h1>
-      {state.data.map((work) => (
-        <Panel
-          key={work.id}
-          title={work.title}
-          action={<Tag kind={work.screening}>{work.screening}</Tag>}
-        >
-          <Field label="Id">
-            <Link to={`/corpus/${work.id}`}>{work.id}</Link>
-          </Field>
-          <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
-          <Field label="Year">{work.year ?? '—'}</Field>
-          <Field label="Venue">{work.venue ?? '—'}</Field>
-          <Field label="Accepted evidence">{work.evidence}</Field>
-          <table>
-            <thead>
-              <tr>
-                <th>Artifact</th>
-                <th>Version</th>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Parsed</th>
-                <th>Source</th>
-              </tr>
-            </thead>
-            <tbody>
+    <FullPageWorkspace
+      title="Corpus"
+      description={`${state.data.length} works. A file with no stored parse cannot have an anchor replayed against it.`}
+    >
+      <div className="rh-web-stack">
+        {state.data.map((work) => (
+          <Panel
+            key={work.id}
+            title={work.title}
+            action={<StatusBadge status={work.screening} />}
+          >
+            <Fields>
+              <Field label="Id">
+                <ObjectRef id={work.id} kind="work" to={`/corpus/${work.id}`} />
+              </Field>
+              <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
+              <Field label="Year">{work.year ?? '—'}</Field>
+              <Field label="Venue">{work.venue ?? '—'}</Field>
+              <Field label="Accepted evidence">{work.evidence}</Field>
+            </Fields>
+            <DataTable
+              label={`Files of ${work.id}`}
+              head={
+                <tr>
+                  <th scope="col">Artifact</th>
+                  <th scope="col">Version</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Parsed</th>
+                  <th scope="col">Source</th>
+                </tr>
+              }
+            >
               {work.artifacts.map((artifact) => (
                 <tr key={artifact.id}>
-                  <td>{artifact.id}</td>
+                  <th scope="row">
+                    <code>{artifact.id}</code>
+                  </th>
                   <td>{artifact.version}</td>
                   <td>{artifact.mime_type}</td>
                   <td>{artifact.size_bytes} bytes</td>
-                  <td>{artifact.parsed ? 'yes' : 'no parse stored'}</td>
+                  <td>
+                    <StatusBadge status={artifact.parsed ? 'valid' : 'unverified'}>
+                      {artifact.parsed ? 'yes' : 'no parse stored'}
+                    </StatusBadge>
+                  </td>
                   <td>
                     <a href={client.artifactBytesUrl(artifact.id)} target="_blank" rel="noreferrer">
                       open the file
@@ -68,11 +93,11 @@ export function CorpusPage() {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        </Panel>
-      ))}
-    </div>
+            </DataTable>
+          </Panel>
+        ))}
+      </div>
+    </FullPageWorkspace>
   );
 }
 
@@ -98,56 +123,103 @@ export function WorkPage() {
 
   const { work, evidence } = state.data;
   return (
-    <div className="work">
-      <h1>{work.title}</h1>
-      <Panel title="Identity">
-        <Field label="Id">{work.id}</Field>
-        <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
-        <Field label="Year">{work.year ?? '—'}</Field>
-        <Field label="Venue">{work.venue ?? '—'}</Field>
-        <Field label="Screening">{work.screening}</Field>
-        <Field label="Identifiers">
-          <code>{JSON.stringify(work.identifiers)}</code>
-        </Field>
-      </Panel>
-      <Panel title="Derived">
-        <Field label="Blocks">{work.blocks}</Field>
-        <Field label="Accepted evidence">{work.evidence}</Field>
-      </Panel>
-      <Panel title="Files">
-        <ul>
-          {work.artifacts.map((artifact) => (
-            <li key={artifact.id}>
-              {artifact.id} · {artifact.kind} · {artifact.original_filename ?? 'unnamed'} ·{' '}
-              <code>{artifact.file_hash}</code>
-            </li>
-          ))}
-        </ul>
-      </Panel>
-      <Panel title={`Accepted evidence (${evidence.length})`}>
-        {evidence.length === 0 ? (
-          <Empty>Nothing has been accepted from this work yet.</Empty>
-        ) : (
-          <ul>
-            {evidence.map((item) => (
-              <li key={item.id}>
-                <Link to={`/evidence/${item.id}`}>{item.id}</Link>{' '}
-                <Tag kind={item.status}>{item.status}</Tag>
-                {item.stale === 'stale' ? <Tag kind="stale">stale</Tag> : null}
-                <span className="muted">
-                  {' '}
-                  {item.field ?? 'no field'} · {item.evidence_type} · {item.strength}
-                  {item.verdict ? ` · ${item.verdict}` : ''}
-                </span>
-                <blockquote>{item.exact_text}</blockquote>
-                {item.qualification ? <p className="muted">{item.qualification}</p> : null}
-              </li>
+    <FullPageWorkspace
+      title={work.title}
+      description={`${work.id} · ${work.authors.join(', ') || 'no authors recorded'}`}
+      toolbar={<StatusBadge status={work.screening} size="md" />}
+    >
+      <div className="rh-web-stack">
+        <Panel title="Identity">
+          <Fields>
+            <Field label="Id">
+              <code>{work.id}</code>
+            </Field>
+            <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
+            <Field label="Year">{work.year ?? '—'}</Field>
+            <Field label="Venue">{work.venue ?? '—'}</Field>
+            <Field label="Screening">{work.screening}</Field>
+            <Field label="Identifiers">
+              <code>{JSON.stringify(work.identifiers)}</code>
+            </Field>
+          </Fields>
+        </Panel>
+
+        <Panel title="Derived">
+          <Fields>
+            <Field label="Blocks">{work.blocks}</Field>
+            <Field label="Accepted evidence">{work.evidence}</Field>
+          </Fields>
+        </Panel>
+
+        <Panel title="Files">
+          <DataTable
+            label={`Files of ${work.id}`}
+            head={
+              <tr>
+                <th scope="col">Artifact</th>
+                <th scope="col">Kind</th>
+                <th scope="col">Filename</th>
+                <th scope="col">File hash</th>
+              </tr>
+            }
+          >
+            {work.artifacts.map((artifact) => (
+              <tr key={artifact.id}>
+                <th scope="row">
+                  <code>{artifact.id}</code>
+                </th>
+                <td>{artifact.kind}</td>
+                <td>{artifact.original_filename ?? 'unnamed'}</td>
+                <td>
+                  <code>{artifact.file_hash}</code>
+                </td>
+              </tr>
             ))}
-          </ul>
-        )}
-      </Panel>
-    </div>
+          </DataTable>
+        </Panel>
+
+        <Panel title={`Accepted evidence (${evidence.length})`}>
+          {evidence.length === 0 ? (
+            <Empty>Nothing has been accepted from this work yet.</Empty>
+          ) : (
+            <ul className="rh-web-list">
+              {evidence.map((item) => (
+                <li key={item.id}>
+                  <EvidenceCard evidence={acceptedEvidenceModel(item)} />
+                  {item.qualification ? (
+                    <p className="rh-text-secondary">{item.qualification}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </div>
+    </FullPageWorkspace>
   );
+}
+
+/**
+ * One accepted `EvidenceSummary` as the Design System's evidence view model.
+ *
+ * Everything mapped here was decided by the daemon: `accepted` is what `evidence.list`
+ * returns (staged proposals are not in it, ADR-003) and `stale` is the mark the staleness
+ * pass recorded. Nothing is inferred.
+ */
+function acceptedEvidenceModel(item: EvidenceSummary): EvidenceModel {
+  return {
+    id: item.id,
+    workId: item.work,
+    workLabel: item.work,
+    quote: item.exact_text,
+    evidenceType: item.evidence_type,
+    strength: item.strength,
+    origin: item.origin,
+    authority: 'accepted',
+    stale: item.stale === 'stale',
+    anchor: { artifactId: item.artifact, stale: item.stale === 'stale' },
+    ...(item.field ? { field: item.field } : {}),
+  };
 }
 
 /** One accepted Evidence object, opened at the exact span it was accepted from. */
@@ -163,32 +235,62 @@ export function EvidencePage() {
   const evidence = state.data.object as Record<string, any>;
   const source = evidence.source ?? {};
   const content = evidence.content ?? {};
+  const artifact = String(source.artifact ?? '');
   return (
-    <div className="evidence">
-      <h1>{evidenceId}</h1>
-      <blockquote className="exact-text">{String(content.exact_text ?? '')}</blockquote>
-      <Panel title="Epistemics">
-        <Field label="Origin">{String(evidence.origin ?? '')}</Field>
-        <Field label="Type">{String(evidence.evidence_type ?? '')}</Field>
-        <Field label="Strength">{String(evidence.strength ?? '')}</Field>
-        <Field label="Status">{String(evidence.verification?.status ?? '')}</Field>
-        <Field label="Accepted by">{String(evidence.verification?.accepted_by ?? '—')}</Field>
-        <Field label="Review action">{String(evidence.verification?.review_action ?? '—')}</Field>
-        <Field label="Rationale">{String(evidence.verification?.rationale ?? '—')}</Field>
-      </Panel>
-      <Panel title="Source">
-        <Field label="Work">{String(source.work ?? '')}</Field>
-        <Field label="Artifact">
-          <a href={client.artifactBytesUrl(String(source.artifact ?? ''))} target="_blank" rel="noreferrer">
-            {String(source.artifact ?? '')}
-          </a>
-        </Field>
-        <Field label="Page">{String(source.page ?? '—')}</Field>
-        <Field label="Block">{String(source.block ?? '')}</Field>
-        <Field label="File hash">
-          <code>{String(source.file_hash ?? '')}</code>
-        </Field>
-      </Panel>
-    </div>
+    <FullPageWorkspace
+      title={evidenceId}
+      description="One accepted Evidence object, with the exact span it was accepted from."
+      toolbar={
+        <a
+          className="rh-web-row"
+          href={client.artifactBytesUrl(artifact)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Icon name="external-link" size={14} />
+          Open the source file
+        </a>
+      }
+    >
+      <div className="rh-web-stack">
+        <blockquote className="rh-web-quote">{String(content.exact_text ?? '')}</blockquote>
+
+        <Panel title="Epistemics">
+          <Fields>
+            <Field label="Origin">{String(evidence.origin ?? '')}</Field>
+            <Field label="Type">{String(evidence.evidence_type ?? '')}</Field>
+            <Field label="Strength">{String(evidence.strength ?? '')}</Field>
+            <Field label="Status">{String(evidence.verification?.status ?? '')}</Field>
+            <Field label="Accepted by">{String(evidence.verification?.accepted_by ?? '—')}</Field>
+            <Field label="Review action">
+              {String(evidence.verification?.review_action ?? '—')}
+            </Field>
+            <Field label="Rationale">{String(evidence.verification?.rationale ?? '—')}</Field>
+          </Fields>
+        </Panel>
+
+        <Panel title="Source">
+          <Fields>
+            <Field label="Work">
+              <ObjectRef
+                id={String(source.work ?? '')}
+                kind="work"
+                to={`/corpus/${String(source.work ?? '')}`}
+              />
+            </Field>
+            <Field label="Artifact">
+              <a href={client.artifactBytesUrl(artifact)} target="_blank" rel="noreferrer">
+                {artifact}
+              </a>
+            </Field>
+            <Field label="Page">{String(source.page ?? '—')}</Field>
+            <Field label="Block">{String(source.block ?? '')}</Field>
+            <Field label="File hash">
+              <code>{String(source.file_hash ?? '')}</code>
+            </Field>
+          </Fields>
+        </Panel>
+      </div>
+    </FullPageWorkspace>
   );
 }

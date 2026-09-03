@@ -9,10 +9,11 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReviewItem } from '../api/dto';
 import { EvidenceReviewPage, ProposedChanges } from './EvidenceReview';
 import { splitAround } from '../components/SourcePane';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 // pdf.js is loaded lazily by the source pane; jsdom has no PDF engine, and the pane's
 // documented fallback is the exact block text, which is what these tests read.
@@ -124,14 +125,15 @@ describe('review authority', () => {
     const daemon = daemonFor();
     renderReview(daemon);
 
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Accept with qualification' })).toBeEnabled(),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Accept with qualification' }));
+    // The bar's button is "Qualify" — the Design System owns the decision vocabulary
+    // (`REVIEW_DECISION_META`) — and the form it opens still submits with the sentence the
+    // researcher is agreeing to.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Qualify' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Qualify' }));
     fireEvent.change(screen.getByLabelText('Qualification recorded with the acceptance'), {
       target: { value: 'holds for the CICIDS2017 capture only' },
     });
-    fireEvent.click(screen.getAllByRole('button', { name: 'Accept with qualification' })[1]!);
+    fireEvent.click(screen.getByRole('button', { name: 'Accept with qualification' }));
 
     await waitFor(() => {
       const call = daemon.capabilityCalls().find((entry) => entry.name === 'review.qualify');
@@ -191,14 +193,7 @@ describe('review authority', () => {
     renderReview(daemonFor(asHost), null);
 
     await waitFor(() => expect(screen.getByTestId('mutation-blocked')).toBeInTheDocument());
-    for (const label of [
-      'Accept',
-      'Accept with qualification',
-      'Edit',
-      'Reject',
-      'Defer',
-      'Request more evidence',
-    ]) {
+    for (const label of ['Accept', 'Qualify', 'Edit', 'Reject', 'Defer', 'Request more evidence']) {
       expect(screen.getByRole('button', { name: label })).toBeDisabled();
     }
     expect(screen.getByTestId('mutation-blocked').textContent).toContain('agent host');
@@ -328,5 +323,27 @@ describe('the diff Product 25 asks for', () => {
     expect(screen.getByText('a/model-x')).toBeInTheDocument();
     expect(screen.getByText('supported')).toBeInTheDocument();
     expect(screen.getByText('contradicted')).toBeInTheDocument();
+  });
+});
+
+describe('the screen a researcher spends their day on', () => {
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Source text')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
+  });
+
+  it('reaches every review decision from the keyboard, in the order it is read', async () => {
+    const user = userEvent.setup();
+    renderReview();
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Accept' })).toBeEnabled());
+    screen.getByRole('button', { name: 'Accept' }).focus();
+
+    for (const next of ['Qualify', 'Edit', 'Reject', 'Defer', 'Request more evidence']) {
+      await user.tab();
+      expect(screen.getByRole('button', { name: next })).toHaveFocus();
+    }
   });
 });

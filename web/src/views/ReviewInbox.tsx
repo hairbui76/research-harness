@@ -1,15 +1,16 @@
 /**
- * The Review Inbox (ROADMAP Task 11.2): the queue in Product 24.2 order, grouped by the
+ * The Review Inbox (ROADMAP Task 11.2): the queue in PRODUCT §24.2 order, grouped by the
  * reason each item is waiting — conflict, high risk, stale, ambiguous, routine.
  *
  * The order and the grouping are the server's: `review.inbox` returns items already sorted
  * and already labelled with a category and the reasons behind it. This view groups by that
  * label and never reorders, because deciding what a researcher should look at first is a
- * scientific judgement, not a presentation one (Product 5 P8).
+ * scientific judgement, not a presentation one (PRODUCT §5 P8).
  */
 import { Link } from 'react-router-dom';
+import { FullPageWorkspace, SourceAnchor } from '@research-harness/design';
 import type { ReviewItem } from '../api/dto';
-import { Empty, ErrorBox, Loading, Panel, Tag } from '../components/Feedback';
+import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
@@ -44,34 +45,49 @@ export function ReviewInboxPage() {
 
   const groups = groupByCategory(state.data.items);
   return (
-    <div className="inbox">
-      <h1>Review inbox</h1>
-      <p className="muted">{state.data.count} waiting, in the order Product 24.2 asks for.</p>
-      {groups.map(([category, items]) => (
-        <Panel key={category} title={`${CATEGORY_LABELS[category] ?? category} (${items.length})`}>
-          <ul className="queue">
-            {items.map((item) => (
-              <ReviewRow key={item.candidate_id} item={item} />
-            ))}
-          </ul>
-        </Panel>
-      ))}
-    </div>
+    <FullPageWorkspace
+      title="Review inbox"
+      description={`${state.data.count} waiting, in the order PRODUCT §24.2 asks for.`}
+    >
+      <div className="rh-web-stack">
+        {groups.map(([category, items]) => (
+          <Panel key={category} title={`${CATEGORY_LABELS[category] ?? category} (${items.length})`}>
+            <ul className="rh-web-list rh-web-list--rules">
+              {items.map((item) => (
+                <ReviewRow key={item.candidate_id} item={item} />
+              ))}
+            </ul>
+          </Panel>
+        ))}
+      </div>
+    </FullPageWorkspace>
   );
 }
 
 export function ReviewRow({ item }: { item: ReviewItem }) {
   return (
-    <li className="queue-row">
-      <Link to={`/review/${item.candidate_id}`}>
-        <span className="field-name">{item.field}</span>
-        <span className="muted"> · {item.work}</span>
-      </Link>
-      <Tag kind={item.category}>{item.category.replace('_', ' ')}</Tag>
-      <span className="muted">tier {item.tier}</span>
-      <span className="muted">{item.verdict ?? 'unverified'}</span>
-      <blockquote>{item.exact_text}</blockquote>
-      <p className="muted">{item.reasons.join('; ')}</p>
+    <li className="rh-web-stack rh-web-stack--tight">
+      <p className="rh-web-row">
+        <Link to={`/review/${item.candidate_id}`}>
+          <span className="rh-web-queue__field">{item.field}</span>
+          <span className="rh-text-secondary"> · {item.work}</span>
+        </Link>
+        <StatusBadge status={item.category}>{item.category.replace('_', ' ')}</StatusBadge>
+        <StatusBadge status={item.verdict ?? 'unverified'}>
+          {item.verdict ?? 'unverified'}
+        </StatusBadge>
+        <span className="rh-text-secondary">tier {item.tier}</span>
+      </p>
+      <SourceAnchor
+        variant="inline"
+        anchor={{
+          artifactId: item.artifact,
+          ...(item.source_context.page === null ? {} : { page: item.source_context.page }),
+          stale: item.anchor_status !== 'valid',
+        }}
+      />
+      <blockquote className="rh-web-quote">{item.exact_text}</blockquote>
+      <p className="rh-text-secondary">{item.reasons.join('; ')}</p>
     </li>
   );
 }

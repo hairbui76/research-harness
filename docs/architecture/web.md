@@ -109,11 +109,16 @@ web/
   capabilities.json     GET /capabilities snapshot       (checked in)
   scripts/              export_backend_json.py, gen-types.mjs
   src/api/              client.ts (mirrors HarnessHttpClient), dto.ts, schema.ts,
-                        session.ts, *.gen.ts
-  src/app/              session context, layout, routes, useAsync
-  src/components/       SourcePane (pdf.js), ReviewActions, JsonEditor, Feedback
+                        session.ts, sse.ts, *.gen.ts
+  src/app/              session context, Layout (the shell), routes.tsx, TokenBar,
+                        SettingsDialog, useAsync
+  src/components/       SourcePane, ReviewActions, JsonEditor, ObjectRef, Feedback
   src/views/            one per navigation entry, plus the detail screens
-  src/test/             harness.tsx and the exported fixtures
+  src/pdf/              pdf.js adapter: worker, usePdfDocument, PdfPage
+  src/render/           Markdown + KaTeX renderer
+  src/editor/           CodeMirror LaTeX editor
+  src/styles.css        application layout only; everything else is the Design System
+  src/test/             harness.tsx, the axe helper, and the exported fixtures
 ```
 
 `src/api/client.ts` is the TypeScript twin of
@@ -122,20 +127,82 @@ and nothing else. A capability refusal comes back as `ok: false` with a stable `
 typed helpers raise `CapabilityError` carrying it, and the views render the daemon's own
 message.
 
+## The shell and the Design System
+
+Every pixel the cockpit draws comes from `@research-harness/design`
+(`docs/architecture/design-system.md`). The client itself owns no palette, no typography, no
+button and no badge.
+
+**`src/main.tsx`** imports `@research-harness/design/styles.css` *before* `./styles.css`, so
+the package's token layer and base rules are in force and the application stylesheet only
+adds what is genuinely layout. It then wraps the client in `ThemeProvider` (dark default,
+comfortable density) and `ToastProvider`.
+
+**`src/app/Layout.tsx`** is an `AppShell`: a skip link, a `ProjectRail`, and the main
+surface. The rail carries the project name from `GET /overview`, the PRODUCT §26 navigation
+with the counts the daemon reported in `overview.attention[].route`, `aria-current="page"` on
+the active route, the principal in the footer (researcher, or the agent host that may only
+read and propose), and a Settings dialog holding the theme and density toggles. Below the
+shell's width breakpoint the rail becomes a drawer and the main surface stays mounted, so
+nothing a researcher has typed is lost.
+
+`ProjectRail` renders real `<a href>` links and the Design System has no router, so the
+shell turns a plain left click into a client-side navigation and leaves modified clicks
+(new tab, new window) to the browser — the rule react-router's own `<Link>` applies.
+
+Two slots in the shell are deliberately empty and are where the conversation workspace lands:
+`sessionList` on the rail, and `inspector` on the shell. A full research page carries its own
+side panel, so no inspector is mounted for the routes below.
+
+**`src/app/routes.tsx`** is the one route table, and the navigation is derived from it, so a
+screen cannot appear in one and not the other. `/` renders the Overview today and `/overview`
+renders it too; moving the Overview aside for the conversation route is two one-line edits
+(`HOME` and `OVERVIEW_PATH`), which the file says in a comment.
+
+**Every view** is a `FullPageWorkspace` — a sticky header with the page's `h1`, its
+description and its toolbar — composing package components: `Card`/`Badge`/`AuthorityBadge`
+through the shared helpers in `src/components/Feedback.tsx`, `EntityRef` through
+`src/components/ObjectRef.tsx` (which gives a reference the cockpit route as its `href`),
+`Button`/`Input`/`Select`/`Textarea`/`Dialog` directly, `AsyncState`/`ErrorNotice`/`Toast`
+for loading, empty and failure states, and `EvidenceCard`/`ClaimCard`/`SourceAnchor`/
+`ProvenancePath`/`ReviewDecisionBar` for the research objects themselves. Tables set
+`data-density="compact"` and scroll inside a named `ScrollArea` rather than widening the page.
+
+**Status is never colour alone.** `StatusBadge` sends the six `AuthorityLabel` words to
+`AuthorityBadge` and everything else — review categories, verifier verdicts, screening and
+anchor states — to a toned `Badge`, and both always render the daemon's own word beside the
+glyph. `authorityOf()` is the single place a v1.0 assessment status is mapped onto the v1.1
+authority vocabulary; it disappears when the ResearchGraph carries `authority` on every node.
+
+**The lint.** `design/scripts/check-tokens.mjs` scans `web/src` as well as `design/src` and
+**fails** on any `#hex`, `rgb()`, `hsl()`, `oklab()`, `oklch()` or a `color-mix()` over
+literals; a genuine visualisation case annotates the line with `/* raw-colour-ok: … */`. It
+runs inside `pnpm --filter @research-harness/design lint`. `web/src/styles.css` reads
+`--rh-*` tokens only.
+
 ## The review screen
 
 `/review/:candidateId` is the screen PRODUCT §25 asks for.
 
-* **Left** — the page the span was read off, rendered from the artifact's own bytes with
-  pdf.js, with the block's stored geometry drawn over it. pdf.js is imported lazily, and
-  when it cannot run the pane falls back to the exact block text with the span marked
-  inside it and a link to the unchanged file. The source is never absent.
-* **Right** — the quoted text, the field, origin, evidence type and strength, the numeric
-  value with the metric/unit/dataset/table a number must carry (§12), the verifier's verdict
-  and rationale, competing candidates, and each side of any conflict with the diff of what
-  accepting it would change.
-* **Actions** — Accept, Accept with qualification, Edit, Reject, Defer, Request more
-  evidence (§24.3). Each is a capability call and a refresh.
+The two halves are a `PaneGroup`, so the split is draggable and keyboard-resizable and
+neither half can push the other off the screen. Below 1100px they stack, source first.
+
+* **Left** — the page the span was read off, rendered from the artifact's own bytes through
+  the `src/pdf` adapter (`usePdfDocument` + `PdfPage`), with the block's stored geometry
+  drawn over it. pdf.js is imported lazily and its worker is configured in exactly one
+  place, `src/pdf/worker.ts`, which is what keeps the no-CDN rule true at runtime. When it
+  cannot run the pane falls back to the exact block text with the span marked inside it and
+  a link to the unchanged file. The source is never absent.
+* **Right** — an `EvidenceCard` for the proposal (quote, field, origin, evidence type,
+  strength, and the `candidate` authority it holds until someone decides), the anchor and
+  the reasons it is in the queue, the numeric value with the metric/unit/dataset/table a
+  number must carry (§12), the verifier's verdict and rationale, competing candidates, and
+  each side of any conflict with the diff of what accepting it would change.
+* **Actions** — a `ReviewDecisionBar` offering Accept, Qualify, Edit, Reject, Defer and
+  Request more evidence (§24.3). Each is a capability call and a refresh. The Design System
+  owns the wording of the six decisions (`REVIEW_DECISION_META`), which is why the second
+  button reads *Qualify* and the form it opens still submits *Accept with qualification*.
+  Without the local token the bar disables every button and prints the reason on screen.
 
 Which capability each action uses. Every one of them takes the staging id and whatever the
 researcher typed, and nothing else — the cockpit never posts back the `Evidence` object the
@@ -145,7 +212,7 @@ id and marks the candidate reviewed in the same transaction.
 | Action | Call |
 |---|---|
 | Accept | `review.accept` `{candidate_id}` |
-| Accept with qualification | `review.qualify` `{candidate_id, qualification}` |
+| Qualify | `review.qualify` `{candidate_id, qualification}` |
 | Edit | `review.edit` `{candidate_id, edited}`. The editor checks the object against the daemon's own `review.edit` schema first; the daemon validates it again, and an edit that moves the source anchor is refused there. |
 | Reject | `review.reject` `{candidate_id, reason}` |
 | Defer | `review.defer` `{candidate_id, note}` |
@@ -198,7 +265,11 @@ and it will pass with nothing to un-mark once the lock is fixed.
 ## Verification
 
 ```bash
-cd web && pnpm install && pnpm typecheck && pnpm test && pnpm build && pnpm lint
+pnpm --filter research-harness-web typecheck
+pnpm --filter research-harness-web lint
+pnpm --filter research-harness-web test      # includes axe-core on the migrated views
+pnpm --filter research-harness-web build
+pnpm --filter @research-harness/design lint  # eslint + check-tokens (web/src too) + contrast
 uv run pytest tests/contract/protocol tests/e2e/test_web_gate.py -q
 ```
 

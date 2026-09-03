@@ -3,11 +3,21 @@
  *
  * `synthesis.compare` reads an existing matrix; it proposes no new facts. An empty cell
  * means "not recorded", never "the work lacks the property" — the table says so, because
- * reading absence out of a blank cell is exactly the mistake Product 11 is about.
+ * reading absence out of a blank cell is exactly the mistake PRODUCT §11 is about.
  */
 import { useState } from 'react';
+import { Button, FullPageWorkspace, Input } from '@research-harness/design';
 import type { JsonObject } from '../api/dto';
-import { Empty, ErrorBox, Field, Loading, Panel, Tag } from '../components/Feedback';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Field,
+  Fields,
+  Loading,
+  Panel,
+  StatusBadge,
+} from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
@@ -27,51 +37,60 @@ export function SynthesisPage() {
 
   const built = matrices.data?.matrices ?? [];
   return (
-    <div className="synthesis">
-      <h1>Synthesis</h1>
-      {built.length === 0 ? (
-        <Empty>No synthesis matrix has been built.</Empty>
-      ) : (
-        built.map((matrix) => (
-          <Panel
-            key={matrix.id}
-            title={matrix.name}
-            action={matrix.stale === 'stale' ? <Tag kind="stale">stale</Tag> : null}
+    <FullPageWorkspace
+      title="Synthesis"
+      description="A matrix reads what was recorded; it proposes no new facts."
+    >
+      <div className="rh-web-stack">
+        {built.length === 0 ? (
+          <Empty>No synthesis matrix has been built.</Empty>
+        ) : (
+          built.map((matrix) => (
+            <Panel
+              key={matrix.id}
+              title={matrix.name}
+              action={matrix.stale === 'stale' ? <StatusBadge status="stale" /> : null}
+            >
+              <Fields>
+                <Field label="Id">
+                  <code>{matrix.id}</code>
+                </Field>
+                <Field label="Taxonomy">{matrix.taxonomy ?? '—'}</Field>
+                <Field label="Rows">{matrix.works} works</Field>
+                <Field label="Fields">{matrix.fields.join(', ') || '—'}</Field>
+                <Field label="Cells">{matrix.cells}</Field>
+              </Fields>
+            </Panel>
+          ))
+        )}
+
+        <Panel title="Compare a field">
+          <form
+            className="rh-web-row"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (field.trim()) setRequested(field.trim());
+            }}
           >
-            <Field label="Id">{matrix.id}</Field>
-            <Field label="Taxonomy">{matrix.taxonomy ?? '—'}</Field>
-            <Field label="Rows">{matrix.works} works</Field>
-            <Field label="Fields">{matrix.fields.join(', ') || '—'}</Field>
-            <Field label="Cells">{matrix.cells}</Field>
-          </Panel>
-        ))
-      )}
+            <Input
+              id="compare-field"
+              label="Field"
+              value={field}
+              placeholder="tokenization"
+              fieldClassName="rh-web-inline-field"
+              onChange={(event) => setField(event.target.value)}
+            />
+            <Button type="submit" variant="primary" size="sm" disabled={!field.trim()}>
+              Compare
+            </Button>
+          </form>
 
-      <Panel title="Compare a field">
-        <form
-          className="prompt"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (field.trim()) setRequested(field.trim());
-          }}
-        >
-          <label htmlFor="compare-field">Field</label>
-          <input
-            id="compare-field"
-            value={field}
-            onChange={(event) => setField(event.target.value)}
-            placeholder="tokenization"
-          />
-          <button type="submit" disabled={!field.trim()}>
-            Compare
-          </button>
-        </form>
-
-        {requested && comparison.loading ? <Loading what={requested} /> : null}
-        {comparison.error ? <ErrorBox error={comparison.error} /> : null}
-        {comparison.data ? <ComparisonTable rows={comparison.data.rows} /> : null}
-      </Panel>
-    </div>
+          {requested && comparison.loading ? <Loading what={requested} /> : null}
+          {comparison.error ? <ErrorBox error={comparison.error} /> : null}
+          {comparison.data ? <ComparisonTable rows={comparison.data.rows} /> : null}
+        </Panel>
+      </div>
+    </FullPageWorkspace>
   );
 }
 
@@ -80,25 +99,29 @@ export function ComparisonTable({ rows }: { rows: JsonObject[] }) {
   const columns = Object.keys(rows[0] ?? {});
   return (
     <>
-      <table>
-        <thead>
+      <DataTable
+        label="Field comparison"
+        head={
           <tr>
             {columns.map((column) => (
-              <th key={column}>{column}</th>
+              <th scope="col" key={column}>
+                {column}
+              </th>
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr key={index}>
-              {columns.map((column) => (
-                <td key={column}>{format(row[column])}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="muted">An empty cell means &ldquo;not recorded&rdquo;, never &ldquo;absent&rdquo;.</p>
+        }
+      >
+        {rows.map((row, index) => (
+          <tr key={index}>
+            {columns.map((column) => (
+              <td key={column}>{format(row[column])}</td>
+            ))}
+          </tr>
+        ))}
+      </DataTable>
+      <p className="rh-text-secondary">
+        An empty cell means &ldquo;not recorded&rdquo;, never &ldquo;absent&rdquo;.
+      </p>
     </>
   );
 }
