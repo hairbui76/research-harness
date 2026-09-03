@@ -6,6 +6,7 @@ Everything is driven through fake executables; the workstation's real CLIs are n
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,7 @@ HELP = (
     "--sandbox --output-schema --json --ephemeral --skip-git-repo-check "
     "--ignore-user-config --ignore-rules"
 )
+NONCE = re.compile(r"provider\.cli\.test-[0-9a-f]{8}")
 
 
 def lines(name: str) -> list[str]:
@@ -55,8 +57,9 @@ def lines(name: str) -> list[str]:
     ]
 
 
-def probe_reply() -> list[str]:
-    body = {"ok": True, "echo": "will be replaced"}
+def probe_reply(echo: str = "{{NONCE}}") -> list[str]:
+    """The two Codex lines of one `CliProbeReply`; the fake fills `{{NONCE}}` in from stdin."""
+    body = {"ok": True, "echo": echo}
     return [
         json.dumps(
             {
@@ -354,15 +357,31 @@ def test_the_test_call_runs_one_validated_request_and_reports_the_destination(
 
     assert report.runtime == "codex" and report.model == "gpt-5.5" and report.version == "0.150.1"
     assert report.egress_host == "chatgpt.com" and report.egress_kind == "external"
+    assert report.ok is True and report.diagnostic is None
+    assert report.latency_ms is not None
     run = codex.runs()[0]
     assert "provider.cli.test" in run["stdin"]
-    if report.ok:
-        assert report.latency_ms is not None and report.diagnostic is None
-    else:
-        assert report.diagnostic == "structured_output" and "echo" in report.message
+    assert len(set(NONCE.findall(run["stdin"]))) == 1, (
+        "one probe carries exactly one nonce, and the fake echoed that one back"
+    )
     assert list(project.repo.layout.traces_dir.glob("*/*.json")), (
         "a test call is traced like any call"
     )
+
+
+def test_the_test_call_reports_a_wrong_echo_as_a_failure(
+    project: CapabilityContext, codex: FakeCli
+) -> None:
+    """A valid object with the wrong nonce is a failure, and the answer is not relayed."""
+    configure_cli_provider(project, ConfigureCliProviderRequest(name="codex-sub", runtime="codex"))
+    codex.set_run(lines=probe_reply(echo="not-the-nonce"))
+
+    report = test_cli_provider(project, TestCliProviderRequest(name="codex-sub"))
+
+    assert report.ok is False
+    assert report.diagnostic == "structured_output"
+    assert report.message == "the runtime answered a valid object, but did not echo the nonce"
+    assert "not-the-nonce" not in report.model_dump_json()
 
 
 def test_the_test_call_is_refused_by_the_policy_before_any_spawn(
