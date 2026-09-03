@@ -50,6 +50,13 @@ working; nothing here renames or removes anything.
 | 38 | `privacy.traces` owns `TracingRouter`, `traced(router, repo)`, `trace_writer_for(repo)`, and the new `sink_of(client)`; `cli.providers` re-exports all four unchanged. `capabilities.extra_handlers._router` wraps its router in one, so a run started over HTTP or MCP writes `.research/traces/` under the project's `redact_traces`. `providers.models.cross_verify.cross_verify(..., trace=...)` forwards a sink to each provider it calls directly, and `claims.audit.trace_sink_for(audit_input)` recovers it from the audit's own clients - cross-verification bypasses the router's `complete`, and was the one call in a run that left no record. | `privacy/`, `capabilities/`, `claims/`, `providers/` |
 | 39 | `providers.models.router.ModelRouter.egress_refusal()` returns the `EgressDeniedError` covering *every* entry, or `None` when one may still be called. `select()` still refuses lazily, which is right for routing; this answers without a request, for a caller about to hand the router to a background run. `capabilities.extra_handlers._router` raises it, so a policy-refused `work.interrogate` / `evidence.verify` over HTTP or MCP comes back as the policy rather than as a failed run record found later (Product 34, ADR-018). | `providers/`, `capabilities/` |
 | 40 | `capabilities.reads` gains the `read` capabilities `search_run.list` (`ListSearchRunsRequest` -> `SearchRunList` of `SearchRunSummary`, newest first, filterable by research question or source) and `search_run.get` (`ReadSearchRunRequest` -> `SearchRunView`: the whole `SearchRun` including its candidates, plus the `discovery.search_runs.MetadataEnrichment` proposals its candidates carry and `apply_capability: work.update_metadata`). `enrichments_for` is imported inside the handler, because `discovery/` imports `capabilities/`; a build without the discovery package answers with the run and `enrichments_derived: false`. Closes the read gap `docs/architecture/web.md` recorded (dogfood F5). | `capabilities/`, `discovery/` |
+| 41 | Four stable id types join `domain/ids.py` and `ID_TYPES` (Product 7.2): `ConversationSessionId` (`CS`), `MessageId` (`M`), `SessionAttachmentId` (`SA`), `ContextPackId` (`CP`). `parse_id` already dispatched longest-prefix-first, so `CS`/`CP` resolve before `C` and `SA` before `S` with no change to the resolver; every existing id parses exactly as before. `ID_TYPES` also feeds `manuscript.protected`'s identifier pattern, so `CS0001`, `M0042`, `SA0003`, and `CP0007` are now protected spans in a style pass -- which is what a manuscript that cites a session should get. | `conversation/`, `graph/` |
+| 42 | `domain/conversation.py` is new. It holds the conversation vocabularies -- `AuthorityLabel`, `Visibility`, `MessageRole`, `AttachmentState`, `ContextClass`, `OmissionReason`, `PromotionTarget`, plus `EgressClass` (`none`/`local`/`external`, the receipt's *effective egress class* without naming a provider), `AttemptStatus`, and `ContentBlockKind` -- and the schemas `ConversationSession` (+ `SessionDefaults`), `Message` (+ `MessageAttempt`, `ModelIdentity`, and the `TextBlock | ReferenceBlock | AttachmentBlock` discriminated union exported as `ContentBlock`), `SessionAttachment`, `ContextPack`/`ContextReceipt`/`ContextItem`/`OmittedContextItem`/`ClassBudget`, and `PromotionRequest`. They live here rather than in `domain/enums.py` because they are one subsystem's vocabulary; `domain/graph.py` imports `AuthorityLabel` and `Visibility` from this module. Math stays inside `TextBlock.text` (never normalized, never split), and there is no reasoning block: hidden model deliberation is neither requested nor stored (Product 20.5). | `conversation/`, `graph/`, `capabilities/` |
+| 43 | Conversation authority is enforced by schema, not by convention. A `Message` refuses `AuthorityLabel.ACCEPTED` on its own content (chat is working context; promotion is the only path to research state), a completed message must carry a block while an interrupted one may be empty, a user message may not carry a failed or retried attempt, and every attachment block must appear in the message's `attachments` index. `PromotionTarget` has no Evidence member on purpose: evidence needs an artifact and a resolvable anchor, so prose cannot become one. `ContextReceipt` refuses a source pointer that is both included and omitted or listed twice, and `ContextPack` refuses spending more tokens than its `token_budget` or a class's `ClassBudget`. | `conversation/` |
+| 44 | `ATTACHMENT_TRANSITIONS` and `transition_attachment(attachment, to_state, **updates)` implement the attachments spec SS2 state machine the way `domain/transitions.py` implements the others, raising `TransitionError` for an untabled move; `allowed_attachment_transitions()` renders the table as strings for UIs. Two edges go beyond the spec's diagram on purpose: `ready -> {session_only, promoting}`, because `Save to corpus` is offered from the composer, transcript, viewer, and inspector and must not require a send first; and `failed -> {validating, sending, promoting}`, because a failed operation leaves the session copy intact and retryable (spec SS6). `in_corpus` is terminal, and the schema requires a content hash from `ready` onward, a reason on `failed`, and Work/Version/Artifact links exactly when the state is `in_corpus`. | `conversation/` |
+| 45 | `WorkspaceLayout` gains the `conversations/CS0001/{session.yaml,messages.jsonl,attachments/,context/,summary.md}` accessors plus `attachment_extension`, `session_attachment_bytes_file`, `.research/cache/attachments` (`attachment_cache_dir`), and `attachment_preview_dir(attachment)` for one attachment's rebuildable previews. `DURABLE_DIRECTORIES` names the third storage tier: durable, private, not canonical scientific state, and not regenerable either. `CANONICAL_DIRECTORIES` is unchanged, so `init` creates exactly the same tree as before and `ConversationStore` creates a session directory on demand. `GITIGNORE_CONTENT` now also lists `conversations/`, and `id_from_path` returns `None` for anything under `conversations/` because `path_for` never produces one -- a conversation object is never written through a canonical transaction. `workspace.events.iter_canonical_entries` skips `conversations/` for the same reason: durable is not authoritative, so a chat message must not restate `projection.rebuild.canonical_digest` or invalidate the `.research/consistency-check.json` proof that the canonical tree is unchanged. | `conversation/`, `graph/`, `projection/` |
+| 46 | `workspace/conversations.py` adds `ConversationStore` (`create_session`, `get_session`, `list_sessions`, `rename_session`, `update_session`, `resume`, `append_message`, `iter_messages`/`messages`/`get_message`/`find_message`, `search`, `add_attachment`, `put_attachment`, `get_attachment`, `list_attachments`, `store_attachment_bytes`, `read_attachment_bytes`, `attachment_bytes_path`, `write_context_pack`, `read_context_pack`, `list_context_packs`, `read_summary`, `write_summary`, `regenerate_summary`), with `SessionMatch`, `SessionTranscript`, `ConversationNotFoundError`, and the pure `derive_summary`. Writes take the workspace lock and commit through the existing journal `Transaction`, so a transcript line and the session record that counts it are one recoverable unit; no `ResearchEvent` is written, because a session is not accepted state. `ConversationStore.for_repository(repo)` reuses the repository's reentrant lock so a promotion can write both sides under one lock. | `conversation/`, `graph/`, `capabilities/` |
+| 47 | `WorkspaceConfig` gains `manuscript: dict[str, Any]`, the optional `manuscript:` section of `research.yaml` (`engine`, `entry_file`, `timeout_seconds`, `extra_args`, `synctex`). It is held raw for the same reason `providers` is -- `workspace/` must not import `manuscript/` -- and `manuscript.toolchain.ManuscriptSettings.from_config` validates it where it is used, refusing an unknown key, an entry file that escapes `manuscript/`, and any compiler flag outside `ALLOWED_EXTRA_ARGS`. The field was necessary rather than convenient: `WorkspaceConfig` forbids extra keys, so without it a researcher who wrote the section could no longer open the workspace. It defaults to `{}`, so an existing `research.yaml` opens unchanged; a rewritten one gains a `manuscript: {}` line, exactly as `providers: []` behaves. | `manuscript/` |
 
 ### Notes for consumers
 
@@ -158,3 +165,67 @@ working; nothing here renames or removes anything.
 - A `--script` file may now be a list, an object keyed by role name, or a single reply
   object. The third shape is what `research draft` always wrote; it used to be readable only
   by the manuscript command's private loader.
+- Conversation id counters are derived from the durable files under `conversations/` --
+  session directory names, each session's `last_message` (falling back to the transcript
+  when a `session.yaml` is lost), and the attachment/context-pack filenames -- and not from
+  `research.yaml`. A canonical transaction rewrites `research.yaml` wholesale from its own
+  cached config, so a counter bumped by a chat message would be dropped by the next
+  accepted-state mutation; and a committed file should not churn on every message. The
+  consequence: `ConversationStore` has no delete operation, and whoever designs session
+  deletion must leave a tombstone or a durable ledger, because a scan cannot see an id that
+  was removed.
+- `GITIGNORE_CONTENT` gained `conversations/`, but nothing rewrites the `.gitignore` of a
+  workspace created before this change. A project initialized earlier keeps ignoring only
+  `.research/`, so the first session it opens would be Git-visible. Adding the line is a
+  one-line `workspace/migrations.py` step; it is not done here because that file belongs to
+  another task in this wave.
+- A `ConversationStore` write is journalled but reports failure the way every other
+  journalled unit does: if the process dies after the intents are applied and before the
+  commit point, recovery on the next open rolls the append *forward*. The caller sees an
+  exception while the message is durable, which is the same contract
+  `WorkspaceTransaction.commit` has always had.
+
+### ResearchGraph projection (Phase 20)
+
+- `domain/graph.py` is new and additive: `NodeKind`, `EdgeKind` (with the
+  `DETERMINISTIC_EDGE_KINDS` / `SCIENTIFIC_EDGE_KINDS` partition), `EdgeOrigin`,
+  `GraphAuthority`, `GraphVisibility`, the `GraphNode` / `GraphEdge` value objects,
+  `StableReference`, and `DeepLink`. `GraphAuthority` and `GraphVisibility` mirror
+  `conversation.AuthorityLabel` and `conversation.Visibility` value for value rather than
+  importing them, so `domain/graph.py` and `domain/conversation.py` stay independent
+  modules; `tests/unit/domain/test_graph.py` pins the two lists together.
+- `GraphEdge` refuses `origin=model_proposed` with `authority=accepted`, and
+  `origin=accepted` with `authority=candidate`. The rule lives on the value object, not in
+  the writer, so no projector, capability, or test helper can construct the forbidden
+  combination (ADR-003).
+- `StableReference` reads the prefix as the maximal leading run of capitals, which is what
+  makes `CS0001` a session rather than claim `S0001` with no longest-prefix table to keep in
+  sync. It accepts every `ID_TYPES` prefix plus `CP`, `CS`, `M`, and `SA` as opaque strings,
+  so a reference parses whether or not its id class has landed.
+- `graph/` is a new package under the layering rule already in `conventions.md`. It reads
+  canonical state through `WorkspaceRepository`, reuses `projection.dependencies` for
+  `depends_on`, and never imports `providers/`, `cli/`, `server/`, `capabilities/`, or
+  `roles/` — `tests/unit/graph/test_layering.py` imports it in a fresh interpreter to prove
+  it. Staged proposals under `.research/staging/` are read as plain JSON for that reason:
+  `evidence.staging` and `workflows.claim_audit` pull `providers/` and `capabilities/` in.
+- Node identities are the graph's public contract and are stable across rebuilds:
+  `W0017` / `V0017-2` / `A0017-3` / `E0482` / `C0041` / `RQ0003` / `D0027` / `S0007`
+  verbatim; `project:<name>`, `block:<artifact>#<block>` (a `BlockId` is unique inside its
+  artifact, not globally), `file:<workspace-relative path>`,
+  `anchor:<file>#<sentence fingerprint>`, `cite:<key>`, and `candidate:<candidate id>` for a
+  staged proposal, which never borrows an `EvidenceId`.
+- Namespaces the graph deliberately does not project: taxonomies, search runs, matrix
+  cells, notes, and interpretations. `projection.dependencies` keeps every one of those
+  edges and stays the authority for staleness; `graph.projectors.graph_identity` returns
+  `None` for them, and `SynthesisProjector` collapses the `evidence -> cell -> matrix` chain
+  into `synthesis --depends_on--> evidence` so the real dependency is not lost.
+- A claim–evidence relation that is not `supports`, `contradicts`, or `qualifies`
+  (`contextualizes`, `exemplifies`, `incomparable_under_current_evidence`) is projected as
+  `mentioned_in` carrying the exact canonical relation in edge metadata. Calling any of them
+  `qualifies` would put a relation in the graph that the Claim does not assert.
+- `projection.rebuild.RebuildReport` gained `graph_nodes` and `graph_edges` (both default
+  `0`), and `summary()` mentions them when non-zero. `rebuild_workspace` calls
+  `graph.rebuild.rebuild_graph` after the projection database is swapped in; a graph failure
+  is logged and reported as zero rows rather than failing a rebuild whose canonical files
+  projected cleanly (ADR-006). `dump_projection` is unaffected: the graph has its own
+  `MetaData` and its own database at `.research/graph/research-graph.db`.

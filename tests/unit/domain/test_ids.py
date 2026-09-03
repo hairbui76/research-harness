@@ -11,12 +11,16 @@ from research_harness.domain.ids import (
     ArtifactId,
     BlockId,
     ClaimId,
+    ContextPackId,
+    ConversationSessionId,
     DecisionId,
     EvidenceId,
     InterpretationId,
+    MessageId,
     QuestionId,
     ResearchId,
     SearchRunId,
+    SessionAttachmentId,
     SynthesisId,
     VersionId,
     WorkId,
@@ -35,6 +39,10 @@ ALL_PREFIXES = {
     DecisionId: "D",
     SearchRunId: "SR",
     SynthesisId: "S",
+    ConversationSessionId: "CS",
+    MessageId: "M",
+    SessionAttachmentId: "SA",
+    ContextPackId: "CP",
 }
 
 

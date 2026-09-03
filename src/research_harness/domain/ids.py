@@ -11,6 +11,10 @@ Grammar::
 
 The optional ``-<digits>`` suffix exists for ``Version`` and ``Artifact`` ids, whose
 number mirrors the owning ``Work`` and whose suffix counts within that work.
+
+Prefixes are dispatched longest-first (:data:`_BY_PREFIX_LENGTH`), which is what keeps
+``SR`` distinct from ``S``, ``CS`` and ``CP`` from ``C``, and ``SA`` from ``S``. A new id
+type therefore only has to declare its prefix and join :data:`ID_TYPES`.
 """
 
 from __future__ import annotations
@@ -30,12 +34,16 @@ __all__ = [
     "ArtifactId",
     "BlockId",
     "ClaimId",
+    "ContextPackId",
+    "ConversationSessionId",
     "DecisionId",
     "EvidenceId",
     "InterpretationId",
+    "MessageId",
     "QuestionId",
     "ResearchId",
     "SearchRunId",
+    "SessionAttachmentId",
     "SynthesisId",
     "VersionId",
     "WorkId",
@@ -253,16 +261,48 @@ class SynthesisId(ResearchId):
     prefix = "S"
 
 
+class ConversationSessionId(ResearchId):
+    """`CS####` - a durable conversation session bound to one project (Product 39)."""
+
+    __slots__ = ()
+    prefix = "CS"
+
+
+class MessageId(ResearchId):
+    """`M####` - one message in a session; numbered per project, not per session."""
+
+    __slots__ = ()
+    prefix = "M"
+
+
+class SessionAttachmentId(ResearchId):
+    """`SA####` - a file attached to a session, session-only until saved to the corpus."""
+
+    __slots__ = ()
+    prefix = "SA"
+
+
+class ContextPackId(ResearchId):
+    """`CP####` - the context assembled for one model call, and its `Context used` receipt."""
+
+    __slots__ = ()
+    prefix = "CP"
+
+
 #: Longest prefix first so that ``SR`` wins over ``S`` and ``RQ`` over nothing.
 ID_TYPES: tuple[type[ResearchId], ...] = (
     ArtifactId,
     BlockId,
     ClaimId,
+    ContextPackId,
+    ConversationSessionId,
     DecisionId,
     EvidenceId,
     InterpretationId,
+    MessageId,
     QuestionId,
     SearchRunId,
+    SessionAttachmentId,
     SynthesisId,
     VersionId,
     WorkId,
