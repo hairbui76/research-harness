@@ -322,6 +322,23 @@ def test_the_policy_is_asked_before_the_runtime(project: CapabilityContext, code
     assert not row.available and "privacy policy" in (row.unavailable_reason or "")
 
 
+def test_the_scan_view_and_the_catalog_agree_about_a_refused_entry(
+    project: CapabilityContext, codex: FakeCli
+) -> None:
+    """The settings screen and the model selector read one verdict, not two (spec §11)."""
+    from research_harness.privacy.policy import EgressPolicy
+
+    configure_cli_provider(project, ConfigureCliProviderRequest(name="codex-sub", runtime="codex"))
+    project.repo.update_config(EgressPolicy(external_models="disabled"))
+    fresh = open_context(project.root, HUMAN_ACTOR)
+
+    view = scan_cli_runtimes(fresh, ScanCliRuntimesRequest()).configured[0]
+    row = list_providers(fresh, ListProvidersRequest()).models[0]
+
+    assert not view.available and "privacy policy" in (view.unavailable_reason or "")
+    assert view.unavailable_reason == row.unavailable_reason
+
+
 # -- test ----------------------------------------------------------------------
 
 
@@ -374,6 +391,22 @@ def test_the_test_call_reports_a_failure_without_a_secret(
     report = test_cli_provider(project, TestCliProviderRequest(name="codex-sub"))
     assert not report.ok and report.diagnostic == "unsupported_model"
     assert "sk-proj" not in report.model_dump_json()
+
+
+def test_the_test_call_says_so_when_the_entry_is_switched_off(
+    project: CapabilityContext, codex: FakeCli
+) -> None:
+    """A disabled entry is not routed, so testing it is answered rather than crashed."""
+    configure_cli_provider(project, ConfigureCliProviderRequest(name="codex-sub", runtime="codex"))
+    configure_cli_provider(
+        project, ConfigureCliProviderRequest(name="codex-sub", runtime="codex", enabled=False)
+    )
+
+    report = test_cli_provider(project, TestCliProviderRequest(name="codex-sub"))
+
+    assert not report.ok and report.diagnostic == "unavailable"
+    assert "disabled" in report.message
+    assert codex.runs() == []
 
 
 def test_the_test_call_is_human_only_even_though_it_is_a_read(
