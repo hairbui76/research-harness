@@ -1,0 +1,156 @@
+{
+  "name": "research-harness",
+  "displayName": "Research Harness",
+  "description": "Attach, audit, and trace manuscript sentences against the Research Harness accepted research graph.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "publisher": "research-harness",
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=20"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "latex",
+    "research",
+    "manuscript",
+    "citations"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:latex",
+    "onLanguage:tex",
+    "onCommand:researchHarness.auditSelection",
+    "onCommand:researchHarness.attachClaim",
+    "onCommand:researchHarness.createClaimFromSelection",
+    "onCommand:researchHarness.addNote",
+    "onCommand:researchHarness.openEvidence",
+    "onCommand:researchHarness.revalidateAnchors",
+    "onCommand:researchHarness.showClaimUnderCursor"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "researchHarness.auditSelection",
+        "title": "Audit Selection",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.attachClaim",
+        "title": "Attach Claim",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.createClaimFromSelection",
+        "title": "Create Claim from Selection",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.addNote",
+        "title": "Add Research Note",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.openEvidence",
+        "title": "Open Evidence",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.revalidateAnchors",
+        "title": "Revalidate Anchors",
+        "category": "Research"
+      },
+      {
+        "command": "researchHarness.showClaimUnderCursor",
+        "title": "Show Claim Under Cursor",
+        "category": "Research"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "researchHarness.auditSelection",
+          "when": "editorLangId =~ /^(latex|tex)$/",
+          "group": "researchHarness@1"
+        },
+        {
+          "command": "researchHarness.attachClaim",
+          "when": "editorLangId =~ /^(latex|tex)$/",
+          "group": "researchHarness@2"
+        },
+        {
+          "command": "researchHarness.createClaimFromSelection",
+          "when": "editorLangId =~ /^(latex|tex)$/",
+          "group": "researchHarness@3"
+        },
+        {
+          "command": "researchHarness.openEvidence",
+          "when": "editorLangId =~ /^(latex|tex)$/",
+          "group": "researchHarness@4"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Research Harness",
+      "properties": {
+        "researchHarness.daemonUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
+          "markdownDescription": "Base URL of the local `research serve` daemon. Loopback only: the daemon is a single-user workstation service."
+        },
+        "researchHarness.tokenPath": {
+          "type": "string",
+          "default": ".research/daemon-token",
+          "markdownDescription": "Local daemon token file, relative to the workspace root (or absolute). Without it the extension is an agent host to the daemon: it may read, but never accept."
+        },
+        "researchHarness.webUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
+          "markdownDescription": "Base URL of the Web cockpit, used to open Claims and Evidence outside the editor. The daemon serves the built bundle at its own address; point this at `http://127.0.0.1:5173` while running the cockpit's Vite dev server."
+        },
+        "researchHarness.manuscriptRoot": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Manuscript project root, relative to the workspace root. Empty means the workspace's canonical `manuscript/` directory."
+        },
+        "researchHarness.mainTex": {
+          "type": "string",
+          "default": "main.tex",
+          "description": "Entry point of the manuscript project, relative to the manuscript root."
+        },
+        "researchHarness.auditOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Refresh manuscript diagnostics when a LaTeX file is saved."
+        },
+        "researchHarness.auditDebounceMs": {
+          "type": "number",
+          "default": 750,
+          "minimum": 0,
+          "description": "How long to wait after the last save before re-running the manuscript audit."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc --noEmit && node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "package": "npx --yes @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.20.0",
+    "@types/vscode": "~1.90.0",
+    "esbuild": "^0.25.12",
+    "eslint": "^9.39.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^3.2.4"
+  }
+}

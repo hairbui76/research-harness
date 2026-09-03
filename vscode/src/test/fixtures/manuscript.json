@@ -1,0 +1,54 @@
+{
+  "bibliography": "% `traffic2024` resolves; `missing2023` deliberately does not.\n\n@inproceedings{traffic2024,\n  author    = {Researcher, A. and Collaborator, B.},\n  title     = {Deep Representations for Encrypted Network Traffic},\n  booktitle = {Proceedings of the Example Conference on Networking}\n}\n",
+  "main_tex": "main.tex",
+  "note": "Written by vscode/scripts/export_fixtures.py from research_harness.manuscript.latex. Do not edit by hand.",
+  "sentences": [
+    {
+      "char_end": 373,
+      "char_start": 244,
+      "citation_keys": [
+        "traffic2024"
+      ],
+      "file": "main.tex",
+      "fingerprint": "sha256:a58f01e52037a241dc4ec04ff37a8f5696902f21070ec4197f85ff1dabcfa7b2",
+      "line_end": 15,
+      "line_start": 14,
+      "normalized_text": "Every encrypted traffic classifier fails under sustained load, and no prior work reports the size of the gap."
+    },
+    {
+      "char_end": 484,
+      "char_start": 375,
+      "citation_keys": [
+        "traffic2024"
+      ],
+      "file": "main.tex",
+      "fingerprint": "sha256:a80feb2ac9f49a977ffddb302483f22b8f296605cd45fa0cedb27daf6e9bc688",
+      "line_end": 18,
+      "line_start": 17,
+      "normalized_text": "Byte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out protocol."
+    },
+    {
+      "char_end": 634,
+      "char_start": 530,
+      "citation_keys": [
+        "missing2023"
+      ],
+      "file": "main.tex",
+      "fingerprint": "sha256:f7a55cc816fe01edc8339cd1cb39cd0a4748525059a530904df8214cdb518452",
+      "line_end": 21,
+      "line_start": 20,
+      "normalized_text": "Prior surveys, e.g. the review of, report no comparable figure for the same setting."
+    },
+    {
+      "char_end": 710,
+      "char_start": 636,
+      "citation_keys": [],
+      "file": "main.tex",
+      "fingerprint": "sha256:55f1fa4ff4d1952235a4beea3cf77db9c93f78ab88f43944c1a16ba3b496a2a3",
+      "line_end": 23,
+      "line_start": 23,
+      "normalized_text": "Our sweep shows that detection quality degrades as the offered load grows."
+    }
+  ],
+  "source": "% A fixture manuscript. No number here measures anything real.\n\\documentclass{article}\n\\usepackage{natbib}\n\n\\title{Encrypted Traffic Under Sustained Load}\n\\author{R. Hale}\n\n\\begin{document}\n\\maketitle\n\n\\section{Introduction}\n\\label{sec:intro}\n\nEvery encrypted traffic classifier fails under sustained load, and no prior work\nreports the size of the gap \\citep{traffic2024}.\n\nByte-level tokenization reaches an F1 of 94.32 on CICIDS2017 under the held-out\nprotocol \\citep{traffic2024}.  % the decimal must not split this sentence\n\nPrior surveys, e.g. the review of \\citet{missing2023}, report no comparable figure\nfor the same setting.\n\nOur sweep shows that detection quality degrades as the offered load grows.\n\n\\begin{equation}\n  F_1 = 2 \\cdot \\frac{P \\cdot R}{P + R}\n\\end{equation}\n\n\\bibliographystyle{plainnat}\n\\bibliography{references}\n\n\\end{document}\n"
+}

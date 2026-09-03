@@ -1,0 +1,5 @@
+# esbuild ships a prebuilt native binary installed by a postinstall script. pnpm 11 refuses
+# to run any dependency's build script unless it is allowed here, and refuses the whole
+# install when an unlisted one exists - so `pnpm install` needs this to succeed at all.
+allowBuilds:
+  esbuild: true
