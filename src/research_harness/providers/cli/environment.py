@@ -12,6 +12,7 @@ import os
 import re
 from collections.abc import Mapping
 from pathlib import Path
+from types import MappingProxyType
 
 from research_harness.providers.cli.types import CliRuntimeDef
 
@@ -77,7 +78,12 @@ ALWAYS_DROP: tuple[re.Pattern[str], ...] = tuple(
     )
 )
 
-FIXED_ENV: Mapping[str, str] = {"NO_COLOR": "1", "TERM": "dumb", "RESEARCH_HARNESS_BOUNDED": "1"}
+FIXED_ENV: Mapping[str, str] = MappingProxyType(
+    {"NO_COLOR": "1", "TERM": "dumb", "RESEARCH_HARNESS_BOUNDED": "1"}
+)
+"""Machine-readable output and the marker a child can read to know it is bounded. A read-only
+view on purpose: it is applied to every bounded run, so an accidental edit anywhere in the
+process would change every one of them."""
 
 
 def _dropped(key: str) -> bool:
@@ -87,7 +93,12 @@ def _dropped(key: str) -> bool:
 def bounded_environment(
     definition: CliRuntimeDef, base: Mapping[str, str], *, executable: Path | None = None
 ) -> dict[str, str]:
-    """Allow-list, then deny-list (which wins), then the fixed and per-runtime values.
+    """Allow-list, then deny-list (which wins), then the per-runtime and fixed values.
+
+    Order is the point twice over. The deny-list wins over a definition's `env_keep`, so a
+    definition cannot re-admit an API key; and `FIXED_ENV` is applied *after* `env_set`, so
+    a definition cannot turn colour back on, restore a rich `TERM`, or unset the bounded
+    marker. A definition configures its own runtime; it does not configure the harness.
 
     `executable` leads `PATH` only when it is absolute. A definition's `executable` is a
     bare name, and prepending its parent would put `.` at the head of the search path of
@@ -102,8 +113,8 @@ def bounded_environment(
         and key not in definition.env_drop
         and not _dropped(key)
     }
-    env.update(FIXED_ENV)
     env.update({key: value for key, value in definition.env_set.items() if not _dropped(key)})
+    env.update(FIXED_ENV)
     if executable is not None and executable.is_absolute():
         parent = str(executable.parent)
         parts = [part for part in env.get("PATH", "").split(os.pathsep) if part and part != parent]

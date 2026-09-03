@@ -591,3 +591,21 @@ def test_a_runtime_that_never_reads_its_stdin_fails_on_the_request_deadline(
     assert "never read the prompt from its stdin" in caught.value.message
     assert time.monotonic() - started < 20
     assert adapter.last_process is not None and not adapter.last_process.running
+
+
+def test_a_failure_message_redacts_the_home_of_the_environment_the_child_got(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """The provider knows the child's `HOME`; a failure message must not print it raw.
+
+    `redact` falls back to *this* process's home, which is not the home a provider built
+    with an explicit `env` handed the child -- exactly the case a daemon or a test creates.
+    """
+    home = str(codex.root / "home")
+    codex.set_run(lines=[], stderr=f"boom while reading {home}/.codex/auth.json", exit=3)
+
+    with pytest.raises(CliTransportError) as caught:
+        provider(codex).complete(model_request)
+
+    assert "~/.codex/auth.json" in caught.value.message
+    assert home not in caught.value.message

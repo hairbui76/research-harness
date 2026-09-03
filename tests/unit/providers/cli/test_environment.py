@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pytest
+
 from research_harness.providers.cli.environment import ALWAYS_DROP, FIXED_ENV, bounded_environment
 from tests.unit.providers.cli.test_registry import definition
 
@@ -82,3 +84,17 @@ def test_fixed_values_make_output_machine_readable() -> None:
     assert (
         env["NO_COLOR"] == "1" and env["TERM"] == "dumb" and env["RESEARCH_HARNESS_BOUNDED"] == "1"
     )
+
+
+def test_a_definition_can_never_override_a_fixed_value() -> None:
+    """`env_set` is a definition's own configuration, not a way past the bounded fixtures."""
+    env = bounded_environment(
+        definition(env_set={"NO_COLOR": "0", "TERM": "xterm-256color", "OPENCODE_X": "1"}), BASE
+    )
+    assert env["NO_COLOR"] == "1" and env["TERM"] == "dumb"
+    assert env["RESEARCH_HARNESS_BOUNDED"] == "1" and env["OPENCODE_X"] == "1"
+
+
+def test_the_fixed_environment_cannot_be_edited_in_place() -> None:
+    with pytest.raises(TypeError):
+        FIXED_ENV["NO_COLOR"] = "0"  # type: ignore[index]

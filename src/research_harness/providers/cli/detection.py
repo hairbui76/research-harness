@@ -48,7 +48,6 @@ __all__ = [
 
 ProbeRunner = Callable[..., ProbeOutcome]
 _Probe = Callable[[Sequence[str], float], ProbeOutcome]
-VERSION_PROBE_TIMEOUT = 3.0
 UNKNOWN_AUTH_GUIDANCE = "authentication is verified on the first request; {login} if it fails"
 
 

@@ -431,9 +431,8 @@ class CliModelProvider(ModelProvider):
         try:
             check_args(argv, runtime=self.runtime.id)
         except RegistryError as exc:
-            home = None if self._env is None else self._env.get("HOME")
             raise CliResponseError(
-                f"{self._who()}: {redact(str(exc), home=home)}",
+                f"{self._who()}: {redact(str(exc), home=self._child_home())}",
                 runtime=self.runtime.id,
                 diagnostic="invalid_invocation",
             ) from exc
@@ -478,10 +477,7 @@ class CliModelProvider(ModelProvider):
         path = self._executable or self._resolved
         if path is None:
             return None
-        home = (
-            None if self._env is None else (self._env.get("HOME") or self._env.get("USERPROFILE"))
-        )
-        return _redact_path(path, home=home)
+        return _redact_path(path, home=self._child_home())
 
     def _failure(self, process: BoundedProcess, **fields: Any) -> Exception:
         return classify_failure(
@@ -491,8 +487,17 @@ class CliModelProvider(ModelProvider):
             stderr_tail=process.stderr_tail(),
             login_guidance=self.runtime.login_guidance,
             exit_code=fields.pop("exit_code", process.exit_code),
+            # The child's own home, not this process's: a provider built with an explicit
+            # `env` -- a daemon, a test -- gave the runtime a different one, and `redact`
+            # can only replace a home it has been told about (spec §19).
+            home=self._child_home(),
             **fields,
         )
+
+    def _child_home(self) -> str | None:
+        if self._env is None:
+            return None
+        return self._env.get("HOME") or self._env.get("USERPROFILE")
 
 
 def _redact_path(path: Path, *, home: str | None = None) -> str:
