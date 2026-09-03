@@ -223,8 +223,8 @@ Last run on 2026-09-03: the four gate modules **50 passed**;
 `tests/e2e/invariants/test_v11_invariants.py` **23 passed**; `tests/perf/test_graph_budgets.py`
 **14 passed**; the Design System **920 passed in 69 files**, `lint` clean (76 gated contrast
 pairs pass, raw-palette lint clean over `design/src` *and* `web/src`); the Web client
-**210 passed, 2 failed in 1 file** — the two failures are in the conversation route that was
-still being written (see *Web halves in progress* below).
+**280 passed in 19 files** at the final gate, once the conversation, attachments, references
+and manuscript routes had landed (see *Web halves* below).
 
 ### Gate P18 — conversation workspace · `tests/e2e/test_conversation_gate.py` (10 tests)
 
@@ -334,18 +334,24 @@ known gaps are in [`docs/architecture/design-system.md`](../architecture/design-
 | P | LaTeX rendering and source ownership | `test_v11_invariants.py` §P (6 tests, including `test_p_chat_mathematics_is_never_compiled_and_never_normalized`) and Gate P21 above; the browser half (Markdown + KaTeX, raw HTML never rendered) is `web/src/render/markdown.test.tsx` | pass |
 | Q | shared Design System integrity | Gate DS above (a JavaScript gate: `pnpm --filter @research-harness/design lint` + `test`, and the raw-palette lint over `web/src`) | pass, with the visual-regression substitution noted |
 
-### Web halves in progress
+### Web halves
 
-Two v1.1 Web surfaces were still being written when this matrix was compiled, and the PM
-re-runs the suite at the final gate:
+The four v1.1 Web surfaces were still being written when this matrix was first compiled;
+all four landed the same day and the final gate ran the whole Web suite green
+(`pnpm --filter research-harness-web test`: 280 passed in 19 files; `typecheck`, `lint`,
+`build` clean; the raw-palette lint over `web/src` clean).
 
-| surface | files | state on 2026-09-03 |
+| surface | files | final state on 2026-09-03 |
 |---|---|---|
-| conversation route | `web/src/views/conversation/ConversationRoute.tsx`, `ConversationRoute.test.tsx`, `mappers.ts`, `mappers.test.ts`; `web/src/app/routes.tsx` | **in progress** — 2 of the route's tests fail (`Replayed from the start.` appears more than once); the other 210 Web tests pass |
-| manuscript workspace route | `web/src/views/manuscript/{ManuscriptWorkspace,EditorPane,PreviewPane,AuditPane,SuggestDialog}.tsx`, `useBuild.ts`, `useSynctex.ts`, `useSuggestion.ts`, `useManuscriptFiles.ts`, `mappers.ts` and their tests | **in progress** — collected and passing at the time of writing, replacing the v1.0 `web/src/views/Manuscript.tsx` |
+| conversation route (P18) | `web/src/views/conversation/{ConversationRoute,Transcript,ComposerPane,ReceiptPanel,PromoteDialog,InspectorPane,SessionListPane}.tsx`, the `use*` hooks, `mappers.ts`; `web/src/app/routes.tsx`, `Layout.tsx` | **landed** — `ConversationRoute.test.tsx` and `mappers.test.ts` cover conversation spec §10 items 1–7 from the Web side (reopen/continue, receipt with accepted evidence and a prior-session excerpt, discrepancy, promote to a claim candidate, evidence not offered, private omission reason, `@E####` → object → message), plus draft survival, streaming interruption and mid-stream reload |
+| attachments (P19) | `web/src/views/conversation/attachments/*` | **landed** — `attachments.test.tsx` and `mappers.test.ts` cover attachments spec §9 items 1–7 (preview without corpus calls, both ids sent, blocked send keeps draft and files, save to an existing Work, same bytes → existing Artifact, failed promotion retryable, no evidence created) |
+| references and inspector (P20) | `web/src/views/conversation/references/*`, `/source/:artifactId` | **landed** — `references.test.tsx` and `mappers.test.ts` cover autocomplete → token → exact resolved id, unresolved/stale/private marks, every `rh://` kind including a broken link, Claim ↔ Evidence ↔ anchor traversal with candidate relations labelled, a private message absent under project visibility, and the graph-unavailable fallback |
+| manuscript workspace route (P21) | `web/src/views/manuscript/*`, replacing the v1.0 `web/src/views/Manuscript.tsx` | **landed** — `ManuscriptWorkspace.test.tsx` and `mappers.test.ts` cover LaTeX spec §10 items 1, 2, 4, 5, 6 from the Web side (open/edit/save/conflict, compile success and failure with the last good PDF, SyncTeX both ways and honest unavailability, suggest → apply refused when blocked, unsaved content surviving a failed compile) |
 
-Neither affects the Python gates: every clause above is demonstrated through the capability
-layer and the CLI, which is what the Web routes call.
+`tests/contract/protocol/test_web_routes.py` pins every hand-declared field of these
+surfaces' DTOs to the schema the daemon publishes (26 passed). None of this affects the
+Python gates: every clause above is demonstrated through the capability layer and the CLI,
+which is what the Web routes call.
 
 ## Open items
 

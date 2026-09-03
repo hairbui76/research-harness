@@ -1414,8 +1414,10 @@ This track turns the proven research core into the primary daily workspace descr
 > **Substitution:** there is no browser in this workspace, so per-theme × per-density DOM
 > snapshots plus a resolved-token snapshot stand in for screenshot regression. That is the
 > gate's form here, not a claim to have run screenshot tests.
-> **Deferred:** the conversation and manuscript *routes* that compose the conversation and
-> manuscript component layers are the Phase 18 and 21 Web halves; see their status blocks.
+> **Composition:** the conversation and manuscript *routes* that compose the conversation
+> and manuscript component layers landed the same day (`web/src/views/conversation/`,
+> `web/src/views/manuscript/`); the final gate ran the Web suite at 280 passed with the
+> raw-palette lint clean over `web/src`. See the Phase 18–21 status blocks.
 
 # Phase 18 — Conversation Workspace Foundation
 
@@ -1453,9 +1455,10 @@ This track turns the proven research core into the primary daily workspace descr
 > `tests/e2e/test_conversation_gate.py` (10 tests), plus 68 unit, 40 integration, 30
 > conversation-store, 35 capability-contract and 9 SSE-contract tests; the whole gate is
 > re-run with `.research/` deleted. Recorded in ADR-025.
-> **In progress:** the `/` three-pane Web route (`web/src/views/conversation/`,
-> `web/src/app/routes.tsx`) — 2 of its own tests were failing when this block was written;
-> the PM re-runs `pnpm --filter research-harness-web test` at the final gate.
+> **Web route:** the `/` three-pane route (`web/src/views/conversation/`,
+> `web/src/app/routes.tsx`) landed with its attachments and graph-reference layers;
+> `ConversationRoute.test.tsx`, `attachments.test.tsx` and `references.test.tsx` cover the
+> Web side of the same clauses, and the final gate ran the Web suite at 280 passed.
 > **Deferred:** a real-provider run. Both API keys in this environment are rejected
 > upstream, so every send was scripted; provider neutrality itself is covered by §42 A.
 
@@ -1575,7 +1578,7 @@ This track turns the proven research core into the primary daily workspace descr
 
 **Gate P21 / v1.1 conversation-first milestone:** compile a real project and inspect its PDF; retain the last good PDF on a new compile failure; navigate source/PDF when mapping exists; distinguish compiler and scientific errors; and apply a model suggestion only through an explicit reviewed diff.
 
-> **Status 2026-09-03 — met on a real engine; the Web route is in progress.** Compilation is
+> **Status 2026-09-03 — met on a real engine, Web route landed.** Compilation is
 > a bounded, confined local process (allowlisted engine and flags, scrubbed environment, no
 > shell escape, `tectonic --untrusted`, `latexmk -norc`, its own process group and timeout),
 > outputs are disposable, the last good PDF survives a failure and is labelled stale, and
@@ -1588,8 +1591,10 @@ This track turns the proven research core into the primary daily workspace descr
 > `tectonic 0.17.0` — a real PDF in 0.38 s, SyncTeX in both directions, and a real
 > `Undefined control sequence` at `main.tex:28` that kept the last good PDF. Recorded in
 > ADR-028 and `docs/plans/dogfood-2026-09-03-v1.1.md` §6.
-> **In progress:** the Web manuscript workspace route (`web/src/views/manuscript/`),
-> replacing the v1.0 Manuscript page; the PM re-runs the Web suite at the final gate.
+> **Web route:** the manuscript workspace (`web/src/views/manuscript/`) replaced the v1.0
+> Manuscript page — file tree, editor with hash-checked saves, real PDF preview with the
+> last-good banner, two diagnostics lists, SyncTeX both ways, candidate diffs;
+> `ManuscriptWorkspace.test.tsx` covers the Web side of the clauses.
 > **Deferred:** the suite's own engine is a hermetic fake toolchain, and the real-toolchain
 > integration test stays opt-in (skipped when no engine is installed), so CI does not
 > depend on a TeX distribution.
@@ -1944,12 +1949,12 @@ When implementation starts, execute in this order:
 18. Phase 17 — hardening             → v1.0
 19. Review and explicitly approve the written conversation-first design specifications   ✓ 2026-09-03
 20. Establish the Research Harness Design System foundation                                ✓ Gate DS met
-21. Phase 18 — conversation workspace foundation                                           ✓ Gate P18 met (Web route in progress)
+21. Phase 18 — conversation workspace foundation                                           ✓ Gate P18 met
 22. Phase 19 — research attachments                                                        ✓ Gate P19 met
 23. Phase 20 — unified ResearchGraph index                                                 ✓ Gate P20 met
-24. Phase 21 — LaTeX manuscript workspace → v1.1 conversation-first milestone              ✓ Gate P21 met (Web route in progress)
+24. Phase 21 — LaTeX manuscript workspace → v1.1 conversation-first milestone              ✓ Gate P21 met → v1.1
 ```
 
 The first implementation milestone worth protecting at all costs is **v0.1 Evidence Loop**. If that loop is trustworthy, every later interface has a sound scientific substrate. If it is not trustworthy, Web/Claude/ChatGPT integrations only make unreliable state easier to access.
 
-Steps 19–24 were authorised on 2026-09-03 by the researcher's explicit instruction to finish this roadmap, which is the "proceed" the *Next Product Track* required; they were executed against `docs/plans/v1.1-implementation-plan.md`. Each gate's dated status block above says what is met, what evidence demonstrates it, and what is deferred. Two Web routes — the `/` conversation workspace and the manuscript workspace — were still being written when the status blocks were dated; nothing beyond Phase 21 is authorised, and the later extensions (v1.2 onward) still need their own explicit instruction.
+Steps 19–24 were authorised on 2026-09-03 by the researcher's explicit instruction to finish this roadmap, which is the "proceed" the *Next Product Track* required; they were executed against `docs/plans/v1.1-implementation-plan.md`. Each gate's dated status block above says what is met, what evidence demonstrates it, and what is deferred. All four Web surfaces (the `/` conversation workspace with its attachments and references layers, and the manuscript workspace) landed the same day and passed the final gate. Nothing beyond Phase 21 is authorised, and the later extensions (v1.2 onward) still need their own explicit instruction.
