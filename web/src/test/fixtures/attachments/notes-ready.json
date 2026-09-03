@@ -1,0 +1,18 @@
+{
+  "id": "SA0004",
+  "session": "CS0001",
+  "state": "ready",
+  "filename": "sweep-notes.md",
+  "media_type": "text/markdown",
+  "size_bytes": 2048,
+  "content_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+  "page_count": null,
+  "description": null,
+  "visibility": "private",
+  "failure_reason": null,
+  "work": null,
+  "version": null,
+  "artifact": null,
+  "created_at": "2026-09-03T15:11:00Z",
+  "updated_at": "2026-09-03T15:11:00Z"
+}

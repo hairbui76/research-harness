@@ -1,0 +1,35 @@
+{
+  "session": "CS0001",
+  "provider": "local-small",
+  "model": "text-1",
+  "ok": false,
+  "refusal": "2 attachment(s) cannot be sent to local-small/text-1: SA0001 figure-3-latency.png: local-small/text-1 does not accept image/png; SA0002 lee-2024-hydrogel-preprint.pdf: local-small/text-1 does not accept application/pdf",
+  "items": [
+    {
+      "attachment": "SA0001",
+      "filename": "figure-3-latency.png",
+      "media_type": "image/png",
+      "size_bytes": 184320,
+      "state": "ready",
+      "disposition": "omitted",
+      "ok": false,
+      "reason": "local-small/text-1 does not accept image/png",
+      "omission": "unsupported_media",
+      "suggested_model": "vendor-vision/vision-1",
+      "page_count": null
+    },
+    {
+      "attachment": "SA0002",
+      "filename": "lee-2024-hydrogel-preprint.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 3400000,
+      "state": "ready",
+      "disposition": "omitted",
+      "ok": false,
+      "reason": "local-small/text-1 does not accept application/pdf",
+      "omission": "unsupported_media",
+      "suggested_model": "vendor-vision/vision-1",
+      "page_count": 14
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "session": "CS0001",
+  "provider": "vendor-vision",
+  "model": "vision-1",
+  "ok": true,
+  "refusal": null,
+  "items": [
+    {
+      "attachment": "SA0001",
+      "filename": "figure-3-latency.png",
+      "media_type": "image/png",
+      "size_bytes": 184320,
+      "state": "ready",
+      "disposition": "sent",
+      "ok": true,
+      "reason": null,
+      "omission": null,
+      "suggested_model": null,
+      "page_count": null
+    },
+    {
+      "attachment": "SA0002",
+      "filename": "lee-2024-hydrogel-preprint.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 3400000,
+      "state": "ready",
+      "disposition": "sent",
+      "ok": true,
+      "reason": null,
+      "omission": null,
+      "suggested_model": null,
+      "page_count": 14
+    }
+  ]
+}

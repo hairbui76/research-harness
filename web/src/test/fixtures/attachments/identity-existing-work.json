@@ -1,0 +1,19 @@
+{
+  "attachment": "SA0002",
+  "choice": "existing_work",
+  "outcome": "same_work",
+  "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+  "requires_confirmation": false,
+  "duplicate": false,
+  "parsable": true,
+  "reasons": [
+    "the title matches W0007 'Hydrogel swelling under cyclic load'; the content hash does not."
+  ],
+  "work": "W0007",
+  "version": null,
+  "artifact": null,
+  "title": "Hydrogel swelling under cyclic load",
+  "doi": "10.1234/hydrogel.2024",
+  "arxiv": null,
+  "year": 2024
+}

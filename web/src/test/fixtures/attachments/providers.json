@@ -1,0 +1,29 @@
+{
+  "count": 2,
+  "models": [
+    {
+      "id": "local-small",
+      "label": "local-small/text-1",
+      "provider": "local_openai_compatible",
+      "egress_class": "local",
+      "input_media": ["text/plain"],
+      "context_tokens": 32000,
+      "vision": false,
+      "available": true,
+      "unavailable_reason": null,
+      "default": true
+    },
+    {
+      "id": "vendor-vision",
+      "label": "vendor-vision/vision-1",
+      "provider": "openai",
+      "egress_class": "external",
+      "input_media": ["application/pdf", "image/png", "text/plain"],
+      "context_tokens": 200000,
+      "vision": true,
+      "available": true,
+      "unavailable_reason": null,
+      "default": false
+    }
+  ]
+}
