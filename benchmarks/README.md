@@ -126,3 +126,29 @@ RESEARCH_HARNESS_PERF=1 uv run pytest tests/perf -q  # ~20 s
 Set `RESEARCH_HARNESS_PERF_SCALE` to change the corpus size. The budgets there are several
 times looser than the measured numbers so a slow CI machine does not fail the build; the
 budgets a researcher should actually get are in the plan document.
+
+## The ResearchGraph benchmark (`benchmarks/graph/`)
+
+A separate corpus and a separate measurement, because the graph's budgets (graph spec §9)
+are about how long a lookup and a two-hop walk take once the index exists, not about how
+long it took to write the corpus:
+
+```bash
+# the agreed personal-scale graph corpus: 200 works, 20,000 blocks, 10,000 evidence,
+# 1,000 claims, 40 sessions (14 private), 1,200 messages, 200 attachments
+uv run python -m benchmarks.graph.run_graph_benchmarks --root /tmp/graph --scale 1.0 \
+    --json /tmp/graph.json --markdown /tmp/graph.md
+
+# measure the corpus already there, without regenerating it
+uv run python -m benchmarks.graph.run_graph_benchmarks --root /tmp/graph --reuse
+
+# corpus only
+uv run python -m benchmarks.graph.generate_graph_corpus --root /tmp/graph --scale 1.0
+```
+
+The canonical half comes from `generate_corpus.generate_workspace` at the fraction that
+yields 200 works, so the two benchmarks share one generator; the conversation half is
+written through `ConversationStore`. The measurement itself is
+`research_harness.graph.bench`, which ships with the package so
+`tests/perf/test_graph_budgets.py` and the Phase 20 gate test can run the same workload
+against much smaller graphs. The exit code is non-zero when any mode misses its budget.

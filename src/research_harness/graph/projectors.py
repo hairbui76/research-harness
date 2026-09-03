@@ -1363,9 +1363,16 @@ def default_projectors() -> tuple[Projector, ...]:
 
     Order matters only for readability of a dump: units are keyed by source, and the writer
     applies them independently.
+
+    `SessionProjector` is imported here rather than at module scope because it builds on
+    this module's context and unit types; the deferred import keeps the dependency in one
+    direction.
     """
+    from research_harness.graph.sessions import SessionProjector
+
     return (
         ProjectProjector(),
+        SessionProjector(),
         CorpusProjector(),
         DocumentProjector(),
         EvidenceProjector(),

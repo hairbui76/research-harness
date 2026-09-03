@@ -290,12 +290,17 @@ def autocomplete(
     prefix: str,
     *,
     kinds: Sequence[NodeKind] | None = None,
+    visibility: Sequence[GraphVisibility] | None = None,
     limit: int = 10,
 ) -> list[NodeRecord]:
     """Nodes whose identity starts with ``prefix``, then nodes whose text matches it.
 
     The composer types `@E04`; identity matches come first because that is what the sigil
     means, and label matches fill the rest of the list so `@CICIDS` finds the work too.
+
+    ``visibility`` restricts the answer to an egress class, which is what a caller
+    completing on behalf of something off this machine must pass; the researcher's own
+    composer completes over everything and passes nothing.
     """
     needle = str(prefix).strip().lstrip("@")
     if not needle or limit <= 0:
@@ -305,6 +310,9 @@ def autocomplete(
     )
     if kinds:
         statement = statement.where(NODES.c.kind.in_([kind.value for kind in kinds]))
+    if visibility:
+        statement = statement.where(NODES.c.visibility.in_([value.value for value in visibility]))
+    allowed = None if not visibility else frozenset(visibility)
     with engine.connect() as connection:
         rows = connection.execute(statement.order_by(NODES.c.identity).limit(limit)).mappings()
         found = [_node(row) for row in rows]
@@ -313,6 +321,8 @@ def autocomplete(
         seen = {record.identity for record in found}
         for hit in _fts_hits(connection, needle, kinds=kinds, limit=limit, prefix=True):
             if hit.node.identity in seen:
+                continue
+            if allowed is not None and hit.node.visibility not in allowed:
                 continue
             seen.add(hit.node.identity)
             found.append(hit.node)
@@ -698,9 +708,18 @@ def search(
     identities: set[str] | None = None
     if neighbourhood is not None:
         identities = {str(neighbourhood)}
+        # The neighbourhood walk takes the caller's visibility filter, not just the hit
+        # list: filtering only the results would let a two-hop search reach a node through
+        # a private one, which is the bypass graph spec §8 forbids.
         identities.update(
             neighbour.node.identity
-            for neighbour in neighbors(engine, neighbourhood, hops=hops, limit=0)
+            for neighbour in neighbors(
+                engine,
+                neighbourhood,
+                hops=hops,
+                visibility=None if filters is None else filters.visibility,
+                limit=0,
+            )
         )
     with engine.connect() as connection:
         hits = _fts_hits(

@@ -41,6 +41,7 @@ __all__ = [
     "NEW_REFERENCE_PREFIXES",
     "REFERENCE_SIGIL",
     "SCIENTIFIC_EDGE_KINDS",
+    "ContextFragment",
     "DeepLink",
     "DeepLinkKind",
     "EdgeKind",
@@ -444,3 +445,51 @@ def _as_int(value: str | None, key: str) -> int | None:
         return int(value)
     except ValueError:
         raise ValueError(f"{key} must be an integer, got {value!r}") from None
+
+
+# --- assembled context ------------------------------------------------------
+
+
+class ContextFragment(DomainModel):
+    """One provenance-bearing piece of assembled context (graph spec §7).
+
+    A fragment is what the graph offers a context assembler: the stable identity, the
+    durable source it came from, the authority and egress class it carries, and the path
+    of identities walked to reach it. Nothing here is a conclusion — a fragment repeats
+    projected text and says where it is from, so the receipt a researcher reads can be
+    built out of the same objects the model was shown.
+
+    ``context_class`` is a plain string holding one of the
+    `domain.conversation.ContextClass` names. It is not the enum: `domain/graph.py` and
+    `domain/conversation.py` are deliberately independent modules (see
+    :class:`GraphAuthority`), and a projection type that imported the conversation
+    vocabulary would couple the graph to the subsystem it is meant to serve.
+    """
+
+    id: NonEmptyStr
+    kind: NodeKind
+    authority: GraphAuthority
+    visibility: GraphVisibility
+    source_pointer: NonEmptyStr
+    """Durable pointer to the material: a workspace-relative path or an `rh://` link."""
+
+    relation_path: tuple[str, ...] = ()
+    """Identities walked to reach this fragment, starting at the seed and ending at ``id``."""
+
+    text: str = ""
+    tokens: int = Field(default=0, ge=0)
+    """Deterministic estimate of what including this fragment costs (characters / 4)."""
+
+    score: float = 0.0
+    """Assembly rank in ``[0, 1]``; higher is packed first. Never scientific confidence."""
+
+    context_class: NonEmptyStr
+
+    @model_validator(mode="after")
+    def _path_ends_where_the_fragment_is(self) -> ContextFragment:
+        if self.relation_path and self.relation_path[-1] != self.id:
+            raise ValueError(
+                f"relation_path must end at the fragment it describes: "
+                f"{self.relation_path[-1]!r} is not {self.id!r}"
+            )
+        return self

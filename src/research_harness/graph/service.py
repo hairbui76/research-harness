@@ -21,6 +21,7 @@ from typing import Self
 from sqlalchemy.engine import Engine
 
 from research_harness.domain.graph import (
+    ContextFragment,
     DeepLink,
     EdgeKind,
     EdgeOrigin,
@@ -28,6 +29,8 @@ from research_harness.domain.graph import (
     GraphVisibility,
     NodeKind,
 )
+from research_harness.graph.context import DEFAULT_LIMIT as CONTEXT_LIMIT
+from research_harness.graph.context import ContextAssembly, assemble
 from research_harness.graph.projectors import Projector
 from research_harness.graph.queries import (
     DEFAULT_LIMIT,
@@ -179,11 +182,18 @@ class ResearchGraph:
         return None if engine is None else _resolve(engine, reference)
 
     def autocomplete(
-        self, prefix: str, *, kinds: Sequence[NodeKind] | None = None, limit: int = 10
+        self,
+        prefix: str,
+        *,
+        kinds: Sequence[NodeKind] | None = None,
+        visibility: Sequence[GraphVisibility] | None = None,
+        limit: int = 10,
     ) -> list[NodeRecord]:
         """Composer completion for a partially typed `@` reference or name."""
         engine = self.engine
-        return [] if engine is None else _autocomplete(engine, prefix, kinds=kinds, limit=limit)
+        if engine is None:
+            return []
+        return _autocomplete(engine, prefix, kinds=kinds, visibility=visibility, limit=limit)
 
     def neighbors(
         self,
@@ -270,3 +280,52 @@ class ResearchGraph:
     def resolve_deep_link(self, link: DeepLink | str) -> ResolvedTarget:
         """Validate an `rh://` link against canonical state before anything opens it."""
         return resolve_deep_link(self._repo, link, engine=self.engine)
+
+    # -- context assembly ----------------------------------------------------
+
+    def context_fragments(
+        self,
+        *,
+        session: str | None = None,
+        query: str = "",
+        references: Sequence[str] = (),
+        visibility: str = GraphVisibility.PRIVATE.value,
+        limit: int = CONTEXT_LIMIT,
+    ) -> tuple[ContextFragment, ...]:
+        """The provenance-bearing subgraph for one context request (graph spec §7).
+
+        ``visibility`` is the egress class of the request — ``"project"`` assembles only
+        what may reach the selected provider, ``"private"`` assembles everything on this
+        machine — and it is applied at every hop, so a private prior-session node cannot
+        enter a project-visible pack through an allowed public neighbour (graph spec §8).
+
+        An absent graph returns no fragments rather than raising: the caller falls back to
+        direct canonical and transcript reads, which is what keeps a workspace usable while
+        `.research/` is missing or rebuilding.
+        """
+        return self.context_assembly(
+            session=session,
+            query=query,
+            references=references,
+            visibility=visibility,
+            limit=limit,
+        ).fragments
+
+    def context_assembly(
+        self,
+        *,
+        session: str | None = None,
+        query: str = "",
+        references: Sequence[str] = (),
+        visibility: str = GraphVisibility.PRIVATE.value,
+        limit: int = CONTEXT_LIMIT,
+    ) -> ContextAssembly:
+        """:meth:`context_fragments` plus the omissions a `Context used` receipt needs."""
+        return assemble(
+            self.engine,
+            session=session,
+            query=query,
+            references=references,
+            visibility=GraphVisibility(str(visibility)),
+            limit=limit,
+        )
