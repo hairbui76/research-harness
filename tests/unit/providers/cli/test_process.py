@@ -11,6 +11,7 @@ import pytest
 
 from research_harness.providers.cli.process import (
     CANCEL_GRACE_SECONDS,
+    MAX_LINE_BYTES,
     BoundedProcess,
     OutputLimitExceeded,
     ProcessTimeout,
@@ -144,3 +145,56 @@ def test_exiting_the_context_cancels_a_running_process(fake: FakeCli, tmp_path: 
 
 def test_the_default_grace_is_short() -> None:
     assert CANCEL_GRACE_SECONDS == 2.0
+
+
+def test_exiting_is_bounded_when_a_grandchild_inherits_the_pipes(tmp_path: Path) -> None:
+    """The child exits at once but a grandchild holds stdout/stderr open (spec §14).
+
+    Without a group kill the reader threads never see EOF, and closing a stream under a
+    blocked reader deadlocks on the buffered-reader lock -- so `with` would never return.
+    """
+    parent = tmp_path / "parent.py"
+    marker = tmp_path / "grandchild.pid"
+    parent.write_text(
+        "import subprocess, sys\n"
+        "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(3600)'])\n"
+        f"open({str(marker)!r}, 'w').write(str(child.pid))\n"
+        "print('parent done', flush=True)\n",
+        encoding="utf-8",
+    )
+    started = time.monotonic()
+    with BoundedProcess.spawn(
+        (sys.executable, str(parent)),
+        env={"PATH": os.environ["PATH"]},
+        cwd=tmp_path,
+        timeout=10,
+    ) as process:
+        assert next(process.lines()) == "parent done"
+        pid = int(marker.read_text())
+        # Pin the exact state the bug needs: the direct child is definitively reaped while
+        # the grandchild is still alive holding the inherited pipes open.
+        assert process.wait(5) == 0
+        assert os.kill(pid, 0) is None
+    assert time.monotonic() - started < 5
+    time.sleep(0.3)
+    with pytest.raises(ProcessLookupError):
+        os.kill(pid, 0)
+
+
+def test_one_enormous_line_is_capped_before_it_is_buffered(fake: FakeCli, tmp_path: Path) -> None:
+    fake.set_run(lines=["z" * (MAX_LINE_BYTES + 100)])
+    with BoundedProcess.spawn(
+        (str(fake.executable), "run"),
+        env=fake.env(),
+        cwd=tmp_path,
+        timeout=10,
+        output_limit=64 * 1024 * 1024,
+    ) as process:
+        process.close_stdin()
+        with pytest.raises(OutputLimitExceeded):
+            for _ in process.lines():
+                pass
+        # The bound, not just the detection: the reader must never have materialised the
+        # whole line, only the capped read plus the one byte that proves it overflowed.
+        assert process._bytes_read <= MAX_LINE_BYTES + 1
+    assert not process.running
