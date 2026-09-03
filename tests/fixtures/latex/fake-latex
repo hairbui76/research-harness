@@ -1,0 +1,284 @@
+#!/usr/bin/env python3
+"""A stand-in LaTeX engine: real argv, real files, no TeX distribution.
+
+The compile service is a process boundary, so the suite tests it the way it tests every
+other boundary in this repository - against a fake that behaves like the real thing rather
+than against a mock of our own call. This script accepts the argv the service builds for
+`pdflatex`/`xelatex`/`lualatex`, `latexmk`, and `tectonic`, writes the files a real engine
+writes (a valid PDF, a transcript with realistic diagnostic lines, and a small SyncTeX
+file), and exits with the code a real engine would.
+
+What it does is chosen by markers in the manuscript source, because the service - not the
+test - builds the command line:
+
+    % fake-latex: fail          exit 1 with an `! Undefined control sequence.` at the
+                                marker's own line, and write no PDF
+    % fake-latex: timeout       start a child process, record its pid, and hang, so a test
+                                can prove the whole process group was killed
+    % fake-latex: no-synctex    behave like an engine that cannot produce SyncTeX data
+    % fake-latex: no-log        write no transcript at all
+
+The same words also work as `--fail`, `--timeout`, `--no-synctex`, and `--no-log` on the
+command line, which is how the script can be exercised on its own.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+MARKER_RE = re.compile(r"%\s*fake-latex:\s*(?P<mode>[a-z-]+)")
+ENV_DUMP_FILENAME = "fake-env.json"
+CHILD_PID_FILENAME = "fake-child.pid"
+HANG_SECONDS = 3600
+
+#: Variables an integration test inspects to prove the environment really was scrubbed.
+WATCHED_ENV = (
+    "TEXINPUTS",
+    "BIBINPUTS",
+    "BSTINPUTS",
+    "TEXMFOUTPUT",
+    "TEXMFHOME",
+    "openout_any",
+    "openin_any",
+    "shell_escape",
+    "max_print_line",
+    "RESEARCH_HARNESS_SECRET",
+)
+
+
+def parse_args(argv: list[str]) -> tuple[Path, Path, bool, set[str]]:
+    """Read the flags every engine the service drives may be given."""
+    outdir = Path.cwd()
+    entry: str | None = None
+    synctex = False
+    modes: set[str] = set()
+    index = 0
+    while index < len(argv):
+        argument = argv[index]
+        if argument in {"-X", "compile"}:
+            index += 1
+            continue
+        if argument in {"--outdir", "-o", "--output-directory"}:
+            index += 1
+            outdir = Path(argv[index]) if index < len(argv) else outdir
+        elif argument.startswith(("-output-directory=", "--output-directory=", "-outdir=")):
+            outdir = Path(argument.partition("=")[2])
+        elif argument in {"--synctex", "-synctex=1", "--synctex=1"}:
+            synctex = True
+        elif argument in {"--fail", "--timeout", "--no-synctex", "--no-log"}:
+            modes.add(argument.lstrip("-"))
+        elif not argument.startswith("-"):
+            entry = argument
+        index += 1
+    return outdir, Path(entry or "main.tex").resolve(), synctex, modes
+
+
+def _relative(path: Path) -> str:
+    """Path as the engine would print it: relative to the working directory when it can be."""
+    try:
+        return path.relative_to(Path.cwd()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def read_markers(entry: Path) -> tuple[set[str], str | None, int]:
+    """Modes requested by the source, plus where the first one was written."""
+    modes: set[str] = set()
+    where: str | None = None
+    line_number = 1
+    candidates = sorted(Path.cwd().rglob("*.tex"))
+    if entry.is_file() and entry not in candidates:
+        candidates.insert(0, entry)
+    candidates = [path for path in candidates if path.is_relative_to(Path.cwd())]
+    for path in candidates:
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for number, line in enumerate(text.splitlines(), start=1):
+            found = MARKER_RE.search(line)
+            if found is None:
+                continue
+            modes.add(found.group("mode"))
+            if where is None:
+                where = _relative(path)
+                line_number = number
+    return modes, where, line_number
+
+
+def minimal_pdf(pages: int = 1) -> bytes:
+    """A structurally valid one-page PDF, with a correct cross-reference table."""
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count %d >>" % pages,
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << >> >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+    offsets = [0]
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += b"%d 0 obj\n" % number + body + b"\nendobj\n"
+    start = len(out)
+    out += b"xref\n0 %d\n" % (len(objects) + 1)
+    out += b"0000000000 65535 f \n"
+    for offset in offsets[1:]:
+        out += b"%010d 00000 n \n" % offset
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (
+        len(objects) + 1,
+        start,
+    )
+    return bytes(out)
+
+
+def success_log(stem: str, inputs: list[str]) -> str:
+    included = "".join(f"({name}\n)\n" for name in inputs)
+    return (
+        "This is FakeTeX, Version 3.141592653 (fake toolchain)\n"
+        f"**{stem}.tex\n"
+        f"({stem}.tex\n"
+        "LaTeX2e <2024-11-01>\n"
+        "(article.cls\n"
+        "Document Class: article 2024/02/08 v1.4n Standard LaTeX document class\n"
+        "(size11.clo))\n"
+        f"{included}"
+        "\nLaTeX Warning: Citation `kraus2019' on page 1 undefined on input line 5.\n"
+        "\n"
+        "Overfull \\hbox (12.34pt too wide) in paragraph at lines 12--14\n"
+        "[1] (main.aux)\n"
+        f"Output written on {stem}.pdf (1 page, 1234 bytes).\n"
+        f"Transcript written on {stem}.log.\n"
+    )
+
+
+def failure_log(stem: str, where: str, line: int) -> str:
+    return (
+        "This is FakeTeX, Version 3.141592653 (fake toolchain)\n"
+        f"**{stem}.tex\n"
+        f"({stem}.tex\n"
+        "LaTeX2e <2024-11-01>\n"
+        "(article.cls\n"
+        "Document Class: article 2024/02/08 v1.4n Standard LaTeX document class\n"
+        "(size11.clo))\n"
+        "No file main.aux.\n"
+        f"({where}\n"
+        "\nLaTeX Warning: Citation `kraus2019' on page 1 undefined on input line 5.\n"
+        "\n"
+        "! Undefined control sequence.\n"
+        f"l.{line} \\badmacro\n"
+        "              \n"
+        "No pages of output.\n"
+        f"Transcript written on {stem}.log.\n"
+    )
+
+
+def synctex_text(entry: Path, inputs: list[str]) -> str:
+    """A small SyncTeX file whose records point at real lines of the real inputs."""
+    names = [entry.resolve().as_posix()] + [
+        (Path.cwd() / name).resolve().as_posix() for name in inputs
+    ]
+    header = "\n".join(f"Input:{tag}:{name}" for tag, name in enumerate(names, start=1))
+    records = [
+        "{1",
+        "[1,1:4736286,4736286:26673152,41484288,0",
+        "(1,4:4736286,10000000:20000000,600000,200000",
+        "h1,4:4736286,10000000:20000000,0,0",
+        ")",
+    ]
+    if len(names) > 1:
+        records += [
+            "(2,3:4736286,12000000:18000000,600000,200000",
+            "h2,3:4736286,12000000:18000000,0,0",
+            ")",
+        ]
+    records += ["]", "}1"]
+    body = "\n".join(records)
+    return (
+        "SyncTeX Version:1\n"
+        f"{header}\n"
+        "Output:pdf\n"
+        "Magnification:1000\n"
+        "Unit:1\n"
+        "X Offset:0\n"
+        "Y Offset:0\n"
+        "Content:\n"
+        "!12\n"
+        f"{body}\n"
+        "Postamble:\n"
+        f"Count:{len(records)}\n"
+        "Post scriptum:\n"
+    )
+
+
+def hang(outdir: Path) -> None:
+    """Start a child in this process group, record it, and wait to be killed."""
+    child = subprocess.Popen(  # noqa: S603 - a sleeping stdlib interpreter, in this group
+        [sys.executable, "-c", "import time; time.sleep(3600)"]
+    )
+    (outdir / CHILD_PID_FILENAME).write_text(f"{child.pid}\n", encoding="utf-8")
+    sys.stdout.write("note: fake engine is hanging on purpose\n")
+    sys.stdout.flush()
+    time.sleep(HANG_SECONDS)
+
+
+def main(argv: list[str]) -> int:
+    outdir, entry, synctex, flag_modes = parse_args(argv)
+    outdir.mkdir(parents=True, exist_ok=True)
+    stem = entry.stem
+
+    source_modes, where, line = read_markers(entry)
+    modes = source_modes | flag_modes
+    place = where or _relative(entry)
+
+    (outdir / ENV_DUMP_FILENAME).write_text(
+        json.dumps(
+            {
+                "argv": argv,
+                "cwd": Path.cwd().as_posix(),
+                "env": {name: os.environ.get(name) for name in WATCHED_ENV},
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    inputs = [
+        _relative(path)
+        for path in sorted(Path.cwd().rglob("*.tex"))
+        if path.resolve() != entry.resolve()
+    ]
+
+    if "timeout" in modes:
+        if "no-log" not in modes:
+            (outdir / f"{stem}.log").write_text(success_log(stem, inputs), encoding="utf-8")
+        hang(outdir)
+        return 0  # pragma: no cover - the process is killed before it gets here
+
+    if "fail" in modes:
+        if "no-log" not in modes:
+            (outdir / f"{stem}.log").write_text(
+                failure_log(stem, place, line), encoding="utf-8"
+            )
+        sys.stderr.write(
+            f"error: {place}:{line}: Undefined control sequence\n"
+            "error: the fake engine had an unrecoverable error\n"
+        )
+        return 1
+
+    if "no-log" not in modes:
+        (outdir / f"{stem}.log").write_text(success_log(stem, inputs), encoding="utf-8")
+    (outdir / f"{stem}.pdf").write_bytes(minimal_pdf())
+    if synctex and "no-synctex" not in modes:
+        (outdir / f"{stem}.synctex").write_text(synctex_text(entry, inputs), encoding="utf-8")
+    sys.stdout.write(f"note: Writing `{outdir / (stem + '.pdf')}'\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -171,6 +171,10 @@ class WorkspaceConfig(BaseModel):
     written before it existed keeps its key order, and defaulted so such a file opens
     unchanged. `EgressPolicy` lives in `privacy/`, which imports neither `providers/` nor
     `workspace/`, so holding it here breaks no layering."""
+    manuscript: dict[str, Any] = Field(default_factory=dict)
+    """LaTeX toolchain settings (engine, entry file, timeout, allowed compiler flags), kept
+    raw because `workspace/` must not import `manuscript/`;
+    `manuscript.toolchain.ManuscriptSettings` validates them where they are used."""
 
     @field_validator("providers")
     @classmethod

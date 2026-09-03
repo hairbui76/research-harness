@@ -1,0 +1,31 @@
+% Synthetic LaTeX project for the compile and SyncTeX tests. No number here is a real
+% measurement; the project exists to exercise a real toolchain end to end.
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+
+\title{Bounded Compilation of Owned Manuscript Source}
+\author{R. Hale}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A manuscript compiles locally, in a bounded process, from source the researcher owns.
+\end{abstract}
+
+\input{sections/intro.tex}
+
+\section{Method}
+\label{sec:method}
+
+The throughput bound follows from the queueing identity
+\begin{equation}
+  \label{eq:throughput}
+  T = \frac{N}{W + S},
+\end{equation}
+which we evaluate at four offered loads.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
