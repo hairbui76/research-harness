@@ -167,9 +167,13 @@ providers:
 ```
 
 `runtime` is required and `base_url`/`api_key_env` are refused for `kind: local_cli`. Only
-`codex` and `claude` may be named: the other five runtimes are detected and listed but
-refused, by `add` and by a hand-written `research.yaml` alike — run `research providers
-scan` to see, for each one, the reason it is not routable.
+`codex` and `claude` are routable: the other five are detected and listed but refused. Four
+of them — Cursor Agent, Amp, DeepSeek Harness, Pi — declare no bounded posture at all, so a
+hand-written `research.yaml` naming one is refused the moment the routing table is read,
+exactly as `add` refuses it. OpenCode declares a posture no installed version has proved,
+so its entry loads and the refusal comes when a request would be routed. `research
+providers scan` prints the reason for each.
+
 `reasoning` is the runtime's own effort name, not a harness word: Codex takes `low`,
 `medium`, `high`, `xhigh` and receives them as `-c model_reasoning_effort="…"`; Claude Code
 takes those and `max`, and receives them as `--effort`. The names come from the runtime
