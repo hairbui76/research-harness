@@ -281,13 +281,20 @@ class NativeStream:
             request_fingerprint=request.fingerprint(),
             stop_reason=stop_reason,
         )
+        # A provider that carries runtime identity of its own (a CLI runtime, its protocol
+        # and the model it was asked for) states it under "cli", so a streamed turn is as
+        # reproducible as the completion path (CLI providers spec §19).
+        payload = trace_payload(request, response)
+        metadata = getattr(self._provider, "trace_metadata", None)
+        if callable(metadata):
+            payload = {**payload, "cli": metadata()}
         try:
             self._trace.record(
                 "completion",
                 provider=self.name,
                 model=response.model,
                 request_fingerprint=response.request_fingerprint,
-                payload=trace_payload(request, response),
+                payload=payload,
             )
         except Exception:
             logger.warning("could not write a %s stream trace", self.name, exc_info=True)
