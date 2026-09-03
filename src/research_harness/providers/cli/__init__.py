@@ -7,6 +7,7 @@ Import the contract from here::
 
 from __future__ import annotations
 
+from research_harness.providers.cli.detection import detect, scan
 from research_harness.providers.cli.errors import (
     CliAuthError,
     CliRateLimitError,
@@ -14,6 +15,10 @@ from research_harness.providers.cli.errors import (
     CliTransportError,
     provider_name,
     redact,
+)
+from research_harness.providers.cli.provider import (
+    CliModelProvider,
+    default_cli_capabilities,
 )
 from research_harness.providers.cli.registry import (
     RUNTIME_DEFS,
@@ -39,6 +44,7 @@ __all__ = [
     "RUNTIME_IDS",
     "UNKNOWN_EXTERNAL_HOST",
     "CliAuthError",
+    "CliModelProvider",
     "CliModelView",
     "CliRateLimitError",
     "CliResponseError",
@@ -47,8 +53,11 @@ __all__ = [
     "CliTransportError",
     "RegistryError",
     "UnknownRuntimeError",
+    "default_cli_capabilities",
+    "detect",
     "get_runtime",
     "provider_name",
     "redact",
+    "scan",
     "unavailable_reason",
 ]
