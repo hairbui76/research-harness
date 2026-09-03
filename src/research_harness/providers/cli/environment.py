@@ -87,7 +87,13 @@ def _dropped(key: str) -> bool:
 def bounded_environment(
     definition: CliRuntimeDef, base: Mapping[str, str], *, executable: Path | None = None
 ) -> dict[str, str]:
-    """Allow-list, then deny-list (which wins), then the fixed and per-runtime values."""
+    """Allow-list, then deny-list (which wins), then the fixed and per-runtime values.
+
+    `executable` leads `PATH` only when it is absolute. A definition's `executable` is a
+    bare name, and prepending its parent would put `.` at the head of the search path of
+    the very process this module exists to bound; a relative path is therefore ignored
+    rather than rejected, leaving `PATH` exactly as filtered.
+    """
     keep = BASE_KEEP | set(definition.env_keep)
     env = {
         key: value
@@ -98,7 +104,7 @@ def bounded_environment(
     }
     env.update(FIXED_ENV)
     env.update({key: value for key, value in definition.env_set.items() if not _dropped(key)})
-    if executable is not None:
+    if executable is not None and executable.is_absolute():
         parent = str(executable.parent)
         parts = [part for part in env.get("PATH", "").split(os.pathsep) if part and part != parent]
         env["PATH"] = os.pathsep.join([parent, *parts])

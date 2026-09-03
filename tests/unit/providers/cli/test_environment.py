@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from research_harness.providers.cli.environment import ALWAYS_DROP, FIXED_ENV, bounded_environment
@@ -66,6 +67,14 @@ def test_a_definition_may_drop_and_set_variables() -> None:
 def test_the_executable_directory_leads_path() -> None:
     env = bounded_environment(definition(), BASE, executable=Path("/opt/tools/bin/fake"))
     assert env["PATH"].split(":")[0] == "/opt/tools/bin"
+
+
+def test_a_relative_executable_never_leads_path() -> None:
+    """A bare name would otherwise put `.` at the head of the bounded child's PATH."""
+    for relative in (Path("fake"), Path("bin/fake")):
+        env = bounded_environment(definition(), BASE, executable=relative)
+        assert env["PATH"] == BASE["PATH"]
+        assert env["PATH"].split(os.pathsep)[0] == "/usr/bin"
 
 
 def test_fixed_values_make_output_machine_readable() -> None:
