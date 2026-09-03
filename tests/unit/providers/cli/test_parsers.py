@@ -6,11 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from research_harness.providers.cli.parsers import PARSERS, CliEvent, EventParser
+from research_harness.providers.cli.parsers import PARSERS, CliEvent, EventParser, parser_for
 from research_harness.providers.cli.parsers.claude_stream import ClaudeStreamParser
 from research_harness.providers.cli.parsers.dsh_profile import DshProfileParser
 from research_harness.providers.cli.parsers.json_events import JsonEventsParser
 from research_harness.providers.cli.parsers.pi_rpc import PiRpcParser
+from research_harness.providers.cli.registry import RUNTIMES
 
 STREAMS = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "cli" / "streams"
 CANONICAL = (
@@ -61,6 +62,27 @@ def test_a_successful_stream_yields_the_answer_usage_and_a_terminal_event(
     if model is not None:
         assert model in {event.model for event in events if event.kind == "model"}
     assert "tool" not in kinds(events)
+
+
+def test_a_captured_live_stream_still_parses_to_a_finished_answer() -> None:
+    """Whatever the opt-in live smoke recorded must parse like the hand-written fixtures.
+
+    The parser comes from the shipped definition, exactly as `CliModelProvider` picks it
+    (`parser_for(self.runtime)`), so this test follows the registry rather than a table of
+    its own. The captures are written by `tests/contract/providers/test_live_cli_smoke.py`
+    with `RESEARCH_HARNESS_LIVE_CLI_CAPTURE` set, so a workstation that has never run it
+    has nothing to check here (CLI providers spec §20).
+    """
+    captures = sorted(STREAMS.glob("*-live-*.jsonl"))
+    if not captures:
+        pytest.skip("no *-live-*.jsonl capture recorded; run the opt-in live CLI smoke first")
+    for path in captures:
+        runtime = path.name.split("-live-", 1)[0]
+        definition = RUNTIMES.get(runtime)
+        assert definition is not None, f"{path.name}: {runtime!r} is not a registered runtime"
+        events = run(parser_for(definition), path.name)
+        assert kinds(events)[-1:] == ["done"], f"{path.name}: ended on {kinds(events)[-3:]}"
+        assert text_of(events).strip(), f"{path.name}: the capture carried no answer text"
 
 
 def test_partial_claude_messages_stream_deltas_that_concatenate_to_the_final_text() -> None:
