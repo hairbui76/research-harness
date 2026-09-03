@@ -68,7 +68,11 @@ from research_harness.domain.research import (
 from research_harness.domain.work import Artifact, Version, Work
 from research_harness.workspace.atomic import TEMP_PREFIX, atomic_write_bytes
 from research_harness.workspace.journal import Transaction
-from research_harness.workspace.layout import BLOCKS_SUFFIX, WorkspaceLayout
+from research_harness.workspace.layout import (
+    BLOCKS_SUFFIX,
+    CONVERSATIONS_DIRNAME,
+    WorkspaceLayout,
+)
 from research_harness.workspace.rejections import RejectionRecord
 from research_harness.workspace.serialization import (
     canonical_bytes,
@@ -550,10 +554,12 @@ def iter_canonical_entries(layout: WorkspaceLayout) -> Iterator[tuple[str, Path]
     """`(workspace-relative path, absolute path)` for every file carrying authority.
 
     Excluded: everything under `.research/` (regenerable by definition), every dot-file and
-    dot-directory (`.git/`, `.gitignore`), and the user's own manuscript sources — the
+    dot-directory (`.git/`, `.gitignore`), the user's own manuscript sources — the
     harness owns only `manuscript/anchors.jsonl` there and must not fail a workspace
-    because a researcher edited their LaTeX. Artifact binaries are included: their bytes
-    are what an accepted evidence anchor was read from.
+    because a researcher edited their LaTeX — and `conversations/`, which is durable but
+    carries no scientific authority: a chat message must not restate the canonical digest
+    or invalidate the proof that the canonical tree is unchanged. Artifact binaries are
+    included: their bytes are what an accepted evidence anchor was read from.
     """
     root = layout.root
     if not root.is_dir():
@@ -561,11 +567,15 @@ def iter_canonical_entries(layout: WorkspaceLayout) -> Iterator[tuple[str, Path]
     manuscript = layout.manuscript_dir.name
     anchors = str(layout.relative(layout.anchors_file))
     for directory, subdirectories, filenames in os.walk(root):
-        subdirectories[:] = sorted(
-            name for name in subdirectories if not name.startswith(".") and name != "__pycache__"
-        )
         prefix = os.path.relpath(directory, root).replace(os.sep, "/")
         prefix = "" if prefix == "." else f"{prefix}/"
+        subdirectories[:] = sorted(
+            name
+            for name in subdirectories
+            if not name.startswith(".")
+            and name != "__pycache__"
+            and not (prefix == "" and name == CONVERSATIONS_DIRNAME)
+        )
         for name in sorted(filenames):
             if name.startswith("."):
                 continue

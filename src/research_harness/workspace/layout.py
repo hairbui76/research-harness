@@ -19,8 +19,20 @@ Layout::
     decisions/D0001.yaml      matrices/S0001.yaml      notes/<key>.yaml
     searches/SR0001.yaml      manuscript/ (+ anchors.jsonl)
     events/research.jsonl
+    conversations/CS0001/     session.yaml, messages.jsonl, attachments/, context/,
+                              summary.md -- durable, private, not scientific state
     .research/                research.db, index/, cache/, staging/, traces/, runs/,
                               journal/, lock  -- regenerable, no scientific authority
+
+Three tiers, not two. `CANONICAL_DIRECTORIES` holds *canonical scientific state*: files with
+scientific authority, meant to be committed, created by `init`. `.research/` holds
+regenerable machine state with no authority at all. `conversations/` is the third tier and
+belongs to neither: a transcript, its attachments, and its context receipts are durable
+source records that deleting `.research/` may never lose (Product 8.2), but they are private
+working context rather than accepted conclusions, so they are listed in the generated
+`.gitignore`, are not created by `init`, and stay out of `path_for`/`id_from_path` -- a
+conversation object is never written through a canonical transaction. `DURABLE_DIRECTORIES`
+names them.
 """
 
 from __future__ import annotations
@@ -30,16 +42,20 @@ import re
 from pathlib import Path, PurePosixPath
 
 from research_harness.domain.claim import Claim
+from research_harness.domain.conversation import SessionAttachment
 from research_harness.domain.document import DocumentBlock, ParsedDocument
 from research_harness.domain.errors import DomainValidationError, WorkspaceError
 from research_harness.domain.evidence import Evidence
 from research_harness.domain.ids import (
     ArtifactId,
     ClaimId,
+    ContextPackId,
+    ConversationSessionId,
     DecisionId,
     QuestionId,
     ResearchId,
     SearchRunId,
+    SessionAttachmentId,
     SynthesisId,
     VersionId,
     WorkId,
@@ -60,6 +76,8 @@ from research_harness.workspace.rejections import REJECTIONS_FILENAME, Rejection
 
 __all__ = [
     "CANONICAL_DIRECTORIES",
+    "CONVERSATIONS_DIRNAME",
+    "DURABLE_DIRECTORIES",
     "GITIGNORE_CONTENT",
     "NOTE_KEY_PATTERN",
     "RESEARCH_DIRECTORIES",
@@ -67,16 +85,21 @@ __all__ = [
     "RESEARCH_FILENAME",
     "WorkspaceLayout",
     "artifact_extension",
+    "attachment_extension",
     "note_key",
 ]
 
 RESEARCH_FILENAME = "research.yaml"
 RESEARCH_DIRNAME = ".research"
+CONVERSATIONS_DIRNAME = "conversations"
 GITIGNORE_FILENAME = ".gitignore"
 EVENTS_FILENAME = "research.jsonl"
 EVIDENCE_FILENAME = "evidence.jsonl"
 ANCHORS_FILENAME = "anchors.jsonl"
 WORK_FILENAME = "work.yaml"
+SESSION_FILENAME = "session.yaml"
+MESSAGES_FILENAME = "messages.jsonl"
+SUMMARY_FILENAME = "summary.md"
 LOCK_FILENAME = "lock"
 DATABASE_FILENAME = "research.db"
 BLOCKS_SUFFIX = ".blocks.jsonl"
@@ -97,6 +120,12 @@ CANONICAL_DIRECTORIES: tuple[str, ...] = (
     "events",
 )
 
+#: Durable private working context: transcripts, session attachments, context receipts.
+#: Not canonical scientific state, and not regenerable either -- see the module docstring.
+#: `init` does not create it; `ConversationStore` creates a session directory when the
+#: researcher opens a session.
+DURABLE_DIRECTORIES: tuple[str, ...] = (CONVERSATIONS_DIRNAME,)
+
 #: Regenerable machine state; deleting the whole tree must never lose a conclusion.
 RESEARCH_DIRECTORIES: tuple[str, ...] = (
     RESEARCH_DIRNAME,
@@ -112,6 +141,10 @@ GITIGNORE_CONTENT = (
     "# Regenerable machine state: SQLite projection, indexes, caches, staging, traces.\n"
     "# Canonical scientific state lives outside it and is meant to be committed.\n"
     f"{RESEARCH_DIRNAME}/\n"
+    "\n"
+    "# Durable but private: conversation transcripts, their attachments, and the context\n"
+    "# receipts of model calls. Sharing them is a separate, explicit export.\n"
+    f"{CONVERSATIONS_DIRNAME}/\n"
 )
 
 NOTE_KEY_PATTERN = re.compile(r"^note-\d{8}-\d{6}-[0-9a-f]{6}$")
@@ -127,14 +160,28 @@ def note_key(created_at: object, token: str) -> str:
     return f"note-{stamp('%Y%m%d-%H%M%S')}-{token}"
 
 
-def artifact_extension(artifact: Artifact) -> str:
-    """File suffix for an artifact's immutable bytes, taken from its original filename."""
-    suffix = PurePosixPath(artifact.original_filename).suffix.lower()
+def _stored_extension(filename: str, mime_type: str) -> str:
+    """Suffix for stored bytes: the original filename's, else one guessed from the type.
+
+    The filename is display metadata and never a path, so only its suffix is used and
+    anything that is not a short alphanumeric extension becomes `.bin`.
+    """
+    suffix = PurePosixPath(filename).suffix.lower()
     if not suffix:
-        suffix = mimetypes.guess_extension(artifact.mime_type) or ".bin"
+        suffix = mimetypes.guess_extension(mime_type) or ".bin"
     if not re.fullmatch(r"\.[A-Za-z0-9]{1,16}", suffix):
         return ".bin"
     return suffix
+
+
+def artifact_extension(artifact: Artifact) -> str:
+    """File suffix for an artifact's immutable bytes, taken from its original filename."""
+    return _stored_extension(artifact.original_filename, artifact.mime_type)
+
+
+def attachment_extension(attachment: SessionAttachment) -> str:
+    """File suffix for a session attachment's bytes, taken from its display filename."""
+    return _stored_extension(attachment.filename, attachment.media_type)
 
 
 class WorkspaceLayout:
@@ -223,6 +270,51 @@ class WorkspaceLayout:
         """`events/research.jsonl` — the Git-visible semantic audit companion."""
         return self.events_dir / EVENTS_FILENAME
 
+    # -- durable conversation state ------------------------------------------
+
+    @property
+    def conversations_dir(self) -> Path:
+        """`conversations/` — durable, private session records; never Git-published."""
+        return self._root / CONVERSATIONS_DIRNAME
+
+    def session_dir(self, session: ConversationSessionId) -> Path:
+        return self.conversations_dir / str(session)
+
+    def session_file(self, session: ConversationSessionId) -> Path:
+        """`conversations/CS0001/session.yaml` — title, timestamps, visibility, defaults."""
+        return self.session_dir(session) / SESSION_FILENAME
+
+    def messages_file(self, session: ConversationSessionId) -> Path:
+        """`conversations/CS0001/messages.jsonl` — the append-only transcript."""
+        return self.session_dir(session) / MESSAGES_FILENAME
+
+    def session_summary_file(self, session: ConversationSessionId) -> Path:
+        """`conversations/CS0001/summary.md` — derived; never outranks the transcript."""
+        return self.session_dir(session) / SUMMARY_FILENAME
+
+    def session_attachments_dir(self, session: ConversationSessionId) -> Path:
+        return self.session_dir(session) / "attachments"
+
+    def session_attachment_file(
+        self, session: ConversationSessionId, attachment: SessionAttachmentId
+    ) -> Path:
+        """Attachment *metadata*; the original bytes sit beside it under the same stem."""
+        return self.session_attachments_dir(session) / f"{attachment}.yaml"
+
+    def session_attachment_bytes_file(self, attachment: SessionAttachment) -> Path:
+        """Original attachment bytes, e.g. `attachments/SA0001.pdf`; immutable once ready."""
+        return (
+            self.session_attachments_dir(attachment.session)
+            / f"{attachment.id}{attachment_extension(attachment)}"
+        )
+
+    def session_context_dir(self, session: ConversationSessionId) -> Path:
+        return self.session_dir(session) / "context"
+
+    def context_pack_file(self, session: ConversationSessionId, pack: ContextPackId) -> Path:
+        """`conversations/CS0001/context/CP0001.json` — one call's pack and its receipt."""
+        return self.session_context_dir(session) / f"{pack}.json"
+
     # -- regenerable machine state -------------------------------------------
 
     @property
@@ -241,6 +333,15 @@ class WorkspaceLayout:
     @property
     def cache_dir(self) -> Path:
         return self.research_dir / "cache"
+
+    @property
+    def attachment_cache_dir(self) -> Path:
+        """Thumbnails and page previews for session attachments; rebuilt on demand."""
+        return self.cache_dir / "attachments"
+
+    def attachment_preview_dir(self, attachment: SessionAttachmentId) -> Path:
+        """One attachment's previews. A projection of the original bytes, never the source."""
+        return self.attachment_cache_dir / str(attachment)
 
     @property
     def staging_dir(self) -> Path:
@@ -388,7 +489,9 @@ class WorkspaceLayout:
         parts = relative.parts
         if relative.name == WORK_FILENAME:
             return WorkId(parts[-2]) if len(parts) >= 2 else None
-        if parts[0] in {"taxonomy", "notes"}:
+        if parts[0] in {"taxonomy", "notes", CONVERSATIONS_DIRNAME}:
+            # `path_for` never produces a conversation path (a session is durable working
+            # context, not canonical state), so its inverse does not claim one either.
             return None
         try:
             return parse_id(relative.stem)
