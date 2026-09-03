@@ -1,0 +1,3 @@
+auto
+sonnet-4
+gpt-5

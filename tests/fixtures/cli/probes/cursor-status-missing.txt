@@ -1,0 +1,1 @@
+Not logged in. Run cursor-agent login to authenticate.

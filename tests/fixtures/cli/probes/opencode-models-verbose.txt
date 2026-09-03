@@ -1,0 +1,5 @@
+anthropic/claude-sonnet-4-5
+{
+  "variants": {"low": {}, "high": {}}
+}
+openai/gpt-5
