@@ -209,6 +209,32 @@ def test_a_failed_help_probe_is_unknown_and_a_none_posture_is_unsupported(tmp_pa
     assert "fake: no deny flag" in status.diagnostics
 
 
+def test_an_environment_injected_posture_is_safe_only_on_a_verified_version(
+    tmp_path: Path,
+) -> None:
+    """A help flag proves a flag exists, never that an injected config denies anything."""
+    fake = installed(tmp_path)
+    posture = BoundedPosture(
+        kind="native_env",
+        help_probe=Probe(args=("exec", "--help")),
+        required_help_flags=("--sandbox", "--json"),
+    )
+    unproven = detect(full_definition(posture=posture), env=fake.env({"PATH": ""}))
+    assert unproven.bounded_mode == "unknown" and not unproven.routable
+    assert (
+        "fake: the environment-injected bounded posture is unproven on this version "
+        "(no recorded fixtures)"
+    ) in unproven.diagnostics
+
+    # The same posture, the same help output; only the recorded version differs.
+    verified = detect(
+        full_definition(posture=posture, verified_versions=("fake 1.2.3",)),
+        env=fake.env({"PATH": ""}),
+    )
+    assert verified.compatibility == "verified"
+    assert verified.bounded_mode == "safe" and verified.routable
+
+
 def test_models_fall_back_and_say_so_when_the_probe_fails(tmp_path: Path) -> None:
     fake = installed(tmp_path)
     fake.write_script({**fake.script(), "probes": [{"args": ["models"], "stdout": "", "exit": 1}]})

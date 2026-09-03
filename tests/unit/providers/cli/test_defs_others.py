@@ -167,6 +167,7 @@ def test_opencode_argv_env_and_models() -> None:
     permission = json.loads(OPENCODE.env_set["OPENCODE_CONFIG_CONTENT"])["permission"]
     assert permission == {"edit": "deny", "bash": "deny", "webfetch": "deny"}
     assert OPENCODE.env_set["OPENCODE_DISABLE_PROJECT_CONFIG"] == "true"
+    assert "OPENCODE_CONFIG" in OPENCODE.env_drop and OPENCODE.env_keep == ()
     assert OPENCODE.posture.kind == "native_env" and OPENCODE.posture.required_help_flags == (
         "--format",
         "--dir",

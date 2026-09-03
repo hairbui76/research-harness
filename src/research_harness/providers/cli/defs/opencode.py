@@ -94,7 +94,8 @@ OPENCODE = CliRuntimeDef(
     default_context_tokens=128_000,
     login_guidance="run `opencode auth login`",
     upstream_source="open-design@9bb4a7d apps/daemon/src/runtimes/defs/opencode.ts",
-    env_keep=("OPENCODE_CONFIG",),
+    env_keep=(),
+    env_drop=("OPENCODE_CONFIG",),
     env_set={
         "OPENCODE_CONFIG_CONTENT": json.dumps(
             {"permission": {"edit": "deny", "bash": "deny", "webfetch": "deny"}}
@@ -102,23 +103,28 @@ OPENCODE = CliRuntimeDef(
         "OPENCODE_DISABLE_PROJECT_CONFIG": "true",
     },
     notes=(
-        "The run is bounded by the environment, not by argv: OPENCODE_CONFIG_CONTENT carries "
-        "a permission table that denies edit, bash and webfetch, and "
+        "What the posture claims and what this workstation can prove are two different "
+        "things, and the gap is the point. The claim: OPENCODE_CONFIG_CONTENT carries a "
+        "permission table denying edit, bash and webfetch, and "
         "OPENCODE_DISABLE_PROJECT_CONFIG stops a checked-in opencode.json from granting them "
-        "back. `--dir` is part of that bound rather than a convenience: OpenCode does not "
-        "treat its process cwd as the workspace but walks up to the nearest enclosing git "
-        "root, so without it a run started anywhere inside a checkout would adopt the whole "
-        "repository. Both flags this definition sends are named in required_help_flags, so a "
-        "build whose `run --help` does not print them is reported unsupported instead of "
-        "being sent flags it may ignore. What that probe cannot prove is that the injected "
-        "permission table is honoured — no OpenCode was installed when this definition was "
-        "ported, so `native_env` rests on the upstream configuration contract rather than on "
-        "an observed refusal, and the first install to be verified should record it in "
-        "verified_versions. The login is not bounded and cannot be: OpenCode "
-        "ships no side-effect-free auth command, so auth_probe is None and auth_status stays "
-        "`unknown`, and it reaches whichever provider the user configured — hence "
-        "unknown_external rather than a named host. env_keep admits OPENCODE_CONFIG so an "
-        "install that keeps its configuration outside the default location is still found. "
+        "back. What the help probe proves: only that `run --help` prints `--format` and "
+        "`--dir`, the two flags in required_help_flags. It says nothing at all about "
+        "permissions — a flag list is not a config layer — and `-m` is sent too whenever a "
+        "model is chosen, so required_help_flags is not the full set of flags this "
+        "definition sends, only the set the bounded posture depends on. Whether the deny "
+        "table is honoured rests on OpenCode's own configuration layering, which no recorded "
+        "fixture here has ever verified: no OpenCode was installed when this was ported and "
+        "verified_versions is empty. So detection reports the bounded mode as unproven and "
+        "the runtime is not routable until someone runs a real OpenCode, records the "
+        "fixtures, and adds that version to verified_versions. `--dir` is part of the claim "
+        "rather than a convenience: OpenCode does not treat its process cwd as the workspace "
+        "but walks up to the nearest enclosing git root, so without it a run started inside "
+        "a checkout would adopt the whole repository. Nothing bounds the login either: "
+        "OpenCode ships no side-effect-free auth command, so auth_probe is None and "
+        "auth_status stays `unknown`, and it reaches whichever provider the user configured "
+        "— hence unknown_external rather than a named host. env_keep is empty and "
+        "OPENCODE_CONFIG is dropped outright, so a pointer to the user's own configuration "
+        "file can never ride into a bounded run and re-grant what the injected table denies. "
         "Variants are read from the catalog for display only; `--variant` is never sent, "
         "because a variant is a per-model name and reasoning_choices is empty."
     ),

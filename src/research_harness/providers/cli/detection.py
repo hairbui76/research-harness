@@ -210,8 +210,9 @@ def detect(
     else:
         version = definition.parse_version(outcome)
 
+    compatibility = compatibility_of(definition, version)
     auth, guidance = _auth(definition, probe, home)
-    bounded = _bounded(definition, probe, diagnostics)
+    bounded = _bounded(definition, probe, diagnostics, compatibility=compatibility)
     models, source = _models(definition, probe, fallback)
     return status(
         available=True,
@@ -220,7 +221,7 @@ def detect(
         auth_status=auth,
         auth_guidance=guidance,
         bounded_mode=bounded,
-        compatibility=compatibility_of(definition, version),
+        compatibility=compatibility,
         models=tuple(_view(item) for item in models),
         model_source=source,
     )
@@ -236,7 +237,13 @@ def _auth(definition: CliRuntimeDef, probe: _Probe, home: str | None) -> tuple[A
     return verdict, redact(guidance, home=home)
 
 
-def _bounded(definition: CliRuntimeDef, probe: _Probe, diagnostics: list[str]) -> BoundedMode:
+def _bounded(
+    definition: CliRuntimeDef,
+    probe: _Probe,
+    diagnostics: list[str],
+    *,
+    compatibility: Compatibility,
+) -> BoundedMode:
     posture = definition.posture
     if posture.kind == "none" or posture.help_probe is None:
         # A scan must say why a runtime is not routable, not only that it is not.
@@ -256,6 +263,16 @@ def _bounded(definition: CliRuntimeDef, probe: _Probe, diagnostics: list[str]) -
             f"which the bounded mode needs"
         )
         return "unsupported"
+    if posture.kind == "native_env" and compatibility != "verified":
+        # Help output can prove a flag exists; it can prove nothing about whether an
+        # injected configuration is honoured. Only a version whose fixtures were recorded
+        # against a real install has evidence for that, so anything else stays unproven
+        # (spec §12: a runtime is routable only with a *tested* bounded posture).
+        diagnostics.append(
+            f"{definition.id}: the environment-injected bounded posture is unproven on this "
+            f"version (no recorded fixtures)"
+        )
+        return "unknown"
     return "safe"
 
 
