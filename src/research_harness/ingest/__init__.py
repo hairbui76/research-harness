@@ -1,0 +1,90 @@
+"""Artifact ingestion: content hashing, PDF metadata inspection, and identity resolution.
+
+Ingestion turns a local file into an immutable, hashed artifact and a `WorkCandidate`,
+then resolves that candidate against the corpus. It never persists: registering the
+resolved Work/Version/Artifact is the workspace layer's job.
+"""
+
+from __future__ import annotations
+
+from research_harness.ingest.hashing import (
+    ALGORITHM,
+    DEFAULT_MIME_TYPE,
+    ArtifactFingerprint,
+    artifact_kind_for_mime,
+    fingerprint_file,
+    sha256_bytes,
+    sha256_file,
+    sniff_mime_type,
+)
+from research_harness.ingest.identity import (
+    AUTHOR_OVERLAP_THRESHOLD,
+    IDENTIFIER_FIELDS,
+    TITLE_SIMILARITY_THRESHOLD,
+    YEAR_TOLERANCE,
+    ExistingRecord,
+    FieldConflict,
+    IdentityResolution,
+    MetadataLookup,
+    NullMetadataLookup,
+    arxiv_base_id,
+    arxiv_version_label,
+    author_surnames,
+    merge_identifiers,
+    normalize_arxiv_id,
+    normalize_doi,
+    normalize_title,
+    resolve_identity,
+    surname_overlap,
+    title_similarity,
+)
+from research_harness.ingest.metadata import (
+    INGEST_ACTOR,
+    FieldNote,
+    PdfInspection,
+    build_work_candidate,
+    find_arxiv_id,
+    find_doi,
+    find_year,
+    inspect_pdf,
+    inspect_pdf_detail,
+)
+
+__all__ = [
+    "ALGORITHM",
+    "AUTHOR_OVERLAP_THRESHOLD",
+    "DEFAULT_MIME_TYPE",
+    "IDENTIFIER_FIELDS",
+    "INGEST_ACTOR",
+    "TITLE_SIMILARITY_THRESHOLD",
+    "YEAR_TOLERANCE",
+    "ArtifactFingerprint",
+    "ExistingRecord",
+    "FieldConflict",
+    "FieldNote",
+    "IdentityResolution",
+    "MetadataLookup",
+    "NullMetadataLookup",
+    "PdfInspection",
+    "artifact_kind_for_mime",
+    "arxiv_base_id",
+    "arxiv_version_label",
+    "author_surnames",
+    "build_work_candidate",
+    "find_arxiv_id",
+    "find_doi",
+    "find_year",
+    "fingerprint_file",
+    "inspect_pdf",
+    "inspect_pdf_detail",
+    "merge_identifiers",
+    "normalize_arxiv_id",
+    "normalize_doi",
+    "normalize_title",
+    "resolve_identity",
+    "sha256_bytes",
+    "sha256_file",
+    "sniff_mime_type",
+    "surname_overlap",
+    "title_similarity",
+]
