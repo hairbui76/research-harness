@@ -182,7 +182,10 @@ def classify_failure(
     """
     who = describe_runtime(runtime, model, version)
     login = login_guidance or f"run `{runtime} login`"
-    detail = redact(stderr_tail.strip()[-400:], home=home)
+    # Redact the whole tail, then truncate: truncating first would cut the anchor a pattern
+    # needs (`/home/<user>`, `sk-proj-`) off the front of the window and let the rest of the
+    # secret through (spec §19). The caller already bounds how much stderr it keeps.
+    detail = redact(stderr_tail.strip(), home=home)[-400:]
     suffix = f": {detail}" if detail else ""
 
     if os_error is not None:

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from research_harness.providers.cli.registry import (
@@ -136,4 +134,3 @@ def test_the_shipped_registry_is_importable_and_ordered() -> None:
     from research_harness.providers.cli.registry import RUNTIME_DEFS, RUNTIME_IDS, RUNTIMES
 
     assert list(RUNTIMES) == list(RUNTIME_IDS) == [item.id for item in RUNTIME_DEFS]
-    assert Path("open-design").is_dir() or True  # the submodule is documentation; never imported

@@ -108,6 +108,42 @@ def test_classify_failure_maps_conditions_onto_provider_errors() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("anchor", "cut_at", "leaked"),
+    [
+        ("/home/alice/.codex/auth.json", 6, "alice/.codex"),
+        ("sk-proj-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcd", 20, "UVWXYZ0123456789abcd"),
+    ],
+)
+def test_a_secret_straddling_the_stderr_truncation_boundary_is_still_redacted(
+    anchor: str, cut_at: int, leaked: str
+) -> None:
+    """The stderr tail is redacted whole and truncated afterwards (spec §19).
+
+    `anchor` is placed so that the last 400 characters of the tail begin `cut_at` characters
+    into it. Truncating first would cut the prefix every pattern anchors on -- `/home/alice`,
+    `sk-proj-` -- off the front of the window and let the rest of the secret through.
+    """
+    trailer = " and later noise in /home/alice/logs"
+    filler = " log noise" * 40
+    tail = anchor + filler[: 400 - len(anchor) + cut_at - len(trailer)] + trailer
+    assert len(tail) > 400
+
+    error = classify_failure(
+        runtime="codex",
+        model="default",
+        version="0.150.1",
+        exit_code=139,
+        stderr_tail=tail,
+        home="/home/alice",
+    )
+
+    assert error.diagnostic == "crashed", "the tail must reach the generic branch that quotes it"
+    assert leaked not in error.message
+    assert "alice" not in error.message and "sk-proj" not in error.message
+    assert "~" in error.message
+
+
 def test_messages_carry_identity_and_a_next_action_but_no_secret() -> None:
     error = classify_failure(
         runtime="codex",
