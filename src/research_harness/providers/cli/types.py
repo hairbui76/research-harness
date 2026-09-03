@@ -75,7 +75,12 @@ class Probe:
 
 @dataclass(frozen=True, slots=True)
 class ProbeOutcome:
-    """What one probe produced. `os_error` set means the process never started."""
+    """What one probe produced. `os_error` set means the process never started.
+
+    `truncated` says a stream hit the probe's output cap, so `stdout`/`stderr` are a
+    prefix rather than the whole answer: a parser that finds nothing in a truncated
+    outcome has learned nothing, not that the CLI said nothing.
+    """
 
     argv: tuple[str, ...]
     exit_code: int | None
@@ -83,6 +88,7 @@ class ProbeOutcome:
     stderr: str
     timed_out: bool = False
     os_error: str | None = None
+    truncated: bool = False
 
     @property
     def started(self) -> bool:

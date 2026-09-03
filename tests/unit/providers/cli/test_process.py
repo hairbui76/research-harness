@@ -12,6 +12,7 @@ import pytest
 from research_harness.providers.cli.process import (
     CANCEL_GRACE_SECONDS,
     MAX_LINE_BYTES,
+    PROBE_OUTPUT_LIMIT_BYTES,
     BoundedProcess,
     OutputLimitExceeded,
     ProcessTimeout,
@@ -231,3 +232,24 @@ def test_a_prompt_smaller_than_the_pipe_buffer_is_written_without_waiting(
         process.close_stdin()
         assert list(process.lines()) == ["ok"]
     assert fake.runs()[0]["stdin"] == "the prompt\n"
+
+
+def test_a_flooding_probe_is_capped_and_says_it_was_truncated(tmp_path: Path) -> None:
+    """A probe is a `--version` or a help text; 3 MiB of it is never held in memory."""
+    flood = FakeCli.install(
+        tmp_path,
+        "flood",
+        probes=[{"args": ["models"], "stdout": "z" * (3 * 1024 * 1024)}],
+    )
+    started = time.monotonic()
+
+    outcome = run_probe((str(flood.executable), "models"), env=flood.env(), timeout=20)
+
+    assert outcome.truncated and not outcome.timed_out
+    assert 0 < len(outcome.stdout) <= PROBE_OUTPUT_LIMIT_BYTES
+    assert time.monotonic() - started < 20
+
+
+def test_an_ordinary_probe_is_whole_and_not_marked_truncated(fake: FakeCli) -> None:
+    outcome = run_probe((str(fake.executable), "--version"), env=fake.env(), timeout=5)
+    assert outcome.stdout.strip() == "fake 1.2.3" and not outcome.truncated

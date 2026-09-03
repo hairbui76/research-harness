@@ -28,6 +28,7 @@ __all__ = [
     "CANCEL_GRACE_SECONDS",
     "DEFAULT_OUTPUT_LIMIT_BYTES",
     "MAX_LINE_BYTES",
+    "PROBE_OUTPUT_LIMIT_BYTES",
     "STDERR_TAIL_BYTES",
     "BoundedProcess",
     "OutputLimitExceeded",
@@ -37,8 +38,13 @@ __all__ = [
 
 DEFAULT_OUTPUT_LIMIT_BYTES = 8 * 1024 * 1024
 MAX_LINE_BYTES = 1024 * 1024
+PROBE_OUTPUT_LIMIT_BYTES = 1024 * 1024
+"""Per stream, per probe. A probe asks for a version banner, a help text, or a model list;
+anything past this is a runaway, and holding it would put the whole of it in memory on the
+strength of a `--version` call."""
 STDERR_TAIL_BYTES = 16 * 1024
 CANCEL_GRACE_SECONDS = 2.0
+_CHUNK_BYTES = 64 * 1024
 _WINDOWS = sys.platform == "win32"
 
 
@@ -104,10 +110,49 @@ def _kill_tree(process: subprocess.Popen[bytes], pgid: int | None, *, force: boo
         process.send_signal(sig)
 
 
+class _CappedReader(threading.Thread):
+    """One probe pipe, kept to at most `limit` bytes but still drained to EOF.
+
+    Both halves matter. The cap is the memory bound: `communicate` would hold whatever the
+    process chose to write. Draining past it is the liveness bound: a reader that simply
+    stopped would fill the pipe, block the child forever, and turn a runaway probe into a
+    hang the timeout has to clean up.
+    """
+
+    def __init__(self, stream: IO[bytes], limit: int) -> None:
+        super().__init__(daemon=True)
+        self._stream = stream
+        self._limit = limit
+        self.data = b""
+        self.truncated = False
+
+    def run(self) -> None:
+        chunks: list[bytes] = []
+        total = 0
+        # Suppressed because a stream closed underneath a reader raises into the thread,
+        # where it would surface only as an unhandled-thread-exception warning.
+        with contextlib.suppress(ValueError, OSError):
+            while total < self._limit:
+                chunk = self._stream.read(min(_CHUNK_BYTES, self._limit - total))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+            else:
+                while self._stream.read(_CHUNK_BYTES):
+                    self.truncated = True
+        self.data = b"".join(chunks)
+
+
 def run_probe(
     argv: tuple[str, ...], *, env: Mapping[str, str], timeout: float, cwd: Path | None = None
 ) -> ProbeOutcome:
-    """Run a short side-effect-free probe to completion, killing its tree on timeout."""
+    """Run a short side-effect-free probe to completion, killing its tree on timeout.
+
+    Each stream is capped at `PROBE_OUTPUT_LIMIT_BYTES` and the outcome says so, so a CLI
+    that answers `--version` with a megabyte of anything costs a megabyte, not whatever it
+    felt like writing.
+    """
     try:
         process = subprocess.Popen(
             list(argv),
@@ -123,20 +168,40 @@ def run_probe(
             argv=argv, exit_code=None, stdout="", stderr="", os_error=_os_error_text(exc)
         )
     pgid = _group_id(process)
+    assert process.stdout is not None and process.stderr is not None
+    streams = (process.stdout, process.stderr)
+    readers = tuple(_CappedReader(stream, PROBE_OUTPUT_LIMIT_BYTES) for stream in streams)
+    for reader in readers:
+        reader.start()
+    timed_out = False
     try:
-        out, err = process.communicate(timeout=timeout)
+        process.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
+        timed_out = True
         _kill_tree(process, pgid, force=True)
-        out, err = process.communicate()
-        return ProbeOutcome(
-            argv=argv,
-            exit_code=process.returncode,
-            stdout=_text(out),
-            stderr=_text(err),
-            timed_out=True,
-        )
+        process.wait()
+    for reader in readers:
+        reader.join(timeout=CANCEL_GRACE_SECONDS)
+    if any(reader.is_alive() for reader in readers):
+        # The child has exited but something it left behind still holds the pipes open --
+        # the case `BoundedProcess.cancel` documents. Signal the group so the readers reach
+        # EOF instead of the join above being the last word.
+        _kill_tree(process, pgid, force=True)
+        for reader in readers:
+            reader.join(timeout=CANCEL_GRACE_SECONDS)
+    for reader, stream in zip(readers, streams, strict=True):
+        # Never under a live reader: closing a stream while a thread is blocked on it
+        # deadlocks on the buffered-reader lock.
+        if not reader.is_alive():
+            with contextlib.suppress(OSError):
+                stream.close()
     return ProbeOutcome(
-        argv=argv, exit_code=process.returncode, stdout=_text(out), stderr=_text(err)
+        argv=argv,
+        exit_code=process.returncode,
+        stdout=_text(readers[0].data),
+        stderr=_text(readers[1].data),
+        timed_out=timed_out,
+        truncated=any(reader.truncated for reader in readers),
     )
 
 
