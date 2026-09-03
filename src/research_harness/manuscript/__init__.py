@@ -15,9 +15,28 @@ ladder (:mod:`~research_harness.manuscript.support`,
 :mod:`~research_harness.manuscript.audit` assembles into the Product 30.3 finding list plus
 the sentence -> Claim -> Evidence -> page-span trace of Product 30.1.
 
-Nothing here edits the manuscript, writes canonical state, or repairs a finding: citation
-existence is never treated as evidence support, and an unresolved one is reported for a
-researcher rather than papered over (Product 30.2, ADR-008).
+Since Phase 21 the package also *writes* manuscript files - and only in the two ways a
+researcher can see. :mod:`~research_harness.manuscript.files` saves a file the caller
+names, with the hash it believed it was editing, and refuses when somebody else changed it
+first. :mod:`~research_harness.manuscript.suggest` turns a model or humanizer rewrite into
+a staged candidate diff under `.research/staging/manuscript/` and applies it only through
+an explicit, audited acceptance. There is no third path: no function here edits prose on
+the harness's own initiative, and a candidate whose protected spans moved, whose
+propositions moved, or whose wording outruns its anchored Claim is refused rather than
+merged (Product 30.4, 42.L; LaTeX spec 4).
+
+Compilation is the other addition and is deliberately not an edit at all:
+:mod:`~research_harness.manuscript.toolchain` finds an engine already on `PATH`,
+:mod:`~research_harness.manuscript.compile` runs it in a bounded, confined process writing
+only into `.research/build/`, :mod:`~research_harness.manuscript.synctex` reads back the
+map it produced, and :mod:`~research_harness.manuscript.workspace` composes all of it into
+one view in which the compiler's diagnostics and the scientific audit's findings stay two
+different lists.
+
+Nothing here repairs a finding, and no write happens without the caller naming the file and
+the version: citation existence is never treated as evidence support, an unresolved one is
+reported for a researcher rather than papered over, and a stale anchor is never quietly
+reattached (Product 30.2, ADR-008).
 """
 
 from __future__ import annotations

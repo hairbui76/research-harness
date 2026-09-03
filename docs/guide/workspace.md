@@ -140,6 +140,47 @@ Practical advice:
   (`api_key_env:`); a key written into the file is refused when the workspace opens. See
   [Providers](providers.md).
 
+## The LaTeX toolchain (`manuscript:`)
+
+`research.yaml` carries three optional sections: `providers:` ([Providers](providers.md)),
+`privacy:`, and `manuscript:` — the local LaTeX toolchain the Manuscript workspace drives.
+Every key has a default, so a project that never writes the section still compiles
+`manuscript/main.tex` with the best engine on `PATH`:
+
+```yaml
+manuscript:
+  engine: tectonic          # latexmk | tectonic | pdflatex | xelatex | lualatex
+  entry_file: main.tex      # relative to manuscript/, must be a .tex file
+  timeout_seconds: 120      # the process group is killed at this point
+  extra_args: [-file-line-error, -halt-on-error]
+  synctex: true             # ask the engine for the source ↔ PDF map
+```
+
+| key | default | meaning |
+|---|---|---|
+| `engine` | the first installed of `latexmk`, `tectonic`, `pdflatex`, `xelatex`, `lualatex` | pin one engine; a pinned engine that is not on `PATH` is a setup message, never a fallback |
+| `entry_file` | `main.tex` | the file a compile runs, relative to `manuscript/`; `..`, absolute paths, and non-`.tex` names are refused |
+| `timeout_seconds` | `120` | wall clock for the whole run; on expiry the process *group* is killed and the log written so far is still parsed |
+| `extra_args` | `[]` | extra compiler flags, from a fixed allowlist |
+| `synctex` | `true` | request SyncTeX data; without it source ↔ PDF navigation reports itself unavailable rather than guessing |
+
+`extra_args` is an allowlist, not a passthrough: a compiler flag is an execution
+capability, so anything not on the list is refused when `research.yaml` is read, before any
+process starts. The accepted flags are `-bibtex`, `-bibtex-cond`, `-file-line-error`,
+`-halt-on-error`, `-interaction=batchmode`, `-interaction=nonstopmode`, `-pdf`, `-pdflua`,
+`-pdfxe`, `--keep-intermediates`, and `--keep-logs`. The harness owns the output directory,
+the working directory, and the SyncTeX flag, so nothing may name a file or a program.
+
+What the compile does *not* get is as fixed as what it does. The working directory is
+`manuscript/`, `shell=False`, and the environment is rebuilt from a small allowlist with
+`TEXINPUTS`/`BIBINPUTS` pinned to the project and `shell_escape=f`. `tectonic` runs
+`--untrusted`. **`latexmk` runs with `-norc`**, because a project `latexmkrc` is unsandboxed
+Perl that would execute on every compile, while a `.tex` file without shell escape is not.
+
+Output goes to `.research/build/manuscript/<build id>/` — disposable, like everything else
+under `.research/`. Deleting it loses build outputs and never a manuscript file: the last
+good PDF simply stops being available until the next successful compile.
+
 ## Identifiers
 
 Ids are stable, typed, and allocated from counters in `research.yaml`:

@@ -600,8 +600,29 @@ def test_drafting_without_a_claim_is_refused(workspace: Path, tmp_path: Path) ->
 
 
 def test_the_module_registers_the_documented_command_names() -> None:
+    """Two families under one name: the anchor/audit commands, and the Phase 21 workspace.
+
+    `files`, `read`, `write`, `compile`, `build`, `synctex`, `suggest`, and `apply` mirror
+    the `manuscript.*` capabilities one for one, so a terminal and a client ask for the same
+    things by the same names (v1.1 plan §0.4).
+    """
     names = {command.name for command in manuscript_commands.manuscript_app.registered_commands}
-    assert names == {"attach", "attach-text", "anchors", "revalidate", "audit", "trace"}
+    assert names == {
+        "attach",
+        "attach-text",
+        "anchors",
+        "revalidate",
+        "audit",
+        "trace",
+        "files",
+        "read",
+        "write",
+        "compile",
+        "build",
+        "synctex",
+        "suggest",
+        "apply",
+    }
     assert callable(manuscript_commands.register)
 
 
