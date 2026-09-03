@@ -1627,23 +1627,22 @@ This track turns the proven research core into the primary daily workspace descr
 
 **Gate CLI-P:** each of the fifteen acceptance criteria in the design specification's §24 is demonstrated by a named test; five of the seven registered runtimes may be listed as detected-but-not-routable, provided each says which gate stopped it.
 
-> **Status 2026-09-04 — ten of the fifteen criteria hold outright; five carry a pending
-> part.** Seven runtimes are registered and detected; Codex CLI and Claude Code are
-> routable, and the other five report the gate that stops them. The clause-by-clause evidence is
-> `docs/plans/acceptance-matrix.md` § *Subscription-backed local CLI providers*; the
-> decision is ADR-030 and the researcher-facing text is `docs/guide/providers.md`.
-> **Pending, and which rows:** (4) is not demonstrated at all yet — its live module and
-> the `RESEARCH_HARNESS_LIVE_CLI_TESTS` gate arrive with the release task, which also
-> supplies (14)'s gated module and (15)'s repository-wide secret scan. (3) and (12) hold
-> on the daemon side and gain their browser half with the *Models & providers* settings
-> section. The remaining ten hold outright.
+> **Status 2026-09-04 — all fifteen criteria hold.** Seven runtimes are registered and
+> detected; Codex CLI and Claude Code are routable, and the other five report the gate that
+> stops them. The clause-by-clause evidence is `docs/plans/acceptance-matrix.md` §
+> *Subscription-backed local CLI providers*; the decision is ADR-030 and the
+> researcher-facing text is `docs/guide/providers.md`. **The one dated criterion:** (4)
+> was demonstrated on 2026-09-04 with Codex CLI 0.150.1 and Claude Code 2.1.259 behind
+> `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` — never in CI — and the sanitized captures of both
+> streams are committed under `tests/fixtures/cli/streams/`; (15)'s repository-wide secret
+> scan ran clean the same day.
 
 | § | criterion | demonstrated by | status |
 |---|---|---|---|
-| 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` shows `9bb4a7d…`; `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
+| 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` shows `-9bb4a7d…` (pinned, never initialized here); `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
 | 2 | A fresh scan detects all seven runtimes independently and normalizes their status | `test_defs_others.py::test_all_seven_runtimes_are_registered_in_display_order`; `tests/unit/providers/cli/test_detection.py`; `test_cli_providers.py::test_scan_lists_all_seven_runtimes_in_registry_order_and_edits_nothing` | holds |
-| 3 | Web and `research providers add` create the same validated entry | `test_cli_providers.py::test_configure_writes_one_validated_entry`; `test_cli_providers_commands.py::test_add_refuses_an_unavailable_runtime_and_writes_an_available_one`; `settings.test.tsx` ("adds a provider with the chosen model and reasoning, after the egress warning") | holds on the Python side; browser half with the settings section |
-| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | `tests/contract/providers/test_live_cli_smoke.py`, gated by `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` — neither is on the tree yet | not yet demonstrated: the live module and its gate variable arrive with Task 15, which records the date and the versions |
+| 3 | Web and `research providers add` create the same validated entry | `test_cli_providers.py::test_configure_writes_one_validated_entry`; `test_cli_providers_commands.py::test_add_refuses_an_unavailable_runtime_and_writes_an_available_one`; `settings.test.tsx` ("adds a provider with the chosen model and reasoning, after the egress warning") | holds |
+| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | `tests/contract/providers/test_live_cli_smoke.py::test_live_cli_smoke` (`codex`, `claude`), gated by `RESEARCH_HARNESS_LIVE_CLI_TESTS=1`; captures `tests/fixtures/cli/streams/codex-live-0.150.1.jsonl` and `claude-live-2.1.259.jsonl` replayed by `test_parsers.py::test_a_captured_live_stream_still_parses_to_a_finished_answer` | holds (opt-in live run on 2026-09-04: Codex CLI 0.150.1, Claude Code 2.1.259) |
 | 5 | Existing commands select the CLI through `--provider`, with no workflow branch | `test_cli_providers_commands.py::test_existing_workflow_commands_select_the_cli_entry_with_provider` | holds |
 | 6 | Research content is delivered through stdin/RPC, never argv | `test_cli_provider.py::test_research_content_travels_on_stdin_never_argv`; `test_cli_provider_runtimes.py::test_every_other_runtime_answers_the_same_contract`; `test_registry.py::test_research_content_may_not_reach_argv` | holds |
 | 7 | A CLI provider is external egress unless local inference is positively established | `test_cli_provider.py::test_capabilities_are_external_text_only_and_structured`; `test_types.py::test_the_unknown_external_host_is_never_local`; `test_registry.py::test_a_local_egress_host_is_refused`; `test_cli_providers.py::test_a_configured_cli_entry_appears_in_the_catalog_as_external` | holds |
@@ -1651,10 +1650,10 @@ This track turns the proven research core into the primary daily workspace descr
 | 9 | The runtime cannot edit files or run project tools; a tool event fails the request | `test_cli_provider.py::test_a_tool_event_cancels_the_process_and_is_a_bounded_authority_violation`; `test_cli_provider_runtimes.py::test_every_other_runtime_fails_on_a_tool_event`; `test_registry.py::test_a_bypass_flag_anywhere_in_argv_is_refused` | holds |
 | 10 | Invalid, partial, or schema-incompatible output never reaches staging or accepted state | `test_cli_provider.py::test_invalid_json_fails_through_the_shared_structured_output_path` and `::test_a_schema_violation_never_returns_a_partial_object` | holds |
 | 11 | Cancellation and timeout terminate the whole process tree | `test_process.py::test_cancel_terminates_grandchildren` and `::test_exiting_is_bounded_when_a_grandchild_inherits_the_pipes`; `test_cli_provider.py::test_abandoning_the_stream_cancels_the_process` and `::test_abandoning_the_stream_through_the_wrapper_also_cancels_the_process` | holds |
-| 12 | Web and CLI display identical availability and failure reasons | `test_cli_providers.py::test_configure_and_scan_answer_identically_over_the_daemon` and `::test_the_scan_view_and_the_catalog_agree_about_a_refused_entry`; `test_cli_providers_commands.py::test_scan_prints_every_runtime_with_its_state`; `settings.test.tsx` ("renders the daemon states …") | holds on the Python side; browser half with the settings section |
+| 12 | Web and CLI display identical availability and failure reasons | `test_cli_providers.py::test_configure_and_scan_answer_identically_over_the_daemon` and `::test_the_scan_view_and_the_catalog_agree_about_a_refused_entry`; `test_cli_providers_commands.py::test_scan_prints_every_runtime_with_its_state`; `settings.test.tsx` ("renders the daemon states: logged out, unsafe, version warning, with its own words") | holds |
 | 13 | Existing HTTP, local-server, and scripted providers pass their tests unchanged | `tests/contract/providers/test_model_contract.py`, `test_native_streaming.py`, `tests/e2e/invariants/test_a_provider_independence.py`, all unchanged; the wave gate ran the full suite at 4250 passed / 40 skipped | holds; Task 15 re-runs the full suite |
-| 14 | Default CI needs no installed CLI, login, key, or network call | every default test drives `tests/fixtures/cli/fakes.py`; `tests/contract/protocol/test_new_capability_parity.py` empties `PATH`; the live test is environment-gated | holds for the default suite; the gate variable and the live module arrive with Task 15 |
-| 15 | Logs, traces, fixtures, configuration, and UI contain no credential material | `test_errors.py::test_messages_carry_identity_and_a_next_action_but_no_secret` and `::test_a_secret_straddling_the_stderr_truncation_boundary_is_still_redacted`; `test_detection.py::test_a_diagnostic_never_carries_a_home_path_or_a_token`; `test_cli_providers.py::test_the_test_call_reports_a_failure_without_a_secret` | holds; Task 15 adds the repository-wide secret scan |
+| 14 | Default CI needs no installed CLI, login, key, or network call | every default test drives `tests/fixtures/cli/fakes.py`; `tests/contract/protocol/test_new_capability_parity.py` empties `PATH`; the live test is environment-gated | holds: unset, every live case skips; set on an empty `PATH`, every case skips as not installed |
+| 15 | Logs, traces, fixtures, configuration, and UI contain no credential material | `test_errors.py::test_messages_carry_identity_and_a_next_action_but_no_secret` and `::test_a_secret_straddling_the_stderr_truncation_boundary_is_still_redacted`; `test_detection.py::test_a_diagnostic_never_carries_a_home_path_or_a_token`; `test_cli_providers.py::test_the_test_call_reports_a_failure_without_a_secret` | holds; the repository-wide secret scan ran clean on 2026-09-04 |
 
 > **Not routable in this release, and why.** Cursor Agent and Amp run headless only behind
 > an approval bypass; DeepSeek Harness's profile and Pi's RPC session execute tools of
