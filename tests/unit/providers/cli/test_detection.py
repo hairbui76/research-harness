@@ -7,6 +7,8 @@ import stat
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from research_harness.providers.cli.detection import (
     DEFAULT_MODEL_OPTION,
     ScanCache,
@@ -68,6 +70,15 @@ def installed(tmp_path: Path, **script: object) -> FakeCli:
     return FakeCli.install(tmp_path, "fake", probes=probes, **script)  # type: ignore[arg-type]
 
 
+def hangs(fake: FakeCli, args: list[str]) -> None:
+    """Make one probe outlast any timeout a test gives it."""
+    script = fake.script()
+    script["probes"] = [
+        {**probe, "sleep": 5} if probe["args"] == args else probe for probe in script["probes"]
+    ]
+    fake.write_script(script)
+
+
 # -- executables -------------------------------------------------------------
 
 
@@ -94,6 +105,19 @@ def test_a_non_executable_file_is_not_a_resolution(tmp_path: Path) -> None:
     plain.write_text("x", encoding="utf-8")
     plain.chmod(plain.stat().st_mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
     assert resolve_executable(definition(), {"PATH": str(tmp_path)}) is None
+
+
+def test_a_relative_path_entry_still_resolves_to_an_absolute_executable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A relative PATH entry means the child's neutral cwd would never find it."""
+    fake = installed(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    env = {"PATH": "bin", "HOME": str(tmp_path)}
+    resolved = resolve_executable(full_definition(), env)
+    assert resolved is not None and resolved.is_absolute()
+    assert resolved.samefile(fake.executable)
+    assert detect(full_definition(), env=env).available
 
 
 # -- one runtime ---------------------------------------------------------------
@@ -124,6 +148,10 @@ def test_an_installed_logged_in_runtime_is_fully_described(tmp_path: Path) -> No
     assert status.model_source == "live" and status.reasoning_choices == ()
     assert status.egress_kind == "external" and status.egress_host == "example.test"
     assert status.scanned_at == datetime(2026, 9, 4, tzinfo=UTC)
+    # "fake 1.2.3" carries no readable digits, so the version is unknown -- and an
+    # unknown version is still routable; only a *known*-bad one closes the gate.
+    assert status.compatibility == "unknown"
+    assert status.routable and status.unavailable_reason is None
 
 
 def test_a_rejected_version_flag_is_still_installed(tmp_path: Path) -> None:
@@ -198,6 +226,7 @@ def test_compatibility_is_a_table_of_versions() -> None:
     assert compatibility_of(d, "0.9.0") == "blocked"
     assert compatibility_of(d, "0.9.9") == "blocked", "below the minimum"
     assert compatibility_of(d, None) == "unknown"
+    assert compatibility_of(d, "fake 1.2.3") == "unknown", "unreadable is not known-bad"
 
 
 def test_a_diagnostic_never_carries_a_home_path_or_a_token(tmp_path: Path) -> None:
@@ -212,6 +241,61 @@ def test_a_diagnostic_never_carries_a_home_path_or_a_token(tmp_path: Path) -> No
     status = detect(full_definition(), env=fake.env({"PATH": "", "HOME": str(tmp_path / "home")}))
     joined = " ".join(status.diagnostics)
     assert "sk-proj" not in joined and str(tmp_path / "home") not in joined
+
+
+# -- probes that fail ----------------------------------------------------------
+
+
+def test_a_file_that_cannot_be_executed_is_unavailable(tmp_path: Path) -> None:
+    fake = installed(tmp_path)
+    fake.executable.chmod(0o644)
+    status = detect(full_definition(), env=fake.env({"PATH": "", "HOME": str(tmp_path)}))
+    assert not status.available and status.executable is None
+    assert status.diagnostics == ("fake is not installed: no 'fake' on PATH",)
+
+
+def test_an_executable_that_will_not_start_is_unavailable_and_says_why(tmp_path: Path) -> None:
+    fake = installed(tmp_path)
+    body = fake.executable.read_text(encoding="utf-8").split("\n", 1)[1]
+    fake.executable.write_text("#!/nonexistent/python3\n" + body, encoding="utf-8")
+    status = detect(full_definition(), env=fake.env({"PATH": "", "HOME": str(tmp_path)}))
+    assert not status.available and status.executable == "~/bin/fake"
+    assert any("could not be started" in line for line in status.diagnostics)
+    assert status.auth_status == "unknown" and status.bounded_mode == "unknown"
+
+
+def test_an_auth_probe_that_times_out_is_unknown_not_missing(tmp_path: Path) -> None:
+    fake = installed(tmp_path)
+    hangs(fake, ["login", "status"])
+    status = detect(
+        full_definition(auth_probe=Probe(args=("login", "status"), timeout_seconds=0.3)),
+        env=fake.env({"PATH": ""}),
+    )
+    assert status.auth_status == "unknown" and "first request" in status.auth_guidance
+
+
+def test_a_help_probe_that_times_out_leaves_the_bounded_mode_unproven(tmp_path: Path) -> None:
+    fake = installed(tmp_path)
+    hangs(fake, ["exec", "--help"])
+    posture = BoundedPosture(
+        kind="native_flags",
+        help_probe=Probe(args=("exec", "--help"), timeout_seconds=0.3),
+        required_help_flags=("--sandbox", "--json"),
+    )
+    status = detect(full_definition(posture=posture), env=fake.env({"PATH": ""}))
+    assert status.bounded_mode == "unknown" and not status.routable
+    assert any("did not answer" in line for line in status.diagnostics)
+
+
+def test_a_model_probe_that_times_out_falls_back_to_the_declared_catalog(tmp_path: Path) -> None:
+    fake = installed(tmp_path)
+    hangs(fake, ["models"])
+    status = detect(
+        full_definition(model_probe=Probe(args=("models",), timeout_seconds=0.3)),
+        env=fake.env({"PATH": ""}),
+    )
+    assert [item.id for item in status.models] == ["default", "fallback-1"]
+    assert status.model_source == "fallback"
 
 
 # -- the scan ------------------------------------------------------------------

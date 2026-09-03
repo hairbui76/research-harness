@@ -80,7 +80,12 @@ def _candidates(name: str, env: Mapping[str, str], platform: str) -> list[str]:
 def resolve_executable(
     definition: CliRuntimeDef, env: Mapping[str, str], *, platform: str = sys.platform
 ) -> Path | None:
-    """The first executable file on the effective PATH, trying fallbacks in order."""
+    """The first executable file on the effective PATH, trying fallbacks in order.
+
+    Always absolute: a relative `PATH` entry resolves against *this* process's cwd, while
+    the child is spawned from a neutral temp directory, so returning it unresolved would
+    both spawn the wrong path and skip `bounded_environment`'s absolute-only PATH prepend.
+    """
     directories = [part for part in env.get("PATH", "").split(os.pathsep) if part]
     for name in (definition.executable, *definition.fallback_executables):
         for directory in directories:
@@ -89,7 +94,7 @@ def resolve_executable(
                 if not path.is_file():
                     continue
                 if platform == "win32" or os.access(path, os.X_OK):
-                    return path
+                    return path.resolve()
     return None
 
 
@@ -114,16 +119,24 @@ def _version_tuple(version: str) -> tuple[int, ...]:
 
 
 def compatibility_of(definition: CliRuntimeDef, version: str | None) -> Compatibility:
-    """`verified` with fixtures, `blocked` when known bad or below the floor, else `warning`."""
+    """`verified` with fixtures, `blocked` when known bad or below the floor, else `warning`.
+
+    An unreadable version string is `unknown`, never `blocked`: `blocked` claims the
+    version is *known* incompatible (spec §21), and a banner no parser could turn into
+    digits is evidence of nothing. Only two comparable version tuples reach the floor.
+    """
     if version is None:
         return "unknown"
     if version in definition.blocked_versions:
         return "blocked"
-    minimum = definition.minimum_version
-    if minimum and _version_tuple(version) < _version_tuple(minimum):
-        return "blocked"
     if version in definition.verified_versions:
         return "verified"
+    digits = _version_tuple(version)
+    if not digits:
+        return "unknown"
+    minimum = _version_tuple(definition.minimum_version or "")
+    if minimum and digits < minimum:
+        return "blocked"
     return "warning"
 
 
