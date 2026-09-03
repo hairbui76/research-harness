@@ -103,8 +103,17 @@ export function fakeDaemon(options: {
   };
 }
 
+/**
+ * A whole `CapabilityResponse`, rather than the `result` a caller wrote out bare.
+ *
+ * `ok` alone cannot tell the two apart: `provider.cli.test` answers a report whose own
+ * verdict field is `ok`, and reading that as an envelope would find no `result` and turn a
+ * success into a refusal. The daemon names the capability on every envelope it sends and
+ * on nothing else, so that is the discriminator.
+ */
 function isEnvelope(value: unknown): boolean {
-  return typeof value === 'object' && value !== null && 'ok' in (value as object);
+  if (typeof value !== 'object' || value === null) return false;
+  return 'ok' in (value as object) && 'capability' in (value as object);
 }
 
 function jsonResponse(body: unknown): Response {

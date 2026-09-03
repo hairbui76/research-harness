@@ -1,0 +1,300 @@
+{
+  "scanned_at": "2026-09-04T00:00:00Z",
+  "count": 7,
+  "runtimes": [
+    {
+      "runtime": "codex",
+      "name": "Codex CLI",
+      "available": true,
+      "executable": "~/.local/bin/codex",
+      "version": "0.150.1",
+      "auth_status": "ok",
+      "auth_guidance": "",
+      "bounded_mode": "safe",
+      "compatibility": "verified",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "gpt-5.5",
+          "label": "gpt-5.5",
+          "reasoning": [
+            "low",
+            "medium",
+            "high",
+            "xhigh"
+          ],
+          "context_tokens": 272000
+        },
+        {
+          "id": "gpt-5.4-mini",
+          "label": "gpt-5.4-mini",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "live",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "egress_kind": "external",
+      "egress_host": "chatgpt.com",
+      "diagnostics": [],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": true,
+      "unavailable_reason": null
+    },
+    {
+      "runtime": "claude",
+      "name": "Claude Code",
+      "available": true,
+      "executable": "~/.local/bin/claude",
+      "version": "2.1.259",
+      "auth_status": "missing",
+      "auth_guidance": "run `claude auth login`",
+      "bounded_mode": "safe",
+      "compatibility": "verified",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "sonnet",
+          "label": "Sonnet (alias)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "opus",
+          "label": "Opus (alias)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "haiku",
+          "label": "Haiku (alias)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "egress_kind": "external",
+      "egress_host": "api.anthropic.com",
+      "diagnostics": [],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "claude is not logged in: run `claude auth login`"
+    },
+    {
+      "runtime": "cursor-agent",
+      "name": "Cursor Agent",
+      "available": true,
+      "executable": "~/.local/bin/cursor-agent",
+      "version": "1.4.0",
+      "auth_status": "ok",
+      "auth_guidance": "",
+      "bounded_mode": "unsupported",
+      "compatibility": "warning",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "auto",
+          "label": "auto",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "sonnet-4",
+          "label": "sonnet-4",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "gpt-5",
+          "label": "gpt-5",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "cursor-agent: headless Cursor Agent runs only with --force (approval bypass); no deny-tools flag is documented"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode"
+    },
+    {
+      "runtime": "amp",
+      "name": "Amp",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `amp login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "amp is not installed: no 'amp' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "amp is not installed on this workstation"
+    },
+    {
+      "runtime": "deepseek-harness",
+      "name": "DeepSeek Harness",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; configure a provider in `dsh` and install the open-design profile if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "deepseek-harness is not installed: no 'dsh' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "deepseek-harness is not installed on this workstation"
+    },
+    {
+      "runtime": "opencode",
+      "name": "OpenCode",
+      "available": true,
+      "executable": "~/.local/bin/opencode-cli",
+      "version": "1.18.0",
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `opencode auth login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "warning",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        },
+        {
+          "id": "anthropic/claude-sonnet-4-5",
+          "label": "anthropic/claude-sonnet-4-5",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "opencode: the environment-injected bounded posture is unproven on this version (no recorded fixtures)"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "opencode 1.18.0 could not prove a bounded (no-tools, read-only) mode"
+    },
+    {
+      "runtime": "pi",
+      "name": "Pi",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; configure a provider key inside `pi` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "pi is not installed: no 'pi' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "pi is not installed on this workstation"
+    }
+  ],
+  "configured": [
+    {
+      "name": "codex-sub",
+      "runtime": "codex",
+      "model": "gpt-5.5",
+      "priority": 10,
+      "enabled": true,
+      "reasoning": null,
+      "timeout_seconds": null,
+      "roles": null,
+      "available": true,
+      "unavailable_reason": null
+    }
+  ],
+  "notice": "A local CLI starts on this workstation, but the model it talks to is the vendor's: research content and object IDs leave the machine when a CLI provider is used."
+}
