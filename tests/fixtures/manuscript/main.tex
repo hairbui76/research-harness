@@ -1,0 +1,33 @@
+% Synthetic manuscript fixture for the manuscript layer. No number here is a real
+% measurement; the project exists to exercise parsing, anchoring, and citation closure.
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{natbib}
+
+\title{Structured Traffic Classification Under Sustained Load}
+\author{R. Hale and M. Okonkwo}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Structured traffic classifiers degrade under sustained load, and the degradation is
+rarely reported. We evaluate four classifiers at 94.32\% offered load and observe a
+4.2 F1 drop.
+\end{abstract}
+
+\input{sections/intro}
+
+\include{sections/method}
+
+\section{Discussion}
+\label{sec:discussion}
+
+The load-dependent gap is consistent with the queueing argument of \citet{hart2018},
+though we cannot separate scheduler effects from tokenizer effects. Claim C0041 stays
+corpus-level until a second corpus is measured.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

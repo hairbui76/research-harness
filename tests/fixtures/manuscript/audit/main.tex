@@ -1,0 +1,40 @@
+% Audit fixture for ROADMAP Task 9.4 and Gate P9. Every body sentence below exists to
+% produce exactly one manuscript audit finding, or - for the last one - none at all.
+% No number here is a real measurement; the ground truth lives in tests/e2e/conftest.py.
+\documentclass[11pt]{article}
+\usepackage{natbib}
+
+\title{Auditing a Manuscript Against Its Research Graph}
+\author{R. Hale}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+Every intrusion detection system fails on encrypted traffic, and no prior work reports
+the size of the gap \citep{author2023}.
+
+Ostrom and Lindqvist describe a corrected split for structured traffic corpora
+\citep{ostrom2020}.
+
+\section{Results}
+
+TrafficLM reaches an F1 of 94.32 on CICIDS2017, while the tuned baseline stays at 71.40
+\citep{author2023}.
+
+Our sweep shows that detection quality degrades as the offered load grows.
+
+The tokenizer improves recall for short flows \citep{author2023}.
+
+We employ the frozen bucket boundaries of the pretrained parent checkpoint
+\citep{author2023}.
+
+The pretrained encoder improves F1 over the strongest baseline in the work examined
+\citep{author2023}.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,43 @@
+\section{Method}
+
+\subsection{Setup}
+
+We replay 10.5 GB of captured traffic through each classifier at a fixed rate of 120 ms
+per batch. The offered load is swept from 10\% to 95\% in steps of 5\%.
+
+The score is the macro-averaged F1 defined in Eq. 1:
+
+\begin{equation}
+  F_1 = 2 \cdot \frac{p \cdot r}{p + r}
+  \label{eq:f1}
+\end{equation}
+
+Table~\ref{tab:results} reports the sweep, and Figure~\ref{fig:load} plots it.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    Classifier & F1 & Load \\
+    \midrule
+    Baseline & 94.32 & 30\% \\
+    Ours & 90.11 & 95\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{Sweep results at each offered load.}
+  \label{tab:results}
+\end{table}
+
+\begin{figure}[t]
+  \includegraphics[width=\linewidth]{figures/load.pdf}
+  \caption{F1 against offered load.}
+  \label{fig:load}
+\end{figure}
+
+The harness is invoked as shown below.
+
+\begin{verbatim}
+research audit manuscript --strict
+\end{verbatim}
+
+Every reported number in this section comes from a single run \citep{nguyen2022}.
