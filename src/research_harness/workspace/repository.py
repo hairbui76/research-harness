@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import logging
 import secrets
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -198,6 +198,16 @@ class WorkspaceConfig(BaseModel):
 
     def with_privacy(self, policy: EgressPolicy) -> WorkspaceConfig:
         return self.model_copy(update={"privacy": policy})
+
+    def with_providers(self, providers: Sequence[Mapping[str, Any]]) -> WorkspaceConfig:
+        """The same config with a new `providers:` table, re-validated.
+
+        `model_validate` rather than `model_copy`: the inline-secret validator above only
+        runs on validation, and a credential must never reach the file (Product 34).
+        """
+        return self.model_validate(
+            {**self.model_dump(), "providers": [dict(item) for item in providers]}
+        )
 
 
 class WorkspaceRepository:
@@ -376,6 +386,22 @@ class WorkspaceRepository:
         """
         with self.lock():
             config = read_yaml(self._layout.research_file, WorkspaceConfig).with_privacy(policy)
+            transaction = Transaction(self._layout)
+            transaction.write(self._layout.research_file, canonical_bytes(config))
+            transaction.commit()
+            self._note_commit(transaction.paths)
+        self._refresh_config(config)
+        return config
+
+    def update_providers(self, providers: Sequence[Mapping[str, Any]]) -> WorkspaceConfig:
+        """Persist a new `providers:` table; same durability as `update_config`, no event.
+
+        Configuration, not scientific state (see `update_config`). Validation runs before
+        the write, so a credential in the new list is refused with the file untouched.
+        """
+        with self.lock():
+            current = read_yaml(self._layout.research_file, WorkspaceConfig)
+            config = current.with_providers(providers)
             transaction = Transaction(self._layout)
             transaction.write(self._layout.research_file, canonical_bytes(config))
             transaction.commit()
