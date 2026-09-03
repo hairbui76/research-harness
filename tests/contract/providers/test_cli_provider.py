@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 
 import pytest
@@ -85,7 +86,8 @@ def provider(codex: FakeCli, **kwargs: object) -> CliModelProvider:
             "CODEX_HOME": str(codex.root / "home" / ".codex"),
         }
     )
-    return CliModelProvider("codex", "gpt-5.5", env=env, timeout=10, **kwargs)  # type: ignore[arg-type]
+    kwargs.setdefault("timeout", 10)
+    return CliModelProvider("codex", "gpt-5.5", env=env, **kwargs)  # type: ignore[arg-type]
 
 
 # -- the contract --------------------------------------------------------------
@@ -567,3 +569,25 @@ def test_an_ordinary_effort_name_still_reaches_the_runtime(
 ) -> None:
     provider(codex, reasoning="high").complete(model_request)
     assert 'model_reasoning_effort="high"' in codex.runs()[0]["argv"]
+
+
+def test_a_runtime_that_never_reads_its_stdin_fails_on_the_request_deadline(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """The prompt write is bounded by the same deadline the read loop uses (spec §14)."""
+    codex.set_run(read_stdin=False, hang=True, lines=[])
+    big = model_request.model_copy(
+        update={
+            "inputs": [model_request.inputs[0].model_copy(update={"content": "filler. " * 25_000})]
+        }
+    )
+    adapter = provider(codex, timeout=2)
+    started = time.monotonic()
+
+    with pytest.raises(CliTransportError) as caught:
+        adapter.complete(big)
+
+    assert caught.value.diagnostic == "timeout"
+    assert "never read the prompt from its stdin" in caught.value.message
+    assert time.monotonic() - started < 20
+    assert adapter.last_process is not None and not adapter.last_process.running

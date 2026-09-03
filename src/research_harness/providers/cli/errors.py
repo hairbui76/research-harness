@@ -171,6 +171,7 @@ def classify_failure(
     exit_code: int | None = None,
     stderr_tail: str = "",
     timed_out: bool = False,
+    stalled_input: bool = False,
     output_limited: bool = False,
     os_error: str | None = None,
     stream_error: str | None = None,
@@ -183,6 +184,10 @@ def classify_failure(
     Structured evidence first (`os_error`, `timed_out`, `output_limited`, a stream error
     with a code), narrowly tested text patterns second, and a generic transport failure
     last. The message names the runtime, model, and version, and a safe next action.
+
+    `stalled_input` narrows a timeout to the one case where raising `timeout_seconds` is
+    not the next action: the deadline passed while the harness was still writing the prompt
+    into a stdin the runtime never read.
     """
     who = describe_runtime(runtime, model, version)
     login = login_guidance or f"run `{runtime} login`"
@@ -200,6 +205,13 @@ def classify_failure(
             f"{who}: the executable could not be started ({redact(os_error, home=home)}); {action}",
             runtime=runtime,
             diagnostic=code,
+        )
+    if timed_out and stalled_input:
+        return CliTransportError(
+            f"{who}: the runtime never read the prompt from its stdin before the timeout; "
+            f"the process was stopped{suffix}",
+            runtime=runtime,
+            diagnostic="timeout",
         )
     if timed_out:
         return CliTransportError(

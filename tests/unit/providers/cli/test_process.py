@@ -198,3 +198,36 @@ def test_one_enormous_line_is_capped_before_it_is_buffered(fake: FakeCli, tmp_pa
         # whole line, only the capped read plus the one byte that proves it overflowed.
         assert process._bytes_read <= MAX_LINE_BYTES + 1
     assert not process.running
+
+
+def test_a_stdin_write_the_child_never_drains_hits_the_same_deadline(
+    fake: FakeCli, tmp_path: Path
+) -> None:
+    """A pipe write blocks once the OS buffer fills; the deadline has to cover it too.
+
+    The fake never reads its stdin and then sleeps for an hour, so a prompt larger than the
+    64 KiB pipe buffer would hold `write` forever -- past every timeout §14 promises.
+    """
+    fake.set_run(read_stdin=False, hang=True, lines=[])
+    started = time.monotonic()
+    with BoundedProcess.spawn(
+        (str(fake.executable), "run"), env=fake.env(), cwd=tmp_path, timeout=1
+    ) as process:
+        with pytest.raises(ProcessTimeout):
+            process.write("x" * 200_000)
+        assert time.monotonic() - started < 10
+        assert not process.running, "the tree is killed exactly as a stalled read kills it"
+    assert process.exit_code is not None, "no zombie is left behind"
+
+
+def test_a_prompt_smaller_than_the_pipe_buffer_is_written_without_waiting(
+    fake: FakeCli, tmp_path: Path
+) -> None:
+    fake.set_run(lines=["ok"])
+    with BoundedProcess.spawn(
+        (str(fake.executable), "run"), env=fake.env(), cwd=tmp_path, timeout=10
+    ) as process:
+        process.write("the prompt\n")
+        process.close_stdin()
+        assert list(process.lines()) == ["ok"]
+    assert fake.runs()[0]["stdin"] == "the prompt\n"

@@ -191,14 +191,48 @@ class BoundedProcess:
     # -- stdin ---------------------------------------------------------------
 
     def write(self, text: str) -> None:
+        """Write to the child's stdin under the same deadline the read loop uses (spec §14).
+
+        A pipe write blocks as soon as the kernel buffer fills -- 64 KiB on Linux -- and a
+        runtime that never drains its stdin would hold the engine here for as long as it
+        liked, past every timeout the spec promises. The write therefore runs on a daemon
+        thread joined against the process's own deadline; on expiry the tree is killed and
+        `ProcessTimeout` is raised, exactly as a stalled read raises it.
+        """
         stdin = self._process.stdin
         if stdin is None or self._stdin_closed:
             return
-        try:
-            stdin.write(text.encode("utf-8"))
-            stdin.flush()
-        except (BrokenPipeError, OSError):
-            self._stdin_closed = True
+        data = text.encode("utf-8")
+        finished = threading.Event()
+
+        def push() -> None:
+            try:
+                stdin.write(data)
+                stdin.flush()
+            except (BrokenPipeError, OSError):
+                self._stdin_closed = True
+            finally:
+                finished.set()
+
+        writer = threading.Thread(target=push, daemon=True)
+        writer.start()
+        remaining = self._deadline - time.monotonic()
+        while remaining > 0 and not finished.wait(min(remaining, 0.25)):
+            remaining = self._deadline - time.monotonic()
+        if finished.is_set():
+            return
+        # Kill first, close second. The writer thread is blocked *inside* the buffered
+        # writer and holds its lock, so closing the stream underneath it would deadlock on
+        # exactly the lock `__exit__` documents for the reader side. Killing the tree drops
+        # the read end of the pipe, the blocked write fails with EPIPE, and the thread
+        # releases the lock on its way out.
+        self._stdin_closed = True
+        self.cancel()
+        writer.join(timeout=1.0)
+        if not writer.is_alive():
+            with contextlib.suppress(OSError):
+                stdin.close()
+        raise ProcessTimeout("the runtime never read its input")
 
     def close_stdin(self) -> None:
         stdin = self._process.stdin

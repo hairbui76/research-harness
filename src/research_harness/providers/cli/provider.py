@@ -337,7 +337,14 @@ class CliModelProvider(ModelProvider):
         process = self._spawn(argv, env=env, cwd=cwd, timeout=self._timeout)
         self.last_process = process
         with process:
-            transport.start(process, prompt, invocation)
+            try:
+                transport.start(process, prompt, invocation)
+            except ProcessTimeout:
+                # The prompt itself never landed: the deadline passed with the write still
+                # blocked on a stdin the runtime never drained.
+                transport.cancel(process)
+                process.cancel()
+                raise self._failure(process, timed_out=True, stalled_input=True) from None
             try:
                 for line in process.lines():
                     if transport.intercept(process, line):
