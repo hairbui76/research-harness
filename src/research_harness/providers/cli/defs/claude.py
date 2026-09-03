@@ -66,6 +66,8 @@ def claude_args(invocation: CliInvocation) -> tuple[str, ...]:
     ]
     if invocation.model:
         args += ["--model", invocation.model]
+    if invocation.reasoning:
+        args += ["--effort", invocation.reasoning]
     return tuple(args)
 
 
@@ -86,7 +88,7 @@ CLAUDE = CliRuntimeDef(
         CliModelOption(id="claude-sonnet-5", label="claude-sonnet-5"),
         CliModelOption(id="claude-haiku-4-5", label="claude-haiku-4-5"),
     ),
-    reasoning_choices=(),
+    reasoning_choices=("low", "medium", "high", "xhigh", "max"),
     protocol="claude_stream",
     transport="stdin_jsonl",
     build_args=claude_args,
@@ -103,6 +105,7 @@ CLAUDE = CliRuntimeDef(
             "--strict-mcp-config",
             "--no-session-persistence",
             "--disable-slash-commands",
+            "--effort",
         ),
         note="no tools at all, every prompt denied, no MCP servers, no session file",
     ),
@@ -114,8 +117,9 @@ CLAUDE = CliRuntimeDef(
     verified_versions=("2.1.259",),
     env_keep=("CLAUDE_CONFIG_DIR",),
     notes=(
-        "2.1.259 does expose `--effort <low|medium|high|xhigh|max>`, but this definition "
-        "does not send it and declares no reasoning_choices, so a requested level only "
-        "routes. Wiring it through is a deliberate follow-up, not an oversight."
+        "Reasoning routes through `--effort`, sent whenever the harness level names one of "
+        "reasoning_choices (low, medium, high, xhigh, max in 2.1.259). The flag is required "
+        "help output, so a build without it is reported unsupported rather than being sent "
+        "an unknown flag."
     ),
 )

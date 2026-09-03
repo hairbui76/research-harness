@@ -125,6 +125,15 @@ def test_claude_argv_disables_every_tool_and_denies_every_prompt() -> None:
     assert not FORBIDDEN_ARGS & set(args)
 
 
+def test_claude_routes_reasoning_through_the_effort_flag() -> None:
+    args = claude_args(invocation(model="opus", reasoning="high"))
+    effort_at = args.index("--effort")
+    assert args[effort_at : effort_at + 2] == ("--effort", "high")
+    assert CLAUDE.reasoning_choices == ("low", "medium", "high", "xhigh", "max")
+    assert not FORBIDDEN_ARGS & set(args)
+    assert "--effort" not in claude_args(invocation(model="opus"))
+
+
 def test_claude_auth_status_reads_the_json_and_falls_back_to_text() -> None:
     assert claude_auth(outcome("claude-auth-status-ok.json")) == ("ok", "")
     assert claude_auth(outcome("claude-auth-status-missing.json")) == (
@@ -143,6 +152,8 @@ def test_claude_auth_status_reads_the_json_and_falls_back_to_text() -> None:
 def test_claude_posture_is_proven_by_the_real_help_text() -> None:
     text = (PROBES / "claude-help.txt").read_text(encoding="utf-8")
     assert all(flag in text for flag in CLAUDE.posture.required_help_flags)
+    # the flag reasoning rides on must stay required, or an older build would be sent it blind
+    assert "--effort" in CLAUDE.posture.required_help_flags
     version = CLAUDE.parse_version(
         ProbeOutcome(argv=("x",), exit_code=0, stdout="2.1.259 (Claude Code)\n", stderr="")
     )
