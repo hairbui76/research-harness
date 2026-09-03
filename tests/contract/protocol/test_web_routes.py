@@ -69,6 +69,77 @@ WEB_RESPONSE_TYPES = {
     "TraceView": "manuscript.trace",
     "FindingLocation": "manuscript.audit",
     "ManuscriptAuditFinding": "manuscript.audit",
+    # v1.1 — manuscript workspace (Phase 21)
+    "ManuscriptFile": "manuscript.files",
+    "ManuscriptTree": "manuscript.files",
+    "FileSnapshot": "manuscript.read_file",
+    "CompileDiagnostic": "manuscript.build",
+    "LastGoodBuild": "manuscript.build",
+    "CompileResult": "manuscript.build",
+    "DiscoveredEngine": "manuscript.build",
+    "ManuscriptSettings": "manuscript.build",
+    "ToolchainReport": "manuscript.build",
+    "BuildView": "manuscript.build",
+    "PdfLocation": "manuscript.synctex",
+    "SourceLocation": "manuscript.synctex",
+    "SynctexView": "manuscript.synctex",
+    "ProtectedSpan": "manuscript.suggest",
+    "ProtectedViolation": "manuscript.suggest",
+    "SemanticDiff": "manuscript.suggest",
+    "StyleReport": "manuscript.suggest",
+    "SuggestionDiffLine": "manuscript.suggest",
+    "SuggestionDiffHunk": "manuscript.suggest",
+    "AnchorImpact": "manuscript.suggest",
+    "SuggestionProvenance": "manuscript.suggest",
+    "SuggestionCandidate": "manuscript.suggest",
+    "AppliedSuggestion": "manuscript.apply_suggestion",
+    # v1.1 — conversation workspace (Phase 18)
+    "ModelIdentity": "session.get",
+    "SessionDefaults": "session.get",
+    "ConversationSession": "session.get",
+    "TextBlock": "session.get",
+    "ReferenceBlock": "session.get",
+    "AttachmentBlock": "session.get",
+    "MessageAttempt": "session.get",
+    "ConversationMessage": "session.get",
+    "SessionAttachmentRecord": "session.get",
+    "SessionView": "session.create",
+    "SessionListView": "session.list",
+    "SessionTranscript": "session.get",
+    "SessionMatch": "session.search",
+    "SessionSearchResults": "session.search",
+    "SessionSummaryView": "session.summarize",
+    "ContextItemView": "context.preview",
+    "OmittedContextItemView": "context.preview",
+    "ContextReceipt": "context.preview",
+    "ClassBudget": "context.preview",
+    "ContextPack": "context.preview",
+    "OmissionView": "context.preview",
+    "DiscrepancyView": "context.preview",
+    "ContextPackView": "context.get",
+    "SendStarted": "session.send",
+    "SessionStopped": "session.stop",
+    "PromotionView": "session.promote",
+    "ProviderModel": "provider.list",
+    "ProviderCatalog": "provider.list",
+    # v1.1 — attachments (Phase 19)
+    "AttachmentView": "attachment.add",
+    "AttachmentRemoved": "attachment.remove",
+    "AttachmentSendItem": "attachment.check_send",
+    "AttachmentSendCheck": "attachment.check_send",
+    "AttachmentIdentityView": "attachment.resolve_identity",
+    "AttachmentPromotionView": "attachment.save_to_corpus",
+    # v1.1 — research graph (Phase 20)
+    "GraphNodeView": "graph.neighbors",
+    "GraphEdgeView": "graph.neighbors",
+    "GraphNeighbourView": "graph.neighbors",
+    "GraphNeighbourhoodView": "graph.neighbors",
+    "GraphResolvedView": "graph.resolve",
+    "GraphAutocompleteResult": "graph.autocomplete",
+    "GraphQueryResult": "graph.query",
+    "GraphProvenanceStepView": "graph.provenance",
+    "GraphProvenanceView": "graph.provenance",
+    "GraphStatusView": "graph.status",
 }
 
 #: The request each cockpit control posts, exactly as `web/src/api/client.ts` builds it.
@@ -504,7 +575,11 @@ def _ts_interface_fields(source: str, name: str) -> set[str]:
     computed members, so matching `name?: type;` lines inside the braces catches a rename,
     which is the whole job.
     """
-    match = re.search(rf"export interface {re.escape(name)}\s*\{{(.*?)\n\}}", source, re.DOTALL)
+    # `export interface Name {` or `export interface Name extends Base {`; the base's own
+    # fields are checked under the base's entry.
+    match = re.search(
+        rf"export interface {re.escape(name)}\b[^{{]*\{{(.*?)\n\}}", source, re.DOTALL
+    )
     if match is None:
         raise AssertionError(f"{WEB_DTO_TS.name} declares no interface {name}")
     return set(re.findall(r"^\s{2}(\w+)\??:", match.group(1), re.MULTILINE))
