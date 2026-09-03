@@ -59,6 +59,11 @@ NEW_CAPABILITIES: dict[str, dict[str, Any]] = {
     # transports too.
     "session.list": {},
     "session.search": {"query": "latency"},
+    # Phase 18. The model catalog is a read of configuration and the egress disclosure, so
+    # a workspace with no `providers:` list answers with an empty catalog rather than an
+    # error — and answers it the same way to a Web client and to an agent host, which is
+    # what lets either of them offer a model selector (v1.1 plan SS0.4).
+    "provider.list": {},
 }
 
 #: The mutations added for the clients. A host is refused all of them, identically.
@@ -113,10 +118,12 @@ ALL_NEW = sorted(
         "attachment.resolve_identity",
         "manuscript.read_file",
         "manuscript.suggest",
-        # Both need a session that already exists, so they are discovered here and
-        # exercised in `tests/contract/capabilities/test_conversation.py`.
+        # These need a session (and, for `context.get`, a recorded receipt) that already
+        # exists, so they are discovered here and exercised in
+        # `tests/contract/capabilities/test_conversation.py`.
         "session.get",
         "context.preview",
+        "context.get",
     }
 )
 

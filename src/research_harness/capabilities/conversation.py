@@ -53,6 +53,7 @@ if TYPE_CHECKING:  # imported lazily at runtime so this layer stays provider-fre
 __all__ = [
     "CONVERSATION_CAPABILITIES",
     "CONVERSATION_CAPABILITY_HANDLERS",
+    "ContextGetRequest",
     "ContextPackView",
     "ContextPreviewRequest",
     "CreateSessionRequest",
@@ -135,6 +136,13 @@ class ContextPreviewRequest(CapabilityRequest):
     token_budget: int | None = Field(default=None, ge=1)
     persist: bool = True
     """Write the pack under `conversations/<id>/context/`; a dry run may say no."""
+
+
+class ContextGetRequest(CapabilityRequest):
+    """`context.get`: read a `Context used` receipt that was already recorded."""
+
+    session: ConversationSessionId
+    pack: ContextPackId
 
 
 class SendMessageRequest(CapabilityRequest):
@@ -396,7 +404,7 @@ def preview_context(ctx: CapabilityContext, request: ContextPreviewRequest) -> C
     from research_harness.conversation.context import ContextBudget
 
     budget = None if request.token_budget is None else ContextBudget(total=request.token_budget)
-    pack, assembled = _service(ctx).preview(
+    pack, _ = _service(ctx).preview(
         request.session,
         request.text,
         request.references,
@@ -404,7 +412,17 @@ def preview_context(ctx: CapabilityContext, request: ContextPreviewRequest) -> C
         budget=budget,
         persist=request.persist,
     )
-    return _pack_view(pack, assembled)
+    return _pack_view(pack)
+
+
+def get_context(ctx: CapabilityContext, request: ContextGetRequest) -> ContextPackView:
+    """`context.get`: the receipt a past message names, in the shape `context.preview` returns.
+
+    The pack is read from `conversations/<session>/context/`, which is durable: the answer
+    survives deleting `.research/` and is the same one the researcher saw when the message
+    was sent (Product 42 M).
+    """
+    return _pack_view(_service(ctx).read_pack(request.session, request.pack))
 
 
 def send_message(ctx: CapabilityContext, request: SendMessageRequest) -> SendStarted:
@@ -520,6 +538,7 @@ CONVERSATION_CAPABILITY_HANDLERS: Mapping[str, Callable[[CapabilityContext, Any]
             "session.retry": retry_message,
             "session.promote": promote_message,
             "context.preview": preview_context,
+            "context.get": get_context,
         }
     )
 )
@@ -656,6 +675,17 @@ def conversation_specs() -> list[CapabilitySpec]:
             request_model=ContextPreviewRequest,
             response_model=ContextPackView,
         ),
+        spec(
+            "context.get",
+            summary="Read the `Context used` receipt recorded for one past model call.",
+            semantics=(
+                "reads a stored receipt of private working context; the receipt is a record "
+                "of what a model was shown and carries no scientific authority"
+            ),
+            permission=Permission.READ,
+            request_model=ContextGetRequest,
+            response_model=ContextPackView,
+        ),
     ]
 
 
@@ -676,8 +706,13 @@ def _message_text(ctx: CapabilityContext, request: PromoteMessageRequest) -> str
     return store.get_message(request.session, request.message).text()
 
 
-def _pack_view(pack: ContextPack, assembled: Any) -> ContextPackView:
-    """The receipt as a host reads it: the pack, plus the parts a UI groups by."""
+def _pack_view(pack: ContextPack) -> ContextPackView:
+    """The receipt as a host reads it: the pack, plus the parts a UI groups by.
+
+    Everything comes off the stored pack, so `context.preview` and `context.get` answer
+    with the same object for the same receipt -- one assembled just now, one read back off
+    disk.
+    """
     return ContextPackView(
         pack=pack,
         tokens=pack.receipt.total_tokens(),
@@ -698,7 +733,7 @@ def _pack_view(pack: ContextPack, assembled: Any) -> ContextPackView:
         ),
         discrepancies=tuple(
             DiscrepancyView(accepted=item.accepted, message=item.message, detail=item.detail)
-            for item in assembled.discrepancies
+            for item in pack.receipt.discrepancies
         ),
-        unresolved=tuple(assembled.unresolved),
+        unresolved=tuple(pack.receipt.unresolved),
     )

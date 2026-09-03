@@ -24,11 +24,22 @@ Wire format, checked against the current Claude API reference:
 * Media inputs are content blocks beside the rendered text: an image is an `image` block
   and a PDF a `document` block, both with a base64 `source`. The encoding lives in
   `providers/models/media.py`, not here.
+
+Streaming is the same endpoint with `stream: true` and no `output_config`:
+
+* `content_block_delta` carries new text in `delta.text` (a `thinking_delta` is ignored
+  along with every other delta type, because no thinking block is ever requested);
+* `message_delta` carries the final `delta.stop_reason` and the cumulative
+  `usage.output_tokens`; `message_start` carries the input tokens and the model;
+* `message_stop` ends the stream, and an `error` event raises rather than truncating
+  silently.
+* A streamed conversation turn is prose, so no schema is requested; a schema-shaped answer
+  goes through `complete()`, which is what `NativeStream` routes it to.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from typing import Any
 
 import httpx
@@ -55,9 +66,11 @@ from research_harness.providers.models.media import (
     anthropic_media_block,
     media_parts,
 )
+from research_harness.providers.models.streaming import StreamDelta
 
 PROVIDER_NAME = "anthropic"
 DEFAULT_BASE_URL = "https://api.anthropic.com"
+MESSAGES_PATH = "/v1/messages"
 API_KEY_ENV_VAR = "ANTHROPIC_API_KEY"
 ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_MAX_CONTEXT_TOKENS = 200_000
@@ -120,9 +133,7 @@ class AnthropicProvider(HttpModelProvider):
     def _execute[T: BaseModel](
         self, request: ModelRequest[T], schema_json: dict[str, Any]
     ) -> RawCompletion:
-        body = self._post(
-            "/v1/messages", self._build_payload(request, schema_json), self._headers()
-        )
+        body = self._post(MESSAGES_PATH, self._build_payload(request, schema_json), self._headers())
         if body.get("type") == "error":
             detail = first_mapping(body.get("error")).get("message", "unspecified error")
             raise ProviderResponseError(
@@ -152,6 +163,67 @@ class AnthropicProvider(HttpModelProvider):
             stop_reason=stop_reason if isinstance(stop_reason, str) else None,
         )
 
+    def stream(self, request: ModelRequest[Any]) -> Iterator[StreamDelta]:
+        """Yield the model's prose as it arrives, then one final delta with the accounting.
+
+        Prose, not structured output: no `output_config` is sent, so the text deltas are
+        the answer rather than fragments of a JSON document. Abandoning this iterator
+        closes the HTTP response, which is how an interrupted turn stops the call instead
+        of draining it (conversation design SS8).
+        """
+        payload = {**self._build_stream_payload(request), "stream": True}
+        index = 0
+        model = self.settings.model
+        stop_reason: str | None = None
+        input_tokens = 0
+        cached_tokens: Any = None
+        output_tokens = 0
+        with self._post_stream(MESSAGES_PATH, payload, self._headers()) as events:
+            for name, data in events:
+                event = first_mapping(data)
+                kind = str(event.get("type") or name)
+                if kind == "error":
+                    detail = first_mapping(event.get("error")).get("message", "unspecified error")
+                    raise ProviderResponseError(
+                        f"Anthropic stream failed: {detail}", provider=self.name
+                    )
+                if kind == "message_start":
+                    message = first_mapping(event.get("message"))
+                    model = str(message.get("model") or model)
+                    usage = first_mapping(message.get("usage"))
+                    input_tokens = _count(usage.get("input_tokens"))
+                    cached_tokens = usage.get("cache_read_input_tokens")
+                    output_tokens = _count(usage.get("output_tokens"))
+                elif kind == "content_block_delta":
+                    delta = first_mapping(event.get("delta"))
+                    text = delta.get("text")
+                    # Only `text_delta` is read: no thinking block is requested, and an
+                    # `input_json_delta` belongs to a tool call this adapter never makes.
+                    if delta.get("type") == "text_delta" and isinstance(text, str) and text:
+                        yield StreamDelta(text=text, index=index)
+                        index += 1
+                elif kind == "message_delta":
+                    reason = first_mapping(event.get("delta")).get("stop_reason")
+                    if isinstance(reason, str):
+                        stop_reason = reason
+                    reported = first_mapping(event.get("usage"))
+                    if "output_tokens" in reported:
+                        output_tokens = _count(reported.get("output_tokens"))
+                elif kind == "message_stop":
+                    break
+        yield StreamDelta(
+            text="",
+            index=index,
+            final=True,
+            model=model,
+            stop_reason=stop_reason,
+            usage=usage_from(
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                cached_input_tokens=cached_tokens,
+            ),
+        )
+
     def _headers(self) -> dict[str, str]:
         headers = {
             "content-type": "application/json",
@@ -161,6 +233,29 @@ class AnthropicProvider(HttpModelProvider):
         if key is not None:
             headers["x-api-key"] = key
         return headers
+
+    def _build_stream_payload(self, request: ModelRequest[Any]) -> dict[str, Any]:
+        """The Messages body for a streamed turn: the same call, without a schema."""
+        payload: dict[str, Any] = {
+            "model": self.settings.model,
+            "max_tokens": request.requirements.max_output_tokens or DEFAULT_MAX_OUTPUT_TOKENS,
+            "system": request.instructions,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": render_inputs(request.inputs) or NO_INPUTS_PROMPT,
+                        },
+                        *(anthropic_media_block(part) for part in media_parts(request.inputs)),
+                    ],
+                }
+            ],
+        }
+        if request.temperature is not None:
+            payload["temperature"] = request.temperature
+        return payload
 
     def _build_payload[T: BaseModel](
         self, request: ModelRequest[T], schema_json: dict[str, Any]
@@ -188,6 +283,11 @@ class AnthropicProvider(HttpModelProvider):
         if request.temperature is not None:
             payload["temperature"] = request.temperature
         return payload
+
+
+def _count(value: Any) -> int:
+    """One usage counter out of loosely-typed streaming JSON, defaulting to zero."""
+    return int(value) if isinstance(value, int) and not isinstance(value, bool) else 0
 
 
 def _extract_text(body: Mapping[str, Any]) -> str:

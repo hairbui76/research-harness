@@ -101,7 +101,10 @@ class BuildRequest(CapabilityRequest):
     """`manuscript.build`: one build's compiler diagnostics and the current audit."""
 
     build_id: str | None = None
-    """The recorded build to read; omitted means the most recent one."""
+    """The build to read: a recorded id, or one of the two role names the daemon's PDF
+    route accepts -- `latest` (the newest build) and `last-good` (the newest one that
+    produced a PDF). Omitted means `latest`, so a client that is looking at
+    `/manuscript/builds/last-good/pdf` can ask about exactly that build."""
 
     audit: bool = True
     parse_sources: bool = False
@@ -116,6 +119,7 @@ class SynctexRequest(CapabilityRequest):
     """
 
     build_id: str | None = None
+    """The build whose map to read; `latest` and `last-good` are accepted here too."""
     file: str | None = None
     line: int | None = Field(default=None, ge=1)
     page: int | None = Field(default=None, ge=1)

@@ -56,6 +56,11 @@ from research_harness.capabilities.manuscript_workspace import (
     manuscript_workspace_specs,
 )
 from research_harness.capabilities.permissions import Permission
+from research_harness.capabilities.providers import (
+    PROVIDER_CAPABILITIES,
+    PROVIDER_CAPABILITY_HANDLERS,
+    provider_specs,
+)
 from research_harness.capabilities.reads import (
     READ_CAPABILITY_HANDLERS,
     AnchorSummary,
@@ -1827,6 +1832,7 @@ EXTRA_CAPABILITY_HANDLERS: Mapping[str, Callable[[CapabilityContext, Any], Any]]
         "state.stale": get_state_stale,
         **MANUSCRIPT_WORKSPACE_HANDLERS,
         **CONVERSATION_CAPABILITY_HANDLERS,
+        **PROVIDER_CAPABILITY_HANDLERS,
         **ATTACHMENT_CAPABILITY_HANDLERS,
         **GRAPH_CAPABILITY_HANDLERS,
         **READ_CAPABILITY_HANDLERS,
@@ -2442,6 +2448,7 @@ _SECTIONS: tuple[tuple[tuple[str, ...], Callable[[], list[CapabilitySpec]]], ...
     ),
     (MANUSCRIPT_WORKSPACE_CAPABILITIES, manuscript_workspace_specs),
     (CONVERSATION_CAPABILITIES, conversation_specs),
+    (PROVIDER_CAPABILITIES, provider_specs),
     (("state.rebuild", "state.stale"), _state_specs),
     (
         ("claim.relate", "claim.unrelate", "claim.supersede", "claim.update_coverage"),

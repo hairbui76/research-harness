@@ -48,7 +48,6 @@ from research_harness.domain.conversation import SessionAttachment, Visibility
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import ConversationSessionId, SessionAttachmentId, WorkId
 from research_harness.providers.models.base import ProviderCapabilities
-from research_harness.providers.models.media import IMAGE_MEDIA_TYPES
 from research_harness.workspace.conversations import ConversationStore
 
 __all__ = [
@@ -467,7 +466,7 @@ def configured_models(ctx: CapabilityContext) -> list[tuple[str, ProviderCapabil
     the way the egress report does: deciding whether a model could take a PNG must not
     depend on having a key for it (Product 34).
     """
-    from research_harness.providers.models.router import RouterConfig
+    from research_harness.providers.models.router import RouterConfig, entry_capabilities
 
     config = RouterConfig.model_validate({"providers": list(ctx.repo.config.providers)})
     entries: list[tuple[int, str, ProviderCapabilities]] = []
@@ -478,34 +477,11 @@ def configured_models(ctx: CapabilityContext) -> list[tuple[str, ProviderCapabil
             (
                 provider_config.priority,
                 f"{provider_config.name}/{provider_config.model}",
-                _declared_capabilities(provider_config),
+                entry_capabilities(provider_config),
             )
         )
     entries.sort(key=lambda item: (item[0], item[1]))
     return [(label, capabilities) for _, label, capabilities in entries]
-
-
-def _declared_capabilities(provider_config: Any) -> ProviderCapabilities:
-    """One entry's capabilities, with a `vision:` override carried into `input_media`.
-
-    `CapabilityOverrides` predates media inputs and still has no `input_media` field, and
-    `_merge_capabilities` applies overrides with `model_copy`, which skips validation — so
-    a workspace that switches vision on for a served model would otherwise get a sighted
-    model that accepts no media at all. Deriving it here keeps the two spellings agreeing
-    until the router carries the field itself.
-    """
-    from research_harness.providers.models.router import entry_capabilities
-
-    capabilities = entry_capabilities(provider_config)
-    override = provider_config.capabilities
-    if override is None or override.vision is None:
-        return capabilities
-    media = (
-        frozenset(capabilities.input_media | IMAGE_MEDIA_TYPES)
-        if override.vision
-        else frozenset(capabilities.input_media - IMAGE_MEDIA_TYPES)
-    )
-    return capabilities.model_copy(update={"input_media": media})
 
 
 def _select_model(

@@ -1,13 +1,21 @@
-"""Shared httpx plumbing: one client per adapter and one HTTP error mapping.
+"""Shared httpx plumbing: one client per adapter, one HTTP error mapping, one SSE reader.
 
 Keeping the mapping here is what makes `ProviderAuthError`, `ProviderRateLimitError`
 and `ProviderTransportError` mean the same thing for every backend, which later phases
 rely on to decide what is retryable.
+
+:func:`post_sse` is the same contract for a streamed call. Both hosted APIs answer a
+streaming request with `text/event-stream`, and both spell one event as an optional
+`event:` line plus one or more `data:` lines; what those payloads *mean* differs per
+vendor and is parsed in the adapter. Abandoning the returned iterator closes the response,
+which is how an interruption stops the call rather than draining it.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import json
+from collections.abc import Iterator, Mapping
+from contextlib import AbstractContextManager, contextmanager
 from typing import Any, Self
 from urllib.parse import urlsplit
 
@@ -74,6 +82,72 @@ def post_json(
             provider=provider,
         )
     return body
+
+
+@contextmanager
+def post_sse(
+    client: httpx.Client,
+    url: str,
+    *,
+    payload: Mapping[str, Any],
+    headers: Mapping[str, str],
+    provider: str,
+) -> Iterator[Iterator[tuple[str, Any]]]:
+    """POST and yield `(event name, decoded data)` pairs from a server-sent event stream.
+
+    The event name is the `event:` line when the server sends one and `"message"` when it
+    does not, which is what the SSE default is. `data:` payloads are decoded as JSON;
+    `[DONE]`, the sentinel OpenAI-compatible servers end with, is passed through as the
+    string it is so the adapter decides what it means. A payload that is neither is
+    skipped rather than raised on: a keep-alive comment or a vendor extension must not
+    break an answer that is already arriving.
+    """
+    try:
+        with client.stream("POST", url, json=dict(payload), headers=dict(headers)) as response:
+            if response.status_code >= 400:
+                response.read()
+                _raise_for_status(response, provider=provider)
+            yield _sse_events(response, provider=provider)
+    except httpx.TimeoutException as exc:
+        raise ProviderTransportError(
+            f"{provider} request timed out: {exc}", provider=provider
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise ProviderTransportError(
+            f"{provider} transport failure: {exc}", provider=provider
+        ) from exc
+
+
+def _sse_events(response: httpx.Response, *, provider: str) -> Iterator[tuple[str, Any]]:
+    """Decode one `text/event-stream` body into `(event, data)` pairs, in order."""
+    del provider
+    name = "message"
+    data: list[str] = []
+    for raw in response.iter_lines():
+        line = raw.rstrip("\r")
+        if not line:
+            if data:
+                yield name, _sse_data("\n".join(data))
+            name, data = "message", []
+            continue
+        if line.startswith(":"):
+            continue
+        field, _, value = line.partition(":")
+        value = value[1:] if value.startswith(" ") else value
+        if field == "event":
+            name = value
+        elif field == "data":
+            data.append(value)
+    if data:
+        yield name, _sse_data("\n".join(data))
+
+
+def _sse_data(payload: str) -> Any:
+    """One `data:` payload as JSON, or the raw string when it is not JSON."""
+    try:
+        return json.loads(payload)
+    except ValueError:
+        return payload
 
 
 def _raise_for_status(response: httpx.Response, *, provider: str) -> None:
@@ -146,6 +220,12 @@ class HttpModelProvider(ModelProvider):
         self, url: str, payload: Mapping[str, Any], headers: Mapping[str, str]
     ) -> dict[str, Any]:
         return post_json(self._client, url, payload=payload, headers=headers, provider=self.name)
+
+    def _post_stream(
+        self, url: str, payload: Mapping[str, Any], headers: Mapping[str, str]
+    ) -> AbstractContextManager[Iterator[tuple[str, Any]]]:
+        """The same POST as a server-sent event stream; closing it interrupts the call."""
+        return post_sse(self._client, url, payload=payload, headers=headers, provider=self.name)
 
     def _api_key(self) -> str | None:
         key = self.settings.api_key

@@ -214,6 +214,87 @@ def test_compile_then_build_answer_with_the_same_build(
     assert view.diagnostics == compiled.diagnostics  # type: ignore[attr-defined]
 
 
+def test_build_accepts_the_same_aliases_the_pdf_route_accepts(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """One vocabulary: a client looking at `builds/latest/pdf` can ask about that build.
+
+    The daemon's PDF route has always taken `latest` and `last-good`; the capability used
+    to answer `no manuscript build latest`, so a client had to know that the route and the
+    capability named builds differently (dogfood, v1.1).
+    """
+    compiled = call(registry, ctx, "manuscript.compile")
+
+    latest = call(registry, ctx, "manuscript.build", {"build_id": "latest"})
+    last_good = call(registry, ctx, "manuscript.build", {"build_id": "last-good"})
+    implicit = call(registry, ctx, "manuscript.build", {})
+
+    assert latest.build_id == compiled.build_id  # type: ignore[attr-defined]
+    assert last_good.build_id == compiled.build_id  # type: ignore[attr-defined]
+    assert implicit.build_id == compiled.build_id  # type: ignore[attr-defined]
+
+
+def test_last_good_names_the_build_that_produced_the_pdf_not_the_newest_one(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """After a failed compile the two aliases diverge, which is the point of having both."""
+    good = call(registry, ctx, "manuscript.compile")
+    path = ctx.repo.layout.manuscript_dir / "sections" / "intro.tex"
+    path.write_text(f"{path.read_text(encoding='utf-8')}\n% fake-latex: fail\n", encoding="utf-8")
+    failed = call(registry, ctx, "manuscript.compile")
+
+    latest = call(registry, ctx, "manuscript.build", {"build_id": "latest"})
+    last_good = call(registry, ctx, "manuscript.build", {"build_id": "last-good"})
+    implicit = call(registry, ctx, "manuscript.build", {})
+
+    assert failed.status is CompileStatus.FAILED  # type: ignore[attr-defined]
+    assert failed.pdf is None and failed.pdf_stale  # type: ignore[attr-defined]
+    # `last-good` names the build that produced the PDF a reader is still looking at, which
+    # is not the newest build any more.
+    assert last_good.build_id == good.build_id  # type: ignore[attr-defined]
+    assert last_good.error_count == 0  # type: ignore[attr-defined]
+    assert last_good.pdf is not None  # type: ignore[attr-defined]
+    assert last_good.build_id == failed.last_good.build_id  # type: ignore[attr-defined]
+    # `latest` is exactly what omitting the id means; both are "whatever compiled last".
+    assert latest.build_id == implicit.build_id  # type: ignore[attr-defined]
+
+
+def test_an_alias_on_a_workspace_that_never_compiled_says_so_rather_than_failing(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """ "Nothing here yet" is the answer a client meets first (LaTeX spec 6)."""
+    view = call(registry, ctx, "manuscript.build", {"build_id": "last-good"})
+
+    assert view.build_id is None and view.compiled is False  # type: ignore[attr-defined]
+    assert view.diagnostics == ()  # type: ignore[attr-defined]
+
+
+def test_synctex_accepts_the_aliases_too(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    call(registry, ctx, "manuscript.compile")
+
+    view = call(
+        registry,
+        ctx,
+        "manuscript.synctex",
+        {"file": "sections/intro.tex", "line": 4, "build_id": "latest"},
+    )
+
+    assert view.available is True  # type: ignore[attr-defined]
+    assert view.pdf_locations  # type: ignore[attr-defined]
+
+
+def test_an_unknown_build_id_is_still_refused_by_name(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """The aliases are two extra names, not an invitation to guess."""
+    from research_harness.manuscript.compile import CompileError
+
+    with pytest.raises(CompileError, match="no manuscript build"):
+        call(registry, ctx, "manuscript.build", {"build_id": "newest"})
+
+
 def test_synctex_answers_forward_after_a_compile(
     registry: CapabilityRegistry, ctx: CapabilityContext
 ) -> None:

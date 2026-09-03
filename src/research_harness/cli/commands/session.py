@@ -39,7 +39,7 @@ from research_harness.domain.conversation import (
 )
 from research_harness.domain.enums import ClaimScope, ClaimType, DecisionType
 from research_harness.domain.errors import ResearchHarnessError
-from research_harness.domain.ids import ConversationSessionId, MessageId
+from research_harness.domain.ids import ContextPackId, ConversationSessionId, MessageId
 
 __all__ = ["register"]
 
@@ -67,11 +67,28 @@ ProviderOption = Annotated[
     str | None,
     typer.Option("--provider", help="Provider entry from `providers:` in research.yaml."),
 ]
+CHAT_SCRIPT_SHAPE = (
+    'a chat script is a JSON list of replies, each an object with a "text" string — or one '
+    'such object for a single answer, e.g. [{"text": "..."}]. The role-keyed form the '
+    'workflow commands take (`{"writer": [...]}`) does not apply here: a conversation '
+    "turn is answered by the routing role `conversation`, which is not a workflow role"
+)
+"""What `--script` expects, stated once so the option help and the refusal agree.
+
+A chat turn's reply schema is `ChatReply` — one `text` field — because a conversation is
+prose rather than a structured research object. A file in any other shape used to reach
+the provider and fail there, as a validation error about a schema the researcher never
+named; it is refused here instead, by the transport that knows what was asked for.
+"""
+
 ScriptOption = Annotated[
     Path | None,
     typer.Option(
         "--script",
-        help="JSON replies for the in-process scripted provider; runs fully offline.",
+        help=(
+            'JSON replies for the in-process scripted provider, e.g. [{"text": "..."}]; '
+            "runs fully offline."
+        ),
         show_default=False,
     ),
 ]
@@ -236,6 +253,14 @@ def session_summarize(
 def session_context(
     session: SessionArgument,
     workspace: WorkspaceOption = None,
+    pack_id: Annotated[
+        str | None,
+        typer.Option(
+            "--pack",
+            help="Read a receipt already recorded, e.g. CP0001, instead of assembling one.",
+            show_default=False,
+        ),
+    ] = None,
     text: Annotated[str, typer.Option("--text", help="The draft to assemble context for.")] = "",
     reference: ReferenceOption = None,
     provider: ProviderOption = None,
@@ -245,28 +270,32 @@ def session_context(
     ] = False,
     as_json: JsonOption = False,
 ) -> None:
-    """Show what a message would send, and what would be refused (`context.preview`)."""
+    """Show what a message would send, or what one did (`context.preview`, `context.get`).
+
+    Without `--pack` this assembles a receipt for a draft and sends nothing. With `--pack`
+    it reads the receipt a past message already named, which is the durable record of what
+    that call was shown.
+    """
     with cli_errors():
-        pack, assembled = _service(workspace).preview(
-            ConversationSessionId(session),
-            text,
-            tuple(reference or ()),
-            model=provider,
-            budget=None if budget is None else ContextBudget(total=budget),
-            persist=persist,
-        )
-        emit(
-            {
-                "pack": pack.model_dump(mode="json"),
-                "discrepancies": [
-                    {"accepted": item.accepted, "message": item.message, "detail": item.detail}
-                    for item in assembled.discrepancies
-                ],
-                "unresolved": list(assembled.unresolved),
-            },
-            _receipt_lines(pack, assembled.unresolved),
-            as_json=as_json,
-        )
+        service = _service(workspace)
+        session_id = ConversationSessionId(session)
+        if pack_id is not None:
+            if text or reference or provider or budget is not None:
+                raise ResearchHarnessError(
+                    "--pack reads a recorded receipt; it takes no draft, reference, "
+                    "provider, or budget"
+                )
+            pack = service.read_pack(session_id, ContextPackId(pack_id))
+        else:
+            pack, _ = service.preview(
+                session_id,
+                text,
+                tuple(reference or ()),
+                model=provider,
+                budget=None if budget is None else ContextBudget(total=budget),
+                persist=persist,
+            )
+        emit(_receipt_payload(pack), _receipt_lines(pack), as_json=as_json)
 
 
 # -- sending -----------------------------------------------------------------
@@ -442,14 +471,34 @@ def _service_for(
     """The service, with the scripted provider wired in when `--script` names one."""
     if script is None:
         return ConversationService(ctx)
-    from research_harness.cli.providers import scripted_model_provider
-
     return ConversationService(
         ctx,
-        providers=ScriptedProviders(
-            scripted_model_provider(script), chunk_words=max(chunk_words, 1)
-        ),
+        providers=ScriptedProviders(_chat_script(script), chunk_words=max(chunk_words, 1)),
     )
+
+
+def _chat_script(path: Path) -> Any:
+    """The scripted answers for `research chat send|retry --script`, shape checked here.
+
+    `cli/providers.py::scripted_model_provider` reads the three shapes the *workflow*
+    commands take, one of which is keyed by role. A conversation turn cannot use it — its
+    role is `conversation`, which the role registry does not know — so this reads the one
+    shape a chat turn can use and says so when the file is not in it.
+    """
+    import json
+
+    from research_harness.cli.providers import SCRIPTED_PROVIDER
+    from research_harness.providers.models.scripted import ScriptedProvider
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ResearchHarnessError(f"cannot read script {path}: {exc}") from exc
+    replies = payload if isinstance(payload, list) else [payload]
+    for reply in replies:
+        if not isinstance(reply, dict) or not isinstance(reply.get("text"), str):
+            raise ResearchHarnessError(f"{path}: {CHAT_SCRIPT_SHAPE}")
+    return ScriptedProvider(list(replies), name=SCRIPTED_PROVIDER)
 
 
 def _session_of(ctx: CapabilityContext, message: MessageId) -> ConversationSessionId:
@@ -485,7 +534,19 @@ def _outcome_lines(outcome: SendOutcome) -> list[str]:
     return lines
 
 
-def _receipt_lines(pack: ContextPack, unresolved: tuple[str, ...]) -> list[str]:
+def _receipt_payload(pack: ContextPack) -> dict[str, Any]:
+    """The receipt as JSON: the pack, plus the two lists a client groups by."""
+    return {
+        "pack": pack.model_dump(mode="json"),
+        "discrepancies": [
+            {"accepted": item.accepted, "message": item.message, "detail": item.detail}
+            for item in pack.receipt.discrepancies
+        ],
+        "unresolved": list(pack.receipt.unresolved),
+    }
+
+
+def _receipt_lines(pack: ContextPack) -> list[str]:
     """The `Context used` receipt as a person reads it: what went, and what did not."""
     lines = [
         f"{pack.id}  {pack.egress.value}  {pack.receipt.total_tokens()} tokens of "
@@ -504,8 +565,14 @@ def _receipt_lines(pack: ContextPack, unresolved: tuple[str, ...]) -> list[str]:
             + (f"  — {item.detail}" if item.detail else "")
             for item in pack.receipt.omitted
         )
-    if unresolved:
-        lines.extend(["", f"unresolved references: {', '.join(unresolved)}"])
+    if pack.receipt.unresolved:
+        lines.extend(["", f"unresolved references: {', '.join(pack.receipt.unresolved)}"])
+    if pack.receipt.discrepancies:
+        lines.extend(["", "accepted state outranked:"])
+        lines.extend(
+            f"  {item.accepted} over {item.message} — {item.detail}"
+            for item in pack.receipt.discrepancies
+        )
     return lines
 
 

@@ -25,6 +25,7 @@ export type CapabilityName =
   | "claim.supersede"
   | "claim.unrelate"
   | "claim.update_coverage"
+  | "context.get"
   | "context.preview"
   | "corpus.ingest"
   | "corpus.screen"
@@ -60,6 +61,7 @@ export type CapabilityName =
   | "note.add"
   | "note.discard"
   | "note.promote"
+  | "provider.list"
   | "question.create"
   | "question.list"
   | "question.resolve"
@@ -237,6 +239,13 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     longRunning: false,
     summary: "Record the search coverage a Claim's scope rests on.",
     semantics: "writes the deterministic discovery funnel onto a Claim; the audit reads it and no model contributes to it",
+  },
+  "context.get": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Read the `Context used` receipt recorded for one past model call.",
+    semantics: "reads a stored receipt of private working context; the receipt is a record of what a model was shown and carries no scientific authority",
   },
   "context.preview": {
     permission: "read",
@@ -482,6 +491,13 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     longRunning: false,
     summary: "Record the research object a captured note became.",
     semantics: "raises a note's authority into a Claim, Question, or Decision; human-only",
+  },
+  "provider.list": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Every configured model, with what it accepts and whether it is available.",
+    semantics: "reads configuration and the project's egress disclosure; contacts nothing, reveals no credential, and changes no state",
   },
   "question.create": {
     permission: "mutate",

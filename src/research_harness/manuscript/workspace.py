@@ -56,6 +56,9 @@ from research_harness.manuscript.synctex import (
 from research_harness.manuscript.toolchain import ManuscriptSettings, ToolchainReport
 
 __all__ = [
+    "BUILD_ALIASES",
+    "LAST_GOOD_BUILD",
+    "LATEST_BUILD",
     "BuildView",
     "ManuscriptTree",
     "ManuscriptWorkspace",
@@ -63,6 +66,17 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+LATEST_BUILD = "latest"
+"""The newest recorded build. Accepted anywhere a build id is: the daemon's PDF route has
+always taken it, and a client that shows "the current build" should not have to look one
+up first (LaTeX spec SS6)."""
+
+LAST_GOOD_BUILD = "last-good"
+"""The newest build that really produced a PDF, whatever has happened since."""
+
+BUILD_ALIASES: frozenset[str] = frozenset({LATEST_BUILD, LAST_GOOD_BUILD})
+"""Build ids that name a build by its role rather than by its timestamp."""
 
 
 class _View(BaseModel):
@@ -322,8 +336,17 @@ class ManuscriptWorkspace:
     # -- internals -----------------------------------------------------------
 
     def _resolve(self, build_id: str | None) -> CompileResult | None:
-        if build_id is None:
+        """One build, by id or by role. `latest` and `last-good` are ids like any other.
+
+        The daemon's PDF route has always accepted the two aliases, so a client that asks
+        `manuscript.build` about the PDF it is looking at has to be able to name it the
+        same way; anything else makes "which build is this?" a question with two answers.
+        """
+        if build_id is None or build_id == LATEST_BUILD:
             return self._compile.latest()
+        if build_id == LAST_GOOD_BUILD:
+            pointer = self._compile.last_good()
+            return None if pointer is None else self._compile.build(pointer.build_id)
         return self._compile.build(build_id)
 
     def _audit(

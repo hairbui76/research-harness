@@ -4499,65 +4499,28 @@
     {
       "human_only": false,
       "long_running": false,
-      "name": "context.preview",
+      "name": "context.get",
       "permission": "read",
       "request_schema": {
         "additionalProperties": false,
-        "description": "`context.preview`: assemble a `ContextPack` without sending it.",
+        "description": "`context.get`: read a `Context used` receipt that was already recorded.",
         "properties": {
-          "model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Model"
-          },
-          "persist": {
-            "default": true,
-            "title": "Persist",
-            "type": "boolean"
-          },
-          "references": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "References",
-            "type": "array"
+          "pack": {
+            "pattern": "^CP\\d{4,}$",
+            "title": "Pack",
+            "type": "string"
           },
           "session": {
             "pattern": "^CS\\d{4,}$",
             "title": "Session",
             "type": "string"
-          },
-          "text": {
-            "default": "",
-            "title": "Text",
-            "type": "string"
-          },
-          "token_budget": {
-            "anyOf": [
-              {
-                "minimum": 1,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Token Budget"
           }
         },
         "required": [
-          "session"
+          "session",
+          "pack"
         ],
-        "title": "ContextPreviewRequest",
+        "title": "ContextGetRequest",
         "type": "object"
       },
       "response_schema": {
@@ -4608,6 +4571,34 @@
             ],
             "title": "ContextClass",
             "type": "string"
+          },
+          "ContextDiscrepancy": {
+            "additionalProperties": false,
+            "description": "One place where remembered conversation disagreed with accepted state.\n\nRecorded on the receipt rather than only returned to the caller that assembled the\npack, because the disagreement is the *reason* a passage is missing: a receipt read\nback a week later has to answer \"what did the model see, and what did it not\" without\nreassembling anything (Product 42 M).",
+            "properties": {
+              "accepted": {
+                "minLength": 1,
+                "title": "Accepted",
+                "type": "string"
+              },
+              "detail": {
+                "minLength": 1,
+                "title": "Detail",
+                "type": "string"
+              },
+              "message": {
+                "minLength": 1,
+                "title": "Message",
+                "type": "string"
+              }
+            },
+            "required": [
+              "accepted",
+              "message",
+              "detail"
+            ],
+            "title": "ContextDiscrepancy",
+            "type": "object"
           },
           "ContextItem": {
             "additionalProperties": false,
@@ -4757,8 +4748,16 @@
           },
           "ContextReceipt": {
             "additionalProperties": false,
-            "description": "What a model was shown and what it was not (conversation design SS5).\n\nA source pointer appears at most once, and never in both lists: a receipt that both\nincluded and omitted the same material would not be an explanation.",
+            "description": "What a model was shown and what it was not (conversation design SS5).\n\nA source pointer appears at most once, and never in both lists: a receipt that both\nincluded and omitted the same material would not be an explanation.\n\n`discrepancies` and `unresolved` are the two facts a bare included/omitted pair cannot\ncarry: which accepted object outranked a remembered passage, and which `@` token named\nnothing this workspace holds. Both default to empty, so a pack written before they\nexisted still validates.",
             "properties": {
+              "discrepancies": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ContextDiscrepancy"
+                },
+                "title": "Discrepancies",
+                "type": "array"
+              },
               "included": {
                 "default": [],
                 "items": {
@@ -4773,6 +4772,681 @@
                   "$ref": "#/$defs/OmittedContextItem"
                 },
                 "title": "Omitted",
+                "type": "array"
+              },
+              "unresolved": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Unresolved",
+                "type": "array"
+              }
+            },
+            "title": "ContextReceipt",
+            "type": "object"
+          },
+          "DiscrepancyView": {
+            "additionalProperties": false,
+            "description": "Where remembered conversation disagreed with accepted state, and what won.",
+            "properties": {
+              "accepted": {
+                "title": "Accepted",
+                "type": "string"
+              },
+              "detail": {
+                "title": "Detail",
+                "type": "string"
+              },
+              "message": {
+                "title": "Message",
+                "type": "string"
+              }
+            },
+            "required": [
+              "accepted",
+              "message",
+              "detail"
+            ],
+            "title": "DiscrepancyView",
+            "type": "object"
+          },
+          "EgressClass": {
+            "description": "How far the assembled context actually travelled (Product 34).\n\nThe domain never names a provider; the class says only whether content left this\nworkstation.",
+            "enum": [
+              "none",
+              "local",
+              "external"
+            ],
+            "title": "EgressClass",
+            "type": "string"
+          },
+          "ModelIdentity": {
+            "additionalProperties": false,
+            "description": "Which model answered, in provider-neutral terms (Product 20.5).\n\n`provider` is the adapter's own name and `model` the model it served; the domain\ntreats both as opaque labels and never branches on their values.",
+            "properties": {
+              "model": {
+                "minLength": 1,
+                "title": "Model",
+                "type": "string"
+              },
+              "provider": {
+                "minLength": 1,
+                "title": "Provider",
+                "type": "string"
+              },
+              "request_fingerprint": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Request Fingerprint"
+              }
+            },
+            "required": [
+              "provider",
+              "model"
+            ],
+            "title": "ModelIdentity",
+            "type": "object"
+          },
+          "OmissionReason": {
+            "description": "Why an item the researcher might expect did not reach the model.",
+            "enum": [
+              "token_budget",
+              "privacy_policy",
+              "egress_blocked",
+              "unsupported_media",
+              "stale",
+              "low_relevance",
+              "unresolved_reference",
+              "conflicts_with_accepted"
+            ],
+            "title": "OmissionReason",
+            "type": "string"
+          },
+          "OmissionView": {
+            "additionalProperties": false,
+            "description": "One thing the model did not see, and why. The receipt's \"why not\" line.",
+            "properties": {
+              "context_class": {
+                "title": "Context Class",
+                "type": "string"
+              },
+              "detail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Detail"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Label"
+              },
+              "reason": {
+                "title": "Reason",
+                "type": "string"
+              },
+              "source": {
+                "title": "Source",
+                "type": "string"
+              },
+              "tokens": {
+                "default": 0,
+                "title": "Tokens",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "source",
+              "context_class",
+              "reason"
+            ],
+            "title": "OmissionView",
+            "type": "object"
+          },
+          "OmittedContextItem": {
+            "additionalProperties": false,
+            "description": "One piece of material that did *not* reach the model, and why.\n\n`tokens` is what including it would have cost, so a receipt can explain a budget\ndecision rather than merely assert it.",
+            "properties": {
+              "authority": {
+                "$ref": "#/$defs/AuthorityLabel",
+                "default": "private"
+              },
+              "context_class": {
+                "$ref": "#/$defs/ContextClass"
+              },
+              "detail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Detail"
+              },
+              "id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Id"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Label"
+              },
+              "reason": {
+                "$ref": "#/$defs/OmissionReason"
+              },
+              "source": {
+                "minLength": 1,
+                "title": "Source",
+                "type": "string"
+              },
+              "tokens": {
+                "default": 0,
+                "minimum": 0,
+                "title": "Tokens",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "context_class",
+              "source",
+              "reason"
+            ],
+            "title": "OmittedContextItem",
+            "type": "object"
+          },
+          "Provenance": {
+            "additionalProperties": false,
+            "description": "Who/what produced a record, and under which workflow run.\n\n``actor`` is an opaque string (``\"human\"``, ``\"human:alice\"``, ``\"vendor-a/model-x\"``,\n``\"local/model-y\"``). The domain never interprets it as a provider vocabulary and\ndefines no provider names of its own.",
+            "properties": {
+              "actor": {
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Note"
+              },
+              "run_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Run Id"
+              },
+              "source": {
+                "$ref": "#/$defs/ProvenanceSource"
+              },
+              "template_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Template Version"
+              },
+              "workflow": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Workflow"
+              }
+            },
+            "required": [
+              "source",
+              "actor"
+            ],
+            "title": "Provenance",
+            "type": "object"
+          },
+          "ProvenanceSource": {
+            "description": "Who produced a record. Never a provider or host name; see `Provenance.actor`.",
+            "enum": [
+              "human",
+              "model",
+              "system",
+              "external_metadata"
+            ],
+            "title": "ProvenanceSource",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "One `Context used` receipt: what was sent, what was not, and what it cost.",
+        "properties": {
+          "discrepancies": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/DiscrepancyView"
+            },
+            "title": "Discrepancies",
+            "type": "array"
+          },
+          "omissions": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/OmissionView"
+            },
+            "title": "Omissions",
+            "type": "array"
+          },
+          "pack": {
+            "$ref": "#/$defs/ContextPack"
+          },
+          "tokens": {
+            "default": 0,
+            "title": "Tokens",
+            "type": "integer"
+          },
+          "tokens_by_class": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Tokens By Class",
+            "type": "object"
+          },
+          "unresolved": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pack"
+        ],
+        "title": "ContextPackView",
+        "type": "object"
+      },
+      "scientific_semantics": "reads a stored receipt of private working context; the receipt is a record of what a model was shown and carries no scientific authority",
+      "summary": "Read the `Context used` receipt recorded for one past model call."
+    },
+    {
+      "human_only": false,
+      "long_running": false,
+      "name": "context.preview",
+      "permission": "read",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`context.preview`: assemble a `ContextPack` without sending it.",
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model"
+          },
+          "persist": {
+            "default": true,
+            "title": "Persist",
+            "type": "boolean"
+          },
+          "references": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "References",
+            "type": "array"
+          },
+          "session": {
+            "pattern": "^CS\\d{4,}$",
+            "title": "Session",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "token_budget": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Token Budget"
+          }
+        },
+        "required": [
+          "session"
+        ],
+        "title": "ContextPreviewRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "$defs": {
+          "AuthorityLabel": {
+            "description": "How much authority a referenced object carries (workspace design SS3).\n\n`accepted` is reserved for reviewed scientific state. Conversation content is\n`private` working context; a promotion produces a `candidate`.",
+            "enum": [
+              "accepted",
+              "candidate",
+              "qualified",
+              "contested",
+              "stale",
+              "private"
+            ],
+            "title": "AuthorityLabel",
+            "type": "string"
+          },
+          "ClassBudget": {
+            "additionalProperties": false,
+            "description": "Tokens allocated to one context class before assembly started.",
+            "properties": {
+              "context_class": {
+                "$ref": "#/$defs/ContextClass"
+              },
+              "tokens": {
+                "minimum": 0,
+                "title": "Tokens",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "context_class",
+              "tokens"
+            ],
+            "title": "ClassBudget",
+            "type": "object"
+          },
+          "ContextClass": {
+            "description": "The kind of material an item in a `ContextPack` came from.",
+            "enum": [
+              "policy",
+              "accepted_state",
+              "current_session",
+              "prior_sessions",
+              "attachments",
+              "corpus_blocks",
+              "discovery"
+            ],
+            "title": "ContextClass",
+            "type": "string"
+          },
+          "ContextDiscrepancy": {
+            "additionalProperties": false,
+            "description": "One place where remembered conversation disagreed with accepted state.\n\nRecorded on the receipt rather than only returned to the caller that assembled the\npack, because the disagreement is the *reason* a passage is missing: a receipt read\nback a week later has to answer \"what did the model see, and what did it not\" without\nreassembling anything (Product 42 M).",
+            "properties": {
+              "accepted": {
+                "minLength": 1,
+                "title": "Accepted",
+                "type": "string"
+              },
+              "detail": {
+                "minLength": 1,
+                "title": "Detail",
+                "type": "string"
+              },
+              "message": {
+                "minLength": 1,
+                "title": "Message",
+                "type": "string"
+              }
+            },
+            "required": [
+              "accepted",
+              "message",
+              "detail"
+            ],
+            "title": "ContextDiscrepancy",
+            "type": "object"
+          },
+          "ContextItem": {
+            "additionalProperties": false,
+            "description": "One piece of material that reached the model, with where it came from.",
+            "properties": {
+              "authority": {
+                "$ref": "#/$defs/AuthorityLabel",
+                "default": "private"
+              },
+              "context_class": {
+                "$ref": "#/$defs/ContextClass"
+              },
+              "id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Id"
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Label"
+              },
+              "source": {
+                "minLength": 1,
+                "title": "Source",
+                "type": "string"
+              },
+              "tokens": {
+                "default": 0,
+                "minimum": 0,
+                "title": "Tokens",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "context_class",
+              "source"
+            ],
+            "title": "ContextItem",
+            "type": "object"
+          },
+          "ContextPack": {
+            "additionalProperties": false,
+            "description": "The context assembled for one model call, plus its `Context used` receipt.\n\nThe pack is written whether or not the call was made: `context.preview` assembles one\nwith `egress = none`, which is how a researcher inspects what *would* be sent.",
+            "properties": {
+              "budgets": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ClassBudget"
+                },
+                "title": "Budgets",
+                "type": "array"
+              },
+              "created_at": {
+                "format": "date-time",
+                "title": "Created At",
+                "type": "string"
+              },
+              "egress": {
+                "$ref": "#/$defs/EgressClass",
+                "default": "none"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "message": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Message"
+              },
+              "model": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ModelIdentity"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "provenance": {
+                "$ref": "#/$defs/Provenance"
+              },
+              "receipt": {
+                "$ref": "#/$defs/ContextReceipt"
+              },
+              "schema_version": {
+                "default": 1,
+                "minimum": 1,
+                "title": "Schema Version",
+                "type": "integer"
+              },
+              "session": {
+                "title": "Session",
+                "type": "string"
+              },
+              "token_budget": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Token Budget"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "title": "Updated At",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "provenance",
+              "session",
+              "receipt"
+            ],
+            "title": "ContextPack",
+            "type": "object"
+          },
+          "ContextReceipt": {
+            "additionalProperties": false,
+            "description": "What a model was shown and what it was not (conversation design SS5).\n\nA source pointer appears at most once, and never in both lists: a receipt that both\nincluded and omitted the same material would not be an explanation.\n\n`discrepancies` and `unresolved` are the two facts a bare included/omitted pair cannot\ncarry: which accepted object outranked a remembered passage, and which `@` token named\nnothing this workspace holds. Both default to empty, so a pack written before they\nexisted still validates.",
+            "properties": {
+              "discrepancies": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ContextDiscrepancy"
+                },
+                "title": "Discrepancies",
+                "type": "array"
+              },
+              "included": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ContextItem"
+                },
+                "title": "Included",
+                "type": "array"
+              },
+              "omitted": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/OmittedContextItem"
+                },
+                "title": "Omitted",
+                "type": "array"
+              },
+              "unresolved": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Unresolved",
                 "type": "array"
               }
             },
@@ -18732,6 +19406,123 @@
       },
       "scientific_semantics": "raises a note's authority into a Claim, Question, or Decision; human-only",
       "summary": "Record the research object a captured note became."
+    },
+    {
+      "human_only": false,
+      "long_running": false,
+      "name": "provider.list",
+      "permission": "read",
+      "request_schema": {
+        "additionalProperties": false,
+        "description": "`provider.list`: every routable model in this project. Takes nothing.",
+        "properties": {},
+        "title": "ListProvidersRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "$defs": {
+          "EgressClass": {
+            "description": "How far the assembled context actually travelled (Product 34).\n\nThe domain never names a provider; the class says only whether content left this\nworkstation.",
+            "enum": [
+              "none",
+              "local",
+              "external"
+            ],
+            "title": "EgressClass",
+            "type": "string"
+          },
+          "ProviderModelView": {
+            "additionalProperties": false,
+            "description": "One configured model, as a selector renders it.",
+            "properties": {
+              "available": {
+                "title": "Available",
+                "type": "boolean"
+              },
+              "context_tokens": {
+                "title": "Context Tokens",
+                "type": "integer"
+              },
+              "default": {
+                "default": false,
+                "title": "Default",
+                "type": "boolean"
+              },
+              "egress_class": {
+                "$ref": "#/$defs/EgressClass"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "input_media": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Input Media",
+                "type": "array"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "provider": {
+                "title": "Provider",
+                "type": "string"
+              },
+              "unavailable_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Unavailable Reason"
+              },
+              "vision": {
+                "title": "Vision",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "provider",
+              "egress_class",
+              "context_tokens",
+              "vision",
+              "available"
+            ],
+            "title": "ProviderModelView",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Every routable model in this project, best priority first.",
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "models": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ProviderModelView"
+            },
+            "title": "Models",
+            "type": "array"
+          }
+        },
+        "title": "ProviderCatalog",
+        "type": "object"
+      },
+      "scientific_semantics": "reads configuration and the project's egress disclosure; contacts nothing, reveals no credential, and changes no state",
+      "summary": "Every configured model, with what it accepts and whether it is available."
     },
     {
       "human_only": true,

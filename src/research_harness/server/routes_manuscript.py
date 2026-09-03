@@ -27,6 +27,7 @@ from fastapi.responses import FileResponse
 
 from research_harness.capabilities.permissions import Permission, Principal
 from research_harness.domain.errors import ResearchHarnessError
+from research_harness.manuscript.workspace import LAST_GOOD_BUILD, LATEST_BUILD
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from fastapi import FastAPI
@@ -46,11 +47,14 @@ PDF_MEDIA_TYPE = "application/pdf"
 
 MANUSCRIPT_PDF_ROUTE = "/manuscript/builds/{build_id}/pdf"
 
-LATEST_ALIAS = "latest"
+LATEST_ALIAS = LATEST_BUILD
 """``/manuscript/builds/latest/pdf`` - the newest build's PDF, else the last good one."""
 
-LAST_GOOD_ALIAS = "last-good"
-"""``/manuscript/builds/last-good/pdf`` - the newest build that really produced a PDF."""
+LAST_GOOD_ALIAS = LAST_GOOD_BUILD
+"""``/manuscript/builds/last-good/pdf`` - the newest build that really produced a PDF.
+
+Both names come from `manuscript/workspace.py`, which is also where `manuscript.build`
+reads them, so the route and the capability cannot disagree about what `latest` means."""
 
 
 def _caller(request: Request) -> Principal:

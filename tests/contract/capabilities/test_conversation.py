@@ -32,7 +32,7 @@ from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import ClaimId, DecisionId
 from research_harness.workspace.repository import WorkspaceRepository
 
-READS = {"session.list", "session.get", "session.search", "context.preview"}
+READS = {"session.list", "session.get", "session.search", "context.preview", "context.get"}
 MUTATIONS = set(CONVERSATION_CAPABILITIES) - READS
 
 
@@ -164,6 +164,73 @@ def test_a_preview_can_refuse_to_persist_itself(
     )
     read = invoke(registry, ctx, "session.get", {"session": str(created.session.id)})
     assert read.context_packs == ()
+
+
+def test_context_get_answers_with_the_receipt_preview_recorded(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """`context.get` and `context.preview` are one shape: a receipt, assembled or read back."""
+    created = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    session = str(created.session.id)
+    preview = invoke(
+        registry, ctx, "context.preview", {"session": session, "text": "does @C0404 still hold"}
+    )
+
+    read = invoke(registry, ctx, "context.get", {"session": session, "pack": str(preview.pack.id)})
+
+    assert read == preview, "the same object, whether it was just assembled or read off disk"
+    assert type(read) is type(preview)
+
+
+def test_a_receipt_read_back_still_names_the_reference_that_resolved_to_nothing(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """A receipt is complete on disk, so `Context used` needs no reassembly (Product 42 M)."""
+    created = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    session = str(created.session.id)
+    preview = invoke(
+        registry,
+        ctx,
+        "context.preview",
+        {"session": session, "references": ["C9999"], "text": "and what about it"},
+    )
+
+    read = invoke(registry, ctx, "context.get", {"session": session, "pack": str(preview.pack.id)})
+
+    assert read.unresolved == ("C9999",)
+    assert read.pack.receipt.unresolved == ("C9999",)
+    assert any(item.reason == "unresolved_reference" for item in read.omissions)
+
+
+def test_a_receipt_survives_deleting_the_projection(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """`conversations/` is durable; `.research/` is not (workspace design SS2)."""
+    import shutil
+
+    created = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    session = str(created.session.id)
+    preview = invoke(registry, ctx, "context.preview", {"session": session, "text": "latency"})
+
+    shutil.rmtree(ctx.repo.layout.research_dir)
+
+    read = invoke(registry, ctx, "context.get", {"session": session, "pack": str(preview.pack.id)})
+    assert read.pack == preview.pack
+
+
+def test_asking_for_a_receipt_that_was_never_recorded_is_a_typed_refusal(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    from research_harness.workspace.conversations import ConversationNotFoundError
+
+    created = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    with pytest.raises(ConversationNotFoundError):
+        invoke(
+            registry,
+            ctx,
+            "context.get",
+            {"session": str(created.session.id), "pack": "CP0404"},
+        )
 
 
 # -- promotion ---------------------------------------------------------------

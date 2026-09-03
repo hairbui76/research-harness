@@ -496,8 +496,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                                above the current directory.                          │
 │                                [env var: RESEARCH_WORKSPACE]                         │
 │ --provider             <str>   Provider entry from `providers:` in research.yaml.    │
-│ --script               <path>  JSON replies for the in-process scripted provider;    │
-│                                runs fully offline.                                   │
+│ --script               <path>  JSON replies for the in-process scripted provider,    │
+│                                e.g. [{"text": "..."}]; runs fully offline.           │
 │ --chunk-words          <int>   Words per delta when the scripted provider streams.   │
 │                                [default: 8]                                          │
 │ --json                         Print the result as JSON instead of text.             │
@@ -547,8 +547,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                                [env var: RESEARCH_WORKSPACE]                         │
 │ --ref                  <str>   Stable reference to send, e.g. E0482; repeatable.     │
 │ --provider             <str>   Provider entry from `providers:` in research.yaml.    │
-│ --script               <path>  JSON replies for the in-process scripted provider;    │
-│                                runs fully offline.                                   │
+│ --script               <path>  JSON replies for the in-process scripted provider,    │
+│                                e.g. [{"text": "..."}]; runs fully offline.           │
 │ --chunk-words          <int>   Words per delta when the scripted provider streams.   │
 │                                [default: 8]                                          │
 │ --budget               <int>   Token budget for the assembled context.               │
@@ -1558,7 +1558,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
  Show one build: compiler diagnostics and scientific findings (`manuscript.build`).
 
 ╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
-│   BUILD_ID      <str>  Build to read; defaults to the latest.                        │
+│   BUILD_ID      <str>  Build to read; `latest` or `last-good` name one by its role,  │
+│                        and omitting it means the latest.                             │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ────────────────────────────────────────────────────────────────────────────╮
 │ --workspace      -w      <path>  Workspace root; defaults to the nearest             │
@@ -1695,7 +1696,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ --page               <int>    PDF page to look back from (1-based).                  │
 │ --x                  <float>  PDF x, points from the left.                           │
 │ --y                  <float>  PDF y, points from the top.                            │
-│ --build              <str>    Build to use; defaults to the latest.                  │
+│ --build              <str>    Build to use; `latest` or `last-good` are accepted, as │
+│                               is omitting it.                                        │
 │ --json                        Print the result as JSON instead of text.              │
 │ --help                        Show this message and exit.                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯

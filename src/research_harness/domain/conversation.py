@@ -59,6 +59,7 @@ __all__ = [
     "ContentBlock",
     "ContentBlockKind",
     "ContextClass",
+    "ContextDiscrepancy",
     "ContextItem",
     "ContextPack",
     "ContextReceipt",
@@ -596,15 +597,41 @@ class ClassBudget(DomainModel):
     tokens: int = Field(ge=0)
 
 
+class ContextDiscrepancy(DomainModel):
+    """One place where remembered conversation disagreed with accepted state.
+
+    Recorded on the receipt rather than only returned to the caller that assembled the
+    pack, because the disagreement is the *reason* a passage is missing: a receipt read
+    back a week later has to answer "what did the model see, and what did it not" without
+    reassembling anything (Product 42 M).
+    """
+
+    accepted: NonEmptyStr
+    """Stable id of the accepted object that won."""
+
+    message: NonEmptyStr
+    """Source pointer of the passage that was left out."""
+
+    detail: NonEmptyStr
+
+
 class ContextReceipt(DomainModel):
     """What a model was shown and what it was not (conversation design SS5).
 
     A source pointer appears at most once, and never in both lists: a receipt that both
     included and omitted the same material would not be an explanation.
+
+    `discrepancies` and `unresolved` are the two facts a bare included/omitted pair cannot
+    carry: which accepted object outranked a remembered passage, and which `@` token named
+    nothing this workspace holds. Both default to empty, so a pack written before they
+    existed still validates.
     """
 
     included: tuple[ContextItem, ...] = ()
     omitted: tuple[OmittedContextItem, ...] = ()
+    discrepancies: tuple[ContextDiscrepancy, ...] = ()
+    unresolved: tuple[str, ...] = ()
+    """Composer tokens that resolved to nothing, in the order they were written."""
 
     def total_tokens(self) -> int:
         """Tokens spent on included material."""
@@ -635,6 +662,9 @@ class ContextReceipt(DomainModel):
         both = sorted(set(included) & set(omitted))
         if both:
             raise ValueError(f"context is both included and omitted: {both}")
+        repeated = sorted({token for token in self.unresolved if self.unresolved.count(token) > 1})
+        if repeated:
+            raise ValueError(f"unresolved repeats a reference token: {repeated}")
         return self
 
 

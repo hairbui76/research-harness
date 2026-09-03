@@ -719,8 +719,11 @@ class SendService:
                 # already handed over was *received*, and an interruption preserves
                 # received content (conversation design SS8). Stopping is prompt either
                 # way -- the check happens before the next one is asked for.
-                state = state.with_delta(delta.text)
-                self._runs.save_checkpoint(run_id, STREAM_STAGE, state.as_dict())
+                # A native stream ends with a terminal delta carrying only the model,
+                # stop reason and usage; it adds no text, so it emits no `delta` event.
+                if delta.text:
+                    state = state.with_delta(delta.text)
+                    self._runs.save_checkpoint(run_id, STREAM_STAGE, state.as_dict())
                 if self._cancelled(run_id):
                     final = "cancelled"
                     break

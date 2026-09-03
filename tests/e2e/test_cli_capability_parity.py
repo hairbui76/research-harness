@@ -241,6 +241,162 @@ def test_the_token_command_prints_a_path_and_not_the_secret(
     assert path.read_text(encoding="utf-8").strip() not in printed
 
 
+# -- v1.1: every new capability is reachable from the terminal ----------------
+
+#: Each v1.1 capability and the `research ...` command that reaches it. A capability with
+#: no terminal counterpart is a capability the researcher can only use through a browser,
+#: which is the thing ADR-004 exists to prevent: the CLI is a first-class client, not a
+#: fallback (v1.1 plan SS0.4).
+V11_CLI_COUNTERPARTS: dict[str, tuple[str, ...]] = {
+    "session.create": ("chat", "new"),
+    "session.rename": ("chat", "rename"),
+    "session.list": ("chat", "list"),
+    "session.get": ("chat", "show"),
+    "session.search": ("chat", "search"),
+    "session.send": ("chat", "send"),
+    "session.stop": ("chat", "stop"),
+    "session.retry": ("chat", "retry"),
+    "session.promote": ("chat", "promote"),
+    "session.summarize": ("chat", "summarize"),
+    # One command, two capabilities: without `--pack` it previews, with `--pack` it reads
+    # the receipt a past message already named.
+    "context.preview": ("chat", "context"),
+    "context.get": ("chat", "context"),
+    "provider.list": ("providers", "list"),
+    "attachment.add": ("attachment", "add"),
+    "attachment.remove": ("attachment", "remove"),
+    "attachment.check_send": ("attachment", "check"),
+    "attachment.resolve_identity": ("attachment", "resolve"),
+    "attachment.save_to_corpus": ("attachment", "save"),
+    "graph.resolve": ("graph", "resolve"),
+    "graph.autocomplete": ("graph", "complete"),
+    "graph.neighbors": ("graph", "neighbors"),
+    "graph.query": ("graph", "query"),
+    "graph.provenance": ("graph", "provenance"),
+    "graph.status": ("graph", "status"),
+    "manuscript.files": ("manuscript", "files"),
+    "manuscript.read_file": ("manuscript", "read"),
+    "manuscript.write_file": ("manuscript", "write"),
+    "manuscript.compile": ("manuscript", "compile"),
+    "manuscript.build": ("manuscript", "build"),
+    "manuscript.synctex": ("manuscript", "synctex"),
+    "manuscript.suggest": ("manuscript", "suggest"),
+    "manuscript.apply_suggestion": ("manuscript", "apply"),
+}
+
+#: The families v1.1 added. `manuscript.*` predates it, so only the workspace half counts.
+V11_PREFIXES = ("session.", "context.", "attachment.", "graph.", "provider.")
+
+
+def v11_capabilities() -> set[str]:
+    """Every capability the v1.1 track registered, read off the registry itself."""
+    from research_harness.capabilities.manuscript_workspace import (
+        MANUSCRIPT_WORKSPACE_CAPABILITIES,
+    )
+    from research_harness.capabilities.registry import build_default_registry
+
+    names = set(build_default_registry().names())
+    return {name for name in names if name.startswith(V11_PREFIXES)} | set(
+        MANUSCRIPT_WORKSPACE_CAPABILITIES
+    )
+
+
+def cli_commands(app: typer.Typer) -> set[tuple[str, ...]]:
+    """Every `(group, command)` the full `research` app publishes."""
+    found: set[tuple[str, ...]] = set()
+    for group in app.registered_groups:
+        instance = group.typer_instance
+        if group.name is None or instance is None:  # pragma: no cover - every group is named
+            continue
+        for command in instance.registered_commands:
+            found.add((group.name, command.name or command.callback.__name__))
+    return found
+
+
+def test_every_v11_capability_has_a_command_in_the_terminal() -> None:
+    """ADR-004: the CLI reaches every capability the daemon and an MCP host reach."""
+    from research_harness.cli.app import app as full_app
+
+    published = cli_commands(full_app)
+    missing = {
+        name: command for name, command in V11_CLI_COUNTERPARTS.items() if command not in published
+    }
+
+    assert not missing, f"capabilities with no `research` command: {missing}"
+
+
+def test_the_counterpart_table_covers_every_v11_capability() -> None:
+    """The table above is the claim; this is what stops it going quietly out of date."""
+    uncovered = v11_capabilities() - set(V11_CLI_COUNTERPARTS)
+
+    assert not uncovered, f"v1.1 capabilities with no listed CLI counterpart: {sorted(uncovered)}"
+
+
+def test_the_terminal_and_the_daemon_report_the_same_model_catalog(
+    workspace: Path, client: TestClient
+) -> None:
+    """`research providers list` is the CLI's view of `provider.list`, not a second answer."""
+    from research_harness.cli.app import app as full_app
+
+    printed = json.loads(
+        run(full_app, "providers", "list", "--workspace", str(workspace), "--json").stdout
+    )
+    served = client.post("/capabilities/provider.list", json={}).json()
+
+    assert served["ok"] is True
+    assert printed == served["result"]
+
+
+def test_the_terminal_reads_back_the_receipt_the_daemon_recorded(
+    workspace: Path, client: TestClient
+) -> None:
+    """`research chat context --pack` and `context.get` are one read (v1.1 plan SS0.4)."""
+    from research_harness.cli.app import app as full_app
+
+    session = client.post("/capabilities/session.create", json={"title": "parity"}).json()
+    session_id = session["result"]["session"]["id"]
+    preview = client.post(
+        "/capabilities/context.preview",
+        json={"session": session_id, "text": "what would this send"},
+    ).json()
+    pack_id = preview["result"]["pack"]["id"]
+
+    printed = json.loads(
+        run(
+            full_app,
+            "chat",
+            "context",
+            session_id,
+            "--workspace",
+            str(workspace),
+            "--pack",
+            pack_id,
+            "--json",
+        ).stdout
+    )
+    read = client.post(
+        "/capabilities/context.get", json={"session": session_id, "pack": pack_id}
+    ).json()
+
+    assert read["ok"] is True
+    assert printed["pack"] == read["result"]["pack"]
+    assert printed["unresolved"] == list(read["result"]["unresolved"])
+    assert read["result"] == preview["result"], "read back, the receipt is the one recorded"
+
+
+def test_asking_a_receipt_for_a_draft_at_the_same_time_is_refused(workspace: Path) -> None:
+    """`--pack` reads; without it the command assembles. Doing both would mean neither."""
+    from research_harness.cli.app import app as full_app
+
+    refused = runner.invoke(
+        full_app,
+        ["chat", "context", "CS0001", "-w", str(workspace), "--pack", "CP0001", "--text", "x"],
+    )
+
+    assert refused.exit_code == 1
+    assert "recorded receipt" in refused.stderr
+
+
 # -- CLI/HTTP transition parity ----------------------------------------------
 
 

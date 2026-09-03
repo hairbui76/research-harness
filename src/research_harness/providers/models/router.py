@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from research_harness.privacy.policy import (
     EgressDeniedError,
@@ -60,6 +60,13 @@ from research_harness.providers.models.local_provider import (
 from research_harness.providers.models.local_provider import (
     LocalOpenAICompatibleProvider,
     default_local_capabilities,
+)
+from research_harness.providers.models.media import (
+    IMAGE_MEDIA_TYPES,
+    SUPPORTED_MEDIA_TYPES,
+    accepts_media,
+    media_parts,
+    normalize_media_type,
 )
 from research_harness.providers.models.openai_provider import (
     DEFAULT_BASE_URL as OPENAI_BASE_URL,
@@ -124,18 +131,29 @@ class ModelRouter:
         """The same entries under a different policy; used when a caller narrows a router."""
         return ModelRouter(self.entries, policy=policy)
 
-    def select(self, requirements: ModelRequirements, role: str) -> ProviderEntry:
+    def select(
+        self,
+        requirements: ModelRequirements,
+        role: str,
+        *,
+        media: Sequence[str] = (),
+    ) -> ProviderEntry:
         """Return the preferred capable and permitted entry, or explain every rejection.
 
         The privacy policy is consulted here, before any request exists, so a refused
         provider is never called. A refusal is not a capability problem: when it is the
         only thing standing between the caller and a provider, `EgressDeniedError` is
         raised so the message names the policy rather than the model.
+
+        ``media`` is the media types the request actually carries. `attachment.check_send`
+        asks the same question before a person presses send; this is the last line, and it
+        reads the inputs rather than a declaration, so a request that gained an attachment
+        after it stated its requirements is refused rather than silently stripped.
         """
         rejections: list[str] = []
         denials: list[EgressDeniedError] = []
         for entry in sorted(self.entries, key=lambda item: item.priority):
-            reasons = _rejection_reasons(entry, requirements, role)
+            reasons = _rejection_reasons(entry, requirements, role, media=media)
             if reasons:
                 rejections.append(f"{entry.label}: {'; '.join(reasons)}")
                 continue
@@ -153,7 +171,11 @@ class ModelRouter:
         self, request: ModelRequest[T], *, trace: TraceSink | None = None
     ) -> ModelResponse[T]:
         """Route the request by its own requirements/role and run it."""
-        entry = self.select(request.requirements, request.role)
+        entry = self.select(
+            request.requirements,
+            request.role,
+            media=[part.media_type for part in media_parts(request.inputs)],
+        )
         return entry.provider.complete(request, trace=trace)
 
     def egress_refusal(self) -> EgressDeniedError | None:
@@ -213,7 +235,11 @@ def _merged_denial(headline: str, denials: Sequence[EgressDeniedError]) -> Egres
 
 
 def _rejection_reasons(
-    entry: ProviderEntry, requirements: ModelRequirements, role: str
+    entry: ProviderEntry,
+    requirements: ModelRequirements,
+    role: str,
+    *,
+    media: Sequence[str] = (),
 ) -> list[str]:
     reasons: list[str] = []
     if entry.roles is not None and role not in entry.roles:
@@ -232,7 +258,28 @@ def _rejection_reasons(
         reasons.append(f"reasoning {requirements.reasoning!r} not offered (has: {levels})")
     if requirements.vision and not capabilities.vision:
         reasons.append("vision required but not supported")
+    refused = _unaccepted_media(capabilities, requirements, media)
+    if refused:
+        accepted = ", ".join(sorted(capabilities.input_media)) or "no media input"
+        reasons.append(f"media {', '.join(refused)} not accepted (accepts: {accepted})")
     return reasons
+
+
+def _unaccepted_media(
+    capabilities: ProviderCapabilities, requirements: ModelRequirements, media: Sequence[str]
+) -> list[str]:
+    """Media types this request needs and this entry does not take, deduplicated.
+
+    Both spellings count: what the job *declared* it needs, and what its inputs actually
+    carry. An adapter raises `UnsupportedMediaError` while encoding the second kind, which
+    is a failure discovered after the model was chosen; refusing here keeps the choice
+    honest and lets the message name a model that would have taken the file.
+    """
+    needed = {
+        *requirements.input_media,
+        *(normalize_media_type(value) for value in media),
+    }
+    return sorted(item for item in needed if item and not accepts_media(capabilities, item))
 
 
 def _no_capable_message(
@@ -261,6 +308,29 @@ class CapabilityOverrides(BaseModel):
     max_context_tokens: int | None = Field(default=None, gt=0)
     reasoning_levels: list[str] | None = None
     vision: bool | None = None
+    input_media: list[str] | None = None
+    """Media types the served model accepts, e.g. `["image/png", "application/pdf"]`.
+
+    `vision` is the older spelling of the image half of this fact; `_merge_capabilities`
+    keeps the two in agreement, and stating both leaves them exactly as written."""
+
+    @field_validator("input_media")
+    @classmethod
+    def _known_media_types(cls, value: list[str] | None) -> list[str] | None:
+        """Normalize the declared types and refuse one the harness cannot encode.
+
+        A typo would otherwise become a model that quietly accepts nothing, and the
+        attachment would be omitted from the request with a reason naming the model rather
+        than the configuration.
+        """
+        if value is None:
+            return None
+        normalized = [normalize_media_type(item) for item in value]
+        unknown = sorted({item for item in normalized if item not in SUPPORTED_MEDIA_TYPES})
+        if unknown:
+            known = ", ".join(sorted(SUPPORTED_MEDIA_TYPES))
+            raise ValueError(f"unsupported input media {', '.join(unknown)} (supported: {known})")
+        return list(dict.fromkeys(normalized))
 
 
 class RouterProviderConfig(BaseModel):
@@ -393,6 +463,12 @@ def _default_capabilities(kind: ProviderKind, base_url: str) -> ProviderCapabili
 def _merge_capabilities(
     defaults: ProviderCapabilities, overrides: CapabilityOverrides | None
 ) -> ProviderCapabilities:
+    """Apply a workspace's overrides to an adapter's defaults, re-validating the result.
+
+    Re-validated rather than copied: `vision` and `input_media` are two spellings of one
+    fact, and `model_copy` skips the validator that keeps them agreeing -- which is how a
+    workspace could once switch vision on and get a sighted model accepting no media.
+    """
     if overrides is None:
         return defaults
     update: dict[str, Any] = {}
@@ -402,6 +478,28 @@ def _merge_capabilities(
         update["max_context_tokens"] = overrides.max_context_tokens
     if overrides.reasoning_levels is not None:
         update["reasoning_levels"] = set(overrides.reasoning_levels)
+    update.update(_merged_media(defaults, overrides))
+    if not update:
+        return defaults
+    return ProviderCapabilities.model_validate({**defaults.model_dump(), **update})
+
+
+def _merged_media(defaults: ProviderCapabilities, overrides: CapabilityOverrides) -> dict[str, Any]:
+    """`vision` and `input_media` after the overrides, always stated together.
+
+    Stating both leaves them as written; stating only the media list derives `vision` from
+    it; stating only `vision` adds or removes the image types and leaves documents alone.
+    """
+    if overrides.input_media is not None and overrides.vision is not None:
+        return {"input_media": frozenset(overrides.input_media), "vision": overrides.vision}
+    if overrides.input_media is not None:
+        media = frozenset(overrides.input_media)
+        return {"input_media": media, "vision": bool(media & IMAGE_MEDIA_TYPES)}
     if overrides.vision is not None:
-        update["vision"] = overrides.vision
-    return defaults.model_copy(update=update) if update else defaults
+        media = (
+            defaults.input_media | IMAGE_MEDIA_TYPES
+            if overrides.vision
+            else defaults.input_media - IMAGE_MEDIA_TYPES
+        )
+        return {"input_media": frozenset(media), "vision": overrides.vision}
+    return {}

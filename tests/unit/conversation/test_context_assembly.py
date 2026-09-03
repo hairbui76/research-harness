@@ -316,6 +316,47 @@ def test_a_message_that_merely_mentions_accepted_state_is_still_packed(
     ]
 
 
+def test_the_receipt_itself_records_the_disagreement_and_survives_a_round_trip(
+    repo: WorkspaceRepository, store: ConversationStore, session: ConversationSession
+) -> None:
+    """A stored receipt has to explain itself: `context.get` reassembles nothing."""
+    from research_harness.domain.conversation import ContextReceipt
+
+    write_claim(repo, "C0001", "Batching reduces tail latency across the corpus.")
+    store.append_message(
+        session.id,
+        say(session.id, "Actually C0001 is wrong, latency got worse.", references=("C0001",)),
+    )
+
+    assembled = assembler(repo, store).assemble(
+        session.id, "what does C0001 say about batching latency", ("C9999",), model=LOCAL
+    )
+    receipt = assembled.receipt
+
+    assert receipt.discrepancies == assembled.discrepancies
+    assert receipt.discrepancies[0].accepted == "C0001"
+    assert receipt.unresolved == ("C9999",)
+    assert ContextReceipt.model_validate_json(receipt.model_dump_json()) == receipt
+
+
+def test_a_receipt_written_before_these_fields_existed_still_validates() -> None:
+    """Additive by construction: an older pack on disk reads back with empty lists."""
+    from research_harness.domain.conversation import ContextReceipt
+
+    receipt = ContextReceipt.model_validate({"included": [], "omitted": []})
+
+    assert receipt.discrepancies == () and receipt.unresolved == ()
+
+
+def test_a_receipt_may_not_name_the_same_unresolved_token_twice() -> None:
+    from pydantic import ValidationError
+
+    from research_harness.domain.conversation import ContextReceipt
+
+    with pytest.raises(ValidationError, match="unresolved repeats"):
+        ContextReceipt.model_validate({"unresolved": ["C9999", "C9999"]})
+
+
 # -- references --------------------------------------------------------------
 
 

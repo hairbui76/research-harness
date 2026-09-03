@@ -19,17 +19,22 @@ iterator, and abandoning it stops the stream. Whatever was already yielded has b
 persisted by the caller, which is what makes an interrupted answer *incomplete* rather
 than lost (conversation design SS8).
 
-Native streaming for the hosted adapters is a follow-up: it belongs inside
-`openai_provider.py` / `anthropic_provider.py` as a `stream()` method, and
-:func:`streaming_provider` will pick it up the moment it exists, with no change here or in
-`conversation/`.
+The hosted adapters now stream natively, and :class:`NativeStream` is the one place that
+knows what that costs the caller: a native `stream()` answers in prose and therefore
+requests no structured output, so a request whose schema is *not* :class:`ChatReply` is
+routed back through the ordinary validated call. The wrapper also carries the two things
+the protocol has no room for -- the routing entry's model label, and the workspace trace
+sink -- so a streamed turn is recorded under `.research/traces/` like every other model
+call.
 """
 
 from __future__ import annotations
 
+import logging
 import re
+import time
 from collections.abc import Iterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Protocol, cast, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -39,7 +44,10 @@ from research_harness.providers.models.base import (
     ModelProvider,
     ModelRequest,
     ModelRequirements,
+    ModelResponse,
     TraceSink,
+    Usage,
+    trace_payload,
 )
 
 __all__ = [
@@ -47,11 +55,14 @@ __all__ = [
     "ChatReply",
     "ChunkedStream",
     "CompletionStream",
+    "NativeStream",
     "StreamDelta",
     "StreamingModelProvider",
     "chat_request",
     "streaming_provider",
 ]
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_CHUNK_WORDS = 8
 """Words per delta when a completed answer is split. Deterministic, so tests can count."""
@@ -76,8 +87,9 @@ class StreamDelta:
     """One appended chunk of a streamed answer.
 
     `text` is *new* text, never the accumulated answer: a consumer appends it. The final
-    delta carries the model identity and stop reason, which a provider only knows once the
-    answer is complete.
+    delta carries the model identity, the stop reason, and the token usage -- the three
+    things a provider only knows once the answer is complete, and which a native stream
+    reports in its last events rather than beside the first.
     """
 
     text: str
@@ -85,6 +97,7 @@ class StreamDelta:
     final: bool = False
     model: str | None = None
     stop_reason: str | None = None
+    usage: Usage | None = None
 
 
 @runtime_checkable
@@ -191,6 +204,95 @@ def split_text(text: str, chunk_words: int) -> list[str]:
     ]
 
 
+class NativeStream:
+    """An adapter that streams natively, given the caller's model label and trace sink.
+
+    Two jobs, and neither belongs in an adapter. First, a native `stream()` answers in
+    *prose*: it asks for no JSON schema, because a schema-shaped answer arrives as JSON
+    fragments that are not an answer until the last one lands. A request for any schema
+    other than :class:`ChatReply` is therefore run as the ordinary validated call. Second,
+    a streamed turn still has to leave a trace, and the trace is written here, once, from
+    what the stream actually delivered.
+    """
+
+    def __init__(
+        self,
+        provider: StreamingModelProvider,
+        *,
+        model: str | None = None,
+        trace: TraceSink | None = None,
+    ) -> None:
+        self._provider = provider
+        self.name = provider.name
+        self._model = model
+        self._trace = trace
+
+    def __repr__(self) -> str:  # pragma: no cover - diagnostics only
+        return f"NativeStream({self.name!r})"
+
+    def stream(self, request: ModelRequest[Any]) -> Iterator[StreamDelta]:
+        """Yield the provider's own deltas, then record what the whole call was."""
+        if request.response_schema is not ChatReply:
+            fallback = CompletionStream(
+                cast(ModelProvider, self._provider), model=self._model, trace=self._trace
+            )
+            yield from fallback.stream(request)
+            return
+        started = time.perf_counter()
+        text: list[str] = []
+        usage = Usage()
+        stop_reason: str | None = None
+        model = self._model
+        for delta in self._provider.stream(request):
+            text.append(delta.text)
+            if delta.usage is not None:
+                usage = delta.usage
+            stop_reason = delta.stop_reason or stop_reason
+            model = self._model or delta.model or model
+            yield (
+                delta
+                if not delta.final or self._model is None
+                else replace(delta, model=self._model)
+            )
+        # Only a stream that ran to the end is traced: an abandoned iterator never reaches
+        # here, and a partial answer is recorded in the run, which is where an interrupted
+        # turn belongs (conversation design SS8).
+        self._record(request, "".join(text), usage, stop_reason, model, started)
+
+    def _record(
+        self,
+        request: ModelRequest[Any],
+        text: str,
+        usage: Usage,
+        stop_reason: str | None,
+        model: str | None,
+        started: float,
+    ) -> None:
+        """Best-effort trace of the completed stream; a diagnostic never fails a call."""
+        if self._trace is None:
+            return
+        response: ModelResponse[ChatReply] = ModelResponse(
+            parsed=ChatReply(text=text),
+            raw_text=text,
+            usage=usage,
+            provider=self.name,
+            model=model or "",
+            latency_ms=int((time.perf_counter() - started) * 1000),
+            request_fingerprint=request.fingerprint(),
+            stop_reason=stop_reason,
+        )
+        try:
+            self._trace.record(
+                "completion",
+                provider=self.name,
+                model=response.model,
+                request_fingerprint=response.request_fingerprint,
+                payload=trace_payload(request, response),
+            )
+        except Exception:
+            logger.warning("could not write a %s stream trace", self.name, exc_info=True)
+
+
 def streaming_provider(
     provider: ModelProvider | StreamingModelProvider,
     *,
@@ -198,7 +300,7 @@ def streaming_provider(
     model: str | None = None,
     trace: TraceSink | None = None,
 ) -> StreamingModelProvider:
-    """The streaming face of ``provider``: itself when it streams, else a wrapper.
+    """The streaming face of ``provider``: its own stream when it has one, else a wrapper.
 
     ``chunk_words`` asks a non-streaming provider to be delivered in pieces; without it the
     whole answer arrives as one delta. ``trace`` is the workspace's trace sink, so a
@@ -207,8 +309,8 @@ def streaming_provider(
     """
     if not isinstance(provider, ModelProvider):
         return provider
-    if hasattr(provider, "stream"):  # pragma: no cover - until an adapter streams natively
-        return cast(StreamingModelProvider, provider)
+    if hasattr(provider, "stream"):
+        return NativeStream(cast(StreamingModelProvider, provider), model=model, trace=trace)
     if chunk_words is not None:
         return ChunkedStream(provider, chunk_words=chunk_words, model=model, trace=trace)
     return CompletionStream(provider, model=model, trace=trace)

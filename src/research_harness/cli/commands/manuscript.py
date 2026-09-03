@@ -297,7 +297,13 @@ def compile_(
 def build(
     build_id: Annotated[
         str | None,
-        typer.Argument(metavar="BUILD_ID", help="Build to read; defaults to the latest."),
+        typer.Argument(
+            metavar="BUILD_ID",
+            help=(
+                "Build to read; `latest` or `last-good` name one by its role, and "
+                "omitting it means the latest."
+            ),
+        ),
     ] = None,
     workspace: WorkspaceOption = None,
     no_audit: Annotated[
@@ -334,7 +340,11 @@ def synctex(
     x: Annotated[float | None, typer.Option("--x", help="PDF x, points from the left.")] = None,
     y: Annotated[float | None, typer.Option("--y", help="PDF y, points from the top.")] = None,
     build_id: Annotated[
-        str | None, typer.Option("--build", help="Build to use; defaults to the latest.")
+        str | None,
+        typer.Option(
+            "--build",
+            help="Build to use; `latest` or `last-good` are accepted, as is omitting it.",
+        ),
     ] = None,
     as_json: JsonOption = False,
 ) -> None:

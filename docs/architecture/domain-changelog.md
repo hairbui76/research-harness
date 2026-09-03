@@ -242,3 +242,20 @@ working; nothing here renames or removes anything.
   `DiffHunk`, `DiffLine`, `AnchorImpact`, and `AppliedSuggestion` (`manuscript/suggest.py`)
   are capability response models and staged-candidate records under `.research/`, not
   domain objects: they carry no `id`, live outside `domain/`, and are regenerable.
+- `ContextDiscrepancy` (`domain/conversation.py`) is new: `accepted` (the stable id of the
+  object that won), `message` (the source pointer of the passage left out), and `detail`. It
+  is the disagreement itself, promoted from an assembly-time dataclass to a domain object;
+  `conversation/context.py` keeps `Discrepancy` as an alias.
+- `ContextReceipt` gains two optional fields, both defaulting to empty so a pack written before
+  them still validates: `discrepancies: tuple[ContextDiscrepancy, ...]` and
+  `unresolved: tuple[str, ...]` (composer tokens that named nothing, in order, refused if
+  repeated). The assembler writes both, so a stored receipt explains itself without
+  reassembly — which is what makes `context.get` a record rather than a re-computation
+  (Product 42 M).
+- `context.get` (read) joins `capabilities/`: `{session, pack}` returns the `ContextPackView`
+  that `context.preview` returns, read from `conversations/<session>/context/`. It is durable:
+  it survives deleting `.research/`.
+- `provider.list` (read) joins `capabilities/` in `capabilities/providers.py`: a
+  `ProviderCatalog` derived from `research.yaml`'s `providers:` section and the egress report.
+  No canonical schema; it is a capability response model that reuses the `EgressClass`
+  vocabulary so a model selector and a receipt speak the same words.

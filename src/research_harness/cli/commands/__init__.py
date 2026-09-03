@@ -22,6 +22,7 @@ from research_harness.cli.commands import (
     init,
     manuscript,
     privacy,
+    provider,
     rebuild,
     research,
     search,
@@ -46,6 +47,7 @@ COMMAND_MODULES: tuple[ModuleType, ...] = (
     graph,
     attachment,
     session,
+    provider,
     privacy,
     serve,
 )

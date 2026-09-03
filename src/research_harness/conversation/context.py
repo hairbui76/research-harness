@@ -49,6 +49,7 @@ from research_harness.domain.conversation import (
     AuthorityLabel,
     ClassBudget,
     ContextClass,
+    ContextDiscrepancy,
     ContextItem,
     ContextPack,
     ContextReceipt,
@@ -259,21 +260,13 @@ class AttachmentPlan:
     inputs: tuple[InputEnvelope, ...] = ()
 
 
-@dataclass(frozen=True, slots=True)
-class Discrepancy:
-    """One place where remembered conversation disagrees with accepted state.
+Discrepancy = ContextDiscrepancy
+"""One place where remembered conversation disagrees with accepted state.
 
-    Surfaced in the assembly result (and from there in the inspector) so the researcher
-    sees the disagreement instead of merely noticing that a message went missing.
-    """
-
-    accepted: str
-    """Stable id of the accepted object that won."""
-
-    message: str
-    """Source pointer of the passage that was left out."""
-
-    detail: str
+The name assembly has always used, kept as an alias now that the record is a domain
+object written into the receipt: a `Context used` read back later carries the
+disagreement, not merely the gap it left (Product 42 M).
+"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -473,15 +466,27 @@ class _Packer:
             )
         )
 
-    def receipt(self) -> ContextReceipt:
-        """The receipt for what was packed: `CONTEXT_ORDER`, then each class's own order."""
+    def receipt(
+        self,
+        *,
+        discrepancies: Sequence[ContextDiscrepancy] = (),
+        unresolved: Sequence[str] = (),
+    ) -> ContextReceipt:
+        """The receipt for what was packed: `CONTEXT_ORDER`, then each class's own order.
+
+        ``discrepancies`` and ``unresolved`` are recorded on the receipt itself so a stored
+        pack explains itself without being reassembled (`context.get`).
+        """
         order = {context_class: index for index, context_class in enumerate(CONTEXT_ORDER)}
         included = sorted(
             enumerate(self.included),
             key=lambda entry: (order.get(entry[1][1].context_class, 99), entry[1][0], entry[0]),
         )
         return ContextReceipt(
-            included=tuple(item for _, (_, item) in included), omitted=tuple(self.omitted)
+            included=tuple(item for _, (_, item) in included),
+            omitted=tuple(self.omitted),
+            discrepancies=tuple(discrepancies),
+            unresolved=tuple(unresolved),
         )
 
 
@@ -549,7 +554,10 @@ class ContextAssembler:
         self._pack_corpus_blocks(packer, resolved, profile, rules)
         self._pack_discovery(packer, query, profile)
 
-        receipt = packer.receipt()
+        receipt = packer.receipt(
+            discrepancies=discrepancies,
+            unresolved=[item.token for item in resolved if not item.resolved],
+        )
         return AssembledContext(
             receipt=receipt,
             budgets=budgets,
