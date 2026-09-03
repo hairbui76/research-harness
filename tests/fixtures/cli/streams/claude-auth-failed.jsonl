@@ -1,0 +1,2 @@
+# source: apps/daemon/tests/runtimes/claude-stream-thinking.test.ts@9bb4a7d; sanitized
+{"type":"assistant","error":"authentication_failed","message":{"id":"msg-auth","role":"assistant","stop_reason":"stop_sequence","content":[{"type":"text","text":"Not logged in · Please run /login"}]}}

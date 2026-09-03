@@ -1,0 +1,7 @@
+# source: apps/daemon/src/runtimes/json-event-stream.ts@9bb4a7d (codex); sanitized
+{"type":"thread.started","thread_id":"thread-x"}
+{"type":"turn.started"}
+{"type":"item.started","item":{"id":"item-0","type":"reasoning","text":""}}
+{"type":"item.completed","item":{"id":"item-0","type":"reasoning","text":"summary"}}
+{"type":"item.completed","item":{"id":"item-1","type":"agent_message","text":"{\"supported\": true, \"confidence\": 0.82, \"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":1200,"cached_input_tokens":400,"output_tokens":95,"reasoning_output_tokens":64}}

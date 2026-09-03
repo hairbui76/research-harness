@@ -1,0 +1,5 @@
+# source: apps/daemon/tests/runtimes/json-event-stream.test.ts@9bb4a7d (opencode); sanitized
+{"type":"step_start","sessionID":"ses-x","part":{"type":"step-start"}}
+{"type":"text","sessionID":"ses-x","part":{"type":"text","text":"{\"supported\": true, \"confidence\": 0.82, "}}
+{"type":"text","sessionID":"ses-x","part":{"type":"text","text":"\"rationale\": \"Table 3 states the throughput directly.\", \"evidence_ids\": [\"ev-001\", \"ev-002\"]}"}}
+{"type":"step_finish","sessionID":"ses-x","part":{"type":"step-finish","tokens":{"input":1200,"output":95,"reasoning":64,"cache":{"read":400,"write":0}},"cost":0}}

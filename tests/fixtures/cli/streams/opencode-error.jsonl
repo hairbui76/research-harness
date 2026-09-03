@@ -1,0 +1,3 @@
+# source: apps/daemon/tests/runtimes/json-event-stream.test.ts@9bb4a7d (opencode); sanitized
+{"type":"step_start","sessionID":"ses-x","part":{"type":"step-start"}}
+{"type":"error","sessionID":"ses-x","error":{"name":"ProviderAuthError","data":{"message":"OpenCode auth failed: login required"}}}

@@ -50,44 +50,28 @@ class EventParser(Protocol):
 ParserFactory = Callable[["CliRuntimeDef"], EventParser]
 
 
-class _Unimplemented:
-    """Placeholder for a protocol family whose parser module has not landed yet.
-
-    It keeps `PARSERS` complete so `registry.validate_definition` can already refuse a
-    definition with no parser, and fails loudly rather than silently if anything tries to
-    read a stream with it.
-    """
-
-    def __init__(self, family: str) -> None:
-        self._family = family
-
-    def feed(self, line: str) -> Iterable[CliEvent]:
-        raise NotImplementedError(f"the {self._family} parser is not implemented")
-
-    def finish(self) -> Iterable[CliEvent]:
-        raise NotImplementedError(f"the {self._family} parser is not implemented")
-
-
-def _unimplemented_factory(family: str) -> ParserFactory:
-    def factory(definition: CliRuntimeDef) -> EventParser:
-        return _Unimplemented(family)
-
-    return factory
-
-
-PARSERS: dict[str, ParserFactory] = {
-    family: _unimplemented_factory(family)
-    for family in ("claude_stream", "json_events", "dsh_profile", "pi_rpc")
-}
-"""Protocol family → parser factory. The four parser modules replace their entry on import
-(`register` below); `registry.validate_definition` refuses a family with no entry."""
+PARSERS: dict[str, ParserFactory] = {}
+"""Protocol family → parser factory. The four parser modules claim their entry on import
+(`register` below, driven by the imports at the bottom of this module), so `PARSERS` is
+complete whenever this package is imported; `registry.validate_definition` refuses a
+family with no entry."""
 
 
 def register(family: ProtocolFamily, factory: ParserFactory) -> None:
-    """Claim a protocol family for a real parser, replacing the placeholder."""
+    """Claim a protocol family for a parser; each parser module calls this on import."""
     PARSERS[family] = factory
 
 
 def parser_for(definition: CliRuntimeDef) -> EventParser:
     """A fresh parser for one run of `definition`."""
     return PARSERS[definition.protocol](definition)
+
+
+# Register the four parsers by importing them; each module calls `register` on import.
+# E402: these must follow `register`, which they call at import time.
+from research_harness.providers.cli.parsers import claude_stream as _claude_stream  # noqa: E402
+from research_harness.providers.cli.parsers import dsh_profile as _dsh_profile  # noqa: E402
+from research_harness.providers.cli.parsers import json_events as _json_events  # noqa: E402
+from research_harness.providers.cli.parsers import pi_rpc as _pi_rpc  # noqa: E402
+
+del _claude_stream, _dsh_profile, _json_events, _pi_rpc
