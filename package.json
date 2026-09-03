@@ -1,0 +1,15 @@
+{
+  "name": "research-harness-workspace",
+  "private": true,
+  "description": "pnpm workspace root for the Research Harness JS packages: the Design System, the Web cockpit, and the VS Code extension.",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --workspace-concurrency=1 build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

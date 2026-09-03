@@ -1,0 +1,10 @@
+# One workspace, three packages. `design` is consumed by `web` through the workspace link;
+# `vscode` is a sibling with its own bundler. pnpm 11 refuses to run any dependency's build
+# script unless it is allowed here: esbuild (Vite and the extension bundler) unpacks its native
+# binary in a postinstall, and nothing else is allowed to run one.
+packages:
+  - design
+  - web
+  - vscode
+allowBuilds:
+  esbuild: true

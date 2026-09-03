@@ -17,3 +17,7 @@ dist/
 .idea/
 .vscode/
 .DS_Store
+
+# JS workspace (pnpm)
+node_modules/
+*.tsbuildinfo

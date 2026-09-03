@@ -14,6 +14,8 @@ that work done by many people (and agents) in parallel still reads as one codeba
 | `ingest/`, `parsing/` | artifact ingestion, identity, DocumentIR, anchors | providers, cli, server |
 | `providers/` | model/search/parser adapters behind neutral contracts | domain-specific business rules, cli, server |
 | `roles/`, `workflows/`, `evidence/`, `claims/`, `manuscript/`, `retrieval/` | application logic | cli, server, protocol |
+| `conversation/` | sessions, messages, attachments, context packs, promotion, save-to-corpus (durable but private working context, never accepted state) | cli, server, protocol |
+| `graph/` | the ResearchGraph projection and its queries; deletable and rebuildable | providers, cli, server |
 | `capabilities/` | **the only supported mutation surface** for accepted state | cli, server |
 | `protocol/`, `server/`, `cli/` | transports; thin clients of `capabilities/` | each other's internals |
 
@@ -75,6 +77,24 @@ that work done by many people (and agents) in parallel still reads as one codeba
   ```
 
 - Do not commit; the project manager commits at phase gates.
+
+## JS packages (`design/`, `web/`, `vscode/`)
+
+- One pnpm workspace at the repository root (`pnpm-workspace.yaml`, `pnpm-lock.yaml`);
+  `pnpm install` runs there. Do **not** edit any `package.json` dependency list or run
+  `pnpm add`; the project manager owns dependencies.
+- Strict TypeScript everywhere; no `any`, no `@ts-ignore` without a comment saying why.
+- The Web client composes `@research-harness/design` and never re-implements a primitive,
+  a theme value, or a status style; see `docs/architecture/design-system.md`.
+- No CDN: fonts, icons, styles, and components are local package assets.
+- Before reporting, run and pass, for every package you touched:
+
+  ```bash
+  pnpm --filter <package> typecheck
+  pnpm --filter <package> lint
+  pnpm --filter <package> test
+  pnpm --filter <package> build
+  ```
 
 ## Report format (for subagents)
 
