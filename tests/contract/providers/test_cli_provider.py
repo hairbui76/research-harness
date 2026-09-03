@@ -11,9 +11,15 @@ import os
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from research_harness.privacy.policy import EgressPolicy
-from research_harness.providers.cli.errors import CliResponseError, CliTransportError
+from research_harness.providers.cli.detection import DEFAULT_CACHE, detect
+from research_harness.providers.cli.errors import (
+    CliAuthError,
+    CliResponseError,
+    CliTransportError,
+)
 from research_harness.providers.cli.provider import CliModelProvider, default_cli_capabilities
 from research_harness.providers.cli.registry import RUNTIMES
 from research_harness.providers.models.base import ModelRequest, StructuredOutputError
@@ -23,6 +29,21 @@ from tests.contract.providers.conftest import CANONICAL_JSON, EXPECTED_VERDICT, 
 from tests.fixtures.cli.fakes import FakeCli
 
 STREAMS = Path(__file__).resolve().parents[2] / "fixtures" / "cli" / "streams"
+
+CODEX_HELP = (
+    "--sandbox --output-schema --json --ephemeral "
+    "--skip-git-repo-check --ignore-user-config --ignore-rules"
+)
+"""Every flag `codex`'s posture requires, so the run-time gate proves the bounded mode."""
+
+CLAUDE_PROBES: list[dict[str, object]] = [
+    {
+        "args": ["auth", "status"],
+        "stdout": json.dumps({"loggedIn": True, "authMethod": "claude.ai"}),
+    },
+    {"args": ["--help"], "stdout": " ".join(RUNTIMES["claude"].posture.required_help_flags)},
+]
+"""A logged-in Claude Code whose help output proves the posture the definition needs."""
 
 
 def lines(name: str) -> list[str]:
@@ -43,9 +64,9 @@ def codex(tmp_path: Path) -> FakeCli:
             {"args": ["login", "status"], "stdout": "Logged in using ChatGPT\n"},
             {
                 "args": ["exec", "--help"],
-                "stdout": "--sandbox --output-schema --json --ephemeral "
-                "--skip-git-repo-check --ignore-user-config --ignore-rules",
+                "stdout": CODEX_HELP,
             },
+            {"args": ["debug", "models"], "stdout": "{}"},
         ],
         run={"lines": lines("codex-success.jsonl")},
     )
@@ -299,6 +320,7 @@ def test_a_chat_turn_streams_prose_deltas_that_concatenate_to_the_answer(tmp_pat
         tmp_path,
         "claude",
         version_stdout="2.1.259 (Claude Code)",
+        probes=CLAUDE_PROBES,
         run={"lines": lines("claude-partial.jsonl")},
     )
     adapter = CliModelProvider("claude", "opus", env=claude.env({"PATH": ""}), timeout=10)
@@ -330,6 +352,7 @@ def test_abandoning_the_stream_cancels_the_process(tmp_path: Path) -> None:
     claude = FakeCli.install(
         tmp_path,
         "claude",
+        probes=CLAUDE_PROBES,
         run={"lines": [*lines("claude-partial.jsonl")[:4], {"sleep": 30}], "hang": True},
     )
     adapter = CliModelProvider("claude", "opus", env=claude.env({"PATH": ""}), timeout=30)
@@ -352,6 +375,7 @@ def test_abandoning_the_stream_through_the_wrapper_also_cancels_the_process(
     claude = FakeCli.install(
         tmp_path,
         "claude",
+        probes=CLAUDE_PROBES,
         run={"lines": [*lines("claude-partial.jsonl")[:4], {"sleep": 30}], "hang": True},
     )
     adapter = CliModelProvider("claude", "opus", env=claude.env({"PATH": ""}), timeout=30)
@@ -385,3 +409,121 @@ def test_the_trace_records_runtime_version_protocol_and_model(
     assert cli["version"] is None, "the provider never probes a version itself"
     assert isinstance(cli["executable"], str) and cli["executable"].endswith("bin/codex")
     assert "sk-metered" not in json.dumps(sink.payloads)
+
+
+# -- the run-time gate ---------------------------------------------------------
+
+UNPROVEN = ["pi", "amp", "cursor-agent", "deepseek-harness"]
+
+
+@pytest.mark.parametrize("runtime", UNPROVEN)
+def test_a_runtime_with_no_bounded_posture_cannot_be_configured_at_all(runtime: str) -> None:
+    """Data only: a hand-written `research.yaml` fails at load, before anything is spawned."""
+    with pytest.raises(ValidationError) as caught:
+        RouterConfig.model_validate(
+            {
+                "providers": [
+                    {"name": "x", "kind": "local_cli", "runtime": runtime, "model": "default"}
+                ]
+            }
+        )
+    message = str(caught.value)
+    assert runtime in message and "no proven bounded" in message
+    assert "cannot be configured" in message
+
+
+def test_opencodes_declared_posture_loads_but_the_engine_refuses_it_at_run_time(
+    tmp_path: Path, model_request: ModelRequest[Verdict]
+) -> None:
+    """The fifth non-routable runtime: it declares a posture, so only the live gate can judge.
+
+    OpenCode's bounded mode is injected through the environment; a help probe can prove a
+    flag exists and never that an injected table denies anything, so an unverified version
+    leaves the posture unproven and the request is refused before a process is spawned.
+    """
+    RouterConfig.model_validate(
+        {"providers": [{"name": "x", "kind": "local_cli", "runtime": "opencode", "model": "d"}]}
+    )
+    fake = FakeCli.install(
+        tmp_path,
+        "opencode-cli",
+        probes=[
+            {"args": ["run", "--help"], "stdout": "--format --dir"},
+            {"args": ["models", "--verbose"], "stdout": ""},
+        ],
+        run={"lines": lines("opencode-success.jsonl")},
+    )
+    env = fake.env({"PATH": "", "HOME": str(fake.root / "home")})
+    with pytest.raises(CliResponseError) as caught:
+        CliModelProvider("opencode", env=env, timeout=10).complete(model_request)
+
+    assert caught.value.diagnostic == "bounded_mode_unsupported"
+    assert caught.value.message == detect(RUNTIMES["opencode"], env=env).unavailable_reason
+    assert fake.runs() == []
+
+
+def test_an_unproven_bounded_mode_is_refused_before_the_process_exists(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """This build of `codex` no longer offers `--sandbox`, so nothing proves the posture."""
+    DEFAULT_CACHE.clear()
+    script = codex.script()
+    script["probes"] = [
+        probe if probe["args"] != ["exec", "--help"] else {**probe, "stdout": "--json --ephemeral"}
+        for probe in script["probes"]
+    ]
+    codex.write_script(script)
+
+    with pytest.raises(CliResponseError) as caught:
+        provider(codex).complete(model_request)
+
+    assert caught.value.diagnostic == "bounded_mode_unsupported"
+    env = codex.env({"PATH": "", "HOME": str(codex.root / "home")})
+    assert caught.value.message == detect(RUNTIMES["codex"], env=env).unavailable_reason
+    assert "no tested bounded" in caught.value.message
+    assert codex.runs() == []
+
+
+def test_a_logged_out_runtime_is_refused_before_the_process_exists(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    DEFAULT_CACHE.clear()
+    script = codex.script()
+    script["probes"] = [
+        probe
+        if probe["args"] != ["login", "status"]
+        else {**probe, "stdout": "Not logged in\n", "exit": 1}
+        for probe in script["probes"]
+    ]
+    codex.write_script(script)
+
+    with pytest.raises(CliAuthError) as caught:
+        provider(codex).complete(model_request)
+
+    assert caught.value.diagnostic == "login_missing"
+    env = codex.env({"PATH": "", "HOME": str(codex.root / "home")})
+    assert caught.value.message == detect(RUNTIMES["codex"], env=env).unavailable_reason
+    assert codex.runs() == []
+
+
+def test_a_routable_runtime_still_completes_and_spawns_exactly_one_run(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """The gate is a gate, not a wall: a proven, logged-in runtime answers as before."""
+    response = provider(codex).complete(model_request)
+
+    assert response.parsed == EXPECTED_VERDICT
+    assert [call["kind"] for call in codex.calls()].count("run") == 1
+
+
+def test_the_gate_pays_at_most_one_probe_round_per_cache_window(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """A second request inside the cache window re-uses the first request's detection."""
+    DEFAULT_CACHE.clear()
+    adapter = provider(codex)
+    adapter.complete(model_request)
+    probes = [call for call in codex.calls() if call["kind"] != "run"]
+    adapter.complete(model_request)
+
+    assert [call for call in codex.calls() if call["kind"] != "run"] == probes

@@ -158,7 +158,7 @@ The entry `add` writes:
 providers:
   - name: codex-sub
     kind: local_cli
-    runtime: codex          # codex | claude | cursor-agent | amp | deepseek-harness | opencode | pi
+    runtime: codex          # codex | claude
     model: gpt-5.5          # or `default` for the CLI's own configured model
     priority: 10
     reasoning: high         # optional; the runtime's own effort name
@@ -166,7 +166,10 @@ providers:
     enabled: true
 ```
 
-`runtime` is required and `base_url`/`api_key_env` are refused for `kind: local_cli`.
+`runtime` is required and `base_url`/`api_key_env` are refused for `kind: local_cli`. Only
+`codex` and `claude` may be named: the other five runtimes are detected and listed but
+refused, by `add` and by a hand-written `research.yaml` alike — run `research providers
+scan` to see, for each one, the reason it is not routable.
 `reasoning` is the runtime's own effort name, not a harness word: Codex takes `low`,
 `medium`, `high`, `xhigh` and receives them as `-c model_reasoning_effort="…"`; Claude Code
 takes those and `max`, and receives them as `--effort`. The names come from the runtime
@@ -200,6 +203,12 @@ verified nor blocked, `unknown` when the version string cannot be read, and `blo
 version known to be incompatible or below a declared floor. Of those four only `blocked`
 stops a runtime being routed on its own: bounded mode is a separate gate, answered for the
 build that is actually installed, so an unrecognised version is a warning, not a refusal.
+These are not report-only. The engine asks the same question again when a request is
+actually routed, from the same 30-second cache, and refuses an entry whose runtime is not
+routable right now — `bounded_mode_unsupported` when the installed build cannot prove the
+no-tools posture, `version_blocked` for a known-incompatible version, `login_missing` when
+the CLI is logged out, and `executable_missing` when it has been uninstalled — with the
+same sentence the scan shows, before the prompt is rendered and before any process exists.
 The one exception is a runtime whose posture is injected through the environment rather
 than proved by a flag — OpenCode's, here: a help probe shows that a flag exists, never that
 an injected setting denies anything, so only a `verified` version proves that posture, and

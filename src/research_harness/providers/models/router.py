@@ -391,11 +391,21 @@ class RouterProviderConfig(BaseModel):
                         f"a CLI provider uses the CLI's own login"
                     )
             try:
-                _get_runtime(self.runtime)
+                definition = _get_runtime(self.runtime)
             except KeyError as exc:
                 raise ValueError(str(exc)) from exc
-        elif self.runtime is not None or self.reasoning is not None:
-            raise ValueError("runtime is only for kind local_cli")
+            if definition.posture.kind == "none":
+                # The same refusal the scan and `provider.cli.configure` give, moved to the
+                # one layer a hand-written `research.yaml` cannot walk past (spec §12).
+                raise ValueError(
+                    f"runtime {self.runtime!r} has no proven bounded (no-tools, read-only) "
+                    f"mode and cannot be configured; run `research providers scan` for the "
+                    f"reason it is detected but never routed"
+                )
+        else:
+            for field in ("runtime", "reasoning"):
+                if getattr(self, field) is not None:
+                    raise ValueError(f"{field} is only for kind local_cli")
         return self
 
     @model_validator(mode="before")

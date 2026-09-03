@@ -20,9 +20,10 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 
-from research_harness.providers.cli.detection import resolve_executable
+from research_harness.providers.cli.detection import detect_cached, resolve_executable
 from research_harness.providers.cli.environment import bounded_environment
 from research_harness.providers.cli.errors import (
+    CliAuthError,
     CliResponseError,
     CliTransportError,
     classify_failure,
@@ -39,7 +40,12 @@ from research_harness.providers.cli.process import (
 from research_harness.providers.cli.prompt import render_chat_prompt, render_prompt
 from research_harness.providers.cli.registry import get_runtime
 from research_harness.providers.cli.transport import transport_for
-from research_harness.providers.cli.types import DEFAULT_MODEL, CliInvocation, CliRuntimeDef
+from research_harness.providers.cli.types import (
+    DEFAULT_MODEL,
+    CliInvocation,
+    CliRuntimeDef,
+    CliRuntimeStatus,
+)
 from research_harness.providers.models.base import (
     EgressDeclaration,
     ModelProvider,
@@ -55,11 +61,17 @@ from research_harness.providers.models.base import (
 from research_harness.providers.models.media import media_parts
 from research_harness.providers.models.streaming import StreamDelta
 
-__all__ = ["CliModelProvider", "SpawnFactory", "default_cli_capabilities"]
+__all__ = [
+    "AvailabilityCheck",
+    "CliModelProvider",
+    "SpawnFactory",
+    "default_cli_capabilities",
+]
 
 logger = logging.getLogger(__name__)
 
 SpawnFactory = Callable[..., BoundedProcess]
+AvailabilityCheck = Callable[[], CliRuntimeStatus]
 HARNESS_LEVELS = frozenset({"low", "medium", "high"})
 
 
@@ -157,7 +169,14 @@ class CliModelProvider(ModelProvider):
         executable: Path | None = None,
         version: str | None = None,
         spawn: SpawnFactory = BoundedProcess.spawn,
+        availability: AvailabilityCheck | None = None,
     ) -> None:
+        """`availability` overrides the run-time gate and exists for tests alone.
+
+        `None` -- what the router always passes, because it never passes this at all --
+        means the cached live detection: production decides with the same probes the scan,
+        the daemon, and the Web cockpit decide with.
+        """
         self.runtime = get_runtime(runtime) if isinstance(runtime, str) else runtime
         self.name = provider_name(self.runtime.id)
         self.model = model
@@ -167,6 +186,7 @@ class CliModelProvider(ModelProvider):
         self._env: Mapping[str, str] | None = env
         self._executable = executable
         self._spawn = spawn
+        self._availability = availability
         self.version = version
         """The installed version when the caller learned it from a scan; never probed here."""
         self._resolved: Path | None = None
@@ -265,6 +285,9 @@ class CliModelProvider(ModelProvider):
                 diagnostic="invalid_invocation",
             )
         env_base: Mapping[str, str] = self._env if self._env is not None else os.environ
+        status = self._status(env_base)
+        if not status.routable:
+            raise self._unroutable(status)
         executable = self._executable or resolve_executable(self.runtime, env_base)
         self._resolved = executable
         if executable is None:
@@ -380,6 +403,36 @@ class CliModelProvider(ModelProvider):
                 stop_reason=collected.stop_reason or "end_turn",
             ),
         )
+
+    # -- the gate ---------------------------------------------------------------
+
+    def _status(self, env: Mapping[str, str]) -> CliRuntimeStatus:
+        """This runtime's verdict now, from the cache the scan and the cockpit share."""
+        if self._availability is not None:
+            return self._availability()
+        return detect_cached(self.runtime, env=env)
+
+    def _unroutable(self, status: CliRuntimeStatus) -> Exception:
+        """Refuse an unproven runtime in the scan's own words, naming the gate that stopped it.
+
+        Spec §12: the engine does not spawn a runtime it cannot show is bounded, logged in,
+        and compatible. The gates are read in `unavailable_reason`'s order so the diagnostic
+        and the sentence always name the same one, and the message is that sentence exactly
+        -- the CLI, the daemon, and the Web cockpit already show it, and a second wording
+        here would be a second answer to one question.
+        """
+        reason = status.unavailable_reason or f"{self.runtime.id} is not routable"
+        if not status.available:
+            return CliTransportError(
+                reason, runtime=self.runtime.id, diagnostic="executable_missing"
+            )
+        if status.auth_status == "missing":
+            return CliAuthError(reason, runtime=self.runtime.id, diagnostic="login_missing")
+        if status.bounded_mode != "safe":
+            return CliResponseError(
+                reason, runtime=self.runtime.id, diagnostic="bounded_mode_unsupported"
+            )
+        return CliResponseError(reason, runtime=self.runtime.id, diagnostic="version_blocked")
 
     # -- helpers ----------------------------------------------------------------
 

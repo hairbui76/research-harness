@@ -41,6 +41,7 @@ __all__ = [
     "ScanCache",
     "compatibility_of",
     "detect",
+    "detect_cached",
     "resolve_executable",
     "scan",
 ]
@@ -336,6 +337,57 @@ class ScanCache:
 DEFAULT_CACHE = ScanCache()
 
 
+def detect_cached(
+    definition: CliRuntimeDef,
+    *,
+    env: Mapping[str, str] | None = None,
+    runner: ProbeRunner = run_probe,
+    fresh: bool = False,
+    cache: ScanCache | None = None,
+    now: datetime | None = None,
+) -> CliRuntimeStatus:
+    """`detect` behind the short cache, fault-isolated: one runtime, one probe per window.
+
+    The one entry point for a caller that must know a runtime's verdict *now* -- a settings
+    screen refreshing, or the engine deciding whether a request may be routed -- without
+    paying a probe round per request. A runtime whose detection raises answers with an
+    unavailable status carrying the reason, never an exception: a broken CLI is a fact
+    about that CLI, not a failure of the caller.
+    """
+    base: Mapping[str, str] = os.environ if env is None else env
+    store = DEFAULT_CACHE if cache is None else cache
+    key = (definition.id, base.get("PATH", ""))
+    if not fresh:
+        cached = store.get(key)
+        if cached is not None:
+            return cached
+    try:
+        result = detect(definition, env=base, runner=runner, now=now)
+    except Exception as exc:  # fault isolation: one broken CLI cannot empty the catalog
+        home = base.get("HOME")
+        failed = f"detection failed: {type(exc).__name__}: {redact(str(exc), home=home)}"
+        result = CliRuntimeStatus(
+            runtime=definition.id,
+            name=definition.name,
+            available=False,
+            executable=None,
+            version=None,
+            auth_status="unknown",
+            auth_guidance=UNKNOWN_AUTH_GUIDANCE.format(login=definition.login_guidance),
+            bounded_mode="unknown",
+            compatibility="unknown",
+            models=(DEFAULT_MODEL_OPTION.as_view(),),
+            model_source="fallback",
+            reasoning_choices=definition.reasoning_choices,
+            egress_kind=definition.egress,
+            egress_host=definition.egress_host,
+            diagnostics=(failed,),
+            scanned_at=now or datetime.now(UTC),
+        )
+    store.put(key, result)
+    return result
+
+
 def scan(
     definitions: Sequence[CliRuntimeDef] | None = None,
     *,
@@ -351,40 +403,9 @@ def scan(
 
     targets = tuple(RUNTIME_DEFS if definitions is None else definitions)
     base: Mapping[str, str] = os.environ if env is None else env
-    home = base.get("HOME")
-    store = DEFAULT_CACHE if cache is None else cache
-    path_key = base.get("PATH", "")
 
     def one(definition: CliRuntimeDef) -> CliRuntimeStatus:
-        key = (definition.id, path_key)
-        if not fresh:
-            cached = store.get(key)
-            if cached is not None:
-                return cached
-        try:
-            result = detect(definition, env=base, runner=runner, now=now)
-        except Exception as exc:  # fault isolation: one broken CLI cannot empty the catalog
-            failed = f"detection failed: {type(exc).__name__}: {redact(str(exc), home=home)}"
-            result = CliRuntimeStatus(
-                runtime=definition.id,
-                name=definition.name,
-                available=False,
-                executable=None,
-                version=None,
-                auth_status="unknown",
-                auth_guidance=UNKNOWN_AUTH_GUIDANCE.format(login=definition.login_guidance),
-                bounded_mode="unknown",
-                compatibility="unknown",
-                models=(DEFAULT_MODEL_OPTION.as_view(),),
-                model_source="fallback",
-                reasoning_choices=definition.reasoning_choices,
-                egress_kind=definition.egress,
-                egress_host=definition.egress_host,
-                diagnostics=(failed,),
-                scanned_at=now or datetime.now(UTC),
-            )
-        store.put(key, result)
-        return result
+        return detect_cached(definition, env=base, runner=runner, fresh=fresh, cache=cache, now=now)
 
     with ThreadPoolExecutor(max_workers=max(1, min(max_workers, len(targets) or 1))) as pool:
         return tuple(pool.map(one, targets))

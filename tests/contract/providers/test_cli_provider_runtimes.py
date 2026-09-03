@@ -1,24 +1,56 @@
 """The five ported runtimes answer the same contract and refuse a tool event (spec §9, §20).
 
-Driven through fake executables replaying the sanitized stream fixtures. These cases
-bypass the posture gate on purpose: the provider itself never checks posture -- the
-capability layer does -- so the wire behaviour is pinned even for the runtimes that are
-detected but never routed.
+Driven through fake executables replaying the sanitized stream fixtures. This module -- and
+only this module -- bypasses the provider's run-time posture gate, by passing the
+`availability` stub the gate exists to be overridden by. Four of these five runtimes have
+no proven bounded mode and the fifth's is unproven, so the engine refuses every one of them
+before it spawns anything; the wire behaviour still has to be pinned, because the parsers
+and transports below the gate are what a future recorded posture would ship on. Every other
+provider test goes through real detection against its fake.
 """
 
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from research_harness.providers.cli.errors import CliResponseError
 from research_harness.providers.cli.provider import CliModelProvider
+from research_harness.providers.cli.registry import RUNTIMES
+from research_harness.providers.cli.types import CliRuntimeStatus
 from research_harness.providers.models.base import ModelRequest
 from tests.contract.providers.conftest import EXPECTED_VERDICT, Verdict
 from tests.contract.providers.test_cli_provider import lines
 from tests.fixtures.cli.fakes import FakeCli
+
+
+def routable(runtime: str) -> Callable[[], CliRuntimeStatus]:
+    """A status that passes every gate, so the run below exercises the wire and nothing else."""
+    definition = RUNTIMES[runtime]
+    status = CliRuntimeStatus(
+        runtime=definition.id,
+        name=definition.name,
+        available=True,
+        executable=None,
+        version=None,
+        auth_status="ok",
+        auth_guidance="",
+        bounded_mode="safe",
+        compatibility="verified",
+        models=(),
+        model_source="fallback",
+        reasoning_choices=definition.reasoning_choices,
+        egress_kind=definition.egress,
+        egress_host=definition.egress_host,
+        diagnostics=(),
+        scanned_at=datetime.now(UTC),
+    )
+    return lambda: status
+
 
 RUNTIME_OF = {
     "cursor-agent": "cursor-agent",
@@ -56,7 +88,9 @@ def test_every_other_runtime_answers_the_same_contract(
     if executable == "dsh":
         body = body[1:]  # `ready` is emitted before the execute command is read
     fake = FakeCli.install(tmp_path, executable, run={"lines": body, **extra})
-    adapter = CliModelProvider(runtime, env=fake.env({"PATH": ""}), timeout=10)
+    adapter = CliModelProvider(
+        runtime, env=fake.env({"PATH": ""}), timeout=10, availability=routable(runtime)
+    )
 
     response = adapter.complete(model_request)
 
@@ -102,6 +136,11 @@ def test_every_other_runtime_fails_on_a_tool_event(
     )
 
     with pytest.raises(CliResponseError) as caught:
-        CliModelProvider(runtime, env=fake.env({"PATH": ""}), timeout=10).complete(model_request)
+        CliModelProvider(
+            runtime,
+            env=fake.env({"PATH": ""}),
+            timeout=10,
+            availability=routable(runtime),
+        ).complete(model_request)
 
     assert caught.value.diagnostic == "bounded_authority_violation"
