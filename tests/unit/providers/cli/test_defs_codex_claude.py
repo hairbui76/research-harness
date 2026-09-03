@@ -176,6 +176,14 @@ def test_claude_auth_reads_the_json_behind_a_banner_and_never_guesses_ok() -> No
     assert verdict == "missing" and "console" in guidance
     assert status(banner + json.dumps({"loggedIn": False, "authMethod": None}))[0] == "missing"
 
+    # a JSON-shaped preamble (an update notice) must not shadow the status object
+    preamble = '{"update":{"available":false,"latest":"2.1.259"}}\n'
+    subscription = json.dumps({"loggedIn": True, "authMethod": "claude.ai"})
+    assert status(banner + preamble + subscription) == ("ok", "")
+    assert status(preamble + json.dumps({"loggedIn": True, "authMethod": "console"}))[0] == (
+        "missing"
+    )
+
     for unparseable in ('Logged in\n"loggedIn": true', '"authenticated": true', "Logged in."):
         assert status(unparseable)[0] == "unknown", "text alone never proves a subscription"
     assert status('Logged in\n"loggedIn": true')[1] == "run `claude auth status`"

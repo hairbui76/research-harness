@@ -30,24 +30,27 @@ _NOT_LOGGED_IN = re.compile(
 )
 
 
-def _status_object(stdout: str) -> object | None:
-    """The first complete `{...}` object in stdout, or `None` if there is none.
+def _status_object(stdout: str) -> dict[str, object] | None:
+    """The first `{...}` object in stdout that carries `loggedIn`, or `None` if there is none.
 
     `claude auth status` prints its object after whatever the build decided to say first --
-    a version banner, an update notice -- and `json.loads` over the whole stream fails on
-    that. Scanning for the object keeps a genuine subscription login readable instead of
-    letting a banner push it onto the text path, which cannot tell one login from another.
+    a version banner, an update notice, even another JSON line -- and `json.loads` over the
+    whole stream fails on that. Scanning for *the status object* (not merely the first
+    object) keeps a genuine subscription login readable instead of letting a preamble push
+    it onto the text path, which cannot tell one login from another.
     """
     decoder = json.JSONDecoder()
     start = stdout.find("{")
     while start != -1:
         parsed: object
         try:
-            parsed, _ = decoder.raw_decode(stdout, start)
+            parsed, end = decoder.raw_decode(stdout, start)
         except ValueError:
             start = stdout.find("{", start + 1)
             continue
-        return parsed
+        if isinstance(parsed, dict) and "loggedIn" in parsed:
+            return parsed
+        start = stdout.find("{", end)
     return None
 
 
@@ -61,7 +64,7 @@ def claude_auth(outcome: ProbeOutcome) -> tuple[AuthStatus, str]:
     of the one login this definition accepts.
     """
     payload = _status_object(outcome.stdout)
-    if isinstance(payload, dict) and isinstance(payload.get("loggedIn"), bool):
+    if payload is not None and isinstance(payload.get("loggedIn"), bool):
         if not payload["loggedIn"]:
             return "missing", "run `claude auth login`"
         method = payload.get("authMethod")
