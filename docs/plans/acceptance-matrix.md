@@ -368,15 +368,16 @@ uv run pytest -q tests/unit/providers/cli tests/contract/providers/test_cli_prov
                  tests/contract/providers/test_cli_provider_runtimes.py \
                  tests/contract/capabilities/test_cli_providers.py \
                  tests/e2e/test_cli_providers_commands.py tests/e2e/test_cli_capability_parity.py
+# the browser half, once the Models & providers settings section has landed:
 pnpm --filter research-harness-web test -- src/app/settings
 ```
 
 | # | criterion | what demonstrates it | where it lives | holds today |
 |---|---|---|---|---|
-| 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` reports `9bb4a7d66d31a4bb7a678a93c6940d3677774e51 open-design`; the shipped registry imports and orders itself with the submodule absent, so nothing under `src/` reads it | `open-design/` (submodule); `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
+| 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` reports `-9bb4a7d66d31a4bb7a678a93c6940d3677774e51 open-design` — the pin, with the leading `-` of a submodule this checkout never initialized; the shipped registry imports and orders itself, and no module under `src/` names the submodule | `open-design/` (submodule); `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
 | 2 | A fresh scan detects all seven runtimes independently, with normalized version/auth/model status | all seven are registered in display order; detection keeps registry order, isolates a runtime that raises, and normalizes each probe into one `CliRuntimeStatus`; the capability answers the same seven and edits nothing | `tests/unit/providers/cli/test_defs_others.py::test_all_seven_runtimes_are_registered_in_display_order`; `tests/unit/providers/cli/test_detection.py` (whole module); `tests/contract/capabilities/test_cli_providers.py::test_scan_lists_all_seven_runtimes_in_registry_order_and_edits_nothing` | holds |
 | 3 | Web and `research providers add` create the same validated entry | the capability writes exactly one validated `local_cli` entry; the terminal refuses an unroutable runtime and writes an available one; the settings screen posts the same request with the chosen model and reasoning | `tests/contract/capabilities/test_cli_providers.py::test_configure_writes_one_validated_entry`; `tests/e2e/test_cli_providers_commands.py::test_add_refuses_an_unavailable_runtime_and_writes_an_available_one`; `web/src/app/settings/settings.test.tsx` ("adds a provider with the chosen model and reasoning, after the egress warning") | holds on the Python side; the browser half lands with the settings section |
-| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | one real subscription-backed call per routable runtime, validated against the same response schema as an HTTP provider | `tests/contract/providers/test_live_cli_smoke.py` (opt-in, `RESEARCH_HARNESS_LIVE_CLI_TESTS=1`) | holds (opt-in live run) — Task 15 records the date and the versions |
+| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | one real subscription-backed call per routable runtime, validated against the same response schema as an HTTP provider | `tests/contract/providers/test_live_cli_smoke.py`, gated by `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` — neither is on the tree yet | not yet demonstrated: the live module and its gate variable arrive with Task 15, which records the run with its date and the CLI versions |
 | 5 | Existing commands select the CLI through `--provider`, with no workflow branch | the same workflow path selects a `local_cli` entry by name; no workflow or domain module knows the kind | `tests/e2e/test_cli_providers_commands.py::test_existing_workflow_commands_select_the_cli_entry_with_provider` | holds |
 | 6 | Research content is delivered through stdin/RPC, never argv | the prompt is written to the child's stdin and is absent from the recorded argv; every other runtime answers the same contract; the registry refuses a definition that could place research content in argv | `tests/contract/providers/test_cli_provider.py::test_research_content_travels_on_stdin_never_argv`; `tests/contract/providers/test_cli_provider_runtimes.py::test_every_other_runtime_answers_the_same_contract`; `tests/unit/providers/cli/test_registry.py::test_research_content_may_not_reach_argv` | holds |
 | 7 | A CLI provider is external egress unless local inference is positively established | declared capabilities are external, text-only, and structured; `unknown.external` is never classified local; a definition declaring a local egress host is refused; a configured entry appears in the catalog as external | `tests/contract/providers/test_cli_provider.py::test_capabilities_are_external_text_only_and_structured`; `tests/unit/providers/cli/test_types.py::test_the_unknown_external_host_is_never_local`; `tests/unit/providers/cli/test_registry.py::test_a_local_egress_host_is_refused`; `tests/contract/capabilities/test_cli_providers.py::test_a_configured_cli_entry_appears_in_the_catalog_as_external` | holds |
@@ -400,16 +401,21 @@ ADR-030; the researcher-facing text is
 half is [`docs/architecture/web.md`](../architecture/web.md).
 
 **Three things this table does not claim.** Criterion (4) is the only one that needs a real
-subscription login, so it reads `holds (opt-in live run)` rather than `holds`: the default
-suite never runs it, and Task 15 records the run with its date and the CLI versions. And
-five of the seven runtimes are detected but not routable in this release — Cursor Agent,
-Amp, DeepSeek Harness, and Pi have no documented bounded mode, and OpenCode's
+subscription login, and neither its module nor its gate variable is on this tree at all, so
+the row says *not yet demonstrated* rather than `holds`: Task 15 writes
+`tests/contract/providers/test_live_cli_smoke.py`, runs it behind
+`RESEARCH_HARNESS_LIVE_CLI_TESTS=1`, and records the date and the CLI versions.
+
+Second, five of the seven runtimes are detected but not routable in this release — Cursor
+Agent, Amp, DeepSeek Harness, and Pi have no documented bounded mode, and OpenCode's
 environment-injected posture is unproven until a version with recorded fixtures is verified
-— so (4) covers Codex CLI and Claude Code, which are the two runtimes the release
-routes. And the two rows that cite `web/src/app/settings/settings.test.tsx` cite a module
-being written as this matrix is compiled: the daemon side of (3) and (12) is green now,
-and the browser side is green when the *Models & providers* section lands — exactly how
-the four v1.1 Web halves above were recorded before they landed.
+— so (4) will cover Codex CLI and Claude Code, which are the two runtimes the release
+routes.
+
+Third, the two rows that cite `web/src/app/settings/settings.test.tsx` cite a module being
+written as this matrix is compiled: the daemon side of (3) and (12) is green now, and the
+browser side is green when the *Models & providers* section lands — exactly how the four
+v1.1 Web halves above were recorded before they landed.
 
 ## Open items
 

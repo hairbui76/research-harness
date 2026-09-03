@@ -1620,28 +1620,30 @@ This track turns the proven research core into the primary daily workspace descr
 ### Boundary requirements
 
 - A CLI is a model backend, never an agent: it does not drive the workflow, cannot accept Evidence, Claims, or Decisions, and cannot edit the project, run project commands, or choose unreviewed tools.
-- "Local" names where the process starts, not where inference happens. A CLI provider is external egress unless local inference is positively established; each definition declares a host or `unknown_external`, and `privacy.external_models: disabled` refuses it before it spawns.
+- "Local" names where the process starts, not where inference happens. A CLI provider is external egress unless local inference is positively established; each definition declares a host, or `unknown.external` when the CLI does not disclose one, and `privacy.external_models: disabled` refuses it before it spawns.
 - Bounded execution is native or nothing: a runtime is routable only when the installed version proves a no-tools, read-only posture through its own controls. There is no prompt-only safety fallback, and no full-agent bypass flag is copied into a definition.
 - Research content travels on stdin or the runtime's RPC channel, never argv, from an empty temporary working directory under an environment with provider API-key and unrelated cloud-credential variables removed.
 - One capability surface answers every client: `provider.cli.scan|configure|remove|test` is the only way Web or CLI learns availability or changes `research.yaml`, and no client recomputes a gate the daemon already decided.
 
 **Gate CLI-P:** each of the fifteen acceptance criteria in the design specification's §24 is demonstrated by a named test; five of the seven registered runtimes may be listed as detected-but-not-routable, provided each says which gate stopped it.
 
-> **Status 2026-09-04 — met, with one criterion resting on an opt-in live run.** Seven
-> runtimes are registered and detected; Codex CLI and Claude Code are routable, and the
-> other five report the gate that stops them. The clause-by-clause evidence is
+> **Status 2026-09-04 — ten of the fifteen criteria hold outright; five carry a pending
+> part.** Seven runtimes are registered and detected; Codex CLI and Claude Code are
+> routable, and the other five report the gate that stops them. The clause-by-clause evidence is
 > `docs/plans/acceptance-matrix.md` § *Subscription-backed local CLI providers*; the
 > decision is ADR-030 and the researcher-facing text is `docs/guide/providers.md`.
-> **Pending:** criterion (4)'s live module and the repository-wide secret scan belong to
-> the release task, and the *Models & providers* settings section is the browser half of
-> (3) and (12) — the daemon half of both is green now.
+> **Pending, and which rows:** (4) is not demonstrated at all yet — its live module and
+> the `RESEARCH_HARNESS_LIVE_CLI_TESTS` gate arrive with the release task, which also
+> supplies (14)'s gated module and (15)'s repository-wide secret scan. (3) and (12) hold
+> on the daemon side and gain their browser half with the *Models & providers* settings
+> section. The remaining ten hold outright.
 
 | § | criterion | demonstrated by | status |
 |---|---|---|---|
 | 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` shows `9bb4a7d…`; `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
 | 2 | A fresh scan detects all seven runtimes independently and normalizes their status | `test_defs_others.py::test_all_seven_runtimes_are_registered_in_display_order`; `tests/unit/providers/cli/test_detection.py`; `test_cli_providers.py::test_scan_lists_all_seven_runtimes_in_registry_order_and_edits_nothing` | holds |
 | 3 | Web and `research providers add` create the same validated entry | `test_cli_providers.py::test_configure_writes_one_validated_entry`; `test_cli_providers_commands.py::test_add_refuses_an_unavailable_runtime_and_writes_an_available_one`; `settings.test.tsx` ("adds a provider with the chosen model and reasoning, after the egress warning") | holds on the Python side; browser half with the settings section |
-| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | `tests/contract/providers/test_live_cli_smoke.py`, gated by `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` | holds (opt-in live run) — Task 15 records the date and versions |
+| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | `tests/contract/providers/test_live_cli_smoke.py`, gated by `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` — neither is on the tree yet | not yet demonstrated: the live module and its gate variable arrive with Task 15, which records the date and the versions |
 | 5 | Existing commands select the CLI through `--provider`, with no workflow branch | `test_cli_providers_commands.py::test_existing_workflow_commands_select_the_cli_entry_with_provider` | holds |
 | 6 | Research content is delivered through stdin/RPC, never argv | `test_cli_provider.py::test_research_content_travels_on_stdin_never_argv`; `test_cli_provider_runtimes.py::test_every_other_runtime_answers_the_same_contract`; `test_registry.py::test_research_content_may_not_reach_argv` | holds |
 | 7 | A CLI provider is external egress unless local inference is positively established | `test_cli_provider.py::test_capabilities_are_external_text_only_and_structured`; `test_types.py::test_the_unknown_external_host_is_never_local`; `test_registry.py::test_a_local_egress_host_is_refused`; `test_cli_providers.py::test_a_configured_cli_entry_appears_in_the_catalog_as_external` | holds |
