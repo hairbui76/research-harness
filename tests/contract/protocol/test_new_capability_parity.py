@@ -64,6 +64,10 @@ NEW_CAPABILITIES: dict[str, dict[str, Any]] = {
     # error — and answers it the same way to a Web client and to an agent host, which is
     # what lets either of them offer a model selector (v1.1 plan SS0.4).
     "provider.list": {},
+    # CLI providers §16. Detection is a read a host may make: the answer on a bare workspace
+    # is the seven supported runtimes, every one of them unavailable, because the fixture
+    # below empties `PATH` so no CLI on this workstation is ever probed by the suite.
+    "provider.cli.scan": {},
 }
 
 #: The mutations added for the clients. A host is refused all of them, identically.
@@ -105,6 +109,12 @@ NEW_MUTATIONS: dict[str, dict[str, Any]] = {
     "session.stop": {"run_id": "run_20260101T000000Z_deadbeef"},
     "session.retry": {"message": "M0001"},
     "session.promote": {"session": "CS0001", "message": "M0001", "target": "note"},
+    # CLI providers §16. Configuring a subscription-backed CLI, removing one, and spending a
+    # researcher's own subscription quota on a test call are all researcher acts: a host is
+    # refused all three, identically on both transports.
+    "provider.cli.configure": {"name": "x", "runtime": "codex"},
+    "provider.cli.remove": {"name": "x"},
+    "provider.cli.test": {"name": "x"},
 }
 
 ALL_NEW = sorted(
@@ -126,6 +136,19 @@ ALL_NEW = sorted(
         "context.get",
     }
 )
+
+
+@pytest.fixture
+def workspace(workspace: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """The shared workspace, with an empty `PATH` for the duration of the test.
+
+    `provider.cli.scan` probes whatever CLIs are on `PATH`, and a suite that spawned the
+    developer's own `codex` or `claude` would be neither hermetic nor quiet. With no `PATH`
+    every runtime resolves to "not installed", which is exactly the answer both transports
+    have to agree on.
+    """
+    monkeypatch.setenv("PATH", "")
+    return workspace
 
 
 def http(client: TestClient, name: str, request: dict[str, Any]) -> dict[str, Any]:
@@ -230,7 +253,12 @@ def test_the_new_mutations_are_marked_human_only_in_both_catalogs(
     descriptor = next(
         item for item in client.get("/capabilities").json()["capabilities"] if item["name"] == name
     )
-    assert spec.permission in {Permission.MUTATE, Permission.STAGE}
+    # Three ways to be the researcher's call: it mutates accepted state, it stages a
+    # proposal, it administers configuration — or it is a read that spends something of
+    # the researcher's (`provider.cli.test` spends subscription quota) and says so.
+    assert spec.permission in {Permission.MUTATE, Permission.STAGE, Permission.ADMIN} or (
+        spec.human_only
+    )
     assert descriptor["human_only"] is True
 
 
