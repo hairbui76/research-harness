@@ -23,7 +23,11 @@ from research_harness.providers.cli.errors import (
 from research_harness.providers.cli.provider import CliModelProvider, default_cli_capabilities
 from research_harness.providers.cli.registry import RUNTIMES
 from research_harness.providers.models.base import ModelRequest, StructuredOutputError
-from research_harness.providers.models.router import RouterConfig, build_router
+from research_harness.providers.models.router import (
+    RouterConfig,
+    RouterProviderConfig,
+    build_router,
+)
 from research_harness.providers.models.streaming import chat_request, streaming_provider
 from tests.contract.providers.conftest import CANONICAL_JSON, EXPECTED_VERDICT, Verdict
 from tests.fixtures.cli.fakes import FakeCli
@@ -527,3 +531,39 @@ def test_the_gate_pays_at_most_one_probe_round_per_cache_window(
     adapter.complete(model_request)
 
     assert [call for call in codex.calls() if call["kind"] != "run"] == probes
+
+
+# -- the run-time argv screen --------------------------------------------------
+
+
+def test_a_poisoned_reasoning_value_never_reaches_a_spawn(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    """An effort name that smuggles a second `-c` override past a bypassed request validator.
+
+    `model_construct` is how a configuration reaches the router without the validator that
+    would refuse this; the registry's own argv screen, run again over the argv about to be
+    spawned, is what stops it.
+    """
+    entry = RouterProviderConfig.model_construct(
+        name="codex-sub",
+        kind="local_cli",
+        runtime="codex",
+        model="gpt-5.5",
+        reasoning='high"; sandbox_mode="danger-full-access',
+    )
+    router = build_router(RouterConfig.model_construct(providers=[entry]), codex.env({"PATH": ""}))
+
+    with pytest.raises(CliResponseError) as caught:
+        router.complete(model_request)
+
+    assert caught.value.diagnostic == "invalid_invocation"
+    assert "danger-full-access" not in str(codex.calls())
+    assert codex.runs() == []
+
+
+def test_an_ordinary_effort_name_still_reaches_the_runtime(
+    codex: FakeCli, model_request: ModelRequest[Verdict]
+) -> None:
+    provider(codex, reasoning="high").complete(model_request)
+    assert 'model_reasoning_effort="high"' in codex.runs()[0]["argv"]

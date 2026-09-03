@@ -29,6 +29,8 @@ __all__ = [
     "RegistryError",
     "UnknownRuntimeError",
     "build_registry",
+    "check_args",
+    "check_reasoning",
     "get_runtime",
     "validate_definition",
 ]
@@ -164,6 +166,33 @@ def _check_args(name: str, args: object) -> None:
             raise RegistryError(f"runtime {name!r}: shell operator {item!r} in argv")
         if _PROMPT_MARKER in item:
             raise RegistryError(f"runtime {name!r}: prompt content in argv")
+
+
+def check_args(argv: Sequence[str], *, runtime: str) -> None:
+    """The same screen, over argv that is about to be spawned rather than a sample (spec §3).
+
+    Construction proves the *builder* is bounded for the sample invocations; this proves the
+    *result* is bounded for the one invocation at hand, after a configured model id and
+    effort name have been substituted into it. A value that reached the configuration
+    without passing its validator -- a `research.yaml` written by a tool, an entry built
+    with `model_construct` -- is caught here, one step before the process exists.
+    """
+    _check_args(runtime, tuple(argv))
+
+
+def check_reasoning(definition: CliRuntimeDef, reasoning: str | None) -> None:
+    """Refuse an effort name the runtime does not offer, naming the ones it does.
+
+    `None` is always allowed: it means "whatever the CLI is configured to use", and no
+    effort argument is built at all.
+    """
+    if reasoning is None or reasoning in definition.reasoning_choices:
+        return
+    offered = ", ".join(definition.reasoning_choices)
+    raise ValueError(
+        f"reasoning {reasoning!r} is not an effort name {definition.id!r} accepts "
+        f"({offered or 'this runtime accepts no reasoning value'})"
+    )
 
 
 def build_registry(definitions: Sequence[CliRuntimeDef]) -> Mapping[str, CliRuntimeDef]:

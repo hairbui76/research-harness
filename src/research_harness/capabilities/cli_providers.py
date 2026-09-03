@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from types import MappingProxyType
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.capabilities.dto import CapabilityRequest
@@ -32,7 +32,12 @@ from research_harness.privacy.policy import (
 from research_harness.privacy.traces import trace_writer_for
 from research_harness.providers.cli.detection import scan
 from research_harness.providers.cli.errors import redact
-from research_harness.providers.cli.registry import RUNTIMES, UnknownRuntimeError, get_runtime
+from research_harness.providers.cli.registry import (
+    RUNTIMES,
+    UnknownRuntimeError,
+    check_reasoning,
+    get_runtime,
+)
 from research_harness.providers.cli.types import CliRuntimeStatus, EgressKind, unavailable_reason
 from research_harness.providers.models.base import (
     InputEnvelope,
@@ -134,6 +139,21 @@ class ConfigureCliProviderRequest(CapabilityRequest):
     timeout_seconds: float | None = Field(default=None, gt=0)
     roles: list[str] | None = None
     enabled: bool = True
+
+    @model_validator(mode="after")
+    def _reasoning_is_one_this_runtime_offers(self) -> ConfigureCliProviderRequest:
+        """An effort name the runtime never accepts is a request error, not a run failure.
+
+        An *unknown* runtime is deliberately not this validator's business: the handler
+        already names it with the ids that exist, and answering the same question twice
+        would give a researcher two different errors for one typo.
+        """
+        try:
+            definition = get_runtime(self.runtime)
+        except UnknownRuntimeError:
+            return self
+        check_reasoning(definition, self.reasoning)
+        return self
 
 
 class CliProviderConfigured(BaseModel):

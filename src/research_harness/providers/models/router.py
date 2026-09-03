@@ -94,6 +94,13 @@ def _get_runtime(runtime: str) -> Any:
     return get_runtime(runtime)
 
 
+def _check_reasoning(definition: Any, reasoning: str | None) -> None:
+    """The registry's own effort-name check, imported lazily to keep the seam one-way."""
+    from research_harness.providers.cli.registry import check_reasoning
+
+    check_reasoning(definition, reasoning)
+
+
 def _runtime_ids() -> tuple[str, ...]:
     """Every runtime id the registry ships, for a configuration error message."""
     from research_harness.providers.cli.registry import RUNTIME_IDS
@@ -402,6 +409,7 @@ class RouterProviderConfig(BaseModel):
                     f"mode and cannot be configured; run `research providers scan` for the "
                     f"reason it is detected but never routed"
                 )
+            _check_reasoning(definition, self.reasoning)
         else:
             for field in ("runtime", "reasoning"):
                 if getattr(self, field) is not None:

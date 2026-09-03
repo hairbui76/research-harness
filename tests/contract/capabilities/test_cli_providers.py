@@ -13,6 +13,7 @@ from typing import Any
 
 import pytest
 import yaml
+from pydantic import ValidationError
 from starlette.testclient import TestClient
 
 from research_harness.capabilities.cli_providers import (
@@ -466,3 +467,17 @@ def test_configure_and_scan_answer_identically_over_the_daemon(
     assert [r["runtime"] for r in scanned["result"]["runtimes"]] == [
         r["runtime"] for r in direct["runtimes"]
     ]
+
+
+def test_configure_refuses_an_effort_name_the_runtime_does_not_offer() -> None:
+    """Refused as data, before a handler, an executable, or a probe is involved."""
+    with pytest.raises(ValidationError, match="low, medium, high, xhigh"):
+        ConfigureCliProviderRequest(name="c", runtime="codex", reasoning="turbo")
+    assert ConfigureCliProviderRequest(name="c", runtime="codex", reasoning="high").reasoning == (
+        "high"
+    )
+    assert ConfigureCliProviderRequest(name="c", runtime="codex").reasoning is None
+    # an unknown runtime is the handler's error to report, and stays exactly one error
+    assert ConfigureCliProviderRequest(name="c", runtime="nope", reasoning="turbo").runtime == (
+        "nope"
+    )

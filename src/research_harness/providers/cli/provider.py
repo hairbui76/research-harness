@@ -38,7 +38,7 @@ from research_harness.providers.cli.process import (
     ProcessTimeout,
 )
 from research_harness.providers.cli.prompt import render_chat_prompt, render_prompt
-from research_harness.providers.cli.registry import get_runtime
+from research_harness.providers.cli.registry import RegistryError, check_args, get_runtime
 from research_harness.providers.cli.transport import transport_for
 from research_harness.providers.cli.types import (
     DEFAULT_MODEL,
@@ -317,6 +317,7 @@ class CliModelProvider(ModelProvider):
                 schema_path=schema_path,
             )
             argv = (str(executable), *self.runtime.build_args(invocation))
+            self._screen(argv)
             env = bounded_environment(self.runtime, env_base, executable=executable)
             yield from self._drive(argv, env, cwd, prompt, invocation, collected)
         finally:
@@ -411,6 +412,24 @@ class CliModelProvider(ModelProvider):
         if self._availability is not None:
             return self._availability()
         return detect_cached(self.runtime, env=env)
+
+    def _screen(self, argv: tuple[str, ...]) -> None:
+        """The registry's argv screen, over the argv this request is about to spawn.
+
+        Registry construction screens what the builder produces for sample invocations; a
+        configured model id or effort name is substituted only here, so this is the one
+        moment the *actual* argv can be checked for a forbidden token, a shell operator, or
+        research content (spec §3, §12).
+        """
+        try:
+            check_args(argv, runtime=self.runtime.id)
+        except RegistryError as exc:
+            home = None if self._env is None else self._env.get("HOME")
+            raise CliResponseError(
+                f"{self._who()}: {redact(str(exc), home=home)}",
+                runtime=self.runtime.id,
+                diagnostic="invalid_invocation",
+            ) from exc
 
     def _unroutable(self, status: CliRuntimeStatus) -> Exception:
         """Refuse an unproven runtime in the scan's own words, naming the gate that stopped it.
