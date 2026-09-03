@@ -108,6 +108,35 @@ def test_classify_failure_maps_conditions_onto_provider_errors() -> None:
     )
 
 
+_UNSUPPORTED_MODEL = "The model `gpt-nope` does not exist or you do not have access to it."
+
+
+@pytest.mark.parametrize(
+    ("field", "text", "diagnostic"),
+    [
+        ("stderr_tail", _UNSUPPORTED_MODEL, "unsupported_model"),
+        ("stream_error", _UNSUPPORTED_MODEL, "unsupported_model"),
+        ("stderr_tail", "unknown model 'gpt-nope'", "unsupported_model"),
+        # The phrase says "you do not have access", which reads like an authentication
+        # problem and is not one: the login is fine, the model is not on it. `_AUTH` runs
+        # first, so this pair is what keeps the two apart.
+        ("stderr_tail", "error: not logged in, run codex login", "login_missing"),
+        ("stream_error", "Not logged in · Please run /login", "login_missing"),
+    ],
+)
+def test_the_model_and_the_login_are_told_apart_by_their_upstream_wording(
+    field: str, text: str, diagnostic: str
+) -> None:
+    """Codex's own "does not exist or you do not have access" is a model fault (spec §15)."""
+    error = classify_failure(
+        runtime="codex", model="gpt-nope", version="0.150.1", exit_code=1, **{field: text}
+    )
+    assert error.diagnostic == diagnostic  # type: ignore[attr-defined]
+    assert isinstance(
+        error, CliResponseError if diagnostic == "unsupported_model" else CliAuthError
+    )
+
+
 @pytest.mark.parametrize(
     ("anchor", "cut_at", "leaked"),
     [

@@ -243,17 +243,28 @@ class NativeStream:
         usage = Usage()
         stop_reason: str | None = None
         model = self._model
-        for delta in self._provider.stream(request):
-            text.append(delta.text)
-            if delta.usage is not None:
-                usage = delta.usage
-            stop_reason = delta.stop_reason or stop_reason
-            model = self._model or delta.model or model
-            yield (
-                delta
-                if not delta.final or self._model is None
-                else replace(delta, model=self._model)
-            )
+        inner = self._provider.stream(request)
+        # Closed explicitly when this generator is abandoned. Interruption is the whole
+        # point of streaming a turn, and an adapter that holds a resource for the call --
+        # an HTTP response, a CLI subprocess -- releases it in its own `finally`, which
+        # only runs if someone closes it. Left to the garbage collector, a cancelled
+        # conversation turn keeps a subprocess alive until the cycle detector next runs.
+        try:
+            for delta in inner:
+                text.append(delta.text)
+                if delta.usage is not None:
+                    usage = delta.usage
+                stop_reason = delta.stop_reason or stop_reason
+                model = self._model or delta.model or model
+                yield (
+                    delta
+                    if not delta.final or self._model is None
+                    else replace(delta, model=self._model)
+                )
+        finally:
+            close = getattr(inner, "close", None)
+            if callable(close):
+                close()
         # Only a stream that ran to the end is traced: an abandoned iterator never reaches
         # here, and a partial answer is recorded in the run, which is where an interrupted
         # turn belongs (conversation design SS8).
@@ -281,13 +292,20 @@ class NativeStream:
             request_fingerprint=request.fingerprint(),
             stop_reason=stop_reason,
         )
+        # A provider that carries runtime identity of its own (a CLI runtime, its protocol
+        # and the model it was asked for) states it under "cli", so a streamed turn is as
+        # reproducible as the completion path (CLI providers spec §19).
+        payload = trace_payload(request, response)
+        metadata = getattr(self._provider, "trace_metadata", None)
+        if callable(metadata):
+            payload = {**payload, "cli": metadata()}
         try:
             self._trace.record(
                 "completion",
                 provider=self.name,
                 model=response.model,
                 request_fingerprint=response.request_fingerprint,
-                payload=trace_payload(request, response),
+                payload=payload,
             )
         except Exception:
             logger.warning("could not write a %s stream trace", self.name, exc_info=True)
