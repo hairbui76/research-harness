@@ -3,8 +3,10 @@
 What demonstrates each acceptance behaviour, where it lives, and whether it holds today.
 Written for ROADMAP Tasks 17.1 and 17.2 and for Gate P17 ("all end-to-end invariants
 pass"), and extended for the conversation-first track's Gates DS and P18–P21
-([§ The v1.1 gates](#the-v11-gates-ds-and-p18p21)). Counts are the tests each module
-collects, including parametrized cases.
+([§ The v1.1 gates](#the-v11-gates-ds-and-p18p21)) and for the v1.1 follow-on's fifteen
+criteria ([§ Subscription-backed local CLI
+providers](#subscription-backed-local-cli-providers-spec-24)). Counts are the tests each
+module collects, including parametrized cases.
 
 Run the whole thing with:
 
@@ -352,6 +354,62 @@ all four landed the same day and the final gate ran the whole Web suite green
 surfaces' DTOs to the schema the daemon publishes (26 passed). None of this affects the
 Python gates: every clause above is demonstrated through the capability layer and the CLI,
 which is what the Web routes call.
+
+## Subscription-backed local CLI providers (spec §24)
+
+The v1.1 follow-on of `docs/superpowers/specs/2026-09-03-subscription-local-cli-providers-design.md`:
+a researcher already logged in to Codex CLI or Claude Code routes research work through
+that CLI, with no API key, under the same privacy policy, traces, and review gates
+(ADR-030). The spec states fifteen acceptance criteria; each one below names the test that
+demonstrates it. Run them with:
+
+```bash
+uv run pytest -q tests/unit/providers/cli tests/contract/providers/test_cli_provider.py \
+                 tests/contract/providers/test_cli_provider_runtimes.py \
+                 tests/contract/capabilities/test_cli_providers.py \
+                 tests/e2e/test_cli_providers_commands.py tests/e2e/test_cli_capability_parity.py
+pnpm --filter research-harness-web test -- src/app/settings
+```
+
+| # | criterion | what demonstrates it | where it lives | holds today |
+|---|---|---|---|---|
+| 1 | Open Design is a pinned submodule, not a runtime dependency | `git submodule status` reports `9bb4a7d66d31a4bb7a678a93c6940d3677774e51 open-design`; the shipped registry imports and orders itself with the submodule absent, so nothing under `src/` reads it | `open-design/` (submodule); `tests/unit/providers/cli/test_registry.py::test_the_shipped_registry_is_importable_and_ordered` | holds |
+| 2 | A fresh scan detects all seven runtimes independently, with normalized version/auth/model status | all seven are registered in display order; detection keeps registry order, isolates a runtime that raises, and normalizes each probe into one `CliRuntimeStatus`; the capability answers the same seven and edits nothing | `tests/unit/providers/cli/test_defs_others.py::test_all_seven_runtimes_are_registered_in_display_order`; `tests/unit/providers/cli/test_detection.py` (whole module); `tests/contract/capabilities/test_cli_providers.py::test_scan_lists_all_seven_runtimes_in_registry_order_and_edits_nothing` | holds |
+| 3 | Web and `research providers add` create the same validated entry | the capability writes exactly one validated `local_cli` entry; the terminal refuses an unroutable runtime and writes an available one; the settings screen posts the same request with the chosen model and reasoning | `tests/contract/capabilities/test_cli_providers.py::test_configure_writes_one_validated_entry`; `tests/e2e/test_cli_providers_commands.py::test_add_refuses_an_unavailable_runtime_and_writes_an_available_one`; `web/src/app/settings/settings.test.tsx` ("adds a provider with the chosen model and reasoning, after the egress warning") | holds on the Python side; the browser half lands with the settings section |
+| 4 | A logged-in user with no API key completes a schema-validated request through each routable CLI | one real subscription-backed call per routable runtime, validated against the same response schema as an HTTP provider | `tests/contract/providers/test_live_cli_smoke.py` (opt-in, `RESEARCH_HARNESS_LIVE_CLI_TESTS=1`) | holds (opt-in live run) — Task 15 records the date and the versions |
+| 5 | Existing commands select the CLI through `--provider`, with no workflow branch | the same workflow path selects a `local_cli` entry by name; no workflow or domain module knows the kind | `tests/e2e/test_cli_providers_commands.py::test_existing_workflow_commands_select_the_cli_entry_with_provider` | holds |
+| 6 | Research content is delivered through stdin/RPC, never argv | the prompt is written to the child's stdin and is absent from the recorded argv; every other runtime answers the same contract; the registry refuses a definition that could place research content in argv | `tests/contract/providers/test_cli_provider.py::test_research_content_travels_on_stdin_never_argv`; `tests/contract/providers/test_cli_provider_runtimes.py::test_every_other_runtime_answers_the_same_contract`; `tests/unit/providers/cli/test_registry.py::test_research_content_may_not_reach_argv` | holds |
+| 7 | A CLI provider is external egress unless local inference is positively established | declared capabilities are external, text-only, and structured; `unknown.external` is never classified local; a definition declaring a local egress host is refused; a configured entry appears in the catalog as external | `tests/contract/providers/test_cli_provider.py::test_capabilities_are_external_text_only_and_structured`; `tests/unit/providers/cli/test_types.py::test_the_unknown_external_host_is_never_local`; `tests/unit/providers/cli/test_registry.py::test_a_local_egress_host_is_refused`; `tests/contract/capabilities/test_cli_providers.py::test_a_configured_cli_entry_appears_in_the_catalog_as_external` | holds |
+| 8 | The project privacy policy prevents the process from spawning | `privacy.external_models: disabled` refuses the request before any process exists, on the provider path and on the capability path alike | `tests/contract/providers/test_cli_provider.py::test_the_privacy_policy_refuses_before_any_process_is_spawned`; `tests/contract/capabilities/test_cli_providers.py::test_the_test_call_is_refused_by_the_policy_before_any_spawn` | holds |
+| 9 | The runtime cannot edit files or run project tools; a tool/file-write event fails the request | a tool event cancels the process and fails as `bounded_authority_violation`, for the reference runtime and for every other one; a bypass flag anywhere in a definition's argv is refused at registry construction | `tests/contract/providers/test_cli_provider.py::test_a_tool_event_cancels_the_process_and_is_a_bounded_authority_violation`; `tests/contract/providers/test_cli_provider_runtimes.py::test_every_other_runtime_fails_on_a_tool_event`; `tests/unit/providers/cli/test_registry.py::test_a_bypass_flag_anywhere_in_argv_is_refused` | holds |
+| 10 | Invalid, partial, or schema-incompatible output never reaches staging or accepted state | invalid JSON fails through the same structured-output path an HTTP provider uses, and a schema violation returns no partial object | `tests/contract/providers/test_cli_provider.py::test_invalid_json_fails_through_the_shared_structured_output_path` and `::test_a_schema_violation_never_returns_a_partial_object` | holds |
+| 11 | Cancellation and timeout terminate the whole process tree | cancel kills grandchildren, exiting stays bounded when a grandchild inherits the pipes, and abandoning the stream — directly or through the wrapper — cancels the process | `tests/unit/providers/cli/test_process.py::test_cancel_terminates_grandchildren` and `::test_exiting_is_bounded_when_a_grandchild_inherits_the_pipes`; `tests/contract/providers/test_cli_provider.py::test_abandoning_the_stream_cancels_the_process` and `::test_abandoning_the_stream_through_the_wrapper_also_cancels_the_process` | holds |
+| 12 | Web and CLI display identical availability and failure reasons from shared capabilities | configure and scan answer identically in process and over the daemon; the scan view and the catalog agree about a refused entry; the terminal prints every runtime with its state; the settings screen renders the daemon's own words | `tests/contract/capabilities/test_cli_providers.py::test_configure_and_scan_answer_identically_over_the_daemon` and `::test_the_scan_view_and_the_catalog_agree_about_a_refused_entry`; `tests/e2e/test_cli_providers_commands.py::test_scan_prints_every_runtime_with_its_state`; `web/src/app/settings/settings.test.tsx` ("renders the daemon states …") | holds on the Python side; the browser half lands with the settings section |
+| 13 | Existing HTTP, local-server, and scripted providers pass their contract and integration tests unchanged | the pre-existing provider contract, native-streaming, and provider-independence modules are untouched by this work and green | `tests/contract/providers/test_model_contract.py`, `tests/contract/providers/test_native_streaming.py`, `tests/e2e/invariants/test_a_provider_independence.py` — unchanged; the wave gate ran the full suite at **4250 passed / 40 skipped** on the tree before Tasks 8–13 | holds; Task 15 re-runs the full suite |
+| 14 | Default CI needs no installed CLI, no login, no key, and no network | every default test drives `tests/fixtures/cli/fakes.py` — a fake executable replaying sanitized fixtures — instead of a real binary; the capability-parity test empties `PATH`, so no CLI on the developer's own workstation is ever probed; the live test is gated by an environment variable | `tests/fixtures/cli/fakes.py`; `tests/contract/protocol/test_new_capability_parity.py` (sets `PATH` to `""`); `RESEARCH_HARNESS_LIVE_CLI_TESTS=1` gates `tests/contract/providers/test_live_cli_smoke.py` | holds for the default suite; the gate variable and the live module arrive with Task 15 |
+| 15 | Logs, traces, fixtures, configuration, and UI contain no credential material | an error carries the runtime identity and a next action but no secret, including a secret straddling the stderr truncation boundary; a diagnostic carries neither a home path nor a token; a failed `test` reports the failure without one | `tests/unit/providers/cli/test_errors.py::test_messages_carry_identity_and_a_next_action_but_no_secret` and `::test_a_secret_straddling_the_stderr_truncation_boundary_is_still_redacted`; `tests/unit/providers/cli/test_detection.py::test_a_diagnostic_never_carries_a_home_path_or_a_token`; `tests/contract/capabilities/test_cli_providers.py::test_the_test_call_reports_a_failure_without_a_secret` | holds; Task 15 adds the repository-wide secret scan |
+
+Supporting: `tests/unit/providers/cli/` (142 tests at the wave gate);
+`tests/contract/providers/test_cli_provider.py` and `test_cli_provider_runtimes.py`, inside
+the `tests/contract/providers` run that reported 226 passed and 3 skipped — the skips are
+the pre-existing live-provider smokes; `tests/contract/capabilities/test_cli_providers.py`
+and `tests/e2e/test_cli_providers_commands.py`, inside the 348 that Task 11's gate ran
+green; and `web/src/app/settings/{settings.test.tsx,mappers.test.ts}` on the browser side.
+ADR-030; the researcher-facing text is
+[the providers guide](../guide/providers.md#subscription-backed-local-clis) and the cockpit
+half is [`docs/architecture/web.md`](../architecture/web.md).
+
+**Three things this table does not claim.** Criterion (4) is the only one that needs a real
+subscription login, so it reads `holds (opt-in live run)` rather than `holds`: the default
+suite never runs it, and Task 15 records the run with its date and the CLI versions. And
+five of the seven runtimes are detected but not routable in this release — Cursor Agent,
+Amp, DeepSeek Harness, and Pi have no documented bounded mode, and OpenCode's
+environment-injected posture is unproven until a version with recorded fixtures is verified
+— so (4) covers Codex CLI and Claude Code, which are the two runtimes the release
+routes. And the two rows that cite `web/src/app/settings/settings.test.tsx` cite a module
+being written as this matrix is compiled: the daemon side of (3) and (12) is green now,
+and the browser side is green when the *Models & providers* section lands — exactly how
+the four v1.1 Web halves above were recorded before they landed.
 
 ## Open items
 

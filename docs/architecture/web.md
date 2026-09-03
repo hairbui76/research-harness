@@ -200,6 +200,51 @@ literals; a genuine visualisation case annotates the line with `/* raw-colour-ok
 runs inside `pnpm --filter @research-harness/design lint`. `web/src/styles.css` reads
 `--rh-*` tokens only.
 
+### Settings → Models & providers
+
+The shell's Settings dialog gained a second tab beside theme and density
+(`src/app/settings/`). It is where a researcher sees which model providers this project
+has, and — for a subscription-backed local CLI — adds one. It is a rendering of daemon
+answers and nothing else: no binary is run here, no availability is decided here, and no
+gate is recomputed here (ADR-030).
+
+**Two inner tabs.** *Local CLIs* opens first and calls `provider.cli.scan` on mount and
+again, with `{ rescan: true }`, on **Rescan**; *API providers* calls `provider.list` and
+lists the configured HTTP entries with the egress class each one declares. The three
+controls on a runtime card are the other three capabilities: **Add provider** /
+**Update provider** posts `provider.cli.configure`, **Remove** posts
+`provider.cli.remove`, and **Test** posts `provider.cli.test` and renders the report it
+answers with — the latency on success, the message and the error code on failure, and
+never the process output.
+
+**The daemon decides routability; the card renders it.** `CliRuntimeStatus` carries
+`routable` and `unavailable_reason` as server-computed fields, so the Add control is
+disabled exactly when `routable` is false and the card repeats `unavailable_reason`
+verbatim as the reason. Five of the seven runtimes are unroutable in this release and each
+says which gate stopped it: Cursor Agent, Amp, DeepSeek Harness and Pi have no bounded
+mode at all, and OpenCode's environment-injected posture is unproven until a version with
+recorded fixtures is verified. The four badges beside a runtime's name — installed, login,
+bounded mode, compatibility — are the daemon's own words with a tone, never a client
+verdict: `mappers.ts` maps a state to a `Badge`, it does not derive one.
+
+**The egress sentence is the daemon's.** The paragraph above the list is
+`CliScanReport.notice` rendered as-is, and each card repeats the destination from
+`egress_host`, or says the CLI does not disclose one. A local process is not local
+inference, and the screen that offers to add one is where that has to be said.
+
+**An agent host sees it read-only.** `provider.cli.configure`, `remove`, and `test` are
+`human_only`, so a window with no local token has all three controls disabled with the
+reason spelled out; only `provider.cli.scan` and `provider.list` answer it. The client
+does not hide the screen — an agent may read what is configured, and only the researcher
+may change it, which is ADR-009's split applied to provider configuration.
+
+`settings.test.tsx` and `mappers.test.ts` cover this from the browser side: both tabs and
+their keyboard order, the loading and empty states, a failed scan that keeps **Rescan**,
+the daemon's own states rendered ("renders the daemon states: logged out, unsafe, version
+warning, with its own words"), the add path with a model and a reasoning level ("adds a
+provider with the chosen model and reasoning, after the egress warning"), test success and
+failure, removal, and the read-only window.
+
 ## The conversation workspace
 
 `/` is the screen a researcher starts on (`src/views/conversation/`). It is the
@@ -686,6 +731,12 @@ compiler's own output rather than as a second call. **Revalidate anchors** calls
 `manuscript.revalidate`, which records the verdicts — a mutation, and human-only, because a
 reworded sentence going stale is a change to accepted state (ADR-008); the control is
 disabled with the reason for an agent host.
+
+**Models and providers** is the Settings dialog above. `provider.list` answers the API
+tab, and `provider.cli.scan`, `provider.cli.configure`, `provider.cli.remove`, and
+`provider.cli.test` answer the Local CLIs tab. Only the first two are open to an agent
+host; the three that change `research.yaml` or spawn a process are `human_only`, and the
+cockpit disables them with the reason rather than hiding the screen.
 
 **Claim coverage** is rendered from the `Coverage` the Claim records — examined of relevant,
 unresolved, overturn risk, and the `SearchRun`s it rests on. `claim.update_coverage` writes
