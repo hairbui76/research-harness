@@ -201,7 +201,9 @@ def _model_entry(
     provider_config: RouterProviderConfig, policy: EgressPolicy, env: Mapping[str, str]
 ) -> EgressEntry:
     egress = entry_capabilities(provider_config).egress
-    key_env = provider_config.api_key_env or MODEL_KEY_ENV_VARS[provider_config.kind]
+    # `.get`, not `[]`: a `local_cli` entry reads no credential of its own -- it borrows the
+    # CLI's existing login -- so it has no row in the table and discloses `key_env=None`.
+    key_env = provider_config.api_key_env or MODEL_KEY_ENV_VARS.get(provider_config.kind)
     return _entry(
         provider=provider_config.name,
         kind="model",

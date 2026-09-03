@@ -76,13 +76,29 @@ from research_harness.providers.models.openai_provider import (
     default_openai_capabilities,
 )
 
-ProviderKind = Literal["openai", "anthropic", "local_openai_compatible"]
+ProviderKind = Literal["openai", "anthropic", "local_openai_compatible", "local_cli"]
 
 _DEFAULT_BASE_URLS: dict[ProviderKind, str] = {
     "openai": OPENAI_BASE_URL,
     "anthropic": ANTHROPIC_BASE_URL,
     "local_openai_compatible": LOCAL_BASE_URL,
 }
+"""`local_cli` is absent on purpose: a CLI entry has no endpoint of its own to configure,
+and `entry_base_url` answers `""` for it before this table is consulted."""
+
+
+def _get_runtime(runtime: str) -> Any:
+    """The CLI runtime definition, imported lazily to keep the seam one-way."""
+    from research_harness.providers.cli.registry import get_runtime
+
+    return get_runtime(runtime)
+
+
+def _runtime_ids() -> tuple[str, ...]:
+    """Every runtime id the registry ships, for a configuration error message."""
+    from research_harness.providers.cli.registry import RUNTIME_IDS
+
+    return RUNTIME_IDS
 
 
 class NoCapableProviderError(ProviderError):
@@ -354,6 +370,33 @@ class RouterProviderConfig(BaseModel):
     timeout_seconds: float | None = Field(default=None, gt=0)
     capabilities: CapabilityOverrides | None = None
     enabled: bool = True
+    runtime: str | None = None
+    """`kind: local_cli` only: the runtime id (`codex`, `claude`, ...) from the CLI registry."""
+    reasoning: str | None = None
+    """`kind: local_cli` only: the runtime's own effort name to send on every request."""
+
+    @model_validator(mode="after")
+    def _cli_fields_match_the_kind(self) -> RouterProviderConfig:
+        if self.kind == "local_cli":
+            if not self.runtime:
+                raise ValueError(
+                    "runtime is required for kind local_cli (one of: "
+                    + ", ".join(_runtime_ids())
+                    + ")"
+                )
+            for field in ("base_url", "api_key_env"):
+                if getattr(self, field) is not None:
+                    raise ValueError(
+                        f"{field} is not allowed for kind local_cli: "
+                        f"a CLI provider uses the CLI's own login"
+                    )
+            try:
+                _get_runtime(self.runtime)
+            except KeyError as exc:
+                raise ValueError(str(exc)) from exc
+        elif self.runtime is not None or self.reasoning is not None:
+            raise ValueError("runtime is only for kind local_cli")
+        return self
 
     @model_validator(mode="before")
     @classmethod
@@ -405,8 +448,28 @@ def _build_entry(
     env: Mapping[str, str],
     transport: httpx.BaseTransport | None,
 ) -> ProviderEntry:
-    base_url = entry_base_url(provider_config)
     capabilities = entry_capabilities(provider_config)
+    if provider_config.kind == "local_cli":
+        from research_harness.providers.cli.provider import CliModelProvider
+
+        assert provider_config.runtime is not None
+        cli = CliModelProvider(
+            provider_config.runtime,
+            provider_config.model,
+            reasoning=provider_config.reasoning,
+            timeout=provider_config.timeout_seconds or 300.0,
+            capabilities=capabilities,
+            env=env,
+        )
+        return ProviderEntry(
+            provider=cli,
+            model=provider_config.model,
+            priority=provider_config.priority,
+            roles=set(provider_config.roles) if provider_config.roles is not None else None,
+            tags={provider_config.name, *provider_config.tags},
+        )
+
+    base_url = entry_base_url(provider_config)
     api_key = env.get(provider_config.api_key_env) if provider_config.api_key_env else None
     kwargs: dict[str, Any] = {
         "base_url": base_url,
@@ -436,7 +499,13 @@ def _build_entry(
 
 
 def entry_base_url(provider_config: RouterProviderConfig) -> str:
-    """The endpoint an entry talks to: its own `base_url`, else the adapter default."""
+    """The endpoint an entry talks to: its own `base_url`, else the adapter default.
+
+    A CLI entry has none: the harness starts a local process, and where *that* sends the
+    request is the runtime's own business, declared as an egress host rather than a URL.
+    """
+    if provider_config.kind == "local_cli":
+        return ""
     return provider_config.base_url or _DEFAULT_BASE_URLS[provider_config.kind]
 
 
@@ -446,16 +515,20 @@ def entry_capabilities(provider_config: RouterProviderConfig) -> ProviderCapabil
     Lets the egress report state what an entry would send without opening a client or
     resolving a credential.
     """
-    return _merge_capabilities(
-        _default_capabilities(provider_config.kind, entry_base_url(provider_config)),
-        provider_config.capabilities,
-    )
+    return _merge_capabilities(_default_capabilities(provider_config), provider_config.capabilities)
 
 
-def _default_capabilities(kind: ProviderKind, base_url: str) -> ProviderCapabilities:
-    if kind == "openai":
+def _default_capabilities(provider_config: RouterProviderConfig) -> ProviderCapabilities:
+    if provider_config.kind == "local_cli":
+        from research_harness.providers.cli.provider import default_cli_capabilities
+
+        return default_cli_capabilities(
+            _get_runtime(provider_config.runtime or ""), provider_config.model
+        )
+    base_url = entry_base_url(provider_config)
+    if provider_config.kind == "openai":
         return default_openai_capabilities(base_url)
-    if kind == "anthropic":
+    if provider_config.kind == "anthropic":
         return default_anthropic_capabilities(base_url)
     return default_local_capabilities(base_url)
 
