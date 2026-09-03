@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from types import MappingProxyType
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.capabilities.dto import CapabilityRequest
@@ -250,6 +250,30 @@ def _cli_entries(ctx: CapabilityContext) -> list[RouterProviderConfig]:
     return [item for item in config.providers if item.kind == "local_cli"]
 
 
+def _schema_mismatch(exc: StructuredOutputError) -> str:
+    """Why the reply was rejected, in terms of *our* schema — never the reply itself.
+
+    Pydantic renders a validation error with the offending input inline, and on a rejected
+    reply both the values and the extra field names in it are the model's own answer. This
+    report is read in a terminal, in the Web settings panel, and by an MCP host, so it says
+    which of the requested fields were wrong and why; the answer stays in the trace, where
+    the privacy policy governs how long it is kept (spec §19).
+    """
+    wanted = tuple(CliProbeReply.model_fields)
+    cause = exc.__cause__
+    if isinstance(cause, ValidationError):
+        reasons = sorted(
+            {
+                f"{error['loc'][0]}: {error['msg']}"
+                for error in cause.errors()
+                if error["loc"] and error["loc"][0] in wanted
+            }
+        )
+        if reasons:
+            return "; ".join(reasons)
+    return f"expected an object with {', '.join(wanted)}"
+
+
 # -- handlers ------------------------------------------------------------------
 
 
@@ -397,7 +421,7 @@ def test_cli_provider(
             **base,
             ok=False,
             message=(
-                f"the runtime answered, but not with the requested object: {redact(exc.message)}"
+                "the runtime answered, but not with the requested object: " + _schema_mismatch(exc)
             ),
             diagnostic="structured_output",
         )
