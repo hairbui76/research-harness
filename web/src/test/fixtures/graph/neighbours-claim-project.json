@@ -1,0 +1,129 @@
+{
+  "origin": {
+    "id": "C0001",
+    "kind": "claim",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "Batching reduces tail latency across the corpus",
+    "text": "Batching reduces tail latency across the corpus",
+    "source": "claims/C0001.yaml",
+    "fingerprint": null,
+    "metadata": {}
+  },
+  "neighbours": [
+    {
+      "node": {
+        "id": "E0482",
+        "kind": "evidence",
+        "authority": "accepted",
+        "visibility": "project",
+        "label": "a nine percent drop in p99 latency under batching",
+        "text": "a nine percent drop in p99 latency under batching",
+        "source": "evidence/E0482.yaml",
+        "fingerprint": null,
+        "metadata": {
+          "work": "W0017",
+          "artifact": "A0017-3"
+        }
+      },
+      "edge": {
+        "from_id": "E0482",
+        "to_id": "C0001",
+        "kind": "supports",
+        "origin": "accepted",
+        "authority": "accepted",
+        "status": "accepted",
+        "source": "claims/C0001.yaml",
+        "metadata": {}
+      },
+      "direction": "in",
+      "hops": 1
+    },
+    {
+      "node": {
+        "id": "E0555",
+        "kind": "evidence",
+        "authority": "accepted",
+        "visibility": "project",
+        "label": "no measurable change in p99 on the smaller cluster",
+        "text": "no measurable change in p99 on the smaller cluster",
+        "source": "evidence/E0555.yaml",
+        "fingerprint": null,
+        "metadata": {
+          "work": "W0021",
+          "artifact": "A0021-1"
+        }
+      },
+      "edge": {
+        "from_id": "E0555",
+        "to_id": "C0001",
+        "kind": "contradicts",
+        "origin": "model_proposed",
+        "authority": "candidate",
+        "status": "staged",
+        "source": "candidates/RC0004.yaml",
+        "metadata": {}
+      },
+      "direction": "in",
+      "hops": 1
+    },
+    {
+      "node": {
+        "id": "E0500",
+        "kind": "evidence",
+        "authority": "stale",
+        "visibility": "project",
+        "label": "throughput rose by four percent",
+        "text": "throughput rose by four percent",
+        "source": "evidence/E0500.yaml",
+        "fingerprint": null,
+        "metadata": {
+          "work": "W0017"
+        }
+      },
+      "edge": {
+        "from_id": "E0500",
+        "to_id": "C0001",
+        "kind": "qualifies",
+        "origin": "accepted",
+        "authority": "stale",
+        "status": "accepted",
+        "source": "claims/C0001.yaml",
+        "metadata": {}
+      },
+      "direction": "in",
+      "hops": 1
+    },
+    {
+      "node": {
+        "id": "M0031",
+        "kind": "message",
+        "authority": "private",
+        "visibility": "project",
+        "label": "The batching claim came up in the reading group session",
+        "text": "The batching claim came up in the reading group session",
+        "source": "conversations/CS0003/messages.jsonl",
+        "fingerprint": null,
+        "metadata": {
+          "session": "CS0003",
+          "role": "user"
+        }
+      },
+      "edge": {
+        "from_id": "M0031",
+        "to_id": "C0001",
+        "kind": "mentioned_in",
+        "origin": "structural",
+        "authority": "private",
+        "status": "",
+        "source": "conversations/CS0003/messages.jsonl",
+        "metadata": {
+          "session": "CS0003",
+          "role": "user"
+        }
+      },
+      "direction": "in",
+      "hops": 1
+    }
+  ]
+}

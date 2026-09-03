@@ -1,0 +1,25 @@
+{
+  "reference": "rh://session/CS0001?message=M9999",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "private",
+  "visibility": "private",
+  "fresh": false,
+  "link": "rh://session/CS0001?message=M9999",
+  "node": {
+    "id": "CS0001",
+    "kind": "session",
+    "authority": "private",
+    "visibility": "private",
+    "label": "Latency study",
+    "text": "Latency study",
+    "source": "conversations/CS0001/session.yaml",
+    "fingerprint": null,
+    "metadata": {
+      "messages": 3
+    }
+  },
+  "problems": [
+    "no message M9999 in session CS0001"
+  ]
+}

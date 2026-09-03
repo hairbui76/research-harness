@@ -1,0 +1,13 @@
+{
+  "available": false,
+  "exists": false,
+  "database": ".research/graph/research-graph.db",
+  "schema_version": null,
+  "built_at": null,
+  "canonical_digest": null,
+  "event_cursor": null,
+  "nodes": 0,
+  "edges": 0,
+  "sources": 0,
+  "rebuilding": false
+}

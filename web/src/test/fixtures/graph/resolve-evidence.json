@@ -1,0 +1,24 @@
+{
+  "reference": "@E0482",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "accepted",
+  "visibility": "project",
+  "fresh": true,
+  "link": "rh://evidence/E0482",
+  "node": {
+    "id": "E0482",
+    "kind": "evidence",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "a nine percent drop in p99 latency under batching",
+    "text": "a nine percent drop in p99 latency under batching",
+    "source": "evidence/E0482.yaml",
+    "fingerprint": null,
+    "metadata": {
+      "work": "W0017",
+      "artifact": "A0017-3"
+    }
+  },
+  "problems": []
+}

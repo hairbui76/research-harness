@@ -1,0 +1,61 @@
+/*
+ * Layout for the graph panes in the inspector, and nothing else.
+ *
+ * The Design System owns every surface, colour and control here — `EntityRef`,
+ * `AuthorityBadge`, `ProvenancePath`, `SourceAnchor`, `ResearchState`. What is left is the
+ * arrangement of them inside a narrow pane. Semantic `--rh-*` tokens only:
+ * `check-tokens.mjs` scans `web/src` and fails the lint on a colour literal.
+ */
+
+.rh-web-graph {
+  min-inline-size: 0;
+}
+
+/* A relation heading: the researcher's words, then the edge kind it came from. */
+.rh-web-graph__relation {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
+.rh-web-graph__relation > code {
+  font-size: var(--rh-type-body-sm-size);
+}
+
+/* The edge's own authority sits after the chip, never inside it. */
+.rh-web-graph__authority {
+  gap: var(--rh-space-1);
+}
+
+/* The draft's flagged references, above the composer and never over it. */
+.rh-web-graph__marks {
+  flex: 0 0 auto;
+}
+
+/* The resolver's sentences, verbatim, under the chip they are about. */
+.rh-web-graph__problems {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+/*
+ * A refused deep link is a strip above the transcript, not a dialog over it.
+ *
+ * The frame keeps the transcript filling whatever is left: it is a flex column, so the
+ * notice takes the height it needs and `.rh-web-transcript` — which already carries
+ * `min-block-size: 0` — shrinks to fit rather than pushing the composer off the screen.
+ */
+.rh-web-graph-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.rh-web-graph__deep-link {
+  flex: 0 0 auto;
+}

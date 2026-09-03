@@ -1,0 +1,13 @@
+{
+  "reference": "@E9999",
+  "project": "tail-latency",
+  "exists": false,
+  "authority": "candidate",
+  "visibility": "private",
+  "fresh": false,
+  "link": null,
+  "node": null,
+  "problems": [
+    "nothing named '@E9999' is projected; the graph may be absent or rebuilding, in which case read the canonical file directly"
+  ]
+}

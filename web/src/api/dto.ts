@@ -1109,3 +1109,393 @@ export interface ContextPreviewRequest {
  * `ManuscriptWorkspaceCapability` did for P21.
  */
 export type ConversationReadCapability = 'context.get' | 'provider.list';
+
+// ---------------------------------------------------------------------------
+// attachments (P19)
+// ---------------------------------------------------------------------------
+//
+// Hand-declared, like the two sections above: `attachment.*` answers through
+// `POST /capabilities/<name>`, so none of these shapes is in `web/openapi.json`. They
+// mirror `capabilities/attachments.py` field for field — the response models there are
+// flat projections rather than embedded domain objects, which is why `AttachmentView` is
+// not `SessionAttachmentRecord`: it carries no `schema_version` and no `provenance`.
+//
+// The one non-capability write in the whole product is the byte route these types serve
+// (`POST /sessions/{id}/attachments`, v1.1 plan §0.4). It writes session-only bytes and
+// creates no Work, Version, Artifact or Evidence; `attachment.save_to_corpus` is the only
+// thing that gives an attachment a corpus identity, and it is an explicit, separate act.
+
+/** `conversation/attachments.py::SendDisposition` — what happens to one file on a send. */
+export type AttachmentDisposition = 'sent' | 'converted' | 'omitted';
+
+/** `conversation/promotion_corpus.py::IdentityChoice`. `undecided` needs the researcher. */
+export type AttachmentIdentityChoice =
+  | 'existing_artifact'
+  | 'existing_version'
+  | 'existing_work'
+  | 'new_work'
+  | 'undecided';
+
+/** `domain/enums.py::IdentityResolutionOutcome`. */
+export type IdentityResolutionOutcomeName =
+  | 'same_artifact'
+  | 'same_version'
+  | 'same_work'
+  | 'distinct_work'
+  | 'unresolved';
+
+/** `ingest/service.py::CreatedKind`. `nothing` is the idempotent re-save. */
+export type AttachmentCreatedKind = 'nothing' | 'artifact' | 'version' | 'work';
+
+/**
+ * `capabilities/attachments.py::AttachmentView` — one session attachment, flat.
+ *
+ * Returned by the byte route and by every `attachment.*` capability that touches one file.
+ * `SessionAttachmentRecord` (the domain object the transcript embeds) is a superset of it,
+ * so a transcript record is usable anywhere this type is expected.
+ */
+export interface AttachmentView {
+  id: string;
+  session: string;
+  state: SessionAttachmentState;
+  filename: string;
+  media_type: string;
+  size_bytes: number;
+  content_hash?: string | null;
+  page_count?: number | null;
+  description?: string | null;
+  visibility: SessionVisibility;
+  failure_reason?: string | null;
+  work?: string | null;
+  version?: string | null;
+  artifact?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+/** `attachment.remove`: what was deleted. Session-only bytes; the corpus is untouched. */
+export interface AttachmentRemoved {
+  session: string;
+  attachment: string;
+  removed: boolean;
+}
+
+/**
+ * One attachment's verdict for one model.
+ *
+ * `ok` answers "does this item let the send proceed", which is not "does it travel": a
+ * `failed` attachment is omitted and still `ok` because it was never ready, while a
+ * *ready* attachment the model cannot take is omitted and **not** ok — dropping that one
+ * silently is the failure the attachments design §5 forbids.
+ */
+export interface AttachmentSendItem {
+  attachment: string;
+  filename: string;
+  media_type: string;
+  size_bytes: number;
+  state: SessionAttachmentState;
+  disposition: AttachmentDisposition;
+  ok: boolean;
+  reason?: string | null;
+  omission?: OmissionReasonName | null;
+  suggested_model?: string | null;
+  page_count?: number | null;
+}
+
+/** `attachment.check_send`: the per-item verdict, and whether the send may proceed. */
+export interface AttachmentSendCheck {
+  session: string;
+  /** The configured entry the check is about — its name in `research.yaml`. */
+  provider: string;
+  /** The model that entry serves. */
+  model: string;
+  ok: boolean;
+  /** One line naming every blocked item, in the daemon's own words. */
+  refusal?: string | null;
+  items: AttachmentSendItem[];
+}
+
+/** `attachment.resolve_identity`: the corpus identity a save would use. A read. */
+export interface AttachmentIdentityView {
+  attachment: string;
+  choice: AttachmentIdentityChoice;
+  outcome: IdentityResolutionOutcomeName;
+  content_hash: string;
+  /** True when saving needs an explicit `as_new` or `attach_to` from the researcher. */
+  requires_confirmation: boolean;
+  /** True when these exact bytes are already an Artifact of this corpus. */
+  duplicate: boolean;
+  parsable: boolean;
+  reasons: string[];
+  work?: string | null;
+  version?: string | null;
+  artifact?: string | null;
+  title?: string | null;
+  doi?: string | null;
+  arxiv?: string | null;
+  year?: number | null;
+}
+
+/**
+ * `attachment.save_to_corpus`: what the promotion linked, and what it created.
+ *
+ * `evidence_created` is always false and is stated rather than assumed: corpus identity is
+ * not evidence, and the receipt says so where a researcher reads it (attachments design
+ * §7). `linked_existing` is true when the same bytes were already registered.
+ */
+export interface AttachmentPromotionView {
+  attachment: AttachmentView;
+  work: string;
+  version: string;
+  artifact: string;
+  created: AttachmentCreatedKind;
+  outcome: IdentityResolutionOutcomeName;
+  parsed: boolean;
+  linked_existing: boolean;
+  evidence_created: boolean;
+  reasons: string[];
+  mutation?: MutationResponse | null;
+}
+
+/** `attachment.check_send`'s request. Empty `attachments` means the whole session. */
+export interface CheckAttachmentSendRequest {
+  session: string;
+  /** The configured entry: its name, its `<entry>/<model>` label, or the served model. */
+  provider?: string | null;
+  model?: string | null;
+  attachments?: string[];
+}
+
+/** `attachment.save_to_corpus`'s request; `as_new`/`attach_to` are the confirmation. */
+export interface SaveAttachmentToCorpusRequest {
+  session: string;
+  attachment: string;
+  as_new?: boolean;
+  attach_to?: string | null;
+  parse?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// research graph (P20)
+// ---------------------------------------------------------------------------
+//
+// Hand-declared like the two sections above: the six `graph.*` reads answer over
+// `POST /capabilities/graph.*` and no HTTP route returns their shapes, so none of them is
+// in `web/openapi.json`. They mirror `capabilities/graph.py` field for field, and the
+// vocabularies mirror `domain/graph.py`.
+//
+// Two fields appear on *every* node and edge on purpose, and this client never derives
+// either of them: `authority` says what scientific standing the projected row has, and
+// `visibility` says whether it may leave the machine. A candidate edge is a proposal until
+// a review says otherwise (ADR-003), and a walk the daemon pruned for privacy comes back
+// pruned — the cockpit renders what it is given and infers nothing (graph spec §8).
+
+/** `domain/graph.py::NodeKind` — every namespace the projection may hold. */
+export type GraphNodeKind =
+  | 'project'
+  | 'session'
+  | 'message'
+  | 'attachment'
+  | 'work'
+  | 'version'
+  | 'artifact'
+  | 'section'
+  | 'paragraph'
+  | 'table'
+  | 'figure'
+  | 'equation'
+  | 'reference'
+  | 'evidence'
+  | 'claim'
+  | 'question'
+  | 'decision'
+  | 'synthesis'
+  | 'manuscript_file'
+  | 'manuscript_anchor'
+  | 'citation';
+
+/** `domain/graph.py::EdgeKind` — deterministic relations first, then scientific ones. */
+export type GraphEdgeKind =
+  | 'contains'
+  | 'version_of'
+  | 'artifact_of'
+  | 'cites'
+  | 'attached_to'
+  | 'anchored_at'
+  | 'mentioned_in'
+  | 'supports'
+  | 'contradicts'
+  | 'qualifies'
+  | 'derived_from'
+  | 'depends_on';
+
+/** `domain/graph.py::SCIENTIFIC_EDGE_KINDS`: the relations that assert something. */
+export const SCIENTIFIC_EDGE_KINDS: readonly GraphEdgeKind[] = [
+  'supports',
+  'contradicts',
+  'qualifies',
+  'derived_from',
+  'depends_on',
+];
+
+/** `domain/graph.py::EdgeOrigin`. `model_proposed` can never carry accepted authority. */
+export type GraphEdgeOrigin = 'structural' | 'accepted' | 'model_proposed' | 'researcher';
+
+/** `domain/graph.py::GraphAuthority`. The same six words as `AuthorityLabelName`. */
+export type GraphAuthorityName = AuthorityLabelName;
+
+/** `domain/graph.py::GraphVisibility`. The same two words as `SessionVisibility`. */
+export type GraphVisibilityName = SessionVisibility;
+
+/** `graph/queries.py::Direction` — which way a traversal followed an edge. */
+export type GraphDirection = 'out' | 'in' | 'both';
+
+/** `domain/graph.py::GraphMetadata` — scalar only, so a row is a diff-free echo. */
+export type GraphMetadata = Record<string, string | number | boolean | null>;
+
+/** `capabilities/graph.py::GraphNodeView` — one projected node and its labels. */
+export interface GraphNodeView {
+  id: string;
+  kind: GraphNodeKind;
+  authority: GraphAuthorityName;
+  visibility: GraphVisibilityName;
+  label: string;
+  text: string;
+  source?: string | null;
+  fingerprint?: string | null;
+  metadata: GraphMetadata;
+}
+
+/** `capabilities/graph.py::GraphEdgeView` — origin and authority keep a proposal a proposal. */
+export interface GraphEdgeView {
+  from_id: string;
+  to_id: string;
+  kind: GraphEdgeKind;
+  origin: GraphEdgeOrigin;
+  authority: GraphAuthorityName;
+  status: string;
+  source?: string | null;
+  metadata: GraphMetadata;
+}
+
+/** `capabilities/graph.py::NeighbourView` — a node, the edge that reached it, and how far. */
+export interface GraphNeighbourView {
+  node: GraphNodeView;
+  edge: GraphEdgeView;
+  direction: GraphDirection;
+  hops: number;
+}
+
+/** `graph.neighbors`: one node and what the graph says is around it. */
+export interface GraphNeighbourhoodView {
+  origin?: GraphNodeView | null;
+  neighbours: GraphNeighbourView[];
+}
+
+/**
+ * `graph.resolve`: what a reference resolves to, and every reason it may not be followed.
+ *
+ * `exists`, `authority` and `fresh` are decided against the canonical (or, for a session,
+ * durable) record, never against the projected row — so a stale index degrades navigation
+ * and can never mislabel authority. `node` is the row, offered so a label can be shown
+ * without a second call, and `problems` is the daemon's own sentence for a refusal.
+ */
+export interface GraphResolvedView {
+  reference: string;
+  project: string;
+  exists: boolean;
+  authority: GraphAuthorityName;
+  visibility: GraphVisibilityName;
+  fresh: boolean;
+  link?: string | null;
+  node?: GraphNodeView | null;
+  problems: string[];
+}
+
+/** `graph.autocomplete`: completion candidates, identity matches first. */
+export interface GraphAutocompleteResult {
+  prefix: string;
+  matches: GraphNodeView[];
+}
+
+/** `graph.query`: nodes matching a structured filter, ordered by identity. */
+export interface GraphQueryResult {
+  nodes: GraphNodeView[];
+}
+
+/** `capabilities/graph.py::ProvenanceStepView` — one hop of a provenance path. */
+export interface GraphProvenanceStepView {
+  edge: GraphEdgeView;
+  node: GraphNodeView;
+  direction: GraphDirection;
+}
+
+/** `graph.provenance`: Claim → Evidence → the exact Artifact anchor, or why there is none. */
+export interface GraphProvenanceView {
+  found: boolean;
+  origin?: GraphNodeView | null;
+  target?: GraphNodeView | null;
+  steps: GraphProvenanceStepView[];
+  identities: string[];
+  /** The exact source location the last hop recorded: page, block, char span. */
+  anchor: GraphMetadata;
+}
+
+/** `graph.status`: what the projection says about itself. */
+export interface GraphStatusView {
+  /** True when a database exists and was built by the schema version this build reads. */
+  available: boolean;
+  exists: boolean;
+  database: string;
+  schema_version?: number | null;
+  built_at?: string | null;
+  canonical_digest?: string | null;
+  event_cursor?: string | null;
+  nodes: number;
+  edges: number;
+  sources: number;
+  /** A rebuild is writing its replacement database beside this one right now. */
+  rebuilding: boolean;
+}
+
+/** `graph.autocomplete`'s request. `visibility` restricts the egress class completed over. */
+export interface GraphAutocompleteRequest {
+  prefix: string;
+  kinds?: GraphNodeKind[];
+  visibility?: GraphVisibilityName[];
+  limit?: number;
+}
+
+/** `graph.neighbors`' request. An excluded node is never traversed *through*. */
+export interface GraphNeighborsRequest {
+  id: string;
+  hops?: number;
+  direction?: GraphDirection;
+  edge_kinds?: GraphEdgeKind[];
+  origins?: GraphEdgeOrigin[];
+  kinds?: GraphNodeKind[];
+  authority?: GraphAuthorityName[];
+  visibility?: GraphVisibilityName[];
+  limit?: number;
+}
+
+/** `graph.query`'s request: the structured filter of `graph/queries.py::GraphFilter`. */
+export interface GraphQueryRequest {
+  kinds?: GraphNodeKind[];
+  authorities?: GraphAuthorityName[];
+  visibility?: GraphVisibilityName[];
+  edge_kinds?: GraphEdgeKind[];
+  origins?: GraphEdgeOrigin[];
+  linked_to?: string | null;
+  direction?: GraphDirection;
+  text?: string | null;
+  identities?: string[];
+  limit?: number;
+}
+
+/** `graph.provenance`'s request; `to_kind` defaults to `artifact` on the daemon. */
+export interface GraphProvenanceRequest {
+  id: string;
+  to_kind?: GraphNodeKind;
+  visibility?: GraphVisibilityName[];
+}

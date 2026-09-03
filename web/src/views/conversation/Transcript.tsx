@@ -12,17 +12,15 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AsyncState, Button, ErrorNotice, Message, VirtualList } from '@research-harness/design';
 import type { AttachmentModel, EntityRefModel, PromotionTarget } from '@research-harness/design';
 import type { ConversationMessage } from '../../api/dto';
 import { renderMarkdown } from '../../render';
 import type { DeepLink } from '../../render';
-import { groupAttempts, routeForDeepLink, toAttachmentModel, toMessageModel } from './mappers';
+import { SaveToCorpusFlow } from './attachments/SaveToCorpusFlow';
+import { groupAttempts, toMessageModel } from './mappers';
 import type { MessageTurn } from './mappers';
 import { useConversation } from './state';
-import { useAttachmentUrls } from './useAttachmentUrls';
-import { useSession } from '../../app/session';
 
 export interface TranscriptProps {
   /** Which attempt of each turn is on screen, by turn key. */
@@ -40,20 +38,24 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
     openRef,
     showReceipt,
     sessions,
+    attachments: files,
+    renderAttachmentPage,
+    // References and the graph (task W3): a deep link is resolved, not navigated.
+    deepLinks,
   } = useConversation();
-  const navigate = useNavigate();
-  const { client } = useSession();
 
-  // The byte routes take the token in a header, so an attachment is drawn from an object
-  // URL rather than from a `src` the browser would fetch on its own.
-  const records = useMemo(() => transcript?.attachments ?? [], [transcript]);
-  const urls = useAttachmentUrls(client, sessions.activeId, records);
-
-  const attachments = useMemo(() => {
-    const map = new Map<string, AttachmentModel>();
-    for (const record of records) map.set(record.id, toAttachmentModel(record, urls.get(record.id)));
-    return map;
-  }, [records, urls]);
+  /*
+   * One set of attachments for the whole workspace (task W2).
+   *
+   * The composer's tray and these rows are the same files, so they come from the same
+   * place: the byte routes take the token in a header, so each one is drawn from an object
+   * URL rather than a `src` the browser would fetch on its own, and each carries the
+   * verdict `attachment.check_send` gave it for the selected model.
+   */
+  const attachments = useMemo(
+    () => new Map<string, AttachmentModel>(files.files.allModels.map((item) => [item.id, item])),
+    [files.files.allModels],
+  );
 
   /**
    * The turns on disk, plus the answer that is still arriving.
@@ -77,13 +79,15 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
 
   const unresolved = useMemo(() => new Set(send.unresolved), [send.unresolved]);
 
-  const onDeepLink = useCallback(
-    (link: DeepLink) => {
-      const route = routeForDeepLink(link);
-      if (route) navigate(route);
-    },
-    [navigate],
-  );
+  /*
+   * `rh://` in a message is a question, not a URL (task W3).
+   *
+   * `deepLinks.open` asks `graph.resolve` whether the target exists in this project, what
+   * authority it carries, whether it may be shown here and whether its anchor still holds,
+   * and only then navigates. A link that fails any of those explains itself above the
+   * transcript instead of opening a plausible page (plan §0.1, graph spec §5).
+   */
+  const onDeepLink = useCallback((link: DeepLink) => deepLinks.open(link), [deepLinks]);
 
   const render = useCallback(
     (text: string) => renderMarkdown(text, { onDeepLink }),
@@ -139,11 +143,37 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
         ? () => void send.retry(message.id)
         : undefined;
 
+    /*
+     * `Save to corpus` on the attachments this turn carries (attachments design §4).
+     *
+     * It sits in the action row rather than under the thumbnail because the Design
+     * System's message body draws the file and the application owns the promotion: the
+     * same flow the composer's tray and the inspector mount, so a researcher can save from
+     * wherever they happen to be looking at the file.
+     */
+    const carried = (message.attachments ?? [])
+      .map((id) => attachments.get(id))
+      .filter((item): item is AttachmentModel => item !== undefined);
+
+    /*
+     * A page renderer only where it can be the right document.
+     *
+     * `Message` takes one renderer for the whole turn, so a message carrying two PDFs has
+     * no way to say which page belongs to which file. Rather than render the first one's
+     * pages under the other one's name, a turn like that keeps the file card and the
+     * download, and the Design System says in words that no renderer is available.
+     */
+    const pdfs = carried.filter((item) => item.mediaType === 'application/pdf');
+    const onlyPdf = pdfs.length === 1 ? pdfs[0] : undefined;
+
     return (
       <Message
         key={message.id}
         message={model}
         renderMarkdown={render}
+        {...(onlyPdf
+          ? { renderPage: (pageIndex: number) => renderAttachmentPage(onlyPdf.id, pageIndex) }
+          : {})}
         selected={selection?.kind === 'message' && selection.messageId === message.id}
         onOpenRef={(entity: EntityRefModel) => openRef(entity)}
         onCopy={() => void copyMessage(message)}
@@ -160,6 +190,15 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
             >
               Inspect
             </Button>
+            {carried.map((attachment) => (
+              <SaveToCorpusFlow
+                key={attachment.id}
+                attachment={attachment}
+                save={files.save}
+                onOpenRef={openRef}
+                label={`Save ${attachment.name} to corpus`}
+              />
+            ))}
             {turn.attempts.length > 1 ? (
               <span className="rh-web-attempts">
                 <Button

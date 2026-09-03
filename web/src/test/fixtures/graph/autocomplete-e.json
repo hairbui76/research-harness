@@ -1,0 +1,46 @@
+{
+  "prefix": "E",
+  "matches": [
+    {
+      "id": "E0482",
+      "kind": "evidence",
+      "authority": "accepted",
+      "visibility": "project",
+      "label": "a nine percent drop in p99 latency under batching",
+      "text": "a nine percent drop in p99 latency under batching",
+      "source": "evidence/E0482.yaml",
+      "fingerprint": null,
+      "metadata": {
+        "work": "W0017",
+        "artifact": "A0017-3"
+      }
+    },
+    {
+      "id": "E0555",
+      "kind": "evidence",
+      "authority": "accepted",
+      "visibility": "project",
+      "label": "no measurable change in p99 on the smaller cluster",
+      "text": "no measurable change in p99 on the smaller cluster",
+      "source": "evidence/E0555.yaml",
+      "fingerprint": null,
+      "metadata": {
+        "work": "W0021",
+        "artifact": "A0021-1"
+      }
+    },
+    {
+      "id": "E0500",
+      "kind": "evidence",
+      "authority": "stale",
+      "visibility": "project",
+      "label": "throughput rose by four percent",
+      "text": "throughput rose by four percent",
+      "source": "evidence/E0500.yaml",
+      "fingerprint": null,
+      "metadata": {
+        "work": "W0017"
+      }
+    }
+  ]
+}

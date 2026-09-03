@@ -16,10 +16,16 @@ import type {
   AnchorSummary,
   AppliedSuggestion,
   ArtifactBlocks,
+  AttachmentIdentityView,
+  AttachmentPromotionView,
+  AttachmentRemoved,
+  AttachmentSendCheck,
+  AttachmentView,
   BuildView,
   CandidateView,
   CapabilityCatalog,
   CapabilityResponse,
+  CheckAttachmentSendRequest,
   ClaimFilters,
   ClaimList,
   ClaimSummary,
@@ -35,6 +41,16 @@ import type {
   EvidenceList,
   EvidenceSummary,
   FileSnapshot,
+  GraphAutocompleteRequest,
+  GraphAutocompleteResult,
+  GraphNeighborsRequest,
+  GraphNeighbourhoodView,
+  GraphProvenanceRequest,
+  GraphProvenanceView,
+  GraphQueryRequest,
+  GraphQueryResult,
+  GraphResolvedView,
+  GraphStatusView,
   HealthReport,
   Json,
   ManuscriptAnchors,
@@ -53,6 +69,7 @@ import type {
   ReviewOutcome,
   RevalidationView,
   RunStatus,
+  SaveAttachmentToCorpusRequest,
   SendMessageRequest,
   SendStarted,
   SessionListView,
@@ -770,6 +787,172 @@ export class HarnessClient {
     return this.bytes(page === undefined ? base : `${base}?page=${page}`);
   }
 
+  // -- attachments (P19) -----------------------------------------------------
+  //
+  // Four capabilities and one byte route. The route is the single documented write that is
+  // not a capability call (v1.1 plan §0.4) and it is deliberately narrow: it writes bytes
+  // into `conversations/<session>/attachments/` through the same service `attachment.add`
+  // uses, under the same `mutate`, researcher-only authorisation, and it can create no
+  // Work, Version, Artifact or Evidence. Corpus identity comes from one place only, and it
+  // is `attachment.save_to_corpus` below.
+
+  /**
+   * Attach one file to a session. Session-only working material; no corpus object.
+   *
+   * The body is the raw file and `Content-Type` is its media type, because base64-ing a
+   * 30 MB PDF through a JSON capability request buys nothing — the same bytes reach the
+   * same service either way. `?filename=` is display metadata: the daemon keeps only its
+   * basename and never treats it as a path (attachments design §8).
+   *
+   * A file the daemon refuses on validation comes back as a `failed` attachment carrying
+   * its reason, not as an error: an item that disappears is the failure mode the design
+   * forbids. Only a refusal of the *request* — no bytes, too large, no such session, a
+   * caller that may not write — throws.
+   */
+  async addSessionAttachment(
+    session: string,
+    file: Blob,
+    options: { filename?: string; description?: string } = {},
+  ): Promise<AttachmentView> {
+    const name = options.filename ?? (file instanceof File ? file.name : 'attachment');
+    const query = new URLSearchParams({ filename: name });
+    if (options.description) query.set('description', options.description);
+    const path = `/sessions/${encodeURIComponent(session)}/attachments?${query.toString()}`;
+    const response = await this.http(`${this.baseUrl}${path}`, {
+      method: 'POST',
+      headers: {
+        ...this.headers(),
+        // The daemon records what we declare and narrows it to its own allowlist before
+        // ever serving the bytes back, so a browser that guessed nothing is still safe.
+        'Content-Type': file.type || 'application/octet-stream',
+      },
+      body: file,
+    });
+    if (!response.ok) {
+      throw new HarnessRequestError(response.status, path, await refusalText(response, path));
+    }
+    return (await response.json()) as AttachmentView;
+  }
+
+  /** Delete one session attachment, its bytes and its previews. The corpus is untouched. */
+  removeSessionAttachment(session: string, attachment: string): Promise<AttachmentRemoved> {
+    return this.call<AttachmentRemoved>('attachment.remove', { session, attachment });
+  }
+
+  /**
+   * Whether each attachment may go to the selected model, and why not. A read.
+   *
+   * `provider` takes the configured entry's name — which is exactly `ProviderModel.id`,
+   * the same string `session.send` takes as `model`. (`ProviderModel.provider` is the
+   * adapter kind and is not what the daemon matches on.) The answer names the entry and
+   * the model it serves, so a client never has to work out which one was checked.
+   */
+  checkAttachmentSend(input: CheckAttachmentSendRequest): Promise<AttachmentSendCheck> {
+    const request: Record<string, Json> = { session: input.session };
+    if (input.provider) request.provider = input.provider;
+    if (input.model) request.model = input.model;
+    if (input.attachments?.length) request.attachments = input.attachments;
+    return this.call<AttachmentSendCheck>('attachment.check_send', request);
+  }
+
+  /** What this attachment would become in the corpus. Writes nothing, saves nothing. */
+  resolveAttachmentIdentity(session: string, attachment: string): Promise<AttachmentIdentityView> {
+    return this.call<AttachmentIdentityView>('attachment.resolve_identity', {
+      session,
+      attachment,
+    });
+  }
+
+  /**
+   * The explicit promotion: copy the bytes into the corpus under a resolved identity.
+   *
+   * `as_new` and `attach_to` are the researcher's answer for an identity the resolver could
+   * not decide; an ambiguous file with neither is refused rather than guessed (PRODUCT §13).
+   * It creates or links Work/Version/Artifact identity and parses the file — and accepts no
+   * Evidence and no Claim, which is what `evidence_created: false` on the result says.
+   */
+  saveAttachmentToCorpus(input: SaveAttachmentToCorpusRequest): Promise<AttachmentPromotionView> {
+    const request: Record<string, Json> = {
+      session: input.session,
+      attachment: input.attachment,
+    };
+    if (input.as_new) request.as_new = true;
+    if (input.attach_to) request.attach_to = input.attach_to;
+    if (input.parse !== undefined) request.parse = input.parse;
+    return this.call<AttachmentPromotionView>('attachment.save_to_corpus', request);
+  }
+
+  // -- research graph (P20) --------------------------------------------------
+  //
+  // All six are `READ`, so they answer for an agent host as well as for the researcher,
+  // and none of them changes a canonical object: the graph is a disposable projection and
+  // rebuilding it is `state.rebuild`'s job. Nothing here interprets a result — `authority`
+  // and `visibility` arrive on every node and edge, and the cockpit renders them.
+
+  /**
+   * Resolve `@E0482`, `E0482`, or `rh://artifact/A0017-3?page=6&block=B0081`.
+   *
+   * The one `graph.*` read that does not answer from the index: existence, authority,
+   * privacy and anchor freshness are checked against the canonical (or, for a session,
+   * durable) record, so a rebuilding graph degrades navigation and never mislabels
+   * authority (graph spec §5, ADR-001).
+   */
+  resolveReference(reference: string): Promise<GraphResolvedView> {
+    return this.call<GraphResolvedView>('graph.resolve', { reference });
+  }
+
+  /** Complete a partially typed `@` reference. Identity matches come before text matches. */
+  autocompleteReferences(input: GraphAutocompleteRequest): Promise<GraphAutocompleteResult> {
+    const request: Record<string, Json> = { prefix: input.prefix };
+    if (input.kinds?.length) request.kinds = input.kinds;
+    if (input.visibility?.length) request.visibility = input.visibility;
+    if (input.limit !== undefined) request.limit = input.limit;
+    return this.call<GraphAutocompleteResult>('graph.autocomplete', request);
+  }
+
+  /** One or two hops around a node, in either direction, filtered as asked. */
+  graphNeighbors(input: GraphNeighborsRequest): Promise<GraphNeighbourhoodView> {
+    const request: Record<string, Json> = { id: input.id };
+    if (input.hops !== undefined) request.hops = input.hops;
+    if (input.direction) request.direction = input.direction;
+    if (input.edge_kinds?.length) request.edge_kinds = input.edge_kinds;
+    if (input.origins?.length) request.origins = input.origins;
+    if (input.kinds?.length) request.kinds = input.kinds;
+    if (input.authority?.length) request.authority = input.authority;
+    if (input.visibility?.length) request.visibility = input.visibility;
+    if (input.limit !== undefined) request.limit = input.limit;
+    return this.call<GraphNeighbourhoodView>('graph.neighbors', request);
+  }
+
+  /** Nodes matching a structured kind/authority/visibility/link filter. */
+  graphQuery(input: GraphQueryRequest = {}): Promise<GraphQueryResult> {
+    const request: Record<string, Json> = {};
+    if (input.kinds?.length) request.kinds = input.kinds;
+    if (input.authorities?.length) request.authorities = input.authorities;
+    if (input.visibility?.length) request.visibility = input.visibility;
+    if (input.edge_kinds?.length) request.edge_kinds = input.edge_kinds;
+    if (input.origins?.length) request.origins = input.origins;
+    if (input.linked_to) request.linked_to = input.linked_to;
+    if (input.direction) request.direction = input.direction;
+    if (input.text) request.text = input.text;
+    if (input.identities?.length) request.identities = input.identities;
+    if (input.limit !== undefined) request.limit = input.limit;
+    return this.call<GraphQueryResult>('graph.query', request);
+  }
+
+  /** The shortest path from a node to its source, e.g. Claim to the exact Artifact anchor. */
+  graphProvenance(input: GraphProvenanceRequest): Promise<GraphProvenanceView> {
+    const request: Record<string, Json> = { id: input.id };
+    if (input.to_kind) request.to_kind = input.to_kind;
+    if (input.visibility?.length) request.visibility = input.visibility;
+    return this.call<GraphProvenanceView>('graph.provenance', request);
+  }
+
+  /** Whether the index is there, how big it is, and whether a rebuild is in flight. */
+  graphStatus(): Promise<GraphStatusView> {
+    return this.call<GraphStatusView>('graph.status', {});
+  }
+
   /**
    * What `subscribeRunEvents` needs, and nothing more.
    *
@@ -817,6 +1000,33 @@ export class HarnessClient {
     }
     return (await response.json()) as T;
   }
+}
+
+/**
+ * The daemon's own words for a route refusal.
+ *
+ * A route raises `HTTPException(detail=...)`, and `detail` is a string for a plain refusal
+ * but the whole capability error body — `{status, error: {code, message}, ...}` — when the
+ * refusal came from `Principal.authorize`, so that a byte route and
+ * `POST /capabilities/attachment.add` disagree about nothing (ADR-009). Both are unwrapped
+ * to the sentence a researcher should read; an unreadable body falls back to the status.
+ */
+async function refusalText(response: Response, path: string): Promise<string> {
+  const fallback = `${response.status} on ${path}`;
+  const body = await response.text().catch(() => '');
+  if (!body) return fallback;
+  try {
+    const parsed = JSON.parse(body) as { detail?: unknown };
+    const detail = parsed.detail;
+    if (typeof detail === 'string') return detail;
+    if (detail !== null && typeof detail === 'object') {
+      const error = (detail as { error?: { message?: unknown } }).error;
+      if (error && typeof error.message === 'string') return error.message;
+    }
+  } catch {
+    /* not JSON: the text itself is the message */
+  }
+  return body || fallback;
 }
 
 /** The part of the manuscript an audit is asked about; blank means the whole project. */

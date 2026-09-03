@@ -1,0 +1,25 @@
+{
+  "reference": "@E0500",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "stale",
+  "visibility": "project",
+  "fresh": false,
+  "link": "rh://evidence/E0500",
+  "node": {
+    "id": "E0500",
+    "kind": "evidence",
+    "authority": "stale",
+    "visibility": "project",
+    "label": "throughput rose by four percent",
+    "text": "throughput rose by four percent",
+    "source": "evidence/E0500.yaml",
+    "fingerprint": null,
+    "metadata": {
+      "work": "W0017"
+    }
+  },
+  "problems": [
+    "E0500 anchor text_hash no longer matches A0017-1; re-anchor before relying on it"
+  ]
+}

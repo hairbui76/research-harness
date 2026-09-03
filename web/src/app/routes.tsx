@@ -6,6 +6,9 @@
  * takes (plan §0.6): a stable id, the icon, and the route the daemon reports counts
  * against in `overview.attention[].route`.
  *
+ * `/source/:artifactId` is not on the navigation: it is where `rh://artifact/…?page=&block=`
+ * deep links land, and it is reached from a reference rather than from the rail.
+ *
  * `/` is the conversation workspace and `/overview` is the Overview. The conversation
  * carries its session in the query — `/?session=CS0001`, optionally `&message=M0042` — so
  * the root stays one route, a conversation is linkable and bookmarkable, and the deep link
@@ -18,6 +21,7 @@ import type { IconName } from '@research-harness/design';
 import { Layout } from './Layout';
 import { ClaimDetailPage, ClaimsPage } from '../views/Claims';
 import { ConversationPage } from '../views/conversation/ConversationRoute';
+import { ArtifactSourcePage } from '../views/conversation/references';
 import { ConflictsPage } from '../views/Conflicts';
 import { CorpusPage, EvidencePage, WorkPage } from '../views/Corpus';
 import { EvidenceReviewPage } from '../views/EvidenceReview';
@@ -78,6 +82,12 @@ export function AppRoutes() {
         <Route path="corpus" element={<CorpusPage />} />
         <Route path="corpus/:workId" element={<WorkPage />} />
         <Route path="evidence/:evidenceId" element={<EvidencePage />} />
+        {/* Where an artifact deep link lands (task W3): `rh://artifact/A0017-3?page=6&
+            block=B0081` resolves to `/source/A0017-3?page=6&block=B0081`, which opens the
+            artifact's own bytes at that page with that block highlighted. It is not in
+            `NAVIGATION` on purpose — an artifact is reached through a reference, a piece of
+            evidence or a link, never by browsing to "source". */}
+        <Route path="source/:artifactId" element={<ArtifactSourcePage />} />
         <Route path="claims" element={<ClaimsPage />} />
         <Route path="claims/:claimId" element={<ClaimDetailPage />} />
         <Route path="questions" element={<QuestionsPage />} />

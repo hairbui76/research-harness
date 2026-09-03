@@ -55,3 +55,47 @@
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
 }
+
+/*
+ * Attachments (task W2).
+ *
+ * The intake is a drop target around the tray, so files land where they are listed. Its
+ * only visual state is a dashed edge while something is being dragged over it; everything
+ * inside — the rows, the badges, the dialogs — is the Design System's.
+ */
+.rh-web-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  border-radius: var(--rh-radius-card);
+}
+
+.rh-web-attachments[data-dragging] {
+  outline: var(--rh-border-width) dashed var(--rh-border-strong);
+  outline-offset: var(--rh-space-1);
+}
+
+/* The drop hint, the closed-intake reason, and the boundary sentence: all of them text. */
+.rh-web-attachments__hint,
+.rh-web-attachments__note,
+.rh-web-attachments__boundary,
+.rh-web-attachments__outcome,
+.rh-web-attachments__unavailable {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-web-attachments__boundary,
+.rh-web-attachments__outcome {
+  display: block;
+}
+
+.rh-web-attachments__save {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}

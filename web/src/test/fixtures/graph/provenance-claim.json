@@ -1,0 +1,131 @@
+{
+  "found": true,
+  "origin": {
+    "id": "C0001",
+    "kind": "claim",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "Batching reduces tail latency across the corpus",
+    "text": "Batching reduces tail latency across the corpus",
+    "source": "claims/C0001.yaml",
+    "fingerprint": null,
+    "metadata": {}
+  },
+  "target": {
+    "id": "A0017-3",
+    "kind": "artifact",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "batching-tail-latency.pdf",
+    "text": "batching-tail-latency.pdf",
+    "source": "corpus/W0017/V0017-2/A0017-3.pdf",
+    "fingerprint": null,
+    "metadata": {
+      "pages": 14,
+      "work": "W0017"
+    }
+  },
+  "steps": [
+    {
+      "edge": {
+        "from_id": "E0482",
+        "to_id": "C0001",
+        "kind": "supports",
+        "origin": "accepted",
+        "authority": "accepted",
+        "status": "accepted",
+        "source": "claims/C0001.yaml",
+        "metadata": {}
+      },
+      "node": {
+        "id": "E0482",
+        "kind": "evidence",
+        "authority": "accepted",
+        "visibility": "project",
+        "label": "a nine percent drop in p99 latency under batching",
+        "text": "a nine percent drop in p99 latency under batching",
+        "source": "evidence/E0482.yaml",
+        "fingerprint": null,
+        "metadata": {
+          "work": "W0017",
+          "artifact": "A0017-3"
+        }
+      },
+      "direction": "in"
+    },
+    {
+      "edge": {
+        "from_id": "E0482",
+        "to_id": "B0081",
+        "kind": "anchored_at",
+        "origin": "structural",
+        "authority": "accepted",
+        "status": "",
+        "source": "evidence/E0482.yaml",
+        "metadata": {
+          "page": 6,
+          "block": "B0081",
+          "char_start": 418,
+          "char_end": 512
+        }
+      },
+      "node": {
+        "id": "B0081",
+        "kind": "paragraph",
+        "authority": "accepted",
+        "visibility": "project",
+        "label": "p99 latency fell by nine percent under batching",
+        "text": "p99 latency fell by nine percent under batching",
+        "source": "corpus/W0017/V0017-2/A0017-3.blocks.json",
+        "fingerprint": null,
+        "metadata": {
+          "page": 6,
+          "order": 81
+        }
+      },
+      "direction": "out"
+    },
+    {
+      "edge": {
+        "from_id": "B0081",
+        "to_id": "A0017-3",
+        "kind": "contains",
+        "origin": "structural",
+        "authority": "accepted",
+        "status": "",
+        "source": "corpus/W0017/V0017-2/A0017-3.blocks.json",
+        "metadata": {
+          "page": 6,
+          "block": "B0081"
+        }
+      },
+      "node": {
+        "id": "A0017-3",
+        "kind": "artifact",
+        "authority": "accepted",
+        "visibility": "project",
+        "label": "batching-tail-latency.pdf",
+        "text": "batching-tail-latency.pdf",
+        "source": "corpus/W0017/V0017-2/A0017-3.pdf",
+        "fingerprint": null,
+        "metadata": {
+          "pages": 14,
+          "work": "W0017"
+        }
+      },
+      "direction": "out"
+    }
+  ],
+  "identities": [
+    "C0001",
+    "E0482",
+    "B0081",
+    "A0017-3"
+  ],
+  "anchor": {
+    "page": 6,
+    "block": "B0081",
+    "char_start": 418,
+    "char_end": 512
+  }
+}

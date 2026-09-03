@@ -1,0 +1,21 @@
+{
+  "reference": "rh://manuscript/main.tex?line=120",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "accepted",
+  "visibility": "project",
+  "fresh": true,
+  "link": "rh://manuscript/main.tex?line=120",
+  "node": {
+    "id": "file:main.tex",
+    "kind": "manuscript_file",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "main.tex",
+    "text": "main.tex",
+    "source": "manuscript/main.tex",
+    "fingerprint": null,
+    "metadata": {}
+  },
+  "problems": []
+}

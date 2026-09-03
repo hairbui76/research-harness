@@ -24,7 +24,7 @@
  * switch: none of them touches a buffer (§9).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Button,
   CandidateDiff,
@@ -160,6 +160,28 @@ export function ManuscriptPage() {
   // The entry file is opened once, when the tree arrives. Anything the researcher opens
   // afterwards stays open: this must never reach past them and change the file on screen.
   const openedEntry = useRef(false);
+
+  /* Deep links into the manuscript (task W3) ------------------------------------------
+   *
+   * `rh://manuscript/main.tex?line=120` resolves to `/manuscript?file=main.tex&line=120`
+   * (`views/conversation/references/deepLinks.ts`), which is this read: open the file the
+   * query names and put the cursor on the line. It happens once per address, so a later
+   * navigation inside the workspace is never fought over, and it claims the entry-file slot
+   * so the tree arriving afterwards does not replace the file the link asked for. */
+  const [params] = useSearchParams();
+  const linkedFile = params.get('file');
+  const linkedLine = params.get('line');
+  const followed = useRef<string | null>(null);
+  useEffect(() => {
+    if (!linkedFile) return;
+    const address = `${linkedFile}#${linkedLine ?? ''}`;
+    if (followed.current === address) return;
+    followed.current = address;
+    openedEntry.current = true;
+    const line = Number.parseInt(linkedLine ?? '', 10);
+    void openAt(linkedFile, Number.isFinite(line) && line > 0 ? line : 1);
+  }, [linkedFile, linkedLine, openAt]);
+
   const tree = files.tree;
   useEffect(() => {
     if (openedEntry.current || !tree) return;

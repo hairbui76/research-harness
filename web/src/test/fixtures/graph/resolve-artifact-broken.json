@@ -1,0 +1,13 @@
+{
+  "reference": "rh://artifact/A0099-9?page=6&block=B0081",
+  "project": "tail-latency",
+  "exists": false,
+  "authority": "candidate",
+  "visibility": "project",
+  "fresh": false,
+  "link": "rh://artifact/A0099-9?page=6&block=B0081",
+  "node": null,
+  "problems": [
+    "no artifact A0099-9 in project tail-latency"
+  ]
+}

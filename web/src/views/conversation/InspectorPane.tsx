@@ -34,7 +34,9 @@ import type { ConversationMessage, OverviewReport } from '../../api/dto';
 import { useSession } from '../../app/session';
 import { useAsync } from '../../app/useAsync';
 import { authorityOf } from '../../components/Feedback';
+import { AttachmentViewer } from './attachments/AttachmentViewer';
 import { entityRefFor, messagesReferencing } from './mappers';
+import { GraphContextPanel } from './references';
 import { ReceiptPanel } from './ReceiptPanel';
 import { useConversation } from './state';
 
@@ -100,6 +102,15 @@ export function InspectorPane() {
         context: (
           <Stack>
             {back}
+            {/* References and the graph (task W3). `back` is the transcript's own answer to
+                "where was this used?" and keeps working while the projection rebuilds; this
+                is the graph's — the provenance path to the exact artifact anchor, and the
+                one-hop neighbourhood, which is where cross-session `mentioned_in` messages
+                appear, exactly as the graph returns them under this session's egress class
+                (graph spec §8; nothing is filtered on this side). */}
+            <GraphContextPanel enabled={tab === 'context'} />
+            {/* Attachments (task W2): the fourth place `Save to corpus` is offered. */}
+            <SelectedAttachment />
             <ReceiptPanel />
           </Stack>
         ),
@@ -125,6 +136,44 @@ export function InspectorPane() {
 
 function Stack({ children }: { children: ReactNode }) {
   return <div className="rh-web-stack rh-web-stack--tight">{children}</div>;
+}
+
+/* -- attachments (task W2) ------------------------------------------------ */
+
+/**
+ * The session attachment the inspector is following, with its corpus action.
+ *
+ * `Save to corpus` is offered from the composer's tray, the transcript, the viewer and
+ * here, because a file the researcher has just opened in the inspector is exactly where
+ * they decide it belongs in the corpus (attachments design §4). The flow is the workspace's
+ * own, so a save started in one place is finished and reported in all four.
+ */
+function SelectedAttachment() {
+  const { selection, attachments, renderAttachmentPage, openRef } = useConversation();
+  if (selection?.kind !== 'reference' || selection.ref.kind !== 'attachment') return null;
+  const attachment = attachments.modelOf(selection.ref.id);
+  if (attachment === null) {
+    return (
+      <AsyncState
+        kind="empty"
+        compact
+        title={`${selection.ref.id} is not in the open session`}
+        description="Open the session it belongs to to preview or save it."
+      />
+    );
+  }
+  return (
+    <section className="rh-web-stack rh-web-stack--tight">
+      <h3 className="rh-text-h4">{attachment.name}</h3>
+      <AttachmentViewer
+        attachment={attachment}
+        renderPage={renderAttachmentPage}
+        save={attachments.save}
+        onOpenRef={openRef}
+        size="sm"
+      />
+    </section>
+  );
 }
 
 /** The daemon's counts, keyed by tab. Nothing here counts anything (PRODUCT §5 P10). */

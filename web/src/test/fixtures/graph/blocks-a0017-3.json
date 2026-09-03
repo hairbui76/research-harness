@@ -1,0 +1,141 @@
+{
+  "artifact": "A0017-3",
+  "blocks": [
+    {
+      "bbox": [
+        54.0,
+        92.69,
+        477.2,
+        118.4
+      ],
+      "id": "B00010",
+      "kind": "paragraph",
+      "order": 0,
+      "page": 1,
+      "section_path": [
+        "Introduction"
+      ],
+      "text": "Body text on page 1."
+    },
+    {
+      "bbox": [
+        54.0,
+        93.69,
+        477.2,
+        119.4
+      ],
+      "id": "B00020",
+      "kind": "paragraph",
+      "order": 1,
+      "page": 2,
+      "section_path": [
+        "Introduction"
+      ],
+      "text": "Body text on page 2."
+    },
+    {
+      "bbox": [
+        54.0,
+        94.69,
+        477.2,
+        120.4
+      ],
+      "id": "B00030",
+      "kind": "paragraph",
+      "order": 2,
+      "page": 3,
+      "section_path": [
+        "Introduction"
+      ],
+      "text": "Body text on page 3."
+    },
+    {
+      "bbox": [
+        54.0,
+        95.69,
+        477.2,
+        121.4
+      ],
+      "id": "B00040",
+      "kind": "paragraph",
+      "order": 3,
+      "page": 4,
+      "section_path": [
+        "Introduction"
+      ],
+      "text": "Body text on page 4."
+    },
+    {
+      "bbox": [
+        54.0,
+        96.69,
+        477.2,
+        122.4
+      ],
+      "id": "B00050",
+      "kind": "paragraph",
+      "order": 4,
+      "page": 5,
+      "section_path": [
+        "Introduction"
+      ],
+      "text": "Body text on page 5."
+    },
+    {
+      "bbox": [
+        54.0,
+        97.69,
+        477.2,
+        123.4
+      ],
+      "id": "B0080",
+      "kind": "section",
+      "order": 5,
+      "page": 6,
+      "section_path": [
+        "Results",
+        "Latency"
+      ],
+      "text": "5.2  Tail latency under batching"
+    },
+    {
+      "bbox": [
+        54.0,
+        98.69,
+        477.2,
+        124.4
+      ],
+      "id": "B0081",
+      "kind": "paragraph",
+      "order": 6,
+      "page": 6,
+      "section_path": [
+        "Results",
+        "Latency"
+      ],
+      "text": "Across the corpus, enabling batching lowered p99 latency by nine percent (from 412 ms to 375 ms) with no change in median latency."
+    },
+    {
+      "bbox": [
+        54.0,
+        99.69,
+        477.2,
+        125.4
+      ],
+      "id": "B0082",
+      "kind": "paragraph",
+      "order": 7,
+      "page": 6,
+      "section_path": [
+        "Results",
+        "Latency"
+      ],
+      "text": "The effect was smaller on the eight-node cluster, where p99 moved by under one percent."
+    }
+  ],
+  "file_hash": "sha256:2fe74d81589898bba093deb236fa1bc19f595f7d9d36c15c26cb29bfe2c1184b",
+  "mime_type": "application/pdf",
+  "page_count": 14,
+  "version": "V0017-2",
+  "work": "W0017"
+}

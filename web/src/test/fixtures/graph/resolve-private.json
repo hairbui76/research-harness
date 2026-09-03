@@ -1,0 +1,24 @@
+{
+  "reference": "@M0009",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "private",
+  "visibility": "private",
+  "fresh": true,
+  "link": null,
+  "node": {
+    "id": "M0009",
+    "kind": "message",
+    "authority": "private",
+    "visibility": "private",
+    "label": "Screening pass: the pilot corpus batching note",
+    "text": "Screening pass: the pilot corpus batching note",
+    "source": "conversations/CS0002/messages.jsonl",
+    "fingerprint": null,
+    "metadata": {
+      "session": "CS0002",
+      "role": "user"
+    }
+  },
+  "problems": []
+}

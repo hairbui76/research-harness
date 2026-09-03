@@ -1,0 +1,24 @@
+{
+  "reference": "rh://artifact/A0017-3?page=6&block=B0081",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "accepted",
+  "visibility": "project",
+  "fresh": true,
+  "link": "rh://artifact/A0017-3?page=6&block=B0081",
+  "node": {
+    "id": "A0017-3",
+    "kind": "artifact",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "batching-tail-latency.pdf",
+    "text": "batching-tail-latency.pdf",
+    "source": "corpus/W0017/V0017-2/A0017-3.pdf",
+    "fingerprint": null,
+    "metadata": {
+      "pages": 14,
+      "work": "W0017"
+    }
+  },
+  "problems": []
+}

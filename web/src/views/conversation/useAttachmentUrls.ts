@@ -8,9 +8,10 @@
  * from nothing else. Every URL is revoked when it stops being used.
  *
  * This hook *renders* what a session already holds. Choosing files, validating them and
- * uploading them is task W2 (`attachment.add` and the multipart route); the composer's
- * `onAttach` and `attachmentTray` slots are where that lands, and nothing here changes
- * when it does.
+ * uploading them is task W2 (`attachment.add` and the byte route); it landed in the
+ * composer's `onAttach` and `attachmentTray` slots and changed one thing here — the
+ * parameter type, which now names the three fields this hook reads so that the flat
+ * `AttachmentView` the `attachment.*` capabilities answer with is drawn the same way.
  */
 import { useEffect, useState } from 'react';
 import type { HarnessClient } from '../../api/client';
@@ -22,6 +23,19 @@ export interface AttachmentUrls {
   previewUrl?: string;
   thumbnailUrl?: string;
 }
+
+/**
+ * What this hook needs to know about an attachment, and nothing else.
+ *
+ * The transcript's records are `SessionAttachmentRecord`s; the composer's tray also holds
+ * the flat `AttachmentView`s the `attachment.*` capabilities answer with (task W2). Both
+ * carry these three fields, and these three are all that decides whether to ask for bytes
+ * and how to draw them.
+ */
+export type AttachmentBytesSource = Pick<
+  SessionAttachmentRecord,
+  'id' | 'state' | 'media_type'
+>;
 
 /** States in which the bytes are durably in the session and worth asking for. */
 const STORED = new Set(['ready', 'sending', 'session_only', 'promoting', 'in_corpus']);
@@ -39,7 +53,7 @@ function objectUrl(bytes: ArrayBuffer, mediaType: string): string | null {
 export function useAttachmentUrls(
   client: HarnessClient,
   sessionId: string | null,
-  records: readonly SessionAttachmentRecord[],
+  records: readonly AttachmentBytesSource[],
 ): Map<string, AttachmentUrls> {
   const [urls, setUrls] = useState<Map<string, AttachmentUrls>>(new Map());
   // The ids, so a re-rendered but unchanged list does not re-fetch every file.

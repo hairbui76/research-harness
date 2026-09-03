@@ -1,0 +1,14 @@
+{
+  "origin": {
+    "id": "C0001",
+    "kind": "claim",
+    "authority": "accepted",
+    "visibility": "project",
+    "label": "Batching reduces tail latency across the corpus",
+    "text": "Batching reduces tail latency across the corpus",
+    "source": "claims/C0001.yaml",
+    "fingerprint": null,
+    "metadata": {}
+  },
+  "neighbours": []
+}

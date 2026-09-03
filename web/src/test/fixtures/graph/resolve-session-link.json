@@ -1,0 +1,23 @@
+{
+  "reference": "rh://session/CS0001?message=M0042",
+  "project": "tail-latency",
+  "exists": true,
+  "authority": "private",
+  "visibility": "private",
+  "fresh": true,
+  "link": "rh://session/CS0001?message=M0042",
+  "node": {
+    "id": "CS0001",
+    "kind": "session",
+    "authority": "private",
+    "visibility": "private",
+    "label": "Latency study",
+    "text": "Latency study",
+    "source": "conversations/CS0001/session.yaml",
+    "fingerprint": null,
+    "metadata": {
+      "messages": 3
+    }
+  },
+  "problems": []
+}

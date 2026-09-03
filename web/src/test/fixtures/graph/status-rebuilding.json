@@ -1,0 +1,13 @@
+{
+  "available": false,
+  "exists": true,
+  "database": ".research/graph/research-graph.db",
+  "schema_version": 1,
+  "built_at": "2026-09-03T14:02:11Z",
+  "canonical_digest": "sha256:6f1cd0a2",
+  "event_cursor": "EV0912",
+  "nodes": 33180,
+  "edges": 74617,
+  "sources": 2307,
+  "rebuilding": true
+}

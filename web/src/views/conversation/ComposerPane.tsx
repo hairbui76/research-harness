@@ -7,18 +7,39 @@
  * rendered as the daemon's own sentence in the Design System's blocking notice, which
  * states in words that the message and its attachments are untouched.
  *
- * Two slots are deliberately empty and named for the tasks that fill them: `onAttach` and
- * `attachmentTray` (task W2, attachments), and the reference provider behind the `@`
- * picker (task W3, `graph.autocomplete`). The composer needs no change for either.
+ * Attachments (task W2) fill `onAttach` and `attachmentTray`: files dropped anywhere on
+ * the composer, or chosen through its paperclip, go to the same intake, and the tray below
+ * lists each one with its own state, its own verdict against the selected model and its
+ * own `Save to corpus`. References (task W3) fill the picker behind `@` from
+ * `graph.autocomplete`, and the two strips above the box are theirs: which index is
+ * answering when it is not the graph, and the draft's references the resolver could not
+ * confirm — marked, and still sendable.
  */
 import { useCallback, useMemo } from 'react';
 import { Button, Composer, ErrorNotice, ModelSelector } from '@research-harness/design';
 import type { ComposerBlockedReason, ComposerSendState } from '@research-harness/design';
+import { AttachmentTrayPane } from './attachments/AttachmentTrayPane';
+import { GraphStatusNotice, ReferenceMarks } from './references';
 import { useConversation } from './state';
 
 export function ComposerPane() {
-  const { sessions, draft, send, models, references, showReceipt, model, setModel } =
-    useConversation();
+  const {
+    sessions,
+    draft,
+    send,
+    models,
+    references,
+    showReceipt,
+    model,
+    setModel,
+    attachments,
+    renderAttachmentPage,
+    openRef,
+    // References and the graph (task W3): which index answers `@`, and what the resolver
+    // said about each token in the draft.
+    graph,
+    draftReferences,
+  } = useConversation();
   const session = sessions.active;
 
   const sendState: ComposerSendState = send.sending
@@ -36,8 +57,15 @@ export function ComposerPane() {
    * Neither one touches the draft.
    */
   const blockedReasons = useMemo<ComposerBlockedReason[]>(
-    () => (send.error !== null && !send.retryable ? [{ reason: send.error }] : []),
-    [send.error, send.retryable],
+    () => [
+      ...(send.error !== null && !send.retryable ? [{ reason: send.error }] : []),
+      // Every attachment the selected model cannot take, each with its own reason and the
+      // model the daemon suggests instead. All of them at once: fixing one file, being
+      // refused again and fixing the next is not what "block the send" should feel like
+      // (attachments design §5).
+      ...attachments.blockedReasons,
+    ],
+    [attachments.blockedReasons, send.error, send.retryable],
   );
 
   /**
@@ -53,19 +81,34 @@ export function ComposerPane() {
     [draft, send],
   );
 
+  /**
+   * Send, after one last check against the model that is selected right now.
+   *
+   * The check is re-run here rather than trusted from the last render because the model
+   * selector and the tray are two controls the researcher can change between one and the
+   * other. A verdict that comes back blocked stops the send before anything is written —
+   * the reasons are already on screen, the draft is untouched, and the attachments stay
+   * exactly where they are. A check that could not run at all does not stop it: the daemon
+   * runs the same check inside `session.send` and refuses there in its own words.
+   */
   const onSend = useCallback(() => {
     const references_ = draft.value.tokens.map((token) => token.id);
-    void send
-      .send({
+    const ids = attachments.files.sendableIds;
+    void (async () => {
+      if (ids.length > 0) {
+        const verdict = await attachments.send.refresh();
+        if (verdict !== null && !verdict.ok) return;
+      }
+      const ok = await send.send({
         text: draft.value.text,
         references: references_,
+        ...(ids.length > 0 ? { attachments: ids } : {}),
         ...(model ? { model } : {}),
-      })
-      .then((ok) => {
-        // Only a send that produced a durable message empties the composer (spec §8).
-        if (ok) draft.clear();
       });
-  }, [draft, model, send]);
+      // Only a send that produced a durable message empties the composer (spec §8).
+      if (ok) draft.clear();
+    })();
+  }, [attachments.files.sendableIds, attachments.send, draft, model, send]);
 
   const onPreview = useCallback(() => {
     if (!session) return;
@@ -81,6 +124,24 @@ export function ComposerPane() {
 
   return (
     <div className="rh-web-composer">
+      {/* References and the graph (task W3). Completion falls back to the project listings
+          when `graph.status` says the index is absent, rebuilding or unreadable, and this
+          is the one place that says so — once, beside the composer, in the Design System's
+          own wording (graph spec §8). */}
+      <GraphStatusNotice
+        degradation={graph.degradation}
+        answering={graph.answering}
+        onRecheck={graph.recheck}
+      />
+      {/* References and the graph (task W3). Every token in the draft is resolved against
+          canonical state; the ones that did not come back clean are marked here, with the
+          resolver's own sentence, before the message is sent (conversation spec §7). They
+          stay sendable — nothing below removes a token or disables Send. */}
+      <ReferenceMarks
+        tokens={draft.value.tokens}
+        flagged={draftReferences.flagged}
+        onOpen={openRef}
+      />
       {models.unavailable ? (
         <p className="rh-web-composer__note rh-text-secondary">{models.unavailable}</p>
       ) : null}
@@ -102,6 +163,16 @@ export function ComposerPane() {
         sendState={sendState}
         disabled={session === null}
         {...(blockedReasons.length > 0 ? { blockedReasons } : {})}
+        {...(attachments.files.canAttach
+          ? { onAttach: (files: File[]) => void attachments.files.attach(files) }
+          : {})}
+        attachmentTray={
+          <AttachmentTrayPane
+            attachments={attachments}
+            renderPage={renderAttachmentPage}
+            onOpenRef={openRef}
+          />
+        }
         referenceResults={references.results}
         referenceLoading={references.loading}
         onReferenceQuery={references.search}

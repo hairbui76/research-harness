@@ -1,0 +1,57 @@
+{
+  "prefix": "batching",
+  "matches": [
+    {
+      "id": "C0001",
+      "kind": "claim",
+      "authority": "accepted",
+      "visibility": "project",
+      "label": "Batching reduces tail latency across the corpus",
+      "text": "Batching reduces tail latency across the corpus",
+      "source": "claims/C0001.yaml",
+      "fingerprint": null,
+      "metadata": {}
+    },
+    {
+      "id": "E0482",
+      "kind": "evidence",
+      "authority": "accepted",
+      "visibility": "project",
+      "label": "a nine percent drop in p99 latency under batching",
+      "text": "a nine percent drop in p99 latency under batching",
+      "source": "evidence/E0482.yaml",
+      "fingerprint": null,
+      "metadata": {
+        "work": "W0017",
+        "artifact": "A0017-3"
+      }
+    },
+    {
+      "id": "W0017",
+      "kind": "work",
+      "authority": "accepted",
+      "visibility": "project",
+      "label": "Batching and tail latency in serving systems",
+      "text": "Batching and tail latency in serving systems",
+      "source": "corpus/W0017/work.yaml",
+      "fingerprint": null,
+      "metadata": {
+        "year": 2025
+      }
+    },
+    {
+      "id": "M0042",
+      "kind": "message",
+      "authority": "private",
+      "visibility": "private",
+      "label": "Yes at the corpus level: C0001 records the accepted claim",
+      "text": "Yes at the corpus level: C0001 records the accepted claim",
+      "source": "conversations/CS0001/messages.jsonl",
+      "fingerprint": null,
+      "metadata": {
+        "session": "CS0001",
+        "role": "assistant"
+      }
+    }
+  ]
+}

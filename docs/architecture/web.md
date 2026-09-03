@@ -128,6 +128,8 @@ web/
   src/views/manuscript/ the LaTeX workspace: the route, its four hooks, its three panes
   src/views/conversation/ the conversation workspace: the `/` route, its state, its hooks,
                         the transcript, the composer, the receipt, promotion, the inspector
+  src/views/conversation/attachments/
+                        intake, the tray, previews, the send check, `Save to corpus`
   src/pdf/              pdf.js adapter: worker, usePdfDocument, PdfPage
   src/render/           Markdown + KaTeX renderer
   src/editor/           CodeMirror LaTeX editor
@@ -234,7 +236,7 @@ one — a research pane that covers the draft on load is the thing §9 forbids.
 | Promotion | `session.promote` |
 | The model selector | `provider.list` |
 | Inspector tabs | `evidence.list`, `claim.list`, `review.inbox`, `state.stale`, `GET /overview` |
-| Attachment bytes already in a session | `GET /sessions/{id}/attachments/{sa}/bytes` and `/preview` |
+| Attachments | the byte route and the four `attachment.*` capabilities — see **Attachments** below |
 
 Every write is `MUTATE` and therefore researcher-only. An agent host reads the transcript,
 opens receipts and browses the inspector; Send, New session, Rename and Promote are absent or
@@ -302,13 +304,178 @@ the way out to the object's own page. The other direction is the point: the insp
 in the transcript. It reads the loaded transcript rather than the graph, so it keeps working
 while the projection is being rebuilt.
 
+### References and the graph
+
+`src/views/conversation/references/` is the Web half of Phase 20. Everything the workspace
+asks the ResearchGraph goes through it, and its rule is the one the projection itself is
+built on: the graph is a **disposable index with no authority of its own** (ADR-006), so
+this directory renders what the daemon returns and infers nothing from it.
+
+**Completion swaps providers, and the daemon chooses.** `useReferenceQuery`'s
+`ReferenceProvider` is a one-method seam with two implementations. `graph.autocomplete`
+completes over every namespace the projection holds — sessions, messages, attachments and
+manuscript files as well as the corpus and the scientific state — and each row arrives with
+its own `authority` and `visibility`, so a stale reference is offered *and marked* rather
+than hidden. `indexReferenceProvider` (task W1, over `state.index` and `evidence.list`)
+stays mounted behind it. `graph.status` picks: `available: false`, `rebuilding: true`, or a
+status read that fails at all, and the fallback answers instead. That is graph spec §8's
+*direct canonical reads remain possible if the graph is unavailable or rebuilding*, and the
+composer says so once, in the Design System's own `index-rebuilding` wording, with a *Check
+again* that re-reads the status when a rebuild finishes. A `graph.autocomplete` call that
+fails after the check falls back for that query rather than emptying the picker.
+
+**Every token is resolved before it is sent.** `graph.resolve` is the one `graph.*` read
+that does not answer from the index: existence, authority, privacy and anchor freshness come
+from the canonical file, or for a session from its durable record. `useResolveReferences`
+puts each answer back onto the draft's own token, so the composer needs no change, and lists
+the ones that did not come back clean above the box with the resolver's own sentence — the
+`Composer`'s `Tag` cannot carry a resolution state and `EntityRef` renders one as an icon
+*and* a word. A flagged token stays sendable: conversation spec §7 asks for *marked before
+sending*, not for the researcher to be stopped from writing about a reference they know is
+broken. `SendStarted.unresolved` is reconciled in afterwards and wins where it disagrees,
+because it describes the send that actually happened. Which of the five words a `ResolvedView`
+is shown as is the one presentational judgement in `references/mappers.ts`, and it is stated
+there: a missing deep link is `broken` (it named a target this project has not got), a
+missing `@` id is `unresolved` (the index may be rebuilding), `fresh: false` is `stale`, and
+`visibility: private` is `private`.
+
+**A deep link is a question, not a URL.** `rh://` in a message is handed to `deepLinks.ts`,
+which resolves it and only then navigates — plan §0.1 requires the project, existence,
+authority, privacy and anchor freshness to be checked *before* anything opens. A link that
+fails explains itself above the transcript in the daemon's words, and offers *Open anyway*
+only when the object exists.
+
+| link | route |
+|---|---|
+| `rh://artifact/A0017-3?page=6&block=B0081` | `/source/A0017-3?page=6&block=B0081` |
+| `rh://artifact/A0017-3` | `/corpus/W0017`, where the file is listed |
+| `rh://evidence/E0482`, `claim`, `work`, `version`, `question`, `decision` | their own pages |
+| `rh://session/CS0001?message=M0042` | `/?session=CS0001&message=M0042` |
+| `rh://attachment/SA0003` | the session the graph says holds it, attachment selected |
+| `rh://manuscript/main.tex?line=120` | `/manuscript?file=main.tex&line=120` |
+
+`/source/:artifactId` is new and is not on the navigation: an artifact is reached through a
+reference, never by browsing to "source". It is thin on purpose — `GET /blocks/{artifact}`
+for the stored parse, then the review screen's own `SourcePane`, so the page, the highlight
+and the geometry have one implementation. `ManuscriptWorkspace` reads `?file=` and `?line=`
+once per address and opens that position through its existing `openAt`.
+
+**The inspector traverses in both directions.** The Context tab's graph pane asks
+`graph.provenance` for the path to the exact artifact anchor — `C0001 → supports → E0482 →
+anchored_at → B0081 → contains → A0017-3`, ending in a `SourceAnchor` that opens the page
+and block — and `graph.neighbors` for one hop in both directions, grouped by relation. Two
+things it is careful about:
+
+* **The edge's authority is not the node's.** Accepted Evidence can be joined to a Claim by
+  an unreviewed proposal, so every scientific row carries both badges with "this relation
+  is" between them, and a `model_proposed` edge also says *proposed by a model, not
+  reviewed*. A candidate relation is never drawn as an accepted one (ADR-003).
+* **Privacy is the graph's answer.** The traversal is asked for under the session's egress
+  class — a `project` session passes `visibility: ['project']`, a `private` session asks for
+  everything on this machine, because private context never leaves it — and the result is
+  rendered exactly as it comes back. A private prior-session message missing from a
+  project-visible object's neighbourhood is missing because the daemon pruned the walk, and
+  nothing on this side filters, re-ranks or re-adds a neighbour (graph spec §8).
+
+This is the *second* half of the two-way navigation, not a replacement for the first: task
+W1's "where was this used?" reads the loaded transcript and keeps working while the
+projection rebuilds, and the graph pane adds what only the graph can see — the messages in
+*other* sessions that mentioned the same object, under the same egress class. Following a
+neighbour inside the pane changes what is followed and never which tab is open, so the walk
+out to the evidence and back to the claim is one movement.
+
+| Part | Capability |
+|---|---|
+| `@` completion | `graph.autocomplete`, or `state.index` + `evidence.list` when the graph cannot answer |
+| Which one answers, and the composer's notice | `graph.status` |
+| Every composer token, and every `rh://` link | `graph.resolve` |
+| The inspector's neighbourhood | `graph.neighbors` (one hop, both directions) |
+| The path to the exact artifact anchor | `graph.provenance` |
+
+`graph.query` is declared on the client and not yet called by a surface: nothing on these
+screens asks a structured kind/authority/link question that a neighbourhood or a listing
+does not already answer.
+
+### Attachments
+
+`src/views/conversation/attachments/` fills the composer's `onAttach` and `attachmentTray`.
+Its one rule follows from the rest of the screen's: an attachment is **session working
+material**, and only an explicit `Save to corpus` gives it a corpus identity.
+
+**Intake.** Files dropped anywhere on the composer, or chosen through its paperclip, reach
+one handler. `POST /sessions/{id}/attachments` is the single documented write that is not a
+capability call (plan §0.4): the raw file is the body, its media type is the `Content-Type`,
+and `?filename=` is display metadata the daemon reduces to a basename. It writes session-only
+bytes through the same service `attachment.add` uses, under the same researcher-only
+`mutate` authorisation, and can create no Work, Version, Artifact or Evidence.
+
+The lifecycle on screen is the daemon's, mirrored: a dropped file is a local row in
+`validating` until the route answers with the record it wrote — `ready`, or `failed`
+carrying the daemon's reason. Files upload one at a time and each result is recorded on its
+own, so **a batch with one refusal leaves the others ready**; a failed row keeps its `File`,
+so `Retry` re-uploads what was chosen rather than asking for it again. Nothing in the client
+decides that a PNG is too large or a PDF too long: it asks, and renders the answer.
+
+**The tray is the draft's files, not the session's.** `session.get` lists every attachment a
+session holds, including the ones past turns carry; those belong to their turn. The tray
+therefore shows the records no message references yet, plus the ones still arriving, and it
+is those ids that ride in `SendMessageRequest.attachments`. A tray that re-offered a sent
+file would silently attach it to every later message.
+
+**Previews.** Images get a thumbnail, a gallery with arrow keys, zoom and the original bytes
+to download; PDFs get a file card, a page viewer and page navigation, rendered by pdf.js
+through `src/pdf` over the attachment's *own bytes* (the card's thumbnail is still the
+daemon's PNG, which is what makes a tray of ten PDFs cheap). Every byte route carries the
+token in a header, so each file is drawn from an object URL and nothing is fetched from the
+network. The viewer says in words that previewing a file — or sending it to a model — adds
+nothing to the corpus. An unsupported type is never dropped and never given a preview it
+cannot honour: it keeps the generic card, its state and the daemon's reason.
+
+**Model compatibility.** `attachment.check_send` runs whenever the selected model or the set
+of attachments changes, and again immediately before a send, because those are two controls
+a researcher can change between one and the other. A blocked verdict fills the composer's
+`blockedReasons` with **every** blocked item — its own reason, its own suggested model —
+disables Send, and leaves the draft and the attachments exactly as they were. Size, page,
+count, media, egress and privacy are all decided in `conversation/attachments.py`; the
+client renames the answer and adds no rule. A check that could not run at all is reported as
+a note and blocks nothing: `session.send` runs the same check inside the mutation and
+refuses there, in the same words.
+
+`Context used` already lists attachments — `receipt_items` packs each one under the
+`attachments` context class as sent, converted or omitted, with the omission reason and the
+model that would have taken it — so the receipt needed no change.
+
+**`Save to corpus`.** Two capabilities, in order and never merged: `attachment.resolve_identity`
+is a read that answers what the bytes would become, and `attachment.save_to_corpus` acts on
+the researcher's confirmation. Nothing is preselected; an identity the resolver could not
+decide is offered as the two answers the capability accepts (`attach_to` a Work, or
+`as_new`), and a decided one sends no answer at all, because the save resolves again under
+the workspace lock. The result says what was created — `created: "nothing"` is the same bytes
+resolving to the existing Artifact — and states that **no evidence was created**, which is a
+field the daemon sets rather than a caveat the client adds. A failed promotion leaves the
+session copy intact, previewable and retryable, and the retry is the same save again.
+
+The flow is mounted in four places, all sharing one state, so a save started in one is
+reported in all: the composer's tray, the transcript's action row, the viewer, and the
+inspector's Context tab when the selected reference is an `SA####`.
+
+| Part | Capability or route |
+|---|---|
+| Intake | `POST /sessions/{id}/attachments` (session-only bytes) |
+| Remove | `attachment.remove` |
+| Compatibility before send | `attachment.check_send` |
+| Identity resolution | `attachment.resolve_identity` (a read) |
+| Promotion | `attachment.save_to_corpus` |
+| Bytes and page previews | `GET …/{sa}/bytes`, `GET …/{sa}/preview?page=N` |
+
+An agent host may read a transcript's attachments and may not attach: the intake is closed
+and says so in the daemon's own sentence, no attach control is offered, and a drop writes
+nothing.
+
 ### Slots left open on purpose
 
-* **Attachments (task W2).** The composer's `onAttach` and `attachmentTray` are unset, and no
-  upload exists here. Attachments a transcript already holds *are* drawn:
-  `useAttachmentUrls` fetches their bytes with the token header and turns them into object
-  URLs, the way `artifactBytes` does, so nothing is loaded from the network.
-* **Graph references (task W3).** `useReferenceQuery`'s provider, as above.
+* **Graph references (task W3).** Filled: the provider is `graph.autocomplete` with
+  the index provider behind it — see *References and the graph* above.
 
 ## The review screen
 

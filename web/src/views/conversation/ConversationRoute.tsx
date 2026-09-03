@@ -26,11 +26,13 @@ import type { PromotionTarget } from '@research-harness/design';
 import type { ConversationMessage } from '../../api/dto';
 import { ComposerPane } from './ComposerPane';
 import { PromoteDialog } from './PromoteDialog';
+import { DeepLinkNotice } from './references';
 import { Transcript } from './Transcript';
 import { useConversation } from './state';
 
 export function ConversationPage() {
-  const { sessions, selectMessage, inspectorOpen, setInspectorOpen } = useConversation();
+  const { sessions, selectMessage, inspectorOpen, setInspectorOpen, deepLinks } =
+    useConversation();
   const [params] = useSearchParams();
   const [attemptOf, setAttemptOf] = useState<Record<string, number>>({});
   const [promoting, setPromoting] = useState<{
@@ -85,11 +87,21 @@ export function ConversationPage() {
           </div>
         }
         transcript={
-          <Transcript
-            attemptOf={attemptOf}
-            onAttemptChange={onAttemptChange}
-            onPromote={onPromote}
-          />
+          <div className="rh-web-graph-frame">
+            {/* References and the graph (task W3): an `rh://` link the resolver refused
+                says so here, above the transcript it was clicked in, in the daemon's own
+                words — never by navigating somewhere plausible instead. */}
+            <DeepLinkNotice
+              problem={deepLinks.problem}
+              onDismiss={deepLinks.dismiss}
+              onOpenAnyway={deepLinks.openAnyway}
+            />
+            <Transcript
+              attemptOf={attemptOf}
+              onAttemptChange={onAttemptChange}
+              onPromote={onPromote}
+            />
+          </div>
         }
         composer={<ComposerPane />}
       />
