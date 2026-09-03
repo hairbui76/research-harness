@@ -29,13 +29,14 @@ sensitive-corpus switch that ADR-018 puts at provider selection.
    — data plus pure builders — and `registry.py` refuses, at import, a definition carrying a
    bypass flag, a shell operator, a local egress host, or research content in argv.
 2. **Bounded execution is native or nothing.** A runtime is routable only when the
-   *installed* version proves a no-tools, read-only posture through a help probe
-   (`bounded_mode: safe`); prompt text alone never counts. Codex runs `codex exec --json
-   --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --sandbox read-only
-   -c approval_policy="never" -C <temp cwd>`; Claude Code runs `claude -p --tools ""
-   --permission-mode dontAsk --permission-prompts none --strict-mcp-config
-   --disable-slash-commands --no-session-persistence --restricted`. A tool or file-write
-   event in a bounded run cancels the process and fails the request
+   *installed* version proves a no-tools, read-only posture (`bounded_mode: safe`) — a flag
+   posture through a help probe, an environment-injected posture through recorded fixtures,
+   because no help output can attest to a deny table. Prompt text alone never counts. Codex
+   runs `codex exec --json --skip-git-repo-check --ephemeral --ignore-user-config
+   --ignore-rules --sandbox read-only -c approval_policy="never" -C <temp cwd>`; Claude Code
+   runs `claude -p --tools "" --permission-mode dontAsk --permission-prompts none
+   --strict-mcp-config --disable-slash-commands --no-session-persistence --restricted`. A
+   tool or file-write event in a bounded run cancels the process and fails the request
    (`bounded_authority_violation`).
 3. **A CLI provider is external egress.** Every definition declares a vendor host or
    `unknown.external`; `privacy.external_models: disabled` refuses it before a process is
@@ -54,15 +55,19 @@ sensitive-corpus switch that ADR-018 puts at provider selection.
 
 ## Consequences
 
-- Cursor Agent, Amp, DeepSeek Harness, and Pi are detected and catalogued but not routable in
-  this release: none documents a deny-tools headless posture, so each reports `bounded_mode:
-  unsupported`, `research providers add` refuses it, and the scan says why. OpenCode is
-  bounded by an injected permission table rather than by flags. Admitting a runtime is a
-  change to one definition's `BoundedPosture` plus fixtures, not to the engine.
+- Five of the seven runtimes are detected and catalogued but not routable in this release,
+  and the scan says why for each. Cursor Agent, Amp, DeepSeek Harness, and Pi report
+  `bounded_mode: unsupported` — the first two run headless only behind an approval bypass, and
+  the other two execute tools of their own. OpenCode declares a deny table injected through
+  `OPENCODE_CONFIG_CONTENT`, which counts only on a version with recorded fixtures, and there
+  is none yet, so it reports `bounded_mode: unknown`. `research providers add` refuses all
+  five. Admitting a runtime is a change to one definition's `BoundedPosture` plus fixtures,
+  not to the engine.
 - A version the harness has no fixtures for is `warning`, and one whose version string cannot
-  be parsed is `unknown` — both still routable, because the bounded posture was proven on the
-  installed build. Only a version listed as incompatible is `blocked`. Refusing every
-  unrecognised version would break the provider on the CLI's next release.
+  be parsed is `unknown` — both still routable when a help probe proved the posture on the
+  installed build. Only a version that is known-incompatible or below the definition's minimum
+  version is `blocked`. Refusing every unrecognised version would break the provider on the
+  CLI's next release.
 - Detection spawns processes, so `provider.list` consults a 30-second in-memory cache and an
   explicit rescan bypasses it. No availability is canonical state.
 - Conversation streaming through a CLI answers in prose; structured workflow requests are
