@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -61,6 +62,31 @@ def test_a_successful_stream_yields_the_answer_usage_and_a_terminal_event(
     if model is not None:
         assert model in {event.model for event in events if event.kind == "model"}
     assert "tool" not in kinds(events)
+
+
+LIVE_PARSERS: dict[str, Callable[[], EventParser]] = {
+    "codex": lambda: JsonEventsParser("codex"),
+    "claude": ClaudeStreamParser,
+}
+
+
+def test_a_captured_live_stream_still_parses_to_a_finished_answer() -> None:
+    """Whatever the opt-in live smoke recorded must parse like the hand-written fixtures.
+
+    The captures are written by `tests/contract/providers/test_live_cli_smoke.py` with
+    `RESEARCH_HARNESS_LIVE_CLI_CAPTURE` set, so a workstation that has never run it has
+    nothing to check here (CLI providers spec §20).
+    """
+    captures = sorted(STREAMS.glob("*-live-*.jsonl"))
+    if not captures:
+        pytest.skip("no *-live-*.jsonl capture recorded; run the opt-in live CLI smoke first")
+    for path in captures:
+        runtime = path.name.split("-live-", 1)[0]
+        factory = LIVE_PARSERS.get(runtime)
+        assert factory is not None, f"{path.name}: no parser is registered for {runtime!r}"
+        events = run(factory(), path.name)
+        assert kinds(events)[-1:] == ["done"], f"{path.name}: ended on {kinds(events)[-3:]}"
+        assert text_of(events).strip(), f"{path.name}: the capture carried no answer text"
 
 
 def test_partial_claude_messages_stream_deltas_that_concatenate_to_the_final_text() -> None:
