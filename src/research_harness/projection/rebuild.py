@@ -178,6 +178,9 @@ class RebuildReport:
     fts_rows: int
     duration_ms: int
     ok: bool
+    graph_nodes: int = 0
+    graph_edges: int = 0
+    """Rows the ResearchGraph projection wrote alongside this rebuild; 0 when it was skipped."""
 
     @property
     def objects(self) -> int:
@@ -191,9 +194,14 @@ class RebuildReport:
                 f"rebuild refused: {len(self.invalid_files)} invalid canonical file(s); "
                 "the existing projection was left untouched"
             )
+        graph = (
+            f", graph {self.graph_nodes} nodes / {self.graph_edges} edges"
+            if self.graph_nodes or self.graph_edges
+            else ""
+        )
         return (
             f"rebuilt {self.objects} objects, {self.fts_rows} indexed rows, "
-            f"{self.stale_marks} stale marks in {self.duration_ms} ms"
+            f"{self.stale_marks} stale marks{graph} in {self.duration_ms} ms"
         )
 
 
@@ -463,6 +471,8 @@ def rebuild_workspace(
     digest = _canonical_digest(layout)
     stale_marks = 0
     fts_rows = 0
+    graph_nodes = 0
+    graph_edges = 0
     if not scan.invalid:
         directory = layout.research_dir if research_dir is None else Path(research_dir)
         directory.mkdir(parents=True, exist_ok=True)
@@ -478,6 +488,7 @@ def rebuild_workspace(
             scan.invalid.append(failure.invalid)
         else:
             _replace_database(temporary, target)
+            graph_nodes, graph_edges = _rebuild_graph(repo, directory)
         finally:
             _remove_database(temporary)
     return RebuildReport(
@@ -488,7 +499,28 @@ def rebuild_workspace(
         fts_rows=fts_rows,
         duration_ms=int((time.perf_counter() - started) * 1000),
         ok=not scan.invalid,
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges,
     )
+
+
+def _rebuild_graph(repo: WorkspaceRepository, directory: Path) -> tuple[int, int]:
+    """Rebuild the ResearchGraph beside the projection; returns ``(nodes, edges)``.
+
+    Imported here rather than at module scope because `graph/` reads this module's
+    `canonical_digest`. A graph failure is logged and reported as zero rows rather than
+    failing the rebuild: the graph is a navigation index, and a workspace whose canonical
+    files projected cleanly is not broken because its adjacency tables are missing
+    (ADR-006; graph spec §8 keeps direct canonical reads available).
+    """
+    from research_harness.graph.rebuild import rebuild_graph
+
+    try:
+        report = rebuild_graph(repo, research_dir=directory)
+    except (ResearchHarnessError, DatabaseError, OSError) as error:
+        logger.warning("the research graph was not rebuilt: %s", _reason(error))
+        return 0, 0
+    return report.nodes, report.edges
 
 
 def _build_database(
