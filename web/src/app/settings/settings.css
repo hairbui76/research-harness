@@ -1,0 +1,152 @@
+/*
+ * Layout for the Models & providers settings, and nothing else.
+ *
+ * Every surface, control and badge here belongs to the Design System; what is left is the
+ * arrangement of a runtime card and the two groups it sits in. Semantic `--rh-*` tokens
+ * only: `check-tokens.mjs` scans `web/src` and fails the lint on a colour literal.
+ */
+
+.rh-settings-providers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+  min-inline-size: 0;
+}
+
+/* The daemon's egress notice, and the rescan beside it. */
+.rh-settings-providers__toolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-3);
+}
+
+/* The rescan sits at the end whether or not the notice has arrived yet. */
+.rh-settings-providers__toolbar > :last-child {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+}
+
+.rh-settings-providers__notice {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-settings-providers__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+}
+
+.rh-settings-providers__group > h3 {
+  margin: 0;
+}
+
+.rh-settings-providers__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One runtime. */
+.rh-runtime-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  padding: var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
+.rh-runtime-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rh-space-2);
+}
+
+.rh-runtime-card__header > h4 {
+  margin: 0;
+}
+
+.rh-runtime-card__version {
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-runtime-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2);
+}
+
+.rh-runtime-card__guidance,
+.rh-runtime-card__egress,
+.rh-runtime-card__configured,
+.rh-runtime-card__reason,
+.rh-runtime-card__blocked {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+/* The daemon's per-runtime findings, one sentence each. */
+.rh-runtime-card__diagnostics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  margin: 0;
+  padding-inline-start: var(--rh-space-4);
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+/* Two columns on a wide dialog, one on a narrow one. */
+.rh-runtime-card__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--rh-space-3);
+}
+
+@media (max-width: 640px) {
+  .rh-runtime-card__form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rh-settings-providers__toolbar {
+    flex-direction: column;
+  }
+}
+
+.rh-runtime-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+/* The last test report the daemon sent for this entry. */
+.rh-runtime-card__test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-runtime-card__test--ok {
+  color: var(--rh-feedback-success-fg);
+}
+
+.rh-runtime-card__test--failed {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-runtime-card__diagnostic {
+  color: var(--rh-text-muted);
+}
