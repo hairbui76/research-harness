@@ -14,6 +14,9 @@ Wire format assumptions, so a future change is easy to spot and correct:
   `input_tokens_details.cached_tokens` and `output_tokens_details.reasoning_tokens`
   when present; `reasoning_tokens` is accounting only, not reasoning content.
 * `store: false` is sent so a research call is not retained server-side (Product SS34).
+* Media inputs are content parts beside the rendered text: an image is `input_image`
+  with a `data:` URL, a PDF is `input_file` with `file_data` plus its display filename.
+  The encoding lives in `providers/models/media.py`, not here.
 """
 
 from __future__ import annotations
@@ -39,6 +42,12 @@ from research_harness.providers.models.base import (
     resolve_api_key,
     usage_from,
 )
+from research_harness.providers.models.media import (
+    DOCUMENT_MEDIA_TYPES,
+    IMAGE_MEDIA_TYPES,
+    media_parts,
+    openai_media_part,
+)
 
 PROVIDER_NAME = "openai"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
@@ -54,6 +63,7 @@ def default_openai_capabilities(base_url: str = DEFAULT_BASE_URL) -> ProviderCap
         max_context_tokens=DEFAULT_MAX_CONTEXT_TOKENS,
         reasoning_levels={"low", "medium", "high"},
         vision=True,
+        input_media=IMAGE_MEDIA_TYPES | DOCUMENT_MEDIA_TYPES,
         egress=EgressDeclaration(
             endpoint_host=endpoint_host(base_url),
             sends_source_text=True,
@@ -144,7 +154,10 @@ class OpenAIProvider(HttpModelProvider):
                         {
                             "type": "input_text",
                             "text": render_inputs(request.inputs) or NO_INPUTS_PROMPT,
-                        }
+                        },
+                        # Media follows the rendered text so the attachments arrive in the
+                        # order the receipt lists them, after the prose that refers to them.
+                        *(openai_media_part(part) for part in media_parts(request.inputs)),
                     ],
                 }
             ],

@@ -32,7 +32,9 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, model_validator
+
+from research_harness.providers.models.media import IMAGE_MEDIA_TYPES, MediaPart
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +104,26 @@ class StructuredOutputError(ProviderError):
 # ----------------------------------------------------------------------- contract
 
 
+def _derive_media_and_vision(data: Any) -> Any:
+    """Keep `vision` and `input_media` two spellings of one fact (attachments design SS5).
+
+    `vision` predates media inputs and every existing caller, adapter default, and
+    workspace override still speaks it, so neither field is allowed to drift: stating
+    `vision=True` alone means the image types, listing image types alone means vision, and
+    stating both leaves them exactly as written.
+    """
+    if not isinstance(data, Mapping):
+        return data
+    if "input_media" in data and "vision" in data:
+        return data
+    if "input_media" in data:
+        media = {str(value) for value in data["input_media"] or ()}
+        return {**data, "vision": bool(media & IMAGE_MEDIA_TYPES)}
+    if data.get("vision"):
+        return {**data, "input_media": frozenset(IMAGE_MEDIA_TYPES)}
+    return data
+
+
 class ModelRequirements(BaseModel):
     """What a job needs from a model, in capability terms (Product SS20.2)."""
 
@@ -111,7 +133,16 @@ class ModelRequirements(BaseModel):
     context_tokens: int = Field(gt=0)
     reasoning: ReasoningLevel
     vision: bool = False
+    """Derived from `input_media`: true when the job sends an image. Kept as its own
+    field because routing and configuration have always spoken in these terms."""
+    input_media: frozenset[str] = frozenset()
+    """Media types this job needs the model to accept (attachments design SS5)."""
     max_output_tokens: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _media_and_vision_agree(cls, data: Any) -> Any:
+        return _derive_media_and_vision(data)
 
 
 class InputEnvelope(BaseModel):
@@ -119,6 +150,10 @@ class InputEnvelope(BaseModel):
 
     `object_id` is the harness ID of the source object (`None` for content that has no
     canonical object yet); `kind` labels what the content is for the model.
+
+    `media` carries the bytes of an attachment the model must actually see; `content`
+    stays the text that describes or accompanies it, so an envelope reads the same way
+    whether or not it has a file attached (attachments design SS5).
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -126,6 +161,7 @@ class InputEnvelope(BaseModel):
     object_id: str | None = None
     kind: str
     content: str
+    media: MediaPart | None = None
 
 
 class ModelRequest[T: BaseModel](BaseModel):
@@ -220,7 +256,16 @@ class ProviderCapabilities(BaseModel):
     max_context_tokens: int
     reasoning_levels: set[str]
     vision: bool
+    """Derived from `input_media` when only one of the two is declared; see
+    `_derive_media_and_vision`. A configured override still wins over both."""
+    input_media: frozenset[str] = frozenset()
+    """Media types this provider/model accepts as input (attachments design SS5)."""
     egress: EgressDeclaration
+
+    @model_validator(mode="before")
+    @classmethod
+    def _media_and_vision_agree(cls, data: Any) -> Any:
+        return _derive_media_and_vision(data)
 
 
 class ProviderSettings(BaseModel):

@@ -14,7 +14,7 @@ live provider would, and invalid model output still cannot reach staging (ADR-00
 from __future__ import annotations
 
 import json
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
 from pydantic import BaseModel
@@ -27,6 +27,12 @@ from research_harness.providers.models.base import (
     ProviderResponseError,
     RawCompletion,
     Usage,
+)
+from research_harness.providers.models.media import (
+    IMAGE_MEDIA_TYPES,
+    MediaPart,
+    media_parts,
+    normalize_media_type,
 )
 from research_harness.providers.models.router import ModelRouter, ProviderEntry
 
@@ -48,13 +54,21 @@ ScriptedScript = Sequence[ScriptedResponse] | Callable[[ModelRequest[Any]], Scri
 """Either a queue of replies consumed in order, or a function of the request."""
 
 
-def default_scripted_capabilities() -> ProviderCapabilities:
-    """Everything a role can ask for, and an explicit declaration of no egress."""
+def default_scripted_capabilities(*, input_media: Iterable[str] = ()) -> ProviderCapabilities:
+    """Everything a role can ask for, and an explicit declaration of no egress.
+
+    `input_media` is the one deliberately configurable capability: a scripted provider
+    stands in for a real model in tests, and an attachment send has to be exercised
+    against both a model that accepts the media and one that does not (attachments design
+    SS5). Passing image types also sets `vision`, exactly as a real adapter's defaults do.
+    """
+    media = frozenset(normalize_media_type(value) for value in input_media)
     return ProviderCapabilities(
         structured_output=True,
         max_context_tokens=2_000_000,
         reasoning_levels={"low", "medium", "high"},
-        vision=False,
+        vision=bool(media & IMAGE_MEDIA_TYPES),
+        input_media=media,
         egress=EgressDeclaration(
             endpoint_host="localhost",
             sends_source_text=False,
@@ -103,6 +117,16 @@ class ScriptedProvider(ModelProvider):
     def capabilities(self) -> ProviderCapabilities:
         """Full capabilities with a no-egress declaration (Product §34)."""
         return self._capabilities
+
+    @property
+    def media(self) -> list[MediaPart]:
+        """Every media part this provider has been handed, in call order.
+
+        Recorded separately from `requests` so a test can assert that an attachment
+        reached the model exactly once, which is the property the `Context used` receipt
+        claims (attachments design SS5).
+        """
+        return [part for request in self.requests for part in media_parts(request.inputs)]
 
     def _execute[T: BaseModel](
         self, request: ModelRequest[T], schema_json: dict[str, Any]

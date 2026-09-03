@@ -67,6 +67,11 @@ def default_local_capabilities(base_url: str = DEFAULT_BASE_URL) -> ProviderCapa
         max_context_tokens=DEFAULT_MAX_CONTEXT_TOKENS,
         reasoning_levels={"low", "medium"},
         vision=False,
+        # A small local server is assumed to read text only, so it takes no media input at
+        # all: a text attachment reaches it converted (inlined into the prompt) rather than
+        # uploaded, and an image is refused before the request is built. A served model
+        # that does take images declares `vision: true` in research.yaml.
+        input_media=frozenset(),
         egress=EgressDeclaration(
             endpoint_host=host,
             sends_source_text=not loopback,

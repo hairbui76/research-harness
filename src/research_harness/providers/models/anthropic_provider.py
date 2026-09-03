@@ -21,6 +21,9 @@ Wire format, checked against the current Claude API reference:
   is no separate reasoning counter to normalize.
 * Usage: `input_tokens`, `output_tokens`, and `cache_read_input_tokens` mapped to
   `cached_input_tokens`.
+* Media inputs are content blocks beside the rendered text: an image is an `image` block
+  and a PDF a `document` block, both with a base64 `source`. The encoding lives in
+  `providers/models/media.py`, not here.
 """
 
 from __future__ import annotations
@@ -46,6 +49,12 @@ from research_harness.providers.models.base import (
     resolve_api_key,
     usage_from,
 )
+from research_harness.providers.models.media import (
+    DOCUMENT_MEDIA_TYPES,
+    IMAGE_MEDIA_TYPES,
+    anthropic_media_block,
+    media_parts,
+)
 
 PROVIDER_NAME = "anthropic"
 DEFAULT_BASE_URL = "https://api.anthropic.com"
@@ -66,6 +75,7 @@ def default_anthropic_capabilities(base_url: str = DEFAULT_BASE_URL) -> Provider
         max_context_tokens=DEFAULT_MAX_CONTEXT_TOKENS,
         reasoning_levels={"low", "medium", "high"},
         vision=True,
+        input_media=IMAGE_MEDIA_TYPES | DOCUMENT_MEDIA_TYPES,
         egress=EgressDeclaration(
             endpoint_host=endpoint_host(base_url),
             sends_source_text=True,
@@ -166,7 +176,10 @@ class AnthropicProvider(HttpModelProvider):
                         {
                             "type": "text",
                             "text": render_inputs(request.inputs) or NO_INPUTS_PROMPT,
-                        }
+                        },
+                        # Media follows the rendered text so the attachments arrive in the
+                        # order the receipt lists them, after the prose that refers to them.
+                        *(anthropic_media_block(part) for part in media_parts(request.inputs)),
                     ],
                 }
             ],
