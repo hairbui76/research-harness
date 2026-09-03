@@ -150,6 +150,10 @@ _RATE = re.compile(
 )
 _MODEL = re.compile(
     r"unknown model|model not found|unsupported model|invalid model|no such model"
+    # The upstream wording a Codex turn fails with when the account cannot reach the
+    # requested model. Matched as the whole phrase, never a bare "does not exist", which
+    # a missing file or a missing thread would also say.
+    r"|does not exist or you do not have access"
     r"|not available for",
     re.IGNORECASE,
 )
