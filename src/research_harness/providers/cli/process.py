@@ -68,7 +68,25 @@ def _popen_kwargs() -> dict[str, Any]:
     return {"start_new_session": True}
 
 
-def _kill_tree(process: subprocess.Popen[bytes], *, force: bool) -> None:
+def _group_id(process: subprocess.Popen[bytes]) -> int | None:
+    """Capture the child's process-group id now, while it is certainly still alive.
+
+    `start_new_session=True` makes the child its own group leader, so this equals its pid.
+    Capturing it once is what makes group signalling safe: `poll()` reaps the child, and a
+    reaped pid is free for reuse, so signalling `process.pid` afterwards could reach an
+    unrelated group. Linux keeps a `struct pid` alive while any process still references it
+    as a pgid, so the id captured here stays reserved for as long as anything in the tree
+    lives -- the stale-pid window is closed by construction. Windows kills by pid instead.
+    """
+    if _WINDOWS:  # pragma: no cover - exercised on Windows only
+        return None
+    try:
+        return os.getpgid(process.pid)
+    except ProcessLookupError:  # pragma: no cover - unreachable before the first reap
+        return process.pid
+
+
+def _kill_tree(process: subprocess.Popen[bytes], pgid: int | None, *, force: bool) -> None:
     if process.poll() is not None and not force:
         return
     if _WINDOWS:  # pragma: no cover - exercised on Windows only
@@ -79,9 +97,9 @@ def _kill_tree(process: subprocess.Popen[bytes], *, force: bool) -> None:
         return
     sig = signal.SIGKILL if force else signal.SIGTERM
     try:
-        os.killpg(process.pid, sig)
+        os.killpg(pgid if pgid is not None else process.pid, sig)
     except ProcessLookupError:
-        return
+        return  # every member of the group is already gone
     except PermissionError:  # pragma: no cover - a foreign group; fall back to the child
         process.send_signal(sig)
 
@@ -104,10 +122,11 @@ def run_probe(
         return ProbeOutcome(
             argv=argv, exit_code=None, stdout="", stderr="", os_error=_os_error_text(exc)
         )
+    pgid = _group_id(process)
     try:
         out, err = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        _kill_tree(process, force=True)
+        _kill_tree(process, pgid, force=True)
         out, err = process.communicate()
         return ProbeOutcome(
             argv=argv,
@@ -132,6 +151,7 @@ class BoundedProcess:
         self, process: subprocess.Popen[bytes], *, timeout: float, output_limit: int
     ) -> None:
         self._process = process
+        self._pgid = _group_id(process)
         self._deadline = time.monotonic() + timeout
         self._limit = output_limit
         self._lines: queue.Queue[str | Exception | None] = queue.Queue()
@@ -190,22 +210,28 @@ class BoundedProcess:
     # -- stdout --------------------------------------------------------------
 
     def _drain_stdout(self, stream: IO[bytes]) -> None:
+        # The size argument is the bound: a line longer than the cap is never materialised
+        # whole, it comes back truncated and trips the check below.
         try:
-            for raw in iter(stream.readline, b""):
-                self._bytes_read += len(raw)
-                if len(raw) > MAX_LINE_BYTES or self._bytes_read > self._limit:
-                    self._lines.put(OutputLimitExceeded())
-                    return
-                self._lines.put(raw.decode("utf-8", errors="replace").rstrip("\r\n"))
+            with contextlib.suppress(ValueError, OSError):
+                for raw in iter(lambda: stream.readline(MAX_LINE_BYTES + 1), b""):
+                    self._bytes_read += len(raw)
+                    if len(raw) > MAX_LINE_BYTES or self._bytes_read > self._limit:
+                        self._lines.put(OutputLimitExceeded())
+                        return
+                    self._lines.put(raw.decode("utf-8", errors="replace").rstrip("\r\n"))
         finally:
             self._lines.put(None)
 
     def _drain_stderr(self, stream: IO[bytes]) -> None:
-        for chunk in iter(lambda: stream.read(4096), b""):
-            self._stderr.append(chunk)
-            self._stderr_bytes += len(chunk)
-            while self._stderr_bytes > STDERR_TAIL_BYTES and len(self._stderr) > 1:
-                self._stderr_bytes -= len(self._stderr.popleft())
+        # Suppressed because a stream closed underneath a reader raises into the thread,
+        # where it would surface only as an unhandled-thread-exception warning.
+        with contextlib.suppress(ValueError, OSError):
+            for chunk in iter(lambda: stream.read(4096), b""):
+                self._stderr.append(chunk)
+                self._stderr_bytes += len(chunk)
+                while self._stderr_bytes > STDERR_TAIL_BYTES and len(self._stderr) > 1:
+                    self._stderr_bytes -= len(self._stderr.popleft())
 
     def lines(self) -> Iterator[str]:
         """Yield stdout lines until EOF; raise on the deadline or the output cap."""
@@ -244,15 +270,20 @@ class BoundedProcess:
             return None
 
     def cancel(self, *, grace: float = CANCEL_GRACE_SECONDS) -> None:
-        """Close stdin, terminate the tree, kill it after ``grace`` seconds."""
+        """Close stdin, terminate the tree, kill it after ``grace`` seconds.
+
+        Idempotent and bounded, so it is safe to call twice and safe to call on a child that
+        has already exited: a grandchild that inherited the pipes can still be holding them
+        open, and only signalling the group lets the reader threads reach EOF.
+        """
         self.close_stdin()
-        if not self.running:
-            _kill_tree(self._process, force=True)  # reap grandchildren that outlived the child
-            return
-        _kill_tree(self._process, force=False)
-        if self.wait(grace) is None:
-            _kill_tree(self._process, force=True)
-            self.wait(grace)
+        if self.running:
+            _kill_tree(self._process, self._pgid, force=False)
+            if self.wait(grace) is None:
+                _kill_tree(self._process, self._pgid, force=True)
+                self.wait(grace)
+        # Unconditional: reaps grandchildren that outlived the direct child.
+        _kill_tree(self._process, self._pgid, force=True)
         for reader in self._readers:
             reader.join(timeout=1.0)
 
@@ -266,8 +297,10 @@ class BoundedProcess:
         tb: TracebackType | None,
     ) -> None:
         del exc_type, exc, tb
-        if self.running:
-            self.cancel()
+        # Always, never `if self.running`: an exited child can leave a grandchild holding the
+        # pipes, and closing a stream while its reader thread is blocked on it deadlocks on
+        # the buffered-reader lock. `cancel` joins the readers, so the closes below are safe.
+        self.cancel()
         for stream in (self._process.stdout, self._process.stderr):
             if stream is not None:
                 with contextlib.suppress(OSError):
