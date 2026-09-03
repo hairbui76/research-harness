@@ -293,3 +293,9 @@ Some output reads like a problem and is not:
 | `[note] projection  not built yet` | a fresh workspace; run `research rebuild` |
 | `[note] daemon token  not created yet` | `serve` was never started |
 | `already registered; nothing was written` | the same bytes were already ingested |
+
+## `ModuleNotFoundError: No module named 'fcntl'` on Windows
+
+Versions before the cross-platform lock imported `fcntl` unconditionally. Update to a
+build that includes `workspace/locking.py` with the `msvcrt` branch (`git pull`, then
+`uv sync`). `research doctor` must run without a traceback afterwards.

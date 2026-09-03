@@ -77,6 +77,23 @@ error: no research workspace at or above /tmp: run `research init <dir>`, pass -
 Working inside the project directory is the usual case, so most examples in this guide
 omit `-w`.
 
+## Windows
+
+The harness runs on Windows (PowerShell or cmd) with the same commands; two differences:
+
+- The workspace lock uses a `msvcrt` byte-range lock instead of `flock`; behaviour is the
+  same (one writer at a time, waiters see who holds it).
+- Shell one-liners in this guide use POSIX syntax. The Web cockpit URL, for example, is
+
+  ```powershell
+  research serve
+  Start-Process "http://127.0.0.1:8765/?token=$(Get-Content .research\daemon-token)"
+  ```
+
+Paths in `research.yaml` and in command output use the platform's separators; canonical
+files are still UTF-8 with `\n` line endings, so a workspace moves between platforms
+unchanged (configure Git with `core.autocrlf=false` for the workspace).
+
 ## Next
 
 * [Workspace](workspace.md) — what `init` created and what belongs in Git.

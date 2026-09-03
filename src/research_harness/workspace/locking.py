@@ -1,6 +1,7 @@
 """The workspace lock that serializes accepted-state mutation (Product 8.2).
 
-One advisory `flock` on `.research/lock` is what makes "validate the change, its event, and
+One advisory lock on `.research/lock` (`flock` on POSIX, a `msvcrt` byte-range lock on
+Windows) is what makes "validate the change, its event, and
 its invalidation set, then commit" a single logical unit across processes: a CLI, an editor
 extension, and a server can all hold the same workspace open, but only one of them mutates
 accepted state at a time. The lock file also carries the holder's pid and timestamp so a
@@ -13,10 +14,11 @@ researcher editing YAML by hand (Product 36 accepts that and validates on next l
 from __future__ import annotations
 
 import errno
-import fcntl
 import json
 import logging
 import os
+import platform
+import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -26,12 +28,39 @@ from typing import Any, Self
 from research_harness.domain.errors import WorkspaceError
 from research_harness.workspace.layout import WorkspaceLayout
 
+if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
+    import msvcrt
+else:
+    import fcntl
+
 __all__ = ["DEFAULT_LOCK_TIMEOUT", "WorkspaceLock", "WorkspaceLockedError", "lock_holder"]
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_LOCK_TIMEOUT = 30.0
 _POLL_INTERVAL = 0.02
+#: Windows locks a byte range rather than the whole file. The range sits far past the holder
+#: payload (locking beyond EOF is allowed) so waiters can still read who holds the lock.
+_WIN_LOCK_OFFSET = 1 << 30
+_WIN_LOCK_BYTES = 1
+_BUSY_ERRNOS = (errno.EACCES, errno.EAGAIN, getattr(errno, "EDEADLOCK", errno.EAGAIN))
+
+
+def _try_lock(fd: int) -> None:
+    """Take the exclusive lock without blocking; raise ``OSError`` when it is busy."""
+    if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
+        os.lseek(fd, _WIN_LOCK_OFFSET, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, _WIN_LOCK_BYTES)
+    else:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock(fd: int) -> None:
+    if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
+        os.lseek(fd, _WIN_LOCK_OFFSET, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, _WIN_LOCK_BYTES)
+    else:
+        fcntl.flock(fd, fcntl.LOCK_UN)
 
 
 class WorkspaceLockedError(WorkspaceError):
@@ -92,10 +121,10 @@ class WorkspaceLock:
         try:
             while True:
                 try:
-                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    _try_lock(fd)
                     break
                 except OSError as exc:
-                    if exc.errno not in (errno.EACCES, errno.EAGAIN):  # pragma: no cover
+                    if exc.errno not in _BUSY_ERRNOS:  # pragma: no cover
                         raise
                     if time.monotonic() >= deadline:
                         raise WorkspaceLockedError(self._timeout_message()) from exc
@@ -114,7 +143,7 @@ class WorkspaceLock:
             return
         self._fd = None
         try:
-            fcntl.flock(fd, fcntl.LOCK_UN)
+            _unlock(fd)
         finally:
             os.close(fd)
 
@@ -166,6 +195,6 @@ class WorkspaceLock:
 
 def _hostname() -> str:
     try:
-        return os.uname().nodename
-    except (AttributeError, OSError):  # pragma: no cover - non-POSIX platforms
+        return platform.node() or "unknown"
+    except OSError:  # pragma: no cover - diagnostics only
         return "unknown"
