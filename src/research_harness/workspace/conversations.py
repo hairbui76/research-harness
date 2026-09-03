@@ -271,6 +271,58 @@ class ConversationStore:
             self._commit(transaction)
         return message
 
+    def reserve_message_id(self, session: ConversationSessionId) -> MessageId:
+        """Take the next `M####` durably, without writing a message yet.
+
+        A streamed answer needs its id before it has any content: every delta a client
+        reads names the message it belongs to, and a client that reconnects has to find
+        that message in the transcript. The reservation is written onto the session record
+        inside the lock and counted by the allocator, so no concurrent append can hand the
+        same id out twice; :meth:`append_reserved_message` releases it.
+        """
+        with self._locked():
+            record = self.get_session(session)
+            message_id = MessageId.next(self._durable_message_ids())
+            updated = record.touch(reserved_messages=(*record.reserved_messages, message_id))
+            transaction = Transaction(self._layout)
+            transaction.write(self._layout.session_file(session), canonical_bytes(updated))
+            self._commit(transaction)
+        return message_id
+
+    def append_reserved_message(self, session: ConversationSessionId, message: Message) -> Message:
+        """Append a message built on a reserved id, releasing the reservation.
+
+        The transcript line, the session counters, and the released reservation are one
+        journalled unit, exactly as an ordinary append is: a reader never sees a message
+        whose id the session still believes is outstanding.
+        """
+        with self._locked():
+            record = self.get_session(session)
+            if message.session != session:
+                raise WorkspaceError(
+                    f"message {message.id} names session {message.session}, not {session}"
+                )
+            if message.id not in record.reserved_messages:
+                raise ConversationNotFoundError(
+                    f"message id {message.id} is not reserved in session {session}"
+                )
+            updated = record.touch(
+                message_count=record.message_count + 1,
+                last_message=message.id,
+                last_message_at=message.created_at,
+                reserved_messages=tuple(
+                    item for item in record.reserved_messages if item != message.id
+                ),
+            )
+            transaction = Transaction(self._layout)
+            transaction.append(
+                self._layout.messages_file(session),
+                dump_jsonl_line(message).encode("utf-8"),
+            )
+            transaction.write(self._layout.session_file(session), canonical_bytes(updated))
+            self._commit(transaction)
+        return message
+
     def iter_messages(self, session: ConversationSessionId) -> Iterator[Message]:
         """Stream a transcript in append order; a session with no messages yields none."""
         yield from iter_jsonl(self._layout.messages_file(session), Message)
@@ -544,6 +596,9 @@ class ConversationStore:
         `session.yaml` and `messages.jsonl` are written in one journalled unit, so the
         session record is enough; a session whose record was lost falls back to its own
         transcript rather than restarting the numbering.
+
+        Reserved ids count as taken: a stream that has an id but has not written its
+        message yet must not have that id handed to somebody else.
         """
         highest: list[str] = []
         for directory in self._session_directories():
@@ -552,6 +607,7 @@ class ConversationStore:
                 session = read_yaml(record, ConversationSession)
                 if session.last_message is not None:
                     highest.append(str(session.last_message))
+                highest.extend(str(item) for item in session.reserved_messages)
                 continue
             highest.extend(
                 str(message.id) for message in iter_jsonl(directory / MESSAGES_FILENAME, Message)

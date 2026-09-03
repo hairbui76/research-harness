@@ -319,6 +319,16 @@ class ConversationSession(CanonicalObject):
     summarized_through: MessageId | None = None
     """Last message the derived `summary.md` covers; a summary never covers more."""
     summary_updated_at: UtcDatetime | None = None
+    reserved_messages: tuple[MessageId, ...] = ()
+    """`M####` handed out for a streaming answer that has not been appended yet.
+
+    A streamed message must have its id *before* its content exists: the events a client
+    reads name the message every delta belongs to, so a reservation is written here, is
+    durable, and is excluded from the next allocation. It is released when the message is
+    appended -- complete, interrupted, or failed. A process that dies mid-stream leaves an
+    unused id, which costs a gap in the numbering and nothing else; ids must be unique,
+    not consecutive.
+    """
 
     @model_validator(mode="after")
     def _counters_agree(self) -> ConversationSession:
@@ -328,6 +338,8 @@ class ConversationSession(CanonicalObject):
             raise ValueError("last_message and last_message_at must be recorded together")
         if self.summarized_through is not None and self.summary_updated_at is None:
             raise ValueError("a summary that covers a message must record when it was written")
+        if len(set(self.reserved_messages)) != len(self.reserved_messages):
+            raise ValueError("a message id is reserved at most once")
         return self
 
 
