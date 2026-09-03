@@ -8,16 +8,27 @@ them and treats one as a bounded-authority violation.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from research_harness.providers.models.base import Usage
 
 if TYPE_CHECKING:  # pragma: no cover - typing only, avoids a cycle with types.py consumers
     from research_harness.providers.cli.types import CliRuntimeDef, ProtocolFamily
 
-__all__ = ["PARSERS", "CliEvent", "EventKind", "EventParser", "ParserFactory", "parser_for"]
+__all__ = [
+    "PARSERS",
+    "CliEvent",
+    "EventKind",
+    "EventParser",
+    "ParserFactory",
+    "json_payload",
+    "load_json_object",
+    "parser_for",
+    "register",
+]
 
 EventKind = Literal[
     "text_delta", "final_text", "usage", "model", "stop", "status", "error", "tool", "done"
@@ -65,6 +76,24 @@ def register(family: ProtocolFamily, factory: ParserFactory) -> None:
 def parser_for(definition: CliRuntimeDef) -> EventParser:
     """A fresh parser for one run of `definition`."""
     return PARSERS[definition.protocol](definition)
+
+
+def json_payload(line: str) -> str:
+    """The JSON text on `line`, or `""` when it is blank or a `#` comment line."""
+    stripped = line.strip()
+    return "" if not stripped or stripped.startswith("#") else stripped
+
+
+def load_json_object(line: str) -> dict[str, Any] | None:
+    """Skips blank and `#` comment lines; the parsed JSON object, or `None` for anything else."""
+    payload = json_payload(line)
+    if not payload:
+        return None
+    try:
+        value = json.loads(payload)
+    except ValueError:
+        return None
+    return value if isinstance(value, dict) else None
 
 
 # Register the four parsers by importing them; each module calls `register` on import.

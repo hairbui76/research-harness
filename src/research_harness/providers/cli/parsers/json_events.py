@@ -9,11 +9,10 @@ step at end of stream is the terminal signal.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from research_harness.providers.cli.parsers import CliEvent, register
+from research_harness.providers.cli.parsers import CliEvent, load_json_object, register
 from research_harness.providers.cli.types import JsonEventsVariant
 from research_harness.providers.models.base import first_mapping, iter_mappings, usage_from
 
@@ -22,17 +21,6 @@ __all__ = ["JsonEventsParser"]
 _CODEX_TOOL_ITEMS = frozenset(
     {"command_execution", "file_change", "mcp_tool_call", "web_search", "tool_call"}
 )
-
-
-def _load(line: str) -> dict[str, Any] | None:
-    stripped = line.strip()
-    if not stripped or stripped.startswith("#"):
-        return None
-    try:
-        value = json.loads(stripped)
-    except ValueError:
-        return None
-    return value if isinstance(value, dict) else None
 
 
 def _message(value: Any, fallback: str) -> str:
@@ -62,7 +50,7 @@ class JsonEventsParser:
         self._opencode_failed = False
 
     def feed(self, line: str) -> Iterable[CliEvent]:
-        obj = _load(line)
+        obj = load_json_object(line)
         if obj is None:
             return []
         if self._variant == "codex":

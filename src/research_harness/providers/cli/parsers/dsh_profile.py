@@ -11,7 +11,7 @@ import json
 from collections.abc import Iterable
 from typing import Any
 
-from research_harness.providers.cli.parsers import CliEvent, register
+from research_harness.providers.cli.parsers import CliEvent, json_payload, register
 from research_harness.providers.models.base import first_mapping, usage_from
 
 __all__ = ["DshProfileParser"]
@@ -38,11 +38,13 @@ class DshProfileParser:
     """Translate one DeepSeek Harness profile run into the event vocabulary."""
 
     def feed(self, line: str) -> Iterable[CliEvent]:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
+        payload = json_payload(line)
+        if not payload:
             return []
+        # Parsed strictly here rather than through `load_json_object`: on this channel
+        # unparseable JSON is a protocol violation, not a line to skip.
         try:
-            frame: Any = json.loads(stripped)
+            frame: Any = json.loads(payload)
         except ValueError:
             return [
                 CliEvent(

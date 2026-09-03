@@ -7,25 +7,13 @@ the terminal event. `tool_execution_start` is a `tool` event.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from research_harness.providers.cli.parsers import CliEvent, register
+from research_harness.providers.cli.parsers import CliEvent, load_json_object, register
 from research_harness.providers.models.base import first_mapping, usage_from
 
 __all__ = ["PiRpcParser"]
-
-
-def _load(line: str) -> dict[str, Any] | None:
-    stripped = line.strip()
-    if not stripped or stripped.startswith("#"):
-        return None
-    try:
-        value = json.loads(stripped)
-    except ValueError:
-        return None
-    return value if isinstance(value, dict) else None
 
 
 class PiRpcParser:
@@ -35,7 +23,7 @@ class PiRpcParser:
         self._failed = False
 
     def feed(self, line: str) -> Iterable[CliEvent]:
-        obj = _load(line)
+        obj = load_json_object(line)
         if obj is None:
             return []
         kind = obj.get("type")
