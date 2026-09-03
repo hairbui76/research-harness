@@ -1,0 +1,17 @@
+schema_name: paper
+version: 1.0.0
+fields:
+  - name: minimal.traffic_unit
+    question: >-
+      Which unit of network traffic does the paper treat as one sample? Quote the sentence
+      that states it.
+    evidence_types:
+      - method_description
+      - representation_description
+    value_kind: categorical
+    risk: 1
+    required: false
+    categories:
+      - packet
+      - flow
+      - session

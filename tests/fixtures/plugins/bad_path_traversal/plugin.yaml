@@ -1,0 +1,10 @@
+name: bad-path-traversal
+version: 0.1.0
+requires_core: ">=0.1"
+description: A manifest that names a file outside its own directory.
+contributes:
+  validators:
+    - ../minimal/validators/traffic_unit.py
+permissions:
+  capabilities:
+    - work.get

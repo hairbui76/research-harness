@@ -1,0 +1,12 @@
+name: bad-role-widened
+version: 0.1.0
+requires_core: ">=0.1"
+description: A role that reuses a core role's name and grants it more than the core does.
+contributes:
+  roles:
+    - roles/extractor.yaml
+permissions:
+  capabilities:
+    - work.get
+    - retrieval.resolve_source
+    - claim.find_support

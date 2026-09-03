@@ -1,0 +1,8 @@
+name: bad-accept-permission
+version: 0.1.0
+requires_core: ">=0.1"
+description: A manifest asking for the acceptance capability that only a researcher holds.
+permissions:
+  capabilities:
+    - work.get
+    - evidence.accept

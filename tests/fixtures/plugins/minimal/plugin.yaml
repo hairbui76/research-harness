@@ -1,0 +1,40 @@
+name: minimal
+version: 0.1.0
+requires_core: ">=0.1,<1.0"
+description: >-
+  The smallest plugin that exercises every extension point: one vocabulary, one
+  interrogation field, two validators, one workflow fragment, one bounded role, one
+  search provider, one writing policy, and one UI descriptor.
+
+contributes:
+  schemas:
+    - schemas/traffic.yaml
+  interrogation:
+    - interrogation/paper.yaml
+  validators:
+    - validators/traffic_unit.py
+    - validators/namespace_probe.py
+  workflows:
+    - workflows/audit.yaml
+  roles:
+    - roles/domain_reviewer.yaml
+  search_providers:
+    - providers/example_index.py
+  writing_policies:
+    - writing/style.yaml
+  ui_extensions:
+    - ui/matrix.yaml
+
+egress:
+  - endpoint_host: index.example.org
+    sends_source_text: false
+    sends_identifiers: true
+    description: Sends the query string and DOIs; never sends source text.
+
+permissions:
+  capabilities:
+    - work.get
+    - evidence.extract
+    - review.inbox
+  roles_used:
+    - evidence_extractor

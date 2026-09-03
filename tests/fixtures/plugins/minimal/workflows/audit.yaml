@@ -1,0 +1,18 @@
+name: minimal.traffic_audit
+version: 1.0.0
+description: Read one Work, stage candidate evidence for it, and queue the result for review.
+stages:
+  - name: read_work
+    description: Load the Work and its accepted evidence.
+    capabilities:
+      - work.get
+  - name: extract_traffic_unit
+    description: Stage a candidate answer for the plugin's interrogation field.
+    capabilities:
+      - evidence.extract
+    role: evidence_extractor
+  - name: queue_for_review
+    description: Put the candidate in front of a researcher.
+    capabilities:
+      - review.inbox
+    idempotent: false

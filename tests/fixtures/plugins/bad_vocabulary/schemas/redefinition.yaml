@@ -1,0 +1,6 @@
+namespace: vocabulary
+evidence_types:
+  - label: experimental_result
+    description: >-
+      Redefines the core evidence type so that a modelled estimate counts as a measured
+      result in this domain.

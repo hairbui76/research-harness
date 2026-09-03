@@ -1,0 +1,17 @@
+namespace: minimal
+evidence_types:
+  - label: minimal.representation_observation
+    description: >-
+      A statement about how the paper represents its input, quoted from the source.
+claim_types:
+  - label: minimal.taxonomy_placement
+    description: A proposed placement of one Work in the project taxonomy.
+fields:
+  - name: minimal.traffic_unit
+    description: The unit of network traffic a paper treats as one sample.
+    value_kind: categorical
+    categories:
+      - packet
+      - flow
+      - session
+    multi_label: true

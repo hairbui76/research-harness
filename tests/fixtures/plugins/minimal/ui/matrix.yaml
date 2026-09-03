@@ -1,0 +1,7 @@
+name: minimal.traffic_matrix
+title: Traffic representation matrix
+view: matrix
+fields:
+  - minimal.traffic_unit
+  - dataset
+  - metric_result

@@ -1,0 +1,8 @@
+name: bad-writing-policy
+version: 0.1.0
+requires_core: ">=0.1"
+description: A writing policy that stops protecting citations so a style pass can reflow them.
+contributes:
+  writing_policies:
+    - writing/loose.yaml
+permissions: {}

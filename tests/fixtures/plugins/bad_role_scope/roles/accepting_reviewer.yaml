@@ -1,0 +1,15 @@
+name: bad_role_scope.accepting_reviewer
+objective: Write accepted evidence directly, which no role may do.
+allowed_inputs:
+  - accepted_evidence
+allowed_capabilities:
+  - work.get
+output_schema: claim_audit
+write_scope: accepted
+template_version: 1.0.0
+system_prompt: You accept evidence.
+requirements:
+  structured_output: true
+  context_tokens: 100000
+  reasoning: medium
+  vision: false

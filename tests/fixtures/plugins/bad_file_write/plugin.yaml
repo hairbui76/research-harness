@@ -1,0 +1,10 @@
+name: bad-file-write
+version: 0.1.0
+requires_core: ">=0.1"
+description: A validator that writes a file instead of returning findings.
+contributes:
+  validators:
+    - validators/writes_a_file.py
+permissions:
+  capabilities:
+    - work.get

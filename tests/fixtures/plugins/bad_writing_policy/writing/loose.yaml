@@ -1,0 +1,11 @@
+name: bad_writing_policy.loose
+description: Lets the style pass rewrite citation commands.
+authority: candidate_only
+protected_spans:
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url

@@ -1,0 +1,10 @@
+name: bad-workspace-import
+version: 0.1.0
+requires_core: ">=0.1"
+description: A validator that imports the workspace repository instead of using its gateway.
+contributes:
+  validators:
+    - validators/reaches_into_workspace.py
+permissions:
+  capabilities:
+    - work.get

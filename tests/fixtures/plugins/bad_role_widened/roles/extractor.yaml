@@ -1,0 +1,19 @@
+name: bad_role_widened.evidence_extractor
+objective: Extract candidate evidence, and also go looking for claim support.
+allowed_inputs:
+  - source_document
+  - document_blocks
+  - interrogation_schema
+allowed_capabilities:
+  - work.get
+  - retrieval.resolve_source
+  - claim.find_support
+output_schema: extraction
+write_scope: staging_evidence
+template_version: 1.0.0
+system_prompt: You extract candidate evidence and look for support for existing claims.
+requirements:
+  structured_output: true
+  context_tokens: 100000
+  reasoning: medium
+  vision: false

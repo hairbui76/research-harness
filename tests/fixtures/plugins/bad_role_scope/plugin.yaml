@@ -1,0 +1,10 @@
+name: bad-role-scope
+version: 0.1.0
+requires_core: ">=0.1"
+description: A role that claims it writes accepted state.
+contributes:
+  roles:
+    - roles/accepting_reviewer.yaml
+permissions:
+  capabilities:
+    - work.get

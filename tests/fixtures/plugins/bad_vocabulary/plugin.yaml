@@ -1,0 +1,10 @@
+name: bad-vocabulary
+version: 0.1.0
+requires_core: ">=0.1"
+description: A vocabulary that redefines a core evidence type instead of adding one.
+contributes:
+  schemas:
+    - schemas/redefinition.yaml
+permissions:
+  capabilities:
+    - work.get

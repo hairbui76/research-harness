@@ -1,0 +1,22 @@
+name: minimal.domain_reviewer
+objective: >-
+  Report whether accepted evidence about a Work's traffic unit is internally consistent
+  with the project taxonomy, quoting the evidence it relied on.
+allowed_inputs:
+  - accepted_evidence
+  - taxonomy
+allowed_capabilities:
+  - work.get
+output_schema: claim_audit
+write_scope: audit_result
+template_version: 1.0.0
+system_prompt: >-
+  You audit accepted evidence about one Work's traffic unit against the project taxonomy.
+  You quote the evidence you rely on and you propose nothing that the evidence does not
+  state. Your output is an audit result with no scientific authority.
+requirements:
+  structured_output: true
+  context_tokens: 100000
+  reasoning: medium
+  vision: false
+  max_output_tokens: 4000

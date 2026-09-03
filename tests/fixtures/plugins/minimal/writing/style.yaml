@@ -1,0 +1,28 @@
+name: minimal.house_style
+description: >-
+  Candidate-only wording constraints for traffic-representation prose; every core
+  protected span is preserved verbatim.
+authority: candidate_only
+protected_spans:
+  - citation
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url
+wording_constraints:
+  - name: no_unbounded_novelty
+    pattern: "(?i)\\b(first|only) (work|paper|study) to\\b"
+    message: >-
+      A novelty claim needs recorded search coverage; state what the recorded searches
+      found instead.
+    severity: error
+  - name: hedge_stacking
+    pattern: "(?i)\\bmay potentially\\b"
+    message: Stacked hedges obscure the claim's actual scope.
+    severity: warning
+style_rules:
+  - Report a measured value with its metric, unit, dataset, and condition.
+  - Name the recorded searches behind any statement about the literature as a whole.
