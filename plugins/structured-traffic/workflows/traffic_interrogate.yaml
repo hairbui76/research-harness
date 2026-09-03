@@ -1,0 +1,63 @@
+# Interrogate one Work against the structured-traffic schema (PRODUCT.md 32.1, category 4).
+#
+# Data, not code: this fragment names stages and the capabilities each stage calls, and the
+# host composes `workflows.engine` stages from it. Every capability below is in
+# `PLUGIN_ALLOWED_CAPABILITIES` and in this plugin's manifest, so the fragment can read,
+# retrieve, and stage candidates — and cannot accept anything.
+#
+# The last stage is the point: the fragment ends in a researcher's inbox. There is no stage
+# after it, because there is no capability a plugin could call to write what a reviewer
+# would decide there.
+name: traffic.interrogate_paper
+version: 1.0.0
+description: >-
+  Read one Work, retrieve the passages that answer the traffic schema, stage candidate
+  evidence for each field, verify the numeric ones, and queue everything for review.
+
+stages:
+  - name: load_work
+    description: Load the Work, its versions, and the artifact the review is reading.
+    capabilities:
+      - work.get
+
+  - name: locate_passages
+    description: >-
+      Retrieve the passages likely to answer each traffic field, and resolve each hit back
+      to the artifact it came from so an anchor exists before anything is extracted.
+    capabilities:
+      - retrieval.search
+      - retrieval.resolve_source
+
+  - name: extract_traffic_fields
+    description: >-
+      Stage one candidate per interrogation field. A field the passages do not answer is
+      left unanswered or answered `unclear`; it is never filled from the model's own
+      knowledge of the dataset.
+    capabilities:
+      - evidence.extract
+    role: evidence_extractor
+
+  - name: verify_measured_values
+    description: >-
+      Re-read the metric candidates against their source spans, checking metric, unit,
+      dataset, split, and rounding. Returns a categorical verdict, never a score.
+    capabilities:
+      - evidence.verify
+    role: evidence_verifier
+
+  - name: audit_domain_consistency
+    description: >-
+      Report whether the accepted evidence for this Work is internally consistent with the
+      project taxonomy — representation family against serialization and tokenization,
+      evaluation unit against traffic unit, encryption status against the corpus.
+    capabilities:
+      - work.get
+    role: traffic.domain_reviewer
+
+  - name: queue_for_review
+    description: >-
+      Put every candidate and every audit result in front of a researcher. The workflow
+      ends here; acceptance is not a stage.
+    capabilities:
+      - review.inbox
+    idempotent: false

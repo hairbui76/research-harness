@@ -1,0 +1,109 @@
+# Project style: the house constraints a candidate is checked against before review.
+#
+# These are preferences, and PRODUCT.md 30.4 is explicit that style preferences never
+# outrank scientific meaning or venue requirements. Every finding here is advisory: none of
+# them blocks acceptance, and a rule that fights a venue requirement loses.
+name: writing.project_style
+description: >-
+  Project constraints on tense, hedging vocabulary, and filler for manuscript candidates.
+  Advisory only: a finding here informs review and never gates it.
+authority: candidate_only
+
+protected_spans:
+  - citation
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url
+
+wording_constraints:
+  # ------------------------------------------------------------------------ tense
+  - name: future_tense_for_completed_work
+    pattern: '(?i)\b(?:we\s+will\s+(?:show|demonstrate|present|evaluate|describe|discuss|argue)|this\s+(?:paper|section|work)\s+will\s+(?:show|present|describe|discuss))\b'
+    message: >-
+      Completed work is reported in the present or past tense. The future tense belongs to
+      the proposal that preceded it.
+    severity: warning
+
+  - name: tense_drift_in_results
+    pattern: '(?i)\b(?:the\s+(?:model|system|method)\s+will\s+(?:reach|achieve|outperform)|results\s+will\s+show)\b'
+    message: A measured result already happened; report it in the past tense.
+    severity: warning
+
+  - name: first_person_singular
+    pattern: '(?<![\w-])I\s+(?:show|argue|find|present|propose|believe|think)\b'
+    message: The project writes in the first person plural or impersonally, not the singular.
+    severity: warning
+
+  # ------------------------------------------------------------- hedging vocabulary
+  - name: stacked_hedges
+    pattern: '(?i)\b(?:may\s+potentially|could\s+potentially|might\s+possibly|may\s+possibly|might\s+arguably|can\s+potentially|could\s+possibly\s+be\s+argued|it\s+is\s+also\s+possible\s+that)\b'
+    message: >-
+      Two hedges do not halve the certainty; they hide what the sentence actually claims.
+      Keep one, chosen for what the evidence supports.
+    severity: error
+
+  - name: hedge_outside_project_vocabulary
+    pattern: '(?i)\b(?:sort\s+of|kind\s+of|more\s+or\s+less|to\s+some\s+extent|arguably|conceivably|ostensibly)\b'
+    message: >-
+      Use the project's hedging vocabulary (see style_rules), which maps onto the scope
+      ladder. An ad-hoc hedge does not.
+    severity: warning
+
+  - name: false_precision_hedge
+    pattern: '(?i)\b(?:approximately|roughly|about|around|nearly)\s+(?=\d)'
+    message: >-
+      A measured value is reported at the precision the source states. Hedge the claim, not
+      the number.
+    severity: warning
+
+  # ----------------------------------------------------------------- banned filler
+  - name: banned_filler
+    pattern: '(?i)\b(?:a\s+wide\s+(?:range|variety)\s+of|in\s+terms\s+of|with\s+regard\s+to|with\s+respect\s+to\s+the\s+fact|a\s+plethora\s+of|a\s+myriad\s+of|the\s+fact\s+that|needless\s+to\s+say)\b'
+    message: This phrase carries no information the sentence does not already carry.
+    severity: warning
+
+  - name: empty_intensifier
+    pattern: '(?i)\b(?:very|really|quite|extremely|highly|incredibly)\s+(?:important|interesting|useful|effective|novel|promising)\b'
+    message: >-
+      An intensifier in front of a value judgement measures nothing. State what was measured.
+    severity: warning
+
+  - name: contraction
+    pattern: '(?i)(?<![\w\\])(?:it''s|don''t|can''t|won''t|isn''t|aren''t|doesn''t|didn''t|we''ve|we''re|that''s|there''s)(?![\w])'
+    message: The project's manuscripts do not use contractions.
+    severity: warning
+
+  - name: title_case_heading
+    pattern: '\\(?:sub)*section\*?\{[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*){2,}\}'
+    message: >-
+      Headings are sentence case in this project. Check the venue's template before changing
+      it back — the venue wins.
+    severity: warning
+
+style_rules:
+  - "future_tense_for_completed_work: \"we show\" or \"we showed\", not \"we will show\"."
+  - "tense_drift_in_results: report measured results in the past tense and standing properties in the present."
+  - "first_person_singular: \"we\", or recast the sentence around the method."
+  - "stacked_hedges: keep the single hedge the evidence supports."
+  - "hedge_outside_project_vocabulary: use one of the project hedges listed below."
+  - "false_precision_hedge: quote the value at the source's precision and hedge the claim instead."
+  - "banned_filler: delete the phrase; the sentence rarely needs replacing."
+  - "empty_intensifier: replace the judgement with the measurement behind it."
+  - "contraction: expand it."
+  - "title_case_heading: sentence case, unless the venue's template requires otherwise."
+
+  # The project's approved hedging vocabulary, ordered by the scope ladder it maps onto.
+  # Anything outside this list is an ad-hoc hedge (PRODUCT.md 10.5).
+  - "Approved hedges (L0/L1): \"in the work examined\", \"among the papers examined\", \"in the papers we examined\"."
+  - "Approved hedges (L2): \"several existing approaches\", \"most systems in the reviewed corpus\"."
+  - "Approved hedges (L3): \"existing work generally\"."
+  - "Approved hedges (L4, coverage-bounded): \"we identified no work that ...\", \"to the best of our knowledge\", \"we are not aware of\"."
+  - "Approved modality: \"may\", \"suggests\", \"is consistent with\". One per claim."
+
+  # Standing constraints.
+  - "Tense: present for standing properties and for what the paper does; past for what was measured and what a cited work reported."
+  - "A venue requirement outranks every rule in this file, and scientific meaning outranks both (PRODUCT.md 30.4)."

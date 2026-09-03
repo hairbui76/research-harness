@@ -1,0 +1,193 @@
+# Domain vocabulary for structured-traffic / LLM-detection papers (PRODUCT.md 33).
+#
+# Everything here is ADDITIVE. Core `EvidenceType`, `ClaimType`, and the core interrogation
+# field names keep exactly the members `domain/enums.py` declares; the loader refuses a
+# label equal to a core one, and every label below is namespaced `traffic.`.
+#
+# `categories` are the controlled values a project may record. They are NOT a taxonomy
+# decision: the accepted taxonomy is a researcher `Decision` (PRODUCT.md 33, 38), and the
+# representation-family values below are the three starting terms PRODUCT.md 33
+# *recommends*, marked as suggestions wherever they appear.
+#
+# `multi_label: true` says a Work may carry several values at once, which is how a hybrid
+# representation is recorded. Nothing collapses a hybrid to one bucket.
+namespace: traffic
+
+evidence_types:
+  - label: traffic.representation_statement
+    description: >-
+      A quoted statement of how the paper turns raw traffic into model input: what is kept,
+      what is derived, and in which order.
+  - label: traffic.tokenization_statement
+    description: >-
+      A quoted statement of the vocabulary and token boundaries the model consumes, which
+      is what makes two "byte-level" systems comparable or not.
+  - label: traffic.encryption_statement
+    description: >-
+      A quoted statement about how much of the captured traffic is encrypted, and at which
+      layer. Never inferred from a dataset's name.
+  - label: traffic.dataset_provenance
+    description: >-
+      A quoted statement about where a capture came from and when it was collected, as
+      distinct from which dataset file was downloaded.
+  - label: traffic.partition_statement
+    description: >-
+      A quoted statement of how train, validation, and test were separated, including the
+      unit the split was applied to.
+  - label: traffic.robustness_statement
+    description: >-
+      A quoted statement about evaluation under distribution shift, adversarial input, or
+      a different capture environment.
+
+claim_types:
+  - label: traffic.representation_placement
+    description: >-
+      A proposed placement of one Work in the project's representation taxonomy. Becomes
+      accepted only through the taxonomy Decision that defines the terms.
+  - label: traffic.encryption_coverage
+    description: >-
+      A claim about how much of a corpus, or of the reviewed literature, is evaluated on
+      encrypted traffic.
+
+fields:
+  - name: traffic.traffic_unit
+    description: >-
+      The unit of network traffic the paper treats as one sample. Multi-label: a system
+      that classifies packets and aggregates them into flows carries both.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - packet
+      - flow
+      - session
+      - connection
+      - burst
+      - host_window
+      - message
+      - unclear
+
+  - name: traffic.representation_family
+    description: >-
+      Project taxonomy placement of the paper's input representation. SUGGESTED STARTING
+      TERMS ONLY (PRODUCT.md 33): `raw sequential`, `field-based`, and `behavior-aware` are
+      proposals for the project's taxonomy Decision, not core enum members and not settled
+      domain facts. Multi-label, because a hybrid representation is common and collapsing
+      it loses the distinction the review is about.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - raw sequential
+      - field-based
+      - behavior-aware
+      - unclear
+
+  - name: traffic.serialization
+    description: The concrete surface form the traffic is written in before tokenization.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - raw_bytes
+      - hex_string
+      - decimal_string
+      - json
+      - csv
+      - key_value_text
+      - natural_language
+      - image
+      - unclear
+
+  - name: traffic.tokenization
+    description: How the serialized traffic is split into the tokens the model consumes.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - byte_level
+      - bpe
+      - wordpiece
+      - sentencepiece
+      - character
+      - field_token
+      - custom_vocabulary
+      - none
+      - unclear
+
+  - name: traffic.llm_architecture
+    description: The model family the paper's own system is built on.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - encoder_only
+      - decoder_only
+      - encoder_decoder
+      - non_transformer
+      - unclear
+
+  - name: traffic.llm_role
+    description: >-
+      What the language model actually does in the pipeline. Multi-label: a model used as
+      both feature extractor and classifier carries both.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - classifier
+      - feature_extractor
+      - generator
+      - explainer
+      - data_augmenter
+      - agent_controller
+      - unclear
+
+  - name: traffic.training_strategy
+    description: How the model's weights were obtained for the reported results.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - from_scratch
+      - continued_pretraining
+      - full_finetuning
+      - parameter_efficient_finetuning
+      - in_context_learning
+      - zero_shot
+      - unclear
+
+  - name: traffic.detection_target
+    description: What the system is asked to decide. Multi-label for multi-task systems.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - application_protocol
+      - encrypted_service
+      - malware_family
+      - intrusion_event
+      - anomaly
+      - user_activity
+      - device_type
+      - unclear
+
+  - name: traffic.encryption_status
+    description: >-
+      How much of the evaluated traffic is encrypted. Single-valued on purpose: `mixed` is
+      the answer for a corpus that contains both, and `unclear` is the answer when the
+      paper does not say. Neither is an absence claim (PRODUCT.md 11).
+    value_kind: categorical
+    categories:
+      - plaintext
+      - partially_encrypted
+      - encrypted
+      - mixed
+      - unclear
+
+  - name: traffic.evaluation_unit
+    description: >-
+      The unit the reported metrics are computed over, which is often not the unit the
+      model consumes. Multi-label when a paper reports at more than one granularity.
+    value_kind: categorical
+    multi_label: true
+    categories:
+      - packet
+      - flow
+      - session
+      - host
+      - time_window
+      - dataset
+      - unclear

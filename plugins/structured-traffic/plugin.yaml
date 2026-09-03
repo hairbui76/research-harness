@@ -1,0 +1,35 @@
+name: structured-traffic
+version: 0.1.0
+requires_core: ">=0.1,<1.0"
+description: >-
+  Representation, detection, and evaluation vocabulary for structured network traffic
+  papers (PRODUCT.md 33). Adds questions and controlled values; adds no authority.
+
+contributes:
+  schemas:
+    - schemas/traffic.yaml
+  interrogation:
+    - interrogation/paper.yaml
+  validators:
+    - validators/traffic_unit.py
+    - validators/dataset_age.py
+  workflows:
+    - workflows/traffic_interrogate.yaml
+  roles:
+    - roles/domain_reviewer.yaml
+
+# No search providers, so nothing this plugin contributes leaves the workstation and the
+# `egress:` block is empty by construction rather than by omission (PRODUCT.md 34).
+
+permissions:
+  capabilities:
+    - work.get
+    - retrieval.search
+    - retrieval.resolve_source
+    - evidence.extract
+    - evidence.verify
+    - review.inbox
+  roles_used:
+    - evidence_extractor
+    - evidence_verifier
+    - traffic.domain_reviewer

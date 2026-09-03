@@ -1,0 +1,388 @@
+# The questions this domain puts to every relevant paper (PRODUCT.md 33, ROADMAP 15.1).
+#
+# These fields are MERGED BESIDE the core `generic-empirical` schema, never over it: the
+# loader builds `structured-traffic:paper` from `DEFAULT_SCHEMA.fields` plus everything
+# below, and `DEFAULT_SCHEMA` keeps the fingerprint it had before the plugin was loaded.
+#
+# `evidence_types` are CORE `EvidenceType` members. The plugin's own namespaced evidence
+# labels live in `schemas/traffic.yaml` and are read beside the core enum, not inside it.
+#
+# `risk` is the review tier the answer is staged at (PRODUCT.md 24.1). Tier 2 is used
+# wherever the answer is an interpretation of the paper rather than a sentence that can be
+# quoted: taxonomy placement, derived information, partitioning, absence of an evaluation,
+# dataset age, deployment assumptions, and every limitation. A `numeric` field is Tier 2
+# whatever this file says, because `InterrogationField.review_tier` overrides it.
+#
+# MULTI-LABEL. `multi_label: true` says one paper may answer this question several times
+# without contradicting itself: three datasets, six baselines, and a hybrid representation
+# that is both `field-based` and `behavior-aware` are additional answers, not competing
+# values, and `evidence.conflicts.is_multi_valued` reads this flag rather than guessing from
+# the field name (dogfood F7). It is the same fact `schemas/traffic.yaml` declares about the
+# vocabulary field, stated here about the question that fills it, and the two must agree.
+# A field WITHOUT the flag takes one value per paper -- `traffic.encryption_status`,
+# `traffic.dataset_age`, and `traffic.train_test_partition` are deliberately single-valued,
+# and a second, different answer to one of them is a conflict a person should see.
+schema_name: paper
+version: 1.0.0
+
+fields:
+  # --------------------------------------------------------------- representation
+  - name: traffic.traffic_unit
+    question: >-
+      Which unit of network traffic does the paper treat as one sample? List every value
+      that applies and quote the sentence that states it.
+    evidence_types:
+      # `definition` is here because the best answer to "which unit is one sample" is
+      # routinely a definition sentence ("A BURST is defined as a set of time-adjacent
+      # network packets..."), and refusing it lost the single best span in the corpus
+      # (dogfood F14).
+      - method_description
+      - representation_description
+      - definition
+    value_kind: categorical
+    risk: 1
+    required: true
+    multi_label: true
+    categories:
+      - packet
+      - flow
+      - session
+      - connection
+      - burst
+      - host_window
+      - message
+      - unclear
+
+  - name: traffic.representation_family
+    question: >-
+      Where does this paper's input representation sit in the project taxonomy? The terms
+      are SUGGESTIONS pending the project's taxonomy Decision, not settled categories. List
+      every value that applies, quote the sentences you relied on, and answer `unclear`
+      rather than choosing a term the paper does not support.
+    evidence_types:
+      - representation_description
+      - method_description
+    value_kind: categorical
+    risk: 2
+    required: false
+    multi_label: true
+    categories:
+      - raw sequential
+      - field-based
+      - behavior-aware
+      - unclear
+
+  - name: traffic.raw_information_retained
+    question: >-
+      Which raw information survives into the model input (header fields, payload bytes,
+      timing, direction, lengths)? Quote the sentence or list that states it.
+    evidence_types:
+      - representation_description
+      - method_description
+    value_kind: text
+    risk: 1
+    required: false
+    multi_label: true
+
+  - name: traffic.derived_information
+    question: >-
+      Which information is computed rather than observed (statistics, aggregates, embedded
+      features, protocol inferences)? Quote what the paper says; do not derive it yourself.
+    evidence_types:
+      - representation_description
+      - method_description
+    value_kind: text
+    risk: 2
+    required: false
+    multi_label: true
+
+  - name: traffic.serialization
+    question: >-
+      In which concrete surface form is the traffic written before tokenization? List every
+      value that applies and quote the sentence or figure caption that states it.
+    evidence_types:
+      - representation_description
+      - implementation_detail
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - raw_bytes
+      - hex_string
+      - decimal_string
+      - json
+      - csv
+      - key_value_text
+      - natural_language
+      - image
+      - unclear
+
+  - name: traffic.tokenization
+    question: >-
+      How is the serialized traffic split into tokens, and over which vocabulary? List every
+      value that applies and quote the sentence that states it.
+    evidence_types:
+      - method_description
+      - implementation_detail
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - byte_level
+      - bpe
+      - wordpiece
+      - sentencepiece
+      - character
+      - field_token
+      - custom_vocabulary
+      - none
+      - unclear
+
+  # ------------------------------------------------------------------------ model
+  - name: traffic.llm_architecture
+    question: >-
+      Which model family is the paper's own system built on? List every value that applies
+      and quote the sentence that names the base model.
+    evidence_types:
+      - method_description
+      - implementation_detail
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - encoder_only
+      - decoder_only
+      - encoder_decoder
+      - non_transformer
+      - unclear
+
+  - name: traffic.llm_role
+    question: >-
+      What does the language model actually do in the pipeline? List every value that
+      applies and quote the sentence that states it.
+    evidence_types:
+      - method_description
+      - representation_description
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - classifier
+      - feature_extractor
+      - generator
+      - explainer
+      - data_augmenter
+      - agent_controller
+      - unclear
+
+  - name: traffic.training_strategy
+    question: >-
+      How were the weights behind the reported results obtained? List every value that
+      applies and quote the sentence that states it.
+    evidence_types:
+      - method_description
+      - experimental_setup
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - from_scratch
+      - continued_pretraining
+      - full_finetuning
+      - parameter_efficient_finetuning
+      - in_context_learning
+      - zero_shot
+      - unclear
+
+  - name: traffic.detection_target
+    question: >-
+      What is the system asked to decide? List every value that applies and quote the
+      sentence that defines the label space.
+    evidence_types:
+      - method_description
+      - experimental_setup
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - application_protocol
+      - encrypted_service
+      - malware_family
+      - intrusion_event
+      - anomaly
+      - user_activity
+      - device_type
+      - unclear
+
+  # ---------------------------------------------------------------------- corpus
+  - name: traffic.dataset
+    question: >-
+      Which traffic corpus do the reported experiments use, including its release or
+      version? Quote the sentence that names it. This refines the core `dataset` answer;
+      it does not replace it.
+    evidence_types:
+      - dataset_description
+      - experimental_setup
+    value_kind: text
+    risk: 1
+    required: true
+    multi_label: true
+
+  - name: traffic.dataset_age
+    question: >-
+      When was the traffic captured? Answer with a year (`2016`) or a range
+      (`2015-2017`), quoting the sentence that states it. The publication year is not the
+      capture year; answer `unclear` when the paper does not say.
+    evidence_types:
+      - dataset_description
+      - experimental_setup
+    value_kind: text
+    risk: 2
+    required: false
+
+  - name: traffic.encryption_status
+    question: >-
+      How much of the evaluated traffic is encrypted, and at which layer? Quote the
+      sentence that states it. Do not infer this from the dataset's name or reputation;
+      answer `unclear` when the paper does not say.
+    evidence_types:
+      - dataset_description
+      - experimental_setup
+    value_kind: categorical
+    risk: 2
+    required: false
+    categories:
+      - plaintext
+      - partially_encrypted
+      - encrypted
+      - mixed
+      - unclear
+
+  - name: traffic.train_test_partition
+    question: >-
+      How were train, validation, and test separated, and over which unit was the split
+      applied? Quote the sentence that states it, and record what the paper does not say
+      rather than assuming a random split.
+    evidence_types:
+      - experimental_setup
+      - implementation_detail
+    value_kind: text
+    risk: 2
+    required: false
+
+  # ------------------------------------------------------------------ evaluation
+  - name: traffic.evaluation_unit
+    question: >-
+      Over which unit are the reported metrics computed? List every value that applies and
+      quote the sentence or table caption that states it. This is frequently not the unit
+      the model consumes.
+    evidence_types:
+      - experimental_setup
+      - experimental_result
+    value_kind: categorical
+    risk: 1
+    required: false
+    multi_label: true
+    categories:
+      - packet
+      - flow
+      - session
+      - host
+      - time_window
+      - dataset
+      - unclear
+
+  - name: traffic.baselines
+    question: >-
+      Which baselines or comparison systems is the paper evaluated against, and were they
+      re-run or quoted from another paper? Quote the sentence that says which.
+    evidence_types:
+      - baseline_description
+      - experimental_setup
+    value_kind: text
+    risk: 1
+    required: false
+    multi_label: true
+
+  - name: traffic.metrics
+    question: >-
+      Which measured value does the paper report for its own system on this corpus? Quote
+      the exact value with its metric, unit, dataset, split, and the table it comes from.
+    evidence_types:
+      - experimental_result
+      - ablation_result
+    value_kind: numeric
+    risk: 2
+    required: true
+    multi_label: true
+
+  - name: traffic.ablations
+    question: >-
+      Which components does the paper ablate, and what changed when each was removed? An
+      honest `not_reported` is a complete answer; it is not an absence claim.
+    evidence_types:
+      - ablation_result
+      - experimental_result
+    value_kind: negative
+    risk: 2
+    required: false
+    multi_label: true
+
+  - name: traffic.robustness_evaluation
+    question: >-
+      Is the system evaluated under distribution shift, a different capture environment,
+      adversarial input, or concept drift? Quote what was done, or record `not_reported`.
+    evidence_types:
+      - experimental_setup
+      - experimental_result
+    value_kind: negative
+    risk: 2
+    required: false
+    multi_label: true
+
+  # ----------------------------------------------------------------- limitations
+  - name: traffic.deployment_assumptions
+    question: >-
+      What must be true of a deployment for this system to work (visibility, decryption,
+      latency budget, per-host state, labelled data)? Quote what the paper states.
+    evidence_types:
+      - deployment_assumption
+      - author_conclusion
+    value_kind: text
+    risk: 2
+    required: false
+    multi_label: true
+
+  - name: traffic.author_stated_limitations
+    question: >-
+      Which limitation, threat to validity, or scope restriction do the authors state
+      themselves about this system or corpus? Quote it verbatim.
+    evidence_types:
+      # A stated limitation is often written as what a deployment must provide; refusing
+      # `deployment_assumption` here rejected authors' own scope restrictions (dogfood F14).
+      - limitation
+      - author_conclusion
+      - deployment_assumption
+    value_kind: text
+    risk: 2
+    required: false
+    multi_label: true
+
+  - name: traffic.researcher_observed_limitations
+    question: >-
+      Which limitation does the reviewing researcher observe that the authors do not state?
+      This answer is a researcher conclusion: it is recorded by a person, cites the evidence
+      it rests on, and is never produced by a model or inferred from a blank field.
+    evidence_types:
+      - limitation
+      - experimental_setup
+    value_kind: text
+    risk: 2
+    required: false
+    multi_label: true

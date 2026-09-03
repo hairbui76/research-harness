@@ -1,0 +1,108 @@
+# Claim language: how strong a sentence may read (PRODUCT.md 10.2, 10.5, 42.G).
+#
+# The core already computes the maximum defensible wording from the accepted claim graph
+# (`claims/strength.py`) and already flags a sentence that reads above its Claim
+# (`manuscript.audit`, OVER_STRONG_WORDING). This policy is the *drafting-time* half: the
+# phrases that escalate a claim before anyone has checked what the evidence supports.
+#
+# The constraints are named for the ladder rung they guard, because `WordingConstraint` has
+# no `ClaimScope` field and inventing one here would put the contract in two places. The
+# rung-to-phrase table of PRODUCT.md 10.5 is recorded verbatim in `style_rules:` below.
+name: writing.claim_language
+description: >-
+  Bounds a manuscript candidate's wording to the claim scope ladder: escalation phrases are
+  flagged at drafting time, and the maximum defensible wording stays a property of the
+  accepted Claim, not of the sentence.
+authority: candidate_only
+
+protected_spans:
+  - citation
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url
+
+wording_constraints:
+  - name: l4_universal_without_coverage
+    pattern: '(?i)\b(?:no (?:prior |existing |published )?(?:work|study|paper|approach)s? (?:exists?|has|have)|there (?:is|are) no (?:work|study|studies|approach|approaches)|nothing in the literature|has never been (?:studied|proposed|explored|attempted))\b'
+    message: >-
+      L4 universal/absence wording asserts something about papers nobody read. It needs
+      exhaustive recorded search coverage and an audited absence decision, not a sentence.
+    severity: error
+
+  - name: l4_novelty_claim
+    pattern: '(?i)\b(?:the first (?:work|paper|study|system|approach|to)|no one has (?:yet )?(?:shown|proposed|studied)|for the first time)\b'
+    message: >-
+      A novelty claim is an absence claim about the whole literature. State what the
+      recorded searches found and when they ran.
+    severity: error
+
+  - name: l3_field_generalization
+    pattern: '(?i)\b(?:existing (?:systems|approaches|work|methods) (?:all|always|invariably|consistently)|the literature (?:shows|agrees|is clear)|it is well known that|as is widely (?:known|accepted|recognised|recognized))\b'
+    message: >-
+      L3 wording generalizes past the reviewed corpus to the field as a whole. It needs
+      systematic coverage; say which corpus was reviewed instead.
+    severity: warning
+
+  - name: l2_corpus_pattern_without_denominator
+    pattern: '(?i)\b(?:most|the majority of|the vast majority of) (?:systems|approaches|papers|works|studies|methods)\b(?![^.]{0,120}(?:reviewed corpus|of the|examined|n\s*=))'
+    message: >-
+      A majority statement needs the corpus it is a majority of. Name the denominator, or
+      drop to the papers actually examined.
+    severity: warning
+
+  - name: proof_verbs
+    pattern: '(?i)\b(?:proves?|proved|proven|demonstrates? conclusively|clearly shows?|obviously|undoubtedly|beyond doubt)\b'
+    message: >-
+      These verbs assert a level of certainty no empirical comparison establishes. Report
+      what was measured, under which conditions.
+    severity: error
+
+  - name: significance_without_test
+    pattern: '(?i)\bsignificantly\s+(?:better|worse|higher|lower|faster|slower|outperform\w*|improv\w+|reduc\w+|increas\w+)\b'
+    message: >-
+      "Significantly" is a statistical statement. Either report the test and its parameters
+      or use a plain comparative.
+    severity: warning
+
+  - name: superlative_without_coverage
+    pattern: '(?i)\b(?:outperforms all|superior to all|the best[- ]performing (?:system|model|method)|achieves the best results across)\b'
+    message: >-
+      A superlative over an unbounded set is an L4 claim. Bound it to the baselines that
+      were actually run.
+    severity: error
+
+  - name: unqualified_absence_of_evidence
+    pattern: '(?i)\b(?:no evidence (?:exists|of)|there is no evidence)\b'
+    message: >-
+      "No evidence exists" is absence; "we found no evidence" is a search result. Product 11
+      keeps them apart, and only an audited decision may promote the second to the first.
+    severity: error
+
+style_rules:
+  # Suggestions, attached to the rule whose name opens the line.
+  - "l4_universal_without_coverage: prefer \"we identified no work that ...\", naming the searches and the date they ran."
+  - "l4_novelty_claim: state the recorded coverage: \"the searches recorded in SR0007 returned no work that ...\"."
+  - "l3_field_generalization: name the reviewed corpus: \"most systems in the reviewed corpus ...\"."
+  - "l2_corpus_pattern_without_denominator: give the denominator: \"most systems in the reviewed corpus (14 of 22) ...\"."
+  - "proof_verbs: report the measurement: \"X reached 94.3 F1 on Y under condition Z\"."
+  - "significance_without_test: either report the test (\"paired t-test, p < 0.01\") or write \"higher\"."
+  - "superlative_without_coverage: bound the comparison to the baselines that were run."
+  - "unqualified_absence_of_evidence: prefer \"the recorded searches returned no evidence that ...\"."
+
+  # The maximum defensible wording ladder of PRODUCT.md 10.5, verbatim. The core computes
+  # which rung an accepted Claim has earned; this table says what that rung sounds like.
+  - "L0 individual -> \"in the work examined\""
+  - "L1 observed_subset (weak coverage) -> \"among the papers examined\""
+  - "L2 corpus_pattern (several independent supports) -> \"several existing approaches\""
+  - "L2 corpus_pattern (majority under a defined corpus) -> \"most systems in the reviewed corpus\""
+  - "L3 field_generalization (strong systematic coverage) -> \"existing work generally\""
+  - "L4 universal_or_absence (exhaustive negative search) -> prefer \"we identified no work that ...\" over an unqualified \"no work exists\""
+
+  # Structural rules a regex cannot express; the core enforces each one.
+  - "A sentence may not read above the scope of the Claim it is anchored to; `manuscript.audit` raises OVER_STRONG_WORDING when it does (PRODUCT.md 42.G)."
+  - "Escalating a Claim's scope is a Decision a researcher accepts, never an edit to a sentence."
+  - "This policy may lower the wording of a candidate. It may never raise the authority of the Claim behind it."

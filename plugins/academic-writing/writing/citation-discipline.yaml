@@ -1,0 +1,93 @@
+# Citation discipline: every substantive sentence carries an anchor or says it has none.
+#
+# The structural half of this policy is core and is not repeated here as regexes, because a
+# regex cannot tell whether a key resolves or whether the cited Work actually supports the
+# Claim. `manuscript.audit` already raises UNREGISTERED_CLAIM, CITATION_MISMATCH, and
+# UNSUPPORTED_NUMERIC for exactly those (PRODUCT.md 30.3, 42.J), and
+# `manuscript.support` decides support from the Claim-Evidence graph rather than from the
+# bibliography.
+#
+# What is left for a wording policy is the *drafting habits* that produce those findings: a
+# citation typed as prose, an attribution with no key behind it, a number reported with
+# nothing to check it against, and a placeholder that is not the sanctioned one.
+name: writing.citation_discipline
+description: >-
+  Flags the drafting habits that end in an unsupported sentence: hand-typed citations, vague
+  attribution, uncited measurements, and invented placeholders. Unsupported content becomes
+  a visible marker and an audit warning, never a fabricated reference.
+authority: candidate_only
+
+protected_spans:
+  - citation
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url
+
+wording_constraints:
+  - name: hand_typed_citation
+    pattern: '[A-Z][A-Za-z''\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z''\-]+)?\s+et\s+al\.?\s*(?=\()'
+    message: >-
+      A citation typed as prose is invisible to the bibliography, to the auditor, and to the
+      Claim-Evidence graph. Use a citation command with a key.
+    severity: error
+
+  - name: vague_attribution_without_key
+    pattern: '(?i)\b(?:several|many|numerous|some|various|a number of|most)\s+(?:studies|works|papers|authors|researchers|approaches)\s+(?:have\s+|has\s+)?(?:shown|argued|reported|demonstrated|found|noted|observed|claimed)\b(?![\s\S]{0,200}?\\(?:cite|citep|citet|citealp|citealt|citeauthor|citeyear|autocite|parencite|textcite|footcite)\b)'
+    message: >-
+      An attribution with no key behind it is an unsourced claim wearing a source's clothes.
+      Cite the works, or mark the sentence NEEDS SOURCE.
+    severity: error
+
+  - name: anonymous_authority
+    pattern: '(?i)\b(?:experts?\s+(?:argue|believe|say|agree)|observers?\s+have\s+(?:cited|noted)|industry\s+reports?\s+(?:show|suggest)|according\s+to\s+(?:several|various|some)\s+(?:sources|studies|reports)|it\s+is\s+(?:widely\s+)?(?:believed|acknowledged)\s+that)\b'
+    message: >-
+      Unnamed experts, observers, and reports are not sources. Name the work, or remove the
+      claim; never invent an attribution to fill the gap.
+    severity: error
+
+  - name: measurement_without_citation
+    pattern: '(?i)\b(?:reaches|reaches an|achieves|achieved|attains|reports|reported|improves\s+by|reduces\s+by|increases\s+by|decreases\s+by)\s+(?=[\d$\\])(?![\s\S]{0,240}?\\(?:cite|citep|citet|citealp|citealt|autocite|parencite|textcite|footcite)\b)'
+    message: >-
+      A measured value with no citation nearby is either the paper's own result — say so —
+      or a number no accepted, source-observed Evidence backs.
+    severity: warning
+
+  - name: invented_placeholder
+    pattern: '(?i)\[(?:citation\s+needed|ref|reference|cite|xx+|\?+)\]|\(\s*(?:ref|citation|cite)\s*\)|\\cite\{\s*\}'
+    message: >-
+      This is not the sanctioned gap marker, so nothing will find it. Write [NEEDS SOURCE]
+      so the gap is visible to the writer, the audit, and the reviewer alike.
+    severity: error
+
+  - name: draft_marker_left_in
+    pattern: '(?<![\w\\])(?:TODO|TBD|FIXME|XXX|UNVERIFIED)(?![\w])'
+    message: >-
+      A draft marker left in a submission is an unresolved gap. UNVERIFIED and NEEDS SOURCE
+      are reporting states, and every one must be resolved or removed before submission.
+    severity: warning
+
+  - name: citation_as_common_knowledge
+    pattern: '(?i)\b(?:as\s+is\s+well\s+(?:known|established)|it\s+has\s+been\s+proven\s+that|it\s+is\s+universally\s+accepted|needs\s+no\s+citation)\b'
+    message: >-
+      "Well known" is how an uncited claim survives review. Cite it or drop it.
+    severity: warning
+
+style_rules:
+  - "hand_typed_citation: write \\citet{key}; the rendered text will read the same and the key will resolve."
+  - "vague_attribution_without_key: cite each work, or write the sentence with [NEEDS SOURCE] and leave it for review."
+  - "anonymous_authority: name the work and what it actually reported."
+  - "measurement_without_citation: attribute the value — \"our system reaches ...\" or \"X reports ... \\citep{key}\"."
+  - "invented_placeholder: use [NEEDS SOURCE]."
+  - "draft_marker_left_in: resolve the gap, or convert it to [NEEDS SOURCE] so review sees it."
+  - "citation_as_common_knowledge: cite the work, or state it as this paper's own assumption."
+
+  # Structural rules, enforced by the core rather than by a pattern.
+  - "Every substantive sentence carries a Claim anchor or the visible marker [NEEDS SOURCE]; `manuscript.audit` raises UNREGISTERED_CLAIM for a substantive sentence with neither (PRODUCT.md 30.3)."
+  - "Every citation key must resolve in the bibliography AND the cited Work must carry accepted Evidence in a supporting relation with the attached Claim; a key that exists but does not support is CITATION_MISMATCH (PRODUCT.md 42.J)."
+  - "Every number needs accepted, source-observed, direct Evidence carrying the same metric, unit, dataset, and condition; otherwise it is UNSUPPORTED_NUMERIC (PRODUCT.md 12)."
+  - "An unsupported statement is reported, never repaired: no style pass, and no model, may add a citation to make a sentence pass (PRODUCT.md 30.2)."
+  - "A gap is written [NEEDS SOURCE] and a value that could not be checked is reported UNVERIFIED. Neither is ever replaced by a plausible reference."

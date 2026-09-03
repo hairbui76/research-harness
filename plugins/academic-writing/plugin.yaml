@@ -1,0 +1,21 @@
+name: academic-writing
+version: 0.1.0
+requires_core: ">=0.1,<1.0"
+description: >-
+  Writing policies for an academic manuscript: claim language bounded by the scope ladder,
+  citation discipline, project style, and the adapted humanizer style pass. Candidate-only.
+
+contributes:
+  writing_policies:
+    - writing/claim-language.yaml
+    - writing/citation-discipline.yaml
+    - writing/project-style.yaml
+    - writing/humanizer.yaml
+
+# This plugin asks for nothing. It contributes no code, calls no capability, names no role,
+# and contacts no host: four YAML files of wording rules and the guidance beside them. The
+# empty block is deliberate — an empty permission set is the strongest thing this manifest
+# can say about what a style pass may do (PRODUCT.md 32.2).
+permissions:
+  capabilities: []
+  roles_used: []

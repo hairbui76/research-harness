@@ -1,0 +1,213 @@
+# `skills/humanizer` (v2.12.0-rh1) adapted as DATA, per docs/plans/skill-audit.md.
+#
+# The skill is a design input, not a runtime component (PRODUCT.md 32.5): nothing loads it,
+# imports it, or calls it. Its patterns are re-expressed here as wording constraints a
+# deterministic, offline pass can apply, and the parts of it that cannot cross the boundary
+# are listed in this plugin's README rather than softened into rules.
+#
+# The one clause that must not travel is the skill's file mode — "when the user names a
+# file, ... write only the final text to the file". A plugin does not write files
+# (PRODUCT.md 32.2). This policy returns findings; `manuscript.style` returns a candidate
+# and a semantic diff; a capability writes, after audit and human acceptance.
+#
+# Every constraint below is FLAGGING ONLY. A finding says "a reader may hear a chatbot
+# here"; it never rewrites, and it never blocks acceptance. Matches that overlap a protected
+# span are dropped before they are reported, which is the skill's own section 14 — "do not
+# change a protected span merely to remove it" — enforced rather than requested.
+name: writing.humanizer
+description: >-
+  The humanizer style pass as candidate-only wording constraints: inflated claims, sales
+  language, vague attribution, stock AI phrasing, filler, chatbot artifacts, and repetitive
+  structure. Flags prose; changes nothing.
+authority: candidate_only
+
+# Every core protected span kind, listed rather than defaulted so that dropping one is a
+# visible edit. `validation.check_writing_policy` refuses a policy that drops any of them.
+protected_spans:
+  - citation
+  - reference
+  - math
+  - number_with_unit
+  - quotation
+  - identifier
+  - code
+  - url
+
+wording_constraints:
+  # ------------------------------------------------- 1. inflated claims (skill 1, 2, 6)
+  - name: inflated_importance
+    pattern: '(?i)\b(?:stands?\s+as\s+a|serves?\s+as\s+a\s+(?:testament|reminder)|is\s+a\s+testament\s+to|marks?\s+a\s+(?:pivotal|key|crucial|significant)\s+(?:moment|point|shift)|underscor(?:es?|ing)\s+(?:its|the|their)\s+(?:importance|significance)|plays?\s+a\s+(?:crucial|vital|pivotal|key|central)\s+role|paves?\s+the\s+way|sets?\s+the\s+stage|represents?\s+a\s+(?:paradigm\s+)?shift)\b'
+    message: >-
+      An ordinary detail is being described as a turning point. Say what it does; let the
+      reader decide whether it matters.
+    severity: warning
+
+  - name: inflated_legacy
+    pattern: '(?i)\b(?:evolving\s+landscape|indelible\s+mark|deeply\s+rooted|enduring\s+legacy|ever-(?:growing|increasing)\s+(?:importance|interest|need)|reflects?\s+(?:a\s+)?broader)\b'
+    message: >-
+      A claim about legacy or a broad trend that the paper does not evidence.
+    severity: warning
+
+  - name: formulaic_challenges_section
+    pattern: '(?i)\b(?:despite\s+(?:its|these)\s+(?:challenges|limitations),|faces?\s+several\s+challenges|challenges\s+and\s+future\s+(?:work|directions)\s+remain|much\s+work\s+remains\s+to\s+be\s+done)\b'
+    message: >-
+      A stock challenges-and-outlook passage usually repeats vague claims instead of adding
+      facts. Name the specific limitation, or cut it.
+    severity: warning
+
+  # ---------------------------------------------------------- 2. sales language (skill 4)
+  - name: sales_language
+    pattern: '(?i)\b(?:boast(?:s|ing|ed)?\s+(?:a|an|over)|vibrant|breathtaking|groundbreaking|cutting-edge|seamless(?:ly)?|revolutioniz\w+|nestled|in\s+the\s+heart\s+of|must-(?:read|visit|have)|unparalleled|unrivalled|unrivaled|game-chang\w+)\b'
+    message: >-
+      This reads as an advertisement for the work rather than a description of it.
+    severity: warning
+
+  - name: commitment_language
+    pattern: '(?i)\b(?:commitment\s+to|dedicated\s+to\s+(?:advancing|delivering)|strives?\s+to|aims?\s+to\s+empower)\b'
+    message: A statement of intent stands in for a statement of what the system does.
+    severity: warning
+
+  # ------------------------------------------------------ 3. vague attribution (skill 5)
+  - name: vague_attribution
+    pattern: '(?i)\b(?:experts?\s+(?:argue|believe|say|agree|suggest)|observers?\s+have\s+(?:cited|noted)|industry\s+reports?|some\s+critics\s+argue|it\s+is\s+(?:widely\s+)?believed\s+that|many\s+would\s+argue)\b'
+    message: >-
+      The claim is assigned to unnamed experts, critics, or reports. Name the source the
+      text actually has, or remove the claim. Never invent one.
+    severity: error
+
+  # ------------------------------------------------------- 4. stock AI phrases (skill 7)
+  - name: stock_ai_phrases
+    pattern: '(?i)\b(?:delv(?:e|es|ing)\s+into|leverag(?:e|es|ing)\s+the\s+power|it\s+is\s+important\s+to\s+note\s+that|it\s+is\s+worth\s+noting\s+that|intricate\s+(?:interplay|tapestry|details)|(?:rich|complex)\s+tapestry|showcas(?:e|es|ing)|garner(?:s|ed|ing)?|underscore(?:s|d)?|foster(?:s|ing)|align\s+with\s+the|holistic\s+approach)\b'
+    message: >-
+      A word that AI writing uses far more often than people do, especially in company.
+      One is nothing; several in a paragraph is a tell.
+    severity: warning
+
+  - name: avoiding_is_and_are
+    pattern: '(?i)\b(?:serves?\s+as|stands?\s+as|represents?|constitutes?|features?|offers?)\s+(?:a|an|the)\s+(?=\w)'
+    message: >-
+      A longer verb replacing "is", "are", or "has". The simple verb usually reads better.
+    severity: warning
+
+  - name: pretend_deeper_truth
+    pattern: '(?i)\b(?:the\s+real\s+question\s+is|at\s+its\s+core|in\s+reality|what\s+really\s+matters|fundamentally,|the\s+deeper\s+issue|the\s+heart\s+of\s+the\s+matter)\b'
+    message: An ordinary point dressed as a hidden truth. State the point.
+    severity: warning
+
+  # ------------------------------------------------- 5. filler and hedging (skill 23, 24)
+  - name: filler_phrases
+    pattern: '(?i)\b(?:in\s+order\s+to|due\s+to\s+the\s+fact\s+that|at\s+this\s+point\s+in\s+time|in\s+the\s+event\s+that|(?:has|have)\s+the\s+ability\s+to|it\s+should\s+be\s+noted\s+that|for\s+the\s+purpose\s+of|as\s+a\s+means\s+to)\b'
+    message: A longer phrase where a shorter one carries the same meaning.
+    severity: warning
+
+  - name: qualifier_pileup
+    pattern: '(?i)\b(?:to\s+be\s+fair,|it(?:''s|\s+is)\s+also\s+possible\s+that|could\s+potentially|might\s+arguably|in\s+some\s+cases\s+it\s+may)\b'
+    message: >-
+      Repeated editing stacks one qualifier on another until every claim sounds uncertain.
+      Keep the qualifier the evidence supports; drop the ones repairing an overstatement.
+    severity: warning
+
+  - name: generic_positive_ending
+    pattern: '(?i)\b(?:the\s+future\s+looks\s+bright|exciting\s+times|a\s+step\s+in\s+the\s+right\s+direction|holds\s+(?:great\s+)?promise\s+for\s+the\s+future|continues?\s+to\s+thrive)\b'
+    message: >-
+      A send-off instead of a last useful fact. End on the concrete finding.
+    severity: warning
+
+  # ------------------------------------------- 6. chatbot artifacts (skill 20, 21, 22, 28)
+  - name: chatbot_artifacts
+    pattern: '(?i)(?:\bI\s+hope\s+this\s+helps\b|\blet\s+me\s+know\s+if\b|\bwould\s+you\s+like\s+(?:me\s+)?to\b|\bwant\s+me\s+to\b|\bshould\s+I\s+continue\b|\bgreat\s+question\b|\bcertainly!|\bof\s+course!|\byou''re\s+absolutely\s+right\b|\bhere\s+is\s+(?:a|an|the)\s+(?:overview|summary|breakdown)\b)'
+    message: A chatbot's greeting, offer, or closing left in text that must stand on its own.
+    severity: error
+
+  - name: knowledge_limit_disclaimer
+    pattern: '(?i)\b(?:as\s+of\s+my\s+last\s+(?:training\s+)?update|up\s+to\s+my\s+(?:last\s+)?(?:knowledge|training)|while\s+specific\s+details\s+(?:are|remain)\s+(?:limited|scarce)|based\s+on\s+(?:the\s+)?available\s+information|not\s+publicly\s+available)\b'
+    message: >-
+      A model's knowledge limit, usually followed by a plausible guess. State what the source
+      does not show, or cut the sentence. A guess is never presented as a fact.
+    severity: error
+
+  - name: announcing_the_point
+    pattern: '(?i)\b(?:let(?:''s|\s+us)\s+(?:dive\s+in|explore|break\s+this\s+down)|here''s\s+what\s+you\s+need\s+to\s+know|without\s+further\s+ado|now\s+let''s\s+look\s+at|heads\s+up[,.:])'
+    message: The next point is announced instead of stated. Remove the announcement.
+    severity: warning
+
+  - name: fake_candid_opening
+    pattern: '(?:^|(?<=[.!?])\s+)(?:Honestly[,?]|Look,|Here''s\s+the\s+thing[,.]|The\s+thing\s+is[,.]|Let''s\s+be\s+honest[,.]|Real\s+talk[,.])'
+    message: A staged pause or claim of honesty before a routine point. State the point.
+    severity: warning
+
+  - name: emoji_decoration
+    pattern: '[\U0001F300-\U0001FAFF←-⇿☀-➿️]'
+    message: Decoration a chatbot added. A manuscript carries none.
+    severity: error
+
+  # ------------------------------ 7. repetitive structure (skill 3, 9, 10, 11, 12, 16)
+  - name: shallow_ing_analysis
+    pattern: '(?i),\s+(?:highlighting|underscoring|emphasizing|ensuring|reflecting|symbolizing|contributing\s+to|showcasing|fostering|encompassing|cultivating|demonstrating\s+the\s+importance)\b'
+    message: >-
+      An "-ing" tail added to make a simple fact sound deeper. It usually adds no claim the
+      sentence did not already make.
+    severity: warning
+
+  - name: not_x_but_y
+    pattern: '(?i)\b(?:it(?:''s|\s+is)\s+not\s+(?:just|merely|only)\s+[^.;]{2,60},\s+it(?:''s|\s+is)|not\s+only\s+[^.;]{2,60}\s+but\s+also)\b'
+    message: An over-used contrast frame. State what the thing is.
+    severity: warning
+
+  - name: false_range
+    pattern: '(?i)\bfrom\s+[^.;,]{2,40}\s+to\s+[^.;,]{2,40},\s+from\s+[^.;,]{2,40}\s+to\s+'
+    message: >-
+      "From X to Y" repeated where X and Y do not form a real range. List what is actually
+      covered.
+    severity: warning
+
+  - name: repeated_sentence_opening
+    pattern: '(?i)(?:^|(?<=[.!?])\s+)(the\s+(?:model|system|method|paper|approach|framework))\b[^.!?]{5,}[.!?]\s+\1\b[^.!?]{5,}[.!?]\s+\1\b'
+    message: >-
+      Three consecutive sentences opening on the same subject. Merge them, or begin one with
+      the action.
+    severity: warning
+
+  - name: bold_mini_heading_list
+    pattern: '(?m)^\s*\\item\s+\\textbf\s*\{[^{}]*\}\s*:'
+    message: >-
+      A vertical list where every item is a bold label and a colon. Prose usually carries the
+      same content in fewer words.
+    severity: warning
+
+style_rules:
+  # Suggestions, attached to the rule whose name opens the line.
+  - "inflated_importance: describe what it does. \"X was established in 1989\" rather than \"marking a pivotal moment\"."
+  - "inflated_legacy: cut the trend claim, or cite the work that establishes it."
+  - "formulaic_challenges_section: name one specific limitation with its evidence, or cut the passage."
+  - "sales_language: replace with the plain description. \"Alamata Raya Kobo is a town in the Gonder region\"."
+  - "commitment_language: state what the system does, not what it aims to do."
+  - "vague_attribution: name the work and what it reported, or delete the sentence."
+  - "stock_ai_phrases: use the ordinary word. \"explore\", \"use\", \"show\", \"support\"."
+  - "avoiding_is_and_are: use \"is\", \"are\", or \"has\"."
+  - "pretend_deeper_truth: state the point directly."
+  - "filler_phrases: \"to\", \"because\", \"now\", \"if\", \"can\"."
+  - "qualifier_pileup: keep one qualifier, chosen for what the evidence supports."
+  - "generic_positive_ending: end on the last concrete fact."
+  - "chatbot_artifacts: delete it."
+  - "knowledge_limit_disclaimer: write what the source does not state, or remove the sentence."
+  - "announcing_the_point: delete the announcement and keep the point."
+  - "fake_candid_opening: open with the claim."
+  - "emoji_decoration: delete it."
+  - "shallow_ing_analysis: end the sentence at the fact, or make the tail its own claim with its own support."
+  - "not_x_but_y: state the property directly."
+  - "false_range: list what is covered."
+  - "repeated_sentence_opening: merge the sentences, or open one with the action."
+  - "bold_mini_heading_list: write the list as prose, or drop the bold labels."
+
+  # What the skill says that no regex can check. Kept here because it is the half that
+  # matters most, and because a rule a machine cannot apply still binds a person.
+  - "Preserve every protected span exactly: citation commands and keys; Claim/Evidence/Work/Version/Artifact/Decision/SearchRun/Synthesis ids; quotations, numbers, units, equations, code, tables, links, and source anchors."
+  - "Preserve epistemic qualifiers, population/setting/method scope, comparison conditions, and negative-evidence wording."
+  - "Preserve the maximum defensible wording established by the accepted Claim graph; see writing/claim-language.yaml."
+  - "Never change a protected span merely to remove a flagged pattern (humanizer 14). If a passage cannot improve without changing one, leave it and flag it."
+  - "Return a manuscript candidate plus a semantic diff, never accepted scientific state."
+  - "Do not flag a watched phrase inside a quotation, a title, a proper name, or an example where the phrase is being discussed rather than used."
+  - "Do not treat any single pattern as proof: one em dash, one curly quote, one \"however\", one short sentence. Several stock patterns in one passage are the evidence."
+  - "Keep specific unusual detail, mixed feelings, deliberate first-person choices, variety in sentence length, genuine asides, and real scope limits, safety notices, and named objections."
+  - "This policy does not search literature, judge evidence quality, resolve conflicts, invent citations, or promote a candidate Claim."
