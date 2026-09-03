@@ -1371,7 +1371,9 @@ Document:
 
 # Next Product Track — v1.1 Conversation-first Research Workspace
 
-This track turns the proven research core into the primary daily workspace described in the approved design specifications under `docs/superpowers/specs/`. The phase descriptions below define outcomes and gates only. A separate implementation plan must not be written or executed until the researcher reviews the written design specifications and explicitly asks to proceed.
+This track turns the proven research core into the primary daily workspace described in the approved design specifications under `docs/superpowers/specs/`. The phase descriptions below define outcomes and gates only.
+
+**Status, 2026-09-03: executing, on the researcher's explicit instruction to finish this roadmap — the "proceed" this track required.** The implementation plan is `docs/plans/v1.1-implementation-plan.md`; the decisions it locked are ADR-025 to ADR-029; the clause-by-clause evidence for every gate below is `docs/plans/acceptance-matrix.md`, and the loop was exercised end to end in `docs/plans/dogfood-2026-09-03-v1.1.md`. PRODUCT §42 M–P joined the invariant suite as `tests/e2e/invariants/test_v11_invariants.py` (23 tests), and §42 Q is the Design System's own JavaScript gate. Each gate carries its own dated status block.
 
 ## Cross-cutting Foundation — Research Harness Design System
 
@@ -1398,6 +1400,22 @@ This track turns the proven research core into the primary daily workspace descr
 - Obsolete marketing/helpdesk/generator artifacts are removed only after useful foundations have verified production replacements.
 
 **Gate DS:** the package builds and is consumed locally by representative conversation, full research, and manuscript compositions; dark/light and compact/comfortable modes pass accessibility and visual checks; runtime makes no Design System CDN requests; and application screens do not duplicate migrated primitives or theme definitions.
+
+> **Status 2026-09-03 — met, with one recorded substitution.** `design/` is
+> `@research-harness/design` in a root pnpm workspace: semantic tokens, dark default and
+> light themes, comfortable/compact density, 25 accessible primitives, the research,
+> conversation, manuscript and workspace component layers, and a specimen gallery.
+> **Evidence:** 920 tests in 69 files pass, each interactive component asserting `axe-core`
+> with no violations; `pnpm --filter @research-harness/design lint` is clean, including the
+> raw-palette lint (over `design/src` *and* `web/src`) and the WCAG 2.2 AA contrast gate
+> (76 gated pairs); `web/dist` makes no CDN request for a font, icon or stylesheet; the
+> Warmline prototype bundle is deleted, and `web/src/styles.css` is application layout in
+> `--rh-*` tokens only. Recorded in ADR-029 and `docs/architecture/design-system.md`.
+> **Substitution:** there is no browser in this workspace, so per-theme × per-density DOM
+> snapshots plus a resolved-token snapshot stand in for screenshot regression. That is the
+> gate's form here, not a claim to have run screenshot tests.
+> **Deferred:** the conversation and manuscript *routes* that compose the conversation and
+> manuscript component layers are the Phase 18 and 21 Web halves; see their status blocks.
 
 # Phase 18 — Conversation Workspace Foundation
 
@@ -1426,6 +1444,21 @@ This track turns the proven research core into the primary daily workspace descr
 
 **Gate P18:** reopen and continue a session; inspect exactly what context a response used; demonstrate cross-session retrieval with privacy filtering; demonstrate that conflicting accepted scientific state outranks chat; and promote an excerpt without bypassing review.
 
+> **Status 2026-09-03 — met on the capability, CLI and daemon surfaces; the Web route is in
+> progress.** Sessions are durable and private under `conversations/CS####/`, outside
+> `.research/` and git-ignored by default; every model call assembles an ordered,
+> token- and privacy-budgeted `ContextPack` and records a `Context used` receipt; promotion
+> reaches Note, Question, Claim candidate and Decision candidate through the existing
+> capabilities, and Evidence from prose is refused. **Evidence:** all five clauses in
+> `tests/e2e/test_conversation_gate.py` (10 tests), plus 68 unit, 40 integration, 30
+> conversation-store, 35 capability-contract and 9 SSE-contract tests; the whole gate is
+> re-run with `.research/` deleted. Recorded in ADR-025.
+> **In progress:** the `/` three-pane Web route (`web/src/views/conversation/`,
+> `web/src/app/routes.tsx`) — 2 of its own tests were failing when this block was written;
+> the PM re-runs `pnpm --filter research-harness-web test` at the final gate.
+> **Deferred:** a real-provider run. Both API keys in this environment are rejected
+> upstream, so every send was scripted; provider neutrality itself is covered by §42 A.
+
 ---
 
 # Phase 19 — Research Attachments
@@ -1453,6 +1486,20 @@ This track turns the proven research core into the primary daily workspace descr
 - A failed promotion leaves the original session attachment intact and retryable.
 
 **Gate P19:** attach and preview an image and PDF without corpus mutation; send with a compatible model and inspect `Context used`; block an incompatible send without losing the draft; promote a PDF through identity resolution; and recover cleanly from a failed promotion.
+
+> **Status 2026-09-03 — met.** An attachment gets an `SA####` identity and nothing else:
+> per-item validation, a state machine whose every failure is retryable, disposable
+> previews, a total sendability check against the selected model's media, size, count,
+> egress and visibility (blocking with a per-item reason and a compatible-model
+> suggestion), and a `Save to corpus` that resolves identity by hash and metadata and runs
+> the normal ingest. No Evidence or Claim is ever created. **Evidence:** all five clauses in
+> `tests/e2e/test_attachments_gate.py` (7 tests), plus 40 integration, 15 capability-contract,
+> 7 provider-media-contract and 21 media-unit tests; the dogfood session saved a duplicate
+> PDF and got the existing Artifact back. Recorded in ADR-026.
+> **Deferred:** the media encoders are asserted against the real OpenAI and Anthropic
+> adapters over `httpx.MockTransport`, not against the vendors' endpoints — no usable key.
+> The Web attachment tray composes the Design System's `AttachmentTray`, `ImageAttachment`
+> and `PdfAttachment` and lands with the conversation route.
 
 ---
 
@@ -1483,6 +1530,23 @@ This track turns the proven research core into the primary daily workspace descr
 
 **Gate P20:** rebuild the graph from durable sources and resolve the same stable references; traverse Claim ↔ Evidence ↔ Artifact anchor; preserve candidate/accepted labels; enforce session privacy during traversal; and meet warm targets of under 100 ms for exact refs and under 250 ms for one- or two-hop queries on the agreed benchmark.
 
+> **Status 2026-09-03 — met, budgets included.** `.research/graph/research-graph.db` is a
+> disposable projection with `authority` and `visibility` on every node and edge; a
+> model-proposed edge cannot be written as accepted; privacy prunes the walk rather than the
+> result; and the resolver answers from canonical files, checking project, existence,
+> authority, privacy and anchor freshness. **Evidence:** all five clauses in
+> `tests/e2e/test_graph_gate.py` (16 tests), 134 integration and 72 unit graph tests, 36
+> capability-contract tests, and `tests/perf/test_graph_budgets.py` (14 tests) asserting the
+> product budgets themselves. **Measured** at `--scale 1.0` on 33,180 nodes / 74,617 edges
+> from 2,307 durable files: exact reference **0.07 ms**, one-hop **0.88 ms**, two-hop
+> **8–12 ms**, autocomplete **0.41 ms**, provenance **3.1 ms** — every mode passing, and
+> privacy filtering measurably free. Recorded in ADR-027,
+> `docs/plans/performance-budgets.md` and `benchmarks/README.md`.
+> **Deferred:** vector/semantic retrieval constrained by graph neighbourhoods is present as
+> lexical + structural retrieval only; the embedded vector projection stays where §15 left
+> it. Composer autocomplete and two-way inspector traversal in the browser land with the
+> conversation route.
+
 ---
 
 # Phase 21 — LaTeX Manuscript Workspace
@@ -1510,6 +1574,25 @@ This track turns the proven research core into the primary daily workspace descr
 - Applying a model suggestion is an explicit user-owned source mutation.
 
 **Gate P21 / v1.1 conversation-first milestone:** compile a real project and inspect its PDF; retain the last good PDF on a new compile failure; navigate source/PDF when mapping exists; distinguish compiler and scientific errors; and apply a model suggestion only through an explicit reviewed diff.
+
+> **Status 2026-09-03 — met on a real engine; the Web route is in progress.** Compilation is
+> a bounded, confined local process (allowlisted engine and flags, scrubbed environment, no
+> shell escape, `tectonic --untrusted`, `latexmk -norc`, its own process group and timeout),
+> outputs are disposable, the last good PDF survives a failure and is labelled stale, and
+> compiler diagnostics and scientific audit findings are two lists that are never merged. A
+> model rewrite is a staged candidate diff; applying is hash-checked, refused on a changed
+> protected span or a failed audit, and recorded as `manuscript.source_written`.
+> **Evidence:** all five clauses in `tests/e2e/test_manuscript_workspace_gate.py` (17 tests,
+> against a real subprocess toolchain), 107 integration and 318 unit manuscript tests, 27
+> capability-contract tests. **On a real engine:** the dogfood session compiled with
+> `tectonic 0.17.0` — a real PDF in 0.38 s, SyncTeX in both directions, and a real
+> `Undefined control sequence` at `main.tex:28` that kept the last good PDF. Recorded in
+> ADR-028 and `docs/plans/dogfood-2026-09-03-v1.1.md` §6.
+> **In progress:** the Web manuscript workspace route (`web/src/views/manuscript/`),
+> replacing the v1.0 Manuscript page; the PM re-runs the Web suite at the final gate.
+> **Deferred:** the suite's own engine is a hermetic fake toolchain, and the real-toolchain
+> integration test stays opt-in (skipped when no engine is installed), so CI does not
+> depend on a TeX distribution.
 
 ---
 
@@ -1607,6 +1690,12 @@ Do not introduce collaboration architecture into v1.0 schemas unless a concrete 
 | LaTeX source/editor/PDF workspace |  |  |  |  | ✓ |
 | Real local compilation / SyncTeX |  |  |  |  | ✓ |
 | Candidate-only model manuscript diffs |  |  |  |  | ✓ |
+
+**Status 2026-09-03.** Every row above is built on the capability, CLI, daemon and MCP
+surfaces, and each gate's dated status block says on what evidence. Two rows are still
+half-landed in the browser: the *three-pane conversation workspace* and the *LaTeX
+source/editor/PDF workspace* have their Design System components and their Python
+capabilities, and their Web routes were still being written when the blocks were dated.
 
 ---
 
@@ -1853,14 +1942,14 @@ When implementation starts, execute in this order:
 16. Phase 15 — structured-traffic dogfood
 17. Phase 16 — VS Code
 18. Phase 17 — hardening             → v1.0
-19. Review and explicitly approve the written conversation-first design specifications
-20. Establish the Research Harness Design System foundation
-21. Phase 18 — conversation workspace foundation
-22. Phase 19 — research attachments
-23. Phase 20 — unified ResearchGraph index
-24. Phase 21 — LaTeX manuscript workspace → v1.1 conversation-first milestone
+19. Review and explicitly approve the written conversation-first design specifications   ✓ 2026-09-03
+20. Establish the Research Harness Design System foundation                                ✓ Gate DS met
+21. Phase 18 — conversation workspace foundation                                           ✓ Gate P18 met (Web route in progress)
+22. Phase 19 — research attachments                                                        ✓ Gate P19 met
+23. Phase 20 — unified ResearchGraph index                                                 ✓ Gate P20 met
+24. Phase 21 — LaTeX manuscript workspace → v1.1 conversation-first milestone              ✓ Gate P21 met (Web route in progress)
 ```
 
 The first implementation milestone worth protecting at all costs is **v0.1 Evidence Loop**. If that loop is trustworthy, every later interface has a sound scientific substrate. If it is not trustworthy, Web/Claude/ChatGPT integrations only make unreliable state easier to access.
 
-No Phase 18–21 implementation starts from this roadmap alone. The next authorised action after this documentation update is researcher review of the written design; a separate implementation plan and coding require a later explicit instruction.
+Steps 19–24 were authorised on 2026-09-03 by the researcher's explicit instruction to finish this roadmap, which is the "proceed" the *Next Product Track* required; they were executed against `docs/plans/v1.1-implementation-plan.md`. Each gate's dated status block above says what is met, what evidence demonstrates it, and what is deferred. Two Web routes — the `/` conversation workspace and the manuscript workspace — were still being written when the status blocks were dated; nothing beyond Phase 21 is authorised, and the later extensions (v1.2 onward) still need their own explicit instruction.

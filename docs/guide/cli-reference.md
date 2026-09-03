@@ -92,6 +92,11 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ index         Build and inspect the disposable retrieval indexes.                    │
 │ manuscript    Attach Claims to manuscript text, revalidate anchors, audit, and       │
 │               trace.                                                                 │
+│ graph         Resolve references and traverse the ResearchGraph index.               │
+│ attachment    Attach files to a conversation session, check them, and save them to   │
+│               the corpus.                                                            │
+│ chat          Research conversations: durable, private working context (Product 39). │
+│ providers     The models this project can route to, and whether they are available.  │
 │ privacy       Show and set this project's privacy and egress policy.                 │
 │ traces        List and purge the disposable provider traces under                    │
 │               `.research/traces/`.                                                   │
@@ -120,6 +125,169 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
+### `research attachment`
+
+```text
+
+ Usage: research attachment [OPTIONS] COMMAND [ARGS]...
+
+ Attach files to a conversation session, check them, and save them to the corpus.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────╮
+│ add      Attach a file to a session as working material (`attachment.add`).          │
+│ list     List a session's attachments and their states.                              │
+│ remove   Delete an attachment, its bytes, and its previews (`attachment.remove`).    │
+│ check    Check whether the attachments may go to the selected model                  │
+│          (`attachment.check_send`).                                                  │
+│ resolve  Show what an attachment would become in the corpus                          │
+│          (`attachment.resolve_identity`).                                            │
+│ save     Save an attachment into the corpus under a resolved identity                │
+│          (`attachment.save_to_corpus`).                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment add`
+
+```text
+
+ Usage: research attachment add [OPTIONS] {session} {file}
+
+ Attach a file to a session as working material (`attachment.add`).
+
+ Session-only: this creates no Work, Version, Artifact, or Evidence.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>   Conversation session (CS####). [required]                  │
+│ *    file         <path>  Local file to attach. [required]                           │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace    -w      <path>  Workspace root; defaults to the nearest research.yaml │
+│                                above the current directory.                          │
+│                                [env var: RESEARCH_WORKSPACE]                         │
+│ --media-type           <str>   Override the media type; sniffed from the bytes.      │
+│ --description          <str>   Alt text or description, kept apart from reading.     │
+│ --visibility           <str>   private|project; defaults to the session's.           │
+│ --json                         Print the result as JSON instead of text.             │
+│ --help                         Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment check`
+
+```text
+
+ Usage: research attachment check [OPTIONS] {session}
+
+ Check whether the attachments may go to the selected model (`attachment.check_send`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Conversation session (CS####). [required]                   │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --provider           <str>   Configured provider name; the preferred one by default. │
+│ --model              <str>   Model served by that provider.                          │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment list`
+
+```text
+
+ Usage: research attachment list [OPTIONS] {session}
+
+ List a session's attachments and their states.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Conversation session (CS####). [required]                   │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment remove`
+
+```text
+
+ Usage: research attachment remove [OPTIONS] {session} {attachment}
+
+ Delete an attachment, its bytes, and its previews (`attachment.remove`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session         <str>  Conversation session (CS####). [required]                │
+│ *    attachment      <str>  Session attachment (SA####). [required]                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment resolve`
+
+```text
+
+ Usage: research attachment resolve [OPTIONS] {session} {attachment}
+
+ Show what an attachment would become in the corpus (`attachment.resolve_identity`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session         <str>  Conversation session (CS####). [required]                │
+│ *    attachment      <str>  Session attachment (SA####). [required]                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research attachment save`
+
+```text
+
+ Usage: research attachment save [OPTIONS] {session} {attachment}
+
+ Save an attachment into the corpus under a resolved identity
+ (`attachment.save_to_corpus`).
+
+ Creates or links Work/Version/Artifact identity and parses the file. It accepts no
+ Evidence and no Claim: extraction still goes through the review gates.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session         <str>  Conversation session (CS####). [required]                │
+│ *    attachment      <str>  Session attachment (SA####). [required]                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --as-new                     Register a new Work even if the identity looks          │
+│                              familiar.                                               │
+│ --attach-to          <str>   Save the file under this Work (W####).                  │
+│ --no-parse                   Register the file without parsing it.                   │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
 ### `research capabilities`
 
 ```text
@@ -133,6 +301,319 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                              above the current directory.                            │
 │                              [env var: RESEARCH_WORKSPACE]                           │
 │ --schemas                    Include the request/response JSON schemas.              │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### `research chat`
+
+```text
+
+ Usage: research chat [OPTIONS] COMMAND [ARGS]...
+
+ Research conversations: durable, private working context (Product 39).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────╮
+│ new        Open a session (`session.create`).                                        │
+│ list       Every session in this project (`session.list`).                           │
+│ show       Reopen a session with its transcript intact (`session.get`).              │
+│ rename     Retitle a session (`session.rename`).                                     │
+│ search     Search titles and transcripts (`session.search`). Works with `.research/` │
+│            deleted.                                                                  │
+│ summarize  Regenerate the derived summary (`session.summarize`). No model call.      │
+│ context    Show what a message would send, or what one did (`context.preview`,       │
+│            `context.get`).                                                           │
+│ send       Send a message and print the answer (`session.send`).                     │
+│ stop       Stop a streaming answer (`session.stop`). What arrived is kept as         │
+│            incomplete.                                                               │
+│ retry      Answer again as a new attempt (`session.retry`); the failed one is kept.  │
+│ promote    Promote an excerpt into reviewable state (`session.promote`).             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat context`
+
+```text
+
+ Usage: research chat context [OPTIONS] {session}
+
+ Show what a message would send, or what one did (`context.preview`, `context.get`).
+
+ Without `--pack` this assembles a receipt for a draft and sends nothing. With `--pack`
+ it reads the receipt a past message already named, which is the durable record of what
+ that call was shown.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w                  <path>  Workspace root; defaults to the nearest     │
+│                                          research.yaml above the current directory.  │
+│                                          [env var: RESEARCH_WORKSPACE]               │
+│ --pack                           <str>   Read a receipt already recorded, e.g.       │
+│                                          CP0001, instead of assembling one.          │
+│ --text                           <str>   The draft to assemble context for.          │
+│ --ref                            <str>   Stable reference to send, e.g. E0482;       │
+│                                          repeatable.                                 │
+│ --provider                       <str>   Provider entry from `providers:` in         │
+│                                          research.yaml.                              │
+│ --budget                         <int>   Token budget for the assembled context.     │
+│ --persist        --no-persist            Record the pack under the session.          │
+│                                          [default: no-persist]                       │
+│ --json                                   Print the result as JSON instead of text.   │
+│ --help                                   Show this message and exit.                 │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat list`
+
+```text
+
+ Usage: research chat list [OPTIONS]
+
+ Every session in this project (`session.list`).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat new`
+
+```text
+
+ Usage: research chat new [OPTIONS] {title}
+
+ Open a session (`session.create`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    title      <str>  What this conversation is about. [required]                   │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace   -w      <path>             Workspace root; defaults to the nearest     │
+│                                          research.yaml above the current directory.  │
+│                                          [env var: RESEARCH_WORKSPACE]               │
+│ --visibility          <private|project>  private keeps the conversation on this      │
+│                                          machine, so only a local provider may       │
+│                                          answer it; project lets the selected        │
+│                                          external provider see it.                   │
+│                                          [default: private]                          │
+│ --model               <str>              Default provider/model for this session.    │
+│ --budget              <int>              Token budget for the assembled context.     │
+│ --json                                   Print the result as JSON instead of text.   │
+│ --help                                   Show this message and exit.                 │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat promote`
+
+```text
+
+ Usage: research chat promote [OPTIONS] {message} {target}
+
+ Promote an excerpt into reviewable state (`session.promote`).
+
+ Evidence is not a target: it needs an Artifact and an exact anchor, so asking for it
+ here is refused with the route that does work.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    message      <str>  The message to promote from, e.g. M0042. [required]         │
+│ *    target       <str>  note | question | claim_candidate | decision_candidate.     │
+│                          [required]                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace      -w      <path>                        Workspace root; defaults to   │
+│                                                        the nearest research.yaml     │
+│                                                        above the current directory.  │
+│                                                        [env var: RESEARCH_WORKSPACE] │
+│ --session                <str>                         Session the message belongs   │
+│                                                        to.                           │
+│ --excerpt                <str>                         Text to promote; defaults to  │
+│                                                        the message.                  │
+│ --rationale              <str>                         Why.                          │
+│ --subject                <str>                         Claim proposition subject.    │
+│ --predicate              <str>                         Claim predicate.              │
+│ --object                 <str>                         Claim object.                 │
+│ --scope                  <individual|observed_subset|  Scope the claim is asserted   │
+│                          corpus_pattern|field_general  at.                           │
+│                          ization|universal_or_absence  [default: individual]         │
+│                          >                                                           │
+│ --type                   <descriptive|comparative|pre  Claim type.                   │
+│                          valence|absence|causal|taxon  [default: descriptive]        │
+│                          omic|methodological|synthesi                                │
+│                          s|recommendation>                                           │
+│ --decision-type          <taxonomy_revision|epistemic  Decision type for a           │
+│                          _override|inclusion|exclusio  candidate.                    │
+│                          n|methodology|other>          [default: other]              │
+│ --json                                                 Print the result as JSON      │
+│                                                        instead of text.              │
+│ --help                                                 Show this message and exit.   │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat rename`
+
+```text
+
+ Usage: research chat rename [OPTIONS] {session} {title}
+
+ Retitle a session (`session.rename`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+│ *    title        <str>  The new title. [required]                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat retry`
+
+```text
+
+ Usage: research chat retry [OPTIONS] {message}
+
+ Answer again as a new attempt (`session.retry`); the failed one is kept.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    message      <str>  The failed model message, e.g. M0042. [required]            │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace    -w      <path>  Workspace root; defaults to the nearest research.yaml │
+│                                above the current directory.                          │
+│                                [env var: RESEARCH_WORKSPACE]                         │
+│ --provider             <str>   Provider entry from `providers:` in research.yaml.    │
+│ --script               <path>  JSON replies for the in-process scripted provider;    │
+│                                runs fully offline.                                   │
+│ --chunk-words          <int>   Words per delta when the scripted provider streams.   │
+│                                [default: 8]                                          │
+│ --json                         Print the result as JSON instead of text.             │
+│ --help                         Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat search`
+
+```text
+
+ Usage: research chat search [OPTIONS] {query}
+
+ Search titles and transcripts (`session.search`). Works with `.research/` deleted.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    query      <str>  Text to look for in titles and messages. [required]           │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --limit              <int>   Maximum sessions to report. [default: 20]               │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat send`
+
+```text
+
+ Usage: research chat send [OPTIONS] {session} {text}
+
+ Send a message and print the answer (`session.send`).
+
+ The run is durable: the same answer is readable afterwards with `session show`, and a
+ client watching `GET /runs/{id}/events` sees exactly these deltas.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+│ *    text         <str>  The message to send. [required]                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace    -w      <path>  Workspace root; defaults to the nearest research.yaml │
+│                                above the current directory.                          │
+│                                [env var: RESEARCH_WORKSPACE]                         │
+│ --ref                  <str>   Stable reference to send, e.g. E0482; repeatable.     │
+│ --provider             <str>   Provider entry from `providers:` in research.yaml.    │
+│ --script               <path>  JSON replies for the in-process scripted provider;    │
+│                                runs fully offline.                                   │
+│ --chunk-words          <int>   Words per delta when the scripted provider streams.   │
+│                                [default: 8]                                          │
+│ --budget               <int>   Token budget for the assembled context.               │
+│ --json                         Print the result as JSON instead of text.             │
+│ --help                         Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat show`
+
+```text
+
+ Usage: research chat show [OPTIONS] {session}
+
+ Reopen a session with its transcript intact (`session.get`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --offset             <int>   First message to print. [default: 0]                    │
+│ --limit              <int>   How many messages to print. [default: 50]               │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat stop`
+
+```text
+
+ Usage: research chat stop [OPTIONS] {run_id}
+
+ Stop a streaming answer (`session.stop`). What arrived is kept as incomplete.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    run_id      <str>  The run to stop. [required]                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat summarize`
+
+```text
+
+ Usage: research chat summarize [OPTIONS] {session}
+
+ Regenerate the derived summary (`session.summarize`). No model call.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
 │ --json                       Print the result as JSON instead of text.               │
 │ --help                       Show this message and exit.                             │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
@@ -568,6 +1049,186 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
+### `research graph`
+
+```text
+
+ Usage: research graph [OPTIONS] COMMAND [ARGS]...
+
+ Resolve references and traverse the ResearchGraph index.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────╮
+│ resolve     Resolve a reference against canonical state (`graph.resolve`).           │
+│ complete    Complete a partially typed `@` reference (`graph.autocomplete`).         │
+│ neighbors   Traverse a one- or two-hop neighbourhood (`graph.neighbors`).            │
+│ query       Filter nodes by kind, authority, visibility, link, and text              │
+│             (`graph.query`).                                                         │
+│ provenance  Trace a node back to its source, e.g. Claim to Artifact anchor           │
+│             (`graph.provenance`).                                                    │
+│ status      Whether the index exists, how big it is, and when it was built           │
+│             (`graph.status`).                                                        │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph complete`
+
+```text
+
+ Usage: research graph complete [OPTIONS] {prefix}
+
+ Complete a partially typed `@` reference (`graph.autocomplete`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    prefix      <str>  Partially typed reference or name. [required]                │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace   -w      <path>              Workspace root; defaults to the nearest    │
+│                                           research.yaml above the current directory. │
+│                                           [env var: RESEARCH_WORKSPACE]              │
+│ --kind                <str>               Restrict to a node kind; repeatable.       │
+│ --visibility          <str>               Restrict to an egress class (private,      │
+│                                           project); repeatable. Excluded nodes are   │
+│                                           never traversed through.                   │
+│ --limit               <int range> [x>=1]  Maximum rows to return. [default: 10]      │
+│ --json                                    Print the result as JSON instead of text.  │
+│ --help                                    Show this message and exit.                │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph neighbors`
+
+```text
+
+ Usage: research graph neighbors [OPTIONS] {ID}
+
+ Traverse a one- or two-hop neighbourhood (`graph.neighbors`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    ID      <str>  Node identity, e.g. C0041 or block:A0017-3#B0081. [required]     │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace   -w      <path>                 Workspace root; defaults to the nearest │
+│                                              research.yaml above the current         │
+│                                              directory.                              │
+│                                              [env var: RESEARCH_WORKSPACE]           │
+│ --hops                <int range> [1<=x<=2]  One or two hops. [default: 1]           │
+│ --direction           <out|in|both>          Follow edges out, in, or both ways.     │
+│                                              [default: both]                         │
+│ --kind                <str>                  Restrict to a node kind; repeatable.    │
+│ --edge                <str>                  Restrict to an edge kind; repeatable.   │
+│ --authority           <str>                  Restrict to an authority label;         │
+│                                              repeatable.                             │
+│ --visibility          <str>                  Restrict to an egress class (private,   │
+│                                              project); repeatable. Excluded nodes    │
+│                                              are never traversed through.            │
+│ --limit               <int range> [x>=1]     Maximum rows to return. [default: 50]   │
+│ --json                                       Print the result as JSON instead of     │
+│                                              text.                                   │
+│ --help                                       Show this message and exit.             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph provenance`
+
+```text
+
+ Usage: research graph provenance [OPTIONS] {ID}
+
+ Trace a node back to its source, e.g. Claim to Artifact anchor (`graph.provenance`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    ID      <str>  Node identity, e.g. C0041 or block:A0017-3#B0081. [required]     │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace   -w      <path>                          Workspace root; defaults to    │
+│                                                       the nearest research.yaml      │
+│                                                       above the current directory.   │
+│                                                       [env var: RESEARCH_WORKSPACE]  │
+│ --to                  <project|session|message|attac  Kind of source the path should │
+│                       hment|work|version|artifact|se  end at.                        │
+│                       ction|paragraph|table|figure|e  [default: artifact]            │
+│                       quation|reference|evidence|cla                                 │
+│                       im|question|decision|synthesis                                 │
+│                       |manuscript_file|manuscript_an                                 │
+│                       chor|citation>                                                 │
+│ --visibility          <str>                           Restrict to an egress class    │
+│                                                       (private, project);            │
+│                                                       repeatable. Excluded nodes are │
+│                                                       never traversed through.       │
+│ --json                                                Print the result as JSON       │
+│                                                       instead of text.               │
+│ --help                                                Show this message and exit.    │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph query`
+
+```text
+
+ Usage: research graph query [OPTIONS]
+
+ Filter nodes by kind, authority, visibility, link, and text (`graph.query`).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace   -w      <path>              Workspace root; defaults to the nearest    │
+│                                           research.yaml above the current directory. │
+│                                           [env var: RESEARCH_WORKSPACE]              │
+│ --kind                <str>               Restrict to a node kind; repeatable.       │
+│ --authority           <str>               Restrict to an authority label;            │
+│                                           repeatable.                                │
+│ --visibility          <str>               Restrict to an egress class (private,      │
+│                                           project); repeatable. Excluded nodes are   │
+│                                           never traversed through.                   │
+│ --edge                <str>               Restrict to an edge kind; repeatable.      │
+│ --linked-to           <str>               Only nodes joined to this identity.        │
+│ --text                <str>               Lexical constraint over label and text.    │
+│ --limit               <int range> [x>=1]  Maximum rows to return. [default: 50]      │
+│ --json                                    Print the result as JSON instead of text.  │
+│ --help                                    Show this message and exit.                │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph resolve`
+
+```text
+
+ Usage: research graph resolve [OPTIONS] {REFERENCE}
+
+ Resolve a reference against canonical state (`graph.resolve`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    REFERENCE      <str>  An @ reference, a node identity, or an rh:// link.        │
+│                            [required]                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research graph status`
+
+```text
+
+ Usage: research graph status [OPTIONS]
+
+ Whether the index exists, how big it is, and when it was built (`graph.status`).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
 ### `research inbox`
 
 ```text
@@ -758,6 +1419,17 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │              30.3).                                                                  │
 │ trace        Resolve FILE:LINE to its Claim, its Evidence, and the exact source      │
 │              span.                                                                   │
+│ files        List the source files of the manuscript (`manuscript.files`).           │
+│ read         Print one manuscript file with the hash a later `write` must present.   │
+│ write        Save one manuscript file, refusing an outside change                    │
+│              (`manuscript.write_file`).                                              │
+│ compile      Compile with the configured local engine (`manuscript.compile`).        │
+│ build        Show one build: compiler diagnostics and scientific findings            │
+│              (`manuscript.build`).                                                   │
+│ synctex      Map source to PDF, or PDF to source (`manuscript.synctex`).             │
+│ suggest      Stage a candidate diff for one span; the manuscript is not touched.     │
+│ apply        Apply a reviewed candidate diff to the manuscript                       │
+│              (`manuscript.apply_suggestion`).                                        │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -779,6 +1451,28 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                              [default: main.tex]                                     │
 │ --json                       Print the result as JSON instead of text.               │
 │ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript apply`
+
+```text
+
+ Usage: research manuscript apply [OPTIONS] {CANDIDATE}
+
+ Apply a reviewed candidate diff to the manuscript (`manuscript.apply_suggestion`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    CANDIDATE      <str>  Staged candidate to apply. [required]                     │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace      -w      <path>  Workspace root; defaults to the nearest             │
+│                                  research.yaml above the current directory.          │
+│                                  [env var: RESEARCH_WORKSPACE]                       │
+│ --expected-hash          <str>   Defaults to the hash the candidate was produced     │
+│                                  against.                                            │
+│ --json                           Print the result as JSON instead of text.           │
+│ --help                           Show this message and exit.                         │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -855,6 +1549,84 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
+#### `research manuscript build`
+
+```text
+
+ Usage: research manuscript build [OPTIONS] [BUILD_ID]
+
+ Show one build: compiler diagnostics and scientific findings (`manuscript.build`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│   BUILD_ID      <str>  Build to read; defaults to the latest.                        │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace      -w      <path>  Workspace root; defaults to the nearest             │
+│                                  research.yaml above the current directory.          │
+│                                  [env var: RESEARCH_WORKSPACE]                       │
+│ --no-audit                       Report compiler diagnostics only.                   │
+│ --parse-sources                  Re-parse source PDFs so anchors are checked.        │
+│ --json                           Print the result as JSON instead of text.           │
+│ --help                           Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript compile`
+
+```text
+
+ Usage: research manuscript compile [OPTIONS]
+
+ Compile with the configured local engine (`manuscript.compile`).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>   Workspace root; defaults to the nearest research.yaml  │
+│                               above the current directory.                           │
+│                               [env var: RESEARCH_WORKSPACE]                          │
+│ --entry              <str>    Entry .tex file; defaults to manuscript.entry_file.    │
+│ --timeout            <float>  Seconds before the process is killed.                  │
+│ --json                        Print the result as JSON instead of text.              │
+│ --help                        Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript files`
+
+```text
+
+ Usage: research manuscript files [OPTIONS]
+
+ List the source files of the manuscript (`manuscript.files`).
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript read`
+
+```text
+
+ Usage: research manuscript read [OPTIONS] {PATH}
+
+ Print one manuscript file with the hash a later `write` must present.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    PATH      <str>  Manuscript-relative file, e.g. sections/intro.tex. [required]  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
 #### `research manuscript revalidate`
 
 ```text
@@ -874,6 +1646,58 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ --dry-run                    Report the verdicts without recording any of them.      │
 │ --json                       Print the result as JSON instead of text.               │
 │ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript suggest`
+
+```text
+
+ Usage: research manuscript suggest [OPTIONS] {FILE:START-END}
+
+ Stage a candidate diff for one span; the manuscript is not touched.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    FILE:START-END      <str>  Span to rewrite, e.g. main.tex:14-18. [required]     │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace     -w      <path>  Workspace root; defaults to the nearest              │
+│                                 research.yaml above the current directory.           │
+│                                 [env var: RESEARCH_WORKSPACE]                        │
+│ --style                 <str>   humanize | venue | copyedit.                         │
+│ --instruction           <str>   What the rewrite should do.                          │
+│ --session               <str>   Conversation session that asked (CS####).            │
+│ --message               <str>   Message that asked (M####).                          │
+│ --context-pack          <str>   Context receipt id (CP####).                         │
+│ --provider              <str>   Provider entry from `providers:` in research.yaml,   │
+│                                 or 'scripted'.                                       │
+│ --script                <path>  JSON file of scripted writer responses.              │
+│ --json                          Print the result as JSON instead of text.            │
+│ --help                          Show this message and exit.                          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript synctex`
+
+```text
+
+ Usage: research manuscript synctex [OPTIONS] [FILE:LINE]
+
+ Map source to PDF, or PDF to source (`manuscript.synctex`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│   FILE:LINE      <str>  Source location to look forward from, e.g. main.tex:16.      │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>   Workspace root; defaults to the nearest research.yaml  │
+│                               above the current directory.                           │
+│                               [env var: RESEARCH_WORKSPACE]                          │
+│ --page               <int>    PDF page to look back from (1-based).                  │
+│ --x                  <float>  PDF x, points from the left.                           │
+│ --y                  <float>  PDF y, points from the top.                            │
+│ --build              <str>    Build to use; defaults to the latest.                  │
+│ --json                        Print the result as JSON instead of text.              │
+│ --help                        Show this message and exit.                            │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -898,6 +1722,32 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                              [default: main.tex]                                     │
 │ --json                       Print the result as JSON instead of text.               │
 │ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research manuscript write`
+
+```text
+
+ Usage: research manuscript write [OPTIONS] {PATH}
+
+ Save one manuscript file, refusing an outside change (`manuscript.write_file`).
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    PATH      <str>  Manuscript-relative file, e.g. sections/intro.tex. [required]  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ *  --expected-hash          <str>   content_hash of the version you edited; a        │
+│                                     mismatch is refused.                             │
+│                                     [required]                                       │
+│    --from                   <path>  File to read the new content from; '-' reads     │
+│                                     stdin.                                           │
+│    --text                   <str>   The new content, inline.                         │
+│    --workspace      -w      <path>  Workspace root; defaults to the nearest          │
+│                                     research.yaml above the current directory.       │
+│                                     [env var: RESEARCH_WORKSPACE]                    │
+│    --json                           Print the result as JSON instead of text.        │
+│    --help                           Show this message and exit.                      │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -1174,6 +2024,39 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
  Usage: research privacy show [OPTIONS]
 
  Print the `privacy:` section of `research.yaml` as it is now.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### `research providers`
+
+```text
+
+ Usage: research providers [OPTIONS] COMMAND [ARGS]...
+
+ The models this project can route to, and whether they are available.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────╮
+│ list  Every configured model, with what it accepts and whether it can be called.     │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research providers list`
+
+```text
+
+ Usage: research providers list [OPTIONS]
+
+ Every configured model, with what it accepts and whether it can be called.
 
 ╭─ Options ────────────────────────────────────────────────────────────────────────────╮
 │ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │

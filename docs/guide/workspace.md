@@ -1,14 +1,17 @@
 # The workspace
 
-A workspace is a directory. Everything the project knows is a file in it, and every file
-is either **canonical** — it carries scientific authority and belongs in Git — or under
-`.research/`, which is machine state you can delete at any time (ADR-001).
+A workspace is a directory, and every file in it belongs to one of three tiers:
+**canonical** state, which carries scientific authority and is meant to be committed
+(ADR-001); `.research/`, which is machine state you can delete at any time; and
+`conversations/`, which is durable but private — the transcripts and their attachments that
+deleting `.research/` must never lose, and that are not published by default (ADR-025).
 
 ```text
 traffic-survey/
 ├── research.yaml                     project identity, schema version, review policy,
 │                                     id counters, providers:, privacy:
-├── .gitignore                        written by `init`; ignores .research/
+├── .gitignore                        written by `init`; ignores .research/ and
+│                                     conversations/
 ├── corpus/
 │   └── works/
 │       └── W0001/
@@ -35,6 +38,13 @@ traffic-survey/
 │   ├── figures/
 │   └── anchors.jsonl                 written by the harness: sentence → Claim bindings
 ├── events/research.jsonl             the semantic event log, one event per line
+├── conversations/CS0001/             durable but private; see below
+│   ├── session.yaml                  title, timestamps, visibility, model defaults
+│   ├── messages.jsonl                the append-only transcript, one Message per line
+│   ├── attachments/SA0001.yaml       session attachment metadata
+│   ├── attachments/SA0001.pdf        its bytes, immutable once ready
+│   ├── context/CP0001.json           one model call's ContextPack and `Context used` receipt
+│   └── summary.md                    derived; regenerable, and never authoritative
 └── .research/                        regenerable; see below
 ```
 
@@ -43,8 +53,9 @@ ingest.
 
 ## What is canonical
 
-Everything outside `.research/`. Canonical objects are YAML (single objects) or JSON
-Lines (append-heavy collections), keys in a stable order, UTF-8, with a trailing newline —
+Everything outside `.research/` and `conversations/`. Canonical objects are YAML (single
+objects) or JSON Lines (append-heavy collections), keys in a stable order, UTF-8, with a
+trailing newline —
 so a `git diff` reads as a change to the science rather than to a serialization. Every
 canonical object carries `schema_version`, `id`, `created_at`, `updated_at`, and
 `provenance`:
@@ -93,6 +104,9 @@ Everything under `.research/`:
 | `traces/` | provider prompts, latency, retrieval traces |
 | `runs/` | durable records and checkpoints of long-running workflows |
 | `journal/` | the transaction journal that makes a multi-file mutation atomic |
+| `graph/` | the [ResearchGraph](graph.md) projection: nodes, edges, adjacency, FTS |
+| `build/manuscript/<id>/` | one LaTeX build: the PDF, the log, the SyncTeX map, `build.json` |
+| `cache/attachments/` | attachment thumbnails and page previews |
 | `lock` | the workspace lock |
 | `daemon-token` | the local HTTP daemon's authority token |
 
@@ -104,6 +118,23 @@ Staging is part of it. A model proposal has no authority until a researcher acce
 so losing `.research/staging/` loses proposals, never conclusions — re-run
 `research interrogate`.
 
+## What is durable but private
+
+`conversations/` is the third tier, and it is neither of the other two. A transcript, its
+attachments, and the `Context used` receipt of every model call are **durable source
+records**: deleting `.research/` may not lose one, and the session ids keep counting from
+the files themselves rather than from the projection. They are also **not scientific
+state**: a message cannot carry accepted authority, `conversations/` is excluded from the
+canonical digest — so chat can never make a workspace inconsistent — and `init`'s
+`.gitignore` keeps it out of Git, because a private thinking log is not published by
+accident. Sharing one is an explicit export.
+
+What a conversation *can* do is be promoted: an excerpt becomes a Note, a Question, a Claim
+candidate, or a Decision candidate through the same capabilities and the same review gate
+as anything else, and an attachment becomes corpus identity only through
+`research attachment save`. See [the conversation workspace](conversation.md) and
+[attachments](attachments.md).
+
 ## Git
 
 The workspace is meant to be a Git repository. `init` writes a `.gitignore` for you:
@@ -112,6 +143,10 @@ The workspace is meant to be a Git repository. `init` writes a `.gitignore` for 
 # Regenerable machine state: SQLite projection, indexes, caches, staging, traces.
 # Canonical scientific state lives outside it and is meant to be committed.
 .research/
+
+# Durable but private: conversation transcripts, their attachments, and the context
+# receipts of model calls. Sharing them is a separate, explicit export.
+conversations/
 ```
 
 ```bash
@@ -197,8 +232,19 @@ Ids are stable, typed, and allocated from counters in `research.yaml`:
 | `D` | Decision | `D0001` |
 | `S` | SynthesisMatrix | `S0001` |
 | `SR` | SearchRun | `SR0001` |
+| `CS` | conversation session (durable, private) | `CS0001` |
+| `M` | message in a session | `M0042` |
+| `SA` | session attachment | `SA0003` |
+| `CP` | context pack / `Context used` receipt | `CP0007` |
 | `cand_<16 hex>` | staged candidate (in `.research/`, never canonical) | `cand_44c1f007fc0db0b2` |
 
 A Work is the scholarly work, a Version is one revision of it, and an Artifact is one file
 of one version. Evidence anchors to an Artifact, a block, and a character range; citations
 are about the Work (ADR-002).
+
+Most of these ids are also stable `@` references in a composer, resolved through
+`research graph resolve` against the canonical object rather than a database row — which is
+why a reference survives deleting the projection. Blocks are addressed as
+`block:<artifact>#<block>`, manuscript objects have no counter id at all, and a few
+namespaces (taxonomies, SearchRuns, matrix cells, notes) are deliberately not projected.
+See [the ResearchGraph](graph.md#stable-references).

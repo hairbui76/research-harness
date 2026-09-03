@@ -1620,6 +1620,8 @@ After the core v1.0 boundary, the next coherent product milestone is the convers
 
 These capabilities must preserve all existing authority, review, provenance, rebuildability, privacy, and provider-neutrality rules. Detailed sequencing belongs in `ROADMAP.md` and the design specifications under `docs/superpowers/specs/`.
 
+*Status note, 2026-09-03: this milestone was implemented as the v1.1 conversation-first track (ROADMAP Phases 18–21 and the Design System foundation). The boundary above is unchanged; the dated gate status for each phase is in `ROADMAP.md`, and the clause-by-clause evidence is in `docs/plans/acceptance-matrix.md`.*
+
 ### Should-have soon after
 
 - external paper discovery;

@@ -37,6 +37,11 @@ and `PRODUCT.md` explicitly rather than introducing an undocumented exception
 | [ADR-022](ADR-022-parser-recovers-but-never-fabricates.md) | The parser reconstructs and recovers, but never fabricates text | Accepted |
 | [ADR-023](ADR-023-measured-budgets-behavior-preserving-fixes.md) | Budgets are measured and published; only behavior-preserving hotspots are fixed | Accepted |
 | [ADR-024](ADR-024-imported-skills-are-classified-design-inputs.md) | Imported research skills are classified design inputs, not runtime components | Accepted |
+| [ADR-025](ADR-025-conversation-is-durable-private-working-context.md) | Conversation is durable private working context, never accepted state | Accepted |
+| [ADR-026](ADR-026-attachments-are-session-only-until-save-to-corpus.md) | Attachments are session-only until an explicit Save to corpus | Accepted |
+| [ADR-027](ADR-027-researchgraph-is-a-disposable-labelled-projection.md) | ResearchGraph is a disposable projection, with authority and visibility on every node and edge | Accepted |
+| [ADR-028](ADR-028-bounded-compilation-and-candidate-only-manuscript-edits.md) | Manuscript compilation is a bounded local process, and model edits are candidate diffs | Accepted |
+| [ADR-029](ADR-029-one-local-design-system-owns-presentation.md) | One local Design System package owns presentation, and owns nothing else | Accepted |
 
 ## Conventions for this directory
 

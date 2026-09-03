@@ -18,6 +18,13 @@ from pathlib import Path
 WIDTH = "88"
 os.environ["COLUMNS"] = WIDTH
 os.environ["TERM"] = "dumb"
+# rich treats a `dumb` TERM as an 80-column terminal and ignores COLUMNS entirely -- but
+# only when it also believes it is writing to a terminal, which any of these variables is
+# enough to make it believe. A shell that exports one (several agent and CI runners do)
+# would otherwise rewrap this whole page to 80 columns, producing a 1,000-line diff that
+# has nothing to do with the CLI.
+for _forcing in ("FORCE_COLOR", "CLICOLOR_FORCE", "TERMINAL_WIDTH"):
+    os.environ.pop(_forcing, None)
 
 import click  # noqa: E402 - after COLUMNS, which Click reads at import time
 from typer.main import get_command  # noqa: E402

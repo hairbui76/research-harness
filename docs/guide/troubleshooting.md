@@ -217,6 +217,113 @@ The line is blank, a comment, or LaTeX structure rather than prose. `research ma
 attach-text "<the sentence>"` finds it by content instead. Line numbers are 1-based and
 relative to the file inside the manuscript root.
 
+```text
+error: No LaTeX engine was found on PATH. Install one of: tectonic (a single binary that
+fetches what a document needs, https://tectonic-typesetting.github.io), or a TeX
+distribution providing latexmk/pdflatex/xelatex/lualatex (TeX Live, MacTeX, MiKTeX). Then
+reopen the manuscript workspace; the harness only ever reads engines from PATH and installs
+nothing itself. No manuscript source was read or modified.
+```
+
+The harness never installs a TeX distribution. If one *is* installed but `research.yaml`
+pins a different engine, the message names what is installed instead
+([the manuscript workspace](manuscript.md#the-toolchain)).
+
+```text
+error: sections/intro.tex changed outside the harness: expected sha256:dead…, found
+sha256:2613e526…; re-read the file before saving again
+```
+
+Someone else — an editor, a `git checkout`, a co-author — changed the file since you read
+it. `research manuscript read <path>` prints the current hash; a save that silently won
+over an outside edit would be data loss.
+
+```text
+error: no manuscript build last-good
+```
+
+`research manuscript build` takes a real build id and, unlike
+`GET /manuscript/builds/{id}/pdf`, does not accept the `latest` / `last-good` aliases. With
+no argument it reads the latest build, whose output names the last good PDF when the latest
+one failed.
+
+## Conversation and attachments
+
+```text
+error: session CS0001 is private and openai/gpt-4o-mini is an external provider, so nothing
+in this conversation may be sent to it (Product 34; workspace design SS7). Send it to a
+local provider, or make the session shareable with `research chat new --visibility project`
+on a new conversation.
+```
+
+A private session is private: the send is refused rather than trimmed to whatever happened
+to be shareable. A session's visibility is fixed at creation, so the fix is either a local
+provider or a new `--visibility project` session
+([conversation workspace](conversation.md#sessions)).
+
+```text
+error: no conversation session CS9999 in /home/you/projects/traffic-survey
+```
+
+`research chat list` shows what exists. Sessions live in `conversations/`, which is *not*
+under `.research/` — a rebuild neither creates nor removes one.
+
+```text
+M0002  failed  (context CP0001)
+error: model output was not valid JSON: Expecting value: line 1 column 1 (char 0)
+```
+
+Usually a `--script` file in the wrong shape: a chat reply is `{"text": "…"}`, not a bare
+string ([Providers](providers.md#the-scripted-provider)). The message and its failed
+attempt are kept — `research chat retry M0002 --script <fixed file>` answers again as a new
+attempt.
+
+```text
+error: session.promote: evidence cannot be created from prose: it needs an Artifact and an
+exact resolvable anchor … Promote the passage to a note, question, or claim candidate
+instead.
+```
+
+Working as designed. Evidence anchors to bytes; a model's sentence about a paper is not the
+paper ([conversation workspace](conversation.md#promotion)).
+
+```text
+error: attachment.check_send: no model providers configured; add a `providers:` list to
+research.yaml so the workspace knows what the attachments would be sent to
+```
+
+The sendability check compares an attachment against a *model*, so it needs at least one
+configured entry — including in a `research demo` workspace, which ships `providers: []`.
+
+```text
+2 attachment(s) cannot be sent to local/qwen2.5-7b-instruct: SA0002 paper.pdf: the selected
+model does not accept application/pdf input; SA0003 figure.png: …
+```
+
+Not an error to work around: the send is blocked so the attachment is not silently dropped.
+Pick a model that accepts the media (the refusal names one when a configured entry
+qualifies and the attachment may leave the machine), or remove the item
+([attachments](attachments.md#what-blocks-a-send)).
+
+## The ResearchGraph
+
+```text
+no graph index at /home/you/projects/traffic-survey/.research/graph/research-graph.db; run
+`research rebuild`
+```
+
+Information, not a failure. The graph is disposable; navigation degrades and nothing else
+does — `research chat show`, `chat search`, and every canonical read keep working.
+
+```text
+@E9999 unavailable in demo: candidate/project, not fresh
+  problem no evidence E9999 in this project
+```
+
+The reference resolved as a *reference* and then failed the canonical check. `problem` says
+which of the four checks failed: existence in this project, authority, privacy, or anchor
+freshness ([the ResearchGraph](graph.md#rh-deep-links)).
+
 ## The daemon
 
 ```text

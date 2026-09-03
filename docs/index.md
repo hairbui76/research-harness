@@ -2,7 +2,9 @@
 
 A local-first, provider-neutral research workstation. Canonical scientific state lives in
 readable, Git-versionable files; models propose, evidence justifies, and the researcher
-decides.
+decides. Conversation is the fastest way in and carries no authority of its own: a session
+is durable, private working context, and everything it produces reaches accepted state
+only through the same review path as everything else.
 
 New here? [Install and first run](guide/install.md), then the quickstart in
 [README.md](../README.md).
@@ -14,12 +16,16 @@ Task-oriented pages for using the harness.
 | page | when you need it |
 |---|---|
 | [Install and first run](guide/install.md) | requirements, `uv sync`, `research doctor`, creating a workspace |
-| [The workspace](guide/workspace.md) | the directory layout, what is canonical vs `.research/`, Git advice, identifiers |
+| [The workspace](guide/workspace.md) | the directory layout, the three storage tiers, Git advice, identifiers |
+| [The conversation workspace](guide/conversation.md) | `research chat`, sessions, `@` references, `Context used`, promotion, retries |
+| [Attachments](guide/attachments.md) | `research attachment`, what blocks a send, `Save to corpus` |
+| [The ResearchGraph](guide/graph.md) | `research graph`, stable references, `rh://` deep links, rebuild, budgets |
+| [The manuscript workspace](guide/manuscript.md) | files, real local compilation, SyncTeX, candidate diffs |
 | [Strict review](guide/review.md) | tiers, inbox order, review actions, batch conditions, conflicts, what a model may not do |
 | [Providers](guide/providers.md) | configuring OpenAI/Anthropic/local/scripted, env vars, egress policy, `research egress`, traces, cost |
 | [Agent hosts over MCP](guide/mcp.md) | `research mcp`, Claude Desktop and Claude Code config, ChatGPT-compatible hosts, tool names, resources |
 | [The local HTTP daemon](guide/http.md) | `research serve`, the token, the routes, the error codes |
-| [The Web cockpit](guide/web.md) | building and starting the browser UI |
+| [The Web cockpit](guide/web.md) | the root pnpm workspace, starting the browser UI, themes and density |
 | [The VS Code extension](guide/vscode.md) | manuscript work in the editor |
 | [Rebuild and recovery](guide/rebuild-and-recovery.md) | `research rebuild`, `research doctor`, journal recovery, inconsistency, schema versions, a corrupt `.research/` |
 | [Plugins](guide/plugins.md) | authoring boundaries, the manifest, allowed capabilities, the example and the two shipped plugins |
@@ -39,9 +45,10 @@ Generated reference, regenerated from the code rather than written by hand:
 | [PRODUCT.md](../PRODUCT.md) | the product specification; the source of every rule the code enforces |
 | [ROADMAP.md](../ROADMAP.md) | the phased implementation plan and the acceptance requirements per task |
 
-### Design specifications awaiting implementation planning
+### Design specifications for the conversation-first track
 
-These documents record the conversation-first workspace design. They do not by themselves authorise implementation.
+These documents record the conversation-first workspace design; the track that implements
+them is planned in [the v1.1 implementation plan](plans/v1.1-implementation-plan.md).
 
 | document | what it defines |
 |---|---|
@@ -58,6 +65,7 @@ These documents record the conversation-first workspace design. They do not by t
 |---|---|
 | [Engineering conventions](architecture/conventions.md) | layering, Python style, canonical serialization, test layout, the rules for parallel work |
 | [The Web research cockpit](architecture/web.md) | the React client: startup, the routes the daemon adds for it, the review screen, generated types, known gaps |
+| [The Design System](architecture/design-system.md) | `@research-harness/design`: the token contract, themes, the lint and contrast gates, the migration |
 | [VS Code manuscript client](architecture/vscode.md) | commands, hover, diagnostics, the sentence port, the backend gaps it works around |
 | [Domain changelog](architecture/domain-changelog.md) | additive amendments to `domain/` and the layers that persist or project it |
 
@@ -78,6 +86,12 @@ suggests violating one, the ADR and `PRODUCT.md` change explicitly.
 | [ADR-008](decisions/ADR-008-staleness-over-silent-rewriting.md) | Staleness instead of silent derived-state rewriting |
 | [ADR-009](decisions/ADR-009-mcp-primary-host-boundary.md) | MCP primary host boundary with HTTP fallback |
 | [ADR-010](decisions/ADR-010-plugin-extension-boundary.md) | Domain plugins may extend vocabularies but not core scientific authority |
+| … | ADR-011 to ADR-024 record the choices made during v1.0 implementation |
+| [ADR-025](decisions/ADR-025-conversation-is-durable-private-working-context.md) | Conversation is durable private working context, never accepted state |
+| [ADR-026](decisions/ADR-026-attachments-are-session-only-until-save-to-corpus.md) | Attachments are session-only until an explicit Save to corpus |
+| [ADR-027](decisions/ADR-027-researchgraph-is-a-disposable-labelled-projection.md) | ResearchGraph is a disposable projection, with authority and visibility on every node and edge |
+| [ADR-028](decisions/ADR-028-bounded-compilation-and-candidate-only-manuscript-edits.md) | Manuscript compilation is a bounded local process, and model edits are candidate diffs |
+| [ADR-029](decisions/ADR-029-one-local-design-system-owns-presentation.md) | One local Design System package owns presentation, and owns nothing else |
 
 ## Plans and reports
 
@@ -86,7 +100,9 @@ suggests violating one, the ADR and `PRODUCT.md` change explicitly.
 | [Acceptance matrix](plans/acceptance-matrix.md) | what demonstrates each acceptance behaviour, where it lives, whether it holds today |
 | [Performance budgets](plans/performance-budgets.md) | measured personal-scale timings and the proposed budgets (`benchmarks/`, `tests/perf/`) |
 | [Skill audit](plans/skill-audit.md) | every asset under `skills/`, classified, and where the in-scope ones landed |
+| [v1.1 implementation plan](plans/v1.1-implementation-plan.md) | the shared contracts, waves, and task briefs the conversation-first track executed |
 | [Dogfood session, 2026-09-03](plans/dogfood-2026-09-03.md) | running the harness on a real review; `docs/dogfood/structured-traffic/` is the resulting workspace |
+| [Dogfood session, v1.1](plans/dogfood-2026-09-03-v1.1.md) | the conversation-first loop end to end: chat, attachments, graph, a real LaTeX compile |
 
 ## Extension points
 

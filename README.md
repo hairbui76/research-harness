@@ -9,6 +9,11 @@ are always regenerable. Models act as bounded semantic workers behind provider-n
 contracts, and one workspace serves four surfaces — CLI, Web cockpit, VS Code, and agent
 hosts over MCP — without any of them holding research logic of its own.
 
+Conversation is the fastest way into a project and carries no authority of its own: a
+session is durable, private working context, `Context used` says exactly what each model
+call was shown and what it was not, and an excerpt or an attached PDF reaches accepted
+state only through the same review path as everything else.
+
 It is not a PDF chatbot, not a RAG application, and not an autonomous agent swarm.
 
 > **Models may propose; evidence must justify; the researcher decides.**
@@ -24,8 +29,9 @@ uv sync
 uv run research doctor
 ```
 
-Node and pnpm are needed only to build the Web cockpit and the VS Code extension.
-Full detail: [docs/guide/install.md](docs/guide/install.md).
+Node and pnpm are needed only to build the Web cockpit, the Design System package, and the
+VS Code extension; they are one pnpm workspace, so `pnpm install` runs once at the
+repository root. Full detail: [docs/guide/install.md](docs/guide/install.md).
 
 ## Try it in one command
 
@@ -219,11 +225,15 @@ Start at **[docs/index.md](docs/index.md)**.
 |---|---|
 | [Install and first run](docs/guide/install.md) | requirements, `uv sync`, `research doctor`, creating a workspace |
 | [The workspace](docs/guide/workspace.md) | the layout, canonical vs `.research/`, Git advice, identifiers |
+| [The conversation workspace](docs/guide/conversation.md) | `research chat`, sessions, `@` references, `Context used`, promotion |
+| [Attachments](docs/guide/attachments.md) | session-only files, what blocks a send, `Save to corpus` |
+| [The ResearchGraph](docs/guide/graph.md) | stable references, `rh://` deep links, traversal, rebuild, budgets |
+| [The manuscript workspace](docs/guide/manuscript.md) | files, real local LaTeX compilation, SyncTeX, candidate diffs |
 | [Strict review](docs/guide/review.md) | tiers, inbox order, actions, batch conditions, what a model may not do |
 | [Providers](docs/guide/providers.md) | OpenAI/Anthropic/local/scripted, env vars, egress policy, traces, cost |
 | [Agent hosts over MCP](docs/guide/mcp.md) | `research mcp`, Claude Desktop and Claude Code config, tool names, resources |
 | [The local HTTP daemon](docs/guide/http.md) | `research serve`, the token, routes, error codes |
-| [The Web cockpit](docs/guide/web.md) · [VS Code](docs/guide/vscode.md) | building and starting the two GUI surfaces |
+| [The Web cockpit](docs/guide/web.md) · [VS Code](docs/guide/vscode.md) | building and starting the two GUI surfaces, themes and density |
 | [Rebuild and recovery](docs/guide/rebuild-and-recovery.md) | rebuild, journal recovery, inconsistency, schema versions |
 | [Plugins](docs/guide/plugins.md) | authoring boundaries, the manifest, allowed capabilities |
 | [Troubleshooting](docs/guide/troubleshooting.md) | real error messages and what they mean |
@@ -235,12 +245,18 @@ Design: [PRODUCT.md](PRODUCT.md) is the specification, [ROADMAP.md](ROADMAP.md) 
 
 ## Status
 
-Version 0.1.0, working toward v1.0. The evidence loop, claims and epistemic audit,
+Version 0.1.0. The v1.0 core is built: the evidence loop, claims and epistemic audit,
 synthesis, manuscript traceability, discovery and coverage, cross-model verification, the
 capability layer with its HTTP daemon and MCP server, the Web cockpit, the VS Code
-extension, and the plugin SPI are all built; ROADMAP Phase 17 is v1.0 hardening. The gate
-for v1.0 is that a real project is usable for a full research session without direct
-database editing or dependence on conversation memory.
+extension, the plugin SPI, and Phase 17 hardening.
+
+The **v1.1 conversation-first track** (ROADMAP Phases 18–21 and the Design System
+foundation) is built on top of it: durable private sessions with token- and privacy-bounded
+context packs and visible `Context used` receipts; session-only attachments with an explicit
+`Save to corpus`; the rebuildable ResearchGraph behind `@` references and `rh://` deep
+links; a manuscript workspace that compiles owned LaTeX source with a real local engine and
+takes model edits only as reviewed candidate diffs; and one Design System package that every
+Web surface composes. See [ROADMAP.md](ROADMAP.md) for the dated gate status of each phase.
 
 Known gaps are recorded where they matter rather than hidden: see
 [docs/plans/acceptance-matrix.md](docs/plans/acceptance-matrix.md) for what each acceptance
@@ -255,6 +271,9 @@ uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
+
+pnpm install            # once, at the repository root: design + web + vscode
+pnpm -r typecheck && pnpm -r lint && pnpm -r test && pnpm -r build
 ```
 
 Read [docs/architecture/conventions.md](docs/architecture/conventions.md) before touching

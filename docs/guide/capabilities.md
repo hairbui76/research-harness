@@ -44,6 +44,11 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | capability | MCP tool | permission | human | what it does, and what it changes |
 |---|---|---|---|---|
 | `anchor.list` | `anchor_list` | `read` |  | Every manuscript sentence bound to a Claim. reads canonical state; changes nothing. |
+| `attachment.add` | `attachment_add` | `mutate` | yes | Attach a file to a session as working material. copies bytes into a session; creates no Work, Version, Artifact, or Evidence. |
+| `attachment.check_send` | `attachment_check_send` | `read` |  | Whether each attachment may go to the selected model, and why not. reads attachment records and provider capabilities; changes nothing. |
+| `attachment.remove` | `attachment_remove` | `mutate` | yes | Delete a session attachment, its bytes, and its previews. removes session-only working material; the corpus is not touched. |
+| `attachment.resolve_identity` | `attachment_resolve_identity` | `read` |  | What one attachment would become in the corpus, without saving it. resolves corpus identity for a file; writes nothing. |
+| `attachment.save_to_corpus` | `attachment_save_to_corpus` | `mutate` | yes | Promote a session attachment into the corpus under a resolved identity. creates or links Work/Version/Artifact identity and parses the file; accepts no Evidence or Claim. |
 | `citation.verify` | `citation_verify` | `read` |  | Check every manuscript citation key against the bibliography. reports missing or unused citation keys; changes nothing. |
 | `claim.audit` | `claim_audit` | `mutate` | yes | Record what the evidence allows a Claim to say. writes the Claim's assessment: status, allowed strength, defensible wording. |
 | `claim.create` | `claim_create` | `mutate` | yes | Register a structured Claim. creates a Claim at its requested strength; the audit decides what it may say. |
@@ -55,6 +60,8 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | `claim.supersede` | `claim_supersede` | `mutate` | yes | Retire a Claim, optionally naming the claim that replaces it. moves a Claim to superseded, which is terminal; human-only. |
 | `claim.unrelate` | `claim_unrelate` | `mutate` | yes | Remove exactly one claim-evidence edge. drops one claim-evidence edge; the assessment is left as it was. |
 | `claim.update_coverage` | `claim_update_coverage` | `mutate` | yes | Record the search coverage a Claim's scope rests on. writes the deterministic discovery funnel onto a Claim; the audit reads it and no model contributes to it. |
+| `context.get` | `context_get` | `read` |  | Read the `Context used` receipt recorded for one past model call. reads a stored receipt of private working context; the receipt is a record of what a model was shown and carries no scientific authority. |
+| `context.preview` | `context_preview` | `read` |  | Assemble the context a message would send, without sending it. reads what would be packed and what would be refused; sends nothing. |
 | `corpus.ingest` | `corpus_ingest` | `mutate` | yes | Register a local file as an immutable Artifact of a Work. creates Work/Version/Artifact identity from a file; proposes no evidence. |
 | `corpus.screen` | `corpus_screen` | `mutate` | yes | Include or exclude one discovery candidate, with its reason. records a screening decision on a SearchRun; acquires no source. |
 | `corpus.search` | `corpus_search` | `mutate` | yes | Search the configured external sources and record the run. reads external catalogues and writes nothing to them; records the SearchRun that makes the operation reproducible, and adds nothing to the corpus. |
@@ -66,15 +73,30 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | `evidence.list` | `evidence_list` | `read` |  | Accepted evidence by work and status; staged proposals are not listed. reads canonical state; changes nothing. |
 | `evidence.reject` | `evidence_reject` | `mutate` | yes | Refuse a candidate and record why. records a refusal so the same proposal is recognised again; creates no Evidence. |
 | `evidence.verify` | `evidence_verify` | `stage` |  | Re-read the source for staged candidates; returns a run id. writes verification verdicts onto staged candidates; accepts nothing. Returns a run id. |
+| `graph.autocomplete` | `graph_autocomplete` | `read` |  | Complete a partially typed reference for the composer. reads a disposable projection; changes no canonical object and grants no authority of its own. |
+| `graph.neighbors` | `graph_neighbors` | `read` |  | One- or two-hop neighbourhood of a node, in either direction. reads a disposable projection; changes no canonical object and grants no authority of its own. |
+| `graph.provenance` | `graph_provenance` | `read` |  | Shortest path from a node to its source, e.g. Claim to Artifact anchor. reads a disposable projection; changes no canonical object and grants no authority of its own. |
+| `graph.query` | `graph_query` | `read` |  | Nodes matching a structured kind/authority/visibility/link filter. reads a disposable projection; changes no canonical object and grants no authority of its own. |
+| `graph.resolve` | `graph_resolve` | `read` |  | Resolve an `@` reference or `rh://` deep link against canonical state. reads a disposable projection; changes no canonical object and grants no authority of its own. |
+| `graph.status` | `graph_status` | `read` |  | Whether the graph index exists, how big it is, and when it was built. reads a disposable projection; changes no canonical object and grants no authority of its own. |
 | `manuscript.anchors` | `manuscript_anchors` | `read` |  | Every stored anchor, with its verdict against the manuscript on disk. reads anchors and computes their verdicts; records none of them. |
+| `manuscript.apply_suggestion` | `manuscript_apply_suggestion` | `mutate` | yes | Apply a reviewed candidate diff to the manuscript source. writes owned manuscript source from an audited candidate and records the source mutation; refuses a changed protected span, a failed audit, and a stale hash. |
 | `manuscript.attach_claim` | `manuscript_attach_claim` | `mutate` | yes | Bind a manuscript sentence to a Claim. creates the manuscript anchor that makes a sentence auditable (Product 30.1). |
 | `manuscript.audit` | `manuscript_audit` | `read` |  | Audit the manuscript against the accepted research graph. reports findings; repairs nothing and writes nothing. |
+| `manuscript.build` | `manuscript_build` | `read` |  | One build: compiler diagnostics and scientific audit findings. reads a recorded build and audits the manuscript; changes nothing. |
+| `manuscript.compile` | `manuscript_compile` | `mutate` | yes | Run the configured local LaTeX engine once, bounded and confined. runs a local process over owned source and writes only disposable build outputs; no manuscript file is changed. |
 | `manuscript.draft` | `manuscript_draft` | `stage` |  | Draft a section from named accepted Claims, into staging. writes a draft candidate under .research/staging; the manuscript is untouched. |
+| `manuscript.files` | `manuscript_files` | `read` |  | Every source file of the manuscript a researcher can open. reads owned manuscript source; changes nothing. |
+| `manuscript.read_file` | `manuscript_read_file` | `read` |  | One manuscript file with the hash a later save must present. reads one owned source file; changes nothing. |
 | `manuscript.revalidate` | `manuscript_revalidate` | `mutate` | yes | Re-find every stored anchor and record what the manuscript now says. records anchor relocation and staleness; a reworded sentence goes stale rather than being reattached, and it requires a human actor. |
+| `manuscript.suggest` | `manuscript_suggest` | `stage` |  | Stage a model rewrite of one span as a reviewable candidate diff. writes a candidate under .research/staging with its protected-span, semantic, and Claim-wording verdicts; the manuscript is untouched. |
+| `manuscript.synctex` | `manuscript_synctex` | `read` |  | Source-to-PDF and PDF-to-source navigation for one build. reads the compiler's SyncTeX map; changes nothing. |
 | `manuscript.trace` | `manuscript_trace` | `read` |  | One sentence, by file and line, down to its Claim and source spans. reads the traceability chain; changes nothing. |
+| `manuscript.write_file` | `manuscript_write_file` | `mutate` | yes | Save one manuscript file, refusing an outside change. writes the researcher's own manuscript source under a hash check; refuses when the file changed outside the harness. |
 | `note.add` | `note_add` | `mutate` | yes | Capture a low-authority research note. creates a note that can never be cited as support until it is promoted. |
 | `note.discard` | `note_discard` | `mutate` | yes | Retire a captured note; discarded is terminal. ends a note's life; nothing downstream moves. |
 | `note.promote` | `note_promote` | `mutate` | yes | Record the research object a captured note became. raises a note's authority into a Claim, Question, or Decision; human-only. |
+| `provider.list` | `provider_list` | `read` |  | Every configured model, with what it accepts and whether it is available. reads configuration and the project's egress disclosure; contacts nothing, reveals no credential, and changes no state. |
 | `question.create` | `question_create` | `mutate` | yes | Register a research question. creates an open ResearchQuestion; answers nothing. |
 | `question.list` | `question_list` | `read` |  | Research questions and what currently bears on them. reads canonical state; changes nothing. |
 | `question.resolve` | `question_resolve` | `mutate` | yes | Answer a research question and capture the answer as a note. moves a ResearchQuestion to answered; writes no evidence. |
@@ -97,6 +119,16 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | `search_run.get` | `search_run_get` | `read` |  | One discovery run with its candidates and the metadata they propose. reads a recorded SearchRun and derives the metadata its candidates offer; proposes nothing to the corpus and changes nothing. |
 | `search_run.list` | `search_run_list` | `read` |  | Recorded discovery runs with their funnel counts, newest first. reads canonical state; changes nothing. |
 | `search_run.record` | `search_run_record` | `mutate` | yes | Persist a reproducible discovery operation. records what was searched, where, and when; adds nothing to the corpus. |
+| `session.create` | `session_create` | `mutate` | yes | Open a durable, private conversation session. writes private working context; creates no accepted scientific state. |
+| `session.get` | `session_get` | `read` |  | One session's transcript, attachments, and recorded receipts. reads durable private working context; changes nothing. |
+| `session.list` | `session_list` | `read` |  | Every conversation session in this project. reads durable private working context; changes nothing. |
+| `session.promote` | `session_promote` | `mutate` | yes | Promote an excerpt to a note, question, claim, or decision candidate. copies an excerpt into reviewable state with provenance to the session and message; the message is untouched, review is not bypassed, and evidence from prose is refused. |
+| `session.rename` | `session_rename` | `mutate` | yes | Retitle a session; its ids and transcript are untouched. writes private working context; creates no accepted scientific state. |
+| `session.retry` | `session_retry` | `mutate` | yes | Answer again as a new attempt, keeping the failed one. adds a new model attempt; the failed attempt's record is kept. Returns a run id. |
+| `session.search` | `session_search` | `read` |  | Sessions whose title or messages contain a query. reads durable private working context; changes nothing. |
+| `session.send` | `session_send` | `mutate` | yes | Send a message and stream the answer into a durable run. appends to a private transcript and records what the model was shown; creates no accepted scientific state. Returns a run id. |
+| `session.stop` | `session_stop` | `mutate` | yes | Stop a streaming answer, keeping what already arrived. cancels a run and marks the partial answer incomplete. |
+| `session.summarize` | `session_summarize` | `mutate` | yes | Regenerate a session's derived summary from its transcript. rewrites a derived summary of private working context; a summary never outranks the transcript, and neither outranks accepted state. |
 | `state.index` | `state_index` | `read` |  | Every navigation list - works, claims, questions, decisions - in one read. reads canonical state; changes nothing. |
 | `state.rebuild` | `state_rebuild` | `admin` | yes | Rebuild the deletable projection from canonical files. rebuilds regenerable state only; canonical files are never written. |
 | `state.stale` | `state_stale` | `read` |  | What is out of date, highest scientific impact first. reads recorded stale marks; recomputes and rewrites nothing. |

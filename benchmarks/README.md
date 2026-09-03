@@ -8,12 +8,14 @@ researcher waits on, so the project manager can schedule optimization against nu
 Results, proposed budgets, and the ranked hotspot list live in
 [`docs/plans/performance-budgets.md`](../docs/plans/performance-budgets.md).
 
-## The two modules
+## The modules
 
 | Module | What it does |
 | --- | --- |
 | `generate_corpus.py` | Builds a deterministic synthetic workspace through `WorkspaceRepository` transactions. |
 | `run_benchmarks.py` | Times project open, rebuild, FTS, the Review Inbox, the claim graph, the vector index, and retrieval against it. |
+| `graph/generate_graph_corpus.py` | The same canonical generator plus a conversation history, at the shape the [ResearchGraph budgets](#the-researchgraph-benchmark-benchmarksgraph) are stated on. |
+| `graph/run_graph_benchmarks.py` | Projects that corpus twice (full rebuild, then incremental update) and times every budgeted graph query mode. |
 
 ## Running
 
@@ -120,12 +122,16 @@ lands.
 
 ```bash
 uv run pytest tests/perf -q                          # skipped
-RESEARCH_HARNESS_PERF=1 uv run pytest tests/perf -q  # ~20 s
+RESEARCH_HARNESS_PERF=1 uv run pytest tests/perf -q  # ~55 s
 ```
 
-Set `RESEARCH_HARNESS_PERF_SCALE` to change the corpus size. The budgets there are several
-times looser than the measured numbers so a slow CI machine does not fail the build; the
-budgets a researcher should actually get are in the plan document.
+Set `RESEARCH_HARNESS_PERF_SCALE` to change the corpus size. The budgets in
+`test_budgets.py` are several times looser than the measured numbers so a slow CI machine
+does not fail the build; the budgets a researcher should actually get are in the plan
+document. `test_graph_budgets.py` is the exception and asserts **the product budgets
+themselves** — 100 ms exact, 250 ms neighbourhood, 100 ms autocomplete — because the margin
+there is three orders of magnitude, so a loaded machine still passes and anything that turns
+an indexed lookup back into a scan fails immediately.
 
 ## The ResearchGraph benchmark (`benchmarks/graph/`)
 
@@ -152,3 +158,27 @@ written through `ConversationStore`. The measurement itself is
 `research_harness.graph.bench`, which ships with the package so
 `tests/perf/test_graph_budgets.py` and the Phase 20 gate test can run the same workload
 against much smaller graphs. The exit code is non-zero when any mode misses its budget.
+
+At `--scale 1.0` the corpus projects **33,180 nodes and 74,617 edges from 2,307 durable
+source files** into an 89 MB database. What a run prints, and what it printed on the
+machine `docs/plans/performance-budgets.md` describes:
+
+```text
+graph: 33180 nodes, 74617 edges from 2307 source(s)
+  exact reference resolution: median 0.07 ms, p95 0.07 ms (budget 100 ms) [pass]
+  one-hop neighbourhood: median 0.88 ms (budget 250 ms) [pass]
+  two-hop neighbourhood: median 11.92 ms, p95 17.48 ms (budget 250 ms) [pass]
+  two-hop neighbourhood, project-visible only: median 8.08 ms (budget 250 ms) [pass]
+  autocomplete: median 0.41 ms (budget 100 ms) [pass]
+  provenance path to artifact: median 3.11 ms (budget 250 ms) [pass]
+  context fragments, project-visible: median 34.56 ms (budget 250 ms) [pass]
+```
+
+Three things are worth knowing before reading a run of your own. **"Warm" is load-bearing**:
+every mode runs a discarded warm-up pass and then reports the median of repeats, because a
+cold number times opening a SQLite file rather than the query. **The build numbers are
+informational** — a rebuild is `research rebuild`'s cost, already budgeted by
+`run_benchmarks.py` — and the no-op incremental update is dominated by re-projecting every
+source to compare fingerprints, not by writing. And **the privacy-filtered walk is not a
+separate cost**: it prunes the frontier, so it measures the same as or faster than the
+unfiltered one, which is what `tests/perf/test_graph_budgets.py` asserts.

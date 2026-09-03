@@ -54,9 +54,15 @@ nothing else.
 | `GET` | `/candidates/{candidate_id}` | one staged candidate, verbatim |
 | `GET` | `/index` | works, claims, questions, decisions, matrices, taxonomies, anchors — summarised |
 | `GET` | `/overview` | what needs attention now, composed server-side |
+| `GET` | `/runs/{run_id}/events` | server-sent events for one model call: `delta`, `status`, `error` |
+| `POST` | `/sessions/{id}/attachments` | multipart-free byte intake for a session attachment |
+| `GET` | `/sessions/{id}/attachments/{sa}/bytes` | the attachment's original bytes, inline and inert |
+| `GET` | `/sessions/{id}/attachments/{sa}/preview` | a PNG page projection, rendered by the harness |
+| `GET` | `/manuscript/builds/{build_id}/pdf` | one build's PDF; `latest` and `last-good` are accepted ids |
 
-`POST /capabilities/{name}` is the entire write surface; everything else is a read. FastAPI
-also serves `/docs`, `/redoc`, and `/openapi.json`. The route set is asserted in
+`POST /capabilities/{name}` is the entire write surface **with one documented exception**,
+the attachment byte route below; everything else is a read. FastAPI also serves `/docs`,
+`/redoc`, and `/openapi.json`. The route set is asserted in
 `tests/contract/protocol/test_http.py`, so a new one cannot appear by accident.
 
 When `web/dist` exists it is mounted at `/` with a single-page fallback; see
@@ -65,8 +71,60 @@ When `web/dist` exists it is mounted at `/` with a single-page fallback; see
 ```console
 $ curl -s http://127.0.0.1:8765/health
 {"ok":true,"workspace":"/home/you/projects/traffic-survey","project":"demo",
- "review_policy":"strict","capabilities":64,"version":"0.1.0"}
+ "review_policy":"strict","capabilities":100,"version":"0.1.0"}
 ```
+
+## Bytes: the four routes that are not JSON
+
+Four things cannot travel as a JSON capability response, and each gets a read-only route:
+an artifact's bytes, a session attachment's bytes, an attachment page preview, and a
+compiled PDF. `GET /manuscript/builds/{build_id}/pdf` accepts `latest` and `last-good` as
+build ids — the two questions a preview asks — and a failed build serves the last good PDF
+rather than nothing. Attachment bytes and previews are served deliberately inert: the media
+type is narrowed to the attachment allowlist (never `text/html`, never an SVG), with
+`X-Content-Type-Options: nosniff` and `Content-Security-Policy: default-src 'none'`.
+
+`POST /sessions/{session_id}/attachments` is **the one write that is not a capability
+call**. The body is the raw file, `Content-Type` is its media type, and `?filename=` is
+display metadata whose basename only is kept. It is narrow on purpose: it writes
+session-only state through the same service `attachment.add` uses, it creates no Work,
+Version, Artifact, or Evidence, and it is authorised exactly as `attachment.add` is
+(`mutate`, researcher only), so it is not a way around a permission. The alternative was
+base64-ing a 30 MB PDF through a JSON request, which buys no boundary.
+
+```bash
+curl -s -X POST "http://127.0.0.1:8765/sessions/CS0001/attachments?filename=paper.pdf" \
+  -H "authorization: Bearer $TOKEN" -H 'content-type: application/pdf' \
+  --data-binary @paper.pdf
+```
+
+## Streaming a model call
+
+`session.send` and `session.retry` are capabilities that return a `run_id`;
+`GET /runs/{run_id}/events` is the **read** that streams what the run recorded. Each
+`data:` line is one JSON object and the stream ends after a terminal `status`:
+
+```text
+event: delta
+data: {"message_id": "M0042", "attempt": 1, "text": "…appended text…"}
+
+event: status
+data: {"run_id": "run_…", "state": "running", "message_id": "M0042", "attempt": 1,
+       "context_pack_id": "CP0007"}
+
+event: error
+data: {"code": "provider_unavailable", "message": "…", "retryable": true}
+```
+
+`state` is one of `queued`, `running`, `succeeded`, `failed`, `cancelled`, `incomplete`,
+and an `error` frame's `code` is one of `provider_rate_limited`, `provider_unavailable`,
+`provider_auth_failed`, `provider_error`, `capability_error`, `run_unreadable`, or
+`internal_error`, each with its own `retryable`. Every delta is persisted into the message *before* it is emitted, so a client that
+reconnects reads the same content from `session.get`, and a client that opens the stream
+after the run finished gets the whole answer replayed and then the terminal status. A
+stream that ends *without* a terminal status means the connection dropped, never that the
+run succeeded — reconcile through `session.get`. `?after=<n>` resumes after the deltas you
+already have.
 
 ## Calling a capability
 
