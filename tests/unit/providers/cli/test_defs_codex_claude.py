@@ -80,6 +80,15 @@ def test_codex_login_status_classifies_both_ways() -> None:
     assert codex_auth(surprising)[0] == "unknown"
 
 
+def test_codex_api_key_login_is_not_a_subscription_and_is_not_routable() -> None:
+    status, guidance = codex_auth(outcome("codex-login-status-apikey.txt"))
+    assert status == "missing", "an API-key login is metered; it is not the ChatGPT subscription"
+    assert "API key" in guidance and "api.openai.com" in guidance
+    # a login that does not name ChatGPT is never silently accepted
+    plain = ProbeOutcome(argv=("x",), exit_code=0, stdout="Logged in\n", stderr="")
+    assert codex_auth(plain)[0] != "ok"
+
+
 def test_codex_debug_models_lists_only_visible_models_with_their_efforts() -> None:
     models = parse_codex_models(outcome("codex-debug-models.json"))
     assert models is not None
@@ -119,6 +128,7 @@ def test_claude_argv_disables_every_tool_and_denies_every_prompt() -> None:
         assert args[args.index(flag) + 1] == "stream-json"
     assert "--include-partial-messages" in args and "--strict-mcp-config" in args
     assert "--no-session-persistence" in args and "--disable-slash-commands" in args
+    assert "--restricted" in args, "restricted mode backs the empty --tools list up"
     assert args[args.index("--model") : args.index("--model") + 2] == ("--model", "opus")
     assert "--bare" not in args, "--bare never reads OAuth and would break the subscription login"
     assert "--output-schema" not in " ".join(args)
@@ -149,11 +159,20 @@ def test_claude_auth_status_reads_the_json_and_falls_back_to_text() -> None:
     )
 
 
+def test_claude_non_subscription_login_is_not_routable() -> None:
+    status, guidance = claude_auth(outcome("claude-auth-status-console.json"))
+    assert status == "missing", "a console login is metered; it is not a Claude.ai subscription"
+    assert "console" in guidance and "Claude.ai" in guidance
+
+
 def test_claude_posture_is_proven_by_the_real_help_text() -> None:
     text = (PROBES / "claude-help.txt").read_text(encoding="utf-8")
     assert all(flag in text for flag in CLAUDE.posture.required_help_flags)
-    # the flag reasoning rides on must stay required, or an older build would be sent it blind
+    # flags the posture and reasoning ride on must stay required, or an older build is sent
+    # them blind
     assert "--effort" in CLAUDE.posture.required_help_flags
+    assert "--restricted" in CLAUDE.posture.required_help_flags
+    assert "--restricted" in text
     version = CLAUDE.parse_version(
         ProbeOutcome(argv=("x",), exit_code=0, stdout="2.1.259 (Claude Code)\n", stderr="")
     )

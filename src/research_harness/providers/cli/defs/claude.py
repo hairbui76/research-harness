@@ -37,7 +37,15 @@ def claude_auth(outcome: ProbeOutcome) -> tuple[AuthStatus, str]:
     except ValueError:
         payload = None
     if isinstance(payload, dict) and isinstance(payload.get("loggedIn"), bool):
-        return ("ok", "") if payload["loggedIn"] else ("missing", "run `claude auth login`")
+        if not payload["loggedIn"]:
+            return "missing", "run `claude auth login`"
+        method = payload.get("authMethod")
+        if method == "claude.ai":
+            return "ok", ""
+        return "missing", (
+            f"logged in without a Claude.ai subscription (authMethod {method}): "
+            "run `claude auth login` with a Claude.ai account"
+        )
     if _LOGGED_IN.search(outcome.text):
         return "ok", ""
     if _NOT_LOGGED_IN.search(outcome.text):
@@ -63,6 +71,7 @@ def claude_args(invocation: CliInvocation) -> tuple[str, ...]:
         "--strict-mcp-config",
         "--disable-slash-commands",
         "--no-session-persistence",
+        "--restricted",
     ]
     if invocation.model:
         args += ["--model", invocation.model]
@@ -106,8 +115,12 @@ CLAUDE = CliRuntimeDef(
             "--no-session-persistence",
             "--disable-slash-commands",
             "--effort",
+            "--restricted",
         ),
-        note="no tools at all, every prompt denied, no MCP servers, no session file",
+        note=(
+            "no tools at all, every prompt denied, no MCP servers, no session file, "
+            "and --restricted as a second line of defence"
+        ),
     ),
     egress="external",
     egress_host="api.anthropic.com",
@@ -120,6 +133,11 @@ CLAUDE = CliRuntimeDef(
         "Reasoning routes through `--effort`, sent whenever the harness level names one of "
         "reasoning_choices (low, medium, high, xhigh, max in 2.1.259). The flag is required "
         "help output, so a build without it is reported unsupported rather than being sent "
-        "an unknown flag."
+        "an unknown flag. `--restricted` backs the empty --tools list up: it removes the "
+        "command- and code-running tools outright, ignores user, project and local settings, "
+        "and refuses bypassPermissions. Only a Claude.ai subscription counts as logged in: "
+        "the environment drops the API-key variables (env_keep admits only CLAUDE_CONFIG_DIR) "
+        "and claude_auth reports any other authMethod as not routable, so a metered "
+        "console login is never used for research."
     ),
 )

@@ -26,7 +26,14 @@ __all__ = ["CODEX", "codex_args", "codex_auth", "parse_codex_models", "parse_sem
 
 _SEMVER = re.compile(r"(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)")
 _LOGGED_IN = re.compile(r"\blogged in\b", re.IGNORECASE)
+_LOGGED_IN_CHATGPT = re.compile(r"logged in using chatgpt", re.IGNORECASE)
+_API_KEY = re.compile(r"api[ _-]?key", re.IGNORECASE)
 _NOT_LOGGED_IN = re.compile(r"\bnot logged in\b|login required|please run .*login", re.IGNORECASE)
+
+_API_KEY_LOGIN = (
+    "logged in with an API key, not a ChatGPT subscription: run `codex login` to use the "
+    "subscription (an API-key login is metered and talks to api.openai.com, not chatgpt.com)"
+)
 
 
 def parse_semver(outcome: ProbeOutcome) -> str | None:
@@ -35,9 +42,16 @@ def parse_semver(outcome: ProbeOutcome) -> str | None:
 
 
 def codex_auth(outcome: ProbeOutcome) -> tuple[AuthStatus, str]:
+    """Only a ChatGPT subscription login counts as `ok`.
+
+    A persisted API-key login lives under `$CODEX_HOME`, which `env_keep` preserves, so
+    dropping `OPENAI_API_KEY` does not by itself rule metered access out: the probe has to.
+    """
     if _NOT_LOGGED_IN.search(outcome.text):
         return "missing", "run `codex login`"
-    if outcome.exit_code == 0 and _LOGGED_IN.search(outcome.text):
+    if _LOGGED_IN.search(outcome.text) and _API_KEY.search(outcome.text):
+        return "missing", _API_KEY_LOGIN
+    if outcome.exit_code == 0 and _LOGGED_IN_CHATGPT.search(outcome.text):
         return "ok", ""
     if outcome.exit_code not in (0, None):
         return "missing" if not outcome.text.strip() else "unknown", "run `codex login`"
@@ -143,7 +157,12 @@ CODEX = CliRuntimeDef(
     verified_versions=("0.150.1",),
     env_keep=("CODEX_HOME",),
     notes=(
-        "A ChatGPT login talks to chatgpt.com; an API-key login would use api.openai.com, "
-        "which the bounded environment prevents by dropping OPENAI_API_KEY."
+        "A ChatGPT login talks to chatgpt.com; an API-key login is metered and would talk to "
+        "api.openai.com instead. Two things bound that: the bounded environment drops the "
+        "API-key variables (env_keep admits only CODEX_HOME), and the auth probe accepts "
+        "only a ChatGPT login. Dropping the variables alone would not be enough, because a "
+        "persisted API-key login lives under $CODEX_HOME, which env_keep preserves; "
+        "codex_auth therefore reports such a login as not routable rather than letting the "
+        "run reach a different host."
     ),
 )
