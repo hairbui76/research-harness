@@ -1,0 +1,8 @@
+{
+  "path": "sections/intro.tex",
+  "kind": "tex",
+  "content": "\\section{Introduction}\n\\label{sec:intro}\n\nAll existing traffic classifiers degrade under sustained load, and no prior work reports\nthe size of the gap \\cite{kraus2019}.\n\nWe compile this manuscript from source that stays under the researcher's control.\n",
+  "content_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "size_bytes": 297,
+  "modified_at": "2026-09-03T09:59:00Z"
+}

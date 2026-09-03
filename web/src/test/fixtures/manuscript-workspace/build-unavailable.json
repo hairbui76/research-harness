@@ -1,0 +1,39 @@
+{
+  "build_id": null,
+  "status": null,
+  "result": null,
+  "diagnostics": [],
+  "error_count": 0,
+  "warning_count": 0,
+  "audit_findings": [],
+  "audit_error_count": 0,
+  "audit_ran": false,
+  "audit_unavailable_reason": "no parsed manuscript: sections/intro.tex could not be read",
+  "pdf_available": false,
+  "pdf": null,
+  "pdf_stale": false,
+  "last_good": null,
+  "synctex_available": false,
+  "synctex_reason": "missing_file",
+  "synctex_detail": "this manuscript has not been compiled yet, so there is no SyncTeX map",
+  "toolchain": {
+    "settings": {
+      "engine": null,
+      "entry_file": "main.tex",
+      "timeout_seconds": 120.0,
+      "extra_args": [],
+      "synctex": true
+    },
+    "installed": [],
+    "configured": null,
+    "selected": null,
+    "guidance": [
+      "No LaTeX engine is installed: latexmk, tectonic, pdflatex, xelatex and lualatex were all absent from PATH.",
+      "Install TeX Live or Tectonic, then set manuscript.engine in research.yaml to pin one."
+    ]
+  },
+  "guidance": [
+    "No LaTeX engine is installed: latexmk, tectonic, pdflatex, xelatex and lualatex were all absent from PATH.",
+    "Install TeX Live or Tectonic, then set manuscript.engine in research.yaml to pin one."
+  ]
+}

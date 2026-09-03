@@ -1,0 +1,138 @@
+{
+  "build_id": "b-0003",
+  "status": "failed",
+  "result": {
+    "build_id": "b-0003",
+    "status": "failed",
+    "engine": "latexmk",
+    "executable": "/usr/bin/latexmk",
+    "args": [
+      "/usr/bin/latexmk",
+      "-norc",
+      "-pdf",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "-outdir=/tmp/rh/build/manuscript/b-0003",
+      "-synctex=1",
+      "main.tex"
+    ],
+    "entry_file": "main.tex",
+    "inputs_fingerprint": "sha256:bbbb222222222222222222222222222222222222222222222222222222222222",
+    "started_at": "2026-09-03T10:05:00Z",
+    "finished_at": "2026-09-03T10:05:03Z",
+    "duration_seconds": 3.0,
+    "timeout_seconds": 120.0,
+    "exit_status": 1,
+    "timed_out": false,
+    "build_dir": ".research/build/manuscript/b-0003",
+    "pdf": null,
+    "log": ".research/build/manuscript/b-0003/main.log",
+    "synctex": null,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "message": "Undefined control sequence \\notacommand",
+        "file": "sections/intro.tex",
+        "line": 7,
+        "code": "Undefined control sequence"
+      },
+      {
+        "severity": "warning",
+        "message": "Citation `kraus2019' undefined on input line 4",
+        "file": "sections/intro.tex",
+        "line": 4,
+        "code": "Citation undefined"
+      }
+    ],
+    "stdout_tail": "! Undefined control sequence.\n",
+    "stderr_tail": "",
+    "last_good": {
+      "build_id": "b-0002",
+      "engine": "latexmk",
+      "pdf": ".research/build/manuscript/b-0002/main.pdf",
+      "compiled_at": "2026-09-03T10:00:04Z",
+      "inputs_fingerprint": "sha256:aaaa111111111111111111111111111111111111111111111111111111111111",
+      "stale": true
+    }
+  },
+  "diagnostics": [
+    {
+      "severity": "error",
+      "message": "Undefined control sequence \\notacommand",
+      "file": "sections/intro.tex",
+      "line": 7,
+      "code": "Undefined control sequence"
+    },
+    {
+      "severity": "warning",
+      "message": "Citation `kraus2019' undefined on input line 4",
+      "file": "sections/intro.tex",
+      "line": 4,
+      "code": "Citation undefined"
+    }
+  ],
+  "error_count": 1,
+  "warning_count": 1,
+  "audit_findings": [
+    {
+      "kind": "over_strong_wording",
+      "severity": "error",
+      "message": "sentence reads above C0001: the Claim allows corpus-level wording, the sentence asserts it universally",
+      "anchor": {
+        "file": "sections/intro.tex",
+        "line_start": 4,
+        "line_end": 5,
+        "char_start": 0,
+        "char_end": 96,
+        "sentence": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap \\cite{kraus2019}.",
+        "sentence_fingerprint": "sha256:cccc111111111111111111111111111111111111111111111111111111111111",
+        "claim": "C0001",
+        "citation_keys": ["kraus2019"],
+        "status": "valid",
+        "stale": "fresh"
+      },
+      "related": ["C0001"],
+      "location": {
+        "file": "sections/intro.tex",
+        "line_start": 4,
+        "line_end": 5,
+        "char_start": 0,
+        "char_end": 96
+      }
+    }
+  ],
+  "audit_error_count": 1,
+  "audit_ran": true,
+  "audit_unavailable_reason": null,
+  "pdf_available": true,
+  "pdf": null,
+  "pdf_stale": true,
+  "last_good": {
+    "build_id": "b-0002",
+    "engine": "latexmk",
+    "pdf": ".research/build/manuscript/b-0002/main.pdf",
+    "compiled_at": "2026-09-03T10:00:04Z",
+    "inputs_fingerprint": "sha256:aaaa111111111111111111111111111111111111111111111111111111111111",
+    "stale": true
+  },
+  "synctex_available": false,
+  "synctex_reason": "missing_file",
+  "synctex_detail": "no SyncTeX file at main.synctex.gz; the engine produced none",
+  "toolchain": {
+    "settings": {
+      "engine": null,
+      "entry_file": "main.tex",
+      "timeout_seconds": 120.0,
+      "extra_args": [],
+      "synctex": true
+    },
+    "installed": [{ "engine": "latexmk", "executable": "/usr/bin/latexmk" }],
+    "configured": null,
+    "selected": { "engine": "latexmk", "executable": "/usr/bin/latexmk" },
+    "guidance": []
+  },
+  "guidance": [
+    "Build b-0003 failed: 1 compiler error(s) against the source as it is now.",
+    "The preview is the last PDF that compiled (b-0002, 2026-09-03T10:00:04+00:00); it is stale."
+  ]
+}

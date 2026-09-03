@@ -1,0 +1,8 @@
+{
+  "path": "main.tex",
+  "kind": "tex",
+  "content": "\\documentclass{article}\n\\usepackage{natbib}\n\\begin{document}\n\\input{sections/intro}\n\\bibliography{references}\n\\end{document}\n",
+  "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "size_bytes": 412,
+  "modified_at": "2026-09-03T09:58:00Z"
+}

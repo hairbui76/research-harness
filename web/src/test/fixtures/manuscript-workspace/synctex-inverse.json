@@ -1,0 +1,12 @@
+{
+  "build_id": "b-0002",
+  "available": true,
+  "reason": null,
+  "detail": null,
+  "pdf_locations": [],
+  "source_location": {
+    "file": "sections/intro.tex",
+    "line": 4,
+    "column": 3
+  }
+}

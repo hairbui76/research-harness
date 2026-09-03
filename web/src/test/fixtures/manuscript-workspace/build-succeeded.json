@@ -1,0 +1,135 @@
+{
+  "build_id": "b-0002",
+  "status": "succeeded",
+  "result": {
+    "build_id": "b-0002",
+    "status": "succeeded",
+    "engine": "latexmk",
+    "executable": "/usr/bin/latexmk",
+    "args": [
+      "/usr/bin/latexmk",
+      "-norc",
+      "-pdf",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "-outdir=/tmp/rh/build/manuscript/b-0002",
+      "-synctex=1",
+      "main.tex"
+    ],
+    "entry_file": "main.tex",
+    "inputs_fingerprint": "sha256:aaaa111111111111111111111111111111111111111111111111111111111111",
+    "started_at": "2026-09-03T10:00:00Z",
+    "finished_at": "2026-09-03T10:00:04Z",
+    "duration_seconds": 4.0,
+    "timeout_seconds": 120.0,
+    "exit_status": 0,
+    "timed_out": false,
+    "build_dir": ".research/build/manuscript/b-0002",
+    "pdf": ".research/build/manuscript/b-0002/main.pdf",
+    "log": ".research/build/manuscript/b-0002/main.log",
+    "synctex": ".research/build/manuscript/b-0002/main.synctex.gz",
+    "diagnostics": [
+      {
+        "severity": "warning",
+        "message": "Citation `kraus2019' undefined on input line 4",
+        "file": "sections/intro.tex",
+        "line": 4,
+        "code": "Citation undefined"
+      }
+    ],
+    "stdout_tail": "Output written on main.pdf (1 page).\n",
+    "stderr_tail": "",
+    "last_good": {
+      "build_id": "b-0002",
+      "engine": "latexmk",
+      "pdf": ".research/build/manuscript/b-0002/main.pdf",
+      "compiled_at": "2026-09-03T10:00:04Z",
+      "inputs_fingerprint": "sha256:aaaa111111111111111111111111111111111111111111111111111111111111",
+      "stale": false
+    }
+  },
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "message": "Citation `kraus2019' undefined on input line 4",
+      "file": "sections/intro.tex",
+      "line": 4,
+      "code": "Citation undefined"
+    }
+  ],
+  "error_count": 0,
+  "warning_count": 1,
+  "audit_findings": [
+    {
+      "kind": "over_strong_wording",
+      "severity": "error",
+      "message": "sentence reads above C0001: the Claim allows corpus-level wording, the sentence asserts it universally",
+      "anchor": {
+        "file": "sections/intro.tex",
+        "line_start": 4,
+        "line_end": 5,
+        "char_start": 0,
+        "char_end": 96,
+        "sentence": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap \\cite{kraus2019}.",
+        "sentence_fingerprint": "sha256:cccc111111111111111111111111111111111111111111111111111111111111",
+        "claim": "C0001",
+        "citation_keys": ["kraus2019"],
+        "status": "valid",
+        "stale": "fresh"
+      },
+      "related": ["C0001"],
+      "location": {
+        "file": "sections/intro.tex",
+        "line_start": 4,
+        "line_end": 5,
+        "char_start": 0,
+        "char_end": 96
+      }
+    },
+    {
+      "kind": "citation_mismatch",
+      "severity": "warning",
+      "message": "citation key `kraus2019' is not in references.bib",
+      "anchor": null,
+      "related": [],
+      "location": {
+        "file": "sections/intro.tex",
+        "line_start": 5,
+        "line_end": 5,
+        "char_start": 0,
+        "char_end": 0
+      }
+    }
+  ],
+  "audit_error_count": 1,
+  "audit_ran": true,
+  "audit_unavailable_reason": null,
+  "pdf_available": true,
+  "pdf": ".research/build/manuscript/b-0002/main.pdf",
+  "pdf_stale": false,
+  "last_good": {
+    "build_id": "b-0002",
+    "engine": "latexmk",
+    "pdf": ".research/build/manuscript/b-0002/main.pdf",
+    "compiled_at": "2026-09-03T10:00:04Z",
+    "inputs_fingerprint": "sha256:aaaa111111111111111111111111111111111111111111111111111111111111",
+    "stale": false
+  },
+  "synctex_available": true,
+  "synctex_reason": null,
+  "synctex_detail": null,
+  "toolchain": {
+    "settings": {
+      "engine": null,
+      "entry_file": "main.tex",
+      "timeout_seconds": 120.0,
+      "extra_args": [],
+      "synctex": true
+    },
+    "installed": [{ "engine": "latexmk", "executable": "/usr/bin/latexmk" }],
+    "configured": null,
+    "selected": { "engine": "latexmk", "executable": "/usr/bin/latexmk" },
+    "guidance": []
+  },
+  "guidance": []
+}

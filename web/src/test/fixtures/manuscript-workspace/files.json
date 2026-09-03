@@ -1,0 +1,24 @@
+{
+  "root": "manuscript",
+  "entry_file": "main.tex",
+  "files": [
+    {
+      "path": "main.tex",
+      "kind": "tex",
+      "size_bytes": 412,
+      "modified_at": "2026-09-03T09:58:00Z"
+    },
+    {
+      "path": "references.bib",
+      "kind": "bib",
+      "size_bytes": 188,
+      "modified_at": "2026-09-03T09:40:00Z"
+    },
+    {
+      "path": "sections/intro.tex",
+      "kind": "tex",
+      "size_bytes": 297,
+      "modified_at": "2026-09-03T09:59:00Z"
+    }
+  ]
+}

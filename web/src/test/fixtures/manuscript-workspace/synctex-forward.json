@@ -1,0 +1,16 @@
+{
+  "build_id": "b-0002",
+  "available": true,
+  "reason": null,
+  "detail": null,
+  "pdf_locations": [
+    {
+      "page": 1,
+      "x": 72.0,
+      "y": 180.0,
+      "width": 468.0,
+      "height": 24.0
+    }
+  ],
+  "source_location": null
+}

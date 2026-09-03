@@ -1,0 +1,127 @@
+{
+  "candidate_id": "mscand_0002",
+  "created_at": "2026-09-03T10:12:00Z",
+  "file": "sections/intro.tex",
+  "line_start": 4,
+  "line_end": 5,
+  "instruction": null,
+  "style": "humanize",
+  "policy": "manuscript.humanize",
+  "source_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "original_text": "All existing traffic classifiers degrade under sustained load, and no prior work reports\nthe size of the gap \\cite{kraus2019}.\n",
+  "proposed_text": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap.\n",
+  "proposed_content": "\\section{Introduction}\n\\label{sec:intro}\n\nAll existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap.\n\nWe compile this manuscript from source that stays under the researcher's control.\n",
+  "hunks": [
+    {
+      "old_start": 4,
+      "old_count": 2,
+      "new_start": 4,
+      "new_count": 1,
+      "lines": [
+        {
+          "kind": "removed",
+          "text": "All existing traffic classifiers degrade under sustained load, and no prior work reports",
+          "old_line": 4,
+          "new_line": null
+        },
+        {
+          "kind": "removed",
+          "text": "the size of the gap \\cite{kraus2019}.",
+          "old_line": 5,
+          "new_line": null
+        },
+        {
+          "kind": "added",
+          "text": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap.",
+          "old_line": null,
+          "new_line": 4
+        }
+      ]
+    }
+  ],
+  "protected_spans": [
+    {
+      "kind": "citation",
+      "char_start": 108,
+      "char_end": 124,
+      "text": "\\cite{kraus2019}"
+    }
+  ],
+  "protected_violations": [
+    {
+      "kind": "citation",
+      "before": "\\cite{kraus2019}",
+      "after": null
+    }
+  ],
+  "semantic_diff": {
+    "added": [],
+    "removed": [],
+    "strengthened": [],
+    "weakened": [
+      {
+        "before": {
+          "text": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap \\cite{kraus2019}.",
+          "scope_level": "corpus",
+          "numbers": [],
+          "citations": ["kraus2019"],
+          "qualifiers": [],
+          "negations": ["no"]
+        },
+        "after": {
+          "text": "All existing traffic classifiers degrade under sustained load, and no prior work reports the size of the gap.",
+          "scope_level": null,
+          "numbers": [],
+          "citations": [],
+          "qualifiers": [],
+          "negations": ["no"]
+        },
+        "direction": "weakened",
+        "reasons": ["citation_dropped", "scope_lowered"]
+      }
+    ],
+    "protected_violations": [
+      {
+        "kind": "citation",
+        "before": "\\cite{kraus2019}",
+        "after": null
+      }
+    ],
+    "unchanged": 0
+  },
+  "style_report": {
+    "policy": "manuscript.humanize",
+    "findings": []
+  },
+  "audit_findings": [],
+  "anchor_impacts": [
+    {
+      "anchor_key": "sections/intro.tex:4",
+      "claim": "C0001",
+      "file": "sections/intro.tex",
+      "line_start": 4,
+      "line_end": 5,
+      "status": "stale",
+      "similarity": 0.87,
+      "reason": "the anchored sentence was reworded"
+    }
+  ],
+  "audit_status": "failed",
+  "blocked_reason": "the rewrite changed 1 protected span (citation); a style pass may change wording, never a protected span",
+  "provenance": {
+    "provenance": {
+      "source": "model",
+      "actor": "local/model-y",
+      "workflow": "manuscript.suggest",
+      "run_id": null,
+      "template_version": null,
+      "note": null
+    },
+    "session_id": null,
+    "message_id": null,
+    "context_pack_id": null
+  },
+  "applied": false,
+  "applied_at": null,
+  "path": ".research/staging/manuscript/mscand_0002.json"
+}
