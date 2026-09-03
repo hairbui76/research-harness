@@ -340,6 +340,30 @@ def test_abandoning_the_stream_cancels_the_process(tmp_path: Path) -> None:
     assert adapter.last_process is not None and not adapter.last_process.running
 
 
+def test_abandoning_the_stream_through_the_wrapper_also_cancels_the_process(
+    tmp_path: Path,
+) -> None:
+    """The wrapper is what a conversation turn actually holds (`conversation/send.py`).
+
+    `streaming_provider` puts a `NativeStream` between the caller and the adapter, and a
+    cancelled turn closes *that*; unless it closes the adapter's stream in turn, the
+    subprocess outlives the turn until the garbage collector notices.
+    """
+    claude = FakeCli.install(
+        tmp_path,
+        "claude",
+        run={"lines": [*lines("claude-partial.jsonl")[:4], {"sleep": 30}], "hang": True},
+    )
+    adapter = CliModelProvider("claude", "opus", env=claude.env({"PATH": ""}), timeout=30)
+    stream = streaming_provider(adapter, model="opus").stream(
+        chat_request(instructions="x", context_tokens=100)
+    )
+    first = next(stream)
+    stream.close()
+    assert first.text == "Batching " and not first.final
+    assert adapter.last_process is not None and not adapter.last_process.running
+
+
 def test_the_trace_records_runtime_version_protocol_and_model(
     codex: FakeCli, model_request: ModelRequest[Verdict]
 ) -> None:
