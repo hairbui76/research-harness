@@ -96,7 +96,11 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | `note.add` | `note_add` | `mutate` | yes | Capture a low-authority research note. creates a note that can never be cited as support until it is promoted. |
 | `note.discard` | `note_discard` | `mutate` | yes | Retire a captured note; discarded is terminal. ends a note's life; nothing downstream moves. |
 | `note.promote` | `note_promote` | `mutate` | yes | Record the research object a captured note became. raises a note's authority into a Claim, Question, or Decision; human-only. |
-| `provider.list` | `provider_list` | `read` |  | Every configured model, with what it accepts and whether it is available. reads configuration and the project's egress disclosure; contacts nothing, reveals no credential, and changes no state. |
+| `provider.cli.configure` | `provider_cli_configure` | `admin` | yes | Add or update one subscription-backed CLI provider entry in research.yaml. changes provider configuration only; writes no research object and no event. |
+| `provider.cli.remove` | `provider_cli_remove` | `admin` | yes | Remove one subscription-backed CLI provider entry from research.yaml. changes provider configuration only; writes no research object and no event. |
+| `provider.cli.scan` | `provider_cli_scan` | `read` |  | Detect the supported local CLIs: installed, version, login, bounded mode, models. runs local version/login/help probes; edits nothing and sends no research content. |
+| `provider.cli.test` | `provider_cli_test` | `read` | yes | Run one minimal schema-validated request through a configured CLI provider. sends one test prompt off the workstation under the privacy policy; stages nothing. |
+| `provider.list` | `provider_list` | `read` |  | Every configured model, with what it accepts and whether it is available. reads configuration and the project's egress disclosure; for configured local CLIs it reads the cached local detection probes; sends no research content, reveals no credential, and changes no state. |
 | `question.create` | `question_create` | `mutate` | yes | Register a research question. creates an open ResearchQuestion; answers nothing. |
 | `question.list` | `question_list` | `read` |  | Research questions and what currently bears on them. reads canonical state; changes nothing. |
 | `question.resolve` | `question_resolve` | `mutate` | yes | Answer a research question and capture the answer as a note. moves a ResearchQuestion to answered; writes no evidence. |
