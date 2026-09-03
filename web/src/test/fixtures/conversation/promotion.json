@@ -1,0 +1,10 @@
+{
+  "target": "claim_candidate",
+  "session": "CS0001",
+  "message": "M0042",
+  "object_id": "C0002",
+  "note_key": null,
+  "accepted": false,
+  "review": "Staged as a claim candidate. It enters the review queue; nothing was accepted.",
+  "decision": null
+}

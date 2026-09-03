@@ -1,0 +1,73 @@
+{
+  "session": {
+    "schema_version": 1,
+    "id": "CS0001",
+    "created_at": "2026-09-01T09:12:00Z",
+    "updated_at": "2026-09-03T15:02:00Z",
+    "provenance": { "source": "human", "actor": "human" },
+    "title": "Latency study",
+    "visibility": "private",
+    "defaults": { "model": null, "mode": null, "token_budget": null },
+    "message_count": 1,
+    "last_message": "M0050",
+    "last_message_at": "2026-09-03T15:02:00Z",
+    "summarized_through": null,
+    "summary_updated_at": null,
+    "reserved_messages": []
+  },
+  "messages": [
+    {
+      "schema_version": 1,
+      "id": "M0050",
+      "created_at": "2026-09-03T15:02:00Z",
+      "updated_at": "2026-09-03T15:02:00Z",
+      "provenance": { "source": "human", "actor": "human" },
+      "session": "CS0001",
+      "role": "user",
+      "blocks": [
+        { "kind": "text", "text": "Read the sweep in this preprint." },
+        { "kind": "attachment", "attachment": "SA0003", "caption": null }
+      ],
+      "authority": "private",
+      "visibility": "private",
+      "attachments": ["SA0003"],
+      "context_pack": null,
+      "model": null,
+      "attempt": {
+        "number": 1,
+        "status": "complete",
+        "retry_of": null,
+        "error": null,
+        "started_at": null,
+        "finished_at": null
+      }
+    }
+  ],
+  "attachments": [
+    {
+      "schema_version": 1,
+      "id": "SA0003",
+      "created_at": "2026-09-03T15:01:40Z",
+      "updated_at": "2026-09-03T15:01:52Z",
+      "provenance": { "source": "human", "actor": "human" },
+      "session": "CS0001",
+      "state": "session_only",
+      "filename": "lee-2024-hydrogel-preprint.pdf",
+      "media_type": "application/pdf",
+      "size_bytes": 3400000,
+      "content_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "page_count": 14,
+      "description": null,
+      "visibility": "private",
+      "failure_reason": null,
+      "work": null,
+      "version": null,
+      "artifact": null
+    }
+  ],
+  "context_packs": [],
+  "total": 1,
+  "offset": 0,
+  "next_offset": null,
+  "summary": null
+}

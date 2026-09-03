@@ -1,0 +1,28 @@
+{
+  "models": [
+    {
+      "id": "local-small",
+      "label": "Local small",
+      "provider": "local",
+      "egress_class": "local",
+      "input_media": ["text/plain"],
+      "context_tokens": 32000,
+      "vision": false,
+      "available": true,
+      "unavailable_reason": null,
+      "default": true
+    },
+    {
+      "id": "vendor-vision",
+      "label": "Vendor vision",
+      "provider": "vendor-a",
+      "egress_class": "external",
+      "input_media": ["text/plain", "image/png", "application/pdf"],
+      "context_tokens": 200000,
+      "vision": true,
+      "available": false,
+      "unavailable_reason": "This session is private, so the egress policy will not send it off the machine.",
+      "default": false
+    }
+  ]
+}

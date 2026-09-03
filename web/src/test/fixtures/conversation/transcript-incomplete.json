@@ -1,0 +1,78 @@
+{
+  "session": {
+    "schema_version": 1,
+    "id": "CS0001",
+    "created_at": "2026-09-01T09:12:00Z",
+    "updated_at": "2026-09-03T14:31:02Z",
+    "provenance": { "source": "human", "actor": "human" },
+    "title": "Latency study",
+    "visibility": "private",
+    "defaults": {
+      "model": { "provider": "local", "model": "local-small" },
+      "mode": null,
+      "token_budget": 8000
+    },
+    "message_count": 4,
+    "last_message": "M0044",
+    "last_message_at": "2026-09-03T14:31:02Z",
+    "summarized_through": null,
+    "summary_updated_at": null,
+    "reserved_messages": []
+  },
+  "messages": [
+    {
+      "schema_version": 1,
+      "id": "M0043",
+      "created_at": "2026-09-03T14:30:40Z",
+      "updated_at": "2026-09-03T14:30:55Z",
+      "provenance": { "source": "model", "actor": "local/local-small" },
+      "session": "CS0001",
+      "role": "assistant",
+      "blocks": [{ "kind": "text", "text": "Under batching the tail flattens, but the" }],
+      "authority": "private",
+      "visibility": "private",
+      "attachments": [],
+      "context_pack": "CP0008",
+      "model": { "provider": "local", "model": "local-small", "request_fingerprint": null },
+      "attempt": {
+        "number": 1,
+        "status": "interrupted",
+        "retry_of": null,
+        "error": null,
+        "started_at": "2026-09-03T14:30:40Z",
+        "finished_at": "2026-09-03T14:30:55Z"
+      }
+    },
+    {
+      "schema_version": 1,
+      "id": "M0044",
+      "created_at": "2026-09-03T14:31:02Z",
+      "updated_at": "2026-09-03T14:31:02Z",
+      "provenance": { "source": "model", "actor": "local/local-small" },
+      "session": "CS0001",
+      "role": "assistant",
+      "blocks": [
+        { "kind": "text", "text": "Under batching the tail flattens across the whole corpus." }
+      ],
+      "authority": "private",
+      "visibility": "private",
+      "attachments": [],
+      "context_pack": "CP0009",
+      "model": { "provider": "local", "model": "local-small", "request_fingerprint": null },
+      "attempt": {
+        "number": 2,
+        "status": "complete",
+        "retry_of": "M0043",
+        "error": null,
+        "started_at": "2026-09-03T14:30:58Z",
+        "finished_at": "2026-09-03T14:31:02Z"
+      }
+    }
+  ],
+  "attachments": [],
+  "context_packs": ["CP0008", "CP0009"],
+  "total": 2,
+  "offset": 0,
+  "next_offset": null,
+  "summary": null
+}

@@ -1,0 +1,93 @@
+{
+  "session": {
+    "schema_version": 1,
+    "id": "CS0001",
+    "created_at": "2026-09-01T09:12:00Z",
+    "updated_at": "2026-09-03T14:20:38Z",
+    "provenance": { "source": "human", "actor": "human" },
+    "title": "Latency study",
+    "visibility": "private",
+    "defaults": {
+      "model": { "provider": "local", "model": "local-small" },
+      "mode": null,
+      "token_budget": 8000
+    },
+    "message_count": 3,
+    "last_message": "M0043",
+    "last_message_at": "2026-09-03T14:20:38Z",
+    "summarized_through": null,
+    "summary_updated_at": null,
+    "reserved_messages": []
+  },
+  "messages": [
+    {
+      "schema_version": 1,
+      "id": "M0041",
+      "created_at": "2026-09-03T14:20:11Z",
+      "updated_at": "2026-09-03T14:20:11Z",
+      "provenance": { "source": "human", "actor": "human" },
+      "session": "CS0001",
+      "role": "user",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Does the batching result hold at the corpus level? The pilot showed $\\Delta p_{99} = -9\\%$."
+        },
+        {
+          "kind": "reference",
+          "target": "E0482",
+          "label": "tail latency drop under batching",
+          "locator": null,
+          "authority": "accepted"
+        }
+      ],
+      "authority": "private",
+      "visibility": "private",
+      "attachments": [],
+      "context_pack": null,
+      "model": null,
+      "attempt": {
+        "number": 1,
+        "status": "complete",
+        "retry_of": null,
+        "error": null,
+        "started_at": null,
+        "finished_at": null
+      }
+    },
+    {
+      "schema_version": 1,
+      "id": "M0042",
+      "created_at": "2026-09-03T14:20:38Z",
+      "updated_at": "2026-09-03T14:20:38Z",
+      "provenance": { "source": "model", "actor": "local/local-small" },
+      "session": "CS0001",
+      "role": "assistant",
+      "blocks": [
+        {
+          "kind": "text",
+          "text": "Yes at the corpus level: **C0001** records the accepted claim, and E0482 anchors the nine percent figure. See [the claim](rh://claim/C0001)."
+        }
+      ],
+      "authority": "private",
+      "visibility": "private",
+      "attachments": [],
+      "context_pack": "CP0007",
+      "model": { "provider": "local", "model": "local-small", "request_fingerprint": null },
+      "attempt": {
+        "number": 1,
+        "status": "complete",
+        "retry_of": null,
+        "error": null,
+        "started_at": "2026-09-03T14:20:31Z",
+        "finished_at": "2026-09-03T14:20:38Z"
+      }
+    }
+  ],
+  "attachments": [],
+  "context_packs": ["CP0007"],
+  "total": 2,
+  "offset": 0,
+  "next_offset": null,
+  "summary": null
+}

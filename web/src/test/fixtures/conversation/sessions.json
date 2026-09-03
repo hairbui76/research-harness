@@ -1,0 +1,41 @@
+{
+  "count": 2,
+  "sessions": [
+    {
+      "schema_version": 1,
+      "id": "CS0001",
+      "created_at": "2026-09-01T09:12:00Z",
+      "updated_at": "2026-09-03T14:20:38Z",
+      "provenance": { "source": "human", "actor": "human" },
+      "title": "Latency study",
+      "visibility": "private",
+      "defaults": {
+        "model": { "provider": "local", "model": "local-small" },
+        "mode": null,
+        "token_budget": 8000
+      },
+      "message_count": 3,
+      "last_message": "M0043",
+      "last_message_at": "2026-09-03T14:20:38Z",
+      "summarized_through": null,
+      "summary_updated_at": null,
+      "reserved_messages": []
+    },
+    {
+      "schema_version": 1,
+      "id": "CS0002",
+      "created_at": "2026-08-20T11:00:00Z",
+      "updated_at": "2026-08-20T11:40:00Z",
+      "provenance": { "source": "human", "actor": "human" },
+      "title": "Screening pass",
+      "visibility": "private",
+      "defaults": { "model": null, "mode": null, "token_budget": null },
+      "message_count": 6,
+      "last_message": "M0012",
+      "last_message_at": "2026-08-20T11:40:00Z",
+      "summarized_through": "M0012",
+      "summary_updated_at": "2026-08-20T11:41:00Z",
+      "reserved_messages": []
+    }
+  ]
+}

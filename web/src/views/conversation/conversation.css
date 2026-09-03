@@ -1,0 +1,57 @@
+/*
+ * Layout for the conversation route, and nothing else.
+ *
+ * The Design System owns every surface, colour and control here; what is left is the
+ * plumbing that makes a full-height three-pane screen with a pinned composer work inside
+ * the shell's `main`. It reads semantic `--rh-*` tokens only — `check-tokens.mjs` scans
+ * `web/src` and fails the lint on a colour literal.
+ *
+ * It lives beside the route rather than in `src/styles.css` so the conversation workspace
+ * can be read, changed and removed in one directory.
+ */
+
+/* The workspace fills whatever the shell gives it, and never grows the page. */
+.rh-web-conversation {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  block-size: 100%;
+}
+
+/* The transcript scrolls; the composer below it does not move. */
+.rh-web-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  min-block-size: 0;
+  block-size: 100%;
+}
+
+.rh-web-transcript__list {
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+/* One turn, with room to breathe between it and the next. */
+.rh-web-transcript .rh-virtual-list__item + .rh-virtual-list__item {
+  padding-block-start: var(--rh-space-3);
+}
+
+/* Attempt navigation sits inside the message's own action row. */
+.rh-web-attempts {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+/* Why there is no model selector, when there is none. */
+.rh-web-composer__note {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}

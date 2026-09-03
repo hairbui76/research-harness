@@ -5,9 +5,11 @@ mutation is one `POST /capabilities/<name>` call, and every judgement it display
 items need review, in what order, what a claim may say, whether an acceptance is allowed —
 was made server-side and is rendered, not recomputed (PRODUCT §5 P10, §26; ADR-004).
 
-It is a cockpit rather than a chat window: navigation is Overview, Review inbox, Conflicts,
-Stale, Corpus, Claims, Questions, Synthesis, Taxonomy, Manuscript, and the screen a
-researcher spends their day on puts the source page beside the decision.
+The default screen is a conversation, and it is still a cockpit rather than a chat window:
+`/` is the conversation workspace, and Overview, Review inbox, Conflicts, Stale, Corpus,
+Claims, Questions, Synthesis, Taxonomy and Manuscript are all one click away in the rail.
+Nothing a researcher says in the conversation becomes accepted scientific state; the screen
+they spend their day on still puts the source page beside the decision.
 
 ## Running it
 
@@ -54,7 +56,8 @@ it never infers its own permissions.
 
 ## Routes the daemon adds for the cockpit
 
-All five are reads. The write surface is still `POST /capabilities/<name>` alone, and
+Every one of them is a read. The write surface is still `POST /capabilities/<name>` alone —
+watching a streamed answer arrive is not authority to have asked for it — and
 `tests/contract/protocol/test_http.py` asserts the whole route set so a new one cannot
 appear by accident.
 
@@ -65,6 +68,8 @@ appear by accident.
 | `GET /candidates/{candidate_id}` | One staged candidate verbatim. `evidence.accept` takes the `Evidence` object, so the cockpit reads it and posts it back unchanged. |
 | `GET /overview` | Attention first: review items, conflicts, stale objects, unsupported manuscript claims, then claim health and open questions. Composed server-side. |
 | `GET /index` | Summaries of everything the navigation lists: works, claims, questions, decisions, matrices, taxonomies, manuscript anchors. The cockpit reads this through `state.index` instead — same answer, and a name every host shares — but the route stays for anything that wants one round trip. |
+| `GET /runs/{run_id}/events` | The server-sent events of one model call: `delta`, `status`, `error`, ending after the terminal status. The daemon persists every delta into the message *before* emitting it, so a client that reconnects reads the same content from `session.get` (plan §0.4). |
+| `GET /sessions/{id}/attachments/{sa}/bytes` and `/preview` | The bytes of a file a session already holds, and a rendered page preview of it. Read with the token header and turned into object URLs, exactly as artifact bytes are. |
 
 `GET /overview` also reports `principal`, `actor`, and `next_decision_id` — the id the next
 `decision.accept` will write, which the Override control needs because an override is a
@@ -94,10 +99,16 @@ capability's permission, and the `review.edit` request schema that the Edit acti
 editor validates a hand edit against.
 
 The capability responses no HTTP route returns (`ClaimList`, `ReviewOutcome`,
-`ManuscriptAnchors`, `RevalidationView`, `TraceView`, `FindingLocation`, …) are not in the
-OpenAPI document, so `src/api/dto.ts` declares them by hand.
+`ManuscriptAnchors`, `RevalidationView`, `TraceView`, `FindingLocation`, and the whole
+`// manuscript workspace (P21)` block — `ManuscriptTree`, `FileSnapshot`, `BuildView`,
+`SynctexView`, `SuggestionCandidate`, `AppliedSuggestion` and their nested models) are not in
+the OpenAPI document, so `src/api/dto.ts` declares them by hand.
 `tests/contract/protocol/test_web_routes.py` checks every field name in those declarations
-against the response schema the daemon publishes, which is what stops them drifting.
+against the response schema the daemon publishes, which is what stops them drifting. Until
+the snapshots are re-exported, the eight `manuscript.*` workspace names are also absent from
+the generated `CapabilityName` union; `HarnessClient` narrows them to
+`ManuscriptWorkspaceCapability` and casts once, in `manuscriptCall`, so a typo is still a
+compile error and the seam disappears with the next regeneration.
 
 Run both after changing a route, a DTO, or a capability request model.
 
@@ -114,6 +125,9 @@ web/
                         SettingsDialog, useAsync
   src/components/       SourcePane, ReviewActions, JsonEditor, ObjectRef, Feedback
   src/views/            one per navigation entry, plus the detail screens
+  src/views/manuscript/ the LaTeX workspace: the route, its four hooks, its three panes
+  src/views/conversation/ the conversation workspace: the `/` route, its state, its hooks,
+                        the transcript, the composer, the receipt, promotion, the inspector
   src/pdf/              pdf.js adapter: worker, usePdfDocument, PdfPage
   src/render/           Markdown + KaTeX renderer
   src/editor/           CodeMirror LaTeX editor
@@ -150,14 +164,18 @@ nothing a researcher has typed is lost.
 shell turns a plain left click into a client-side navigation and leaves modified clicks
 (new tab, new window) to the browser — the rule react-router's own `<Link>` applies.
 
-Two slots in the shell are deliberately empty and are where the conversation workspace lands:
-`sessionList` on the rail, and `inspector` on the shell. A full research page carries its own
-side panel, so no inspector is mounted for the routes below.
+Two slots in the shell belong to the conversation workspace: `sessionList` on the rail, and
+`inspector` on the shell. The session history is in the rail on *every* route, so a
+researcher reading a claim can still see and reopen the conversation they were in; the
+inspector is mounted for `/` alone, because a full research page carries its own side panel.
+`Layout` therefore wraps the whole shell in `ConversationProvider`
+(`src/views/conversation/state.tsx`), which is the state the rail, the route and the
+inspector share.
 
 **`src/app/routes.tsx`** is the one route table, and the navigation is derived from it, so a
-screen cannot appear in one and not the other. `/` renders the Overview today and `/overview`
-renders it too; moving the Overview aside for the conversation route is two one-line edits
-(`HOME` and `OVERVIEW_PATH`), which the file says in a comment.
+screen cannot appear in one and not the other. `/` renders the conversation workspace and
+`/overview` renders the Overview; an unknown path renders the Overview too, because a
+mistyped URL names no session.
 
 **Every view** is a `FullPageWorkspace` — a sticky header with the page's `h1`, its
 description and its toolbar — composing package components: `Card`/`Badge`/`AuthorityBadge`
@@ -179,6 +197,118 @@ authority vocabulary; it disappears when the ResearchGraph carries `authority` o
 literals; a genuine visualisation case annotates the line with `/* raw-colour-ok: … */`. It
 runs inside `pnpm --filter @research-harness/design lint`. `web/src/styles.css` reads
 `--rh-*` tokens only.
+
+## The conversation workspace
+
+`/` is the screen a researcher starts on (`src/views/conversation/`). It is the
+conversation-first workspace of `docs/superpowers/specs/2026-09-03-conversation-workspace-design.md`,
+and its one rule is the same as the rest of the cockpit's: conversation is durable *private
+working context*, never accepted scientific state. Nothing on this screen writes research
+state except an explicit promotion, and every answer carries a receipt saying exactly what
+the model was shown.
+
+**The URL carries the session.** `/?session=CS0001`, optionally `&message=M0042`. One route,
+so the rail's session list is a query change rather than a remount, a conversation is
+linkable and bookmarkable, and the deep link `rh://session/CS0001?message=M0042` (plan §0.1)
+resolves to exactly that address. Reopening the project with no session in the URL restores
+the one this workspace was last in — remembered per workspace path in `localStorage` — and
+otherwise the most recently updated one.
+
+**Three panes, from two places.** The rail and the inspector are `AppShell`'s, because the
+shell owns the narrow-screen behaviour the spec asks for: below 960px both side panes become
+drawers and `main` is never unmounted, so opening the session list cannot lose an unsent
+draft. The centre is `ConversationWorkspace`: a toolbar, the scrolling transcript, and a
+composer pinned below it. The inspector starts open on a wide screen and closed on a narrow
+one — a research pane that covers the draft on load is the thing §9 forbids.
+
+### What each part calls
+
+| Part | Capability |
+|---|---|
+| Session history, search, create, rename | `session.list`, `session.search`, `session.create`, `session.rename` |
+| Transcript, and every reconciliation | `session.get` |
+| Send, stop, retry | `session.send`, `session.stop`, `session.retry` |
+| The answer as it arrives | `GET /runs/{run_id}/events` (a read) |
+| `Context used` on an answer | `context.get` |
+| `Preview context` on a draft | `context.preview` with `persist: false` |
+| Promotion | `session.promote` |
+| The model selector | `provider.list` |
+| Inspector tabs | `evidence.list`, `claim.list`, `review.inbox`, `state.stale`, `GET /overview` |
+| Attachment bytes already in a session | `GET /sessions/{id}/attachments/{sa}/bytes` and `/preview` |
+
+Every write is `MUTATE` and therefore researcher-only. An agent host reads the transcript,
+opens receipts and browses the inspector; Send, New session, Rename and Promote are absent or
+disabled with the daemon's own reason (PRODUCT §29, ADR-007).
+
+### Streaming, and why the client never owns the answer
+
+`session.send` returns as soon as the user's message, the `ContextPack` and the run are
+durable, and hands back ids that can already be read. The deltas are then a *read* of what
+the run has persisted — the daemon writes each one into the message before it emits it — so
+`useSend` shows them for immediacy and throws its buffer away the moment the run reaches a
+terminal state, a stream drops, or the researcher stops it. What is on screen afterwards is
+whatever `session.get` returned. Three consequences fall out of that and are tested:
+
+* **A reload mid-stream recovers.** The run id is stored beside the draft, so a remount
+  resubscribes; the daemon replays from delta zero and the buffer is rebuilt rather than
+  appended to, so nothing is doubled.
+* **An interruption keeps what arrived.** The `incomplete` marker and the retry come from
+  the attempt the daemon wrote, never from a status the client invented. A stream that ends
+  without a terminal status means the connection dropped, and the client says so by
+  reconciling.
+* **A refusal leaves the draft alone.** `useDraft` writes every keystroke to `localStorage`
+  keyed by session and clears it in exactly one place: after a send that produced a durable
+  message. A refusal, an outage, a navigation and a remount all leave the words where they
+  were.
+
+A retry is a new message naming the attempt it retries, so `groupAttempts` folds a retry
+chain into one turn with its attempts navigable inside it. Nothing is hidden: every attempt
+is still on screen, one click away, with its own `attempt n of m`.
+
+### `Context used`
+
+Per answer, from the `CP####` the message records; per draft, from `context.preview` with
+`persist: false`, so inspecting a draft leaves no pack behind. The Design System's
+`ContextReceipt` lists what was included and omitted by class with the daemon's own reason
+for each omission, the provider, model and egress class, and the token allocation. Where
+remembered conversation contradicted an accepted Claim or Decision, the pack's
+`discrepancies` are rendered as `ConflictNotice`: the assembler already resolved it —
+accepted state was sent — and the notice exists so the researcher sees the disagreement and
+not only its outcome.
+
+### References and promotion
+
+`@` completion runs through `useReferenceQuery`, whose `ReferenceProvider` is a parameter
+with two implementations by design. The one in place completes over `state.index` and
+`evidence.list` — the same listings the research pages read, so it works with no projection
+at all. Task W3 passes a `graph.autocomplete` provider instead, and nothing else changes: the
+picker, the composer and the token round-trip only ever see `EntityRefModel`s. Selected
+references travel as `references` (the stable ids) with `session.send`, and
+`SendStarted.unresolved` marks the ones the assembler could not resolve on the message that
+used them.
+
+Promotion offers four targets and only four — note, question, Claim candidate, Decision
+candidate — and says on screen why Evidence is not among them: evidence needs an artifact and
+an exact resolvable anchor, and prose has neither. The dialog shows the provenance it is
+about to record, the claim form asks for subject, predicate and object, and the result is a
+toast naming what was created with a link to it. Nothing is accepted; a candidate enters the
+existing review workflow.
+
+### Two-way navigation
+
+A reference in a message opens its object in the inspector, and the inspector's header offers
+the way out to the object's own page. The other direction is the point: the inspector lists
+**every message that referenced the selected object**, and each one selects that message back
+in the transcript. It reads the loaded transcript rather than the graph, so it keeps working
+while the projection is being rebuilt.
+
+### Slots left open on purpose
+
+* **Attachments (task W2).** The composer's `onAttach` and `attachmentTray` are unset, and no
+  upload exists here. Attachments a transcript already holds *are* drawn:
+  `useAttachmentUrls` fetches their bytes with the token header and turns them into object
+  URLs, the way `artifactBytes` does, so nothing is loaded from the network.
+* **Graph references (task W3).** `useReferenceQuery`'s provider, as above.
 
 ## The review screen
 
@@ -225,6 +355,93 @@ methods and additionally closes the record with the researcher's reason, which n
 does — accepting a conflicted proposal through `review.accept` would write the Evidence
 correctly and leave the disagreement on the Conflicts screen for ever. Accept therefore asks
 for a reason when, and only when, there is a conflict to close.
+
+## The manuscript workspace
+
+`/manuscript` is the screen the LaTeX workspace specification asks for
+(`docs/superpowers/specs/2026-09-03-latex-manuscript-workspace-design.md`): owned LaTeX
+source, a real local compile, the actual PDF, and the scientific audit, in one view. It is
+the Design System's `ManuscriptWorkspace` — a file tree, the source frame, the PDF frame,
+and a collapsible inspector — wrapped around this client's CodeMirror (`src/editor`) and
+pdf.js (`src/pdf`) adapters. Pane sizes and the inspector's open state are remembered in
+`localStorage` under `rh.manuscript.*`, every access guarded, and below the package's width
+breakpoint the editor and preview become tabs with *both panels still mounted*, so neither
+the cursor nor the page being read is lost.
+
+```
+src/views/manuscript/
+  ManuscriptWorkspace.tsx   the route (`ManuscriptPage`): layout, and nothing else
+  useManuscriptFiles.ts     the tree, one buffer per open path, save and conflict
+  useBuild.ts               manuscript.build / manuscript.compile, and the PDF's bytes
+  useSynctex.ts             both directions, or the daemon's reason there are none
+  useSuggestion.ts          stage a candidate; apply it only on an explicit click
+  EditorPane.tsx            SourceEditorFrame + LatexEditor
+  PreviewPane.tsx           PdfPreview + PdfPage, the coordinate flip, the text search
+  AuditPane.tsx             DiagnosticsPanel, and the v1.0 anchors/trace/revalidate screen
+  SuggestDialog.tsx         what `manuscript.suggest` needs, and nothing else
+  mappers.ts                DTOs -> FileNode / BuildModel / DiagnosticModel / …
+```
+
+**Which capability each part calls.** All eight are `POST /capabilities/manuscript.*`; the
+PDF is the one thing that cannot be assembled from JSON.
+
+| Part | Call |
+|---|---|
+| File tree | `manuscript.files` — a *flat* list; `mappers.ts` grows the directories out of the path segments |
+| Opening a file | `manuscript.read_file` `{path}` |
+| Save (`Mod-S` or the button) | `manuscript.write_file` `{path, content, expected_hash}` |
+| Compile | `manuscript.compile`, which answers with the same `BuildView` a read does |
+| The inspector | `manuscript.build` `{audit: true}` — a *read*, so it answers for an agent host and for a workspace with no engine |
+| Jump to PDF / back | `manuscript.synctex` `{file, line}` / `{page, x, y}` |
+| Suggest… | `manuscript.suggest` `{file, line_start, line_end, provider, style?, instruction?}` |
+| Apply | `manuscript.apply_suggestion` `{candidate_id, expected_hash}` |
+| The pages | `GET /manuscript/builds/{build_id}/pdf`, fetched with the bearer token and handed to `usePdfDocument` as an `ArrayBuffer`, exactly as the review screen fetches artifact bytes |
+
+**A save is an act, and a conflict is a refusal.** Edits stay in the buffer until the
+researcher saves. A save presents the `content_hash` of the snapshot it was read from; when
+the bytes on disk are no longer those, the daemon refuses and the frame shows a banner with
+two answers. *Reload from disk* re-reads and discards the local text. *Keep mine* re-reads
+only to learn the new hash — the text stays, and the next save is checked against what is on
+disk now, which the banner says before the researcher has to choose. `ErrorBody` carries no
+structured hashes, so the conflict is recognised by the daemon's own sentence and answered
+by re-reading; the hashes in the message are never parsed.
+
+**A failure keeps the last good PDF.** `BuildView.pdf` is set only when *this* build
+produced one. When it did not and `last_good` exists, the model carries only `lastGood`,
+which is what makes `PdfPreview` keep the older document on screen under a timestamped stale
+banner while the diagnostics describe the source as it is now. A missing toolchain is read
+off `toolchain.selected`, not off a refused compile, so the pane shows the setup guidance
+without anything having been started and without a source file being touched.
+
+**The two lists never merge.** `DiagnosticsPanel` puts compiler diagnostics and scientific
+findings under separate headings with separate severity words (`Error`/`Warning` against
+`Must fix`/`Review`/`Note`) and separate counts, and the inspector's tab label carries both
+counts side by side — `2 compiler · 1 audit` — because summing them would answer a question
+nobody asked. Either list opens the exact source position: the file is opened if it is not
+already, then `LatexEditor.goTo(line)`.
+
+**Coordinates.** `PdfLocation` is in PDF points from the page's *top* left; `PdfPage` draws
+and reports in PDF *user* space, whose origin is the *bottom* left. `PreviewPane` flips
+between them about the page's real height, read back from pdf.js, so the highlight is right
+on A4 and on US Letter. When the build reports no SyncTeX map, both directions are disabled
+and the daemon's reason is printed; nothing is guessed.
+
+**A model never writes the manuscript.** `manuscript.suggest` stages a candidate and leaves
+the file byte-identical; the diff is reviewed in a dialog with the protected spans marked in
+words, the semantic summary in the reviewer's terms, and the audit status. Apply is a click
+and is disabled with the reason whenever the daemon blocked it, whenever this window is an
+agent host, and whenever the target file has unsaved edits that applying would overwrite.
+Applying takes the snapshot `AppliedSuggestion` returns — the file the daemon wrote, read
+back under the same lock — and refreshes the audit.
+
+**Referencing.** *Copy reference* yields `rh://manuscript/<file>?line=<n>` for use in a
+conversation; `manuscriptReference()` in `mappers.ts` is the one place that format is
+written, and `useBuild`/`useSynctex` are reusable by the conversation routes.
+
+**Permissions.** `files`/`read_file`/`build`/`synctex` are reads and `suggest` stages, so an
+agent host sees everything and may propose. `write_file`, `compile` and `apply_suggestion`
+are human-only: without the local token the editor is read-only with the reason on the chip,
+Save and Compile are disabled, and Apply is disabled with the same sentence.
 
 ## Gate P11 walkthrough
 
@@ -294,12 +511,14 @@ without one and the daemon's `objects[0]` is the id used afterwards, so the Over
 no longer reads `next_decision_id` before writing. `GET /overview` still reports it, for
 display.
 
-**Manuscript** is three reads and one mutation. `manuscript.anchors` lists every stored
-anchor beside the verdict it currently earns; `manuscript.audit` reports findings, each
-rendered at its own `location`; `manuscript.trace` walks one sentence down to its Claim and
-source spans. **Revalidate anchors** calls `manuscript.revalidate`, which records the
-verdicts — a mutation, and human-only, because a reworded sentence going stale is a change
-to accepted state (ADR-008); the control is disabled with the reason for an agent host.
+**Manuscript** is now the workspace above; the v1.0 anchor-and-audit screen lives on as the
+inspector's second tab. `manuscript.anchors` lists every stored anchor beside the verdict it
+currently earns and `manuscript.trace` walks one sentence down to its Claim and source
+spans; the audit findings come from `manuscript.build`, which runs the same audit beside the
+compiler's own output rather than as a second call. **Revalidate anchors** calls
+`manuscript.revalidate`, which records the verdicts — a mutation, and human-only, because a
+reworded sentence going stale is a change to accepted state (ADR-008); the control is
+disabled with the reason for an agent host.
 
 **Claim coverage** is rendered from the `Coverage` the Claim records — examined of relevant,
 unresolved, overturn risk, and the `SearchRun`s it rests on. `claim.update_coverage` writes

@@ -7,13 +7,20 @@
  * accept anything. Below the shell's breakpoint the rail becomes a drawer and `main`
  * stays mounted, so nothing a researcher has typed is lost when they open it.
  *
- * Two slots are deliberately empty here:
+ * Both of the slots this file used to leave empty are now filled by the conversation
+ * workspace (`src/views/conversation`):
  *
- * * `sessionList` — W1 fills it with the conversation history (`SessionList` over
- *   `session.list`). Nothing else about the rail changes when it does.
- * * `inspector` — a full research page carries its own side panel, so the shell mounts no
- *   inspector and the slot stays absent. W1 passes `<ResearchInspector />` here for the
- *   conversation route, with `inspectorOpen` state beside `railOpen` below.
+ * * `sessionList` — the session history, on every route. The rail owns it everywhere, not
+ *   just on `/`, so a researcher reading a claim can still see and reopen the conversation
+ *   they were in (workspace design §2).
+ * * `inspector` — mounted for the conversation route only. A full research page carries
+ *   its own side panel, so on every other route the slot stays absent and `AppShell` draws
+ *   two panes. Below the shell's breakpoint the rail *and* the inspector become drawers
+ *   while `main` stays mounted, which is what keeps an unsent draft alive when either one
+ *   is opened (conversation spec §9).
+ *
+ * The workspace state itself is a context mounted here rather than props threaded through
+ * `Outlet`, because three parts of the tree — rail, route, inspector — share one session.
  */
 import { useCallback, useMemo, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
@@ -24,9 +31,22 @@ import { useSession } from './session';
 import { NAVIGATION } from './routes';
 import { SettingsDialog } from './SettingsDialog';
 import { TokenBar } from './TokenBar';
+import { InspectorPane } from '../views/conversation/InspectorPane';
+import { SessionListPane } from '../views/conversation/SessionListPane';
+import { ConversationProvider, useConversation } from '../views/conversation/state';
 
+/** The shell, wrapped in the conversation state its rail and inspector both read. */
 export function Layout() {
+  return (
+    <ConversationProvider>
+      <Shell />
+    </ConversationProvider>
+  );
+}
+
+function Shell() {
   const { overview, canMutate, error, loading } = useSession();
+  const conversation = useConversation();
   const location = useLocation();
   const [railOpen, setRailOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -69,6 +89,14 @@ export function Layout() {
         mainLabel="Research workspace"
         railOpen={railOpen}
         onRailOpenChange={setRailOpen}
+        // The inspector belongs to the conversation; the research pages have their own.
+        {...(conversation.active
+          ? {
+              inspector: <InspectorPane />,
+              inspectorOpen: conversation.inspectorOpen,
+              onInspectorOpenChange: conversation.setInspectorOpen,
+            }
+          : {})}
         rail={
           // The click handler routes the rail's links; it adds no behaviour of its own,
           // so the interactive elements are still the rail's own buttons and links.
@@ -79,8 +107,12 @@ export function Layout() {
               onNavigate={() => setRailOpen(false)}
               onOpenSettings={() => setSettingsOpen(true)}
               {...(providerStatus ? { providerStatus } : {})}
-              // W1: the conversation session history goes here.
-              // sessionList={<SessionList … />}
+              // Opening a session is a mutation, so a window that may only read is not
+              // offered the control; the history below it is a read and stays.
+              {...(canMutate
+                ? { onNewSession: () => void conversation.sessions.create() }
+                : {})}
+              sessionList={<SessionListPane />}
             />
           </div>
         }

@@ -14,7 +14,9 @@ import type { CapabilityName } from './capabilities.gen';
 import type {
   AnchorList,
   AnchorSummary,
+  AppliedSuggestion,
   ArtifactBlocks,
+  BuildView,
   CandidateView,
   CapabilityCatalog,
   CapabilityResponse,
@@ -24,24 +26,45 @@ import type {
   ClaimSupport,
   ComparisonView,
   ConflictResolution,
+  ContextPackView,
+  ContextPreviewRequest,
+  ConversationReadCapability,
+  ConversationSession,
   DecisionList,
   DecisionSummary,
   EvidenceList,
   EvidenceSummary,
+  FileSnapshot,
   HealthReport,
   Json,
   ManuscriptAnchors,
   ManuscriptAuditReport,
+  ManuscriptTree,
+  ManuscriptWorkspaceCapability,
   MutationResponse,
   ObjectView,
   OverviewReport,
+  PromoteMessageRequest,
+  PromotionView,
+  ProviderCatalog,
   QuestionList,
   QuestionSummary,
   ReviewInbox,
   ReviewOutcome,
   RevalidationView,
   RunStatus,
+  SendMessageRequest,
+  SendStarted,
+  SessionListView,
+  SessionSearchResults,
+  SessionStopped,
+  SessionSummaryView,
+  SessionTranscript,
+  SessionView,
   StaleReport,
+  SuggestionCandidate,
+  SuggestionRequest,
+  SynctexView,
   TraceView,
   WorkList,
   WorkSummary,
@@ -441,10 +464,349 @@ export class HarnessClient {
     });
   }
 
+  // -- manuscript workspace (P21) --------------------------------------------
+  //
+  // The eight capabilities of the LaTeX workspace, plus the one byte route a PDF cannot be
+  // assembled from JSON without. The permission split is the daemon's, not this client's:
+  // files/read/build/synctex are reads, `suggest` stages, and write/compile/apply are
+  // human-only mutations that come back as `permission_denied` for an agent host.
+
+  /** Every source file of the manuscript, flat, with the entry file a compile would run. */
+  manuscriptFiles(): Promise<ManuscriptTree> {
+    return this.manuscriptCall<ManuscriptTree>('manuscript.files', {});
+  }
+
+  /** One file's text and the `content_hash` a later save has to present. */
+  manuscriptReadFile(path: string): Promise<FileSnapshot> {
+    return this.manuscriptCall<FileSnapshot>('manuscript.read_file', { path });
+  }
+
+  /**
+   * Save one file, proving which version was edited.
+   *
+   * A hash that no longer matches the bytes on disk is refused rather than merged; the
+   * refusal names both hashes in its message, and the cockpit answers it by re-reading the
+   * file, never by parsing the prose (LaTeX spec §4).
+   */
+  manuscriptWriteFile(path: string, content: string, expectedHash: string): Promise<FileSnapshot> {
+    return this.manuscriptCall<FileSnapshot>('manuscript.write_file', {
+      path,
+      content,
+      expected_hash: expectedHash,
+    });
+  }
+
+  /** Run the configured local engine once. Refuses outright when none is installed. */
+  manuscriptCompile(entryFile?: string | null, timeoutSeconds?: number): Promise<BuildView> {
+    const request: Record<string, Json> = {};
+    if (entryFile) request.entry_file = entryFile;
+    if (timeoutSeconds !== undefined) request.timeout_seconds = timeoutSeconds;
+    return this.manuscriptCall<BuildView>('manuscript.compile', request);
+  }
+
+  /**
+   * One build's compiler diagnostics beside the current scientific audit.
+   *
+   * A read, so it answers for an agent host too, and it answers for a workspace with no
+   * engine at all — which is how the cockpit learns that the toolchain is missing without
+   * starting a compile it knows will be refused.
+   */
+  manuscriptBuild(buildId?: string | null, audit = true, parseSources = false): Promise<BuildView> {
+    const request: Record<string, Json> = { audit, parse_sources: parseSources };
+    if (buildId) request.build_id = buildId;
+    return this.manuscriptCall<BuildView>('manuscript.build', request);
+  }
+
+  /** Source to PDF: where `file`:`line` landed, or why that cannot be answered. */
+  manuscriptSynctexForward(file: string, line: number, buildId?: string | null): Promise<SynctexView> {
+    const request: Record<string, Json> = { file, line };
+    if (buildId) request.build_id = buildId;
+    return this.manuscriptCall<SynctexView>('manuscript.synctex', request);
+  }
+
+  /**
+   * PDF to source: the line behind a point on a page.
+   *
+   * `x` and `y` are PDF points measured from the page's **top left**, which is the space
+   * `PdfLocation` answers in; the caller converts from pdf.js's user space.
+   */
+  manuscriptSynctexInverse(
+    page: number,
+    x: number,
+    y: number,
+    buildId?: string | null,
+  ): Promise<SynctexView> {
+    const request: Record<string, Json> = { page, x, y };
+    if (buildId) request.build_id = buildId;
+    return this.manuscriptCall<SynctexView>('manuscript.synctex', request);
+  }
+
+  /** Stage a model rewrite of one span as a reviewable candidate. Writes no source file. */
+  manuscriptSuggest(request: SuggestionRequest): Promise<SuggestionCandidate> {
+    const body: Record<string, Json> = {
+      file: request.file,
+      line_start: request.line_start,
+      line_end: request.line_end,
+      provider: request.provider,
+    };
+    if (request.instruction) body.instruction = request.instruction;
+    if (request.style) body.style = request.style;
+    if (request.session_id) body.session_id = request.session_id;
+    if (request.message_id) body.message_id = request.message_id;
+    if (request.context_pack_id) body.context_pack_id = request.context_pack_id;
+    return this.manuscriptCall<SuggestionCandidate>('manuscript.suggest', body);
+  }
+
+  /**
+   * Write a reviewed candidate into the source.
+   *
+   * `expected_hash` defaults server-side to the hash the candidate was produced against, so
+   * the cockpit passes the hash of the snapshot the reviewer actually has open: a candidate
+   * reviewed against text somebody has since changed is refused, not merged.
+   */
+  manuscriptApplySuggestion(
+    candidateId: string,
+    expectedHash?: string | null,
+  ): Promise<AppliedSuggestion> {
+    const request: Record<string, Json> = { candidate_id: candidateId };
+    if (expectedHash) request.expected_hash = expectedHash;
+    return this.manuscriptCall<AppliedSuggestion>('manuscript.apply_suggestion', request);
+  }
+
+  /**
+   * The compiled PDF's bytes, for `usePdfDocument`.
+   *
+   * `latest` and `last-good` are accepted where a build id is expected, because "show me
+   * what I just compiled" and "show me the last thing that worked" are exactly the two
+   * questions a failed build makes different. A workspace that has never compiled answers
+   * 404, which surfaces as `HarnessRequestError`.
+   */
+  async manuscriptBuildPdf(buildId: string): Promise<ArrayBuffer> {
+    const path = `/manuscript/builds/${encodeURIComponent(buildId)}/pdf`;
+    const response = await this.http(`${this.baseUrl}${path}`, { headers: this.headers() });
+    if (!response.ok) {
+      throw new HarnessRequestError(response.status, path, `${response.status} on ${path}`);
+    }
+    return response.arrayBuffer();
+  }
+
+  /** The same PDF as a link a browser can open; the token rides as a query, as for artifacts. */
+  manuscriptBuildPdfUrl(buildId: string): string {
+    const path = `${this.baseUrl}/manuscript/builds/${encodeURIComponent(buildId)}/pdf`;
+    return this.token ? `${path}?token=${encodeURIComponent(this.token)}` : path;
+  }
+
+  /**
+   * The one seam over the stale capability-name union.
+   *
+   * `capabilities.gen.ts` is regenerated from the daemon snapshot after the P21 backend
+   * wave; until then the eight manuscript-workspace names are absent from `CapabilityName`.
+   * Narrowing to `ManuscriptWorkspaceCapability` keeps a typo a compile error, and the cast
+   * lives here rather than at nine call sites.
+   */
+  private manuscriptCall<T>(name: ManuscriptWorkspaceCapability, request: Json = {}): Promise<T> {
+    return this.call<T>(name as CapabilityName, request);
+  }
+
+  // -- conversation workspace (P18) ------------------------------------------
+  //
+  // The permission split is the daemon's: the five reads answer for an agent host, and
+  // every write — create, rename, send, stop, retry, promote, summarize — is `MUTATE` and
+  // therefore researcher-only, so a host may be shown a transcript and may not append to
+  // one (`capabilities/conversation.py`). `session.send` is the *only* way a message is
+  // written; the run's events are a read stream, not a second write surface.
+
+  /** Open a durable session. Private by default; the daemon allocates the `CS####`. */
+  async createSession(input: {
+    title: string;
+    visibility?: 'private' | 'project';
+    model?: string | null;
+    mode?: string | null;
+    tokenBudget?: number | null;
+  }): Promise<ConversationSession> {
+    const request: Record<string, Json> = { title: input.title };
+    if (input.visibility) request.visibility = input.visibility;
+    if (input.model) request.model = input.model;
+    if (input.mode) request.mode = input.mode;
+    if (input.tokenBudget !== undefined && input.tokenBudget !== null) {
+      request.token_budget = input.tokenBudget;
+    }
+    return (await this.call<SessionView>('session.create', request)).session;
+  }
+
+  /** Retitle a session. Its id and transcript are untouched. */
+  async renameSession(session: string, title: string): Promise<ConversationSession> {
+    return (await this.call<SessionView>('session.rename', { session, title })).session;
+  }
+
+  /** Every conversation session in this project, ordered by id. */
+  async sessions(): Promise<ConversationSession[]> {
+    return (await this.call<SessionListView>('session.list', {})).sessions;
+  }
+
+  /**
+   * One session's transcript, oldest first.
+   *
+   * This is also the reconciliation read: the daemon persists every streamed delta into
+   * the message before emitting it, so re-reading here is how a client recovers from a
+   * dropped stream, a reload, or a stop (v1.1 plan §0.4).
+   */
+  sessionTranscript(
+    session: string,
+    page: { offset?: number; limit?: number } = {},
+  ): Promise<SessionTranscript> {
+    const request: Record<string, Json> = { session };
+    if (page.offset !== undefined) request.offset = page.offset;
+    if (page.limit !== undefined) request.limit = page.limit;
+    return this.call<SessionTranscript>('session.get', request);
+  }
+
+  /** Sessions whose title or messages contain a query. A direct transcript read. */
+  searchSessions(query: string, limit?: number): Promise<SessionSearchResults> {
+    const request: Record<string, Json> = { query };
+    if (limit !== undefined) request.limit = limit;
+    return this.call<SessionSearchResults>('session.search', request);
+  }
+
+  /** Regenerate the derived `summary.md`. A summary never outranks the transcript. */
+  summarizeSession(session: string): Promise<SessionSummaryView> {
+    return this.call<SessionSummaryView>('session.summarize', { session });
+  }
+
+  /**
+   * Append a message and start the answer.
+   *
+   * It returns as soon as the user message, the `ContextPack` and the run are durable, so
+   * every id it hands back can already be read; the answer is followed on
+   * `GET /runs/{run_id}/events` through `subscribeRunEvents`.
+   */
+  sendMessage(input: SendMessageRequest): Promise<SendStarted> {
+    const request: Record<string, Json> = { session: input.session, text: input.text };
+    if (input.references?.length) request.references = input.references;
+    if (input.attachments?.length) request.attachments = input.attachments;
+    if (input.model) request.model = input.model;
+    if (input.token_budget) request.token_budget = input.token_budget;
+    return this.call<SendStarted>('session.send', request);
+  }
+
+  /** Cancel a run. The partial answer is kept on disk and marked incomplete. */
+  stopSend(runId: string): Promise<SessionStopped> {
+    return this.call<SessionStopped>('session.stop', { run_id: runId });
+  }
+
+  /** Answer again as a new attempt. Nothing about the failed attempt is deleted. */
+  retryMessage(message: string, options: { session?: string; model?: string } = {}): Promise<SendStarted> {
+    const request: Record<string, Json> = { message };
+    if (options.session) request.session = options.session;
+    if (options.model) request.model = options.model;
+    return this.call<SendStarted>('session.retry', request);
+  }
+
+  /**
+   * Copy an excerpt into reviewable state.
+   *
+   * `target: 'evidence'` is accepted by the request schema on purpose: the daemon refuses
+   * it with the anchor requirement rather than with "not a valid enum value" (§42 M), and
+   * the dialog renders that refusal instead of hiding the option silently.
+   */
+  promoteMessage(input: PromoteMessageRequest): Promise<PromotionView> {
+    const request: Record<string, Json> = {
+      session: input.session,
+      message: input.message,
+      target: input.target,
+    };
+    if (input.excerpt) request.excerpt = input.excerpt;
+    if (input.rationale) request.rationale = input.rationale;
+    if (input.question) request.question = input.question;
+    if (input.claim) request.claim = input.claim;
+    if (input.subject) request.subject = input.subject;
+    if (input.predicate) request.predicate = input.predicate;
+    if (input.object) request.object = input.object;
+    if (input.claim_type) request.claim_type = input.claim_type;
+    if (input.scope) request.scope = input.scope;
+    if (input.corpus) request.corpus = input.corpus;
+    if (input.decision_type) request.decision_type = input.decision_type;
+    if (input.title) request.title = input.title;
+    return this.call<PromotionView>('session.promote', request);
+  }
+
+  /** What a message *would* send. `persist: false` is the draft preview; it sends nothing. */
+  previewContext(input: ContextPreviewRequest): Promise<ContextPackView> {
+    const request: Record<string, Json> = { session: input.session };
+    if (input.text !== undefined) request.text = input.text;
+    if (input.references?.length) request.references = input.references;
+    if (input.model) request.model = input.model;
+    if (input.token_budget) request.token_budget = input.token_budget;
+    if (input.persist !== undefined) request.persist = input.persist;
+    return this.call<ContextPackView>('context.preview', request);
+  }
+
+  /** The receipt recorded on a past message: the same view `context.preview` returns. */
+  getContext(session: string, pack: string): Promise<ContextPackView> {
+    return this.conversationCall<ContextPackView>('context.get', { session, pack });
+  }
+
+  /**
+   * The models this project may send to, with the egress class each one implies.
+   *
+   * Derived server-side from the router configuration and the egress report, so the model
+   * selector offers what the daemon says exists and never works out a provider rule for
+   * itself; an unavailable model comes back with the daemon's own reason.
+   */
+  providers(): Promise<ProviderCatalog> {
+    return this.conversationCall<ProviderCatalog>('provider.list', {});
+  }
+
+  /** One session attachment's bytes, read with the token header like artifact bytes. */
+  sessionAttachmentBytes(session: string, attachment: string): Promise<ArrayBuffer> {
+    return this.bytes(
+      `/sessions/${encodeURIComponent(session)}/attachments/${encodeURIComponent(attachment)}/bytes`,
+    );
+  }
+
+  /** A rendered page preview of a session attachment, same authority, same route family. */
+  sessionAttachmentPreview(session: string, attachment: string, page?: number): Promise<ArrayBuffer> {
+    const base = `/sessions/${encodeURIComponent(session)}/attachments/${encodeURIComponent(attachment)}/preview`;
+    return this.bytes(page === undefined ? base : `${base}?page=${page}`);
+  }
+
+  /**
+   * What `subscribeRunEvents` needs, and nothing more.
+   *
+   * The event stream is read with `fetch` rather than `EventSource` so the token can ride
+   * in the `Authorization` header (see `sse.ts`); it therefore needs this client's origin,
+   * token and `fetch` — one accessor rather than three, and no method here opens a stream,
+   * because the run's events belong to the caller's lifecycle, not to the client's.
+   */
+  get stream(): { baseUrl: string; token: string | null; fetchImpl: typeof fetch } {
+    return { baseUrl: this.baseUrl, token: this.token, fetchImpl: this.http };
+  }
+
+  /**
+   * The seam over the stale capability-name union, for P18's two newest reads.
+   *
+   * `context.get` and `provider.list` are not yet in `capabilities.gen.ts`. Same shape as
+   * `manuscriptCall` above, and it disappears the same way: when the snapshot is
+   * regenerated, `ConversationReadCapability` becomes a subset of `CapabilityName` and the
+   * cast can go.
+   */
+  private conversationCall<T>(name: ConversationReadCapability, request: Json = {}): Promise<T> {
+    return this.call<T>(name as CapabilityName, request);
+  }
+
   // -- plumbing --------------------------------------------------------------
 
   private headers(): Record<string, string> {
     return this.token ? { Authorization: `Bearer ${this.token}` } : {};
+  }
+
+  /** One byte route, read with the token header. The caller makes the object URL. */
+  private async bytes(path: string): Promise<ArrayBuffer> {
+    const response = await this.http(`${this.baseUrl}${path}`, { headers: this.headers() });
+    if (!response.ok) {
+      throw new HarnessRequestError(response.status, path, `${response.status} on ${path}`);
+    }
+    return response.arrayBuffer();
   }
 
   private async get<T>(path: string): Promise<T> {

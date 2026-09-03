@@ -1,11 +1,17 @@
 /**
  * The shell: the rail, the routes it reaches, and the appearance settings.
  *
- * What is asserted here is what W1–W4 build on. The research navigation is one list
- * (`routes.tsx`), the counts on it are the daemon's own (`overview.attention[].route`), the
- * active route carries `aria-current="page"`, a plain click on a rail link is a
- * client-side navigation rather than a page load, and the theme and density toggles write
- * the Design System's `data-theme` / `data-density` onto the document.
+ * What is asserted here is what the routes build on. The research navigation is one list
+ * (`routes.tsx`) — the conversation first, then the Overview and the research pages — the
+ * counts on it are the daemon's own (`overview.attention[].route`), the active route
+ * carries `aria-current="page"`, a plain click on a rail link is a client-side navigation
+ * rather than a page load, and the theme and density toggles write the Design System's
+ * `data-theme` / `data-density` onto the document.
+ *
+ * The rail also carries the conversation's session history on every route, which is why
+ * the shell mounts the conversation state (`views/conversation/state.tsx`) above it. A
+ * daemon that answers no `session.list` — every fixture below — leaves the history empty
+ * and changes nothing else about the rail.
  */
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
@@ -27,6 +33,7 @@ describe('the project rail', () => {
       node.querySelector('.rh-project-rail__nav-label')?.textContent,
     );
     expect(items).toEqual([
+      'Conversation',
       'Overview',
       'Review inbox',
       'Conflicts',
@@ -45,6 +52,16 @@ describe('the project rail', () => {
       String(review?.count),
     );
     expect(screen.getByRole('link', { name: /Conflicts/ }).textContent).not.toMatch(/\d/);
+  });
+
+  it('carries the conversation session history, on every route', async () => {
+    renderShell();
+
+    // The slot is filled from `session.list`; this fixture daemon answers none, so the
+    // history is present and empty rather than absent. Nothing else about the rail moves.
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    expect(screen.getByRole('searchbox', { name: 'Search sessions' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New session' })).toBeInTheDocument();
   });
 
   it('marks the active route with aria-current, and follows a click without reloading', async () => {
