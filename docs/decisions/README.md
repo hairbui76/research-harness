@@ -42,6 +42,7 @@ and `PRODUCT.md` explicitly rather than introducing an undocumented exception
 | [ADR-027](ADR-027-researchgraph-is-a-disposable-labelled-projection.md) | ResearchGraph is a disposable projection, with authority and visibility on every node and edge | Accepted |
 | [ADR-028](ADR-028-bounded-compilation-and-candidate-only-manuscript-edits.md) | Manuscript compilation is a bounded local process, and model edits are candidate diffs | Accepted |
 | [ADR-029](ADR-029-one-local-design-system-owns-presentation.md) | One local Design System package owns presentation, and owns nothing else | Accepted |
+| [ADR-030](ADR-030-cli-backed-providers-are-bounded-external-workers.md) | CLI-backed providers are bounded external workers behind the neutral provider boundary | Accepted |
 
 ## Conventions for this directory
 

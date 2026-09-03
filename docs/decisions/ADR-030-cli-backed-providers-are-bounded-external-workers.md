@@ -1,0 +1,124 @@
+# ADR-030: CLI-backed providers are bounded external workers behind the neutral provider boundary
+
+**Status:** Accepted
+**Date:** 2026-09-04
+**Source:** PRODUCT.md §20, §21, §34, §42 (A); `docs/superpowers/specs/2026-09-03-subscription-local-cli-providers-design.md` §4, §8–§12, §17–§19, §21, §24; implemented in `providers/cli/` (`types.py`, `registry.py`, `defs/`, `detection.py`, `environment.py`, `process.py`, `transport.py`, `parsers/`, `prompt.py`, `provider.py`, `errors.py`), `capabilities/cli_providers.py`, `cli/commands/provider.py`, `web/src/app/settings/`
+
+## Context
+
+A researcher who already pays for Codex CLI, Claude Code, Cursor Agent, Amp, DeepSeek
+Harness, OpenCode, or Pi has a model login on the workstation and no API key. Open Design
+(the pinned reference implementation, `open-design@9bb4a7d`) shows the CLIs can be driven
+headlessly, but it drives them as *full agents*: tools on, approvals bypassed, the project
+as the working directory — `--sandbox workspace-write`, `--permission-mode
+bypassPermissions`, `--force`, `--dangerously-allow-all`. That authority model is the
+opposite of ADR-005, where the provider layer answers one request and proposes nothing, and
+of ADR-007, where nothing reaches accepted state without review. It also collapses PRODUCT
+§21's two layers: an agent host is where the researcher works, a model provider is a worker
+the harness calls. Claude Code is both, and the two must not be coupled.
+
+The second trap is the word "local". The process starts here; the model does not run here.
+Classifying a CLI provider as local inference would let a vendor-hosted model past the
+sensitive-corpus switch that ADR-018 puts at provider selection.
+
+## Decision
+
+1. **A CLI is a model backend, not an agent.** `CliModelProvider` turns one `ModelRequest`
+   into one subprocess run and returns one `RawCompletion`; validation, traces, staging, and
+   review stay on the shared path (ADR-005). Every runtime is a declarative `CliRuntimeDef`
+   — data plus pure builders — and `registry.py` refuses, at import, a definition carrying a
+   bypass flag, a shell operator, a local egress host, or research content in argv.
+2. **Bounded execution is native or nothing.** A runtime is routable only when the
+   *installed* version proves a no-tools, read-only posture through a help probe
+   (`bounded_mode: safe`); prompt text alone never counts. Codex runs `codex exec --json
+   --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --sandbox read-only
+   -c approval_policy="never" -C <temp cwd>`; Claude Code runs `claude -p --tools ""
+   --permission-mode dontAsk --permission-prompts none --strict-mcp-config
+   --disable-slash-commands --no-session-persistence --restricted`. A tool or file-write
+   event in a bounded run cancels the process and fails the request
+   (`bounded_authority_violation`).
+3. **A CLI provider is external egress.** Every definition declares a vendor host or
+   `unknown.external`; `privacy.external_models: disabled` refuses it before a process is
+   spawned; the catalog, `research egress`, traces, and receipts all say `external`.
+4. **The subscription login is the only credential, and it stays the subscription login.**
+   Research content travels on stdin or the runtime's RPC channel — never argv — in an empty
+   temporary working directory, under an environment allow-list from which every API-key,
+   token, and cloud-credential variable is removed. Dropping variables is not sufficient on
+   its own, because a persisted API-key login lives in the CLI's own config directory, which
+   the allow-list keeps; so the auth probe decides too. Codex counts as logged in only for a
+   ChatGPT login, Claude Code only for `authMethod: claude.ai`. Any other login is reported
+   as not logged in, with guidance, because it is metered and reaches a different host.
+5. **One capability surface.** `provider.cli.scan|configure|remove|test` are the only way any
+   client learns availability or changes `research.yaml`. The server computes `routable` and
+   `unavailable_reason`; Web and CLI render those strings and re-derive no rule (ADR-004).
+
+## Consequences
+
+- Cursor Agent, Amp, DeepSeek Harness, and Pi are detected and catalogued but not routable in
+  this release: none documents a deny-tools headless posture, so each reports `bounded_mode:
+  unsupported`, `research providers add` refuses it, and the scan says why. OpenCode is
+  bounded by an injected permission table rather than by flags. Admitting a runtime is a
+  change to one definition's `BoundedPosture` plus fixtures, not to the engine.
+- A version the harness has no fixtures for is `warning`, and one whose version string cannot
+  be parsed is `unknown` — both still routable, because the bounded posture was proven on the
+  installed build. Only a version listed as incompatible is `blocked`. Refusing every
+  unrecognised version would break the provider on the CLI's next release.
+- Detection spawns processes, so `provider.list` consults a 30-second in-memory cache and an
+  explicit rescan bypasses it. No availability is canonical state.
+- Conversation streaming through a CLI answers in prose; structured workflow requests are
+  buffered and validated through the shared structured-output path. Image and document inputs
+  are refused in this release.
+- The harness now depends on the flags of a third-party CLI. Drift surfaces at the help probe
+  rather than mid-run: a build missing a required flag is reported unsupported instead of
+  being sent a flag it does not understand.
+
+## Invariants this ADR protects
+
+- Research content never appears in argv, in a process listing, or in a file outside the
+  request's temporary working directory (spec §12, §24 (6)).
+- A definition that carries a bypass flag, a shell operator, or a local egress host cannot be
+  loaded, let alone spawned (spec §8, §12; §24 (7)).
+- A runtime with no proven bounded posture is never spawned for research, and there is no
+  prompt-only fallback (spec §12; §24 (9)).
+- The privacy policy decides before a process exists, on every transport (ADR-018, PRODUCT
+  §34; spec §24 (8)).
+- A subscription login never becomes metered API-key access (spec §12, §19; §24 (4)).
+- No credential, home path, or raw process output reaches an error, a diagnostic, a trace,
+  `research.yaml`, a fixture, or browser storage (PRODUCT §34; spec §19, §24 (15)).
+- Invalid, partial, or schema-incompatible output never reaches staging, and a cancellation or
+  timeout terminates the whole process tree (spec §13, §14; §24 (10), (11)).
+- Provider neutrality holds: no workflow, capability, or domain module knows a runtime exists
+  (PRODUCT §20, §42 (A); ADR-005; spec §24 (5), (13)).
+
+## Rejected alternatives
+
+- **Run Open Design's daemon as a service.** A second authority model, a Node runtime in the
+  critical path, and a bypass posture to unwind on every upgrade.
+- **Treat a local process as local inference.** It reads well in a selector and would let a
+  vendor-hosted model past the sensitive-corpus switch — the one thing ADR-018 exists to stop.
+- **Use a prompt-only "do not use tools" instruction as the safety mechanism.** Model
+  instructions are not an authority boundary; a single non-compliant turn is a file write.
+- **Read the CLI's credential store and call the vendor's HTTP API directly.** Faster and
+  fully typed, and it turns a subscription login into an exfiltrated token; spec §19 forbids
+  the harness reading, copying, exporting, or displaying a credential store at all.
+- **Refuse any version without recorded fixtures.** Safe-looking, but it makes every upstream
+  release an outage; the help probe proves the posture on the build that is installed.
+
+## Where it is enforced
+
+- `providers/cli/registry.py` — `FORBIDDEN_ARGS`, the shell-operator and prompt-marker checks,
+  and `is_local_endpoint` on every declared host, run over `SAMPLE_INVOCATIONS` at import.
+- `providers/cli/types.py` — `BoundedPosture`, `UNKNOWN_EXTERNAL_HOST`, and the server-computed
+  `CliRuntimeStatus.routable` / `unavailable_reason`.
+- `providers/cli/environment.py` — `BASE_KEEP`, `ALWAYS_DROP` (deny-list wins), `FIXED_ENV`.
+- `providers/cli/defs/*.py` — each runtime's bounded argv, help-probe flags, and
+  `classify_auth`; `detection.py` (fault-isolated probes, `ScanCache`), `process.py`
+  (process-group cancellation), `transport.py`, `parsers/`, `prompt.py`, `provider.py`,
+  `errors.py` (`DiagnosticCode`, redaction).
+- `capabilities/cli_providers.py` (the four capabilities, `EXTERNAL_EGRESS_NOTICE`,
+  `cli_availability`) and `capabilities/providers.py`; `cli/commands/provider.py`;
+  `web/src/app/settings/`.
+- `tests/unit/providers/cli/`, `tests/contract/providers/test_cli_provider.py`,
+  `tests/contract/capabilities/test_cli_providers.py`,
+  `tests/e2e/test_cli_providers_commands.py`, `web/src/app/settings/settings.test.tsx`.
+- `docs/guide/providers.md` — *Subscription-backed local CLIs*.
