@@ -103,12 +103,19 @@ def test_add_refuses_an_unavailable_runtime_and_writes_an_available_one(
 
 
 def test_test_states_the_destination_before_it_calls(workspace: Path, codex: FakeCli) -> None:
+    """The destination is named first, and the verdict is the runtime's, not the command's.
+
+    `codex-success.jsonl` answers with a claim-shaped object, so this probe deterministically
+    fails `CliProbeReply` and the command must exit 1 -- and must still not print the answer.
+    """
     run("providers", "add", "codex", "--name", "codex-sub", "--workspace", str(workspace))
     code, out = run("providers", "test", "codex-sub", "--workspace", str(workspace))
     lines_out = out.splitlines()
     assert lines_out[0].startswith("egress: codex-sub sends research content to chatgpt.com")
-    assert code in (0, 1)
-    assert "codex" in out and ("ok" in out or "failed" in out)
+    assert code == 1, "a probe the runtime failed exits non-zero"
+    assert lines_out[1] == "codex-sub (codex/default, 0.150.1): failed"
+    assert "the runtime answered, but not with the requested object" in out
+    assert "diagnostic: structured_output" in out
     assert "supported" not in out, "no raw model response is printed"
 
 

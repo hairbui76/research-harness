@@ -282,7 +282,7 @@ def _provider_checks(repo: WorkspaceRepository) -> list[DoctorCheck]:
                     f"  {entry.name}",
                     True,
                     f"local_cli:{entry.runtime}/{entry.model}, {_state(status)}{enabled}",
-                    note=not status.routable,
+                    note=not status.routable and entry.enabled,
                 )
             )
             continue

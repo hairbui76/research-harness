@@ -49,6 +49,7 @@ from research_harness.cli.context import (
     context_for,
     emit,
 )
+from research_harness.providers.cli.registry import RUNTIME_IDS, RUNTIMES
 from research_harness.providers.cli.types import CliRuntimeStatus, unavailable_reason
 
 __all__ = ["register"]
@@ -112,9 +113,7 @@ def providers_scan(
 def providers_add(
     runtime: Annotated[
         str,
-        typer.Argument(
-            help="Runtime id: codex, claude, cursor-agent, amp, deepseek-harness, opencode, pi."
-        ),
+        typer.Argument(help=f"Runtime id: {', '.join(RUNTIME_IDS)}."),
     ],
     name: Annotated[str, typer.Option("--name", help="The entry name `--provider` selects.")],
     workspace: WorkspaceOption = None,
@@ -168,8 +167,6 @@ def providers_test(
         ctx = context_for(workspace)
         entry = next((item for item in ctx.repo.config.providers if item.get("name") == name), None)
         if entry is not None and not as_json:
-            from research_harness.providers.cli.registry import RUNTIMES
-
             definition = RUNTIMES.get(str(entry.get("runtime")))
             if definition is not None:
                 typer.echo(
