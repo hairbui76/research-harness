@@ -1,0 +1,5 @@
+{"models":[
+ {"slug":"gpt-5.5","display_name":"GPT-5.5","default_reasoning_level":"xhigh","supported_reasoning_levels":[{"effort":"low"},{"effort":"medium"},{"effort":"high"},{"effort":"xhigh"}],"visibility":"list","context_window":272000,"input_modalities":["text","image"]},
+ {"slug":"gpt-5.4-mini","display_name":"GPT-5.4-Mini","default_reasoning_level":"medium","supported_reasoning_levels":[{"effort":"low"},{"effort":"medium"},{"effort":"high"}],"visibility":"list","context_window":272000,"input_modalities":["text"]},
+ {"slug":"codex-auto-review","display_name":"Codex Auto Review","default_reasoning_level":"medium","supported_reasoning_levels":[{"effort":"low"}],"visibility":"hide","context_window":272000,"input_modalities":["text"]}
+]}
