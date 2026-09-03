@@ -5,6 +5,10 @@
 auth probe, or a run prints, how long it takes, and whether it hangs. Every invocation
 appends `{"kind", "argv", "cwd", "env", "stdin"}` to `calls.jsonl`, which is how a test
 proves the prompt travelled on stdin, the API key was stripped, and the cwd was a temp dir.
+
+A run line may contain the placeholder `{{NONCE}}`, which the program replaces with the
+`provider.cli.test-<8 hex>` nonce it read on stdin, so a scripted reply can echo a nonce it
+cannot know in advance; lines without the placeholder are emitted unchanged.
 """
 
 from __future__ import annotations
@@ -19,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 PROGRAM = r"""#!/usr/bin/env python3
-import json, os, sys, time
+import json, os, re, sys, time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT = json.load(open(os.path.join(ROOT, "script.json"), encoding="utf-8"))
 
@@ -27,6 +31,15 @@ def record(kind, stdin=None):
     with open(os.path.join(ROOT, "calls.jsonl"), "a", encoding="utf-8") as handle:
         handle.write(json.dumps({"kind": kind, "argv": sys.argv[1:], "cwd": os.getcwd(),
                                  "env": dict(os.environ), "stdin": stdin}) + "\n")
+
+def fill(lines, nonce):
+    filled = []
+    for line in lines:
+        if isinstance(line, dict) and "sleep" in line:
+            filled.append(line); continue
+        text = line if isinstance(line, str) else json.dumps(line)
+        filled.append(text.replace("{{NONCE}}", nonce))
+    return filled
 
 def emit(lines):
     for line in lines:
@@ -50,7 +63,8 @@ stdin = None
 if run.get("read_stdin", True):
     stdin = sys.stdin.readline() if run.get("read_one_line") else sys.stdin.read()
 record("run", stdin)
-emit(run.get("lines", []))
+found = re.search(r"provider\.cli\.test-[0-9a-f]{8}", stdin or "")
+emit(fill(run.get("lines", []), found.group(0) if found else ""))
 if run.get("hang"):
     time.sleep(3600)
 sys.stderr.write(run.get("stderr", ""))

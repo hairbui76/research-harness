@@ -30,6 +30,20 @@ def lines(name: str) -> list[str]:
     ]
 
 
+def probe_reply() -> list[str]:
+    """The two Codex lines of one passing probe; the fake fills `{{NONCE}}` in from stdin."""
+    body = {"ok": True, "echo": "{{NONCE}}"}
+    return [
+        json.dumps(
+            {
+                "type": "item.completed",
+                "item": {"id": "i", "type": "agent_message", "text": json.dumps(body)},
+            }
+        ),
+        json.dumps({"type": "turn.completed", "usage": {"input_tokens": 3, "output_tokens": 2}}),
+    ]
+
+
 @pytest.fixture
 def codex(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> FakeCli:
     DEFAULT_CACHE.clear()
@@ -117,6 +131,25 @@ def test_test_states_the_destination_before_it_calls(workspace: Path, codex: Fak
     assert "the runtime answered, but not with the requested object" in out
     assert "diagnostic: structured_output" in out
     assert "supported" not in out, "no raw model response is printed"
+
+
+def test_test_exits_zero_when_the_runtime_echoes_the_nonce(workspace: Path, codex: FakeCli) -> None:
+    """The success path: the destination is named first, then the verdict, and the exit is 0."""
+    run("providers", "add", "codex", "--name", "codex-sub", "--workspace", str(workspace))
+    codex.set_run(lines=probe_reply())
+
+    code, out = run("providers", "test", "codex-sub", "--workspace", str(workspace))
+
+    lines_out = out.splitlines()
+    assert code == 0, out
+    assert lines_out[0].startswith("egress: codex-sub sends research content to chatgpt.com")
+    assert lines_out[1].endswith(": ok"), "the egress sentence precedes the verdict line"
+    assert "diagnostic" not in out
+
+    code, out = run("providers", "test", "codex-sub", "--workspace", str(workspace), "--json")
+    assert code == 0, out
+    body = json.loads(out)
+    assert body["ok"] is True and body["egress_host"] == "chatgpt.com"
 
 
 def test_remove_takes_the_entry_out(workspace: Path, codex: FakeCli) -> None:
