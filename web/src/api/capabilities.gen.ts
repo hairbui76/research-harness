@@ -529,7 +529,7 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     humanOnly: false,
     longRunning: false,
     summary: "Every configured model, with what it accepts and whether it is available.",
-    semantics: "reads configuration and the project's egress disclosure; contacts nothing, reveals no credential, and changes no state",
+    semantics: "reads configuration and the project's egress disclosure; for configured local CLIs it reads the cached local detection probes; sends no research content, reveals no credential, and changes no state",
   },
   "question.create": {
     permission: "mutate",
