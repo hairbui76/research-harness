@@ -21,6 +21,7 @@ from research_harness.providers.cli.types import (
 
 __all__ = [
     "FORBIDDEN_ARGS",
+    "FORBIDDEN_VALUES",
     "RUNTIMES",
     "RUNTIME_DEFS",
     "RUNTIME_IDS",
@@ -47,6 +48,16 @@ FORBIDDEN_ARGS: frozenset[str] = frozenset(
     }
 )
 """Flags Open Design uses to run a *full* agent. Never in a bounded definition (spec §12)."""
+
+FORBIDDEN_VALUES: frozenset[str] = frozenset(
+    token for token in FORBIDDEN_ARGS if not token.startswith("-")
+)
+"""The forbidden tokens that name a *setting*, not a flag: `bypassPermissions`,
+`danger-full-access`, `workspace-write`. A CLI takes these as the value half of a
+configuration override -- `-c sandbox_mode="danger-full-access"`, `--sandbox=workspace-write`
+-- which arrives as one argv item whose `=`-split still carries the quotes, so nothing but a
+substring match sees it. Screened that way, and deliberately over-broad: no bounded
+definition has any business mentioning them at all."""
 
 _SHELL_OPERATORS = frozenset({";", "&&", "||", "|", ">", ">>", "<", "`"})
 _PROMPT_MARKER = "PROMPT-MARKER"
@@ -143,7 +154,11 @@ def _check_args(name: str, args: object) -> None:
     if not isinstance(args, tuple) or not all(isinstance(item, str) for item in args):
         raise RegistryError(f"runtime {name!r}: build_args must return a tuple of strings")
     for item in args:
-        if item in FORBIDDEN_ARGS or any(token in item.split("=") for token in FORBIDDEN_ARGS):
+        if (
+            item in FORBIDDEN_ARGS
+            or any(token in item.split("=") for token in FORBIDDEN_ARGS)
+            or any(token in item for token in FORBIDDEN_VALUES)
+        ):
             raise RegistryError(f"runtime {name!r}: forbidden argument {item!r}")
         if item in _SHELL_OPERATORS:
             raise RegistryError(f"runtime {name!r}: shell operator {item!r} in argv")

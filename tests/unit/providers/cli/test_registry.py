@@ -77,6 +77,35 @@ def test_a_bypass_flag_anywhere_in_argv_is_refused(token: str) -> None:
         validate_definition(definition(build_args=unsafe))
 
 
+def test_a_forbidden_token_quoted_inside_a_value_is_refused() -> None:
+    """`-c sandbox_mode="danger-full-access"` is one argv item, not a flag and its value.
+
+    Splitting on `=` leaves `"danger-full-access"` with its quotes, which no exact match
+    recognises; the three tokens that are configuration *values* rather than flags are
+    therefore screened as substrings of the whole item.
+    """
+
+    def quoted(invocation: CliInvocation) -> tuple[str, ...]:
+        return ("exec", "-c", 'sandbox_mode="danger-full-access"')
+
+    with pytest.raises(RegistryError, match="forbidden argument"):
+        validate_definition(definition(build_args=quoted))
+
+    def workspace(invocation: CliInvocation) -> tuple[str, ...]:
+        return ("exec", "--sandbox=workspace-write,network")
+
+    with pytest.raises(RegistryError, match="forbidden argument"):
+        validate_definition(definition(build_args=workspace))
+
+
+def test_the_shipped_definitions_all_pass_the_substring_screen() -> None:
+    """The screen is a net, not a wall: nothing this branch ships is caught by it."""
+    from research_harness.providers.cli.registry import RUNTIME_DEFS
+
+    for shipped in RUNTIME_DEFS:
+        validate_definition(shipped)
+
+
 def test_argv_must_be_a_tuple_of_plain_strings_without_shell_operators() -> None:
     def shell(invocation: CliInvocation) -> tuple[str, ...]:
         return ("exec", "&&", "rm")
