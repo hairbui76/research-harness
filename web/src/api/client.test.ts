@@ -449,3 +449,36 @@ describe('reads and refusals', () => {
     );
   });
 });
+
+describe('subscription-backed CLI providers', () => {
+  it('scans through provider.cli.scan and forwards rescan', async () => {
+    const daemon = fakeDaemon({ capabilities: { 'provider.cli.scan': { scanned_at: 't', count: 0, runtimes: [], configured: [], notice: 'n' } } });
+    const client = new HarnessClient({ baseUrl: 'http://daemon.test', token: 't', fetchImpl: daemon.fetch });
+    const report = await client.providerCliScan(true);
+    expect(report.count).toBe(0);
+    expect(daemon.capabilityCalls()).toEqual([{ name: 'provider.cli.scan', request: { rescan: true } }]);
+  });
+
+  it('configures, tests, and removes by name', async () => {
+    const daemon = fakeDaemon({
+      capabilities: {
+        'provider.cli.configure': { entry: { name: 'codex-sub' }, created: true, file: 'research.yaml' },
+        'provider.cli.test': { name: 'codex-sub', ok: true, message: 'ok' },
+        'provider.cli.remove': { name: 'codex-sub', file: 'research.yaml' },
+      },
+    });
+    const client = new HarnessClient({ baseUrl: 'http://daemon.test', token: 't', fetchImpl: daemon.fetch });
+    await client.providerCliConfigure({ name: 'codex-sub', runtime: 'codex', model: 'gpt-5.5', priority: 10 });
+    await client.providerCliTest('codex-sub');
+    await client.providerCliRemove('codex-sub');
+    expect(daemon.capabilityCalls().map((call) => call.name)).toEqual(['provider.cli.configure', 'provider.cli.test', 'provider.cli.remove']);
+    expect(daemon.capabilityCalls()[0]!.request).toEqual({ name: 'codex-sub', runtime: 'codex', model: 'gpt-5.5', priority: 10 });
+    expect(daemon.capabilityCalls()[2]!.request).toEqual({ name: 'codex-sub' });
+  });
+
+  it('surfaces a refusal as a CapabilityError', async () => {
+    const daemon = fakeDaemon({ capabilities: { 'provider.cli.configure': { capability: 'provider.cli.configure', ok: false, error: { code: 'permission_denied', message: 'human only' } } } });
+    const client = new HarnessClient({ baseUrl: 'http://daemon.test', token: null, fetchImpl: daemon.fetch });
+    await expect(client.providerCliConfigure({ name: 'x', runtime: 'codex' })).rejects.toThrow('human only');
+  });
+});

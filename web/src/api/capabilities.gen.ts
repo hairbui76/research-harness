@@ -61,6 +61,10 @@ export type CapabilityName =
   | "note.add"
   | "note.discard"
   | "note.promote"
+  | "provider.cli.configure"
+  | "provider.cli.remove"
+  | "provider.cli.scan"
+  | "provider.cli.test"
   | "provider.list"
   | "question.create"
   | "question.list"
@@ -491,6 +495,34 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     longRunning: false,
     summary: "Record the research object a captured note became.",
     semantics: "raises a note's authority into a Claim, Question, or Decision; human-only",
+  },
+  "provider.cli.configure": {
+    permission: "admin",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Add or update one subscription-backed CLI provider entry in research.yaml.",
+    semantics: "changes provider configuration only; writes no research object and no event",
+  },
+  "provider.cli.remove": {
+    permission: "admin",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Remove one subscription-backed CLI provider entry from research.yaml.",
+    semantics: "changes provider configuration only; writes no research object and no event",
+  },
+  "provider.cli.scan": {
+    permission: "read",
+    humanOnly: false,
+    longRunning: false,
+    summary: "Detect the supported local CLIs: installed, version, login, bounded mode, models.",
+    semantics: "runs local version/login/help probes; edits nothing and sends no research content",
+  },
+  "provider.cli.test": {
+    permission: "read",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Run one minimal schema-validated request through a configured CLI provider.",
+    semantics: "sends one test prompt off the workstation under the privacy policy; stages nothing",
   },
   "provider.list": {
     permission: "read",

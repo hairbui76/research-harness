@@ -1,0 +1,12 @@
+{
+  "name": "codex-sub",
+  "runtime": "codex",
+  "model": "gpt-5.5",
+  "version": "0.150.1",
+  "egress_host": "chatgpt.com",
+  "egress_kind": "external",
+  "ok": true,
+  "latency_ms": 2140,
+  "message": "Codex CLI answered through the subscription login in 2140 ms",
+  "diagnostic": null
+}
