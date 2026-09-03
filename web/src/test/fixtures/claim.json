@@ -4,7 +4,7 @@
   "object": {
     "assessment": {
       "allowed_strength": "individual",
-      "audited_at": "2026-09-03T12:14:17.288478Z",
+      "audited_at": "2026-09-03T19:25:05.194335Z",
       "maximum_defensible_wording": "one system on one held-out split",
       "requested_strength": "observed_subset",
       "status": "supported"
@@ -17,7 +17,7 @@
       "search_runs": [],
       "unresolved_works": 0
     },
-    "created_at": "2026-09-03T12:14:17.259371Z",
+    "created_at": "2026-09-03T19:25:04.878197Z",
     "decisions": [],
     "derived_from": [],
     "id": "C0001",
@@ -52,6 +52,6 @@
     "stale": "fresh",
     "statement": "TrafficLM reaches an F1 of 94.32 on CICIDS2017",
     "type": "descriptive",
-    "updated_at": "2026-09-03T12:14:17.288488Z"
+    "updated_at": "2026-09-03T19:25:05.194389Z"
   }
 }

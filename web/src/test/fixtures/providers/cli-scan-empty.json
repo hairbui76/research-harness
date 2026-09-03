@@ -1,0 +1,232 @@
+{
+  "scanned_at": "2026-09-04T00:00:00Z",
+  "count": 7,
+  "runtimes": [
+    {
+      "runtime": "codex",
+      "name": "Codex CLI",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `codex login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "egress_kind": "external",
+      "egress_host": "chatgpt.com",
+      "diagnostics": [
+        "codex is not installed: no 'codex' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "codex is not installed on this workstation"
+    },
+    {
+      "runtime": "claude",
+      "name": "Claude Code",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `claude auth login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "egress_kind": "external",
+      "egress_host": "api.anthropic.com",
+      "diagnostics": [
+        "claude is not installed: no 'claude' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "claude is not installed on this workstation"
+    },
+    {
+      "runtime": "cursor-agent",
+      "name": "Cursor Agent",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `cursor-agent login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "cursor-agent is not installed: no 'cursor-agent' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "cursor-agent is not installed on this workstation"
+    },
+    {
+      "runtime": "amp",
+      "name": "Amp",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `amp login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "amp is not installed: no 'amp' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "amp is not installed on this workstation"
+    },
+    {
+      "runtime": "deepseek-harness",
+      "name": "DeepSeek Harness",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; configure a provider in `dsh` and install the open-design profile if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "deepseek-harness is not installed: no 'dsh' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "deepseek-harness is not installed on this workstation"
+    },
+    {
+      "runtime": "opencode",
+      "name": "OpenCode",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; run `opencode auth login` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "opencode is not installed: no 'opencode-cli' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "opencode is not installed on this workstation"
+    },
+    {
+      "runtime": "pi",
+      "name": "Pi",
+      "available": false,
+      "executable": null,
+      "version": null,
+      "auth_status": "unknown",
+      "auth_guidance": "authentication is verified on the first request; configure a provider key inside `pi` if it fails",
+      "bounded_mode": "unknown",
+      "compatibility": "unknown",
+      "models": [
+        {
+          "id": "default",
+          "label": "Default (CLI configuration)",
+          "reasoning": [],
+          "context_tokens": null
+        }
+      ],
+      "model_source": "fallback",
+      "reasoning_choices": [
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "egress_kind": "unknown_external",
+      "egress_host": "unknown.external",
+      "diagnostics": [
+        "pi is not installed: no 'pi' on PATH"
+      ],
+      "scanned_at": "2026-09-04T00:00:00Z",
+      "routable": false,
+      "unavailable_reason": "pi is not installed on this workstation"
+    }
+  ],
+  "configured": [],
+  "notice": "A local CLI starts on this workstation, but the model it talks to is the vendor's: research content and object IDs leave the machine when a CLI provider is used."
+}
