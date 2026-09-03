@@ -13,7 +13,12 @@ Two properties are deliberate:
 * **No network, no credential.** The catalog is built the way `egress_report` is built:
   from the adapters' own capability factories and the *names* of the environment variables
   a key would come from. `available` is a boolean and `unavailable_reason` is a sentence;
-  no field of this module can hold a key (Product 34).
+  no field of this module can hold a key (Product 34). One entry kind is not answerable
+  from configuration alone: a `local_cli` entry borrows the CLI's own login, so whether it
+  can be called is a fact about this workstation. For those, and only those, the catalog
+  reads the cached local detection probes (`--version`, login status, `--help`) — local
+  processes that carry no research content and read no credential. Nothing here opens a
+  network connection.
 * **`default` is the router's answer, not a preference.** It marks the entry
   `ModelRouter.select` would return for an unconstrained call — the first the policy allows,
   in priority order — so a client that shows a default shows the one that would actually be
@@ -23,12 +28,18 @@ Two properties are deliberate:
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from types import MappingProxyType
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from research_harness.capabilities.cli_providers import (
+    CLI_PROVIDER_CAPABILITIES,
+    CLI_PROVIDER_CAPABILITY_HANDLERS,
+    cli_availability,
+    cli_provider_specs,
+)
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.capabilities.dto import CapabilityRequest
 from research_harness.capabilities.permissions import Permission
@@ -36,6 +47,7 @@ from research_harness.capabilities.registry import CapabilitySpec
 from research_harness.domain.conversation import EgressClass
 from research_harness.privacy.egress import EgressEntry, egress_report
 from research_harness.privacy.policy import is_local_endpoint
+from research_harness.providers.cli.types import CliRuntimeStatus
 from research_harness.providers.models.base import ProviderCapabilities
 from research_harness.providers.models.router import (
     RouterConfig,
@@ -53,8 +65,8 @@ __all__ = [
     "provider_specs",
 ]
 
-#: Every capability this module registers (v1.1 plan SS0.4).
-PROVIDER_CAPABILITIES: tuple[str, ...] = ("provider.list",)
+#: Every capability this module registers (v1.1 plan SS0.4, CLI providers spec SS16).
+PROVIDER_CAPABILITIES: tuple[str, ...] = ("provider.list", *CLI_PROVIDER_CAPABILITIES)
 
 
 class ListProvidersRequest(CapabilityRequest):
@@ -88,8 +100,9 @@ class ProviderModelView(BaseModel):
 
     vision: bool
     available: bool
-    """Whether it could be called now: allowed by the policy, and either local or holding
-    a credential. Never determined by contacting anything."""
+    """Whether it could be called now: allowed by the policy, and then either local, or
+    holding a credential, or — for a `local_cli` entry — installed, logged in and provably
+    bounded according to the cached detection probes. Never determined over the network."""
 
     unavailable_reason: str | None = None
     default: bool = False
@@ -115,6 +128,7 @@ def list_providers(ctx: CapabilityContext, request: ListProvidersRequest) -> Pro
     environment: Mapping[str, str] = os.environ
     config = RouterConfig.model_validate({"providers": list(ctx.repo.config.providers)})
     enabled = [entry for entry in config.providers if entry.enabled]
+    statuses = _cli_statuses(enabled)
     disclosed = {
         (row.provider, row.model): row
         for row in egress_report(ctx.repo, environment).of_kind("model")
@@ -128,23 +142,50 @@ def list_providers(ctx: CapabilityContext, request: ListProvidersRequest) -> Pro
         None,
     )
     models = [
-        _model_view(entry, entry_capabilities(entry), row, default=index == routed)
+        _model_view(entry, entry_capabilities(entry), row, statuses, default=index == routed)
         for index, (entry, row) in enumerate(rows)
     ]
     return ProviderCatalog(count=len(models), models=tuple(models))
+
+
+def _cli_statuses(
+    enabled: Sequence[RouterProviderConfig],
+) -> Mapping[str, CliRuntimeStatus]:
+    """One cached scan of exactly the CLI runtimes this project routes to (spec SS11).
+
+    Nothing is probed when no entry is a `local_cli` one, so a catalog of HTTP providers
+    still contacts nothing and starts no process.
+    """
+    cli_runtimes = {
+        entry.runtime for entry in enabled if entry.kind == "local_cli" and entry.runtime
+    }
+    if not cli_runtimes:
+        return {}
+    from research_harness.providers.cli.detection import scan
+    from research_harness.providers.cli.registry import RUNTIMES
+
+    found = scan([RUNTIMES[name] for name in cli_runtimes if name in RUNTIMES])
+    return {status.runtime: status for status in found}
 
 
 def _model_view(
     entry: RouterProviderConfig,
     capabilities: ProviderCapabilities,
     disclosure: EgressEntry | None,
+    statuses: Mapping[str, CliRuntimeStatus],
     *,
     default: bool,
 ) -> ProviderModelView:
     """One catalog row: what it is, what it takes, and whether it can be called."""
     host = capabilities.egress.endpoint_host
     local = is_local_endpoint(host)
-    available, reason = _availability(disclosure, local=local)
+    if entry.kind == "local_cli":
+        # A CLI entry borrows the CLI's own login, so "no credential" is the wrong question:
+        # the policy is asked first, then the runtime's own gates (spec SS11).
+        refused = None if disclosure is None or disclosure.allowed_by_policy else disclosure.reason
+        available, reason = cli_availability(entry, statuses, refused)
+    else:
+        available, reason = _availability(disclosure, local=local)
     return ProviderModelView(
         id=entry.name,
         label=f"{entry.name}/{entry.model}",
@@ -178,23 +219,25 @@ def _availability(disclosure: EgressEntry | None, *, local: bool) -> tuple[bool,
 
 
 PROVIDER_CAPABILITY_HANDLERS: Mapping[str, Callable[[CapabilityContext, Any], Any]] = (
-    MappingProxyType({"provider.list": list_providers})
+    MappingProxyType({"provider.list": list_providers, **CLI_PROVIDER_CAPABILITY_HANDLERS})
 )
 
 
 def provider_specs() -> list[CapabilitySpec]:
-    """`provider.list`, named and permissioned. A read a host may make."""
+    """`provider.list` and the four `provider.cli.*` capabilities, named and permissioned."""
     return [
         CapabilitySpec(
             name="provider.list",
             summary="Every configured model, with what it accepts and whether it is available.",
             permission=Permission.READ,
             scientific_semantics=(
-                "reads configuration and the project's egress disclosure; contacts nothing, "
-                "reveals no credential, and changes no state"
+                "reads configuration and the project's egress disclosure; for configured "
+                "local CLIs it reads the cached local detection probes; sends no research "
+                "content, reveals no credential, and changes no state"
             ),
             request_model=ListProvidersRequest,
             response_model=ProviderCatalog,
             handler=list_providers,
-        )
+        ),
+        *cli_provider_specs(),
     ]
