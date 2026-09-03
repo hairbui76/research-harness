@@ -46,6 +46,15 @@ reason on screen. See [Review](review.md#what-a-model-or-an-agent-host-cannot-do
 
 ## Before there is anything to review
 
+The quickest way is the bundled demo, which needs no API key:
+
+```bash
+research demo ./demo-review
+research serve -w ./demo-review
+```
+
+Otherwise, stage proposals from a real workspace:
+
 The cockpit does not run models. Stage some proposals first — from the CLI, an MCP host, or
 anything else that can call `work.interrogate` and `evidence.verify`:
 

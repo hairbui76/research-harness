@@ -40,6 +40,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │               (`corpus.ingest`).                                                     │
 │ parse         Parse a Work's artifact into structural blocks and store them          │
 │               (`work.parse`).                                                        │
+│ demo          Create a workspace with verified proposals waiting for review —        │
+│               offline, no API key.                                                   │
 │ rebuild       Rebuild `.research/research.db` from canonical files; never writes     │
 │               canonical state.                                                       │
 │ interrogate   Ask a Work the interrogation schema's questions; every answer lands in │
@@ -452,6 +454,31 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                                         Claim.                                       │
 │    --json                               Print the result as JSON instead of text.    │
 │    --help                               Show this message and exit.                  │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### `research demo`
+
+```text
+
+ Usage: research demo [OPTIONS] {directory}
+
+ Create a workspace with verified proposals waiting for review — offline, no API key.
+
+ Ingests and parses the bundled synthetic paper, stages three proposals with the
+ scripted provider, verifies them, and rebuilds the projection. Nothing is accepted:
+ that is the researcher's step, in the cockpit (`research serve`), the CLI
+ (`research inbox`, `research review`), or an MCP host.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    directory      <path>  Directory to create the demo workspace in (must not      │
+│                             exist).                                                  │
+│                             [required]                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --name        <str>  Project name. [default: demo]                                   │
+│ --json               Print the result as JSON instead of text.                       │
+│ --help               Show this message and exit.                                     │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 

@@ -27,6 +27,18 @@ uv run research doctor
 Node and pnpm are needed only to build the Web cockpit and the VS Code extension.
 Full detail: [docs/guide/install.md](docs/guide/install.md).
 
+## Try it in one command
+
+```bash
+uv run research demo ./demo-review        # bundled synthetic paper, offline, no API key
+uv run research serve -w ./demo-review    # then open http://127.0.0.1:8765/?token=<.research/daemon-token>
+```
+
+The demo ingests and parses a synthetic paper, stages three proposals with the scripted
+provider, verifies them, and rebuilds the projection — and accepts nothing, because that is
+the researcher's step: the Review inbox in the cockpit (or `research inbox` / `research
+review`) is where the loop continues.
+
 ## Ten-minute walkthrough
 
 Every block below was produced by running the command shown, against

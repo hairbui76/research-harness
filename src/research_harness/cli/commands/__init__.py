@@ -14,6 +14,7 @@ import typer
 from research_harness.cli.commands import (
     claim,
     corpus,
+    demo,
     discover,
     evidence,
     init,
@@ -31,6 +32,7 @@ __all__ = ["COMMAND_MODULES", "register_all"]
 COMMAND_MODULES: tuple[ModuleType, ...] = (
     init,
     corpus,
+    demo,
     rebuild,
     evidence,
     claim,
