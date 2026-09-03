@@ -45,6 +45,38 @@ provider, verifies them, and rebuilds the projection — and accepts nothing, be
 the researcher's step: the Review inbox in the cockpit (or `research inbox` / `research
 review`) is where the loop continues.
 
+## Run the Web cockpit
+
+The daemon serves the cockpit itself, from `web/dist`, so build it once first (Node 20+ and
+pnpm 11; `research doctor` says whether you have them). Without a build the daemon still
+runs, but serves the JSON API alone.
+
+```bash
+pnpm install                                     # once, at the repository root
+pnpm --filter research-harness-web build         # writes web/dist
+
+uv run research serve -w ./demo-review           # binds 127.0.0.1:8765, loopback only
+open "http://127.0.0.1:8765/?token=$(cat ./demo-review/.research/daemon-token)"
+```
+
+The token is a file only a local process can read (`research token -w ./demo-review` prints
+its path); the cockpit stores it for the origin on first load and strips it from the address
+bar. Without a token the cockpit still opens, read-only, as an agent host. The default route
+is the three-pane conversation workspace; Overview, Review inbox, Corpus, Claims, Manuscript
+and the other research pages are in the left rail. Dark is the default theme; light and
+compact density are in the rail's settings.
+
+To work on the cockpit's source instead, run the Vite dev server against a daemon started in
+development mode:
+
+```bash
+RESEARCH_HARNESS_DEV=1 uv run research serve -w ./demo-review   # opens CORS to the Vite origin only
+pnpm --filter research-harness-web dev                          # http://127.0.0.1:5173, hot reload
+```
+
+Full detail, including themes, the Design System specimen gallery and the VS Code
+extension: [docs/guide/web.md](docs/guide/web.md).
+
 ## Ten-minute walkthrough
 
 Every block below was produced by running the command shown, against
