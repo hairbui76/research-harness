@@ -1,0 +1,31 @@
+/*
+ * Density.
+ *
+ * `comfortable` is the default and suits conversation and manuscript reading. `compact`
+ * suits corpus tables, graph results and review queues. The attribute is not restricted to
+ * the root: a compact table can sit inside a comfortable page.
+ *
+ *   --rh-density-row         the height of one list/table/control row
+ *   --rh-density-gap         the gap between items inside a row
+ *   --rh-density-pad         the inline padding of a row or cell
+ *   --rh-density-font-scale  multiplier applied to type-role sizes in dense surfaces
+ */
+:root,
+[data-density='comfortable'] {
+  --rh-density-row: 36px;
+  --rh-density-gap: var(--rh-space-2);
+  --rh-density-pad: var(--rh-space-3);
+  --rh-density-font-scale: 1;
+}
+
+[data-density='compact'] {
+  --rh-density-row: 28px;
+  --rh-density-gap: var(--rh-space-1);
+  --rh-density-pad: var(--rh-space-2);
+  --rh-density-font-scale: 0.929;
+
+  /* Controls shrink with the rows they sit in, so a compact table's buttons still fit. */
+  --rh-control-height-sm: 22px;
+  --rh-control-height-md: 28px;
+  --rh-control-padding-md: var(--rh-space-2);
+}

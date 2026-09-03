@@ -1,0 +1,7 @@
+/*
+ * The error and async-state presentation, in one place, matching the aggregator style of
+ * `src/primitives/primitives.css`. `src/styles.css` reaches these through that file.
+ */
+
+@import './AsyncState.css';
+@import './ErrorNotice.css';

@@ -1,0 +1,25 @@
+/*
+ * @research-harness/design — the one stylesheet a consumer links.
+ *
+ *   import '@research-harness/design/styles.css';
+ *
+ * Order matters: raw palette, then the token layer, then the themes that map semantic
+ * names onto the palette, then the document base, then the component styles.
+ *
+ * There is no @import of a remote stylesheet or font anywhere in this package. Everything
+ * below resolves to a file inside the package.
+ */
+
+@import './tokens/palette.css';
+@import './tokens/spacing.css';
+@import './tokens/radius.css';
+@import './tokens/typography.css';
+@import './tokens/motion.css';
+@import './tokens/semantic.css';
+/* density comes after semantic: `[data-density]` and `:root` have equal specificity, so on
+   a root that carries the attribute the later rule is the one that wins. */
+@import './tokens/density.css';
+@import './themes/dark.css';
+@import './themes/light.css';
+@import './base.css';
+@import './primitives/primitives.css';

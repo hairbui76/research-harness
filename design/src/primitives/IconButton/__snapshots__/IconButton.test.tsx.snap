@@ -1,0 +1,637 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`IconButton theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <button
+      aria-label="Collapse"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost"
+      data-variant="ghost"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-panel-left rh-icon"
+        data-icon="panel-left"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          height="18"
+          rx="2"
+          width="18"
+          x="3"
+          y="3"
+        />
+        <path
+          d="M9 3v18"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Send"
+      class="rh-icon-button rh-icon-button--md rh-button--accent"
+      data-variant="accent"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-send rh-icon"
+        data-icon="send"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+        />
+        <path
+          d="m21.854 2.147-10.94 10.939"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Delete"
+      class="rh-icon-button rh-icon-button--sm rh-button--danger"
+      data-variant="danger"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+        data-icon="trash-2"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10 11v6"
+        />
+        <path
+          d="M14 11v6"
+        />
+        <path
+          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+        />
+        <path
+          d="M3 6h18"
+        />
+        <path
+          d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+        />
+      </svg>
+    </button>
+    <button
+      aria-busy="true"
+      aria-label="Retry"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost is-loading"
+      data-variant="ghost"
+      disabled=""
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-loader rh-icon"
+        data-icon="loader"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 2v4"
+        />
+        <path
+          d="m16.2 7.8 2.9-2.9"
+        />
+        <path
+          d="M18 12h4"
+        />
+        <path
+          d="m16.2 16.2 2.9 2.9"
+        />
+        <path
+          d="M12 18v4"
+        />
+        <path
+          d="m4.9 19.1 2.9-2.9"
+        />
+        <path
+          d="M2 12h4"
+        />
+        <path
+          d="m4.9 4.9 2.9 2.9"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`IconButton theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <button
+      aria-label="Collapse"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost"
+      data-variant="ghost"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-panel-left rh-icon"
+        data-icon="panel-left"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          height="18"
+          rx="2"
+          width="18"
+          x="3"
+          y="3"
+        />
+        <path
+          d="M9 3v18"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Send"
+      class="rh-icon-button rh-icon-button--md rh-button--accent"
+      data-variant="accent"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-send rh-icon"
+        data-icon="send"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+        />
+        <path
+          d="m21.854 2.147-10.94 10.939"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Delete"
+      class="rh-icon-button rh-icon-button--sm rh-button--danger"
+      data-variant="danger"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+        data-icon="trash-2"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10 11v6"
+        />
+        <path
+          d="M14 11v6"
+        />
+        <path
+          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+        />
+        <path
+          d="M3 6h18"
+        />
+        <path
+          d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+        />
+      </svg>
+    </button>
+    <button
+      aria-busy="true"
+      aria-label="Retry"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost is-loading"
+      data-variant="ghost"
+      disabled=""
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-loader rh-icon"
+        data-icon="loader"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 2v4"
+        />
+        <path
+          d="m16.2 7.8 2.9-2.9"
+        />
+        <path
+          d="M18 12h4"
+        />
+        <path
+          d="m16.2 16.2 2.9 2.9"
+        />
+        <path
+          d="M12 18v4"
+        />
+        <path
+          d="m4.9 19.1 2.9-2.9"
+        />
+        <path
+          d="M2 12h4"
+        />
+        <path
+          d="m4.9 4.9 2.9 2.9"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`IconButton theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <button
+      aria-label="Collapse"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost"
+      data-variant="ghost"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-panel-left rh-icon"
+        data-icon="panel-left"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          height="18"
+          rx="2"
+          width="18"
+          x="3"
+          y="3"
+        />
+        <path
+          d="M9 3v18"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Send"
+      class="rh-icon-button rh-icon-button--md rh-button--accent"
+      data-variant="accent"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-send rh-icon"
+        data-icon="send"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+        />
+        <path
+          d="m21.854 2.147-10.94 10.939"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Delete"
+      class="rh-icon-button rh-icon-button--sm rh-button--danger"
+      data-variant="danger"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+        data-icon="trash-2"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10 11v6"
+        />
+        <path
+          d="M14 11v6"
+        />
+        <path
+          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+        />
+        <path
+          d="M3 6h18"
+        />
+        <path
+          d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+        />
+      </svg>
+    </button>
+    <button
+      aria-busy="true"
+      aria-label="Retry"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost is-loading"
+      data-variant="ghost"
+      disabled=""
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-loader rh-icon"
+        data-icon="loader"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 2v4"
+        />
+        <path
+          d="m16.2 7.8 2.9-2.9"
+        />
+        <path
+          d="M18 12h4"
+        />
+        <path
+          d="m16.2 16.2 2.9 2.9"
+        />
+        <path
+          d="M12 18v4"
+        />
+        <path
+          d="m4.9 19.1 2.9-2.9"
+        />
+        <path
+          d="M2 12h4"
+        />
+        <path
+          d="m4.9 4.9 2.9 2.9"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`IconButton theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <button
+      aria-label="Collapse"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost"
+      data-variant="ghost"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-panel-left rh-icon"
+        data-icon="panel-left"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          height="18"
+          rx="2"
+          width="18"
+          x="3"
+          y="3"
+        />
+        <path
+          d="M9 3v18"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Send"
+      class="rh-icon-button rh-icon-button--md rh-button--accent"
+      data-variant="accent"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-send rh-icon"
+        data-icon="send"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+        />
+        <path
+          d="m21.854 2.147-10.94 10.939"
+        />
+      </svg>
+    </button>
+    <button
+      aria-label="Delete"
+      class="rh-icon-button rh-icon-button--sm rh-button--danger"
+      data-variant="danger"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+        data-icon="trash-2"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10 11v6"
+        />
+        <path
+          d="M14 11v6"
+        />
+        <path
+          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+        />
+        <path
+          d="M3 6h18"
+        />
+        <path
+          d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+        />
+      </svg>
+    </button>
+    <button
+      aria-busy="true"
+      aria-label="Retry"
+      class="rh-icon-button rh-icon-button--md rh-button--ghost is-loading"
+      data-variant="ghost"
+      disabled=""
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-loader rh-icon"
+        data-icon="loader"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 2v4"
+        />
+        <path
+          d="m16.2 7.8 2.9-2.9"
+        />
+        <path
+          d="M18 12h4"
+        />
+        <path
+          d="m16.2 16.2 2.9 2.9"
+        />
+        <path
+          d="M12 18v4"
+        />
+        <path
+          d="m4.9 19.1 2.9-2.9"
+        />
+        <path
+          d="M2 12h4"
+        />
+        <path
+          d="m4.9 4.9 2.9 2.9"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

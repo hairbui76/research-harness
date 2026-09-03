@@ -1,0 +1,529 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RadioGroup theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    aria-labelledby="rh-radiogroup-ID-label"
+    class="rh-field rh-radio-group"
+    role="radiogroup"
+  >
+    <span
+      class="rh-field__label"
+      id="rh-radiogroup-ID-label"
+    >
+      Promote as
+    </span>
+    <div
+      class="rh-radio-group__items"
+    >
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              aria-describedby="snap-note-description"
+              checked=""
+              class="rh-radio__input"
+              id="snap-note"
+              name="snap-promote"
+              type="radio"
+              value="note"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-note"
+          >
+            Note
+          </label>
+        </div>
+        <p
+          class="rh-field__description"
+          id="snap-note-description"
+        >
+          Working context only.
+        </p>
+      </div>
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              class="rh-radio__input"
+              id="snap-question"
+              name="snap-promote"
+              type="radio"
+              value="question"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-question"
+          >
+            Question
+          </label>
+        </div>
+      </div>
+      <div
+        class="rh-field rh-field--inline is-disabled"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio is-disabled"
+          >
+            <input
+              class="rh-radio__input"
+              disabled=""
+              id="snap-claim"
+              name="snap-promote"
+              type="radio"
+              value="claim"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-claim"
+          >
+            Claim candidate
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RadioGroup theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    aria-labelledby="rh-radiogroup-ID-label"
+    class="rh-field rh-radio-group"
+    role="radiogroup"
+  >
+    <span
+      class="rh-field__label"
+      id="rh-radiogroup-ID-label"
+    >
+      Promote as
+    </span>
+    <div
+      class="rh-radio-group__items"
+    >
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              aria-describedby="snap-note-description"
+              checked=""
+              class="rh-radio__input"
+              id="snap-note"
+              name="snap-promote"
+              type="radio"
+              value="note"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-note"
+          >
+            Note
+          </label>
+        </div>
+        <p
+          class="rh-field__description"
+          id="snap-note-description"
+        >
+          Working context only.
+        </p>
+      </div>
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              class="rh-radio__input"
+              id="snap-question"
+              name="snap-promote"
+              type="radio"
+              value="question"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-question"
+          >
+            Question
+          </label>
+        </div>
+      </div>
+      <div
+        class="rh-field rh-field--inline is-disabled"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio is-disabled"
+          >
+            <input
+              class="rh-radio__input"
+              disabled=""
+              id="snap-claim"
+              name="snap-promote"
+              type="radio"
+              value="claim"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-claim"
+          >
+            Claim candidate
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RadioGroup theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    aria-labelledby="rh-radiogroup-ID-label"
+    class="rh-field rh-radio-group"
+    role="radiogroup"
+  >
+    <span
+      class="rh-field__label"
+      id="rh-radiogroup-ID-label"
+    >
+      Promote as
+    </span>
+    <div
+      class="rh-radio-group__items"
+    >
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              aria-describedby="snap-note-description"
+              checked=""
+              class="rh-radio__input"
+              id="snap-note"
+              name="snap-promote"
+              type="radio"
+              value="note"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-note"
+          >
+            Note
+          </label>
+        </div>
+        <p
+          class="rh-field__description"
+          id="snap-note-description"
+        >
+          Working context only.
+        </p>
+      </div>
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              class="rh-radio__input"
+              id="snap-question"
+              name="snap-promote"
+              type="radio"
+              value="question"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-question"
+          >
+            Question
+          </label>
+        </div>
+      </div>
+      <div
+        class="rh-field rh-field--inline is-disabled"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio is-disabled"
+          >
+            <input
+              class="rh-radio__input"
+              disabled=""
+              id="snap-claim"
+              name="snap-promote"
+              type="radio"
+              value="claim"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-claim"
+          >
+            Claim candidate
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RadioGroup theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    aria-labelledby="rh-radiogroup-ID-label"
+    class="rh-field rh-radio-group"
+    role="radiogroup"
+  >
+    <span
+      class="rh-field__label"
+      id="rh-radiogroup-ID-label"
+    >
+      Promote as
+    </span>
+    <div
+      class="rh-radio-group__items"
+    >
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              aria-describedby="snap-note-description"
+              checked=""
+              class="rh-radio__input"
+              id="snap-note"
+              name="snap-promote"
+              type="radio"
+              value="note"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-note"
+          >
+            Note
+          </label>
+        </div>
+        <p
+          class="rh-field__description"
+          id="snap-note-description"
+        >
+          Working context only.
+        </p>
+      </div>
+      <div
+        class="rh-field rh-field--inline"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio"
+          >
+            <input
+              class="rh-radio__input"
+              id="snap-question"
+              name="snap-promote"
+              type="radio"
+              value="question"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-question"
+          >
+            Question
+          </label>
+        </div>
+      </div>
+      <div
+        class="rh-field rh-field--inline is-disabled"
+      >
+        <div
+          class="rh-field__row"
+        >
+          <span
+            class="rh-radio is-disabled"
+          >
+            <input
+              class="rh-radio__input"
+              disabled=""
+              id="snap-claim"
+              name="snap-promote"
+              type="radio"
+              value="claim"
+            />
+            <span
+              aria-hidden="true"
+              class="rh-radio__box"
+            >
+              <span
+                class="rh-radio__dot"
+              />
+            </span>
+          </span>
+          <label
+            class="rh-field__label"
+            for="snap-claim"
+          >
+            Claim candidate
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

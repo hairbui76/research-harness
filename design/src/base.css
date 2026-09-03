@@ -1,0 +1,193 @@
+/*
+ * Base layer: the document defaults and the handful of utility classes every surface
+ * needs. Everything here reads semantic tokens; no colour literal appears below.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--rh-surface-canvas);
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
+  letter-spacing: var(--rh-type-body-ls);
+  font-weight: var(--rh-type-body-weight);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Warm scrollbars, so a scrolling pane does not punch a cold hole in the canvas. Both
+   properties inherit, so declaring them once on the body reaches every pane. */
+body {
+  scrollbar-color: var(--rh-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+/*
+ * One focus treatment for the whole system, in both themes. Components never remove it;
+ * where a control needs the ring inside its own box it sets --rh-focus-ring-offset
+ * locally rather than switching the outline off.
+ */
+:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+::selection {
+  background: var(--rh-surface-selected);
+  color: var(--rh-text-primary);
+}
+
+/*
+ * Links carry an underline, always. Colour is never the only signal that something is a
+ * link, and the AI/action accent is not spent on navigation.
+ */
+a {
+  color: var(--rh-text-link);
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration-color: currentcolor;
+}
+
+hr {
+  border: 0;
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  margin: var(--rh-space-4) 0;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+}
+
+/* Utilities ------------------------------------------------------------------------- */
+
+.rh-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * The reading surface. `paper` is near-white in both themes, so it brings its own ink:
+ * apply this class rather than setting background-color alone, or dark-theme text will
+ * disappear into the page.
+ */
+.rh-surface-paper {
+  background: var(--rh-surface-paper);
+  color: var(--rh-text-on-paper);
+  border-color: var(--rh-border-on-paper);
+}
+
+.rh-surface-paper :where(a) {
+  color: var(--rh-text-on-paper);
+  text-decoration-color: var(--rh-border-on-paper);
+}
+
+.rh-text-display {
+  font: var(--rh-type-display-weight) var(--rh-type-display-size) / var(--rh-type-display-lh)
+    var(--rh-font-sans);
+  letter-spacing: var(--rh-type-display-ls);
+  margin: 0;
+}
+
+.rh-text-h1 {
+  font: var(--rh-type-h1-weight) var(--rh-type-h1-size) / var(--rh-type-h1-lh) var(--rh-font-sans);
+  letter-spacing: var(--rh-type-h1-ls);
+  margin: 0;
+}
+
+.rh-text-h2 {
+  font: var(--rh-type-h2-weight) var(--rh-type-h2-size) / var(--rh-type-h2-lh) var(--rh-font-sans);
+  letter-spacing: var(--rh-type-h2-ls);
+  margin: 0;
+}
+
+.rh-text-h3 {
+  font: var(--rh-type-h3-weight) var(--rh-type-h3-size) / var(--rh-type-h3-lh) var(--rh-font-sans);
+  letter-spacing: var(--rh-type-h3-ls);
+  margin: 0;
+}
+
+.rh-text-h4 {
+  font: var(--rh-type-h4-weight) var(--rh-type-h4-size) / var(--rh-type-h4-lh) var(--rh-font-sans);
+  letter-spacing: var(--rh-type-h4-ls);
+  margin: 0;
+}
+
+.rh-text-lead {
+  font: var(--rh-type-lead-weight) var(--rh-type-lead-size) / var(--rh-type-lead-lh)
+    var(--rh-font-sans);
+  letter-spacing: var(--rh-type-lead-ls);
+  margin: 0;
+}
+
+.rh-text-ui {
+  font: var(--rh-type-ui-weight) var(--rh-type-ui-size) / var(--rh-type-ui-lh) var(--rh-font-sans);
+  letter-spacing: var(--rh-type-ui-ls);
+}
+
+.rh-text-body {
+  font: var(--rh-type-body-weight) var(--rh-type-body-size) / var(--rh-type-body-lh)
+    var(--rh-font-sans);
+  letter-spacing: var(--rh-type-body-ls);
+}
+
+.rh-text-body-sm {
+  font: var(--rh-type-body-sm-weight) var(--rh-type-body-sm-size) / var(--rh-type-body-sm-lh)
+    var(--rh-font-sans);
+  letter-spacing: var(--rh-type-body-sm-ls);
+}
+
+/* Metadata label: mono, uppercase, wide-tracked. Never body copy. */
+.rh-text-label {
+  font: var(--rh-type-label-weight) var(--rh-type-label-size) / var(--rh-type-label-lh)
+    var(--rh-font-mono);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+  color: var(--rh-text-muted);
+}
+
+.rh-text-mono {
+  font: var(--rh-type-mono-weight) var(--rh-type-mono-size) / var(--rh-type-mono-lh)
+    var(--rh-font-mono);
+  letter-spacing: var(--rh-type-mono-ls);
+}
+
+/* Editorial voice: pull quotes, source excerpts, manuscript prose. */
+.rh-text-serif {
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-lead-size);
+  line-height: var(--rh-type-lead-lh);
+}
+
+.rh-text-secondary {
+  color: var(--rh-text-secondary);
+}
+
+.rh-text-muted {
+  color: var(--rh-text-muted);
+}

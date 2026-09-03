@@ -1,0 +1,461 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Switch theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            aria-describedby="snap-theme-description"
+            class="rh-switch__input"
+            id="snap-theme"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-theme"
+        >
+          Light theme
+        </label>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-theme-description"
+      >
+        Stored on this machine only.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            checked=""
+            class="rh-switch__input"
+            id="snap-density"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-density"
+        >
+          Compact density
+        </label>
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--inline is-disabled"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch is-disabled"
+        >
+          <input
+            class="rh-switch__input"
+            disabled=""
+            id="snap-locked"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-locked"
+        >
+          Locked
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Switch theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            aria-describedby="snap-theme-description"
+            class="rh-switch__input"
+            id="snap-theme"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-theme"
+        >
+          Light theme
+        </label>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-theme-description"
+      >
+        Stored on this machine only.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            checked=""
+            class="rh-switch__input"
+            id="snap-density"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-density"
+        >
+          Compact density
+        </label>
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--inline is-disabled"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch is-disabled"
+        >
+          <input
+            class="rh-switch__input"
+            disabled=""
+            id="snap-locked"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-locked"
+        >
+          Locked
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Switch theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            aria-describedby="snap-theme-description"
+            class="rh-switch__input"
+            id="snap-theme"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-theme"
+        >
+          Light theme
+        </label>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-theme-description"
+      >
+        Stored on this machine only.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            checked=""
+            class="rh-switch__input"
+            id="snap-density"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-density"
+        >
+          Compact density
+        </label>
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--inline is-disabled"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch is-disabled"
+        >
+          <input
+            class="rh-switch__input"
+            disabled=""
+            id="snap-locked"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-locked"
+        >
+          Locked
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Switch theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            aria-describedby="snap-theme-description"
+            class="rh-switch__input"
+            id="snap-theme"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-theme"
+        >
+          Light theme
+        </label>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-theme-description"
+      >
+        Stored on this machine only.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--inline"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch"
+        >
+          <input
+            checked=""
+            class="rh-switch__input"
+            id="snap-density"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-density"
+        >
+          Compact density
+        </label>
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--inline is-disabled"
+    >
+      <div
+        class="rh-field__row"
+      >
+        <span
+          class="rh-switch is-disabled"
+        >
+          <input
+            class="rh-switch__input"
+            disabled=""
+            id="snap-locked"
+            role="switch"
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+            class="rh-switch__track"
+          >
+            <span
+              class="rh-switch__thumb"
+            />
+          </span>
+        </span>
+        <label
+          class="rh-field__label"
+          for="snap-locked"
+        >
+          Locked
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+`;

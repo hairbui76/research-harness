@@ -1,0 +1,111 @@
+.rh-evidence-card.is-selected {
+  border-color: var(--rh-accent-border);
+}
+
+.rh-evidence-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-evidence-card__id {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-mono-lh);
+}
+
+button.rh-evidence-card__id {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+button.rh-evidence-card__id:hover {
+  text-decoration-color: currentcolor;
+}
+
+.rh-evidence-card__work {
+  overflow: hidden;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  font-weight: var(--rh-type-body-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-evidence-card__badges {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+/* The quoted words are the evidence. Serif, full width, never clipped. */
+.rh-evidence-card__quote {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: 2px solid var(--rh-border-default);
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-lead-size);
+  line-height: var(--rh-type-lead-lh);
+}
+
+.rh-evidence-card[data-stale] .rh-evidence-card__quote {
+  border-inline-start-color: var(--rh-status-stale-border);
+}
+
+.rh-evidence-card__numeric {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  margin: var(--rh-space-3) 0 0;
+}
+
+.rh-evidence-card__numeric-value {
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-h3-size);
+  font-weight: var(--rh-type-h3-weight);
+}
+
+.rh-evidence-card__numeric-meta {
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-evidence-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2) var(--rh-space-6);
+  margin: var(--rh-space-3) 0 0;
+}
+
+.rh-evidence-card__fact {
+  min-width: 0;
+}
+
+.rh-evidence-card__fact-value {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-evidence-card__footer {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-evidence-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+}

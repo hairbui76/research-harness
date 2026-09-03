@@ -1,0 +1,13 @@
+/*
+ * Manuscript component styles, aggregated the way `src/primitives/primitives.css`
+ * aggregates the primitives. `src/styles.css` reaches these through that file.
+ */
+
+@import './FileTree/FileTree.css';
+@import './SourceEditorFrame/SourceEditorFrame.css';
+@import './PdfPreview/PdfPreview.css';
+@import './CompilerStatus/CompilerStatus.css';
+@import './CompilerDiagnostic/CompilerDiagnostic.css';
+@import './AuditFinding/AuditFinding.css';
+@import './DiagnosticsPanel/DiagnosticsPanel.css';
+@import './CandidateDiff/CandidateDiff.css';

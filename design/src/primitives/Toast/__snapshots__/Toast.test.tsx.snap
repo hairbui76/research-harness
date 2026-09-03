@@ -1,0 +1,757 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Toast > Toast theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="toast"
+>
+  <div
+    aria-label="Notifications"
+    class="rh-toast-viewport"
+    data-placement="bottom-right"
+    role="region"
+  >
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="info"
+      role="status"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-info rh-icon"
+          data-icon="info"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 16v-4"
+          />
+          <path
+            d="M12 8h.01"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Information
+            :
+          </span>
+           
+          Saved to corpus
+        </p>
+        <p
+          class="rh-toast__description"
+        >
+          Evidence linked to claim C-12.
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="error"
+      role="alert"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Error
+            :
+          </span>
+           
+          Provider unavailable
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Toast > Toast theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-rh-portal="toast"
+>
+  <div
+    aria-label="Notifications"
+    class="rh-toast-viewport"
+    data-placement="bottom-right"
+    role="region"
+  >
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="info"
+      role="status"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-info rh-icon"
+          data-icon="info"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 16v-4"
+          />
+          <path
+            d="M12 8h.01"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Information
+            :
+          </span>
+           
+          Saved to corpus
+        </p>
+        <p
+          class="rh-toast__description"
+        >
+          Evidence linked to claim C-12.
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="error"
+      role="alert"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Error
+            :
+          </span>
+           
+          Provider unavailable
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Toast > Toast theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="toast"
+>
+  <div
+    aria-label="Notifications"
+    class="rh-toast-viewport"
+    data-placement="bottom-right"
+    role="region"
+  >
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="info"
+      role="status"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-info rh-icon"
+          data-icon="info"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 16v-4"
+          />
+          <path
+            d="M12 8h.01"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Information
+            :
+          </span>
+           
+          Saved to corpus
+        </p>
+        <p
+          class="rh-toast__description"
+        >
+          Evidence linked to claim C-12.
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="error"
+      role="alert"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Error
+            :
+          </span>
+           
+          Provider unavailable
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Toast > Toast theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-rh-portal="toast"
+>
+  <div
+    aria-label="Notifications"
+    class="rh-toast-viewport"
+    data-placement="bottom-right"
+    role="region"
+  >
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="info"
+      role="status"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-info rh-icon"
+          data-icon="info"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 16v-4"
+          />
+          <path
+            d="M12 8h.01"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Information
+            :
+          </span>
+           
+          Saved to corpus
+        </p>
+        <p
+          class="rh-toast__description"
+        >
+          Evidence linked to claim C-12.
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      aria-atomic="true"
+      class="rh-toast"
+      data-tone="error"
+      role="alert"
+    >
+      <span
+        class="rh-toast__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-toast__content"
+      >
+        <p
+          class="rh-toast__title"
+        >
+          <span
+            class="rh-toast__tone-label"
+          >
+            Error
+            :
+          </span>
+           
+          Provider unavailable
+        </p>
+      </div>
+      <button
+        aria-label="Dismiss notification"
+        class="rh-toast__close"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;

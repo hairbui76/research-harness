@@ -1,0 +1,213 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AppShell theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-app-shell"
+    data-inspector-open=""
+    id="rh-appshell-ID"
+  >
+    <a
+      class="rh-app-shell__skip"
+      href="#rh-appshell-r9-main"
+    >
+      Skip to main content
+    </a>
+    <div
+      class="rh-app-shell__body"
+    >
+      <div
+        class="rh-app-shell__rail"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          rail
+        </nav>
+      </div>
+      <main
+        aria-label="Workspace"
+        class="rh-app-shell__main"
+        id="rh-appshell-ID-main"
+        tabindex="-1"
+      >
+        <p>
+          main
+        </p>
+      </main>
+      <aside
+        aria-label="Research inspector"
+        class="rh-app-shell__inspector"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          inspector
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AppShell theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-app-shell"
+    data-inspector-open=""
+    id="rh-appshell-ID"
+  >
+    <a
+      class="rh-app-shell__skip"
+      href="#rh-appshell-ra-main"
+    >
+      Skip to main content
+    </a>
+    <div
+      class="rh-app-shell__body"
+    >
+      <div
+        class="rh-app-shell__rail"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          rail
+        </nav>
+      </div>
+      <main
+        aria-label="Workspace"
+        class="rh-app-shell__main"
+        id="rh-appshell-ID-main"
+        tabindex="-1"
+      >
+        <p>
+          main
+        </p>
+      </main>
+      <aside
+        aria-label="Research inspector"
+        class="rh-app-shell__inspector"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          inspector
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AppShell theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-app-shell"
+    data-inspector-open=""
+    id="rh-appshell-ID"
+  >
+    <a
+      class="rh-app-shell__skip"
+      href="#rh-appshell-rb-main"
+    >
+      Skip to main content
+    </a>
+    <div
+      class="rh-app-shell__body"
+    >
+      <div
+        class="rh-app-shell__rail"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          rail
+        </nav>
+      </div>
+      <main
+        aria-label="Workspace"
+        class="rh-app-shell__main"
+        id="rh-appshell-ID-main"
+        tabindex="-1"
+      >
+        <p>
+          main
+        </p>
+      </main>
+      <aside
+        aria-label="Research inspector"
+        class="rh-app-shell__inspector"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          inspector
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AppShell theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-app-shell"
+    data-inspector-open=""
+    id="rh-appshell-ID"
+  >
+    <a
+      class="rh-app-shell__skip"
+      href="#rh-appshell-rc-main"
+    >
+      Skip to main content
+    </a>
+    <div
+      class="rh-app-shell__body"
+    >
+      <div
+        class="rh-app-shell__rail"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          rail
+        </nav>
+      </div>
+      <main
+        aria-label="Workspace"
+        class="rh-app-shell__main"
+        id="rh-appshell-ID-main"
+        tabindex="-1"
+      >
+        <p>
+          main
+        </p>
+      </main>
+      <aside
+        aria-label="Research inspector"
+        class="rh-app-shell__inspector"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          inspector
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+`;

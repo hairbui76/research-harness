@@ -1,0 +1,16 @@
+/*
+ * The research-semantic component styles, aggregated the way `primitives/primitives.css`
+ * aggregates the primitives. `styles.css` reaches these through that file, so a new
+ * component appends one line here and nothing else moves.
+ */
+
+@import './AuthorityBadge/AuthorityBadge.css';
+@import './EntityRef/EntityRef.css';
+@import './SourceAnchor/SourceAnchor.css';
+@import './EvidenceCard/EvidenceCard.css';
+@import './ClaimCard/ClaimCard.css';
+@import './ProvenancePath/ProvenancePath.css';
+@import './ContextReceipt/ContextReceipt.css';
+@import './ReviewDecisionBar/ReviewDecisionBar.css';
+@import './ConflictNotice/ConflictNotice.css';
+@import './SaveToCorpusAction/SaveToCorpusAction.css';

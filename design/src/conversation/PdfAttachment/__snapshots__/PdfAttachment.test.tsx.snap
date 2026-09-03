@@ -1,0 +1,517 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PdfAttachment theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-pdf-attachment"
+  >
+    <div
+      class="rh-attachment-card"
+      data-state="ready"
+    >
+      <span
+        class="rh-attachment-card__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-text rh-icon"
+          data-icon="file-text"
+          fill="none"
+          focusable="false"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 9H8"
+          />
+          <path
+            d="M16 13H8"
+          />
+          <path
+            d="M16 17H8"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-attachment-card__body"
+      >
+        <button
+          aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+          class="rh-attachment-card__open"
+          type="button"
+        >
+          <span
+            class="rh-attachment-card__name"
+            title="lee-2024-hydrogel-preprint.pdf"
+          >
+            lee-2024-hydrogel-preprint.pdf
+          </span>
+        </button>
+        <span
+          class="rh-attachment-card__meta"
+        >
+          <span
+            class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+            data-state="ready"
+            data-tone="neutral"
+            title="Copied into the session and ready to send."
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-check rh-icon"
+              data-icon="circle-check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="m16 9-5.5 5.5L8 12"
+              />
+            </svg>
+            <span
+              class="rh-badge__label"
+            >
+              Ready
+            </span>
+          </span>
+          <span
+            class="rh-attachment__facts"
+          >
+            <span
+              class="rh-attachment__type"
+            >
+              application/pdf
+            </span>
+            <span
+              class="rh-attachment__size"
+            >
+              3.4 MB
+            </span>
+            <span
+              class="rh-attachment__pages"
+            >
+              14
+               
+              pages
+            </span>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`PdfAttachment theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-pdf-attachment"
+  >
+    <div
+      class="rh-attachment-card"
+      data-state="ready"
+    >
+      <span
+        class="rh-attachment-card__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-text rh-icon"
+          data-icon="file-text"
+          fill="none"
+          focusable="false"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 9H8"
+          />
+          <path
+            d="M16 13H8"
+          />
+          <path
+            d="M16 17H8"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-attachment-card__body"
+      >
+        <button
+          aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+          class="rh-attachment-card__open"
+          type="button"
+        >
+          <span
+            class="rh-attachment-card__name"
+            title="lee-2024-hydrogel-preprint.pdf"
+          >
+            lee-2024-hydrogel-preprint.pdf
+          </span>
+        </button>
+        <span
+          class="rh-attachment-card__meta"
+        >
+          <span
+            class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+            data-state="ready"
+            data-tone="neutral"
+            title="Copied into the session and ready to send."
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-check rh-icon"
+              data-icon="circle-check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="m16 9-5.5 5.5L8 12"
+              />
+            </svg>
+            <span
+              class="rh-badge__label"
+            >
+              Ready
+            </span>
+          </span>
+          <span
+            class="rh-attachment__facts"
+          >
+            <span
+              class="rh-attachment__type"
+            >
+              application/pdf
+            </span>
+            <span
+              class="rh-attachment__size"
+            >
+              3.4 MB
+            </span>
+            <span
+              class="rh-attachment__pages"
+            >
+              14
+               
+              pages
+            </span>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`PdfAttachment theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-pdf-attachment"
+  >
+    <div
+      class="rh-attachment-card"
+      data-state="ready"
+    >
+      <span
+        class="rh-attachment-card__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-text rh-icon"
+          data-icon="file-text"
+          fill="none"
+          focusable="false"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 9H8"
+          />
+          <path
+            d="M16 13H8"
+          />
+          <path
+            d="M16 17H8"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-attachment-card__body"
+      >
+        <button
+          aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+          class="rh-attachment-card__open"
+          type="button"
+        >
+          <span
+            class="rh-attachment-card__name"
+            title="lee-2024-hydrogel-preprint.pdf"
+          >
+            lee-2024-hydrogel-preprint.pdf
+          </span>
+        </button>
+        <span
+          class="rh-attachment-card__meta"
+        >
+          <span
+            class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+            data-state="ready"
+            data-tone="neutral"
+            title="Copied into the session and ready to send."
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-check rh-icon"
+              data-icon="circle-check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="m16 9-5.5 5.5L8 12"
+              />
+            </svg>
+            <span
+              class="rh-badge__label"
+            >
+              Ready
+            </span>
+          </span>
+          <span
+            class="rh-attachment__facts"
+          >
+            <span
+              class="rh-attachment__type"
+            >
+              application/pdf
+            </span>
+            <span
+              class="rh-attachment__size"
+            >
+              3.4 MB
+            </span>
+            <span
+              class="rh-attachment__pages"
+            >
+              14
+               
+              pages
+            </span>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`PdfAttachment theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-pdf-attachment"
+  >
+    <div
+      class="rh-attachment-card"
+      data-state="ready"
+    >
+      <span
+        class="rh-attachment-card__icon"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-text rh-icon"
+          data-icon="file-text"
+          fill="none"
+          focusable="false"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 9H8"
+          />
+          <path
+            d="M16 13H8"
+          />
+          <path
+            d="M16 17H8"
+          />
+        </svg>
+      </span>
+      <div
+        class="rh-attachment-card__body"
+      >
+        <button
+          aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+          class="rh-attachment-card__open"
+          type="button"
+        >
+          <span
+            class="rh-attachment-card__name"
+            title="lee-2024-hydrogel-preprint.pdf"
+          >
+            lee-2024-hydrogel-preprint.pdf
+          </span>
+        </button>
+        <span
+          class="rh-attachment-card__meta"
+        >
+          <span
+            class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+            data-state="ready"
+            data-tone="neutral"
+            title="Copied into the session and ready to send."
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-check rh-icon"
+              data-icon="circle-check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="m16 9-5.5 5.5L8 12"
+              />
+            </svg>
+            <span
+              class="rh-badge__label"
+            >
+              Ready
+            </span>
+          </span>
+          <span
+            class="rh-attachment__facts"
+          >
+            <span
+              class="rh-attachment__type"
+            >
+              application/pdf
+            </span>
+            <span
+              class="rh-attachment__size"
+            >
+              3.4 MB
+            </span>
+            <span
+              class="rh-attachment__pages"
+            >
+              14
+               
+              pages
+            </span>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

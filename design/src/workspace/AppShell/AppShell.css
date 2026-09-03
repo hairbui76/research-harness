@@ -1,0 +1,130 @@
+.rh-app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  block-size: 100%;
+  background: var(--rh-surface-canvas);
+  color: var(--rh-text-primary);
+}
+
+/*
+ * The skip link is the first thing in the tab order and the first thing on screen once
+ * it has focus. It is off-canvas rather than hidden, so it is announced normally.
+ */
+.rh-app-shell__skip {
+  position: absolute;
+  inset-block-start: var(--rh-space-2);
+  inset-inline-start: var(--rh-space-2);
+  z-index: var(--rh-z-sticky);
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.rh-app-shell__skip:focus-visible {
+  transform: translateY(0);
+}
+
+.rh-app-shell__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  flex: none;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+.rh-app-shell__bar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--rh-type-h4-size);
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-app-shell__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.rh-app-shell__rail {
+  flex: none;
+  min-height: 0;
+  overflow: hidden;
+  border-inline-end: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+.rh-app-shell__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rh-app-shell__inspector {
+  flex: none;
+  inline-size: 22rem;
+  max-inline-size: 40%;
+  min-height: 0;
+  overflow: hidden;
+  border-inline-start: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+/* Drawers -------------------------------------------------------------------------- */
+
+.rh-app-shell__drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--rh-z-overlay);
+  display: flex;
+}
+
+.rh-app-shell__drawer--end {
+  justify-content: flex-end;
+}
+
+.rh-app-shell__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--rh-surface-scrim);
+}
+
+.rh-app-shell__drawer-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(20rem, 85vw);
+  max-inline-size: 85vw;
+  block-size: 100%;
+  overflow: auto;
+  background: var(--rh-surface-pane);
+  box-shadow: var(--rh-shadow-overlay);
+}
+
+.rh-app-shell__drawer--start .rh-app-shell__drawer-panel {
+  border-inline-end: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-app-shell__drawer--end .rh-app-shell__drawer-panel {
+  border-inline-start: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-app-shell__drawer-head {
+  display: flex;
+  justify-content: flex-end;
+  flex: none;
+  padding: var(--rh-space-2);
+}

@@ -1,0 +1,457 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Combobox > Combobox theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-combobox"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-12"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-12
+            </span>
+            <span
+              class="rh-combobox__option-description"
+            >
+              Contested
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-13"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-13
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-4"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-4
+            </span>
+          </div>
+          <div
+            aria-disabled="true"
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-9"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-9
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Combobox > Combobox theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-combobox"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-12"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-12
+            </span>
+            <span
+              class="rh-combobox__option-description"
+            >
+              Contested
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-13"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-13
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-4"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-4
+            </span>
+          </div>
+          <div
+            aria-disabled="true"
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-9"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-9
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Combobox > Combobox theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-combobox"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-12"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-12
+            </span>
+            <span
+              class="rh-combobox__option-description"
+            >
+              Contested
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-13"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-13
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-4"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-4
+            </span>
+          </div>
+          <div
+            aria-disabled="true"
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-9"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-9
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Combobox > Combobox theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-combobox"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-12"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-12
+            </span>
+            <span
+              class="rh-combobox__option-description"
+            >
+              Contested
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-c-13"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Claim C-13
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-4"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-4
+            </span>
+          </div>
+          <div
+            aria-disabled="true"
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-e-9"
+            role="option"
+          >
+            <span
+              class="rh-combobox__option-label"
+            >
+              Evidence E-9
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

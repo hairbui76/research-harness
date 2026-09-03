@@ -1,0 +1,97 @@
+.rh-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-tabs[data-orientation='vertical'] {
+  flex-direction: row;
+}
+
+.rh-tabs__list {
+  display: flex;
+  align-items: stretch;
+  gap: var(--rh-space-1);
+  border-bottom: 1px solid var(--rh-border-subtle);
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.rh-tabs[data-orientation='vertical'] > .rh-tabs__list {
+  flex-direction: column;
+  border-bottom: 0;
+  border-right: 1px solid var(--rh-border-subtle);
+  overflow-x: visible;
+}
+
+.rh-tabs__tab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-height: var(--rh-density-row);
+  padding: var(--rh-space-2) var(--rh-density-pad);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--rh-radius-nav) var(--rh-radius-nav) 0 0;
+  background: transparent;
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-ui-size);
+  line-height: var(--rh-type-ui-lh);
+  letter-spacing: var(--rh-type-ui-ls);
+  font-weight: var(--rh-type-ui-weight);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--rh-duration-fast) var(--rh-ease-standard),
+    background-color var(--rh-duration-fast) var(--rh-ease-standard),
+    border-color var(--rh-duration-fast) var(--rh-ease-standard);
+}
+
+.rh-tabs__tab:hover:not([aria-disabled='true']) {
+  color: var(--rh-text-primary);
+  background: var(--rh-surface-subtle);
+}
+
+.rh-tabs__tab[data-state='selected'] {
+  color: var(--rh-text-primary);
+  border-bottom-color: var(--rh-accent);
+}
+
+.rh-tabs[data-orientation='vertical'] .rh-tabs__tab {
+  border-bottom: 0;
+  border-right: 2px solid transparent;
+  border-radius: var(--rh-radius-nav) 0 0 var(--rh-radius-nav);
+  justify-content: flex-start;
+}
+
+.rh-tabs[data-orientation='vertical'] .rh-tabs__tab[data-state='selected'] {
+  border-right-color: var(--rh-accent);
+}
+
+.rh-tabs__tab[aria-disabled='true'] {
+  color: var(--rh-text-muted);
+  cursor: not-allowed;
+}
+
+.rh-tabs__tab:focus-visible,
+.rh-tabs__panel:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-tabs__panel {
+  min-width: 0;
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rh-tabs__tab {
+    transition: none;
+  }
+}

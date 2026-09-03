@@ -1,0 +1,593 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Tag theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-at-sign rh-icon"
+          data-icon="at-sign"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+          />
+          <path
+            d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+          />
+        </svg>
+        <span
+          class="rh-tag__label"
+        >
+          W0017
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-tag rh-tag--md is-selected"
+      data-selected="true"
+    >
+      <button
+        aria-pressed="true"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          traffic
+        </span>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <button
+        aria-pressed="false"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          E0482
+        </span>
+      </button>
+      <button
+        aria-label="Remove E0482"
+        class="rh-tag__remove"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--sm is-disabled"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          locked
+        </span>
+      </span>
+      <button
+        aria-label="Remove locked"
+        class="rh-tag__remove"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Tag theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-at-sign rh-icon"
+          data-icon="at-sign"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+          />
+          <path
+            d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+          />
+        </svg>
+        <span
+          class="rh-tag__label"
+        >
+          W0017
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-tag rh-tag--md is-selected"
+      data-selected="true"
+    >
+      <button
+        aria-pressed="true"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          traffic
+        </span>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <button
+        aria-pressed="false"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          E0482
+        </span>
+      </button>
+      <button
+        aria-label="Remove E0482"
+        class="rh-tag__remove"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--sm is-disabled"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          locked
+        </span>
+      </span>
+      <button
+        aria-label="Remove locked"
+        class="rh-tag__remove"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Tag theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-at-sign rh-icon"
+          data-icon="at-sign"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+          />
+          <path
+            d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+          />
+        </svg>
+        <span
+          class="rh-tag__label"
+        >
+          W0017
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-tag rh-tag--md is-selected"
+      data-selected="true"
+    >
+      <button
+        aria-pressed="true"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          traffic
+        </span>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <button
+        aria-pressed="false"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          E0482
+        </span>
+      </button>
+      <button
+        aria-label="Remove E0482"
+        class="rh-tag__remove"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--sm is-disabled"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          locked
+        </span>
+      </span>
+      <button
+        aria-label="Remove locked"
+        class="rh-tag__remove"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Tag theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-at-sign rh-icon"
+          data-icon="at-sign"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+          />
+          <path
+            d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+          />
+        </svg>
+        <span
+          class="rh-tag__label"
+        >
+          W0017
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-tag rh-tag--md is-selected"
+      data-selected="true"
+    >
+      <button
+        aria-pressed="true"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          traffic
+        </span>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--md"
+    >
+      <button
+        aria-pressed="false"
+        class="rh-tag__body rh-tag__body--button"
+        type="button"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          E0482
+        </span>
+      </button>
+      <button
+        aria-label="Remove E0482"
+        class="rh-tag__remove"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+    <span
+      class="rh-tag rh-tag--sm is-disabled"
+    >
+      <span
+        class="rh-tag__body"
+      >
+        <span
+          class="rh-tag__label"
+        >
+          locked
+        </span>
+      </span>
+      <button
+        aria-label="Remove locked"
+        class="rh-tag__remove"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x rh-icon"
+          data-icon="x"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+</div>
+`;

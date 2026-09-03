@@ -1,0 +1,83 @@
+.rh-compiler-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  padding: var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-compiler-status__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+}
+
+.rh-compiler-status__state {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  font-size: var(--rh-type-h4-size);
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-compiler-status[data-tone='success'] .rh-compiler-status__state {
+  color: var(--rh-feedback-success-fg);
+}
+
+.rh-compiler-status[data-tone='error'] .rh-compiler-status__state {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-compiler-status[data-tone='warning'] .rh-compiler-status__state {
+  color: var(--rh-feedback-warning-fg);
+}
+
+.rh-compiler-status[data-tone='info'] .rh-compiler-status__state {
+  color: var(--rh-feedback-info-fg);
+}
+
+.rh-compiler-status__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14ch, 1fr));
+  gap: var(--rh-space-2) var(--rh-space-4);
+  margin: 0;
+}
+
+.rh-compiler-status__facts dt {
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+  color: var(--rh-text-muted);
+}
+
+.rh-compiler-status__facts dd {
+  margin: 0;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.rh-compiler-status__synctex,
+.rh-compiler-status__guidance,
+.rh-compiler-status__last-good {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-2);
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
+.rh-compiler-status__guidance {
+  padding: var(--rh-space-2);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-feedback-warning-bg);
+  color: var(--rh-feedback-warning-fg);
+}

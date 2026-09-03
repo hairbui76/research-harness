@@ -1,0 +1,14 @@
+/*
+ * Workspace composition styles, aggregated the way `src/primitives/primitives.css`
+ * aggregates the primitives. `src/styles.css` reaches these through that file.
+ *
+ * `ThemeProvider` has no stylesheet: it renders no DOM, only `data-theme` and
+ * `data-density` on the document element, which the token layer already answers to.
+ */
+
+@import './AppShell/AppShell.css';
+@import './ProjectRail/ProjectRail.css';
+@import './ConversationWorkspace/ConversationWorkspace.css';
+@import './ResearchInspector/ResearchInspector.css';
+@import './FullPageWorkspace/FullPageWorkspace.css';
+@import './ManuscriptWorkspace/ManuscriptWorkspace.css';

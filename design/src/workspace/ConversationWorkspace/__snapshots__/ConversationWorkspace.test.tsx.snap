@@ -1,0 +1,589 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ConversationWorkspace theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-conversation-workspace"
+  >
+    <div
+      class="rh-pane-group"
+      data-direction="horizontal"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-conversation-workspace__rail"
+        data-direction="horizontal"
+        data-max-size="35"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 18%;"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          sessions
+        </nav>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the sessions pane"
+        aria-orientation="vertical"
+        aria-valuemax="35"
+        aria-valuemin="12"
+        aria-valuenow="18"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__centre"
+        data-direction="horizontal"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 54%;"
+      >
+        <div
+          class="rh-conversation-workspace__toolbar"
+        >
+          <div
+            class="rh-conversation-workspace__toolbar-slot"
+          />
+          <button
+            aria-expanded="true"
+            aria-label="Collapse the research inspector"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-conversation-workspace__inspector-toggle"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-panel-right rh-icon"
+              data-icon="panel-right"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+              <path
+                d="M15 3v18"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          aria-label="Conversation"
+          class="rh-conversation-workspace__transcript"
+          role="group"
+        >
+          <ol>
+            <li>
+              M0042
+            </li>
+          </ol>
+        </div>
+        <div
+          class="rh-conversation-workspace__composer"
+        >
+          <p>
+            composer
+          </p>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-1"
+        aria-label="Resize the research inspector"
+        aria-orientation="vertical"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="54"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__inspector"
+        data-direction="horizontal"
+        data-max-size="45"
+        data-min-size="18"
+        id="rh-panegroup-ID-pane-2"
+        style="flex-basis: 28.000000000000004%;"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          evidence
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConversationWorkspace theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-conversation-workspace"
+  >
+    <div
+      class="rh-pane-group"
+      data-direction="horizontal"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-conversation-workspace__rail"
+        data-direction="horizontal"
+        data-max-size="35"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 18%;"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          sessions
+        </nav>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the sessions pane"
+        aria-orientation="vertical"
+        aria-valuemax="35"
+        aria-valuemin="12"
+        aria-valuenow="18"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__centre"
+        data-direction="horizontal"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 54%;"
+      >
+        <div
+          class="rh-conversation-workspace__toolbar"
+        >
+          <div
+            class="rh-conversation-workspace__toolbar-slot"
+          />
+          <button
+            aria-expanded="true"
+            aria-label="Collapse the research inspector"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-conversation-workspace__inspector-toggle"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-panel-right rh-icon"
+              data-icon="panel-right"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+              <path
+                d="M15 3v18"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          aria-label="Conversation"
+          class="rh-conversation-workspace__transcript"
+          role="group"
+        >
+          <ol>
+            <li>
+              M0042
+            </li>
+          </ol>
+        </div>
+        <div
+          class="rh-conversation-workspace__composer"
+        >
+          <p>
+            composer
+          </p>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-1"
+        aria-label="Resize the research inspector"
+        aria-orientation="vertical"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="54"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__inspector"
+        data-direction="horizontal"
+        data-max-size="45"
+        data-min-size="18"
+        id="rh-panegroup-ID-pane-2"
+        style="flex-basis: 28.000000000000004%;"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          evidence
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConversationWorkspace theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-conversation-workspace"
+  >
+    <div
+      class="rh-pane-group"
+      data-direction="horizontal"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-conversation-workspace__rail"
+        data-direction="horizontal"
+        data-max-size="35"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 18%;"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          sessions
+        </nav>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the sessions pane"
+        aria-orientation="vertical"
+        aria-valuemax="35"
+        aria-valuemin="12"
+        aria-valuenow="18"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__centre"
+        data-direction="horizontal"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 54%;"
+      >
+        <div
+          class="rh-conversation-workspace__toolbar"
+        >
+          <div
+            class="rh-conversation-workspace__toolbar-slot"
+          />
+          <button
+            aria-expanded="true"
+            aria-label="Collapse the research inspector"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-conversation-workspace__inspector-toggle"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-panel-right rh-icon"
+              data-icon="panel-right"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+              <path
+                d="M15 3v18"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          aria-label="Conversation"
+          class="rh-conversation-workspace__transcript"
+          role="group"
+        >
+          <ol>
+            <li>
+              M0042
+            </li>
+          </ol>
+        </div>
+        <div
+          class="rh-conversation-workspace__composer"
+        >
+          <p>
+            composer
+          </p>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-1"
+        aria-label="Resize the research inspector"
+        aria-orientation="vertical"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="54"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__inspector"
+        data-direction="horizontal"
+        data-max-size="45"
+        data-min-size="18"
+        id="rh-panegroup-ID-pane-2"
+        style="flex-basis: 28.000000000000004%;"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          evidence
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConversationWorkspace theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-conversation-workspace"
+  >
+    <div
+      class="rh-pane-group"
+      data-direction="horizontal"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-conversation-workspace__rail"
+        data-direction="horizontal"
+        data-max-size="35"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 18%;"
+      >
+        <nav
+          aria-label="Sessions"
+        >
+          sessions
+        </nav>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the sessions pane"
+        aria-orientation="vertical"
+        aria-valuemax="35"
+        aria-valuemin="12"
+        aria-valuenow="18"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__centre"
+        data-direction="horizontal"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 54%;"
+      >
+        <div
+          class="rh-conversation-workspace__toolbar"
+        >
+          <div
+            class="rh-conversation-workspace__toolbar-slot"
+          />
+          <button
+            aria-expanded="true"
+            aria-label="Collapse the research inspector"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-conversation-workspace__inspector-toggle"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-panel-right rh-icon"
+              data-icon="panel-right"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+              <path
+                d="M15 3v18"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
+          aria-label="Conversation"
+          class="rh-conversation-workspace__transcript"
+          role="group"
+        >
+          <ol>
+            <li>
+              M0042
+            </li>
+          </ol>
+        </div>
+        <div
+          class="rh-conversation-workspace__composer"
+        >
+          <p>
+            composer
+          </p>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-1"
+        aria-label="Resize the research inspector"
+        aria-orientation="vertical"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="54"
+        class="rh-pane-handle"
+        data-direction="horizontal"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-conversation-workspace__inspector"
+        data-direction="horizontal"
+        data-max-size="45"
+        data-min-size="18"
+        id="rh-panegroup-ID-pane-2"
+        style="flex-basis: 28.000000000000004%;"
+      >
+        <section
+          aria-label="Inspector body"
+        >
+          evidence
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;

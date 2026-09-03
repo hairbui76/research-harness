@@ -1,0 +1,22 @@
+.rh-review-decision-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-review-decision-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+/* The reason a decision cannot be recorded is text on the page, not a tooltip. */
+.rh-review-decision-bar__reason {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+}

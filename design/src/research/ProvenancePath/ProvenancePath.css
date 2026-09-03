@@ -1,0 +1,40 @@
+.rh-provenance-path__steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rh-provenance-path--vertical .rh-provenance-path__steps {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+}
+
+.rh-provenance-path__step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-provenance-path--vertical .rh-provenance-path__step {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+}
+
+/* The edge is named in words; the arrow only says which way to read it. */
+.rh-provenance-path__relation {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}

@@ -1,0 +1,43 @@
+.rh-reference-picker__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-reference-picker__id {
+  flex: none;
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+.rh-reference-picker__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A reference that will not resolve is still selectable — and says so in words. */
+.rh-reference-picker__resolution {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-reference-picker__row[data-resolution='stale'] .rh-reference-picker__resolution {
+  color: var(--rh-status-stale-fg);
+}
+
+.rh-reference-picker__row[data-resolution='private'] .rh-reference-picker__resolution {
+  color: var(--rh-status-private-fg);
+}
+
+.rh-reference-picker__row[data-resolution='unresolved'] .rh-reference-picker__resolution,
+.rh-reference-picker__row[data-resolution='broken'] .rh-reference-picker__resolution {
+  color: var(--rh-feedback-error-fg);
+}

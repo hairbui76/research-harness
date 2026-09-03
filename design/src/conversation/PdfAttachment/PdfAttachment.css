@@ -1,0 +1,54 @@
+/* The card shell is shared with every other file kind; see attachmentParts.css. */
+
+.rh-pdf-preview__boundary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  margin: 0 0 var(--rh-space-3);
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-feedback-info-border);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-feedback-info-bg);
+  color: var(--rh-feedback-info-fg);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+/* A page of a source is near-white in both themes and brings its own ink. */
+.rh-pdf-preview__stage {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  min-block-size: 240px;
+  max-block-size: 60vh;
+  padding: var(--rh-space-4);
+  border: var(--rh-border-width) solid var(--rh-border-on-paper);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-paper);
+  color: var(--rh-text-on-paper);
+}
+
+.rh-pdf-preview__unavailable {
+  margin: 0;
+  color: var(--rh-text-on-paper-secondary);
+  text-align: center;
+}
+
+.rh-pdf-preview__pager {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+.rh-pdf-preview__page {
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+.rh-pdf-preview__download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  color: var(--rh-text-link);
+  font-size: var(--rh-type-body-sm-size);
+}

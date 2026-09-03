@@ -1,0 +1,90 @@
+.rh-pdf-preview {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  block-size: 100%;
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-primary);
+}
+
+.rh-pdf-preview__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-4);
+  flex-wrap: wrap;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-pdf-preview__pager,
+.rh-pdf-preview__zoom {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+.rh-pdf-preview__page-count,
+.rh-pdf-preview__scale {
+  margin: 0;
+  min-inline-size: 8ch;
+  text-align: center;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-secondary);
+}
+
+.rh-pdf-preview__scale {
+  min-inline-size: 5ch;
+}
+
+.rh-pdf-preview__search {
+  margin-inline-start: auto;
+  min-inline-size: 16ch;
+}
+
+.rh-pdf-preview__stale {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  background: var(--rh-status-stale-bg);
+  color: var(--rh-status-stale-fg);
+  border-bottom: var(--rh-border-width) solid var(--rh-status-stale-border);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-pdf-preview__surface {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: var(--rh-space-4);
+  background: var(--rh-surface-canvas);
+}
+
+.rh-pdf-preview__surface:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: calc(var(--rh-focus-ring-offset) * -1);
+}
+
+.rh-pdf-preview__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: var(--rh-space-16);
+  border: var(--rh-border-width) solid var(--rh-border-on-paper);
+  border-radius: var(--rh-radius-card);
+  font-family: var(--rh-font-serif);
+}
+
+.rh-pdf-preview__footer {
+  margin: 0;
+  padding: var(--rh-space-1) var(--rh-space-3);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  font-size: var(--rh-type-body-sm-size);
+  color: var(--rh-text-muted);
+}

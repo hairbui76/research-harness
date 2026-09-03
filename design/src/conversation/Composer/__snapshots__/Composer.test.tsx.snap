@@ -1,0 +1,861 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Composer theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-composer"
+    data-send-state="idle"
+  >
+    <ul
+      aria-label="References in this message"
+      class="rh-composer__tokens"
+    >
+      <li>
+        <span
+          class="rh-tag rh-tag--sm"
+        >
+          <span
+            class="rh-tag__body"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-at-sign rh-icon"
+              data-icon="at-sign"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
+              <path
+                d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+              />
+            </svg>
+            <span
+              class="rh-tag__label"
+            >
+              E0482
+               Storage modulus at 24 h
+            </span>
+          </span>
+          <button
+            aria-label="Remove reference E0482"
+            class="rh-tag__remove"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </span>
+      </li>
+    </ul>
+    <div
+      class="rh-composer__field"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-textarea-ID"
+        >
+          Message
+        </label>
+        <textarea
+          aria-describedby="rh-composer-ID-hint"
+          class="rh-control rh-textarea rh-textarea--resize-none rh-composer__textarea"
+          id="rh-textarea-ID"
+          placeholder="Ask about this project. Type @ to reference a work, evidence or claim."
+          rows="3"
+          style="height: auto;"
+        >
+          Does the sweep support C0041?
+        </textarea>
+      </div>
+    </div>
+    <div
+      class="rh-composer__toolbar"
+    >
+      <input
+        hidden=""
+        multiple=""
+        type="file"
+      />
+      <button
+        aria-label="Attach files"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-paperclip rh-icon"
+          data-icon="paperclip"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"
+          />
+        </svg>
+      </button>
+      <span
+        class="rh-composer__spacer"
+      />
+      <button
+        class="rh-button rh-button--accent rh-button--sm"
+        data-variant="accent"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-send rh-icon"
+            data-icon="send"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+            />
+            <path
+              d="m21.854 2.147-10.94 10.939"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Send
+          </span>
+        </span>
+      </button>
+    </div>
+    <p
+      class="rh-composer__hint"
+      id="rh-composer-ID-hint"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-corner-down-left rh-icon"
+        data-icon="corner-down-left"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 4v7a4 4 0 0 1-4 4H4"
+        />
+        <path
+          d="m9 10-5 5 5 5"
+        />
+      </svg>
+      <span>
+        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`Composer theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-composer"
+    data-send-state="idle"
+  >
+    <ul
+      aria-label="References in this message"
+      class="rh-composer__tokens"
+    >
+      <li>
+        <span
+          class="rh-tag rh-tag--sm"
+        >
+          <span
+            class="rh-tag__body"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-at-sign rh-icon"
+              data-icon="at-sign"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
+              <path
+                d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+              />
+            </svg>
+            <span
+              class="rh-tag__label"
+            >
+              E0482
+               Storage modulus at 24 h
+            </span>
+          </span>
+          <button
+            aria-label="Remove reference E0482"
+            class="rh-tag__remove"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </span>
+      </li>
+    </ul>
+    <div
+      class="rh-composer__field"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-textarea-ID"
+        >
+          Message
+        </label>
+        <textarea
+          aria-describedby="rh-composer-ID-hint"
+          class="rh-control rh-textarea rh-textarea--resize-none rh-composer__textarea"
+          id="rh-textarea-ID"
+          placeholder="Ask about this project. Type @ to reference a work, evidence or claim."
+          rows="3"
+          style="height: auto;"
+        >
+          Does the sweep support C0041?
+        </textarea>
+      </div>
+    </div>
+    <div
+      class="rh-composer__toolbar"
+    >
+      <input
+        hidden=""
+        multiple=""
+        type="file"
+      />
+      <button
+        aria-label="Attach files"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-paperclip rh-icon"
+          data-icon="paperclip"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"
+          />
+        </svg>
+      </button>
+      <span
+        class="rh-composer__spacer"
+      />
+      <button
+        class="rh-button rh-button--accent rh-button--sm"
+        data-variant="accent"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-send rh-icon"
+            data-icon="send"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+            />
+            <path
+              d="m21.854 2.147-10.94 10.939"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Send
+          </span>
+        </span>
+      </button>
+    </div>
+    <p
+      class="rh-composer__hint"
+      id="rh-composer-ID-hint"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-corner-down-left rh-icon"
+        data-icon="corner-down-left"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 4v7a4 4 0 0 1-4 4H4"
+        />
+        <path
+          d="m9 10-5 5 5 5"
+        />
+      </svg>
+      <span>
+        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`Composer theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-composer"
+    data-send-state="idle"
+  >
+    <ul
+      aria-label="References in this message"
+      class="rh-composer__tokens"
+    >
+      <li>
+        <span
+          class="rh-tag rh-tag--sm"
+        >
+          <span
+            class="rh-tag__body"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-at-sign rh-icon"
+              data-icon="at-sign"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
+              <path
+                d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+              />
+            </svg>
+            <span
+              class="rh-tag__label"
+            >
+              E0482
+               Storage modulus at 24 h
+            </span>
+          </span>
+          <button
+            aria-label="Remove reference E0482"
+            class="rh-tag__remove"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </span>
+      </li>
+    </ul>
+    <div
+      class="rh-composer__field"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-textarea-ID"
+        >
+          Message
+        </label>
+        <textarea
+          aria-describedby="rh-composer-ID-hint"
+          class="rh-control rh-textarea rh-textarea--resize-none rh-composer__textarea"
+          id="rh-textarea-ID"
+          placeholder="Ask about this project. Type @ to reference a work, evidence or claim."
+          rows="3"
+          style="height: auto;"
+        >
+          Does the sweep support C0041?
+        </textarea>
+      </div>
+    </div>
+    <div
+      class="rh-composer__toolbar"
+    >
+      <input
+        hidden=""
+        multiple=""
+        type="file"
+      />
+      <button
+        aria-label="Attach files"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-paperclip rh-icon"
+          data-icon="paperclip"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"
+          />
+        </svg>
+      </button>
+      <span
+        class="rh-composer__spacer"
+      />
+      <button
+        class="rh-button rh-button--accent rh-button--sm"
+        data-variant="accent"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-send rh-icon"
+            data-icon="send"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+            />
+            <path
+              d="m21.854 2.147-10.94 10.939"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Send
+          </span>
+        </span>
+      </button>
+    </div>
+    <p
+      class="rh-composer__hint"
+      id="rh-composer-ID-hint"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-corner-down-left rh-icon"
+        data-icon="corner-down-left"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 4v7a4 4 0 0 1-4 4H4"
+        />
+        <path
+          d="m9 10-5 5 5 5"
+        />
+      </svg>
+      <span>
+        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`Composer theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-composer"
+    data-send-state="idle"
+  >
+    <ul
+      aria-label="References in this message"
+      class="rh-composer__tokens"
+    >
+      <li>
+        <span
+          class="rh-tag rh-tag--sm"
+        >
+          <span
+            class="rh-tag__body"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-at-sign rh-icon"
+              data-icon="at-sign"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
+              <path
+                d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"
+              />
+            </svg>
+            <span
+              class="rh-tag__label"
+            >
+              E0482
+               Storage modulus at 24 h
+            </span>
+          </span>
+          <button
+            aria-label="Remove reference E0482"
+            class="rh-tag__remove"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </span>
+      </li>
+    </ul>
+    <div
+      class="rh-composer__field"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-textarea-ID"
+        >
+          Message
+        </label>
+        <textarea
+          aria-describedby="rh-composer-ID-hint"
+          class="rh-control rh-textarea rh-textarea--resize-none rh-composer__textarea"
+          id="rh-textarea-ID"
+          placeholder="Ask about this project. Type @ to reference a work, evidence or claim."
+          rows="3"
+          style="height: auto;"
+        >
+          Does the sweep support C0041?
+        </textarea>
+      </div>
+    </div>
+    <div
+      class="rh-composer__toolbar"
+    >
+      <input
+        hidden=""
+        multiple=""
+        type="file"
+      />
+      <button
+        aria-label="Attach files"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-paperclip rh-icon"
+          data-icon="paperclip"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"
+          />
+        </svg>
+      </button>
+      <span
+        class="rh-composer__spacer"
+      />
+      <button
+        class="rh-button rh-button--accent rh-button--sm"
+        data-variant="accent"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-send rh-icon"
+            data-icon="send"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+            />
+            <path
+              d="m21.854 2.147-10.94 10.939"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Send
+          </span>
+        </span>
+      </button>
+    </div>
+    <p
+      class="rh-composer__hint"
+      id="rh-composer-ID-hint"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-corner-down-left rh-icon"
+        data-icon="corner-down-left"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 4v7a4 4 0 0 1-4 4H4"
+        />
+        <path
+          d="m9 10-5 5 5 5"
+        />
+      </svg>
+      <span>
+        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
+      </span>
+    </p>
+  </div>
+</div>
+`;

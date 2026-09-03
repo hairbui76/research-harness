@@ -1,0 +1,74 @@
+/*
+ * The native input stays in the DOM and keeps every click, so labelling, keyboard and the
+ * indeterminate property behave exactly as the platform intends. It is drawn transparent
+ * on top of the box that carries the visible styling.
+ */
+.rh-checkbox {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: var(--rh-space-4);
+  height: var(--rh-space-4);
+}
+
+.rh-checkbox__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.rh-checkbox__input:disabled {
+  cursor: not-allowed;
+}
+
+.rh-checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-inverse);
+  pointer-events: none;
+  transition:
+    background-color var(--rh-duration-fast) linear,
+    border-color var(--rh-duration-fast) linear;
+}
+
+.rh-checkbox__box .rh-icon {
+  opacity: 0;
+}
+
+.rh-checkbox__input:checked + .rh-checkbox__box,
+.rh-checkbox__input:indeterminate + .rh-checkbox__box {
+  background: var(--rh-surface-inverse);
+  border-color: var(--rh-surface-inverse);
+}
+
+.rh-checkbox__input:checked + .rh-checkbox__box .rh-icon,
+.rh-checkbox__input:indeterminate + .rh-checkbox__box .rh-icon {
+  opacity: 1;
+}
+
+.rh-checkbox__input:hover:not(:disabled) + .rh-checkbox__box {
+  border-color: var(--rh-text-primary);
+}
+
+.rh-checkbox__input[aria-invalid='true'] + .rh-checkbox__box {
+  border-color: var(--rh-feedback-error-fg);
+}
+
+.rh-checkbox__input:focus-visible + .rh-checkbox__box {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-checkbox.is-disabled {
+  opacity: 0.55;
+}

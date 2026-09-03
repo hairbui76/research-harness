@@ -1,0 +1,1117 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-diagnostic-list"
+    data-source="compiler"
+  >
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/main.tex
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          2
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/main.tex"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="error"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-alert rh-icon"
+              data-icon="alert-circle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="8"
+                y2="12"
+              />
+              <line
+                x1="12"
+                x2="12.01"
+                y1="16"
+                y2="16"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Error
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Undefined control sequence \\includegraph.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 120, column 3
+            </span>
+            <code
+              class="rh-diagnostic__code"
+            >
+              Undefined control sequence
+            </code>
+          </button>
+        </li>
+        <li
+          class="rh-diagnostic"
+          data-severity="warning"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Warning
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Overfull \\hbox (12.4pt too wide).
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 210
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/refs.bib
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          1
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/refs.bib"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="info"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-info rh-icon"
+              data-icon="info"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 16v-4"
+              />
+              <path
+                d="M12 8h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Info
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Entry "smith2024" has no year field.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 8
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CompilerDiagnosticList theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-diagnostic-list"
+    data-source="compiler"
+  >
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/main.tex
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          2
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/main.tex"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="error"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-alert rh-icon"
+              data-icon="alert-circle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="8"
+                y2="12"
+              />
+              <line
+                x1="12"
+                x2="12.01"
+                y1="16"
+                y2="16"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Error
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Undefined control sequence \\includegraph.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 120, column 3
+            </span>
+            <code
+              class="rh-diagnostic__code"
+            >
+              Undefined control sequence
+            </code>
+          </button>
+        </li>
+        <li
+          class="rh-diagnostic"
+          data-severity="warning"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Warning
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Overfull \\hbox (12.4pt too wide).
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 210
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/refs.bib
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          1
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/refs.bib"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="info"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-info rh-icon"
+              data-icon="info"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 16v-4"
+              />
+              <path
+                d="M12 8h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Info
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Entry "smith2024" has no year field.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 8
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CompilerDiagnosticList theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-diagnostic-list"
+    data-source="compiler"
+  >
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/main.tex
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          2
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/main.tex"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="error"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-alert rh-icon"
+              data-icon="alert-circle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="8"
+                y2="12"
+              />
+              <line
+                x1="12"
+                x2="12.01"
+                y1="16"
+                y2="16"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Error
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Undefined control sequence \\includegraph.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 120, column 3
+            </span>
+            <code
+              class="rh-diagnostic__code"
+            >
+              Undefined control sequence
+            </code>
+          </button>
+        </li>
+        <li
+          class="rh-diagnostic"
+          data-severity="warning"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Warning
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Overfull \\hbox (12.4pt too wide).
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 210
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/refs.bib
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          1
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/refs.bib"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="info"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-info rh-icon"
+              data-icon="info"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 16v-4"
+              />
+              <path
+                d="M12 8h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Info
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Entry "smith2024" has no year field.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 8
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CompilerDiagnosticList theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-diagnostic-list"
+    data-source="compiler"
+  >
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/main.tex
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          2
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/main.tex"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="error"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-circle-alert rh-icon"
+              data-icon="alert-circle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="8"
+                y2="12"
+              />
+              <line
+                x1="12"
+                x2="12.01"
+                y1="16"
+                y2="16"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Error
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Undefined control sequence \\includegraph.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 120, column 3
+            </span>
+            <code
+              class="rh-diagnostic__code"
+            >
+              Undefined control sequence
+            </code>
+          </button>
+        </li>
+        <li
+          class="rh-diagnostic"
+          data-severity="warning"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Warning
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Overfull \\hbox (12.4pt too wide).
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 210
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div
+      class="rh-diagnostic-list__group"
+    >
+      <h4
+        class="rh-diagnostic-list__file"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-file-code rh-icon"
+          data-icon="file-code"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+          />
+          <path
+            d="M14 2v5a1 1 0 0 0 1 1h5"
+          />
+          <path
+            d="M10 12.5 8 15l2 2.5"
+          />
+          <path
+            d="m14 12.5 2 2.5-2 2.5"
+          />
+        </svg>
+        <span>
+          manuscript/refs.bib
+        </span>
+        <span
+          class="rh-diagnostic-list__count"
+        >
+          1
+        </span>
+      </h4>
+      <ul
+        aria-label="Compiler diagnostics: manuscript/refs.bib"
+        class="rh-diagnostic-list__rows"
+      >
+        <li
+          class="rh-diagnostic"
+          data-severity="info"
+          data-source="compiler"
+        >
+          <button
+            class="rh-diagnostic__button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-info rh-icon"
+              data-icon="info"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 16v-4"
+              />
+              <path
+                d="M12 8h.01"
+              />
+            </svg>
+            <span
+              class="rh-diagnostic__severity"
+            >
+              Info
+            </span>
+            <span
+              class="rh-diagnostic__message"
+            >
+              Entry "smith2024" has no year field.
+            </span>
+            <span
+              class="rh-diagnostic__position"
+            >
+              line 8
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;

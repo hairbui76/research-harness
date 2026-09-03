@@ -1,0 +1,75 @@
+.rh-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  padding: var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
+/* Drag feedback uses the AI/action accent because attaching is an action, not a state. */
+.rh-composer.is-dragging {
+  border-color: var(--rh-accent-border);
+  background: var(--rh-accent-subtle);
+}
+
+.rh-composer[data-blocked] {
+  border-color: var(--rh-feedback-error-border);
+}
+
+.rh-composer__tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rh-composer__field {
+  position: relative;
+  min-width: 0;
+}
+
+.rh-composer__textarea {
+  max-block-size: 40vh;
+}
+
+/* The picker floats above the box, anchored at the caret's column. */
+.rh-composer__picker {
+  position: absolute;
+  z-index: var(--rh-z-popover);
+  inset-block-end: calc(100% + var(--rh-space-1));
+  inline-size: min(28rem, 100%);
+  padding: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
+.rh-composer__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+.rh-composer__spacer {
+  flex: 1 1 auto;
+}
+
+.rh-composer__hint {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-composer__blocked-list {
+  margin: var(--rh-space-1) 0 0;
+  padding-inline-start: var(--rh-space-5);
+}

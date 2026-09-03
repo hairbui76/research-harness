@@ -1,0 +1,18 @@
+.rh-input {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.rh-input__icon {
+  position: absolute;
+  top: 50%;
+  left: var(--rh-control-padding-md);
+  transform: translateY(-50%);
+  color: var(--rh-text-muted);
+  pointer-events: none;
+}
+
+.rh-control--with-icon {
+  padding-left: calc(var(--rh-control-padding-md) + var(--rh-space-5));
+}

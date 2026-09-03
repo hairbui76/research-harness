@@ -1,0 +1,313 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Dialog > Dialog theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="dialog"
+>
+  <div
+    class="rh-dialog__scrim"
+    data-rh-dialog-scrim=""
+  >
+    <div
+      aria-describedby="rh-dialog-ID-description"
+      aria-labelledby="rh-dialog-ID-title"
+      aria-modal="true"
+      class="rh-dialog"
+      data-size="md"
+      role="dialog"
+    >
+      <header
+        class="rh-dialog__header"
+      >
+        <h2
+          class="rh-dialog__title"
+          id="rh-dialog-ID-title"
+        >
+          Promote candidate claim?
+        </h2>
+        <div
+          class="rh-dialog__header-actions"
+        >
+          <button
+            aria-label="Close"
+            class="rh-dialog__close"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div
+        class="rh-dialog__body"
+        id="rh-dialog-ID-description"
+      >
+        Nothing is accepted yet.
+      </div>
+      <footer
+        class="rh-dialog__footer"
+      >
+        <button
+          type="button"
+        >
+          Cancel
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Dialog > Dialog theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-rh-portal="dialog"
+>
+  <div
+    class="rh-dialog__scrim"
+    data-rh-dialog-scrim=""
+  >
+    <div
+      aria-describedby="rh-dialog-ID-description"
+      aria-labelledby="rh-dialog-ID-title"
+      aria-modal="true"
+      class="rh-dialog"
+      data-size="md"
+      role="dialog"
+    >
+      <header
+        class="rh-dialog__header"
+      >
+        <h2
+          class="rh-dialog__title"
+          id="rh-dialog-ID-title"
+        >
+          Promote candidate claim?
+        </h2>
+        <div
+          class="rh-dialog__header-actions"
+        >
+          <button
+            aria-label="Close"
+            class="rh-dialog__close"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div
+        class="rh-dialog__body"
+        id="rh-dialog-ID-description"
+      >
+        Nothing is accepted yet.
+      </div>
+      <footer
+        class="rh-dialog__footer"
+      >
+        <button
+          type="button"
+        >
+          Cancel
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Dialog > Dialog theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="dialog"
+>
+  <div
+    class="rh-dialog__scrim"
+    data-rh-dialog-scrim=""
+  >
+    <div
+      aria-describedby="rh-dialog-ID-description"
+      aria-labelledby="rh-dialog-ID-title"
+      aria-modal="true"
+      class="rh-dialog"
+      data-size="md"
+      role="dialog"
+    >
+      <header
+        class="rh-dialog__header"
+      >
+        <h2
+          class="rh-dialog__title"
+          id="rh-dialog-ID-title"
+        >
+          Promote candidate claim?
+        </h2>
+        <div
+          class="rh-dialog__header-actions"
+        >
+          <button
+            aria-label="Close"
+            class="rh-dialog__close"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div
+        class="rh-dialog__body"
+        id="rh-dialog-ID-description"
+      >
+        Nothing is accepted yet.
+      </div>
+      <footer
+        class="rh-dialog__footer"
+      >
+        <button
+          type="button"
+        >
+          Cancel
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Dialog > Dialog theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-rh-portal="dialog"
+>
+  <div
+    class="rh-dialog__scrim"
+    data-rh-dialog-scrim=""
+  >
+    <div
+      aria-describedby="rh-dialog-ID-description"
+      aria-labelledby="rh-dialog-ID-title"
+      aria-modal="true"
+      class="rh-dialog"
+      data-size="md"
+      role="dialog"
+    >
+      <header
+        class="rh-dialog__header"
+      >
+        <h2
+          class="rh-dialog__title"
+          id="rh-dialog-ID-title"
+        >
+          Promote candidate claim?
+        </h2>
+        <div
+          class="rh-dialog__header-actions"
+        >
+          <button
+            aria-label="Close"
+            class="rh-dialog__close"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-x rh-icon"
+              data-icon="x"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6 6 18"
+              />
+              <path
+                d="m6 6 12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div
+        class="rh-dialog__body"
+        id="rh-dialog-ID-description"
+      >
+        Nothing is accepted yet.
+      </div>
+      <footer
+        class="rh-dialog__footer"
+      >
+        <button
+          type="button"
+        >
+          Cancel
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>
+`;

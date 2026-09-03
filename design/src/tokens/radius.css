@@ -1,0 +1,11 @@
+/*
+ * Radius. Near-rectangular interactive elements against soft warm surfaces is the
+ * identity: 4px on controls, 6px on nav items, 8px on cards and containers. Nothing is
+ * pill-shaped except avatars, status pips and removable tags.
+ */
+:root {
+  --rh-radius-control: 4px;
+  --rh-radius-nav: 6px;
+  --rh-radius-card: 8px;
+  --rh-radius-pill: 999px;
+}

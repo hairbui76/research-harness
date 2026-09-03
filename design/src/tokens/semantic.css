@@ -1,0 +1,59 @@
+/*
+ * The semantic token contract.
+ *
+ * Every colour a component uses is one of the `--rh-*` names below. The values live in
+ * design/src/themes/dark.css (the default) and design/src/themes/light.css; this file
+ * declares the names, documents what each one means, and holds the semantic tokens that
+ * do not change between themes.
+ *
+ * Surfaces      --rh-surface-canvas    the application background
+ *               --rh-surface-pane      a working pane sitting on the canvas
+ *               --rh-surface-raised    cards, menus, popovers, dialogs
+ *               --rh-surface-paper     neutral PDF/manuscript reading surface (near-white
+ *                                      in BOTH themes; pair it with --rh-text-on-paper*)
+ *               --rh-surface-inverse   inverted band; pair with --rh-text-inverse
+ *               --rh-surface-subtle    hover tint
+ *               --rh-surface-selected  selected row/item tint
+ *               --rh-surface-scrim     the flat wash behind an overlay
+ * Borders       --rh-border-subtle | --rh-border-default | --rh-border-strong
+ *               --rh-border-on-paper   hairline on the reading surface
+ * Text          --rh-text-primary | --rh-text-secondary | --rh-text-muted
+ *               --rh-text-inverse      on --rh-surface-inverse
+ *               --rh-text-link         link ink; links are underlined, never colour-only
+ *               --rh-text-on-accent    alias of --rh-accent-fg
+ *               --rh-text-on-paper | --rh-text-on-paper-secondary | --rh-text-on-paper-muted
+ * Accent        --rh-accent            AI/action accent: model activity, the primary
+ *                                      send/run action, active reference tracking, and
+ *                                      selected AI provenance. Never scientific truth,
+ *                                      never decoration, never a generic hover colour.
+ *               --rh-accent-hover | --rh-accent-subtle | --rh-accent-border
+ *               --rh-accent-fg         ink ON an accent fill
+ *               --rh-accent-text       accent ink on a normal surface (passes AA as text)
+ * Focus         --rh-focus-ring (colour) + the width/offset below
+ * Status        --rh-status-<accepted|candidate|qualified|contested|stale|private>-<fg|bg|border>
+ *               Scientific authority. Visibly distinct from --rh-accent in both themes and
+ *               never the only signal: components pair them with an icon and a text label.
+ * Feedback      --rh-feedback-<success|error|warning|info>-<fg|bg|border>
+ *               Transient application feedback. Not scientific authority.
+ */
+:root {
+  /* Focus. Width and offset are theme-independent; only the colour switches. */
+  --rh-focus-ring-width: 2px;
+  --rh-focus-ring-offset: 2px;
+
+  /* Hairline width. Depth in this system is a border plus a surface change, not a shadow. */
+  --rh-border-width: 1px;
+
+  /* Control geometry, shared by every interactive primitive. */
+  --rh-control-height-sm: 26px;
+  --rh-control-height-md: 32px;
+  --rh-control-padding-sm: var(--rh-space-2);
+  --rh-control-padding-md: var(--rh-space-3);
+
+  /* Stacking order for anything that leaves the document flow. */
+  --rh-z-base: 0;
+  --rh-z-sticky: 100;
+  --rh-z-overlay: 200;
+  --rh-z-popover: 300;
+  --rh-z-toast: 400;
+}

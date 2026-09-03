@@ -1,0 +1,365 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ImageAttachment theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-image-attachment rh-image-attachment--md"
+    data-state="session_only"
+  >
+    <button
+      aria-label="Open figure-3-stiffness-sweep.png"
+      class="rh-image-attachment__thumb"
+      type="button"
+    >
+      <img
+        alt="Figure 3"
+        class="rh-image-attachment__image"
+        src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+      />
+    </button>
+    <div
+      class="rh-image-attachment__body"
+    >
+      <span
+        class="rh-image-attachment__name"
+        title="figure-3-stiffness-sweep.png"
+      >
+        figure-3-stiffness-sweep.png
+      </span>
+      <span
+        class="rh-image-attachment__meta"
+      >
+        <span
+          class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+          data-state="session_only"
+          data-tone="neutral"
+          title="Working material in this session. Not part of the corpus."
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-lock rh-icon"
+            data-icon="lock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="11"
+              rx="2"
+              ry="2"
+              width="18"
+              x="3"
+              y="11"
+            />
+            <path
+              d="M7 11V7a5 5 0 0 1 10 0v4"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Session only
+          </span>
+        </span>
+        <span
+          class="rh-attachment__facts"
+        >
+          <span
+            class="rh-attachment__type"
+          >
+            image/png
+          </span>
+          <span
+            class="rh-attachment__size"
+          >
+            482 kB
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ImageAttachment theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-image-attachment rh-image-attachment--md"
+    data-state="session_only"
+  >
+    <button
+      aria-label="Open figure-3-stiffness-sweep.png"
+      class="rh-image-attachment__thumb"
+      type="button"
+    >
+      <img
+        alt="Figure 3"
+        class="rh-image-attachment__image"
+        src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+      />
+    </button>
+    <div
+      class="rh-image-attachment__body"
+    >
+      <span
+        class="rh-image-attachment__name"
+        title="figure-3-stiffness-sweep.png"
+      >
+        figure-3-stiffness-sweep.png
+      </span>
+      <span
+        class="rh-image-attachment__meta"
+      >
+        <span
+          class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+          data-state="session_only"
+          data-tone="neutral"
+          title="Working material in this session. Not part of the corpus."
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-lock rh-icon"
+            data-icon="lock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="11"
+              rx="2"
+              ry="2"
+              width="18"
+              x="3"
+              y="11"
+            />
+            <path
+              d="M7 11V7a5 5 0 0 1 10 0v4"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Session only
+          </span>
+        </span>
+        <span
+          class="rh-attachment__facts"
+        >
+          <span
+            class="rh-attachment__type"
+          >
+            image/png
+          </span>
+          <span
+            class="rh-attachment__size"
+          >
+            482 kB
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ImageAttachment theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-image-attachment rh-image-attachment--md"
+    data-state="session_only"
+  >
+    <button
+      aria-label="Open figure-3-stiffness-sweep.png"
+      class="rh-image-attachment__thumb"
+      type="button"
+    >
+      <img
+        alt="Figure 3"
+        class="rh-image-attachment__image"
+        src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+      />
+    </button>
+    <div
+      class="rh-image-attachment__body"
+    >
+      <span
+        class="rh-image-attachment__name"
+        title="figure-3-stiffness-sweep.png"
+      >
+        figure-3-stiffness-sweep.png
+      </span>
+      <span
+        class="rh-image-attachment__meta"
+      >
+        <span
+          class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+          data-state="session_only"
+          data-tone="neutral"
+          title="Working material in this session. Not part of the corpus."
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-lock rh-icon"
+            data-icon="lock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="11"
+              rx="2"
+              ry="2"
+              width="18"
+              x="3"
+              y="11"
+            />
+            <path
+              d="M7 11V7a5 5 0 0 1 10 0v4"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Session only
+          </span>
+        </span>
+        <span
+          class="rh-attachment__facts"
+        >
+          <span
+            class="rh-attachment__type"
+          >
+            image/png
+          </span>
+          <span
+            class="rh-attachment__size"
+          >
+            482 kB
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ImageAttachment theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-image-attachment rh-image-attachment--md"
+    data-state="session_only"
+  >
+    <button
+      aria-label="Open figure-3-stiffness-sweep.png"
+      class="rh-image-attachment__thumb"
+      type="button"
+    >
+      <img
+        alt="Figure 3"
+        class="rh-image-attachment__image"
+        src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+      />
+    </button>
+    <div
+      class="rh-image-attachment__body"
+    >
+      <span
+        class="rh-image-attachment__name"
+        title="figure-3-stiffness-sweep.png"
+      >
+        figure-3-stiffness-sweep.png
+      </span>
+      <span
+        class="rh-image-attachment__meta"
+      >
+        <span
+          class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+          data-state="session_only"
+          data-tone="neutral"
+          title="Working material in this session. Not part of the corpus."
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-lock rh-icon"
+            data-icon="lock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              height="11"
+              rx="2"
+              ry="2"
+              width="18"
+              x="3"
+              y="11"
+            />
+            <path
+              d="M7 11V7a5 5 0 0 1 10 0v4"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Session only
+          </span>
+        </span>
+        <span
+          class="rh-attachment__facts"
+        >
+          <span
+            class="rh-attachment__type"
+          >
+            image/png
+          </span>
+          <span
+            class="rh-attachment__size"
+          >
+            482 kB
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;

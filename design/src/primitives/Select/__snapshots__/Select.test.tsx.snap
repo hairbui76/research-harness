@@ -1,0 +1,629 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Select theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-model"
+      >
+        Model
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-model-description"
+          class="rh-control rh-select__control"
+          id="snap-model"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-model-description"
+      >
+        Used for the next send.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-fallback"
+      >
+        Fallback
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-fallback-error"
+          aria-invalid="true"
+          class="rh-control rh-select__control rh-control--sm"
+          id="snap-fallback"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-fallback-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Unavailable offline.
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Select theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-model"
+      >
+        Model
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-model-description"
+          class="rh-control rh-select__control"
+          id="snap-model"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-model-description"
+      >
+        Used for the next send.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-fallback"
+      >
+        Fallback
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-fallback-error"
+          aria-invalid="true"
+          class="rh-control rh-select__control rh-control--sm"
+          id="snap-fallback"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-fallback-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Unavailable offline.
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Select theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-model"
+      >
+        Model
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-model-description"
+          class="rh-control rh-select__control"
+          id="snap-model"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-model-description"
+      >
+        Used for the next send.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-fallback"
+      >
+        Fallback
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-fallback-error"
+          aria-invalid="true"
+          class="rh-control rh-select__control rh-control--sm"
+          id="snap-fallback"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-fallback-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Unavailable offline.
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Select theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-model"
+      >
+        Model
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-model-description"
+          class="rh-control rh-select__control"
+          id="snap-model"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-model-description"
+      >
+        Used for the next send.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-fallback"
+      >
+        Fallback
+      </label>
+      <div
+        class="rh-select"
+      >
+        <select
+          aria-describedby="snap-fallback-error"
+          aria-invalid="true"
+          class="rh-control rh-select__control rh-control--sm"
+          id="snap-fallback"
+        >
+          <option
+            value="local"
+          >
+            Local model
+          </option>
+          <option
+            value="hosted"
+          >
+            Hosted model
+          </option>
+        </select>
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-chevron-down rh-icon rh-select__chevron"
+          data-icon="chevron-down"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m6 9 6 6 6-6"
+          />
+        </svg>
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-fallback-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Unavailable offline.
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;

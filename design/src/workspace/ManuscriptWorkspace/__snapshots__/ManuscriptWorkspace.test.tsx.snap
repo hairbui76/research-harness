@@ -1,0 +1,717 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ManuscriptWorkspace theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-manuscript-workspace"
+    data-inspector-open=""
+    data-inspector-placement="bottom"
+  >
+    <div
+      class="rh-manuscript-workspace__bar"
+    >
+      <div
+        class="rh-manuscript-workspace__bar-slot"
+      />
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the build and audit panel"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-manuscript-workspace__inspector-toggle"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-bottom rh-icon"
+          data-icon="panel-bottom"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M3 15h18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-pane-group rh-manuscript-workspace__rows"
+      data-direction="vertical"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-manuscript-workspace__top"
+        data-direction="vertical"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 68%;"
+      >
+        <div
+          class="rh-pane-group rh-manuscript-workspace__columns"
+          data-direction="horizontal"
+          id="rh-panegroup-ID"
+        >
+          <div
+            class="rh-pane rh-manuscript-workspace__files"
+            data-direction="horizontal"
+            data-max-size="40"
+            data-min-size="10"
+            id="rh-panegroup-ID-pane-0"
+            style="flex-basis: 20%;"
+          >
+            <nav
+              aria-label="Files"
+            >
+              main.tex
+            </nav>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-0"
+            aria-label="Resize the manuscript files pane"
+            aria-orientation="vertical"
+            aria-valuemax="40"
+            aria-valuemin="10"
+            aria-valuenow="20"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__document"
+            data-direction="horizontal"
+            data-min-size="25"
+            id="rh-panegroup-ID-pane-1"
+            style="flex-basis: 42%;"
+          >
+            <p>
+              editor
+            </p>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-1"
+            aria-label="Resize the PDF pane"
+            aria-orientation="vertical"
+            aria-valuemax="100"
+            aria-valuemin="25"
+            aria-valuenow="42"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__preview"
+            data-direction="horizontal"
+            data-min-size="20"
+            id="rh-panegroup-ID-pane-2"
+            style="flex-basis: 38%;"
+          >
+            <p>
+              preview
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the build and audit panel"
+        aria-orientation="horizontal"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="68"
+        class="rh-pane-handle"
+        data-direction="vertical"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-manuscript-workspace__inspector"
+        data-direction="vertical"
+        data-max-size="60"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 32%;"
+      >
+        <section
+          aria-label="Build and audit"
+          class="rh-manuscript-workspace__inspector-body"
+        >
+          <p>
+            diagnostics
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ManuscriptWorkspace theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-manuscript-workspace"
+    data-inspector-open=""
+    data-inspector-placement="bottom"
+  >
+    <div
+      class="rh-manuscript-workspace__bar"
+    >
+      <div
+        class="rh-manuscript-workspace__bar-slot"
+      />
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the build and audit panel"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-manuscript-workspace__inspector-toggle"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-bottom rh-icon"
+          data-icon="panel-bottom"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M3 15h18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-pane-group rh-manuscript-workspace__rows"
+      data-direction="vertical"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-manuscript-workspace__top"
+        data-direction="vertical"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 68%;"
+      >
+        <div
+          class="rh-pane-group rh-manuscript-workspace__columns"
+          data-direction="horizontal"
+          id="rh-panegroup-ID"
+        >
+          <div
+            class="rh-pane rh-manuscript-workspace__files"
+            data-direction="horizontal"
+            data-max-size="40"
+            data-min-size="10"
+            id="rh-panegroup-ID-pane-0"
+            style="flex-basis: 20%;"
+          >
+            <nav
+              aria-label="Files"
+            >
+              main.tex
+            </nav>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-0"
+            aria-label="Resize the manuscript files pane"
+            aria-orientation="vertical"
+            aria-valuemax="40"
+            aria-valuemin="10"
+            aria-valuenow="20"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__document"
+            data-direction="horizontal"
+            data-min-size="25"
+            id="rh-panegroup-ID-pane-1"
+            style="flex-basis: 42%;"
+          >
+            <p>
+              editor
+            </p>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-1"
+            aria-label="Resize the PDF pane"
+            aria-orientation="vertical"
+            aria-valuemax="100"
+            aria-valuemin="25"
+            aria-valuenow="42"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__preview"
+            data-direction="horizontal"
+            data-min-size="20"
+            id="rh-panegroup-ID-pane-2"
+            style="flex-basis: 38%;"
+          >
+            <p>
+              preview
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the build and audit panel"
+        aria-orientation="horizontal"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="68"
+        class="rh-pane-handle"
+        data-direction="vertical"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-manuscript-workspace__inspector"
+        data-direction="vertical"
+        data-max-size="60"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 32%;"
+      >
+        <section
+          aria-label="Build and audit"
+          class="rh-manuscript-workspace__inspector-body"
+        >
+          <p>
+            diagnostics
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ManuscriptWorkspace theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-manuscript-workspace"
+    data-inspector-open=""
+    data-inspector-placement="bottom"
+  >
+    <div
+      class="rh-manuscript-workspace__bar"
+    >
+      <div
+        class="rh-manuscript-workspace__bar-slot"
+      />
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the build and audit panel"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-manuscript-workspace__inspector-toggle"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-bottom rh-icon"
+          data-icon="panel-bottom"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M3 15h18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-pane-group rh-manuscript-workspace__rows"
+      data-direction="vertical"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-manuscript-workspace__top"
+        data-direction="vertical"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 68%;"
+      >
+        <div
+          class="rh-pane-group rh-manuscript-workspace__columns"
+          data-direction="horizontal"
+          id="rh-panegroup-ID"
+        >
+          <div
+            class="rh-pane rh-manuscript-workspace__files"
+            data-direction="horizontal"
+            data-max-size="40"
+            data-min-size="10"
+            id="rh-panegroup-ID-pane-0"
+            style="flex-basis: 20%;"
+          >
+            <nav
+              aria-label="Files"
+            >
+              main.tex
+            </nav>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-0"
+            aria-label="Resize the manuscript files pane"
+            aria-orientation="vertical"
+            aria-valuemax="40"
+            aria-valuemin="10"
+            aria-valuenow="20"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__document"
+            data-direction="horizontal"
+            data-min-size="25"
+            id="rh-panegroup-ID-pane-1"
+            style="flex-basis: 42%;"
+          >
+            <p>
+              editor
+            </p>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-1"
+            aria-label="Resize the PDF pane"
+            aria-orientation="vertical"
+            aria-valuemax="100"
+            aria-valuemin="25"
+            aria-valuenow="42"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__preview"
+            data-direction="horizontal"
+            data-min-size="20"
+            id="rh-panegroup-ID-pane-2"
+            style="flex-basis: 38%;"
+          >
+            <p>
+              preview
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the build and audit panel"
+        aria-orientation="horizontal"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="68"
+        class="rh-pane-handle"
+        data-direction="vertical"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-manuscript-workspace__inspector"
+        data-direction="vertical"
+        data-max-size="60"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 32%;"
+      >
+        <section
+          aria-label="Build and audit"
+          class="rh-manuscript-workspace__inspector-body"
+        >
+          <p>
+            diagnostics
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ManuscriptWorkspace theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-manuscript-workspace"
+    data-inspector-open=""
+    data-inspector-placement="bottom"
+  >
+    <div
+      class="rh-manuscript-workspace__bar"
+    >
+      <div
+        class="rh-manuscript-workspace__bar-slot"
+      />
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the build and audit panel"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-manuscript-workspace__inspector-toggle"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-bottom rh-icon"
+          data-icon="panel-bottom"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M3 15h18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-pane-group rh-manuscript-workspace__rows"
+      data-direction="vertical"
+      id="rh-panegroup-ID"
+    >
+      <div
+        class="rh-pane rh-manuscript-workspace__top"
+        data-direction="vertical"
+        data-min-size="30"
+        id="rh-panegroup-ID-pane-0"
+        style="flex-basis: 68%;"
+      >
+        <div
+          class="rh-pane-group rh-manuscript-workspace__columns"
+          data-direction="horizontal"
+          id="rh-panegroup-ID"
+        >
+          <div
+            class="rh-pane rh-manuscript-workspace__files"
+            data-direction="horizontal"
+            data-max-size="40"
+            data-min-size="10"
+            id="rh-panegroup-ID-pane-0"
+            style="flex-basis: 20%;"
+          >
+            <nav
+              aria-label="Files"
+            >
+              main.tex
+            </nav>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-0"
+            aria-label="Resize the manuscript files pane"
+            aria-orientation="vertical"
+            aria-valuemax="40"
+            aria-valuemin="10"
+            aria-valuenow="20"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__document"
+            data-direction="horizontal"
+            data-min-size="25"
+            id="rh-panegroup-ID-pane-1"
+            style="flex-basis: 42%;"
+          >
+            <p>
+              editor
+            </p>
+          </div>
+          <div
+            aria-controls="rh-panegroup-ID-pane-1"
+            aria-label="Resize the PDF pane"
+            aria-orientation="vertical"
+            aria-valuemax="100"
+            aria-valuemin="25"
+            aria-valuenow="42"
+            class="rh-pane-handle"
+            data-direction="horizontal"
+            role="separator"
+            tabindex="0"
+          >
+            <span
+              aria-hidden="true"
+              class="rh-pane-handle__grip"
+            />
+          </div>
+          <div
+            class="rh-pane rh-manuscript-workspace__preview"
+            data-direction="horizontal"
+            data-min-size="20"
+            id="rh-panegroup-ID-pane-2"
+            style="flex-basis: 38%;"
+          >
+            <p>
+              preview
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        aria-controls="rh-panegroup-ID-pane-0"
+        aria-label="Resize the build and audit panel"
+        aria-orientation="horizontal"
+        aria-valuemax="100"
+        aria-valuemin="30"
+        aria-valuenow="68"
+        class="rh-pane-handle"
+        data-direction="vertical"
+        role="separator"
+        tabindex="0"
+      >
+        <span
+          aria-hidden="true"
+          class="rh-pane-handle__grip"
+        />
+      </div>
+      <div
+        class="rh-pane rh-manuscript-workspace__inspector"
+        data-direction="vertical"
+        data-max-size="60"
+        data-min-size="12"
+        id="rh-panegroup-ID-pane-1"
+        style="flex-basis: 32%;"
+      >
+        <section
+          aria-label="Build and audit"
+          class="rh-manuscript-workspace__inspector-body"
+        >
+          <p>
+            diagnostics
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+`;

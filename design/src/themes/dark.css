@@ -1,0 +1,97 @@
+/*
+ * Dark theme — the product default.
+ *
+ * Warm near-black canvas, slightly lighter working panes, restrained warm borders, and a
+ * neutral near-white `paper` surface for PDF/manuscript reading. Applied to `:root` with
+ * no attribute so dark is what you get before any preference is read, and to any element
+ * carrying `data-theme="dark"` so one pane can be themed independently of the document.
+ */
+:root,
+:root[data-theme='dark'],
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --rh-surface-canvas: var(--rh-palette-warm-975);
+  --rh-surface-pane: var(--rh-palette-warm-950);
+  --rh-surface-raised: var(--rh-palette-warm-900);
+  --rh-surface-paper: var(--rh-palette-paper);
+  --rh-surface-inverse: var(--rh-palette-warm-100);
+  --rh-surface-subtle: var(--rh-palette-warm-850);
+  --rh-surface-selected: var(--rh-palette-warm-800);
+  --rh-surface-scrim: var(--rh-palette-scrim-dark);
+
+  /* Borders */
+  --rh-border-subtle: var(--rh-palette-warm-850);
+  --rh-border-default: var(--rh-palette-warm-750);
+  --rh-border-strong: var(--rh-palette-warm-500);
+
+  /* Text */
+  --rh-text-primary: var(--rh-palette-warm-100);
+  --rh-text-secondary: var(--rh-palette-warm-300);
+  --rh-text-muted: var(--rh-palette-warm-450);
+  --rh-text-inverse: var(--rh-palette-warm-975);
+  --rh-text-link: var(--rh-palette-warm-100);
+  --rh-text-on-accent: var(--rh-accent-fg);
+
+  /* Reading-surface ink. `paper` is near-white in both themes, so it carries its own text
+     tokens: the theme's primary/secondary/muted inks would be illegible on it. */
+  --rh-text-on-paper: var(--rh-palette-paper-ink);
+  --rh-text-on-paper-secondary: var(--rh-palette-paper-ink-secondary);
+  --rh-text-on-paper-muted: var(--rh-palette-paper-ink-muted);
+  --rh-border-on-paper: var(--rh-palette-paper-line);
+
+  /* AI / action accent */
+  --rh-accent: var(--rh-palette-accent-500);
+  --rh-accent-hover: var(--rh-palette-accent-400);
+  --rh-accent-subtle: var(--rh-palette-accent-tint-dark);
+  --rh-accent-border: var(--rh-palette-accent-edge-dark);
+  --rh-accent-fg: var(--rh-palette-warm-1000);
+  --rh-accent-text: var(--rh-palette-accent-300);
+
+  /* Focus */
+  --rh-focus-ring: var(--rh-palette-warm-150);
+
+  /* Scientific status */
+  --rh-status-accepted-fg: var(--rh-palette-green-300);
+  --rh-status-accepted-bg: var(--rh-palette-green-tint-dark);
+  --rh-status-accepted-border: var(--rh-palette-green-edge-dark);
+  --rh-status-candidate-fg: var(--rh-palette-blue-300);
+  --rh-status-candidate-bg: var(--rh-palette-blue-tint-dark);
+  --rh-status-candidate-border: var(--rh-palette-blue-edge-dark);
+  --rh-status-qualified-fg: var(--rh-palette-violet-300);
+  --rh-status-qualified-bg: var(--rh-palette-violet-tint-dark);
+  --rh-status-qualified-border: var(--rh-palette-violet-edge-dark);
+  --rh-status-contested-fg: var(--rh-palette-red-300);
+  --rh-status-contested-bg: var(--rh-palette-red-tint-dark);
+  --rh-status-contested-border: var(--rh-palette-red-edge-dark);
+  --rh-status-stale-fg: var(--rh-palette-ochre-300);
+  --rh-status-stale-bg: var(--rh-palette-ochre-tint-dark);
+  --rh-status-stale-border: var(--rh-palette-ochre-edge-dark);
+  --rh-status-private-fg: var(--rh-palette-slate-300);
+  --rh-status-private-bg: var(--rh-palette-slate-tint-dark);
+  --rh-status-private-border: var(--rh-palette-slate-edge-dark);
+
+  /* Feedback */
+  --rh-feedback-success-fg: var(--rh-palette-green-300);
+  --rh-feedback-success-bg: var(--rh-palette-green-tint-dark);
+  --rh-feedback-success-border: var(--rh-palette-green-edge-dark);
+  --rh-feedback-error-fg: var(--rh-palette-red-300);
+  --rh-feedback-error-bg: var(--rh-palette-red-tint-dark);
+  --rh-feedback-error-border: var(--rh-palette-red-edge-dark);
+  --rh-feedback-warning-fg: var(--rh-palette-amber-300);
+  --rh-feedback-warning-bg: var(--rh-palette-amber-tint-dark);
+  --rh-feedback-warning-border: var(--rh-palette-amber-edge-dark);
+  --rh-feedback-info-fg: var(--rh-palette-blue-300);
+  --rh-feedback-info-bg: var(--rh-palette-blue-tint-dark);
+  --rh-feedback-info-border: var(--rh-palette-blue-edge-dark);
+
+  /* Depth. Elevation is a warm hairline plus a surface change; overlays are the one
+     exception and take a single soft shadow so they read above the page. */
+  --rh-shadow-overlay: 0 16px 40px rgba(6, 5, 4, 0.55);
+}
+
+/* Explicit for the no-preference case, alongside the `:root` rule above. */
+:root:not([data-theme]) {
+  color-scheme: dark;
+}

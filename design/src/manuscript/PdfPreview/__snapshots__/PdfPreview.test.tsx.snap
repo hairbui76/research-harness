@@ -1,0 +1,1257 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PdfPreview theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <section
+    aria-label="PDF preview"
+    class="rh-pdf-preview"
+    data-stale=""
+    data-status="failed"
+    id="rh-pdfpreview-ID"
+  >
+    <div
+      class="rh-pdf-preview__toolbar"
+    >
+      <div
+        class="rh-pdf-preview__pager"
+      >
+        <button
+          aria-label="Previous page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-left rh-icon"
+            data-icon="chevron-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m15 18-6-6 6-6"
+            />
+          </svg>
+        </button>
+        <p
+          aria-live="polite"
+          class="rh-pdf-preview__page-count"
+        >
+          Page 3 of 12
+        </p>
+        <button
+          aria-label="Next page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-right rh-icon"
+            data-icon="chevron-right"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m9 18 6-6-6-6"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="rh-pdf-preview__zoom"
+      >
+        <button
+          aria-label="Zoom out"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-out rh-icon"
+            data-icon="zoom-out"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <p
+          class="rh-pdf-preview__scale"
+        >
+          100
+          %
+        </p>
+        <button
+          aria-label="Zoom in"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-in rh-icon"
+            data-icon="zoom-in"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="11"
+              x2="11"
+              y1="8"
+              y2="14"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Fit page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-maximize rh-icon"
+            data-icon="maximize"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 3H5a2 2 0 0 0-2 2v3"
+            />
+            <path
+              d="M21 8V5a2 2 0 0 0-2-2h-3"
+            />
+            <path
+              d="M3 16v3a2 2 0 0 0 2 2h3"
+            />
+            <path
+              d="M16 21h3a2 2 0 0 0 2-2v-3"
+            />
+          </svg>
+        </button>
+      </div>
+      <form
+        class="rh-pdf-preview__search"
+      >
+        <div
+          class="rh-field rh-field--stacked is-disabled"
+        >
+          <label
+            class="rh-field__label rh-visually-hidden"
+            for="rh-input-ID"
+          >
+            Search the PDF
+          </label>
+          <div
+            class="rh-input"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search rh-icon rh-input__icon"
+              data-icon="search"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21 21-4.34-4.34"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+            </svg>
+            <input
+              class="rh-control rh-control--sm rh-control--with-icon"
+              disabled=""
+              id="rh-input-ID"
+              placeholder="Search the PDF"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <p
+      class="rh-pdf-preview__stale"
+      role="status"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock rh-icon"
+        data-icon="clock"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <path
+          d="M12 6v6l4 2"
+        />
+      </svg>
+      <span>
+        Showing the last successful PDF from 2026-09-03 09:41 UTC; the current build failed.
+      </span>
+    </p>
+    <div
+      aria-label="PDF preview pages"
+      class="rh-pdf-preview__surface"
+      role="group"
+      tabindex="0"
+    >
+      <div
+        class="rh-pdf-preview__placeholder rh-surface-paper"
+      >
+        <p>
+          Page 3
+        </p>
+      </div>
+    </div>
+    <p
+      class="rh-pdf-preview__footer"
+    >
+      PDF-to-source navigation is unavailable for this build.
+    </p>
+  </section>
+</div>
+`;
+
+exports[`PdfPreview theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <section
+    aria-label="PDF preview"
+    class="rh-pdf-preview"
+    data-stale=""
+    data-status="failed"
+    id="rh-pdfpreview-ID"
+  >
+    <div
+      class="rh-pdf-preview__toolbar"
+    >
+      <div
+        class="rh-pdf-preview__pager"
+      >
+        <button
+          aria-label="Previous page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-left rh-icon"
+            data-icon="chevron-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m15 18-6-6 6-6"
+            />
+          </svg>
+        </button>
+        <p
+          aria-live="polite"
+          class="rh-pdf-preview__page-count"
+        >
+          Page 3 of 12
+        </p>
+        <button
+          aria-label="Next page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-right rh-icon"
+            data-icon="chevron-right"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m9 18 6-6-6-6"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="rh-pdf-preview__zoom"
+      >
+        <button
+          aria-label="Zoom out"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-out rh-icon"
+            data-icon="zoom-out"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <p
+          class="rh-pdf-preview__scale"
+        >
+          100
+          %
+        </p>
+        <button
+          aria-label="Zoom in"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-in rh-icon"
+            data-icon="zoom-in"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="11"
+              x2="11"
+              y1="8"
+              y2="14"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Fit page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-maximize rh-icon"
+            data-icon="maximize"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 3H5a2 2 0 0 0-2 2v3"
+            />
+            <path
+              d="M21 8V5a2 2 0 0 0-2-2h-3"
+            />
+            <path
+              d="M3 16v3a2 2 0 0 0 2 2h3"
+            />
+            <path
+              d="M16 21h3a2 2 0 0 0 2-2v-3"
+            />
+          </svg>
+        </button>
+      </div>
+      <form
+        class="rh-pdf-preview__search"
+      >
+        <div
+          class="rh-field rh-field--stacked is-disabled"
+        >
+          <label
+            class="rh-field__label rh-visually-hidden"
+            for="rh-input-ID"
+          >
+            Search the PDF
+          </label>
+          <div
+            class="rh-input"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search rh-icon rh-input__icon"
+              data-icon="search"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21 21-4.34-4.34"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+            </svg>
+            <input
+              class="rh-control rh-control--sm rh-control--with-icon"
+              disabled=""
+              id="rh-input-ID"
+              placeholder="Search the PDF"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <p
+      class="rh-pdf-preview__stale"
+      role="status"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock rh-icon"
+        data-icon="clock"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <path
+          d="M12 6v6l4 2"
+        />
+      </svg>
+      <span>
+        Showing the last successful PDF from 2026-09-03 09:41 UTC; the current build failed.
+      </span>
+    </p>
+    <div
+      aria-label="PDF preview pages"
+      class="rh-pdf-preview__surface"
+      role="group"
+      tabindex="0"
+    >
+      <div
+        class="rh-pdf-preview__placeholder rh-surface-paper"
+      >
+        <p>
+          Page 3
+        </p>
+      </div>
+    </div>
+    <p
+      class="rh-pdf-preview__footer"
+    >
+      PDF-to-source navigation is unavailable for this build.
+    </p>
+  </section>
+</div>
+`;
+
+exports[`PdfPreview theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <section
+    aria-label="PDF preview"
+    class="rh-pdf-preview"
+    data-stale=""
+    data-status="failed"
+    id="rh-pdfpreview-ID"
+  >
+    <div
+      class="rh-pdf-preview__toolbar"
+    >
+      <div
+        class="rh-pdf-preview__pager"
+      >
+        <button
+          aria-label="Previous page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-left rh-icon"
+            data-icon="chevron-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m15 18-6-6 6-6"
+            />
+          </svg>
+        </button>
+        <p
+          aria-live="polite"
+          class="rh-pdf-preview__page-count"
+        >
+          Page 3 of 12
+        </p>
+        <button
+          aria-label="Next page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-right rh-icon"
+            data-icon="chevron-right"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m9 18 6-6-6-6"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="rh-pdf-preview__zoom"
+      >
+        <button
+          aria-label="Zoom out"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-out rh-icon"
+            data-icon="zoom-out"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <p
+          class="rh-pdf-preview__scale"
+        >
+          100
+          %
+        </p>
+        <button
+          aria-label="Zoom in"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-in rh-icon"
+            data-icon="zoom-in"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="11"
+              x2="11"
+              y1="8"
+              y2="14"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Fit page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-maximize rh-icon"
+            data-icon="maximize"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 3H5a2 2 0 0 0-2 2v3"
+            />
+            <path
+              d="M21 8V5a2 2 0 0 0-2-2h-3"
+            />
+            <path
+              d="M3 16v3a2 2 0 0 0 2 2h3"
+            />
+            <path
+              d="M16 21h3a2 2 0 0 0 2-2v-3"
+            />
+          </svg>
+        </button>
+      </div>
+      <form
+        class="rh-pdf-preview__search"
+      >
+        <div
+          class="rh-field rh-field--stacked is-disabled"
+        >
+          <label
+            class="rh-field__label rh-visually-hidden"
+            for="rh-input-ID"
+          >
+            Search the PDF
+          </label>
+          <div
+            class="rh-input"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search rh-icon rh-input__icon"
+              data-icon="search"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21 21-4.34-4.34"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+            </svg>
+            <input
+              class="rh-control rh-control--sm rh-control--with-icon"
+              disabled=""
+              id="rh-input-ID"
+              placeholder="Search the PDF"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <p
+      class="rh-pdf-preview__stale"
+      role="status"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock rh-icon"
+        data-icon="clock"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <path
+          d="M12 6v6l4 2"
+        />
+      </svg>
+      <span>
+        Showing the last successful PDF from 2026-09-03 09:41 UTC; the current build failed.
+      </span>
+    </p>
+    <div
+      aria-label="PDF preview pages"
+      class="rh-pdf-preview__surface"
+      role="group"
+      tabindex="0"
+    >
+      <div
+        class="rh-pdf-preview__placeholder rh-surface-paper"
+      >
+        <p>
+          Page 3
+        </p>
+      </div>
+    </div>
+    <p
+      class="rh-pdf-preview__footer"
+    >
+      PDF-to-source navigation is unavailable for this build.
+    </p>
+  </section>
+</div>
+`;
+
+exports[`PdfPreview theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <section
+    aria-label="PDF preview"
+    class="rh-pdf-preview"
+    data-stale=""
+    data-status="failed"
+    id="rh-pdfpreview-ID"
+  >
+    <div
+      class="rh-pdf-preview__toolbar"
+    >
+      <div
+        class="rh-pdf-preview__pager"
+      >
+        <button
+          aria-label="Previous page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-left rh-icon"
+            data-icon="chevron-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m15 18-6-6 6-6"
+            />
+          </svg>
+        </button>
+        <p
+          aria-live="polite"
+          class="rh-pdf-preview__page-count"
+        >
+          Page 3 of 12
+        </p>
+        <button
+          aria-label="Next page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-right rh-icon"
+            data-icon="chevron-right"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m9 18 6-6-6-6"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="rh-pdf-preview__zoom"
+      >
+        <button
+          aria-label="Zoom out"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-out rh-icon"
+            data-icon="zoom-out"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <p
+          class="rh-pdf-preview__scale"
+        >
+          100
+          %
+        </p>
+        <button
+          aria-label="Zoom in"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-zoom-in rh-icon"
+            data-icon="zoom-in"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <line
+              x1="21"
+              x2="16.65"
+              y1="21"
+              y2="16.65"
+            />
+            <line
+              x1="11"
+              x2="11"
+              y1="8"
+              y2="14"
+            />
+            <line
+              x1="8"
+              x2="14"
+              y1="11"
+              y2="11"
+            />
+          </svg>
+        </button>
+        <button
+          aria-label="Fit page"
+          class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+          data-variant="ghost"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-maximize rh-icon"
+            data-icon="maximize"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 3H5a2 2 0 0 0-2 2v3"
+            />
+            <path
+              d="M21 8V5a2 2 0 0 0-2-2h-3"
+            />
+            <path
+              d="M3 16v3a2 2 0 0 0 2 2h3"
+            />
+            <path
+              d="M16 21h3a2 2 0 0 0 2-2v-3"
+            />
+          </svg>
+        </button>
+      </div>
+      <form
+        class="rh-pdf-preview__search"
+      >
+        <div
+          class="rh-field rh-field--stacked is-disabled"
+        >
+          <label
+            class="rh-field__label rh-visually-hidden"
+            for="rh-input-ID"
+          >
+            Search the PDF
+          </label>
+          <div
+            class="rh-input"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search rh-icon rh-input__icon"
+              data-icon="search"
+              fill="none"
+              focusable="false"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21 21-4.34-4.34"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+            </svg>
+            <input
+              class="rh-control rh-control--sm rh-control--with-icon"
+              disabled=""
+              id="rh-input-ID"
+              placeholder="Search the PDF"
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+    <p
+      class="rh-pdf-preview__stale"
+      role="status"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-clock rh-icon"
+        data-icon="clock"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <path
+          d="M12 6v6l4 2"
+        />
+      </svg>
+      <span>
+        Showing the last successful PDF from 2026-09-03 09:41 UTC; the current build failed.
+      </span>
+    </p>
+    <div
+      aria-label="PDF preview pages"
+      class="rh-pdf-preview__surface"
+      role="group"
+      tabindex="0"
+    >
+      <div
+        class="rh-pdf-preview__placeholder rh-surface-paper"
+      >
+        <p>
+          Page 3
+        </p>
+      </div>
+    </div>
+    <p
+      class="rh-pdf-preview__footer"
+    >
+      PDF-to-source navigation is unavailable for this build.
+    </p>
+  </section>
+</div>
+`;

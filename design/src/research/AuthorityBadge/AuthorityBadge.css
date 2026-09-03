@@ -1,0 +1,5 @@
+/* The badge itself is the primitive; this only adds the focus affordance the tooltip
+   variant needs, so a describable badge shows where the keyboard is. */
+.rh-authority-badge[tabindex] {
+  cursor: help;
+}

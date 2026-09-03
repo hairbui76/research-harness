@@ -1,0 +1,477 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AsyncState > AsyncState theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-state"
+    data-kind="retryable"
+    data-tone="warning"
+    role="status"
+  >
+    <span
+      class="rh-state__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-refresh-cw rh-icon"
+        data-icon="refresh-cw"
+        fill="none"
+        focusable="false"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+        />
+        <path
+          d="M21 3v5h-5"
+        />
+        <path
+          d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+        />
+        <path
+          d="M8 16H3v5"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-state__body"
+    >
+      <p
+        class="rh-state__kind"
+      >
+        Try again
+      </p>
+      <p
+        class="rh-state__title"
+      >
+        The model provider did not respond
+      </p>
+      <p
+        class="rh-state__description"
+      >
+        No reply arrived, so nothing was recorded.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+        </span>
+      </p>
+      <div
+        class="rh-state__actions"
+      >
+        <button
+          class="rh-button rh-button--primary rh-button--sm"
+          data-variant="primary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Retry
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AsyncState > AsyncState theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-state"
+    data-kind="retryable"
+    data-tone="warning"
+    role="status"
+  >
+    <span
+      class="rh-state__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-refresh-cw rh-icon"
+        data-icon="refresh-cw"
+        fill="none"
+        focusable="false"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+        />
+        <path
+          d="M21 3v5h-5"
+        />
+        <path
+          d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+        />
+        <path
+          d="M8 16H3v5"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-state__body"
+    >
+      <p
+        class="rh-state__kind"
+      >
+        Try again
+      </p>
+      <p
+        class="rh-state__title"
+      >
+        The model provider did not respond
+      </p>
+      <p
+        class="rh-state__description"
+      >
+        No reply arrived, so nothing was recorded.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+        </span>
+      </p>
+      <div
+        class="rh-state__actions"
+      >
+        <button
+          class="rh-button rh-button--primary rh-button--sm"
+          data-variant="primary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Retry
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AsyncState > AsyncState theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-state"
+    data-kind="retryable"
+    data-tone="warning"
+    role="status"
+  >
+    <span
+      class="rh-state__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-refresh-cw rh-icon"
+        data-icon="refresh-cw"
+        fill="none"
+        focusable="false"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+        />
+        <path
+          d="M21 3v5h-5"
+        />
+        <path
+          d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+        />
+        <path
+          d="M8 16H3v5"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-state__body"
+    >
+      <p
+        class="rh-state__kind"
+      >
+        Try again
+      </p>
+      <p
+        class="rh-state__title"
+      >
+        The model provider did not respond
+      </p>
+      <p
+        class="rh-state__description"
+      >
+        No reply arrived, so nothing was recorded.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+        </span>
+      </p>
+      <div
+        class="rh-state__actions"
+      >
+        <button
+          class="rh-button rh-button--primary rh-button--sm"
+          data-variant="primary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Retry
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AsyncState > AsyncState theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-state"
+    data-kind="retryable"
+    data-tone="warning"
+    role="status"
+  >
+    <span
+      class="rh-state__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-refresh-cw rh-icon"
+        data-icon="refresh-cw"
+        fill="none"
+        focusable="false"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+        />
+        <path
+          d="M21 3v5h-5"
+        />
+        <path
+          d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+        />
+        <path
+          d="M8 16H3v5"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-state__body"
+    >
+      <p
+        class="rh-state__kind"
+      >
+        Try again
+      </p>
+      <p
+        class="rh-state__title"
+      >
+        The model provider did not respond
+      </p>
+      <p
+        class="rh-state__description"
+      >
+        No reply arrived, so nothing was recorded.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+        </span>
+      </p>
+      <div
+        class="rh-state__actions"
+      >
+        <button
+          class="rh-button rh-button--primary rh-button--sm"
+          data-variant="primary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Retry
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

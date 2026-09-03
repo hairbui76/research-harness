@@ -1,0 +1,46 @@
+.rh-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rh-control-height-md);
+  height: var(--rh-control-height-md);
+  padding: 0;
+  border: var(--rh-border-width) solid transparent;
+  border-radius: var(--rh-radius-control);
+  cursor: pointer;
+  /* Fill and ink come from the shared `.rh-button--<variant>` class, which is always
+     applied. Setting them here would win on source order and flatten every variant. */
+  transition:
+    transform var(--rh-duration-fast) var(--rh-ease-standard),
+    background-color var(--rh-duration-fast) linear,
+    border-color var(--rh-duration-fast) linear,
+    color var(--rh-duration-fast) linear;
+}
+
+.rh-icon-button--sm {
+  width: var(--rh-control-height-sm);
+  height: var(--rh-control-height-sm);
+}
+
+.rh-icon-button:hover:not(:disabled) {
+  transform: scale(var(--rh-scale-hover));
+}
+
+.rh-icon-button:active:not(:disabled) {
+  transform: scale(var(--rh-scale-press));
+}
+
+.rh-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.rh-icon-button.is-loading .rh-icon {
+  animation: rh-spin 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rh-icon-button.is-loading .rh-icon {
+    animation: none;
+  }
+}

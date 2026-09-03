@@ -1,0 +1,225 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SaveToCorpusAction theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-save-to-corpus"
+    data-state="idle"
+  >
+    <button
+      class="rh-button rh-button--secondary rh-button--sm"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-library rh-icon"
+          data-icon="library"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6 4 14"
+          />
+          <path
+            d="M12 6v14"
+          />
+          <path
+            d="M8 8v12"
+          />
+          <path
+            d="M4 4v16"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Save to corpus
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`SaveToCorpusAction theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-save-to-corpus"
+    data-state="idle"
+  >
+    <button
+      class="rh-button rh-button--secondary rh-button--sm"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-library rh-icon"
+          data-icon="library"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6 4 14"
+          />
+          <path
+            d="M12 6v14"
+          />
+          <path
+            d="M8 8v12"
+          />
+          <path
+            d="M4 4v16"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Save to corpus
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`SaveToCorpusAction theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-save-to-corpus"
+    data-state="idle"
+  >
+    <button
+      class="rh-button rh-button--secondary rh-button--sm"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-library rh-icon"
+          data-icon="library"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6 4 14"
+          />
+          <path
+            d="M12 6v14"
+          />
+          <path
+            d="M8 8v12"
+          />
+          <path
+            d="M4 4v16"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Save to corpus
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`SaveToCorpusAction theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-save-to-corpus"
+    data-state="idle"
+  >
+    <button
+      class="rh-button rh-button--secondary rh-button--sm"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-library rh-icon"
+          data-icon="library"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 6 4 14"
+          />
+          <path
+            d="M12 6v14"
+          />
+          <path
+            d="M8 8v12"
+          />
+          <path
+            d="M4 4v16"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Save to corpus
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

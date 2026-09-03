@@ -1,0 +1,92 @@
+.rh-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  /* Height comes from the text, not from a control track: a badge sits inside a line of
+     prose or a table cell as often as it sits in a toolbar. */
+  padding: 2px var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+  font-weight: var(--rh-type-ui-weight);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.rh-badge--sm {
+  padding: 1px var(--rh-space-1);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+}
+
+/* Scientific status. Colour is the third channel here, after the glyph and the label. */
+.rh-badge--status-accepted {
+  background: var(--rh-status-accepted-bg);
+  border-color: var(--rh-status-accepted-border);
+  color: var(--rh-status-accepted-fg);
+}
+
+.rh-badge--status-candidate {
+  background: var(--rh-status-candidate-bg);
+  border-color: var(--rh-status-candidate-border);
+  color: var(--rh-status-candidate-fg);
+}
+
+.rh-badge--status-qualified {
+  background: var(--rh-status-qualified-bg);
+  border-color: var(--rh-status-qualified-border);
+  color: var(--rh-status-qualified-fg);
+}
+
+.rh-badge--status-contested {
+  background: var(--rh-status-contested-bg);
+  border-color: var(--rh-status-contested-border);
+  color: var(--rh-status-contested-fg);
+}
+
+.rh-badge--status-stale {
+  background: var(--rh-status-stale-bg);
+  border-color: var(--rh-status-stale-border);
+  color: var(--rh-status-stale-fg);
+}
+
+.rh-badge--status-private {
+  background: var(--rh-status-private-bg);
+  border-color: var(--rh-status-private-border);
+  color: var(--rh-status-private-fg);
+}
+
+/* Application feedback tones. Never a statement about scientific truth. */
+.rh-badge--tone-success {
+  background: var(--rh-feedback-success-bg);
+  border-color: var(--rh-feedback-success-border);
+  color: var(--rh-feedback-success-fg);
+}
+
+.rh-badge--tone-error {
+  background: var(--rh-feedback-error-bg);
+  border-color: var(--rh-feedback-error-border);
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-badge--tone-warning {
+  background: var(--rh-feedback-warning-bg);
+  border-color: var(--rh-feedback-warning-border);
+  color: var(--rh-feedback-warning-fg);
+}
+
+.rh-badge--tone-info {
+  background: var(--rh-feedback-info-bg);
+  border-color: var(--rh-feedback-info-border);
+  color: var(--rh-feedback-info-fg);
+}
+
+/* AI/action accent: this thing came from, or is about, a model call. */
+.rh-badge--tone-accent {
+  background: var(--rh-accent-subtle);
+  border-color: var(--rh-accent-border);
+  color: var(--rh-accent-text);
+}

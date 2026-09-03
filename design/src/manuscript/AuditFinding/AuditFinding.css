@@ -1,0 +1,134 @@
+.rh-audit-finding-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rh-audit-finding-list__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+/*
+ * An audit row is visibly a different kind of row from a compiler diagnostic: it leads
+ * with a bracketed severity chip on the scientific-status palette rather than a compiler
+ * severity word on the feedback palette.
+ */
+.rh-audit-finding {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  padding: var(--rh-space-1) var(--rh-space-2);
+  border-inline-start: 2px solid var(--rh-status-candidate-border);
+  border-radius: var(--rh-radius-control);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-audit-finding[data-severity='error'] {
+  border-inline-start-color: var(--rh-status-contested-border);
+}
+
+.rh-audit-finding[data-severity='info'] {
+  border-inline-start-color: var(--rh-status-qualified-border);
+}
+
+.rh-audit-finding__severity {
+  flex: none;
+  padding-inline: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-status-candidate-border);
+  border-radius: var(--rh-radius-pill);
+  background: var(--rh-status-candidate-bg);
+  color: var(--rh-status-candidate-fg);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-audit-finding[data-severity='error'] .rh-audit-finding__severity {
+  border-color: var(--rh-status-contested-border);
+  background: var(--rh-status-contested-bg);
+  color: var(--rh-status-contested-fg);
+}
+
+.rh-audit-finding[data-severity='info'] .rh-audit-finding__severity {
+  border-color: var(--rh-status-qualified-border);
+  background: var(--rh-status-qualified-bg);
+  color: var(--rh-status-qualified-fg);
+}
+
+.rh-audit-finding__button {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--rh-text-primary);
+  font: inherit;
+  text-align: start;
+}
+
+button.rh-audit-finding__button {
+  cursor: pointer;
+}
+
+button.rh-audit-finding__button:hover .rh-audit-finding__kind {
+  text-decoration: underline;
+}
+
+.rh-audit-finding__kind {
+  flex: none;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-audit-finding__message {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--rh-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.rh-audit-finding__position {
+  flex: none;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-muted);
+}
+
+.rh-audit-finding__refs {
+  display: inline-flex;
+  gap: var(--rh-space-1);
+  flex: none;
+}
+
+.rh-audit-finding__ref {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  padding-inline: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-pill);
+  background: transparent;
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  cursor: pointer;
+}
+
+.rh-audit-finding__ref:disabled {
+  cursor: default;
+  color: var(--rh-text-muted);
+}
+
+.rh-audit-finding__ref:not(:disabled):hover {
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-primary);
+}

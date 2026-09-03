@@ -1,0 +1,142 @@
+.rh-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rh-space-2);
+  height: var(--rh-control-height-md);
+  padding: 0 var(--rh-control-padding-md);
+  border: var(--rh-border-width) solid transparent;
+  border-radius: var(--rh-radius-control);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-ui-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-ui-lh);
+  font-weight: var(--rh-type-ui-weight);
+  letter-spacing: var(--rh-type-ui-ls);
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  color: var(--rh-text-primary);
+  transition:
+    transform var(--rh-duration-fast) var(--rh-ease-standard),
+    background-color var(--rh-duration-fast) linear,
+    border-color var(--rh-duration-fast) linear,
+    color var(--rh-duration-fast) linear;
+}
+
+.rh-button--sm {
+  height: var(--rh-control-height-sm);
+  padding: 0 var(--rh-control-padding-sm);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  gap: var(--rh-space-1);
+}
+
+.rh-button--full {
+  width: 100%;
+}
+
+.rh-button__content {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+}
+
+.rh-button:hover:not(:disabled) {
+  transform: scale(var(--rh-scale-hover));
+}
+
+.rh-button:active:not(:disabled) {
+  transform: scale(var(--rh-scale-press));
+}
+
+.rh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Variants ---------------------------------------------------------------------------- */
+
+.rh-button--primary {
+  background: var(--rh-surface-inverse);
+  color: var(--rh-text-inverse);
+}
+
+.rh-button--primary:hover:not(:disabled) {
+  background: var(--rh-text-primary);
+}
+
+/* The visible edge is what says "this is a button", so it takes the 3:1 hairline. */
+.rh-button--secondary {
+  background: var(--rh-surface-raised);
+  border-color: var(--rh-border-strong);
+  color: var(--rh-text-primary);
+}
+
+.rh-button--secondary:hover:not(:disabled) {
+  background: var(--rh-surface-subtle);
+  border-color: var(--rh-text-primary);
+}
+
+.rh-button--ghost {
+  background: transparent;
+  color: var(--rh-text-secondary);
+}
+
+.rh-button--ghost:hover:not(:disabled) {
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-primary);
+}
+
+.rh-button--danger {
+  background: var(--rh-feedback-error-bg);
+  border-color: var(--rh-feedback-error-border);
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-button--danger:hover:not(:disabled) {
+  border-color: var(--rh-feedback-error-fg);
+}
+
+/* The AI/action accent: send, run, model activity. Not an emphasis colour. */
+.rh-button--accent {
+  background: var(--rh-accent);
+  color: var(--rh-accent-fg);
+}
+
+.rh-button--accent:hover:not(:disabled) {
+  background: var(--rh-accent-hover);
+}
+
+/* Loading ----------------------------------------------------------------------------- */
+
+.rh-button.is-loading .rh-button__content {
+  visibility: hidden;
+}
+
+.rh-button__spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rh-button__spinner .rh-icon {
+  animation: rh-spin 900ms linear infinite;
+}
+
+@keyframes rh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+ * Reduced motion: motion.css already collapses durations, and the spinner stops turning
+ * so nothing loops in the corner of the eye. The `aria-busy` state still carries meaning.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .rh-button__spinner .rh-icon {
+    animation: none;
+  }
+}

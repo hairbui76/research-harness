@@ -1,0 +1,108 @@
+/*
+ * Raw palette. This file and design/src/themes/*.css are the ONLY places in the package
+ * where a colour literal may appear (design/scripts/check-tokens.mjs enforces it).
+ *
+ * The ramp is warm all the way down: every neutral carries a little red/yellow so the
+ * dark canvas reads as ink on paper rather than as a cold console. Cool greys are a bug.
+ * Translated from the source bundle's warm-neutral foundation (cream #faf9f6, white,
+ * off-black #111111, oat #dedbd6, sand #d3cec6) and extended into a full dark ramp.
+ */
+:root {
+  /* Warm neutral ramp, darkest to lightest. */
+  --rh-palette-warm-1000: #0e0d0c;
+  --rh-palette-warm-975: #141312;
+  --rh-palette-warm-950: #1b1a18;
+  --rh-palette-warm-900: #232120;
+  --rh-palette-warm-850: #2b2926;
+  --rh-palette-warm-800: #33302c;
+  --rh-palette-warm-750: #3d3a35;
+  --rh-palette-warm-700: #4a4640;
+  --rh-palette-warm-600: #635e56;
+  --rh-palette-warm-500: #7d776e;
+  --rh-palette-warm-450: #948d83;
+  --rh-palette-warm-400: #a49d93;
+  --rh-palette-warm-350: #b5aea4;
+  --rh-palette-warm-300: #c9c2b8;
+  --rh-palette-warm-250: #d3cec6;
+  --rh-palette-warm-200: #dedbd6;
+  --rh-palette-warm-150: #e7e3dc;
+  --rh-palette-warm-100: #ece8e2;
+  --rh-palette-warm-75: #f2efe9;
+  --rh-palette-warm-50: #faf9f6;
+  --rh-palette-white: #ffffff;
+  --rh-palette-off-black: #111111;
+
+  /* Reading surface. Near-white in BOTH themes: a page of a paper is a page of a paper. */
+  --rh-palette-paper: #f8f7f4;
+  --rh-palette-paper-ink: #1a1815;
+  --rh-palette-paper-ink-secondary: #4d483f;
+  --rh-palette-paper-ink-muted: #6b6558;
+  --rh-palette-paper-line: #ded9cf;
+
+  /* AI / action accent. Reserved for model activity, the primary send/run action,
+     active reference tracking, and selected AI provenance. Never scientific truth. */
+  --rh-palette-accent-700: #b83a00;
+  --rh-palette-accent-600: #d94800;
+  --rh-palette-accent-500: #ff5600;
+  --rh-palette-accent-400: #ff7331;
+  --rh-palette-accent-300: #ff9057;
+  --rh-palette-accent-tint-dark: #3a1d0e;
+  --rh-palette-accent-tint-light: #ffe9dd;
+  --rh-palette-accent-edge-dark: #6d3717;
+  --rh-palette-accent-edge-light: #ffcbaf;
+
+  /* Scientific status hues. Six mutually distinct families, all distinct from the accent. */
+  --rh-palette-green-700: #1a6330;
+  --rh-palette-green-300: #93d8a3;
+  --rh-palette-green-tint-light: #e4f2e7;
+  --rh-palette-green-tint-dark: #14281a;
+  --rh-palette-green-edge-light: #b6dabf;
+  --rh-palette-green-edge-dark: #2f5a3c;
+
+  --rh-palette-blue-700: #1a4f7a;
+  --rh-palette-blue-300: #93c6ec;
+  --rh-palette-blue-tint-light: #e4eef7;
+  --rh-palette-blue-tint-dark: #11202d;
+  --rh-palette-blue-edge-light: #b3d0e7;
+  --rh-palette-blue-edge-dark: #2c4d68;
+
+  --rh-palette-violet-700: #57368a;
+  --rh-palette-violet-300: #c4abec;
+  --rh-palette-violet-tint-light: #eee8f7;
+  --rh-palette-violet-tint-dark: #201a31;
+  --rh-palette-violet-edge-light: #cfc0e6;
+  --rh-palette-violet-edge-dark: #463a63;
+
+  --rh-palette-red-700: #9c2019;
+  --rh-palette-red-300: #f2a79f;
+  --rh-palette-red-tint-light: #fbe8e6;
+  --rh-palette-red-tint-dark: #2e1512;
+  --rh-palette-red-edge-light: #eec1bb;
+  --rh-palette-red-edge-dark: #6b302a;
+
+  --rh-palette-ochre-700: #74561a;
+  --rh-palette-ochre-300: #dcc082;
+  --rh-palette-ochre-tint-light: #f5eedd;
+  --rh-palette-ochre-tint-dark: #2a2212;
+  --rh-palette-ochre-edge-light: #decfa8;
+  --rh-palette-ochre-edge-dark: #5a4a26;
+
+  --rh-palette-slate-700: #3b4653;
+  --rh-palette-slate-300: #b0bbc7;
+  --rh-palette-slate-tint-light: #ebeef2;
+  --rh-palette-slate-tint-dark: #191d22;
+  --rh-palette-slate-edge-light: #cbd3db;
+  --rh-palette-slate-edge-dark: #3a444f;
+
+  /* Feedback-only hue (warning); success/error/info reuse green/red/blue above. */
+  --rh-palette-amber-700: #7d5300;
+  --rh-palette-amber-300: #eebe6a;
+  --rh-palette-amber-tint-light: #fbf0da;
+  --rh-palette-amber-tint-dark: #2c2210;
+  --rh-palette-amber-edge-light: #e6d3a5;
+  --rh-palette-amber-edge-dark: #5c4720;
+
+  /* Scrims. Alpha is deliberate here; nothing else in the system uses transparency. */
+  --rh-palette-scrim-dark: rgba(8, 7, 6, 0.66);
+  --rh-palette-scrim-light: rgba(26, 24, 21, 0.42);
+}

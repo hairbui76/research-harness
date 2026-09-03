@@ -1,0 +1,40 @@
+.rh-scroll-area {
+  min-width: 0;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rh-border-strong) transparent;
+  overscroll-behavior: contain;
+}
+
+.rh-scroll-area[data-orientation='vertical'] {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.rh-scroll-area[data-orientation='horizontal'] {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.rh-scroll-area[data-orientation='both'] {
+  overflow: auto;
+}
+
+.rh-scroll-area:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-scroll-area::-webkit-scrollbar {
+  width: var(--rh-space-2);
+  height: var(--rh-space-2);
+}
+
+.rh-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--rh-border-strong);
+  border-radius: var(--rh-radius-pill);
+}
+
+.rh-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}

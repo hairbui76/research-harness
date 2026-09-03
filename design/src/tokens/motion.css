@@ -1,0 +1,39 @@
+/*
+ * Motion. Restrained: this is a research instrument, not a landing page. The source
+ * bundle's 1.1 hover / 0.85 press scale is far too strong for a dense interface, so the
+ * system uses 1.02 and 0.98 and reserves motion for direct manipulation.
+ *
+ * No entrance animation on scroll, no parallax, no looping ambient motion.
+ */
+:root {
+  --rh-duration-fast: 120ms;
+  --rh-duration-base: 200ms;
+  --rh-duration-slow: 400ms;
+  --rh-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --rh-scale-hover: 1.02;
+  --rh-scale-press: 0.98;
+}
+
+/*
+ * Reduced motion is honoured at the token level, so every component that reads these
+ * tokens is covered without writing its own media query: durations collapse to a single
+ * frame and the hover/press scales become identity transforms.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rh-duration-fast: 1ms;
+    --rh-duration-base: 1ms;
+    --rh-duration-slow: 1ms;
+    --rh-scale-hover: 1;
+    --rh-scale-press: 1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,39 @@
+.rh-diagnostics-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+  min-width: 0;
+  padding: var(--rh-space-3);
+  color: var(--rh-text-primary);
+}
+
+.rh-diagnostics-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-diagnostics-panel__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  font-size: var(--rh-type-h3-size);
+  line-height: var(--rh-type-h3-lh);
+  font-weight: var(--rh-type-h3-weight);
+}
+
+.rh-diagnostics-panel__count {
+  margin-inline-start: auto;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  font-weight: var(--rh-type-body-weight);
+  color: var(--rh-text-muted);
+}
+
+.rh-diagnostics-panel__note {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  color: var(--rh-text-muted);
+}

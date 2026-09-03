@@ -1,0 +1,1353 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SessionList theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-session-list"
+  >
+    <div
+      class="rh-session-list__toolbar"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-input-ID"
+        >
+          Search sessions
+        </label>
+        <div
+          class="rh-input"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-search rh-icon rh-input__icon"
+            data-icon="search"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m21 21-4.34-4.34"
+            />
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+          </svg>
+          <input
+            class="rh-control rh-control--sm rh-control--with-icon rh-session-list__search"
+            id="rh-input-ID"
+            placeholder="Search sessions"
+            type="search"
+          />
+        </div>
+      </div>
+      <button
+        class="rh-button rh-button--secondary rh-button--sm"
+        data-variant="secondary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Sessions"
+      class="rh-session-list__items"
+    >
+      <li>
+        <div
+          class="rh-session-list__row"
+          data-active="true"
+        >
+          <button
+            aria-current="true"
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Stiffness threshold for C0041
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0001
+              </span>
+              <time
+                datetime="2026-09-03T14:20:38Z"
+              >
+                2026-09-03 14:20
+              </time>
+              <span>
+                24
+                 
+                messages
+              </span>
+            </span>
+            <span
+              class="rh-session-list__preview"
+            >
+              The sweep supports an association, not the causal wording.
+            </span>
+          </button>
+          <button
+            aria-label="Rename Stiffness threshold for C0041"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Grant notes
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0004
+              </span>
+              <time
+                datetime="2026-08-28T09:02:00Z"
+              >
+                2026-08-28 09:02
+              </time>
+              <span>
+                6
+                 
+                messages
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Grant notes"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Taxonomy clean-up
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0007
+              </span>
+              <time
+                datetime="2026-08-19T17:44:00Z"
+              >
+                2026-08-19 17:44
+              </time>
+              <span>
+                41
+                 
+                messages
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Taxonomy clean-up"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`SessionList theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-session-list"
+  >
+    <div
+      class="rh-session-list__toolbar"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-input-ID"
+        >
+          Search sessions
+        </label>
+        <div
+          class="rh-input"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-search rh-icon rh-input__icon"
+            data-icon="search"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m21 21-4.34-4.34"
+            />
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+          </svg>
+          <input
+            class="rh-control rh-control--sm rh-control--with-icon rh-session-list__search"
+            id="rh-input-ID"
+            placeholder="Search sessions"
+            type="search"
+          />
+        </div>
+      </div>
+      <button
+        class="rh-button rh-button--secondary rh-button--sm"
+        data-variant="secondary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Sessions"
+      class="rh-session-list__items"
+    >
+      <li>
+        <div
+          class="rh-session-list__row"
+          data-active="true"
+        >
+          <button
+            aria-current="true"
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Stiffness threshold for C0041
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0001
+              </span>
+              <time
+                datetime="2026-09-03T14:20:38Z"
+              >
+                2026-09-03 14:20
+              </time>
+              <span>
+                24
+                 
+                messages
+              </span>
+            </span>
+            <span
+              class="rh-session-list__preview"
+            >
+              The sweep supports an association, not the causal wording.
+            </span>
+          </button>
+          <button
+            aria-label="Rename Stiffness threshold for C0041"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Grant notes
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0004
+              </span>
+              <time
+                datetime="2026-08-28T09:02:00Z"
+              >
+                2026-08-28 09:02
+              </time>
+              <span>
+                6
+                 
+                messages
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Grant notes"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Taxonomy clean-up
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0007
+              </span>
+              <time
+                datetime="2026-08-19T17:44:00Z"
+              >
+                2026-08-19 17:44
+              </time>
+              <span>
+                41
+                 
+                messages
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Taxonomy clean-up"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`SessionList theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-session-list"
+  >
+    <div
+      class="rh-session-list__toolbar"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-input-ID"
+        >
+          Search sessions
+        </label>
+        <div
+          class="rh-input"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-search rh-icon rh-input__icon"
+            data-icon="search"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m21 21-4.34-4.34"
+            />
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+          </svg>
+          <input
+            class="rh-control rh-control--sm rh-control--with-icon rh-session-list__search"
+            id="rh-input-ID"
+            placeholder="Search sessions"
+            type="search"
+          />
+        </div>
+      </div>
+      <button
+        class="rh-button rh-button--secondary rh-button--sm"
+        data-variant="secondary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Sessions"
+      class="rh-session-list__items"
+    >
+      <li>
+        <div
+          class="rh-session-list__row"
+          data-active="true"
+        >
+          <button
+            aria-current="true"
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Stiffness threshold for C0041
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0001
+              </span>
+              <time
+                datetime="2026-09-03T14:20:38Z"
+              >
+                2026-09-03 14:20
+              </time>
+              <span>
+                24
+                 
+                messages
+              </span>
+            </span>
+            <span
+              class="rh-session-list__preview"
+            >
+              The sweep supports an association, not the causal wording.
+            </span>
+          </button>
+          <button
+            aria-label="Rename Stiffness threshold for C0041"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Grant notes
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0004
+              </span>
+              <time
+                datetime="2026-08-28T09:02:00Z"
+              >
+                2026-08-28 09:02
+              </time>
+              <span>
+                6
+                 
+                messages
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Grant notes"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Taxonomy clean-up
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0007
+              </span>
+              <time
+                datetime="2026-08-19T17:44:00Z"
+              >
+                2026-08-19 17:44
+              </time>
+              <span>
+                41
+                 
+                messages
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Taxonomy clean-up"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`SessionList theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-session-list"
+  >
+    <div
+      class="rh-session-list__toolbar"
+    >
+      <div
+        class="rh-field rh-field--stacked"
+      >
+        <label
+          class="rh-field__label rh-visually-hidden"
+          for="rh-input-ID"
+        >
+          Search sessions
+        </label>
+        <div
+          class="rh-input"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-search rh-icon rh-input__icon"
+            data-icon="search"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m21 21-4.34-4.34"
+            />
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+          </svg>
+          <input
+            class="rh-control rh-control--sm rh-control--with-icon rh-session-list__search"
+            id="rh-input-ID"
+            placeholder="Search sessions"
+            type="search"
+          />
+        </div>
+      </div>
+      <button
+        class="rh-button rh-button--secondary rh-button--sm"
+        data-variant="secondary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Sessions"
+      class="rh-session-list__items"
+    >
+      <li>
+        <div
+          class="rh-session-list__row"
+          data-active="true"
+        >
+          <button
+            aria-current="true"
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Stiffness threshold for C0041
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0001
+              </span>
+              <time
+                datetime="2026-09-03T14:20:38Z"
+              >
+                2026-09-03 14:20
+              </time>
+              <span>
+                24
+                 
+                messages
+              </span>
+            </span>
+            <span
+              class="rh-session-list__preview"
+            >
+              The sweep supports an association, not the causal wording.
+            </span>
+          </button>
+          <button
+            aria-label="Rename Stiffness threshold for C0041"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Grant notes
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0004
+              </span>
+              <time
+                datetime="2026-08-28T09:02:00Z"
+              >
+                2026-08-28 09:02
+              </time>
+              <span>
+                6
+                 
+                messages
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Grant notes"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+      <li>
+        <div
+          class="rh-session-list__row"
+        >
+          <button
+            class="rh-session-list__select"
+            type="button"
+          >
+            <span
+              class="rh-session-list__title"
+            >
+              Taxonomy clean-up
+            </span>
+            <span
+              class="rh-session-list__meta"
+            >
+              <span
+                class="rh-session-list__id"
+              >
+                CS0007
+              </span>
+              <time
+                datetime="2026-08-19T17:44:00Z"
+              >
+                2026-08-19 17:44
+              </time>
+              <span>
+                41
+                 
+                messages
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Rename Taxonomy clean-up"
+            class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-session-list__rename-button"
+            data-variant="ghost"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-pen-line rh-icon"
+              data-icon="pen-line"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 21h8"
+              />
+              <path
+                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+              />
+            </svg>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;

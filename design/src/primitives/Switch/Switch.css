@@ -1,0 +1,71 @@
+.rh-switch {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: var(--rh-space-8);
+  height: var(--rh-space-5);
+}
+
+.rh-switch__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.rh-switch__input:disabled {
+  cursor: not-allowed;
+}
+
+.rh-switch__track {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  /* 3px, not a spacing step: this is the inset of a 12px thumb inside a 20px track, not
+     layout spacing. 32 - 2 border - 6 padding = 24 of travel for a 12px thumb. */
+  padding: 3px;
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-pill);
+  background: var(--rh-surface-pane);
+  pointer-events: none;
+  transition:
+    background-color var(--rh-duration-fast) linear,
+    border-color var(--rh-duration-fast) linear;
+}
+
+.rh-switch__thumb {
+  width: var(--rh-space-3);
+  height: var(--rh-space-3);
+  border-radius: var(--rh-radius-pill);
+  background: var(--rh-text-muted);
+  transition:
+    transform var(--rh-duration-fast) var(--rh-ease-standard),
+    background-color var(--rh-duration-fast) linear;
+}
+
+.rh-switch__input:checked + .rh-switch__track {
+  background: var(--rh-surface-inverse);
+  border-color: var(--rh-surface-inverse);
+}
+
+.rh-switch__input:checked + .rh-switch__track .rh-switch__thumb {
+  background: var(--rh-text-inverse);
+  transform: translateX(var(--rh-space-3));
+}
+
+.rh-switch__input:hover:not(:disabled) + .rh-switch__track {
+  border-color: var(--rh-text-primary);
+}
+
+.rh-switch__input:focus-visible + .rh-switch__track {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-switch.is-disabled {
+  opacity: 0.55;
+}

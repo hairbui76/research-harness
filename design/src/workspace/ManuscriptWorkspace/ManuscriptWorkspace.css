@@ -1,0 +1,102 @@
+.rh-manuscript-workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  block-size: 100%;
+  inline-size: 100%;
+  background: var(--rh-surface-canvas);
+  color: var(--rh-text-primary);
+}
+
+.rh-manuscript-workspace__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  flex: none;
+  min-block-size: var(--rh-density-row);
+  padding: var(--rh-space-1) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+.rh-manuscript-workspace__bar-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rh-manuscript-workspace__rows,
+.rh-manuscript-workspace__side-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.rh-manuscript-workspace__side-layout {
+  display: flex;
+}
+
+.rh-manuscript-workspace__top {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.rh-manuscript-workspace__columns {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rh-manuscript-workspace__files,
+.rh-manuscript-workspace__document,
+.rh-manuscript-workspace__preview {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.rh-manuscript-workspace__inspector {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+.rh-manuscript-workspace[data-inspector-placement='end'] .rh-manuscript-workspace__inspector {
+  flex: none;
+  inline-size: 24rem;
+  max-inline-size: 40%;
+  border-top: 0;
+  border-inline-start: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-manuscript-workspace__inspector-body {
+  min-width: 0;
+}
+
+.rh-manuscript-workspace__tabs {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/*
+ * The hidden panel keeps its box in the DOM: `Tabs keepMounted` leaves both editor and
+ * preview mounted so the cursor position and the page being read survive a tab switch.
+ */
+.rh-manuscript-workspace__tab-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}

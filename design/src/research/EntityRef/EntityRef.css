@@ -1,0 +1,90 @@
+.rh-entity-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  max-width: 100%;
+  padding: 1px var(--rh-space-2) 1px var(--rh-space-1);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+  text-align: start;
+  text-decoration: none;
+  vertical-align: baseline;
+  transition: border-color var(--rh-duration-fast) linear;
+}
+
+.rh-entity-ref--interactive {
+  cursor: pointer;
+}
+
+.rh-entity-ref--interactive:hover {
+  border-color: var(--rh-accent-border);
+  background: var(--rh-accent-subtle);
+}
+
+/* The id is a machine identity: mono, never wrapped, never elided. */
+.rh-entity-ref__id {
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  letter-spacing: var(--rh-type-mono-ls);
+  white-space: nowrap;
+}
+
+.rh-entity-ref__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rh-text-secondary);
+}
+
+.rh-entity-ref__kind {
+  flex: none;
+  color: var(--rh-text-muted);
+}
+
+.rh-entity-ref__authority {
+  flex: none;
+}
+
+/* Resolution trouble is a word as well as a glyph, so it survives greyscale and hover. */
+.rh-entity-ref__resolution {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  font-weight: var(--rh-type-ui-weight);
+  text-transform: uppercase;
+  letter-spacing: var(--rh-type-label-ls);
+}
+
+.rh-entity-ref[data-resolution='stale'] {
+  border-color: var(--rh-status-stale-border);
+  background: var(--rh-status-stale-bg);
+  color: var(--rh-status-stale-fg);
+}
+
+.rh-entity-ref[data-resolution='private'] {
+  border-color: var(--rh-status-private-border);
+  background: var(--rh-status-private-bg);
+  color: var(--rh-status-private-fg);
+}
+
+.rh-entity-ref[data-resolution='unresolved'],
+.rh-entity-ref[data-resolution='broken'] {
+  border-color: var(--rh-feedback-error-border);
+  background: var(--rh-feedback-error-bg);
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-entity-ref[data-resolution='broken'] .rh-entity-ref__id {
+  text-decoration: line-through;
+}
+
+.rh-entity-ref--sm {
+  padding: 0 var(--rh-space-1);
+}

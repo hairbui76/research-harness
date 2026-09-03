@@ -1,0 +1,83 @@
+/*
+ * Typography.
+ *
+ * Three roles: sans for UI and conversation, serif for editorial source/manuscript
+ * moments, mono for ids, provenance, code and machine diagnostics.
+ *
+ * Font families are system stacks. There is no @import and no @font-face pointing at a
+ * URL anywhere in this package: the runtime must render with zero network requests. When
+ * licensed faces are self-hosted, swap the first entry of each stack and nothing else.
+ *
+ * The scale is tuned for a dense research application, not a landing page. `display` is
+ * 28px, not the 80px of the source marketing bundle; body is 14px/1.5 and UI text is 13px.
+ * Each role exposes -size, -lh, -ls and -weight.
+ */
+:root {
+  --rh-font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --rh-font-serif: ui-serif, Charter, 'Iowan Old Style', Georgia, Cambria,
+    'Times New Roman', Times, serif;
+  --rh-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  /* Page/section title. The largest type the application ever uses. */
+  --rh-type-display-size: 28px;
+  --rh-type-display-lh: 1.15;
+  --rh-type-display-ls: -0.5px;
+  --rh-type-display-weight: 600;
+
+  --rh-type-h1-size: 22px;
+  --rh-type-h1-lh: 1.2;
+  --rh-type-h1-ls: -0.35px;
+  --rh-type-h1-weight: 600;
+
+  --rh-type-h2-size: 18px;
+  --rh-type-h2-lh: 1.25;
+  --rh-type-h2-ls: -0.2px;
+  --rh-type-h2-weight: 600;
+
+  --rh-type-h3-size: 15px;
+  --rh-type-h3-lh: 1.3;
+  --rh-type-h3-ls: -0.1px;
+  --rh-type-h3-weight: 600;
+
+  --rh-type-h4-size: 13px;
+  --rh-type-h4-lh: 1.35;
+  --rh-type-h4-ls: normal;
+  --rh-type-h4-weight: 600;
+
+  /* Standfirst / emphasised opening paragraph. */
+  --rh-type-lead-size: 16px;
+  --rh-type-lead-lh: 1.5;
+  --rh-type-lead-ls: normal;
+  --rh-type-lead-weight: 400;
+
+  /* Interface chrome: buttons, tabs, menu items, table headers. */
+  --rh-type-ui-size: 13px;
+  --rh-type-ui-lh: 1.4;
+  --rh-type-ui-ls: normal;
+  --rh-type-ui-weight: 500;
+
+  /* Reading text: conversation turns, evidence quotes, descriptions. */
+  --rh-type-body-size: 14px;
+  --rh-type-body-lh: 1.5;
+  --rh-type-body-ls: normal;
+  --rh-type-body-weight: 400;
+
+  --rh-type-body-sm-size: 12px;
+  --rh-type-body-sm-lh: 1.45;
+  --rh-type-body-sm-ls: normal;
+  --rh-type-body-sm-weight: 400;
+
+  /* Metadata label: uppercase, wide-tracked, set in --rh-font-mono. Never body copy. */
+  --rh-type-label-size: 11px;
+  --rh-type-label-lh: 1.25;
+  --rh-type-label-ls: 0.08em;
+  --rh-type-label-weight: 600;
+
+  /* Ids, provenance, code, compiler output. */
+  --rh-type-mono-size: 12px;
+  --rh-type-mono-lh: 1.5;
+  --rh-type-mono-ls: normal;
+  --rh-type-mono-weight: 400;
+}

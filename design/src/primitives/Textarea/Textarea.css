@@ -1,0 +1,14 @@
+.rh-textarea {
+  height: auto;
+  min-height: var(--rh-control-height-md);
+  padding: var(--rh-space-2) var(--rh-control-padding-md);
+  font-family: inherit;
+}
+
+.rh-textarea--resize-none {
+  resize: none;
+}
+
+.rh-textarea--resize-vertical {
+  resize: vertical;
+}

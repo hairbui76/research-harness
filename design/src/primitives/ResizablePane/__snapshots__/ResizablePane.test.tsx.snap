@@ -1,0 +1,205 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ResizablePane > ResizablePane theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    aria-label="Workspace"
+    class="rh-pane-group"
+    data-direction="horizontal"
+    id="rh-panegroup-ID"
+  >
+    <div
+      class="rh-pane"
+      data-collapsed-size="0"
+      data-direction="horizontal"
+      data-min-size="15"
+      id="rh-panegroup-ID-pane-0"
+      style="flex-basis: 30%;"
+    >
+      Sessions
+    </div>
+    <div
+      aria-controls="rh-panegroup-ID-pane-0"
+      aria-label="Resize the session list"
+      aria-orientation="vertical"
+      aria-valuemax="100"
+      aria-valuemin="15"
+      aria-valuenow="30"
+      class="rh-pane-handle"
+      data-direction="horizontal"
+      role="separator"
+      tabindex="0"
+    >
+      <span
+        aria-hidden="true"
+        class="rh-pane-handle__grip"
+      />
+    </div>
+    <div
+      class="rh-pane"
+      data-direction="horizontal"
+      data-min-size="20"
+      id="rh-panegroup-ID-pane-1"
+      style="flex-basis: 70%;"
+    >
+      Conversation
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResizablePane > ResizablePane theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    aria-label="Workspace"
+    class="rh-pane-group"
+    data-direction="horizontal"
+    id="rh-panegroup-ID"
+  >
+    <div
+      class="rh-pane"
+      data-collapsed-size="0"
+      data-direction="horizontal"
+      data-min-size="15"
+      id="rh-panegroup-ID-pane-0"
+      style="flex-basis: 30%;"
+    >
+      Sessions
+    </div>
+    <div
+      aria-controls="rh-panegroup-ID-pane-0"
+      aria-label="Resize the session list"
+      aria-orientation="vertical"
+      aria-valuemax="100"
+      aria-valuemin="15"
+      aria-valuenow="30"
+      class="rh-pane-handle"
+      data-direction="horizontal"
+      role="separator"
+      tabindex="0"
+    >
+      <span
+        aria-hidden="true"
+        class="rh-pane-handle__grip"
+      />
+    </div>
+    <div
+      class="rh-pane"
+      data-direction="horizontal"
+      data-min-size="20"
+      id="rh-panegroup-ID-pane-1"
+      style="flex-basis: 70%;"
+    >
+      Conversation
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResizablePane > ResizablePane theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    aria-label="Workspace"
+    class="rh-pane-group"
+    data-direction="horizontal"
+    id="rh-panegroup-ID"
+  >
+    <div
+      class="rh-pane"
+      data-collapsed-size="0"
+      data-direction="horizontal"
+      data-min-size="15"
+      id="rh-panegroup-ID-pane-0"
+      style="flex-basis: 30%;"
+    >
+      Sessions
+    </div>
+    <div
+      aria-controls="rh-panegroup-ID-pane-0"
+      aria-label="Resize the session list"
+      aria-orientation="vertical"
+      aria-valuemax="100"
+      aria-valuemin="15"
+      aria-valuenow="30"
+      class="rh-pane-handle"
+      data-direction="horizontal"
+      role="separator"
+      tabindex="0"
+    >
+      <span
+        aria-hidden="true"
+        class="rh-pane-handle__grip"
+      />
+    </div>
+    <div
+      class="rh-pane"
+      data-direction="horizontal"
+      data-min-size="20"
+      id="rh-panegroup-ID-pane-1"
+      style="flex-basis: 70%;"
+    >
+      Conversation
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ResizablePane > ResizablePane theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    aria-label="Workspace"
+    class="rh-pane-group"
+    data-direction="horizontal"
+    id="rh-panegroup-ID"
+  >
+    <div
+      class="rh-pane"
+      data-collapsed-size="0"
+      data-direction="horizontal"
+      data-min-size="15"
+      id="rh-panegroup-ID-pane-0"
+      style="flex-basis: 30%;"
+    >
+      Sessions
+    </div>
+    <div
+      aria-controls="rh-panegroup-ID-pane-0"
+      aria-label="Resize the session list"
+      aria-orientation="vertical"
+      aria-valuemax="100"
+      aria-valuemin="15"
+      aria-valuenow="30"
+      class="rh-pane-handle"
+      data-direction="horizontal"
+      role="separator"
+      tabindex="0"
+    >
+      <span
+        aria-hidden="true"
+        class="rh-pane-handle__grip"
+      />
+    </div>
+    <div
+      class="rh-pane"
+      data-direction="horizontal"
+      data-min-size="20"
+      id="rh-panegroup-ID-pane-1"
+      style="flex-basis: 70%;"
+    >
+      Conversation
+    </div>
+  </div>
+</div>
+`;

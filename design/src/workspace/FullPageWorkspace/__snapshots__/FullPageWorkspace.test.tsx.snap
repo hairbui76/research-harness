@@ -1,0 +1,249 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FullPageWorkspace theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <section
+    aria-labelledby="rh-fullpage-ID-title"
+    class="rh-full-page"
+    data-side="end"
+    id="rh-fullpage-ID"
+  >
+    <header
+      class="rh-full-page__header"
+    >
+      <div
+        class="rh-full-page__heading"
+      >
+        <h1
+          class="rh-full-page__title"
+          id="rh-fullpage-ID-title"
+        >
+          Corpus
+        </h1>
+        <p
+          class="rh-full-page__description"
+        >
+          Every artifact in this project
+        </p>
+      </div>
+      <div
+        class="rh-full-page__toolbar"
+      >
+        <button
+          type="button"
+        >
+          Filter
+        </button>
+      </div>
+    </header>
+    <div
+      class="rh-full-page__body"
+    >
+      <div
+        class="rh-full-page__content"
+      >
+        <p>
+          rows
+        </p>
+      </div>
+      <aside
+        aria-label="Facets"
+        class="rh-full-page__side"
+      >
+        <p>
+          Facets
+        </p>
+      </aside>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`FullPageWorkspace theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <section
+    aria-labelledby="rh-fullpage-ID-title"
+    class="rh-full-page"
+    data-side="end"
+    id="rh-fullpage-ID"
+  >
+    <header
+      class="rh-full-page__header"
+    >
+      <div
+        class="rh-full-page__heading"
+      >
+        <h1
+          class="rh-full-page__title"
+          id="rh-fullpage-ID-title"
+        >
+          Corpus
+        </h1>
+        <p
+          class="rh-full-page__description"
+        >
+          Every artifact in this project
+        </p>
+      </div>
+      <div
+        class="rh-full-page__toolbar"
+      >
+        <button
+          type="button"
+        >
+          Filter
+        </button>
+      </div>
+    </header>
+    <div
+      class="rh-full-page__body"
+    >
+      <div
+        class="rh-full-page__content"
+      >
+        <p>
+          rows
+        </p>
+      </div>
+      <aside
+        aria-label="Facets"
+        class="rh-full-page__side"
+      >
+        <p>
+          Facets
+        </p>
+      </aside>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`FullPageWorkspace theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <section
+    aria-labelledby="rh-fullpage-ID-title"
+    class="rh-full-page"
+    data-side="end"
+    id="rh-fullpage-ID"
+  >
+    <header
+      class="rh-full-page__header"
+    >
+      <div
+        class="rh-full-page__heading"
+      >
+        <h1
+          class="rh-full-page__title"
+          id="rh-fullpage-ID-title"
+        >
+          Corpus
+        </h1>
+        <p
+          class="rh-full-page__description"
+        >
+          Every artifact in this project
+        </p>
+      </div>
+      <div
+        class="rh-full-page__toolbar"
+      >
+        <button
+          type="button"
+        >
+          Filter
+        </button>
+      </div>
+    </header>
+    <div
+      class="rh-full-page__body"
+    >
+      <div
+        class="rh-full-page__content"
+      >
+        <p>
+          rows
+        </p>
+      </div>
+      <aside
+        aria-label="Facets"
+        class="rh-full-page__side"
+      >
+        <p>
+          Facets
+        </p>
+      </aside>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`FullPageWorkspace theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <section
+    aria-labelledby="rh-fullpage-ID-title"
+    class="rh-full-page"
+    data-side="end"
+    id="rh-fullpage-ID"
+  >
+    <header
+      class="rh-full-page__header"
+    >
+      <div
+        class="rh-full-page__heading"
+      >
+        <h1
+          class="rh-full-page__title"
+          id="rh-fullpage-ID-title"
+        >
+          Corpus
+        </h1>
+        <p
+          class="rh-full-page__description"
+        >
+          Every artifact in this project
+        </p>
+      </div>
+      <div
+        class="rh-full-page__toolbar"
+      >
+        <button
+          type="button"
+        >
+          Filter
+        </button>
+      </div>
+    </header>
+    <div
+      class="rh-full-page__body"
+    >
+      <div
+        class="rh-full-page__content"
+      >
+        <p>
+          rows
+        </p>
+      </div>
+      <aside
+        aria-label="Facets"
+        class="rh-full-page__side"
+      >
+        <p>
+          Facets
+        </p>
+      </aside>
+    </div>
+  </section>
+</div>
+`;

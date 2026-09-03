@@ -1,0 +1,20 @@
+.rh-popover {
+  z-index: 65;
+  min-width: 12rem;
+  max-width: min(28rem, calc(100vw - var(--rh-space-8)));
+  max-height: min(28rem, calc(100vh - var(--rh-space-8)));
+  overflow: auto;
+  padding: var(--rh-space-4);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+  border: 1px solid var(--rh-border-default);
+  border-radius: var(--rh-radius-card);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-popover:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}

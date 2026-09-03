@@ -1,0 +1,585 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CompilerStatus theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-compiler-status"
+    data-status="succeeded"
+    data-tone="success"
+  >
+    <div
+      class="rh-compiler-status__head"
+    >
+      <p
+        class="rh-compiler-status__state"
+        role="status"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          Compiled
+        </span>
+      </p>
+    </div>
+    <dl
+      class="rh-compiler-status__facts"
+    >
+      <div>
+        <dt>
+          Engine
+        </dt>
+        <dd>
+          latexmk -pdf
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Build
+        </dt>
+        <dd>
+          B0007
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Started
+        </dt>
+        <dd>
+          2026-09-03 09:59 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Finished
+        </dt>
+        <dd>
+          2026-09-03 10:00 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Took
+        </dt>
+        <dd>
+          24s
+        </dd>
+      </div>
+    </dl>
+    <p
+      class="rh-compiler-status__synctex"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-crosshair rh-icon"
+        data-icon="crosshair"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="22"
+          x2="18"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="6"
+          x2="2"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="6"
+          y2="2"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="22"
+          y2="18"
+        />
+      </svg>
+      <span>
+        Source and PDF navigation is available for this build.
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`CompilerStatus theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-compiler-status"
+    data-status="succeeded"
+    data-tone="success"
+  >
+    <div
+      class="rh-compiler-status__head"
+    >
+      <p
+        class="rh-compiler-status__state"
+        role="status"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          Compiled
+        </span>
+      </p>
+    </div>
+    <dl
+      class="rh-compiler-status__facts"
+    >
+      <div>
+        <dt>
+          Engine
+        </dt>
+        <dd>
+          latexmk -pdf
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Build
+        </dt>
+        <dd>
+          B0007
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Started
+        </dt>
+        <dd>
+          2026-09-03 09:59 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Finished
+        </dt>
+        <dd>
+          2026-09-03 10:00 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Took
+        </dt>
+        <dd>
+          24s
+        </dd>
+      </div>
+    </dl>
+    <p
+      class="rh-compiler-status__synctex"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-crosshair rh-icon"
+        data-icon="crosshair"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="22"
+          x2="18"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="6"
+          x2="2"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="6"
+          y2="2"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="22"
+          y2="18"
+        />
+      </svg>
+      <span>
+        Source and PDF navigation is available for this build.
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`CompilerStatus theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-compiler-status"
+    data-status="succeeded"
+    data-tone="success"
+  >
+    <div
+      class="rh-compiler-status__head"
+    >
+      <p
+        class="rh-compiler-status__state"
+        role="status"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          Compiled
+        </span>
+      </p>
+    </div>
+    <dl
+      class="rh-compiler-status__facts"
+    >
+      <div>
+        <dt>
+          Engine
+        </dt>
+        <dd>
+          latexmk -pdf
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Build
+        </dt>
+        <dd>
+          B0007
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Started
+        </dt>
+        <dd>
+          2026-09-03 09:59 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Finished
+        </dt>
+        <dd>
+          2026-09-03 10:00 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Took
+        </dt>
+        <dd>
+          24s
+        </dd>
+      </div>
+    </dl>
+    <p
+      class="rh-compiler-status__synctex"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-crosshair rh-icon"
+        data-icon="crosshair"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="22"
+          x2="18"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="6"
+          x2="2"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="6"
+          y2="2"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="22"
+          y2="18"
+        />
+      </svg>
+      <span>
+        Source and PDF navigation is available for this build.
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`CompilerStatus theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-compiler-status"
+    data-status="succeeded"
+    data-tone="success"
+  >
+    <div
+      class="rh-compiler-status__head"
+    >
+      <p
+        class="rh-compiler-status__state"
+        role="status"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          Compiled
+        </span>
+      </p>
+    </div>
+    <dl
+      class="rh-compiler-status__facts"
+    >
+      <div>
+        <dt>
+          Engine
+        </dt>
+        <dd>
+          latexmk -pdf
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Build
+        </dt>
+        <dd>
+          B0007
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Started
+        </dt>
+        <dd>
+          2026-09-03 09:59 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Finished
+        </dt>
+        <dd>
+          2026-09-03 10:00 UTC
+        </dd>
+      </div>
+      <div>
+        <dt>
+          Took
+        </dt>
+        <dd>
+          24s
+        </dd>
+      </div>
+    </dl>
+    <p
+      class="rh-compiler-status__synctex"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-crosshair rh-icon"
+        data-icon="crosshair"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="22"
+          x2="18"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="6"
+          x2="2"
+          y1="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="6"
+          y2="2"
+        />
+        <line
+          x1="12"
+          x2="12"
+          y1="22"
+          y2="18"
+        />
+      </svg>
+      <span>
+        Source and PDF navigation is available for this build.
+      </span>
+    </p>
+  </div>
+</div>
+`;

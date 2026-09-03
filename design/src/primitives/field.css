@@ -1,0 +1,103 @@
+/* Shared scaffolding for every labelled control (see field.tsx). */
+
+.rh-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+  font-family: var(--rh-font-sans);
+}
+
+.rh-field__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  color: var(--rh-text-primary);
+  font-size: calc(var(--rh-type-ui-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-ui-lh);
+  font-weight: var(--rh-type-ui-weight);
+}
+
+.rh-field__required {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+.rh-field--inline .rh-field__label {
+  font-weight: var(--rh-type-body-weight);
+}
+
+.rh-field__description {
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+/* The glyph is the point: an error is never signalled by red text alone. */
+.rh-field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-feedback-error-fg);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-field__error .rh-icon {
+  margin-top: 1px;
+}
+
+.rh-field.is-disabled .rh-field__label,
+.rh-field.is-disabled .rh-field__description {
+  opacity: 0.55;
+}
+
+/* The shared control box: input, textarea and select all wear it. */
+.rh-control {
+  width: 100%;
+  min-width: 0;
+  height: var(--rh-control-height-md);
+  padding: 0 var(--rh-control-padding-md);
+  /* `--rh-border-strong` and not `--rh-border-default`: the edge of an input is the only
+     thing that says where the input is, so it is held to WCAG 1.4.11's 3:1. Decorative
+     separators use the lighter hairlines. */
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-lh);
+  transition: border-color var(--rh-duration-fast) linear;
+}
+
+.rh-control--sm {
+  height: var(--rh-control-height-sm);
+  padding: 0 var(--rh-control-padding-sm);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+}
+
+.rh-control::placeholder {
+  color: var(--rh-text-muted);
+}
+
+.rh-control:hover:not(:disabled) {
+  border-color: var(--rh-text-primary);
+}
+
+.rh-control[aria-invalid='true'] {
+  border-color: var(--rh-feedback-error-border);
+}
+
+.rh-control:disabled {
+  cursor: not-allowed;
+  background: var(--rh-surface-subtle);
+  opacity: 0.65;
+}

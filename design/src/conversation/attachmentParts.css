@@ -1,0 +1,94 @@
+/* The shared attachment presentation: the file card, the state badge, the facts row and
+   the blocked-send reason. Used by PdfAttachment, ImageAttachment and the generic card. */
+
+.rh-attachment-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-3);
+  min-width: 0;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
+.rh-attachment-card[data-state='failed'] {
+  border-color: var(--rh-feedback-error-border);
+}
+
+.rh-attachment-card[data-sendable='no'] {
+  border-color: var(--rh-feedback-warning-border);
+}
+
+.rh-attachment-card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-secondary);
+}
+
+.rh-attachment-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+}
+
+.rh-attachment-card__name {
+  display: block;
+  overflow: hidden;
+  font-weight: var(--rh-type-ui-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-attachment-card__open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--rh-text-primary);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rh-attachment-card__open:hover .rh-attachment-card__name {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rh-attachment-card__meta,
+.rh-attachment__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+.rh-attachment__facts {
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+/* Why a file cannot be sent is text beside the file, not only in the composer's notice. */
+.rh-attachment__blocked {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-feedback-warning-fg);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-attachment-card__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--rh-space-1);
+}

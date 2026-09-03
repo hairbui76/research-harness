@@ -1,0 +1,357 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ModelSelector theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-label="Model: Claude Opus 5"
+    class="rh-button rh-button--secondary rh-button--sm rh-model-selector__trigger"
+    data-state="closed"
+    data-variant="secondary"
+    id="rh-menu-ID-trigger"
+    type="button"
+  >
+    <span
+      class="rh-button__content"
+    >
+      <span
+        class="rh-button__label"
+      >
+        <span
+          class="rh-model-selector__current"
+        >
+          <span
+            class="rh-model-selector__name"
+          >
+            Claude Opus 5
+          </span>
+          <span
+            class="rh-model-selector__egress"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-globe rh-icon"
+              data-icon="globe"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+              />
+              <path
+                d="M2 12h20"
+              />
+            </svg>
+            <span>
+              External
+            </span>
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-chevron-down rh-icon"
+        data-icon="chevron-down"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`ModelSelector theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-label="Model: Claude Opus 5"
+    class="rh-button rh-button--secondary rh-button--sm rh-model-selector__trigger"
+    data-state="closed"
+    data-variant="secondary"
+    id="rh-menu-ID-trigger"
+    type="button"
+  >
+    <span
+      class="rh-button__content"
+    >
+      <span
+        class="rh-button__label"
+      >
+        <span
+          class="rh-model-selector__current"
+        >
+          <span
+            class="rh-model-selector__name"
+          >
+            Claude Opus 5
+          </span>
+          <span
+            class="rh-model-selector__egress"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-globe rh-icon"
+              data-icon="globe"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+              />
+              <path
+                d="M2 12h20"
+              />
+            </svg>
+            <span>
+              External
+            </span>
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-chevron-down rh-icon"
+        data-icon="chevron-down"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`ModelSelector theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-label="Model: Claude Opus 5"
+    class="rh-button rh-button--secondary rh-button--sm rh-model-selector__trigger"
+    data-state="closed"
+    data-variant="secondary"
+    id="rh-menu-ID-trigger"
+    type="button"
+  >
+    <span
+      class="rh-button__content"
+    >
+      <span
+        class="rh-button__label"
+      >
+        <span
+          class="rh-model-selector__current"
+        >
+          <span
+            class="rh-model-selector__name"
+          >
+            Claude Opus 5
+          </span>
+          <span
+            class="rh-model-selector__egress"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-globe rh-icon"
+              data-icon="globe"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+              />
+              <path
+                d="M2 12h20"
+              />
+            </svg>
+            <span>
+              External
+            </span>
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-chevron-down rh-icon"
+        data-icon="chevron-down"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`ModelSelector theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-label="Model: Claude Opus 5"
+    class="rh-button rh-button--secondary rh-button--sm rh-model-selector__trigger"
+    data-state="closed"
+    data-variant="secondary"
+    id="rh-menu-ID-trigger"
+    type="button"
+  >
+    <span
+      class="rh-button__content"
+    >
+      <span
+        class="rh-button__label"
+      >
+        <span
+          class="rh-model-selector__current"
+        >
+          <span
+            class="rh-model-selector__name"
+          >
+            Claude Opus 5
+          </span>
+          <span
+            class="rh-model-selector__egress"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-globe rh-icon"
+              data-icon="globe"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+              />
+              <path
+                d="M2 12h20"
+              />
+            </svg>
+            <span>
+              External
+            </span>
+          </span>
+        </span>
+      </span>
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-chevron-down rh-icon"
+        data-icon="chevron-down"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m6 9 6 6 6-6"
+        />
+      </svg>
+    </span>
+  </button>
+</div>
+`;

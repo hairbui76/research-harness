@@ -1,0 +1,42 @@
+/*
+ * Every primitive's stylesheet, in one place. `src/styles.css` imports this file, so a
+ * consumer that links the package's one stylesheet gets every component.
+ *
+ * This file holds nothing but @import lines, which CSS requires to come before any rule —
+ * so a new primitive's stylesheet is appended at the end and nothing else has to move.
+ */
+
+@import './field.css';
+@import './Icon/Icon.css';
+@import './Button/Button.css';
+@import './IconButton/IconButton.css';
+@import './Badge/Badge.css';
+@import './Tag/Tag.css';
+@import './Card/Card.css';
+@import './Input/Input.css';
+@import './Textarea/Textarea.css';
+@import './Select/Select.css';
+@import './Checkbox/Checkbox.css';
+@import './Radio/Radio.css';
+@import './Switch/Switch.css';
+/* overlay, navigation, and layout primitive styles (DS1b) are imported below */
+@import './Tabs/Tabs.css';
+@import './Tooltip/Tooltip.css';
+@import './Dialog/Dialog.css';
+@import './Toast/Toast.css';
+@import './Popover/Popover.css';
+@import './Menu/Menu.css';
+@import './Combobox/Combobox.css';
+@import './Progress/Progress.css';
+@import './Skeleton/Skeleton.css';
+@import './ScrollArea/ScrollArea.css';
+@import './ResizablePane/ResizablePane.css';
+@import './VirtualList/VirtualList.css';
+/* the error/async-state presentation rides along here so `styles.css` stays untouched */
+@import '../states/states.css';
+/* research semantics and conversation (DS2a), aggregated in their own folders */
+@import '../research/research.css';
+@import '../conversation/conversation.css';
+/* manuscript and workspace composition (DS2b), aggregated in their own folders */
+@import '../manuscript/manuscript.css';
+@import '../workspace/workspace.css';

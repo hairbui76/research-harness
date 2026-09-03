@@ -1,0 +1,137 @@
+.rh-image-attachment {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-3);
+  min-width: 0;
+  padding: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
+.rh-image-attachment[data-state='failed'] {
+  border-color: var(--rh-feedback-error-border);
+}
+
+.rh-image-attachment__thumb {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 72px;
+  block-size: 72px;
+  overflow: hidden;
+  padding: 0;
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+  cursor: pointer;
+}
+
+.rh-image-attachment--sm .rh-image-attachment__thumb {
+  inline-size: 48px;
+  block-size: 48px;
+}
+
+.rh-image-attachment__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.rh-image-attachment__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rh-space-1);
+  overflow: hidden;
+  padding: var(--rh-space-1);
+  color: var(--rh-text-muted);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  text-align: center;
+  word-break: break-all;
+}
+
+.rh-image-attachment__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+}
+
+.rh-image-attachment__name {
+  overflow: hidden;
+  font-weight: var(--rh-type-ui-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-image-attachment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+.rh-image-attachment__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+/* The viewer ------------------------------------------------------------------------- */
+
+.rh-image-gallery__position {
+  margin: 0 0 var(--rh-space-2);
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+/* The stage is the neutral reading surface: a figure should look the same in both themes. */
+.rh-image-gallery__stage {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  min-block-size: 200px;
+  max-block-size: 60vh;
+  padding: var(--rh-space-4);
+  border: var(--rh-border-width) solid var(--rh-border-on-paper);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-paper);
+  color: var(--rh-text-on-paper);
+}
+
+.rh-image-gallery__image {
+  max-inline-size: 100%;
+  transform-origin: center center;
+  transition: transform var(--rh-duration-fast) var(--rh-ease-standard);
+}
+
+.rh-image-gallery__unavailable {
+  margin: 0;
+  color: var(--rh-text-on-paper-secondary);
+  text-align: center;
+}
+
+.rh-image-gallery__hint {
+  margin: var(--rh-space-2) 0 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-image-gallery__controls {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+.rh-image-gallery__download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  color: var(--rh-text-link);
+  font-size: var(--rh-type-body-sm-size);
+}

@@ -1,0 +1,397 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MessageContent theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-message-content"
+    data-status="complete"
+  >
+    <div
+      class="rh-message-content__text"
+    >
+      <p>
+        The sweep supports an association, not the causal wording. E0482 measures modulus, not neurite length.
+      </p>
+    </div>
+    <div
+      class="rh-message-content__reference"
+    >
+      <a
+        class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+        data-authority="accepted"
+        data-kind="evidence"
+        data-resolution="resolved"
+        href="rh://evidence/E0482"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span
+          class="rh-entity-ref__id"
+        >
+          E0482
+        </span>
+        <span
+          class="rh-entity-ref__label"
+        >
+          Storage modulus at 24 h
+        </span>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+          data-authority="accepted"
+          data-status="accepted"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-check rh-icon"
+            data-icon="circle-check"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="m16 9-5.5 5.5L8 12"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Accepted
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MessageContent theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-message-content"
+    data-status="complete"
+  >
+    <div
+      class="rh-message-content__text"
+    >
+      <p>
+        The sweep supports an association, not the causal wording. E0482 measures modulus, not neurite length.
+      </p>
+    </div>
+    <div
+      class="rh-message-content__reference"
+    >
+      <a
+        class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+        data-authority="accepted"
+        data-kind="evidence"
+        data-resolution="resolved"
+        href="rh://evidence/E0482"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span
+          class="rh-entity-ref__id"
+        >
+          E0482
+        </span>
+        <span
+          class="rh-entity-ref__label"
+        >
+          Storage modulus at 24 h
+        </span>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+          data-authority="accepted"
+          data-status="accepted"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-check rh-icon"
+            data-icon="circle-check"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="m16 9-5.5 5.5L8 12"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Accepted
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MessageContent theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-message-content"
+    data-status="complete"
+  >
+    <div
+      class="rh-message-content__text"
+    >
+      <p>
+        The sweep supports an association, not the causal wording. E0482 measures modulus, not neurite length.
+      </p>
+    </div>
+    <div
+      class="rh-message-content__reference"
+    >
+      <a
+        class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+        data-authority="accepted"
+        data-kind="evidence"
+        data-resolution="resolved"
+        href="rh://evidence/E0482"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span
+          class="rh-entity-ref__id"
+        >
+          E0482
+        </span>
+        <span
+          class="rh-entity-ref__label"
+        >
+          Storage modulus at 24 h
+        </span>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+          data-authority="accepted"
+          data-status="accepted"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-check rh-icon"
+            data-icon="circle-check"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="m16 9-5.5 5.5L8 12"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Accepted
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MessageContent theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-message-content"
+    data-status="complete"
+  >
+    <div
+      class="rh-message-content__text"
+    >
+      <p>
+        The sweep supports an association, not the causal wording. E0482 measures modulus, not neurite length.
+      </p>
+    </div>
+    <div
+      class="rh-message-content__reference"
+    >
+      <a
+        class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+        data-authority="accepted"
+        data-kind="evidence"
+        data-resolution="resolved"
+        href="rh://evidence/E0482"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span
+          class="rh-entity-ref__id"
+        >
+          E0482
+        </span>
+        <span
+          class="rh-entity-ref__label"
+        >
+          Storage modulus at 24 h
+        </span>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+          data-authority="accepted"
+          data-status="accepted"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-check rh-icon"
+            data-icon="circle-check"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="m16 9-5.5 5.5L8 12"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Accepted
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+`;

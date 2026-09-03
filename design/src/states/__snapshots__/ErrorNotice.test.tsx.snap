@@ -1,0 +1,481 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-error-notice"
+    data-kind="blocked"
+    data-tone="error"
+    role="alert"
+  >
+    <span
+      class="rh-error-notice__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-shield-off rh-icon"
+        data-icon="shield-off"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m2 2 20 20"
+        />
+        <path
+          d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+        />
+        <path
+          d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-error-notice__body"
+    >
+      <p
+        class="rh-error-notice__title"
+      >
+        <span
+          class="rh-error-notice__kind"
+        >
+          Blocked
+          :
+        </span>
+         
+        A privacy rule blocked this request
+      </p>
+      <p
+        class="rh-error-notice__description"
+      >
+        Change the session privacy class or remove the restricted content.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+           
+          Nothing left the workspace.
+        </span>
+      </p>
+      <div
+        class="rh-error-notice__actions"
+      >
+        <button
+          class="rh-button rh-button--secondary rh-button--sm"
+          data-variant="secondary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Open privacy settings
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-error-notice"
+    data-kind="blocked"
+    data-tone="error"
+    role="alert"
+  >
+    <span
+      class="rh-error-notice__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-shield-off rh-icon"
+        data-icon="shield-off"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m2 2 20 20"
+        />
+        <path
+          d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+        />
+        <path
+          d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-error-notice__body"
+    >
+      <p
+        class="rh-error-notice__title"
+      >
+        <span
+          class="rh-error-notice__kind"
+        >
+          Blocked
+          :
+        </span>
+         
+        A privacy rule blocked this request
+      </p>
+      <p
+        class="rh-error-notice__description"
+      >
+        Change the session privacy class or remove the restricted content.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+           
+          Nothing left the workspace.
+        </span>
+      </p>
+      <div
+        class="rh-error-notice__actions"
+      >
+        <button
+          class="rh-button rh-button--secondary rh-button--sm"
+          data-variant="secondary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Open privacy settings
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ErrorNotice > ErrorNotice theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-error-notice"
+    data-kind="blocked"
+    data-tone="error"
+    role="alert"
+  >
+    <span
+      class="rh-error-notice__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-shield-off rh-icon"
+        data-icon="shield-off"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m2 2 20 20"
+        />
+        <path
+          d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+        />
+        <path
+          d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-error-notice__body"
+    >
+      <p
+        class="rh-error-notice__title"
+      >
+        <span
+          class="rh-error-notice__kind"
+        >
+          Blocked
+          :
+        </span>
+         
+        A privacy rule blocked this request
+      </p>
+      <p
+        class="rh-error-notice__description"
+      >
+        Change the session privacy class or remove the restricted content.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+           
+          Nothing left the workspace.
+        </span>
+      </p>
+      <div
+        class="rh-error-notice__actions"
+      >
+        <button
+          class="rh-button rh-button--secondary rh-button--sm"
+          data-variant="secondary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Open privacy settings
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ErrorNotice > ErrorNotice theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-error-notice"
+    data-kind="blocked"
+    data-tone="error"
+    role="alert"
+  >
+    <span
+      class="rh-error-notice__icon"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-shield-off rh-icon"
+        data-icon="shield-off"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m2 2 20 20"
+        />
+        <path
+          d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+        />
+        <path
+          d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+        />
+      </svg>
+    </span>
+    <div
+      class="rh-error-notice__body"
+    >
+      <p
+        class="rh-error-notice__title"
+      >
+        <span
+          class="rh-error-notice__kind"
+        >
+          Blocked
+          :
+        </span>
+         
+        A privacy rule blocked this request
+      </p>
+      <p
+        class="rh-error-notice__description"
+      >
+        Change the session privacy class or remove the restricted content.
+      </p>
+      <p
+        class="rh-state__safety"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Your draft is safe. The source is unchanged.
+           
+          Nothing left the workspace.
+        </span>
+      </p>
+      <div
+        class="rh-error-notice__actions"
+      >
+        <button
+          class="rh-button rh-button--secondary rh-button--sm"
+          data-variant="secondary"
+          type="button"
+        >
+          <span
+            class="rh-button__content"
+          >
+            <span
+              class="rh-button__label"
+            >
+              Open privacy settings
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

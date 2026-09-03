@@ -1,0 +1,529 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SourceAnchor theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-source-anchor rh-source-anchor--block"
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+      </span>
+      <blockquote
+        class="rh-source-anchor__quote"
+      >
+        Storage modulus rose from 1.2 to 8.4 kPa over 24 h, with no measurable change in swelling ratio.
+      </blockquote>
+    </div>
+    <span
+      class="rh-source-anchor rh-source-anchor--inline"
+      data-stale=""
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-stale"
+          data-status="stale"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-clock rh-icon"
+            data-icon="clock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="M12 6v6l4 2"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Stale
+          </span>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`SourceAnchor theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-source-anchor rh-source-anchor--block"
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+      </span>
+      <blockquote
+        class="rh-source-anchor__quote"
+      >
+        Storage modulus rose from 1.2 to 8.4 kPa over 24 h, with no measurable change in swelling ratio.
+      </blockquote>
+    </div>
+    <span
+      class="rh-source-anchor rh-source-anchor--inline"
+      data-stale=""
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-stale"
+          data-status="stale"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-clock rh-icon"
+            data-icon="clock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="M12 6v6l4 2"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Stale
+          </span>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`SourceAnchor theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-source-anchor rh-source-anchor--block"
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+      </span>
+      <blockquote
+        class="rh-source-anchor__quote"
+      >
+        Storage modulus rose from 1.2 to 8.4 kPa over 24 h, with no measurable change in swelling ratio.
+      </blockquote>
+    </div>
+    <span
+      class="rh-source-anchor rh-source-anchor--inline"
+      data-stale=""
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-stale"
+          data-status="stale"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-clock rh-icon"
+            data-icon="clock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="M12 6v6l4 2"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Stale
+          </span>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`SourceAnchor theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-source-anchor rh-source-anchor--block"
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+      </span>
+      <blockquote
+        class="rh-source-anchor__quote"
+      >
+        Storage modulus rose from 1.2 to 8.4 kPa over 24 h, with no measurable change in swelling ratio.
+      </blockquote>
+    </div>
+    <span
+      class="rh-source-anchor rh-source-anchor--inline"
+      data-stale=""
+    >
+      <span
+        class="rh-source-anchor__row"
+      >
+        <a
+          aria-label="Open source at A0017-3 · p.6 · B0081 · chars 1204–1361"
+          class="rh-source-anchor__open"
+          href="rh://artifact/A0017-3?page=6&block=B0081"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-quote rh-icon"
+            data-icon="quote"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+            />
+          </svg>
+          <span
+            class="rh-source-anchor__target"
+          >
+            A0017-3 · p.6 · B0081 · chars 1204–1361
+          </span>
+        </a>
+        <span
+          class="rh-badge rh-badge--sm rh-badge--status-stale"
+          data-status="stale"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-clock rh-icon"
+            data-icon="clock"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="M12 6v6l4 2"
+            />
+          </svg>
+          <span
+            class="rh-badge__label"
+          >
+            Stale
+          </span>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;

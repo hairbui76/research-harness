@@ -1,0 +1,105 @@
+.rh-file-tree {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--rh-space-1);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-ui-size);
+  line-height: var(--rh-type-ui-lh);
+  color: var(--rh-text-primary);
+}
+
+.rh-file-tree__row {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-height: var(--rh-density-row);
+  padding-inline-end: var(--rh-space-2);
+  border-radius: var(--rh-radius-nav);
+  cursor: default;
+  user-select: none;
+}
+
+.rh-file-tree__row:hover {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-file-tree__row.is-selected {
+  background: var(--rh-surface-selected);
+  font-weight: var(--rh-type-ui-weight);
+}
+
+.rh-file-tree__row:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: calc(var(--rh-focus-ring-offset) * -1);
+}
+
+.rh-file-tree__twisty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--rh-space-4);
+  flex: none;
+  color: var(--rh-text-muted);
+}
+
+.rh-file-tree__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-file-tree__marker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  flex: none;
+  margin-inline-start: auto;
+  padding-inline: var(--rh-space-1);
+  border: var(--rh-border-width) solid transparent;
+  border-radius: var(--rh-radius-pill);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-file-tree__marker[data-tone='dirty'] {
+  color: var(--rh-status-candidate-fg);
+  background: var(--rh-status-candidate-bg);
+  border-color: var(--rh-status-candidate-border);
+}
+
+.rh-file-tree__marker[data-tone='conflict'] {
+  color: var(--rh-status-contested-fg);
+  background: var(--rh-status-contested-bg);
+  border-color: var(--rh-status-contested-border);
+}
+
+/* The marker already pushed itself to the end; a row without one needs the trigger to. */
+.rh-file-tree__menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-inline-start: auto;
+  inline-size: var(--rh-space-5);
+  block-size: var(--rh-space-5);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rh-radius-control);
+  background: transparent;
+  color: var(--rh-text-muted);
+  cursor: pointer;
+}
+
+.rh-file-tree__marker ~ .rh-file-tree__menu-trigger {
+  margin-inline-start: var(--rh-space-1);
+}
+
+.rh-file-tree__menu-trigger:hover,
+.rh-file-tree__menu-trigger[data-state='open'] {
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+}

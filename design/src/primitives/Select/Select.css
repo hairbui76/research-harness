@@ -1,0 +1,26 @@
+.rh-select {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.rh-select__control {
+  appearance: none;
+  padding-right: calc(var(--rh-control-padding-md) + var(--rh-space-5));
+  cursor: pointer;
+}
+
+.rh-select__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--rh-control-padding-md);
+  transform: translateY(-50%);
+  color: var(--rh-text-muted);
+  pointer-events: none;
+}
+
+/* The popup list is drawn by the platform, so it needs the theme's own surface tokens. */
+.rh-select__control option {
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+}

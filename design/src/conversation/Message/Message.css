@@ -1,0 +1,77 @@
+.rh-message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  padding: var(--rh-space-3) var(--rh-space-4);
+  border-inline-start: 2px solid transparent;
+}
+
+.rh-message[data-role='user'] {
+  background: var(--rh-surface-subtle);
+}
+
+/* The accent marks model activity — never that something is true. */
+.rh-message[data-role='assistant'] {
+  border-inline-start-color: var(--rh-accent-border);
+}
+
+.rh-message[data-role='system'],
+.rh-message[data-role='tool'] {
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-message[data-status='failed'] {
+  border-inline-start-color: var(--rh-feedback-error-border);
+}
+
+.rh-message[data-status='incomplete'] {
+  border-inline-start-color: var(--rh-feedback-warning-border);
+}
+
+.rh-message.is-selected {
+  background: var(--rh-surface-selected);
+}
+
+.rh-message__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-message__role {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  font-weight: var(--rh-type-ui-weight);
+}
+
+.rh-message__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-message__id,
+.rh-message__time,
+.rh-message__model,
+.rh-message__attempt {
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+/* Actions stay on the page instead of appearing on hover: promotion and the receipt are
+   how conversation becomes reviewable state, and they must be findable by keyboard. */
+.rh-message__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1);
+}

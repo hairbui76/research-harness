@@ -1,0 +1,15 @@
+/*
+ * The conversation component styles, aggregated the way `primitives/primitives.css`
+ * aggregates the primitives. A new component appends one line here and nothing else moves.
+ */
+
+@import './attachmentParts.css';
+@import './ImageAttachment/ImageAttachment.css';
+@import './PdfAttachment/PdfAttachment.css';
+@import './AttachmentTray/AttachmentTray.css';
+@import './MessageContent/MessageContent.css';
+@import './Message/Message.css';
+@import './ReferencePicker/ReferencePicker.css';
+@import './ModelSelector/ModelSelector.css';
+@import './Composer/Composer.css';
+@import './SessionList/SessionList.css';

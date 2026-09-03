@@ -1,0 +1,70 @@
+.rh-conflict-notice {
+  border-color: var(--rh-status-contested-border);
+}
+
+.rh-conflict-notice__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  color: var(--rh-status-contested-fg);
+}
+
+.rh-conflict-notice__explanation {
+  margin: 0 0 var(--rh-space-3);
+  font-size: var(--rh-type-body-size);
+}
+
+.rh-conflict-notice__sides {
+  display: grid;
+  gap: var(--rh-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.rh-conflict-notice__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  align-items: flex-start;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+}
+
+/* The winner is marked in words as well as in weight: "sent" and "not used". */
+.rh-conflict-notice__side[data-side='accepted'] {
+  border-color: var(--rh-status-accepted-border);
+  background: var(--rh-status-accepted-bg);
+}
+
+.rh-conflict-notice__side-label {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  margin: 0;
+  font: var(--rh-type-label-weight) var(--rh-type-label-size) / var(--rh-type-label-lh)
+    var(--rh-font-mono);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-conflict-notice__side[data-side='accepted'] .rh-conflict-notice__side-label {
+  color: var(--rh-status-accepted-fg);
+}
+
+.rh-conflict-notice__side[data-side='chat'] .rh-conflict-notice__side-label {
+  color: var(--rh-text-muted);
+}
+
+.rh-conflict-notice__excerpt {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: 2px solid var(--rh-border-default);
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
+}
+
+.rh-conflict-notice__side[data-side='chat'] .rh-conflict-notice__excerpt {
+  color: var(--rh-text-secondary);
+}

@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScrollArea > ScrollArea theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-scroll-area"
+    data-orientation="vertical"
+    data-scrollable=""
+    role="region"
+    style="max-height: 200px;"
+    tabindex="0"
+  >
+    <p>
+      Long transcript
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ScrollArea > ScrollArea theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-scroll-area"
+    data-orientation="vertical"
+    data-scrollable=""
+    role="region"
+    style="max-height: 200px;"
+    tabindex="0"
+  >
+    <p>
+      Long transcript
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ScrollArea > ScrollArea theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-scroll-area"
+    data-orientation="vertical"
+    data-scrollable=""
+    role="region"
+    style="max-height: 200px;"
+    tabindex="0"
+  >
+    <p>
+      Long transcript
+    </p>
+  </div>
+</div>
+`;
+
+exports[`ScrollArea > ScrollArea theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-scroll-area"
+    data-orientation="vertical"
+    data-scrollable=""
+    role="region"
+    style="max-height: 200px;"
+    tabindex="0"
+  >
+    <p>
+      Long transcript
+    </p>
+  </div>
+</div>
+`;

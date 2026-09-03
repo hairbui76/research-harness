@@ -1,0 +1,143 @@
+.rh-claim-card.is-selected {
+  border-color: var(--rh-accent-border);
+}
+
+.rh-claim-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-claim-card__id {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-mono-lh);
+}
+
+button.rh-claim-card__id {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+button.rh-claim-card__id:hover {
+  text-decoration-color: currentcolor;
+}
+
+.rh-claim-card__status {
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  font-weight: var(--rh-type-body-weight);
+}
+
+.rh-claim-card__badges {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+/* The claim sentence itself reads as prose, not as a table cell. */
+.rh-claim-card__text {
+  margin: 0;
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-lead-size);
+  line-height: var(--rh-type-lead-lh);
+}
+
+.rh-claim-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2) var(--rh-space-6);
+  margin: var(--rh-space-3) 0 0;
+}
+
+.rh-claim-card__fact-value {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-claim-card__ceiling {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  margin: var(--rh-space-3) 0 0;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-status-qualified-border);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-status-qualified-bg);
+  color: var(--rh-status-qualified-fg);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-claim-card__footer {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-claim-card__support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rh-claim-card__support-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+button.rh-claim-card__support-button {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+button.rh-claim-card__support-button:hover {
+  color: var(--rh-text-primary);
+  text-decoration-color: currentcolor;
+}
+
+.rh-claim-card__support-count {
+  font-family: var(--rh-font-mono);
+  font-weight: var(--rh-type-ui-weight);
+}
+
+.rh-claim-card__support-item[data-relation='supports'] {
+  color: var(--rh-status-accepted-fg);
+}
+
+.rh-claim-card__support-item[data-relation='contradicts'] {
+  color: var(--rh-status-contested-fg);
+}
+
+.rh-claim-card__support-item[data-relation='qualifies'] {
+  color: var(--rh-status-qualified-fg);
+}
+
+.rh-claim-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+}

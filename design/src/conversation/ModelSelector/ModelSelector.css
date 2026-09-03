@@ -1,0 +1,70 @@
+.rh-model-selector__current {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-model-selector__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Egress is a word beside its glyph everywhere it appears: "leaves the machine" is not a
+   thing to encode in a colour. */
+.rh-model-selector__egress {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-model-selector__menu {
+  max-inline-size: 26rem;
+}
+
+.rh-model-selector__option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+}
+
+.rh-model-selector__option-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+}
+
+.rh-model-selector__provider {
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-model-selector__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+.rh-model-selector__context {
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+/* An unusable model stays on the list with its reason rather than disappearing. */
+.rh-model-selector__unavailable {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-1);
+  color: var(--rh-feedback-warning-fg);
+  font-size: var(--rh-type-body-sm-size);
+}

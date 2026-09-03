@@ -1,0 +1,2673 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ReferencePicker theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-combobox rh-reference-picker"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert a research reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      placeholder="Search works, evidence, claims…"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert a research reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Works
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-W0017"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-book-open rh-icon"
+                data-icon="book-open"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5v16"
+                />
+                <path
+                  d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                W0017
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Hydrogel stiffness and neurite outgrowth
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Artifacts
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-A0017-3"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                A0017-3
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Preprint v3
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge"
+                data-authority="stale"
+                data-status="stale"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Stale
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span>
+                  Stale
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-E0482"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                E0482
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Storage modulus at 24 h
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0041"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0041
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Stiffer gels shorten neurites
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified rh-authority-badge"
+                data-authority="qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Qualified
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0099"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="unresolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-question-mark rh-icon"
+                  data-icon="circle-help"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span>
+                  Unresolved
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Sessions
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-CS0004"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="private"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-messages-square rh-icon"
+                data-icon="messages-square"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                />
+                <path
+                  d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                CS0004
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Grant notes
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge"
+                data-authority="private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span>
+                  Private
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ReferencePicker theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-combobox rh-reference-picker"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert a research reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      placeholder="Search works, evidence, claims…"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert a research reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Works
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-W0017"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-book-open rh-icon"
+                data-icon="book-open"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5v16"
+                />
+                <path
+                  d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                W0017
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Hydrogel stiffness and neurite outgrowth
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Artifacts
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-A0017-3"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                A0017-3
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Preprint v3
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge"
+                data-authority="stale"
+                data-status="stale"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Stale
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span>
+                  Stale
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-E0482"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                E0482
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Storage modulus at 24 h
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0041"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0041
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Stiffer gels shorten neurites
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified rh-authority-badge"
+                data-authority="qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Qualified
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0099"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="unresolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-question-mark rh-icon"
+                  data-icon="circle-help"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span>
+                  Unresolved
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Sessions
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-CS0004"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="private"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-messages-square rh-icon"
+                data-icon="messages-square"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                />
+                <path
+                  d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                CS0004
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Grant notes
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge"
+                data-authority="private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span>
+                  Private
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ReferencePicker theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-combobox rh-reference-picker"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert a research reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      placeholder="Search works, evidence, claims…"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert a research reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Works
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-W0017"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-book-open rh-icon"
+                data-icon="book-open"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5v16"
+                />
+                <path
+                  d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                W0017
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Hydrogel stiffness and neurite outgrowth
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Artifacts
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-A0017-3"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                A0017-3
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Preprint v3
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge"
+                data-authority="stale"
+                data-status="stale"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Stale
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span>
+                  Stale
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-E0482"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                E0482
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Storage modulus at 24 h
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0041"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0041
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Stiffer gels shorten neurites
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified rh-authority-badge"
+                data-authority="qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Qualified
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0099"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="unresolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-question-mark rh-icon"
+                  data-icon="circle-help"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span>
+                  Unresolved
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Sessions
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-CS0004"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="private"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-messages-square rh-icon"
+                data-icon="messages-square"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                />
+                <path
+                  d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                CS0004
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Grant notes
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge"
+                data-authority="private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span>
+                  Private
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ReferencePicker theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-combobox rh-reference-picker"
+    data-state="open"
+  >
+    <input
+      aria-autocomplete="list"
+      aria-controls="rh-combobox-ID-listbox"
+      aria-expanded="true"
+      aria-label="Insert a research reference"
+      autocomplete="off"
+      class="rh-combobox__input"
+      id="rh-combobox-ID"
+      placeholder="Search works, evidence, claims…"
+      role="combobox"
+      type="text"
+      value=""
+    />
+    <div
+      class="rh-combobox__panel"
+    >
+      <div
+        aria-label="Insert a research reference"
+        class="rh-combobox__listbox"
+        id="rh-combobox-ID-listbox"
+        role="listbox"
+      >
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Works
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-W0017"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-book-open rh-icon"
+                data-icon="book-open"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 5v16"
+                />
+                <path
+                  d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                W0017
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Hydrogel stiffness and neurite outgrowth
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Artifacts
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-A0017-3"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                A0017-3
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Preprint v3
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge"
+                data-authority="stale"
+                data-status="stale"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Stale
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-clock rh-icon"
+                  data-icon="clock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 6v6l4 2"
+                  />
+                </svg>
+                <span>
+                  Stale
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Evidence
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-E0482"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                E0482
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Storage modulus at 24 h
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge"
+                data-authority="accepted"
+                data-status="accepted"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Accepted
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Claims
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0041"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="resolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0041
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Stiffer gels shorten neurites
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified rh-authority-badge"
+                data-authority="qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Qualified
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-C0099"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="unresolved"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                C0099
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-question-mark rh-icon"
+                  data-icon="circle-help"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span>
+                  Unresolved
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          aria-labelledby="rh-comboboxgroup-ID"
+          class="rh-combobox__group"
+          role="group"
+        >
+          <div
+            class="rh-combobox__group-label"
+            id="rh-comboboxgroup-ID"
+          >
+            Sessions
+          </div>
+          <div
+            aria-selected="false"
+            class="rh-combobox__option"
+            id="rh-combobox-ID-option-CS0004"
+            role="option"
+          >
+            <span
+              class="rh-reference-picker__row"
+              data-resolution="private"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-messages-square rh-icon"
+                data-icon="messages-square"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                />
+                <path
+                  d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+                />
+              </svg>
+              <span
+                class="rh-reference-picker__id"
+              >
+                CS0004
+              </span>
+              <span
+                class="rh-reference-picker__label"
+              >
+                Grant notes
+              </span>
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge"
+                data-authority="private"
+                data-status="private"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Private
+                </span>
+              </span>
+              <span
+                class="rh-reference-picker__resolution"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span>
+                  Private
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

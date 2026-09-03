@@ -1,0 +1,205 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Menu > Menu theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="menu"
+>
+  <div
+    aria-labelledby="rh-menu-ID-trigger"
+    class="rh-menu"
+    data-placement="bottom"
+    id="rh-menu-ID-menu"
+    role="menu"
+    style="position: fixed; top: 4px; left: 8px;"
+  >
+    <div
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Rename
+      </span>
+      <span
+        class="rh-menu__item-hint"
+      >
+        R
+      </span>
+    </div>
+    <div
+      aria-orientation="horizontal"
+      class="rh-menu__separator"
+      role="separator"
+    />
+    <div
+      aria-disabled="true"
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Duplicate
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Menu > Menu theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-rh-portal="menu"
+>
+  <div
+    aria-labelledby="rh-menu-ID-trigger"
+    class="rh-menu"
+    data-placement="bottom"
+    id="rh-menu-ID-menu"
+    role="menu"
+    style="position: fixed; top: 4px; left: 8px;"
+  >
+    <div
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Rename
+      </span>
+      <span
+        class="rh-menu__item-hint"
+      >
+        R
+      </span>
+    </div>
+    <div
+      aria-orientation="horizontal"
+      class="rh-menu__separator"
+      role="separator"
+    />
+    <div
+      aria-disabled="true"
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Duplicate
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Menu > Menu theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-rh-portal="menu"
+>
+  <div
+    aria-labelledby="rh-menu-ID-trigger"
+    class="rh-menu"
+    data-placement="bottom"
+    id="rh-menu-ID-menu"
+    role="menu"
+    style="position: fixed; top: 4px; left: 8px;"
+  >
+    <div
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Rename
+      </span>
+      <span
+        class="rh-menu__item-hint"
+      >
+        R
+      </span>
+    </div>
+    <div
+      aria-orientation="horizontal"
+      class="rh-menu__separator"
+      role="separator"
+    />
+    <div
+      aria-disabled="true"
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Duplicate
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Menu > Menu theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-rh-portal="menu"
+>
+  <div
+    aria-labelledby="rh-menu-ID-trigger"
+    class="rh-menu"
+    data-placement="bottom"
+    id="rh-menu-ID-menu"
+    role="menu"
+    style="position: fixed; top: 4px; left: 8px;"
+  >
+    <div
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Rename
+      </span>
+      <span
+        class="rh-menu__item-hint"
+      >
+        R
+      </span>
+    </div>
+    <div
+      aria-orientation="horizontal"
+      class="rh-menu__separator"
+      role="separator"
+    />
+    <div
+      aria-disabled="true"
+      class="rh-menu__item"
+      data-rh-roving-item=""
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
+        class="rh-menu__item-label"
+      >
+        Duplicate
+      </span>
+    </div>
+  </div>
+</div>
+`;

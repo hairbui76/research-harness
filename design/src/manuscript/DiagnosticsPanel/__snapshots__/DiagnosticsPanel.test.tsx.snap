@@ -1,0 +1,1473 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-diagnostics-panel"
+    id="rh-diagnostics-ID"
+  >
+    <section
+      aria-labelledby="rh-diagnostics-ID-compiler"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-compiler"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-wrench rh-icon"
+          data-icon="wrench"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+          />
+        </svg>
+        <span>
+          Compiler diagnostics
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          1 message
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the LaTeX engine reported about this build.
+      </p>
+      <div
+        class="rh-diagnostic-list"
+        data-source="compiler"
+      >
+        <div
+          class="rh-diagnostic-list__group"
+        >
+          <h4
+            class="rh-diagnostic-list__file"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file-code rh-icon"
+              data-icon="file-code"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+              <path
+                d="M10 12.5 8 15l2 2.5"
+              />
+              <path
+                d="m14 12.5 2 2.5-2 2.5"
+              />
+            </svg>
+            <span>
+              manuscript/main.tex
+            </span>
+            <span
+              class="rh-diagnostic-list__count"
+            >
+              1
+            </span>
+          </h4>
+          <ul
+            aria-label="Compiler diagnostics: manuscript/main.tex"
+            class="rh-diagnostic-list__rows"
+          >
+            <li
+              class="rh-diagnostic"
+              data-severity="error"
+              data-source="compiler"
+            >
+              <span
+                aria-disabled="true"
+                class="rh-diagnostic__button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert rh-icon"
+                  data-icon="alert-circle"
+                  fill="none"
+                  focusable="false"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="rh-diagnostic__severity"
+                >
+                  Error
+                </span>
+                <span
+                  class="rh-diagnostic__message"
+                >
+                  Undefined control sequence.
+                </span>
+                <span
+                  class="rh-diagnostic__position"
+                >
+                  line 120
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section
+      aria-labelledby="rh-diagnostics-ID-audit"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-audit"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-microscope rh-icon"
+          data-icon="microscope"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18h8"
+          />
+          <path
+            d="M3 22h18"
+          />
+          <path
+            d="M14 22a7 7 0 1 0 0-14h-1"
+          />
+          <path
+            d="M9 14h2"
+          />
+          <path
+            d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+          />
+          <path
+            d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+          />
+        </svg>
+        <span>
+          Scientific audit
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          2 findings
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the manuscript claims, checked against accepted state. Separate from the compiler: a document can compile and still fail this.
+      </p>
+      <div
+        class="rh-audit-finding-list"
+        data-source="audit"
+      >
+        <ul
+          aria-label="Scientific audit"
+          class="rh-audit-finding-list__rows"
+        >
+          <li
+            class="rh-audit-finding"
+            data-kind="citation_mismatch"
+            data-severity="error"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Must fix
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Citation mismatch
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                The key "smith2024" is cited but missing from refs.bib.
+              </span>
+              <span
+                class="rh-audit-finding__position"
+              >
+                manuscript/main.tex, line 44
+              </span>
+            </span>
+          </li>
+          <li
+            class="rh-audit-finding"
+            data-kind="stale_claim"
+            data-severity="warning"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Review
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Stale claim
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                C0041 moved since this paragraph was written.
+              </span>
+            </span>
+            <span
+              class="rh-audit-finding__refs"
+            >
+              <button
+                class="rh-audit-finding__ref"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-bookmark rh-icon"
+                  data-icon="bookmark"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                C0041
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-diagnostics-panel"
+    id="rh-diagnostics-ID"
+  >
+    <section
+      aria-labelledby="rh-diagnostics-ID-compiler"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-compiler"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-wrench rh-icon"
+          data-icon="wrench"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+          />
+        </svg>
+        <span>
+          Compiler diagnostics
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          1 message
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the LaTeX engine reported about this build.
+      </p>
+      <div
+        class="rh-diagnostic-list"
+        data-source="compiler"
+      >
+        <div
+          class="rh-diagnostic-list__group"
+        >
+          <h4
+            class="rh-diagnostic-list__file"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file-code rh-icon"
+              data-icon="file-code"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+              <path
+                d="M10 12.5 8 15l2 2.5"
+              />
+              <path
+                d="m14 12.5 2 2.5-2 2.5"
+              />
+            </svg>
+            <span>
+              manuscript/main.tex
+            </span>
+            <span
+              class="rh-diagnostic-list__count"
+            >
+              1
+            </span>
+          </h4>
+          <ul
+            aria-label="Compiler diagnostics: manuscript/main.tex"
+            class="rh-diagnostic-list__rows"
+          >
+            <li
+              class="rh-diagnostic"
+              data-severity="error"
+              data-source="compiler"
+            >
+              <span
+                aria-disabled="true"
+                class="rh-diagnostic__button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert rh-icon"
+                  data-icon="alert-circle"
+                  fill="none"
+                  focusable="false"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="rh-diagnostic__severity"
+                >
+                  Error
+                </span>
+                <span
+                  class="rh-diagnostic__message"
+                >
+                  Undefined control sequence.
+                </span>
+                <span
+                  class="rh-diagnostic__position"
+                >
+                  line 120
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section
+      aria-labelledby="rh-diagnostics-ID-audit"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-audit"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-microscope rh-icon"
+          data-icon="microscope"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18h8"
+          />
+          <path
+            d="M3 22h18"
+          />
+          <path
+            d="M14 22a7 7 0 1 0 0-14h-1"
+          />
+          <path
+            d="M9 14h2"
+          />
+          <path
+            d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+          />
+          <path
+            d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+          />
+        </svg>
+        <span>
+          Scientific audit
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          2 findings
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the manuscript claims, checked against accepted state. Separate from the compiler: a document can compile and still fail this.
+      </p>
+      <div
+        class="rh-audit-finding-list"
+        data-source="audit"
+      >
+        <ul
+          aria-label="Scientific audit"
+          class="rh-audit-finding-list__rows"
+        >
+          <li
+            class="rh-audit-finding"
+            data-kind="citation_mismatch"
+            data-severity="error"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Must fix
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Citation mismatch
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                The key "smith2024" is cited but missing from refs.bib.
+              </span>
+              <span
+                class="rh-audit-finding__position"
+              >
+                manuscript/main.tex, line 44
+              </span>
+            </span>
+          </li>
+          <li
+            class="rh-audit-finding"
+            data-kind="stale_claim"
+            data-severity="warning"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Review
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Stale claim
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                C0041 moved since this paragraph was written.
+              </span>
+            </span>
+            <span
+              class="rh-audit-finding__refs"
+            >
+              <button
+                class="rh-audit-finding__ref"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-bookmark rh-icon"
+                  data-icon="bookmark"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                C0041
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`DiagnosticsPanel theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-diagnostics-panel"
+    id="rh-diagnostics-ID"
+  >
+    <section
+      aria-labelledby="rh-diagnostics-ID-compiler"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-compiler"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-wrench rh-icon"
+          data-icon="wrench"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+          />
+        </svg>
+        <span>
+          Compiler diagnostics
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          1 message
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the LaTeX engine reported about this build.
+      </p>
+      <div
+        class="rh-diagnostic-list"
+        data-source="compiler"
+      >
+        <div
+          class="rh-diagnostic-list__group"
+        >
+          <h4
+            class="rh-diagnostic-list__file"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file-code rh-icon"
+              data-icon="file-code"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+              <path
+                d="M10 12.5 8 15l2 2.5"
+              />
+              <path
+                d="m14 12.5 2 2.5-2 2.5"
+              />
+            </svg>
+            <span>
+              manuscript/main.tex
+            </span>
+            <span
+              class="rh-diagnostic-list__count"
+            >
+              1
+            </span>
+          </h4>
+          <ul
+            aria-label="Compiler diagnostics: manuscript/main.tex"
+            class="rh-diagnostic-list__rows"
+          >
+            <li
+              class="rh-diagnostic"
+              data-severity="error"
+              data-source="compiler"
+            >
+              <span
+                aria-disabled="true"
+                class="rh-diagnostic__button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert rh-icon"
+                  data-icon="alert-circle"
+                  fill="none"
+                  focusable="false"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="rh-diagnostic__severity"
+                >
+                  Error
+                </span>
+                <span
+                  class="rh-diagnostic__message"
+                >
+                  Undefined control sequence.
+                </span>
+                <span
+                  class="rh-diagnostic__position"
+                >
+                  line 120
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section
+      aria-labelledby="rh-diagnostics-ID-audit"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-audit"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-microscope rh-icon"
+          data-icon="microscope"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18h8"
+          />
+          <path
+            d="M3 22h18"
+          />
+          <path
+            d="M14 22a7 7 0 1 0 0-14h-1"
+          />
+          <path
+            d="M9 14h2"
+          />
+          <path
+            d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+          />
+          <path
+            d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+          />
+        </svg>
+        <span>
+          Scientific audit
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          2 findings
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the manuscript claims, checked against accepted state. Separate from the compiler: a document can compile and still fail this.
+      </p>
+      <div
+        class="rh-audit-finding-list"
+        data-source="audit"
+      >
+        <ul
+          aria-label="Scientific audit"
+          class="rh-audit-finding-list__rows"
+        >
+          <li
+            class="rh-audit-finding"
+            data-kind="citation_mismatch"
+            data-severity="error"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Must fix
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Citation mismatch
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                The key "smith2024" is cited but missing from refs.bib.
+              </span>
+              <span
+                class="rh-audit-finding__position"
+              >
+                manuscript/main.tex, line 44
+              </span>
+            </span>
+          </li>
+          <li
+            class="rh-audit-finding"
+            data-kind="stale_claim"
+            data-severity="warning"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Review
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Stale claim
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                C0041 moved since this paragraph was written.
+              </span>
+            </span>
+            <span
+              class="rh-audit-finding__refs"
+            >
+              <button
+                class="rh-audit-finding__ref"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-bookmark rh-icon"
+                  data-icon="bookmark"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                C0041
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-diagnostics-panel"
+    id="rh-diagnostics-ID"
+  >
+    <section
+      aria-labelledby="rh-diagnostics-ID-compiler"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-compiler"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-wrench rh-icon"
+          data-icon="wrench"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+          />
+        </svg>
+        <span>
+          Compiler diagnostics
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          1 message
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the LaTeX engine reported about this build.
+      </p>
+      <div
+        class="rh-diagnostic-list"
+        data-source="compiler"
+      >
+        <div
+          class="rh-diagnostic-list__group"
+        >
+          <h4
+            class="rh-diagnostic-list__file"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file-code rh-icon"
+              data-icon="file-code"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+              <path
+                d="M10 12.5 8 15l2 2.5"
+              />
+              <path
+                d="m14 12.5 2 2.5-2 2.5"
+              />
+            </svg>
+            <span>
+              manuscript/main.tex
+            </span>
+            <span
+              class="rh-diagnostic-list__count"
+            >
+              1
+            </span>
+          </h4>
+          <ul
+            aria-label="Compiler diagnostics: manuscript/main.tex"
+            class="rh-diagnostic-list__rows"
+          >
+            <li
+              class="rh-diagnostic"
+              data-severity="error"
+              data-source="compiler"
+            >
+              <span
+                aria-disabled="true"
+                class="rh-diagnostic__button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert rh-icon"
+                  data-icon="alert-circle"
+                  fill="none"
+                  focusable="false"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="rh-diagnostic__severity"
+                >
+                  Error
+                </span>
+                <span
+                  class="rh-diagnostic__message"
+                >
+                  Undefined control sequence.
+                </span>
+                <span
+                  class="rh-diagnostic__position"
+                >
+                  line 120
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section
+      aria-labelledby="rh-diagnostics-ID-audit"
+      class="rh-diagnostics-panel__section"
+    >
+      <h3
+        class="rh-diagnostics-panel__heading"
+        id="rh-diagnostics-ID-audit"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-microscope rh-icon"
+          data-icon="microscope"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18h8"
+          />
+          <path
+            d="M3 22h18"
+          />
+          <path
+            d="M14 22a7 7 0 1 0 0-14h-1"
+          />
+          <path
+            d="M9 14h2"
+          />
+          <path
+            d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+          />
+          <path
+            d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+          />
+        </svg>
+        <span>
+          Scientific audit
+        </span>
+        <span
+          class="rh-diagnostics-panel__count"
+        >
+          2 findings
+        </span>
+      </h3>
+      <p
+        class="rh-diagnostics-panel__note"
+      >
+        What the manuscript claims, checked against accepted state. Separate from the compiler: a document can compile and still fail this.
+      </p>
+      <div
+        class="rh-audit-finding-list"
+        data-source="audit"
+      >
+        <ul
+          aria-label="Scientific audit"
+          class="rh-audit-finding-list__rows"
+        >
+          <li
+            class="rh-audit-finding"
+            data-kind="citation_mismatch"
+            data-severity="error"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Must fix
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-quote rh-icon"
+                data-icon="quote"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+                <path
+                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Citation mismatch
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                The key "smith2024" is cited but missing from refs.bib.
+              </span>
+              <span
+                class="rh-audit-finding__position"
+              >
+                manuscript/main.tex, line 44
+              </span>
+            </span>
+          </li>
+          <li
+            class="rh-audit-finding"
+            data-kind="stale_claim"
+            data-severity="warning"
+            data-source="audit"
+          >
+            <span
+              class="rh-audit-finding__severity"
+            >
+              Review
+            </span>
+            <span
+              class="rh-audit-finding__button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-audit-finding__kind"
+              >
+                Stale claim
+              </span>
+              <span
+                class="rh-audit-finding__message"
+              >
+                C0041 moved since this paragraph was written.
+              </span>
+            </span>
+            <span
+              class="rh-audit-finding__refs"
+            >
+              <button
+                class="rh-audit-finding__ref"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-bookmark rh-icon"
+                  data-icon="bookmark"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                  />
+                </svg>
+                C0041
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+`;

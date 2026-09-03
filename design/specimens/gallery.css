@@ -1,0 +1,220 @@
+/*
+ * The specimen gallery's own chrome. It reads the same semantic tokens as the package it
+ * shows, so a token change is visible in the gallery itself as well as in the specimens.
+ */
+
+.gallery-body {
+  margin: 0;
+  background: var(--rh-surface-canvas);
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-body-size);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: 18rem 1fr;
+  min-block-size: 100vh;
+}
+
+@media (max-width: 900px) {
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gallery__skip {
+  position: absolute;
+  inset-block-start: var(--rh-space-2);
+  inset-inline-start: var(--rh-space-2);
+  padding: var(--rh-space-2);
+  background: var(--rh-surface-raised);
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  transform: translateY(-200%);
+}
+
+.gallery__skip:focus-visible {
+  transform: translateY(0);
+}
+
+.gallery__index {
+  position: sticky;
+  inset-block-start: 0;
+  align-self: start;
+  max-block-size: 100vh;
+  overflow: auto;
+  padding: var(--rh-space-4);
+  border-inline-end: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-pane);
+}
+
+.gallery__title {
+  margin: 0 0 var(--rh-space-3);
+  font-size: var(--rh-type-h2-size);
+  line-height: var(--rh-type-h2-lh);
+}
+
+.gallery__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  margin-bottom: var(--rh-space-3);
+}
+
+.gallery__controls fieldset {
+  display: flex;
+  gap: var(--rh-space-3);
+  align-items: center;
+  margin: 0;
+  padding: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+}
+
+.gallery__controls legend {
+  padding-inline: var(--rh-space-1);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+  color: var(--rh-text-muted);
+}
+
+.gallery__controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.gallery__motion,
+.gallery__count {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  color: var(--rh-text-muted);
+}
+
+.gallery__motion[data-reduced] {
+  color: var(--rh-feedback-info-fg);
+}
+
+.gallery__search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  margin-bottom: var(--rh-space-4);
+  font-size: var(--rh-type-body-sm-size);
+  color: var(--rh-text-secondary);
+}
+
+.gallery__search input {
+  min-block-size: var(--rh-control-height-md);
+  padding: 0 var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+  font: inherit;
+}
+
+.gallery__index-group h2 {
+  margin: var(--rh-space-3) 0 var(--rh-space-1);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+  color: var(--rh-text-muted);
+}
+
+.gallery__index-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gallery__index-group a {
+  display: block;
+  padding: var(--rh-space-1) var(--rh-space-2);
+  border-radius: var(--rh-radius-nav);
+  color: var(--rh-text-secondary);
+  text-decoration: none;
+}
+
+.gallery__index-group a:hover {
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-primary);
+}
+
+.gallery__main {
+  min-width: 0;
+  padding: var(--rh-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-8);
+}
+
+.gallery__folder {
+  margin: 0 0 var(--rh-space-4);
+  padding-bottom: var(--rh-space-2);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  font-size: var(--rh-type-h1-size);
+  line-height: var(--rh-type-h1-lh);
+  text-transform: capitalize;
+}
+
+.gallery__component {
+  margin-bottom: var(--rh-space-8);
+}
+
+.gallery__component-title {
+  margin: 0 0 var(--rh-space-3);
+  font-size: var(--rh-type-h2-size);
+}
+
+.gallery__frames {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+}
+
+.gallery__frame {
+  margin: 0;
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  overflow: hidden;
+  background: var(--rh-surface-pane);
+}
+
+.gallery__frame-caption {
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-raised);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-secondary);
+}
+
+.gallery__stage {
+  padding: var(--rh-space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-3);
+  align-items: flex-start;
+}
+
+/* A specimen that needs room to be itself — a workspace, a shell — says so. */
+.gallery__stage > .gallery-block {
+  inline-size: 100%;
+}
+
+.gallery-frame-fixed {
+  inline-size: 100%;
+  block-size: 26rem;
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  overflow: hidden;
+}

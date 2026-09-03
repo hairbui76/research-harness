@@ -1,0 +1,153 @@
+.rh-toast-viewport {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  width: min(26rem, calc(100vw - var(--rh-space-8)));
+  padding: var(--rh-space-4);
+  pointer-events: none;
+}
+
+.rh-toast-viewport[data-placement^='top'] {
+  top: 0;
+}
+
+.rh-toast-viewport[data-placement^='bottom'] {
+  bottom: 0;
+  flex-direction: column-reverse;
+}
+
+.rh-toast-viewport[data-placement$='left'] {
+  left: 0;
+}
+
+.rh-toast-viewport[data-placement$='right'] {
+  right: 0;
+}
+
+.rh-toast-viewport[data-placement$='center'] {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rh-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rh-space-3);
+  padding: var(--rh-space-3) var(--rh-space-4);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+  border: 1px solid var(--rh-border-default);
+  border-left: 3px solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-card);
+  font-family: var(--rh-font-sans);
+  pointer-events: auto;
+}
+
+.rh-toast[data-tone='info'] {
+  border-left-color: var(--rh-feedback-info-border);
+}
+
+.rh-toast[data-tone='success'] {
+  border-left-color: var(--rh-feedback-success-border);
+}
+
+.rh-toast[data-tone='warning'] {
+  border-left-color: var(--rh-feedback-warning-border);
+}
+
+.rh-toast[data-tone='error'] {
+  border-left-color: var(--rh-feedback-error-border);
+}
+
+.rh-toast__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.rh-toast[data-tone='info'] .rh-toast__icon {
+  color: var(--rh-feedback-info-fg);
+}
+
+.rh-toast[data-tone='success'] .rh-toast__icon {
+  color: var(--rh-feedback-success-fg);
+}
+
+.rh-toast[data-tone='warning'] .rh-toast__icon {
+  color: var(--rh-feedback-warning-fg);
+}
+
+.rh-toast[data-tone='error'] .rh-toast__icon {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-toast__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rh-toast__title {
+  margin: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+  font-weight: var(--rh-type-label-weight);
+  color: var(--rh-text-primary);
+}
+
+/* The tone is always written out, never carried by the border colour alone. */
+.rh-toast__tone-label {
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+  color: var(--rh-text-muted);
+}
+
+.rh-toast__description {
+  margin: var(--rh-space-1) 0 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+  color: var(--rh-text-secondary);
+}
+
+.rh-toast__action {
+  flex: none;
+  padding: var(--rh-space-1) var(--rh-space-3);
+  border: 1px solid var(--rh-border-default);
+  border-radius: var(--rh-radius-control);
+  background: transparent;
+  color: var(--rh-text-link);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-label-size);
+  cursor: pointer;
+}
+
+.rh-toast__close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rh-space-6);
+  height: var(--rh-space-6);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--rh-radius-control);
+  background: transparent;
+  color: var(--rh-text-muted);
+  cursor: pointer;
+}
+
+.rh-toast__action:hover,
+.rh-toast__close:hover {
+  background: var(--rh-surface-subtle);
+  color: var(--rh-text-primary);
+}
+
+.rh-toast__action:focus-visible,
+.rh-toast__close:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}

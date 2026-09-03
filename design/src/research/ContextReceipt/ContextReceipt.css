@@ -1,0 +1,140 @@
+.rh-context-receipt {
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-context-receipt .rh-card__header {
+  flex-wrap: wrap;
+  font-size: var(--rh-type-h4-size);
+}
+
+.rh-context-receipt__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rh-radius-control);
+  background: none;
+  color: var(--rh-text-primary);
+  font: var(--rh-type-h4-weight) var(--rh-type-h4-size) / var(--rh-type-h4-lh)
+    var(--rh-font-sans);
+  cursor: pointer;
+}
+
+.rh-context-receipt__summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  color: var(--rh-text-secondary);
+  font: var(--rh-type-body-sm-weight) var(--rh-type-body-sm-size) / var(--rh-type-body-sm-lh)
+    var(--rh-font-sans);
+}
+
+.rh-context-receipt__pack,
+.rh-context-receipt__model,
+.rh-context-receipt__tokens,
+.rh-context-receipt__pointer {
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+}
+
+.rh-context-receipt__pointer {
+  overflow: hidden;
+  color: var(--rh-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-context-receipt__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+}
+
+.rh-context-receipt__egress-note {
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
+.rh-context-receipt__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-context-receipt__section h3 {
+  margin: 0;
+}
+
+/* Omissions are the half of the receipt a researcher is most likely to be surprised by,
+   so they are ruled off rather than tucked under the included list. */
+.rh-context-receipt__section[data-omitted] {
+  padding-top: var(--rh-space-3);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-context-receipt__allocation,
+.rh-context-receipt__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rh-context-receipt__allocation {
+  gap: var(--rh-space-2);
+}
+
+.rh-context-receipt__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  margin-block-start: var(--rh-space-2);
+}
+
+.rh-context-receipt__group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font: var(--rh-type-h4-weight) var(--rh-type-h4-size) / var(--rh-type-h4-lh)
+    var(--rh-font-sans);
+}
+
+.rh-context-receipt__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  padding: var(--rh-space-1) 0;
+}
+
+.rh-context-receipt__reason {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  padding: 0 var(--rh-space-1);
+  border: var(--rh-border-width) solid var(--rh-feedback-warning-border);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-feedback-warning-bg);
+  color: var(--rh-feedback-warning-fg);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  font-weight: var(--rh-type-ui-weight);
+  text-transform: uppercase;
+  letter-spacing: var(--rh-type-label-ls);
+}
+
+.rh-context-receipt__detail {
+  flex: 1 1 100%;
+  color: var(--rh-text-muted);
+}
+
+.rh-context-receipt__none {
+  margin: 0;
+  color: var(--rh-text-muted);
+}

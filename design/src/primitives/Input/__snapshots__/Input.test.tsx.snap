@@ -1,0 +1,665 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Input theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-title"
+      >
+        Title
+        <span
+          aria-hidden="true"
+          class="rh-field__required"
+        >
+          *
+        </span>
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-title-description"
+          class="rh-control"
+          id="snap-title"
+          required=""
+        />
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-title-description"
+      >
+        Shown in the rail.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-doi"
+      >
+        DOI
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-doi-error"
+          aria-invalid="true"
+          class="rh-control"
+          id="snap-doi"
+        />
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-doi-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Not a valid DOI.
+        </span>
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label rh-visually-hidden"
+        for="snap-search"
+      >
+        Search
+      </label>
+      <div
+        class="rh-input"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-search rh-icon rh-input__icon"
+          data-icon="search"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21 21-4.34-4.34"
+          />
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+        </svg>
+        <input
+          class="rh-control rh-control--sm rh-control--with-icon"
+          id="snap-search"
+        />
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--stacked is-disabled"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-locked"
+      >
+        Locked
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          class="rh-control"
+          disabled=""
+          id="snap-locked"
+          value="read only"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Input theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-title"
+      >
+        Title
+        <span
+          aria-hidden="true"
+          class="rh-field__required"
+        >
+          *
+        </span>
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-title-description"
+          class="rh-control"
+          id="snap-title"
+          required=""
+        />
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-title-description"
+      >
+        Shown in the rail.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-doi"
+      >
+        DOI
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-doi-error"
+          aria-invalid="true"
+          class="rh-control"
+          id="snap-doi"
+        />
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-doi-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Not a valid DOI.
+        </span>
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label rh-visually-hidden"
+        for="snap-search"
+      >
+        Search
+      </label>
+      <div
+        class="rh-input"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-search rh-icon rh-input__icon"
+          data-icon="search"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21 21-4.34-4.34"
+          />
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+        </svg>
+        <input
+          class="rh-control rh-control--sm rh-control--with-icon"
+          id="snap-search"
+        />
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--stacked is-disabled"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-locked"
+      >
+        Locked
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          class="rh-control"
+          disabled=""
+          id="snap-locked"
+          value="read only"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Input theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-title"
+      >
+        Title
+        <span
+          aria-hidden="true"
+          class="rh-field__required"
+        >
+          *
+        </span>
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-title-description"
+          class="rh-control"
+          id="snap-title"
+          required=""
+        />
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-title-description"
+      >
+        Shown in the rail.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-doi"
+      >
+        DOI
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-doi-error"
+          aria-invalid="true"
+          class="rh-control"
+          id="snap-doi"
+        />
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-doi-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Not a valid DOI.
+        </span>
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label rh-visually-hidden"
+        for="snap-search"
+      >
+        Search
+      </label>
+      <div
+        class="rh-input"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-search rh-icon rh-input__icon"
+          data-icon="search"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21 21-4.34-4.34"
+          />
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+        </svg>
+        <input
+          class="rh-control rh-control--sm rh-control--with-icon"
+          id="snap-search"
+        />
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--stacked is-disabled"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-locked"
+      >
+        Locked
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          class="rh-control"
+          disabled=""
+          id="snap-locked"
+          value="read only"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Input theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-title"
+      >
+        Title
+        <span
+          aria-hidden="true"
+          class="rh-field__required"
+        >
+          *
+        </span>
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-title-description"
+          class="rh-control"
+          id="snap-title"
+          required=""
+        />
+      </div>
+      <p
+        class="rh-field__description"
+        id="snap-title-description"
+      >
+        Shown in the rail.
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+      data-invalid="true"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-doi"
+      >
+        DOI
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          aria-describedby="snap-doi-error"
+          aria-invalid="true"
+          class="rh-control"
+          id="snap-doi"
+        />
+      </div>
+      <p
+        class="rh-field__error"
+        id="snap-doi-error"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-alert rh-icon"
+          data-icon="alert-circle"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+        <span>
+          Not a valid DOI.
+        </span>
+      </p>
+    </div>
+    <div
+      class="rh-field rh-field--stacked"
+    >
+      <label
+        class="rh-field__label rh-visually-hidden"
+        for="snap-search"
+      >
+        Search
+      </label>
+      <div
+        class="rh-input"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-search rh-icon rh-input__icon"
+          data-icon="search"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21 21-4.34-4.34"
+          />
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+        </svg>
+        <input
+          class="rh-control rh-control--sm rh-control--with-icon"
+          id="snap-search"
+        />
+      </div>
+    </div>
+    <div
+      class="rh-field rh-field--stacked is-disabled"
+    >
+      <label
+        class="rh-field__label"
+        for="snap-locked"
+      >
+        Locked
+      </label>
+      <div
+        class="rh-input"
+      >
+        <input
+          class="rh-control"
+          disabled=""
+          id="snap-locked"
+          value="read only"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

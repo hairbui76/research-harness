@@ -1,0 +1,845 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Button theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <button
+      class="rh-button rh-button--primary rh-button--md"
+      data-variant="primary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Primary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-plus rh-icon"
+          data-icon="plus"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12h14"
+          />
+          <path
+            d="M12 5v14"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Secondary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--ghost rh-button--sm"
+      data-variant="ghost"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Ghost
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--danger rh-button--md"
+      data-variant="danger"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Danger
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--accent rh-button--md"
+      data-variant="accent"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-send rh-icon"
+          data-icon="send"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+          />
+          <path
+            d="m21.854 2.147-10.94 10.939"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Send
+        </span>
+      </span>
+    </button>
+    <button
+      aria-busy="true"
+      class="rh-button rh-button--secondary rh-button--md is-loading"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Loading
+        </span>
+      </span>
+      <span
+        class="rh-button__spinner"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-loader rh-icon"
+          data-icon="loader"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2v4"
+          />
+          <path
+            d="m16.2 7.8 2.9-2.9"
+          />
+          <path
+            d="M18 12h4"
+          />
+          <path
+            d="m16.2 16.2 2.9 2.9"
+          />
+          <path
+            d="M12 18v4"
+          />
+          <path
+            d="m4.9 19.1 2.9-2.9"
+          />
+          <path
+            d="M2 12h4"
+          />
+          <path
+            d="m4.9 4.9 2.9 2.9"
+          />
+        </svg>
+      </span>
+      <span
+        class="rh-visually-hidden"
+      >
+        Loading
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Disabled
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Button theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <button
+      class="rh-button rh-button--primary rh-button--md"
+      data-variant="primary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Primary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-plus rh-icon"
+          data-icon="plus"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12h14"
+          />
+          <path
+            d="M12 5v14"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Secondary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--ghost rh-button--sm"
+      data-variant="ghost"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Ghost
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--danger rh-button--md"
+      data-variant="danger"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Danger
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--accent rh-button--md"
+      data-variant="accent"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-send rh-icon"
+          data-icon="send"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+          />
+          <path
+            d="m21.854 2.147-10.94 10.939"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Send
+        </span>
+      </span>
+    </button>
+    <button
+      aria-busy="true"
+      class="rh-button rh-button--secondary rh-button--md is-loading"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Loading
+        </span>
+      </span>
+      <span
+        class="rh-button__spinner"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-loader rh-icon"
+          data-icon="loader"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2v4"
+          />
+          <path
+            d="m16.2 7.8 2.9-2.9"
+          />
+          <path
+            d="M18 12h4"
+          />
+          <path
+            d="m16.2 16.2 2.9 2.9"
+          />
+          <path
+            d="M12 18v4"
+          />
+          <path
+            d="m4.9 19.1 2.9-2.9"
+          />
+          <path
+            d="M2 12h4"
+          />
+          <path
+            d="m4.9 4.9 2.9 2.9"
+          />
+        </svg>
+      </span>
+      <span
+        class="rh-visually-hidden"
+      >
+        Loading
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Disabled
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Button theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <button
+      class="rh-button rh-button--primary rh-button--md"
+      data-variant="primary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Primary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-plus rh-icon"
+          data-icon="plus"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12h14"
+          />
+          <path
+            d="M12 5v14"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Secondary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--ghost rh-button--sm"
+      data-variant="ghost"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Ghost
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--danger rh-button--md"
+      data-variant="danger"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Danger
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--accent rh-button--md"
+      data-variant="accent"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-send rh-icon"
+          data-icon="send"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+          />
+          <path
+            d="m21.854 2.147-10.94 10.939"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Send
+        </span>
+      </span>
+    </button>
+    <button
+      aria-busy="true"
+      class="rh-button rh-button--secondary rh-button--md is-loading"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Loading
+        </span>
+      </span>
+      <span
+        class="rh-button__spinner"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-loader rh-icon"
+          data-icon="loader"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2v4"
+          />
+          <path
+            d="m16.2 7.8 2.9-2.9"
+          />
+          <path
+            d="M18 12h4"
+          />
+          <path
+            d="m16.2 16.2 2.9 2.9"
+          />
+          <path
+            d="M12 18v4"
+          />
+          <path
+            d="m4.9 19.1 2.9-2.9"
+          />
+          <path
+            d="M2 12h4"
+          />
+          <path
+            d="m4.9 4.9 2.9 2.9"
+          />
+        </svg>
+      </span>
+      <span
+        class="rh-visually-hidden"
+      >
+        Loading
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Disabled
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Button theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <button
+      class="rh-button rh-button--primary rh-button--md"
+      data-variant="primary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Primary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-plus rh-icon"
+          data-icon="plus"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12h14"
+          />
+          <path
+            d="M12 5v14"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Secondary
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--ghost rh-button--sm"
+      data-variant="ghost"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Ghost
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--danger rh-button--md"
+      data-variant="danger"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Danger
+        </span>
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--accent rh-button--md"
+      data-variant="accent"
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-send rh-icon"
+          data-icon="send"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+          />
+          <path
+            d="m21.854 2.147-10.94 10.939"
+          />
+        </svg>
+        <span
+          class="rh-button__label"
+        >
+          Send
+        </span>
+      </span>
+    </button>
+    <button
+      aria-busy="true"
+      class="rh-button rh-button--secondary rh-button--md is-loading"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Loading
+        </span>
+      </span>
+      <span
+        class="rh-button__spinner"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-loader rh-icon"
+          data-icon="loader"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2v4"
+          />
+          <path
+            d="m16.2 7.8 2.9-2.9"
+          />
+          <path
+            d="M18 12h4"
+          />
+          <path
+            d="m16.2 16.2 2.9 2.9"
+          />
+          <path
+            d="M12 18v4"
+          />
+          <path
+            d="m4.9 19.1 2.9-2.9"
+          />
+          <path
+            d="M2 12h4"
+          />
+          <path
+            d="m4.9 4.9 2.9 2.9"
+          />
+        </svg>
+      </span>
+      <span
+        class="rh-visually-hidden"
+      >
+        Loading
+      </span>
+    </button>
+    <button
+      class="rh-button rh-button--secondary rh-button--md"
+      data-variant="secondary"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="rh-button__content"
+      >
+        <span
+          class="rh-button__label"
+        >
+          Disabled
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

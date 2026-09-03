@@ -1,0 +1,1961 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AttachmentTray theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-attachment-tray"
+  >
+    <ul
+      aria-label="Attachments"
+      class="rh-attachment-tray__list"
+    >
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-image-attachment rh-image-attachment--md"
+          data-state="session_only"
+        >
+          <button
+            aria-label="Open figure-3-stiffness-sweep.png"
+            class="rh-image-attachment__thumb"
+            type="button"
+          >
+            <img
+              alt="figure-3-stiffness-sweep.png"
+              class="rh-image-attachment__image"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+            />
+          </button>
+          <div
+            class="rh-image-attachment__body"
+          >
+            <span
+              class="rh-image-attachment__name"
+              title="figure-3-stiffness-sweep.png"
+            >
+              figure-3-stiffness-sweep.png
+            </span>
+            <span
+              class="rh-image-attachment__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="session_only"
+                data-tone="neutral"
+                title="Working material in this session. Not part of the corpus."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Session only
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  image/png
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  482 kB
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="rh-image-attachment__actions"
+          >
+            <button
+              aria-label="Remove figure-3-stiffness-sweep.png"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-pdf-attachment"
+        >
+          <div
+            class="rh-attachment-card"
+            data-state="ready"
+          >
+            <span
+              class="rh-attachment-card__icon"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="20"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+            </span>
+            <div
+              class="rh-attachment-card__body"
+            >
+              <button
+                aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+                class="rh-attachment-card__open"
+                type="button"
+              >
+                <span
+                  class="rh-attachment-card__name"
+                  title="lee-2024-hydrogel-preprint.pdf"
+                >
+                  lee-2024-hydrogel-preprint.pdf
+                </span>
+              </button>
+              <span
+                class="rh-attachment-card__meta"
+              >
+                <span
+                  class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                  data-state="ready"
+                  data-tone="neutral"
+                  title="Copied into the session and ready to send."
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-circle-check rh-icon"
+                    data-icon="circle-check"
+                    fill="none"
+                    focusable="false"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <path
+                      d="m16 9-5.5 5.5L8 12"
+                    />
+                  </svg>
+                  <span
+                    class="rh-badge__label"
+                  >
+                    Ready
+                  </span>
+                </span>
+                <span
+                  class="rh-attachment__facts"
+                >
+                  <span
+                    class="rh-attachment__type"
+                  >
+                    application/pdf
+                  </span>
+                  <span
+                    class="rh-attachment__size"
+                  >
+                    3.4 MB
+                  </span>
+                  <span
+                    class="rh-attachment__pages"
+                  >
+                    14
+                     
+                    pages
+                  </span>
+                </span>
+              </span>
+            </div>
+            <div
+              class="rh-attachment-card__actions"
+            >
+              <button
+                aria-label="Remove lee-2024-hydrogel-preprint.pdf"
+                class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+                data-variant="ghost"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                  data-icon="trash-2"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 11v6"
+                  />
+                  <path
+                    d="M14 11v6"
+                  />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                  />
+                  <path
+                    d="M3 6h18"
+                  />
+                  <path
+                    d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-attachment-card"
+          data-sendable="no"
+          data-state="ready"
+        >
+          <span
+            class="rh-attachment-card__icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file rh-icon"
+              data-icon="file"
+              fill="none"
+              focusable="false"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+            </svg>
+          </span>
+          <div
+            class="rh-attachment-card__body"
+          >
+            <span
+              class="rh-attachment-card__name"
+              title="raw-traces.h5"
+            >
+              raw-traces.h5
+            </span>
+            <span
+              class="rh-attachment-card__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="ready"
+                data-tone="neutral"
+                title="Copied into the session and ready to send."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Ready
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  application/x-hdf5
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  91 MB
+                </span>
+              </span>
+            </span>
+            <p
+              class="rh-attachment__blocked"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-shield-off rh-icon"
+                data-icon="shield-off"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m2 2 20 20"
+                />
+                <path
+                  d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+                />
+                <path
+                  d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+                />
+              </svg>
+              <span>
+                The selected model cannot read HDF5 files.
+                 Try 
+                a local analysis tool
+                .
+              </span>
+            </p>
+          </div>
+          <div
+            class="rh-attachment-card__actions"
+          >
+            <button
+              aria-label="Remove raw-traces.h5"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`AttachmentTray theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-attachment-tray"
+  >
+    <ul
+      aria-label="Attachments"
+      class="rh-attachment-tray__list"
+    >
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-image-attachment rh-image-attachment--md"
+          data-state="session_only"
+        >
+          <button
+            aria-label="Open figure-3-stiffness-sweep.png"
+            class="rh-image-attachment__thumb"
+            type="button"
+          >
+            <img
+              alt="figure-3-stiffness-sweep.png"
+              class="rh-image-attachment__image"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+            />
+          </button>
+          <div
+            class="rh-image-attachment__body"
+          >
+            <span
+              class="rh-image-attachment__name"
+              title="figure-3-stiffness-sweep.png"
+            >
+              figure-3-stiffness-sweep.png
+            </span>
+            <span
+              class="rh-image-attachment__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="session_only"
+                data-tone="neutral"
+                title="Working material in this session. Not part of the corpus."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Session only
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  image/png
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  482 kB
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="rh-image-attachment__actions"
+          >
+            <button
+              aria-label="Remove figure-3-stiffness-sweep.png"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-pdf-attachment"
+        >
+          <div
+            class="rh-attachment-card"
+            data-state="ready"
+          >
+            <span
+              class="rh-attachment-card__icon"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="20"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+            </span>
+            <div
+              class="rh-attachment-card__body"
+            >
+              <button
+                aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+                class="rh-attachment-card__open"
+                type="button"
+              >
+                <span
+                  class="rh-attachment-card__name"
+                  title="lee-2024-hydrogel-preprint.pdf"
+                >
+                  lee-2024-hydrogel-preprint.pdf
+                </span>
+              </button>
+              <span
+                class="rh-attachment-card__meta"
+              >
+                <span
+                  class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                  data-state="ready"
+                  data-tone="neutral"
+                  title="Copied into the session and ready to send."
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-circle-check rh-icon"
+                    data-icon="circle-check"
+                    fill="none"
+                    focusable="false"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <path
+                      d="m16 9-5.5 5.5L8 12"
+                    />
+                  </svg>
+                  <span
+                    class="rh-badge__label"
+                  >
+                    Ready
+                  </span>
+                </span>
+                <span
+                  class="rh-attachment__facts"
+                >
+                  <span
+                    class="rh-attachment__type"
+                  >
+                    application/pdf
+                  </span>
+                  <span
+                    class="rh-attachment__size"
+                  >
+                    3.4 MB
+                  </span>
+                  <span
+                    class="rh-attachment__pages"
+                  >
+                    14
+                     
+                    pages
+                  </span>
+                </span>
+              </span>
+            </div>
+            <div
+              class="rh-attachment-card__actions"
+            >
+              <button
+                aria-label="Remove lee-2024-hydrogel-preprint.pdf"
+                class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+                data-variant="ghost"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                  data-icon="trash-2"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 11v6"
+                  />
+                  <path
+                    d="M14 11v6"
+                  />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                  />
+                  <path
+                    d="M3 6h18"
+                  />
+                  <path
+                    d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-attachment-card"
+          data-sendable="no"
+          data-state="ready"
+        >
+          <span
+            class="rh-attachment-card__icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file rh-icon"
+              data-icon="file"
+              fill="none"
+              focusable="false"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+            </svg>
+          </span>
+          <div
+            class="rh-attachment-card__body"
+          >
+            <span
+              class="rh-attachment-card__name"
+              title="raw-traces.h5"
+            >
+              raw-traces.h5
+            </span>
+            <span
+              class="rh-attachment-card__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="ready"
+                data-tone="neutral"
+                title="Copied into the session and ready to send."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Ready
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  application/x-hdf5
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  91 MB
+                </span>
+              </span>
+            </span>
+            <p
+              class="rh-attachment__blocked"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-shield-off rh-icon"
+                data-icon="shield-off"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m2 2 20 20"
+                />
+                <path
+                  d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+                />
+                <path
+                  d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+                />
+              </svg>
+              <span>
+                The selected model cannot read HDF5 files.
+                 Try 
+                a local analysis tool
+                .
+              </span>
+            </p>
+          </div>
+          <div
+            class="rh-attachment-card__actions"
+          >
+            <button
+              aria-label="Remove raw-traces.h5"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`AttachmentTray theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-attachment-tray"
+  >
+    <ul
+      aria-label="Attachments"
+      class="rh-attachment-tray__list"
+    >
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-image-attachment rh-image-attachment--md"
+          data-state="session_only"
+        >
+          <button
+            aria-label="Open figure-3-stiffness-sweep.png"
+            class="rh-image-attachment__thumb"
+            type="button"
+          >
+            <img
+              alt="figure-3-stiffness-sweep.png"
+              class="rh-image-attachment__image"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+            />
+          </button>
+          <div
+            class="rh-image-attachment__body"
+          >
+            <span
+              class="rh-image-attachment__name"
+              title="figure-3-stiffness-sweep.png"
+            >
+              figure-3-stiffness-sweep.png
+            </span>
+            <span
+              class="rh-image-attachment__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="session_only"
+                data-tone="neutral"
+                title="Working material in this session. Not part of the corpus."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Session only
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  image/png
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  482 kB
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="rh-image-attachment__actions"
+          >
+            <button
+              aria-label="Remove figure-3-stiffness-sweep.png"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-pdf-attachment"
+        >
+          <div
+            class="rh-attachment-card"
+            data-state="ready"
+          >
+            <span
+              class="rh-attachment-card__icon"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="20"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+            </span>
+            <div
+              class="rh-attachment-card__body"
+            >
+              <button
+                aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+                class="rh-attachment-card__open"
+                type="button"
+              >
+                <span
+                  class="rh-attachment-card__name"
+                  title="lee-2024-hydrogel-preprint.pdf"
+                >
+                  lee-2024-hydrogel-preprint.pdf
+                </span>
+              </button>
+              <span
+                class="rh-attachment-card__meta"
+              >
+                <span
+                  class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                  data-state="ready"
+                  data-tone="neutral"
+                  title="Copied into the session and ready to send."
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-circle-check rh-icon"
+                    data-icon="circle-check"
+                    fill="none"
+                    focusable="false"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <path
+                      d="m16 9-5.5 5.5L8 12"
+                    />
+                  </svg>
+                  <span
+                    class="rh-badge__label"
+                  >
+                    Ready
+                  </span>
+                </span>
+                <span
+                  class="rh-attachment__facts"
+                >
+                  <span
+                    class="rh-attachment__type"
+                  >
+                    application/pdf
+                  </span>
+                  <span
+                    class="rh-attachment__size"
+                  >
+                    3.4 MB
+                  </span>
+                  <span
+                    class="rh-attachment__pages"
+                  >
+                    14
+                     
+                    pages
+                  </span>
+                </span>
+              </span>
+            </div>
+            <div
+              class="rh-attachment-card__actions"
+            >
+              <button
+                aria-label="Remove lee-2024-hydrogel-preprint.pdf"
+                class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+                data-variant="ghost"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                  data-icon="trash-2"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 11v6"
+                  />
+                  <path
+                    d="M14 11v6"
+                  />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                  />
+                  <path
+                    d="M3 6h18"
+                  />
+                  <path
+                    d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-attachment-card"
+          data-sendable="no"
+          data-state="ready"
+        >
+          <span
+            class="rh-attachment-card__icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file rh-icon"
+              data-icon="file"
+              fill="none"
+              focusable="false"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+            </svg>
+          </span>
+          <div
+            class="rh-attachment-card__body"
+          >
+            <span
+              class="rh-attachment-card__name"
+              title="raw-traces.h5"
+            >
+              raw-traces.h5
+            </span>
+            <span
+              class="rh-attachment-card__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="ready"
+                data-tone="neutral"
+                title="Copied into the session and ready to send."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Ready
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  application/x-hdf5
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  91 MB
+                </span>
+              </span>
+            </span>
+            <p
+              class="rh-attachment__blocked"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-shield-off rh-icon"
+                data-icon="shield-off"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m2 2 20 20"
+                />
+                <path
+                  d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+                />
+                <path
+                  d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+                />
+              </svg>
+              <span>
+                The selected model cannot read HDF5 files.
+                 Try 
+                a local analysis tool
+                .
+              </span>
+            </p>
+          </div>
+          <div
+            class="rh-attachment-card__actions"
+          >
+            <button
+              aria-label="Remove raw-traces.h5"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`AttachmentTray theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-attachment-tray"
+  >
+    <ul
+      aria-label="Attachments"
+      class="rh-attachment-tray__list"
+    >
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-image-attachment rh-image-attachment--md"
+          data-state="session_only"
+        >
+          <button
+            aria-label="Open figure-3-stiffness-sweep.png"
+            class="rh-image-attachment__thumb"
+            type="button"
+          >
+            <img
+              alt="figure-3-stiffness-sweep.png"
+              class="rh-image-attachment__image"
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+            />
+          </button>
+          <div
+            class="rh-image-attachment__body"
+          >
+            <span
+              class="rh-image-attachment__name"
+              title="figure-3-stiffness-sweep.png"
+            >
+              figure-3-stiffness-sweep.png
+            </span>
+            <span
+              class="rh-image-attachment__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="session_only"
+                data-tone="neutral"
+                title="Working material in this session. Not part of the corpus."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-lock rh-icon"
+                  data-icon="lock"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="11"
+                    rx="2"
+                    ry="2"
+                    width="18"
+                    x="3"
+                    y="11"
+                  />
+                  <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Session only
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  image/png
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  482 kB
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="rh-image-attachment__actions"
+          >
+            <button
+              aria-label="Remove figure-3-stiffness-sweep.png"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-pdf-attachment"
+        >
+          <div
+            class="rh-attachment-card"
+            data-state="ready"
+          >
+            <span
+              class="rh-attachment-card__icon"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-text rh-icon"
+                data-icon="file-text"
+                fill="none"
+                focusable="false"
+                height="20"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 9H8"
+                />
+                <path
+                  d="M16 13H8"
+                />
+                <path
+                  d="M16 17H8"
+                />
+              </svg>
+            </span>
+            <div
+              class="rh-attachment-card__body"
+            >
+              <button
+                aria-label="Preview lee-2024-hydrogel-preprint.pdf"
+                class="rh-attachment-card__open"
+                type="button"
+              >
+                <span
+                  class="rh-attachment-card__name"
+                  title="lee-2024-hydrogel-preprint.pdf"
+                >
+                  lee-2024-hydrogel-preprint.pdf
+                </span>
+              </button>
+              <span
+                class="rh-attachment-card__meta"
+              >
+                <span
+                  class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                  data-state="ready"
+                  data-tone="neutral"
+                  title="Copied into the session and ready to send."
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-circle-check rh-icon"
+                    data-icon="circle-check"
+                    fill="none"
+                    focusable="false"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <path
+                      d="m16 9-5.5 5.5L8 12"
+                    />
+                  </svg>
+                  <span
+                    class="rh-badge__label"
+                  >
+                    Ready
+                  </span>
+                </span>
+                <span
+                  class="rh-attachment__facts"
+                >
+                  <span
+                    class="rh-attachment__type"
+                  >
+                    application/pdf
+                  </span>
+                  <span
+                    class="rh-attachment__size"
+                  >
+                    3.4 MB
+                  </span>
+                  <span
+                    class="rh-attachment__pages"
+                  >
+                    14
+                     
+                    pages
+                  </span>
+                </span>
+              </span>
+            </div>
+            <div
+              class="rh-attachment-card__actions"
+            >
+              <button
+                aria-label="Remove lee-2024-hydrogel-preprint.pdf"
+                class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+                data-variant="ghost"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                  data-icon="trash-2"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10 11v6"
+                  />
+                  <path
+                    d="M14 11v6"
+                  />
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                  />
+                  <path
+                    d="M3 6h18"
+                  />
+                  <path
+                    d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li
+        class="rh-attachment-tray__item"
+      >
+        <div
+          class="rh-attachment-card"
+          data-sendable="no"
+          data-state="ready"
+        >
+          <span
+            class="rh-attachment-card__icon"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file rh-icon"
+              data-icon="file"
+              fill="none"
+              focusable="false"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+            </svg>
+          </span>
+          <div
+            class="rh-attachment-card__body"
+          >
+            <span
+              class="rh-attachment-card__name"
+              title="raw-traces.h5"
+            >
+              raw-traces.h5
+            </span>
+            <span
+              class="rh-attachment-card__meta"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--tone-neutral rh-attachment__state"
+                data-state="ready"
+                data-tone="neutral"
+                title="Copied into the session and ready to send."
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check rh-icon"
+                  data-icon="circle-check"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="m16 9-5.5 5.5L8 12"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Ready
+                </span>
+              </span>
+              <span
+                class="rh-attachment__facts"
+              >
+                <span
+                  class="rh-attachment__type"
+                >
+                  application/x-hdf5
+                </span>
+                <span
+                  class="rh-attachment__size"
+                >
+                  91 MB
+                </span>
+              </span>
+            </span>
+            <p
+              class="rh-attachment__blocked"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-shield-off rh-icon"
+                data-icon="shield-off"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m2 2 20 20"
+                />
+                <path
+                  d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"
+                />
+                <path
+                  d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
+                />
+              </svg>
+              <span>
+                The selected model cannot read HDF5 files.
+                 Try 
+                a local analysis tool
+                .
+              </span>
+            </p>
+          </div>
+          <div
+            class="rh-attachment-card__actions"
+          >
+            <button
+              aria-label="Remove raw-traces.h5"
+              class="rh-icon-button rh-icon-button--sm rh-button--ghost"
+              data-variant="ghost"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trash2 lucide-trash-2 rh-icon"
+                data-icon="trash-2"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 11v6"
+                />
+                <path
+                  d="M14 11v6"
+                />
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                />
+                <path
+                  d="M3 6h18"
+                />
+                <path
+                  d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;

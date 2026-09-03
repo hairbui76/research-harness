@@ -1,0 +1,581 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Icon theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="14"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="16"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="18"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="18"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-label="Accepted"
+      class="lucide lucide-circle-check rh-icon"
+      data-icon="circle-check"
+      fill="none"
+      focusable="false"
+      height="16"
+      role="img"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
+      <path
+        d="m16 9-5.5 5.5L8 12"
+      />
+    </svg>
+  </div>
+</div>
+`;
+
+exports[`Icon theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="14"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="16"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="18"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="18"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-label="Accepted"
+      class="lucide lucide-circle-check rh-icon"
+      data-icon="circle-check"
+      fill="none"
+      focusable="false"
+      height="16"
+      role="img"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
+      <path
+        d="m16 9-5.5 5.5L8 12"
+      />
+    </svg>
+  </div>
+</div>
+`;
+
+exports[`Icon theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="14"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="16"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="18"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="18"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-label="Accepted"
+      class="lucide lucide-circle-check rh-icon"
+      data-icon="circle-check"
+      fill="none"
+      focusable="false"
+      height="16"
+      role="img"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
+      <path
+        d="m16 9-5.5 5.5L8 12"
+      />
+    </svg>
+  </div>
+</div>
+`;
+
+exports[`Icon theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="14"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="16"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="18"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="18"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-send rh-icon"
+      data-icon="send"
+      fill="none"
+      focusable="false"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+      />
+      <path
+        d="m21.854 2.147-10.94 10.939"
+      />
+    </svg>
+    <svg
+      aria-label="Accepted"
+      class="lucide lucide-circle-check rh-icon"
+      data-icon="circle-check"
+      fill="none"
+      focusable="false"
+      height="16"
+      role="img"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+      />
+      <path
+        d="m16 9-5.5 5.5L8 12"
+      />
+    </svg>
+  </div>
+</div>
+`;

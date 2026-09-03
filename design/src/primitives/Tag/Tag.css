@@ -1,0 +1,89 @@
+.rh-tag {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-pill);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-sans);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.rh-tag__body {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  min-width: 0;
+  height: var(--rh-control-height-sm);
+  padding: 0 var(--rh-space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.rh-tag--sm .rh-tag__body {
+  height: calc(var(--rh-control-height-sm) - var(--rh-space-1));
+  padding: 0 var(--rh-space-2);
+}
+
+.rh-tag__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-tag__body--button {
+  cursor: pointer;
+  transition: background-color var(--rh-duration-fast) linear;
+}
+
+.rh-tag__body--button:hover:not(:disabled) {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-tag.is-selected {
+  border-color: var(--rh-border-strong);
+  background: var(--rh-surface-selected);
+  color: var(--rh-text-primary);
+}
+
+.rh-tag.is-disabled {
+  opacity: 0.55;
+}
+
+.rh-tag__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rh-control-height-sm);
+  padding: 0;
+  border: 0;
+  border-left: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--rh-duration-fast) linear,
+    color var(--rh-duration-fast) linear;
+}
+
+.rh-tag__remove:hover:not(:disabled) {
+  background: var(--rh-feedback-error-bg);
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-tag__body:disabled,
+.rh-tag__remove:disabled {
+  cursor: not-allowed;
+}
+
+/* The focus ring is drawn inside the pill, which clips its own overflow. */
+.rh-tag__body:focus-visible,
+.rh-tag__remove:focus-visible {
+  outline-offset: calc(-1 * var(--rh-focus-ring-width));
+}

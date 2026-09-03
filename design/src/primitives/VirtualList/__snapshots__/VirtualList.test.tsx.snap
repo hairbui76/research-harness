@@ -1,0 +1,257 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VirtualList > VirtualList theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-virtual-list"
+    role="list"
+    style="height: 120px;"
+    tabindex="0"
+  >
+    <div
+      class="rh-virtual-list__sizer"
+      role="presentation"
+      style="height: 120px;"
+    >
+      <div
+        class="rh-virtual-list__window"
+        role="presentation"
+        style="transform: translateY(0px);"
+      >
+        <div
+          aria-posinset="1"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="0"
+          data-rh-key="m-0"
+          role="listitem"
+        >
+          <p>
+            Message 0
+          </p>
+        </div>
+        <div
+          aria-posinset="2"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="1"
+          data-rh-key="m-1"
+          role="listitem"
+        >
+          <p>
+            Message 1
+          </p>
+        </div>
+        <div
+          aria-posinset="3"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="2"
+          data-rh-key="m-2"
+          role="listitem"
+        >
+          <p>
+            Message 2
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VirtualList > VirtualList theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-virtual-list"
+    role="list"
+    style="height: 120px;"
+    tabindex="0"
+  >
+    <div
+      class="rh-virtual-list__sizer"
+      role="presentation"
+      style="height: 120px;"
+    >
+      <div
+        class="rh-virtual-list__window"
+        role="presentation"
+        style="transform: translateY(0px);"
+      >
+        <div
+          aria-posinset="1"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="0"
+          data-rh-key="m-0"
+          role="listitem"
+        >
+          <p>
+            Message 0
+          </p>
+        </div>
+        <div
+          aria-posinset="2"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="1"
+          data-rh-key="m-1"
+          role="listitem"
+        >
+          <p>
+            Message 1
+          </p>
+        </div>
+        <div
+          aria-posinset="3"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="2"
+          data-rh-key="m-2"
+          role="listitem"
+        >
+          <p>
+            Message 2
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VirtualList > VirtualList theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-virtual-list"
+    role="list"
+    style="height: 120px;"
+    tabindex="0"
+  >
+    <div
+      class="rh-virtual-list__sizer"
+      role="presentation"
+      style="height: 120px;"
+    >
+      <div
+        class="rh-virtual-list__window"
+        role="presentation"
+        style="transform: translateY(0px);"
+      >
+        <div
+          aria-posinset="1"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="0"
+          data-rh-key="m-0"
+          role="listitem"
+        >
+          <p>
+            Message 0
+          </p>
+        </div>
+        <div
+          aria-posinset="2"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="1"
+          data-rh-key="m-1"
+          role="listitem"
+        >
+          <p>
+            Message 1
+          </p>
+        </div>
+        <div
+          aria-posinset="3"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="2"
+          data-rh-key="m-2"
+          role="listitem"
+        >
+          <p>
+            Message 2
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VirtualList > VirtualList theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    aria-label="Transcript"
+    class="rh-virtual-list"
+    role="list"
+    style="height: 120px;"
+    tabindex="0"
+  >
+    <div
+      class="rh-virtual-list__sizer"
+      role="presentation"
+      style="height: 120px;"
+    >
+      <div
+        class="rh-virtual-list__window"
+        role="presentation"
+        style="transform: translateY(0px);"
+      >
+        <div
+          aria-posinset="1"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="0"
+          data-rh-key="m-0"
+          role="listitem"
+        >
+          <p>
+            Message 0
+          </p>
+        </div>
+        <div
+          aria-posinset="2"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="1"
+          data-rh-key="m-1"
+          role="listitem"
+        >
+          <p>
+            Message 1
+          </p>
+        </div>
+        <div
+          aria-posinset="3"
+          aria-setsize="3"
+          class="rh-virtual-list__item"
+          data-index="2"
+          data-rh-key="m-2"
+          role="listitem"
+        >
+          <p>
+            Message 2
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

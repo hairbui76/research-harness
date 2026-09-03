@@ -1,0 +1,87 @@
+/*
+ * Light theme — selectable, never the default.
+ *
+ * Warm cream canvas with white working panes, derived from the source bundle's foundation
+ * (cream #faf9f6 canvas, white panes, off-black #111111 ink, oat #dedbd6 hairlines). Same
+ * semantic token names as dark; only the values move.
+ */
+:root[data-theme='light'],
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --rh-surface-canvas: var(--rh-palette-warm-50);
+  --rh-surface-pane: var(--rh-palette-white);
+  --rh-surface-raised: var(--rh-palette-white);
+  --rh-surface-paper: var(--rh-palette-white);
+  --rh-surface-inverse: var(--rh-palette-warm-975);
+  --rh-surface-subtle: var(--rh-palette-warm-75);
+  --rh-surface-selected: var(--rh-palette-warm-150);
+  --rh-surface-scrim: var(--rh-palette-scrim-light);
+
+  /* Borders */
+  --rh-border-subtle: var(--rh-palette-warm-150);
+  --rh-border-default: var(--rh-palette-warm-200);
+  --rh-border-strong: var(--rh-palette-warm-500);
+
+  /* Text */
+  --rh-text-primary: var(--rh-palette-off-black);
+  --rh-text-secondary: var(--rh-palette-warm-700);
+  --rh-text-muted: var(--rh-palette-warm-600);
+  --rh-text-inverse: var(--rh-palette-warm-100);
+  --rh-text-link: var(--rh-palette-off-black);
+  --rh-text-on-accent: var(--rh-accent-fg);
+
+  /* Reading-surface ink */
+  --rh-text-on-paper: var(--rh-palette-paper-ink);
+  --rh-text-on-paper-secondary: var(--rh-palette-paper-ink-secondary);
+  --rh-text-on-paper-muted: var(--rh-palette-paper-ink-muted);
+  --rh-border-on-paper: var(--rh-palette-paper-line);
+
+  /* AI / action accent */
+  --rh-accent: var(--rh-palette-accent-500);
+  --rh-accent-hover: var(--rh-palette-accent-600);
+  --rh-accent-subtle: var(--rh-palette-accent-tint-light);
+  --rh-accent-border: var(--rh-palette-accent-edge-light);
+  --rh-accent-fg: var(--rh-palette-warm-1000);
+  --rh-accent-text: var(--rh-palette-accent-700);
+
+  /* Focus */
+  --rh-focus-ring: var(--rh-palette-warm-1000);
+
+  /* Scientific status */
+  --rh-status-accepted-fg: var(--rh-palette-green-700);
+  --rh-status-accepted-bg: var(--rh-palette-green-tint-light);
+  --rh-status-accepted-border: var(--rh-palette-green-edge-light);
+  --rh-status-candidate-fg: var(--rh-palette-blue-700);
+  --rh-status-candidate-bg: var(--rh-palette-blue-tint-light);
+  --rh-status-candidate-border: var(--rh-palette-blue-edge-light);
+  --rh-status-qualified-fg: var(--rh-palette-violet-700);
+  --rh-status-qualified-bg: var(--rh-palette-violet-tint-light);
+  --rh-status-qualified-border: var(--rh-palette-violet-edge-light);
+  --rh-status-contested-fg: var(--rh-palette-red-700);
+  --rh-status-contested-bg: var(--rh-palette-red-tint-light);
+  --rh-status-contested-border: var(--rh-palette-red-edge-light);
+  --rh-status-stale-fg: var(--rh-palette-ochre-700);
+  --rh-status-stale-bg: var(--rh-palette-ochre-tint-light);
+  --rh-status-stale-border: var(--rh-palette-ochre-edge-light);
+  --rh-status-private-fg: var(--rh-palette-slate-700);
+  --rh-status-private-bg: var(--rh-palette-slate-tint-light);
+  --rh-status-private-border: var(--rh-palette-slate-edge-light);
+
+  /* Feedback */
+  --rh-feedback-success-fg: var(--rh-palette-green-700);
+  --rh-feedback-success-bg: var(--rh-palette-green-tint-light);
+  --rh-feedback-success-border: var(--rh-palette-green-edge-light);
+  --rh-feedback-error-fg: var(--rh-palette-red-700);
+  --rh-feedback-error-bg: var(--rh-palette-red-tint-light);
+  --rh-feedback-error-border: var(--rh-palette-red-edge-light);
+  --rh-feedback-warning-fg: var(--rh-palette-amber-700);
+  --rh-feedback-warning-bg: var(--rh-palette-amber-tint-light);
+  --rh-feedback-warning-border: var(--rh-palette-amber-edge-light);
+  --rh-feedback-info-fg: var(--rh-palette-blue-700);
+  --rh-feedback-info-bg: var(--rh-palette-blue-tint-light);
+  --rh-feedback-info-border: var(--rh-palette-blue-edge-light);
+
+  --rh-shadow-overlay: 0 16px 40px rgba(26, 24, 21, 0.16);
+}

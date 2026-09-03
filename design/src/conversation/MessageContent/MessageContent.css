@@ -1,0 +1,53 @@
+.rh-message-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-message-content__text {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* The app's Markdown renderer owns the inside of a text block; these are the only rules
+   the system imposes on it, so a paragraph does not fight the message's own spacing. */
+.rh-message-content__text > :first-child {
+  margin-block-start: 0;
+}
+
+.rh-message-content__text > :last-child {
+  margin-block-end: 0;
+}
+
+.rh-message-content__text :where(pre) {
+  overflow-x: auto;
+  padding: var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-pane);
+}
+
+.rh-message-content__reference,
+.rh-message-content__attachment {
+  min-width: 0;
+}
+
+.rh-message-content__streaming {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  margin: 0;
+  color: var(--rh-accent-text);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+.rh-message-content__streaming .rh-icon {
+  animation: rh-message-spin 1s linear infinite;
+}
+
+@keyframes rh-message-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,99 @@
+.rh-diagnostic-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-diagnostic-list__group {
+  min-width: 0;
+}
+
+.rh-diagnostic-list__file {
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0 0 var(--rh-space-1);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  font-weight: var(--rh-type-h4-weight);
+  color: var(--rh-text-secondary);
+}
+
+.rh-diagnostic-list__count {
+  margin-inline-start: auto;
+  padding-inline: var(--rh-space-2);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-pill);
+  color: var(--rh-text-muted);
+}
+
+.rh-diagnostic-list__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rh-diagnostic {
+  min-width: 0;
+}
+
+.rh-diagnostic__button {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  inline-size: 100%;
+  min-block-size: var(--rh-density-row);
+  padding: var(--rh-space-1) var(--rh-space-2);
+  border: 0;
+  border-radius: var(--rh-radius-control);
+  background: transparent;
+  color: var(--rh-text-primary);
+  font: inherit;
+  font-size: var(--rh-type-body-sm-size);
+  text-align: start;
+}
+
+button.rh-diagnostic__button {
+  cursor: pointer;
+}
+
+button.rh-diagnostic__button:hover {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-diagnostic__severity {
+  flex: none;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-label-size);
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-diagnostic[data-severity='error'] .rh-diagnostic__severity {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-diagnostic[data-severity='warning'] .rh-diagnostic__severity {
+  color: var(--rh-feedback-warning-fg);
+}
+
+.rh-diagnostic[data-severity='info'] .rh-diagnostic__severity {
+  color: var(--rh-feedback-info-fg);
+}
+
+.rh-diagnostic__message {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rh-diagnostic__position,
+.rh-diagnostic__code {
+  flex: none;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-muted);
+}

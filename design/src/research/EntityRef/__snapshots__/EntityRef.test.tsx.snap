@@ -1,0 +1,1537 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EntityRef theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div>
+    <a
+      class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+      data-authority="accepted"
+      data-kind="work"
+      data-resolution="resolved"
+      href="rh://work/W0017"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-book-open rh-icon rh-entity-ref__kind"
+        data-icon="book-open"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5v16"
+        />
+        <path
+          d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        W0017
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Hydrogel stiffness and neurite outgrowth
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+        data-authority="accepted"
+        data-status="accepted"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Accepted
+        </span>
+      </span>
+    </a>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="stale"
+      data-kind="artifact"
+      data-resolution="stale"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-file-text rh-icon rh-entity-ref__kind"
+        data-icon="file-text"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+        />
+        <path
+          d="M14 2v5a1 1 0 0 0 1 1h5"
+        />
+        <path
+          d="M10 9H8"
+        />
+        <path
+          d="M16 13H8"
+        />
+        <path
+          d="M16 17H8"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        A0017-3
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Preprint v3
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge rh-entity-ref__authority"
+        data-authority="stale"
+        data-status="stale"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Stale
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span>
+          Stale
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="private"
+      data-kind="session"
+      data-resolution="private"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-messages-square rh-icon rh-entity-ref__kind"
+        data-icon="messages-square"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+        />
+        <path
+          d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        CS0004
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Grant notes
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge rh-entity-ref__authority"
+        data-authority="private"
+        data-status="private"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Private
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Private
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--sm"
+      data-kind="evidence"
+      data-resolution="broken"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+        data-icon="quote"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+        <path
+          d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        E9999
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-link2-off lucide-link-2-off rh-icon"
+          data-icon="link-2-off"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 17H7A5 5 0 0 1 7 7"
+          />
+          <path
+            d="M15 7h2a5 5 0 0 1 4 8"
+          />
+          <line
+            x1="8"
+            x2="12"
+            y1="12"
+            y2="12"
+          />
+          <line
+            x1="2"
+            x2="22"
+            y1="2"
+            y2="22"
+          />
+        </svg>
+        <span>
+          Broken
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`EntityRef theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div>
+    <a
+      class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+      data-authority="accepted"
+      data-kind="work"
+      data-resolution="resolved"
+      href="rh://work/W0017"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-book-open rh-icon rh-entity-ref__kind"
+        data-icon="book-open"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5v16"
+        />
+        <path
+          d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        W0017
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Hydrogel stiffness and neurite outgrowth
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+        data-authority="accepted"
+        data-status="accepted"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Accepted
+        </span>
+      </span>
+    </a>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="stale"
+      data-kind="artifact"
+      data-resolution="stale"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-file-text rh-icon rh-entity-ref__kind"
+        data-icon="file-text"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+        />
+        <path
+          d="M14 2v5a1 1 0 0 0 1 1h5"
+        />
+        <path
+          d="M10 9H8"
+        />
+        <path
+          d="M16 13H8"
+        />
+        <path
+          d="M16 17H8"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        A0017-3
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Preprint v3
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge rh-entity-ref__authority"
+        data-authority="stale"
+        data-status="stale"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Stale
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span>
+          Stale
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="private"
+      data-kind="session"
+      data-resolution="private"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-messages-square rh-icon rh-entity-ref__kind"
+        data-icon="messages-square"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+        />
+        <path
+          d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        CS0004
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Grant notes
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge rh-entity-ref__authority"
+        data-authority="private"
+        data-status="private"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Private
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Private
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--sm"
+      data-kind="evidence"
+      data-resolution="broken"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+        data-icon="quote"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+        <path
+          d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        E9999
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-link2-off lucide-link-2-off rh-icon"
+          data-icon="link-2-off"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 17H7A5 5 0 0 1 7 7"
+          />
+          <path
+            d="M15 7h2a5 5 0 0 1 4 8"
+          />
+          <line
+            x1="8"
+            x2="12"
+            y1="12"
+            y2="12"
+          />
+          <line
+            x1="2"
+            x2="22"
+            y1="2"
+            y2="22"
+          />
+        </svg>
+        <span>
+          Broken
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`EntityRef theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div>
+    <a
+      class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+      data-authority="accepted"
+      data-kind="work"
+      data-resolution="resolved"
+      href="rh://work/W0017"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-book-open rh-icon rh-entity-ref__kind"
+        data-icon="book-open"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5v16"
+        />
+        <path
+          d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        W0017
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Hydrogel stiffness and neurite outgrowth
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+        data-authority="accepted"
+        data-status="accepted"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Accepted
+        </span>
+      </span>
+    </a>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="stale"
+      data-kind="artifact"
+      data-resolution="stale"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-file-text rh-icon rh-entity-ref__kind"
+        data-icon="file-text"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+        />
+        <path
+          d="M14 2v5a1 1 0 0 0 1 1h5"
+        />
+        <path
+          d="M10 9H8"
+        />
+        <path
+          d="M16 13H8"
+        />
+        <path
+          d="M16 17H8"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        A0017-3
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Preprint v3
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge rh-entity-ref__authority"
+        data-authority="stale"
+        data-status="stale"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Stale
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span>
+          Stale
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="private"
+      data-kind="session"
+      data-resolution="private"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-messages-square rh-icon rh-entity-ref__kind"
+        data-icon="messages-square"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+        />
+        <path
+          d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        CS0004
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Grant notes
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge rh-entity-ref__authority"
+        data-authority="private"
+        data-status="private"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Private
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Private
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--sm"
+      data-kind="evidence"
+      data-resolution="broken"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+        data-icon="quote"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+        <path
+          d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        E9999
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-link2-off lucide-link-2-off rh-icon"
+          data-icon="link-2-off"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 17H7A5 5 0 0 1 7 7"
+          />
+          <path
+            d="M15 7h2a5 5 0 0 1 4 8"
+          />
+          <line
+            x1="8"
+            x2="12"
+            y1="12"
+            y2="12"
+          />
+          <line
+            x1="2"
+            x2="22"
+            y1="2"
+            y2="22"
+          />
+        </svg>
+        <span>
+          Broken
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`EntityRef theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div>
+    <a
+      class="rh-entity-ref rh-entity-ref--md rh-entity-ref--interactive"
+      data-authority="accepted"
+      data-kind="work"
+      data-resolution="resolved"
+      href="rh://work/W0017"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-book-open rh-icon rh-entity-ref__kind"
+        data-icon="book-open"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5v16"
+        />
+        <path
+          d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        W0017
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Hydrogel stiffness and neurite outgrowth
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-accepted rh-authority-badge rh-entity-ref__authority"
+        data-authority="accepted"
+        data-status="accepted"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Accepted
+        </span>
+      </span>
+    </a>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="stale"
+      data-kind="artifact"
+      data-resolution="stale"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-file-text rh-icon rh-entity-ref__kind"
+        data-icon="file-text"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+        />
+        <path
+          d="M14 2v5a1 1 0 0 0 1 1h5"
+        />
+        <path
+          d="M10 9H8"
+        />
+        <path
+          d="M16 13H8"
+        />
+        <path
+          d="M16 17H8"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        A0017-3
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Preprint v3
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-stale rh-authority-badge rh-entity-ref__authority"
+        data-authority="stale"
+        data-status="stale"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Stale
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-clock rh-icon"
+          data-icon="clock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="M12 6v6l4 2"
+          />
+        </svg>
+        <span>
+          Stale
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--md"
+      data-authority="private"
+      data-kind="session"
+      data-resolution="private"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-messages-square rh-icon rh-entity-ref__kind"
+        data-icon="messages-square"
+        fill="none"
+        focusable="false"
+        height="16"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+        />
+        <path
+          d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        CS0004
+      </span>
+      <span
+        class="rh-entity-ref__label"
+      >
+        Grant notes
+      </span>
+      <span
+        class="rh-badge rh-badge--sm rh-badge--status-private rh-authority-badge rh-entity-ref__authority"
+        data-authority="private"
+        data-status="private"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span
+          class="rh-badge__label"
+        >
+          Private
+        </span>
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-lock rh-icon"
+          data-icon="lock"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="11"
+            rx="2"
+            ry="2"
+            width="18"
+            x="3"
+            y="11"
+          />
+          <path
+            d="M7 11V7a5 5 0 0 1 10 0v4"
+          />
+        </svg>
+        <span>
+          Private
+        </span>
+      </span>
+    </span>
+    <span
+      class="rh-entity-ref rh-entity-ref--sm"
+      data-kind="evidence"
+      data-resolution="broken"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-quote rh-icon rh-entity-ref__kind"
+        data-icon="quote"
+        fill="none"
+        focusable="false"
+        height="14"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="14"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+        <path
+          d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+        />
+      </svg>
+      <span
+        class="rh-entity-ref__id"
+      >
+        E9999
+      </span>
+      <span
+        class="rh-entity-ref__resolution"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-link2-off lucide-link-2-off rh-icon"
+          data-icon="link-2-off"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 17H7A5 5 0 0 1 7 7"
+          />
+          <path
+            d="M15 7h2a5 5 0 0 1 4 8"
+          />
+          <line
+            x1="8"
+            x2="12"
+            y1="12"
+            y2="12"
+          />
+          <line
+            x1="2"
+            x2="22"
+            y1="2"
+            y2="22"
+          />
+        </svg>
+        <span>
+          Broken
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;

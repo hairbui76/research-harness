@@ -1,0 +1,181 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Progress > Progress theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <div
+    class="rh-progress"
+    data-size="md"
+  >
+    <div
+      class="rh-progress__header"
+    >
+      <span
+        class="rh-progress__label"
+        id="rh-progress-ID-label"
+      >
+        Compiling manuscript
+      </span>
+      <span
+        class="rh-progress__value"
+      >
+        30%
+      </span>
+    </div>
+    <div
+      aria-labelledby="rh-progress-ID-label"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="30"
+      aria-valuetext="30%"
+      class="rh-progress__track"
+      data-state="determinate"
+      data-tone="accent"
+      id="rh-progress-ID"
+      role="progressbar"
+    >
+      <div
+        class="rh-progress__indicator"
+        style="inline-size: 30%;"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Progress > Progress theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <div
+    class="rh-progress"
+    data-size="md"
+  >
+    <div
+      class="rh-progress__header"
+    >
+      <span
+        class="rh-progress__label"
+        id="rh-progress-ID-label"
+      >
+        Compiling manuscript
+      </span>
+      <span
+        class="rh-progress__value"
+      >
+        30%
+      </span>
+    </div>
+    <div
+      aria-labelledby="rh-progress-ID-label"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="30"
+      aria-valuetext="30%"
+      class="rh-progress__track"
+      data-state="determinate"
+      data-tone="accent"
+      id="rh-progress-ID"
+      role="progressbar"
+    >
+      <div
+        class="rh-progress__indicator"
+        style="inline-size: 30%;"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Progress > Progress theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <div
+    class="rh-progress"
+    data-size="md"
+  >
+    <div
+      class="rh-progress__header"
+    >
+      <span
+        class="rh-progress__label"
+        id="rh-progress-ID-label"
+      >
+        Compiling manuscript
+      </span>
+      <span
+        class="rh-progress__value"
+      >
+        30%
+      </span>
+    </div>
+    <div
+      aria-labelledby="rh-progress-ID-label"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="30"
+      aria-valuetext="30%"
+      class="rh-progress__track"
+      data-state="determinate"
+      data-tone="accent"
+      id="rh-progress-ID"
+      role="progressbar"
+    >
+      <div
+        class="rh-progress__indicator"
+        style="inline-size: 30%;"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Progress > Progress theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <div
+    class="rh-progress"
+    data-size="md"
+  >
+    <div
+      class="rh-progress__header"
+    >
+      <span
+        class="rh-progress__label"
+        id="rh-progress-ID-label"
+      >
+        Compiling manuscript
+      </span>
+      <span
+        class="rh-progress__value"
+      >
+        30%
+      </span>
+    </div>
+    <div
+      aria-labelledby="rh-progress-ID-label"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="30"
+      aria-valuetext="30%"
+      class="rh-progress__track"
+      data-state="determinate"
+      data-tone="accent"
+      id="rh-progress-ID"
+      role="progressbar"
+    >
+      <div
+        class="rh-progress__indicator"
+        style="inline-size: 30%;"
+      />
+    </div>
+  </div>
+</div>
+`;

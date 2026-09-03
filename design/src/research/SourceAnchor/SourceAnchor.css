@@ -1,0 +1,67 @@
+.rh-source-anchor {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.rh-source-anchor--block {
+  display: flex;
+}
+
+.rh-source-anchor__row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.rh-source-anchor__open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rh-radius-control);
+  background: none;
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-mono-lh);
+  text-decoration: none;
+}
+
+a.rh-source-anchor__open,
+button.rh-source-anchor__open {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+a.rh-source-anchor__open:hover,
+button.rh-source-anchor__open:hover {
+  color: var(--rh-text-primary);
+  text-decoration-color: currentcolor;
+}
+
+.rh-source-anchor__target {
+  overflow-wrap: anywhere;
+}
+
+/* The quote is the source's own voice: serif, ruled, never restyled by the surface. */
+.rh-source-anchor__quote {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: 2px solid var(--rh-border-default);
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
+}
+
+.rh-source-anchor[data-stale] .rh-source-anchor__quote {
+  border-inline-start-color: var(--rh-status-stale-border);
+}
