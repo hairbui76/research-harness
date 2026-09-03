@@ -1,0 +1,49 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Core" subtitle="Button, IconButton, Card, Badge, Tag, Icon" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{margin:0;padding:20px;background:var(--surface-page)}.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.stack{display:flex;flex-direction:column;gap:16px}.lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-tertiary)}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const { Button, IconButton, Card, Badge, Tag, Icon } = window.WarmlineDesignSystem_273f7f;
+function Demo(){return (
+  <div className="stack">
+    <div className="row">
+      <Button>Start free trial</Button>
+      <Button variant="outlined">View pricing</Button>
+      <Button variant="warm">Talk to sales</Button>
+      <Button variant="accent"><Icon name="sparkles" size={16} /> Ask Fin</Button>
+      <Button variant="ghost">Learn more</Button>
+      <Button disabled>Disabled</Button>
+    </div>
+    <div className="row">
+      <Button size="sm">Small</Button>
+      <Button size="lg">Large</Button>
+      <IconButton name="search" />
+      <IconButton name="more-horizontal" variant="outlined" />
+      <IconButton name="send" variant="solid" />
+      <Badge>New</Badge>
+      <Badge tone="accent">AI</Badge>
+      <Badge tone="success">Resolved</Badge>
+      <Badge tone="error">Overdue</Badge>
+      <Tag selected>Open</Tag>
+      <Tag onRemove={()=>{}}>Billing</Tag>
+    </div>
+    <div className="row" style={{alignItems:'stretch'}}>
+      <Card style={{flex:1}} padding={20}>
+        <div className="lbl">Resolution rate</div>
+        <div style={{fontSize:32,letterSpacing:'-0.96px',lineHeight:1,marginTop:10}}>65%</div>
+      </Card>
+      <Card tone="white" style={{flex:1}} padding={20} interactive>
+        <div className="lbl">White, interactive</div>
+        <div style={{fontSize:32,letterSpacing:'-0.96px',lineHeight:1,marginTop:10}}>1.2s</div>
+      </Card>
+      <Card tone="inverse" style={{flex:1}} padding={20}>
+        <div className="lbl" style={{color:'var(--color-sand)'}}>Inverse</div>
+        <div style={{fontSize:32,letterSpacing:'-0.96px',lineHeight:1,marginTop:10}}>24/7</div>
+      </Card>
+    </div>
+  </div>);}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script></body></html>

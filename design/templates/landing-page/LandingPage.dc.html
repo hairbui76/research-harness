@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Landing page" description="Warm-cream marketing page: compressed hero, trust strip, feature trio, inverse CTA band." -->
+<helmet><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><script src="./ds-base.js"></script><style>body{margin:0;background:#faf9f6;color:#111111;font-family:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif}a{color:#111111;text-decoration:none}a:hover{color:#ff5600}</style></helmet>
+<div style="min-height:100vh;background:#faf9f6">
+<header style="position:sticky;top:0;z-index:20;background:#ffffff;border-bottom:1px solid #dedbd6">
+<div style="max-width:1200px;margin:0 auto;padding:0 40px;height:64px;display:flex;align-items:center;gap:40px">
+<div style="font-size:22px;line-height:1;letter-spacing:-0.66px">Warmline</div>
+<nav style="display:flex;align-items:center;gap:24px;flex:1"><a href="#" style="font-size:16px;line-height:1">Product</a><a href="#" style="font-size:16px;line-height:1;color:#626260">Solutions</a><a href="#" style="font-size:16px;line-height:1;color:#626260">Pricing</a><a href="#" style="font-size:16px;line-height:1;color:#626260">Docs</a></nav>
+<div style="display:flex;align-items:center;gap:10px">
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Button" variant="ghost" size="sm" hint-size="90px,32px">Sign in</x-import>
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Button" size="sm" hint-size="130px,32px">Start free trial</x-import>
+</div></div></header>
+<section style="max-width:1200px;margin:0 auto;padding:80px 40px 60px;display:grid;grid-template-columns:1.15fr 0.85fr;gap:60px;align-items:center">
+<div>
+<div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;line-height:1.3;letter-spacing:1.2px;text-transform:uppercase;color:#7b7b78">AI-first customer service</div>
+<h1 style="margin:24px 0 0;font-size:80px;line-height:1;letter-spacing:-2.4px;font-weight:400">Support that answers before you do.</h1>
+<p style="margin:24px 0 0;font-size:20px;line-height:0.95;letter-spacing:-0.2px;color:#626260;max-width:520px;text-wrap:pretty">Fin resolves the questions your team keeps repeating. Your people take the ones that matter.</p>
+<div style="display:flex;gap:12px;margin-top:32px">
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Button" size="lg" hint-size="150px,48px">Start free trial</x-import>
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Button" variant="outlined" size="lg" hint-size="150px,48px">Book a demo</x-import>
+</div>
+<p style="margin:20px 0 0;font-size:14px;font-weight:300;line-height:1.4;color:#7b7b78">14 days free · no card · cancel in one click</p>
+</div>
+<sc-if value="{{ showChatPanel }}" hint-placeholder-val="{{ true }}">
+<div style="background:#ffffff;border:1px solid #dedbd6;border-radius:8px;padding:20px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:999px;background:#ff5600"></span><span style="font-size:16px">Fin</span>
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Badge" tone="accent" hint-size="34px,20px">AI</x-import></div>
+<div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#7b7b78">Live</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:20px">
+<div style="align-self:flex-end;max-width:78%;background:#111111;color:#ffffff;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.4">My invoice charged twice this month — can you refund one?</div>
+<div style="align-self:flex-start;max-width:88%;background:#faf9f6;border:1px solid #dedbd6;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.4">I found two charges on 4 Sept for $49. I've refunded the duplicate — it'll clear in 3–5 days.</div>
+</div></div>
+</sc-if>
+</section>
+<sc-if value="{{ showTrustStrip }}" hint-placeholder-val="{{ true }}">
+<div style="border-top:1px solid #dedbd6;border-bottom:1px solid #dedbd6;background:#ffffff">
+<div style="max-width:1200px;margin:0 auto;padding:24px 40px;display:flex;align-items:center;gap:40px">
+<div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#7b7b78;flex:0 0 auto">Trusted by 25,000+ teams</div>
+<div style="display:flex;gap:40px;flex:1;justify-content:flex-end">
+<sc-for list="{{ logos }}" as="logo" hint-placeholder-count="6"><div style="font-size:20px;letter-spacing:-0.4px;color:#7b7b78">{{ logo }}</div></sc-for>
+</div></div></div>
+</sc-if>
+<section style="max-width:1200px;margin:0 auto;padding:80px 40px">
+<h2 style="margin:0;font-size:54px;line-height:1;letter-spacing:-1.6px;font-weight:400;max-width:720px">Everything a support team runs on, in one place.</h2>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px">
+<div style="background:#faf9f6;border:1px solid #dedbd6;border-radius:8px;padding:24px">
+<h3 style="margin:0;font-size:32px;line-height:1;letter-spacing:-0.96px;font-weight:400">Fin answers instantly</h3>
+<p style="margin:16px 0 0;font-size:16px;line-height:1.5;color:#626260;text-wrap:pretty">An AI agent trained on your help center, macros and past conversations — live in a day.</p>
+</div>
+<div style="background:#faf9f6;border:1px solid #dedbd6;border-radius:8px;padding:24px">
+<h3 style="margin:0;font-size:32px;line-height:1;letter-spacing:-0.96px;font-weight:400">One desk for the rest</h3>
+<p style="margin:16px 0 0;font-size:16px;line-height:1.5;color:#626260;text-wrap:pretty">Email, chat, phone and social land in a single inbox with the context your team trusts.</p>
+</div>
+<div style="background:#faf9f6;border:1px solid #dedbd6;border-radius:8px;padding:24px">
+<h3 style="margin:0;font-size:32px;line-height:1;letter-spacing:-0.96px;font-weight:400">Reporting you'll read</h3>
+<p style="margin:16px 0 0;font-size:16px;line-height:1.5;color:#626260;text-wrap:pretty">Resolution rate, first reply, CSAT and cost per conversation — in one view.</p>
+</div></div></section>
+<section style="background:#111111;color:#ffffff">
+<div style="max-width:1200px;margin:0 auto;padding:96px 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:60px">
+<div style="max-width:640px">
+<div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#d3cec6">Get started</div>
+<h2 style="margin:20px 0 0;font-size:54px;line-height:1;letter-spacing:-1.6px;font-weight:400">Turn support into your fastest team.</h2>
+</div>
+<div style="display:flex;gap:12px;flex:0 0 auto">
+<x-import component-from-global-scope="WarmlineDesignSystem_273f7f.Button" variant="warm" hint-size="150px,40px">Start free trial</x-import>
+</div></div></section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showChatPanel&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;showTrustStrip&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showChatPanel: this.props.showChatPanel ?? true,
+      showTrustStrip: this.props.showTrustStrip ?? true,
+      logos: ["Northwind", "Lumen", "Parcel", "Hatchway", "Vela", "Orbit"],
+    };
+  }
+}
+
+</script>
+</body>
+</html>
