@@ -262,7 +262,7 @@ Start at **[docs/index.md](docs/index.md)**.
 | [The ResearchGraph](docs/guide/graph.md) | stable references, `rh://` deep links, traversal, rebuild, budgets |
 | [The manuscript workspace](docs/guide/manuscript.md) | files, real local LaTeX compilation, SyncTeX, candidate diffs |
 | [Strict review](docs/guide/review.md) | tiers, inbox order, actions, batch conditions, what a model may not do |
-| [Providers](docs/guide/providers.md) | OpenAI/Anthropic/local/scripted, env vars, egress policy, traces, cost |
+| [Providers](docs/guide/providers.md) | OpenAI/Anthropic/local/scripted, subscription-backed local CLIs, env vars, egress policy, traces, cost |
 | [Agent hosts over MCP](docs/guide/mcp.md) | `research mcp`, Claude Desktop and Claude Code config, tool names, resources |
 | [The local HTTP daemon](docs/guide/http.md) | `research serve`, the token, routes, error codes |
 | [The Web cockpit](docs/guide/web.md) · [VS Code](docs/guide/vscode.md) | building and starting the two GUI surfaces, themes and density |
@@ -289,6 +289,18 @@ context packs and visible `Context used` receipts; session-only attachments with
 links; a manuscript workspace that compiles owned LaTeX source with a real local engine and
 takes model edits only as reviewed candidate diffs; and one Design System package that every
 Web surface composes. See [ROADMAP.md](ROADMAP.md) for the dated gate status of each phase.
+
+**Subscription-backed local CLI providers** (2026-09-04): a researcher logged in to Codex
+CLI or Claude Code can route research work through that CLI with no API key, under the same
+privacy policy, traces, and review gates. Only a subscription login counts; the CLI runs
+with its tools off, read-only or restricted according to what that CLI offers; research
+content travels on stdin and never argv; and the provider is still *external* egress —
+the process starts here, the model is the vendor's. Five runtimes are detected but not
+routable in this release: Cursor Agent, Amp, DeepSeek Harness, and Pi document no bounded
+mode, and OpenCode's is injected through the environment rather than proved by a flag, so
+it stays unproven until a version with recorded fixtures is verified. See
+[providers](docs/guide/providers.md#subscription-backed-local-clis) and
+[ADR-030](docs/decisions/ADR-030-cli-backed-providers-are-bounded-external-workers.md).
 
 Known gaps are recorded where they matter rather than hidden: see
 [docs/plans/acceptance-matrix.md](docs/plans/acceptance-matrix.md) for what each acceptance

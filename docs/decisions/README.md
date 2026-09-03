@@ -53,7 +53,7 @@ and `PRODUCT.md` explicitly rather than introducing an undocumented exception
 - Each ADR states the decision, its consequences, the testable invariants it protects
   (mapped to `PRODUCT.md` §42 acceptance tests where one applies), the alternatives that
   were rejected, and the packages and test directories where it is enforced. Keep one to a
-  page: the existing records are 80 lines each.
+  page: the existing records are roughly 80–140 lines each.
 - An implementation-time ADR names the modules that implement it in its `Source` line, and
   records a known gap in `Consequences` rather than describing behaviour the code does not
   have yet.

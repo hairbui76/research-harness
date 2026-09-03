@@ -259,3 +259,21 @@ working; nothing here renames or removes anything.
   `ProviderCatalog` derived from `research.yaml`'s `providers:` section and the egress report.
   No canonical schema; it is a capability response model that reuses the `EgressClass`
   vocabulary so a model selector and a receipt speak the same words.
+- No domain object changed for the subscription-backed local CLI providers. The four
+  `provider.cli.scan|configure|remove|test` capabilities join `capabilities/` in
+  `capabilities/cli_providers.py`; `CliRuntimeStatus`, `CliScanReport`,
+  `ConfiguredCliProviderView`, and the three report models are capability response models
+  derived from local probes and `research.yaml`, carrying no `id` and no digest, because a
+  CLI being installed today is not a fact about this project's science.
+- `RouterProviderConfig` (`providers/models/router.py` — a provider-layer model, not a
+  domain object) gains two optional fields, both `None` by default so every existing entry
+  validates unchanged: `runtime`, required when `kind` is `local_cli` and refused
+  otherwise, and `reasoning`, the runtime's own effort name. The same validator refuses
+  `base_url` and `api_key_env` on a `local_cli` entry: that entry has no endpoint and no
+  key, it has the CLI's own login (ADR-030).
+- `WorkspaceConfig.providers` is unchanged in shape — still the raw list `workspace/` holds
+  without importing `providers/` — and `WorkspaceRepository.update_providers(providers)`
+  is new beside `update_config`: it validates, then writes the whole `providers:` table
+  through the journal `Transaction` under the workspace lock, and appends **no**
+  `ResearchEvent`. Provider configuration is configuration, not accepted scientific state,
+  so a credential written into the new list is refused with the file untouched.

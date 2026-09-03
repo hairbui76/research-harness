@@ -148,7 +148,9 @@ $ research interrogate W0001 --provider codex-sub
 ```
 
 Once an entry exists, every later scan repeats it under a `configured in research.yaml`
-block with its priority and whether it is routable right now.
+block with its priority and whether it is routable right now. `research providers remove
+codex-sub` deletes that one entry from `research.yaml`, and leaves every other provider —
+and the CLI's own login — untouched.
 
 The entry `add` writes:
 
@@ -189,21 +191,25 @@ it reports `bounded mode unproven`. `add` refuses all five. A tool call during a
 cancels the process and fails the request (`bounded_authority_violation`); there is no
 prompt-only fallback.
 
-**What a scan reports.** Installed state and version; login, as `logged in`, `not logged in`,
-or `login unverified`; bounded mode, as `bounded mode ok`, `no bounded mode`, or
-`bounded mode unproven`; compatibility; and the models the CLI itself lists (`live`) or the
-shipped hints (`fallback`). Compatibility is `verified` for a version with recorded fixtures,
-`warning` for an untested newer one, `unknown` when the version string cannot be read, and
-`blocked` for a version known to be incompatible or below a declared floor. Of those four
-only `blocked` stops a runtime being routed: bounded mode is a separate gate, answered for
-the build that is actually installed, so an unrecognised version is a warning, not a
-refusal. A runtime
-that cannot be routed ends its line with the one reason that stops it — the same sentence
-`add` refuses with and the Web cockpit shows. A scan edits nothing and sends no research
-content: it runs the CLI's own `--version`, login-status, help, and model-list commands with
-short timeouts, and the result is cached for 30 seconds so a selector stays responsive
-(`--rescan` bypasses the cache). The Web cockpit's *Settings → Models & providers → Local
-CLIs* tab renders the same report from the same capabilities.
+**What a scan reports.** Installed state and version; login, as `logged in`,
+`not logged in`, or `login unverified`; bounded mode, as `bounded mode ok`,
+`no bounded mode`, or `bounded mode unproven`; compatibility; and the models the CLI
+itself lists (`live`) or the shipped hints (`fallback`). Compatibility is `verified` for a
+version with recorded fixtures, `warning` for any parseable version that is neither
+verified nor blocked, `unknown` when the version string cannot be read, and `blocked` for a
+version known to be incompatible or below a declared floor. Of those four only `blocked`
+stops a runtime being routed on its own: bounded mode is a separate gate, answered for the
+build that is actually installed, so an unrecognised version is a warning, not a refusal.
+The one exception is a runtime whose posture is injected through the environment rather
+than proved by a flag — OpenCode's, here: a help probe shows that a flag exists, never that
+an injected setting denies anything, so only a `verified` version proves that posture, and
+every other version leaves the bounded mode `unproven`. A runtime that cannot be routed
+ends its line with the one reason that stops it — the same sentence `add` refuses with and
+the Web cockpit shows. A scan edits nothing and sends no research content: it runs the
+CLI's own `--version`, login-status, help, and model-list commands with short timeouts, and
+the result is cached for 30 seconds so a selector stays responsive (`--rescan` bypasses the
+cache). The Web cockpit's *Settings → Models & providers → Local CLIs* tab renders the same
+report from the same capabilities.
 
 **Traces and errors.** A CLI call is traced like any other under `.research/traces/`. An
 ordinary `--provider codex-sub` call adds the runtime id, protocol family, transport, model,
