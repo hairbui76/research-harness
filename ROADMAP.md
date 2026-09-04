@@ -1675,8 +1675,9 @@ a named test; a binding adds no gate and bypasses none.
 
 > **Status 2026-09-04 — all eight criteria hold.** `session.configure` stores the binding
 > on the session record and never in `research.yaml`; `WorkspaceProviders.select` resolves a
-> runtime binding into one in-memory `session:<runtime>` entry for that call and narrows to
-> it, so the privacy policy and the run-time runtime gate apply unchanged. `research chat
+> runtime binding into one in-memory `session:<runtime>` entry for that call and selects
+> that entry by identity — never by name or tag, which a hand-written entry could claim — so
+> the privacy policy and the run-time runtime gate apply unchanged. `research chat
 > configure` binds, shows, and clears, and `chat list`, `chat show`, the composer's grouped
 > picker and the session rail all print the same words. The clause-by-clause evidence is
 > `docs/plans/acceptance-matrix.md` § *Session runtime binding*; the decision is the
@@ -1685,6 +1686,12 @@ a named test; a binding adds no gate and bypasses none.
 > test at all — only the compatibility table it reads is pinned — and `executable_missing`
 > has no binding-specific test; both are the CLI providers layer's gate, which a binding
 > reaches through the identical `RouterProviderConfig`.
+>
+> **One gap deferred rather than closed:** the reasoning level a bound answer used is
+> recorded in no durable artefact — transcript, receipt, run record and completion trace
+> carry provider and model only — so nothing on disk tells a `high` answer from a `low` one
+> after the fact. A follow-on adds the effort to `ProviderProfile`, for bindings and
+> configured entries alike.
 >
 > **One fact worth stating outside the table:** a *private* session cannot be bound to a
 > runtime at all, because every CLI runtime is external egress, and no capability changes a

@@ -469,6 +469,17 @@ through `update_session`), and criterion (3)'s `version_blocked` branch is reach
 test at all — only the compatibility table it reads is pinned. Both gaps are inherited from
 the CLI providers layer rather than introduced here.
 
+A third gap is not a missing test but a missing record: the **reasoning level a bound answer
+actually used is written to no durable artefact**. The transcript, the receipt, the run
+record and the completion trace all carry provider and model only, so nothing on disk
+distinguishes an answer produced at `high` from the same question answered at `low`, and a
+binding whose effort changed between two messages leaves no trace of the change. It is
+disclosed by every *live* surface — `bound to: session:codex/gpt-5.5 (reasoning high)` — but
+that is the binding as it is now, not the one an old answer ran under. A follow-on carries
+the effort on `ProviderProfile`, for bindings and configured entries alike, which is the one
+place all four artefacts read from. Deferred deliberately: it is a schema addition to the
+reproducibility record, not a fix to this feature.
+
 And one fact no criterion states that every reader needs: a **private** session cannot be
 bound to a runtime at all — `session.configure` refuses with the send path's private-egress
 sentence, because every CLI runtime is external egress — and no capability changes a
