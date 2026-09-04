@@ -3,7 +3,8 @@
 `research serve` runs a FastAPI app over one workspace. It is a transport and nothing
 more: it resolves who is calling, hands the call to the capability registry, and renders
 the answer (ADR-004). There is no route that runs SQL, writes a caller-named file, or
-patches an object field.
+patches an object field. `research app` serves the same routes over many workspaces at
+once — [the multi-project host](#the-multi-project-host) — without changing any of them.
 
 ```console
 $ research serve
@@ -185,6 +186,63 @@ cannot interleave writes. A long-running capability (`work.interrogate`,
 `evidence.verify`) persists its run first and returns a durable `run_id`; poll
 `GET /runs/{run_id}` rather than holding the connection open. `POST /runs/{id}/cancel`
 sets a durable cancel flag the run checks before its next stage.
+
+## The multi-project host
+
+`research app` serves a second host from the same code. Everything above still describes it,
+one prefix down: the workspace routes live below `/api/projects/{project_id}`, with the same
+request and response bodies, the same capability envelope, and the same error codes. There
+is one implementation of those routes, so the two hosts cannot drift.
+
+```bash
+curl -s -H "authorization: Bearer $APP_TOKEN" \
+  http://127.0.0.1:8765/api/projects/prj_2b93f0c4a1de77e5/overview
+```
+
+`GET /api/app/health` answers `{"ok":true,"kind":"multi_project","version":…}` and is the
+one route that needs no credential; the one-workspace daemon does not serve it, which is how
+a client — and `research app` itself, before it starts a second server — tells the two
+apart. A `project_id` is opaque: no capability, byte, run, session, graph, or manuscript
+request accepts a workspace path, and a run or object id from one project is simply *not
+found* in another.
+
+In front of them sits the control plane, which is application state rather than research
+state:
+
+| method | path | what it does |
+|---|---|---|
+| `POST` | `/api/app/bootstrap` | mint a one-time launch nonce; app token only, no browser credential |
+| `POST` | `/api/app/session` | exchange that nonce, same-origin, for the app token — once |
+| `GET` | `/api/projects` | every registered project with its availability and active-run count |
+| `POST` | `/api/projects/create` | initialize a new child of a chosen parent folder and register it |
+| `POST` | `/api/projects/open` | register an existing workspace |
+| `POST` | `/api/projects/initialize` | initialize a confirmed ordinary folder, then register it |
+| `POST` | `/api/projects/{project_id}/locate` | repoint a moved project, keeping its identity |
+| `POST` | `/api/projects/{project_id}/reveal` | show the registered root in the file manager; takes no path |
+| `PATCH` | `/api/projects/{project_id}` | rename the display name in the registry |
+| `DELETE` | `/api/projects/{project_id}` | forget the entry; `204`, and no file is removed |
+| `POST` | `/api/dialogs/folder` | run the platform folder dialog; answers `{path, method, cancelled, fallback_required}` |
+
+Every one of them requires the app token — the file `app-token` in the application data
+directory, not `.research/daemon-token` — and every mutation additionally requires the
+request to carry the app's own `Origin`, so a page on another origin cannot drive the
+loopback app from your browser. An unauthenticated caller gets `401` and learns nothing: not
+a project, not a path, not whether either exists.
+
+Control-plane failures use the same shape as a capability error, with their own codes:
+
+| code | HTTP | when |
+|---|---|---|
+| `project_not_found` | 404 | no registered project has that id |
+| `project_needs_initialization` | 409 | the folder is readable but holds no `research.yaml` |
+| `project_active_runs` | 409 | the project still has a running workflow |
+| `project_invalid` | 422 | the path, the name, or the registry document is unusable |
+| `picker_unavailable` | 503 | no folder dialog on this machine; offer the manual path field |
+| `control_permission_denied` | 401/403 | no app token, a foreign `Origin`, or a spent launch nonce |
+
+`research serve` is unchanged by all of this: the same routes at the same paths, the same
+`.research/daemon-token`, the same principals. See
+[the Web cockpit](web.md#the-multi-project-app).
 
 ## When to use HTTP instead of MCP
 

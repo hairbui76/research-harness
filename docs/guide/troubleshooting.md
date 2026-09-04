@@ -354,6 +354,68 @@ the full object for you.
 
 If a workspace lock is held by a process that no longer exists, delete `.research/lock`.
 
+## The multi-project app
+
+```text
+error: port 8765 is in use by something that is not a Research Harness app (HTTP 404 from
+/api/app/health); stop it, or run `research app --port <other port>`. A one-workspace
+`research serve` daemon answers like this.
+```
+
+`research app` joins an app that is already running and refuses to fight anything else for
+the port. A `research serve` daemon on `8765` is the usual cause: stop it, or give the app
+another `--port`.
+
+```text
+error: the app already running on port 8765 does not accept this app token: it was started
+from a different app data directory.
+```
+
+Two app data directories on one machine — usually a shell with a different
+`XDG_DATA_HOME`. Use the instance that is already running, stop it, or pick another
+`--port`.
+
+```text
+This launch link has already been used or has expired. Start Research Harness again with
+`research app` to open a fresh window.
+```
+
+The URL `research app` opens carries a one-time nonce good for a minute; a bookmark or a
+reload after it was spent has nothing to exchange. Run `research app` again — it opens a new
+authenticated window. A tab that never had a token at all says so instead, with the same
+remedy. Nothing is wrong with your projects.
+
+```text
+This machine has no folder dialog available, so type the absolute path instead.
+```
+
+No `zenity` and no `kdialog` on this Linux desktop. Install either one, or type an absolute
+path into the field the dialog offers instead — it is authenticated the same way, and it is
+the only other route a path may reach the app by.
+
+```json
+{"detail":{"code":"picker_unavailable","message":"the zenity folder dialog timed out after 600s"}}
+```
+
+The dialog started and never came back — a window behind another one, or a desktop session
+the daemon cannot draw on. Nothing was registered. Try again, or use the manual path field.
+
+```text
+Unavailable
+```
+
+The folder moved, was renamed, or is not mounted. The project keeps its identity and its
+history; use **Locate folder** to point it at the folder's new place. **Forget project**
+would remove the entry and still delete nothing.
+
+```json
+{"detail":{"code":"project_active_runs","message":"Traffic survey has 1 active run(s); wait for them or cancel them first"}}
+```
+
+Forgetting or relocating a project with a workflow still running is refused. Let it finish,
+or cancel it, then try again. Switching to another project is always allowed — the workflow
+keeps running.
+
 ## MCP hosts
 
 A host that reports the server exited immediately is hiding a one-line `error:`. Run the

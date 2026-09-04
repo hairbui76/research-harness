@@ -10,7 +10,109 @@ Full detail, including the review screen, the routes the daemon adds for it, how
 TypeScript types are generated from the daemon, and the known gaps, is in
 **[docs/architecture/web.md](../architecture/web.md)**.
 
-## Starting it
+There are two ways to serve it, and the cockpit itself is the same either way:
+
+* `research app` — the **multi-project application**. One loopback process holds every
+  project you have opened, and you switch between them in the browser.
+* `research serve -w <workspace>` — the **one-workspace daemon**, unchanged. One workspace,
+  one port, one `.research/daemon-token`.
+
+## The multi-project app
+
+```bash
+uv sync
+uv run research app          # binds 127.0.0.1:8765 and opens your browser
+```
+
+Installed on your `PATH` that is just `research app`; `uv run` is the repository-development
+form. The command is independent of the current directory — it reads no `research.yaml` and
+takes no `-w`, because the application resolves projects through its own registry. `--port`
+moves it; `--no-open` prints the URL instead of launching a browser. If a compatible app is
+already listening on the port, the command opens *that* one rather than starting a second
+server; if something unrelated holds the port — a `research serve` daemon, for instance —
+it says so and names `--port` instead of driving it.
+
+The app serves the same `web/dist` bundle the daemon does, so build it once
+([below](#starting-it-over-one-workspace)); without a build there is a JSON API and no
+screen to open.
+
+### Project Home
+
+The first screen is **Your research projects**: every workspace the application has been
+shown, most recently opened first. Each row carries the display name, the folder path, when
+it was last opened, its availability (`Unavailable`, `Invalid`, `Incompatible`, `Busy`, or
+nothing at all when it is fine), and how many workflows are still running in it. With no
+projects registered, Project Home is where you start; with projects, the app opens the most
+recent available one and Project Home stays one click away.
+
+| action | what it does |
+|---|---|
+| **New project** | asks for a name and a parent folder, creates a filesystem-safe child of it, and initializes it exactly as `research init` does. It never writes into an existing folder — if the child name is taken, choose another name or use **Open folder**. |
+| **Open folder** | validates a folder you choose and registers it. A folder already registered opens its existing project instead of a duplicate. |
+| **Initialize research project** | offered when the folder you chose is readable but holds no `research.yaml`. It lists the files it is about to create and waits for you; nothing is initialized automatically. |
+| **Locate** | for a project whose folder moved or is not mounted. It keeps the project's identity — its id, its history, its remembered conversation state — and replaces the recorded path only after the new folder validates as the same kind of workspace. |
+| **Rename** | changes the display name in this application only. `research.yaml` is scientific state and is not touched. |
+| **Forget project** | removes the registry entry. It **does not delete** anything: the folder and every file in it stay exactly as they are, and **Open folder** adds it back. A project with a workflow still running refuses to be forgotten until it finishes or is cancelled. |
+
+### The project rail
+
+Inside a project the left rail becomes the switcher. It shows the open project, every other
+registered project with its availability and background-run count, **Add project**, and
+**All projects** back to Project Home. Switching projects never cancels work: the workflow
+keeps running, the rail says so, and returning to that project reconnects to its durable run
+status. The per-project **Project actions** menu is **Show in file manager**, **Locate
+folder**, **Rename**, and **Forget project** — the same four operations as on Project Home,
+with the same confirmations.
+
+### Choosing a folder
+
+Every path that reaches the application comes from a dialog a human answered, run by the
+local process rather than the browser:
+
+* **Windows** — the native `FolderBrowserDialog`, shown from a short-lived PowerShell
+  process.
+* **Linux** — `zenity`, then `kdialog`.
+* **Neither installed** — the dialog reports that no picker is available and the UI offers
+  an authenticated field for an absolute path instead. Cancelling a dialog is a normal
+  result, not an error, and changes nothing.
+
+### The app token
+
+The application binds `127.0.0.1` only; that is a boundary, not a default, and there is no
+setting that widens it. Its authority is one random token in `app-token`, beside
+`projects.json` in the application data directory
+([where that is](install.md#where-the-app-keeps-its-data)).
+
+The token never travels in a URL. What `research app` puts in the launch URL is a
+single-use `bootstrap` nonce valid for a minute; the page exchanges it once, same-origin,
+for a token it keeps in `sessionStorage` and removes from the address bar. So the tab is
+signed in, the token dies with the tab, and a bookmarked URL without the nonce shows *"This
+tab is not signed in to the local application. Start Research Harness with `research app`"*
+rather than a broken screen — start the app again and you get a fresh authenticated window.
+
+Without that token the application refuses everything on its control plane, and refuses it
+without disclosing anything: an unauthenticated caller cannot list projects, learn a local
+path, open a folder picker, register, rename, locate, or forget. Research authority is
+unchanged by any of it — registering a folder grants access to that workspace, not the right
+to accept anything in it. See [Review](review.md#what-a-model-or-an-agent-host-cannot-do).
+
+### What it deliberately is not
+
+* not a desktop application — no Electron, no Tauri; it is a browser page on loopback;
+* not a scan of your disk — a project appears in the list because you opened it;
+* no cloud sync of the registry, and no copy of project contents into application data;
+* no arbitrary file or shell authority: workspace content is still reached through
+  capabilities, repositories, and the manuscript and attachment services.
+
+### When to keep using `research serve`
+
+The one-workspace daemon is unchanged and is still the right answer when a single workspace
+is the whole story: `research serve -w <workspace>`, `research mcp -w <workspace>`, `-w` on
+any command, `RESEARCH_WORKSPACE`, `.research/daemon-token`, the VS Code extension, and any
+script or MCP host already pointed at a fixed port. The multi-project app adds a mode; it
+removes nothing.
+
+## Starting it over one workspace
 
 Needs Node and pnpm (`research doctor` reports whether you have them). The three JavaScript
 packages — the Design System, the cockpit, and the VS Code extension — are **one pnpm

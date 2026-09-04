@@ -33,6 +33,30 @@ Node and pnpm are needed only to build the Web cockpit, the Design System packag
 VS Code extension; they are one pnpm workspace, so `pnpm install` runs once at the
 repository root. Full detail: [docs/guide/install.md](docs/guide/install.md).
 
+## Open the app
+
+```bash
+uv sync
+uv run research app          # binds 127.0.0.1:8765 and opens your browser
+```
+
+`research app` is the multi-project entry point. It starts once, independently of the
+current directory — it reads no `research.yaml` and takes no `-w` — and opens **Your
+research projects**: every workspace you have shown it, most recently opened first. **New
+project** creates and initializes a folder you choose; **Open folder** registers one that
+already holds a `research.yaml`. Installed on your `PATH` the command is `research app`;
+`uv run research app` is the repository-development form of the same thing.
+
+The app remembers paths, never contents: a small `projects.json` under your platform's
+application data directory. **Forget project** removes that entry and nothing else — the
+folder and every file in it stay where they are. Full detail, including the folder picker,
+the app token, and what the app deliberately does not do:
+[the Web cockpit](docs/guide/web.md#the-multi-project-app).
+
+`research serve -w <workspace>`, `research mcp -w <workspace>`, `-w` on every command, and
+`.research/daemon-token` are unchanged. One workspace, one port, one token is still the
+right shape for a script, an editor, or an MCP host.
+
 ## Try it in one command
 
 ```bash
@@ -45,11 +69,13 @@ provider, verifies them, and rebuilds the projection — and accepts nothing, be
 the researcher's step: the Review inbox in the cockpit (or `research inbox` / `research
 review`) is where the loop continues.
 
-## Run the Web cockpit
+## Run the Web cockpit over one workspace
 
-The daemon serves the cockpit itself, from `web/dist`, so build it once first (Node 20+ and
-pnpm 11; `research doctor` says whether you have them). Without a build the daemon still
-runs, but serves the JSON API alone.
+Both `research app` and `research serve` serve the same cockpit from `web/dist`, so build
+it once first (Node 20+ and pnpm 11; `research doctor` says whether you have them). Without
+a build either command still runs, but serves the JSON API alone. `research serve` is the
+one-workspace daemon: it takes `-w`, uses the workspace's own `.research/daemon-token`, and
+is what the VS Code extension and a shell script talk to.
 
 ```bash
 pnpm install                                     # once, at the repository root
@@ -301,6 +327,14 @@ mode, and OpenCode's is injected through the environment rather than proved by a
 it stays unproven until a version with recorded fixtures is verified. See
 [providers](docs/guide/providers.md#subscription-backed-local-clis) and
 [ADR-030](docs/decisions/ADR-030-cli-backed-providers-are-bounded-external-workers.md).
+
+**The multi-project local app** (2026-09-04): `research app` serves several local projects
+from one loopback process, so opening a second project no longer means stopping the first
+one's workflows or choosing another port. The registry stores approved folder paths only;
+project-scoped requests carry an opaque `project_id` and never a filesystem path; and the
+release is deliberately not a desktop shell, not a project scan of your disk, not a cloud
+sync, and not a general-purpose file agent. See
+[the Web cockpit](docs/guide/web.md#the-multi-project-app).
 
 Known gaps are recorded where they matter rather than hidden: see
 [docs/plans/acceptance-matrix.md](docs/plans/acceptance-matrix.md) for what each acceptance

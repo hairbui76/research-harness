@@ -77,12 +77,53 @@ error: no research workspace at or above /tmp: run `research init <dir>`, pass -
 Working inside the project directory is the usual case, so most examples in this guide
 omit `-w`.
 
+## Starting the app instead
+
+One command does not follow that rule, because it is not about a workspace:
+
+```console
+$ uv run research app
+research app on http://127.0.0.1:8765
+app data  /home/you/.local/share/research-harness
+open  http://127.0.0.1:8765/?bootstrap=…
+```
+
+`research app` starts the multi-project application, which keeps its own list of the
+projects you have opened and lets you create, open, and switch between them in the browser.
+It reads no `research.yaml`, takes no `--workspace`, and can be started from anywhere.
+`--port` moves it off `8765`; `--no-open` prints the URL instead of launching a browser.
+Installed on your `PATH` it is `research app`; `uv run` is only how this repository runs it.
+The rest — Project Home, the folder picker, the token — is in
+[the Web cockpit](web.md#the-multi-project-app).
+
+### Where the app keeps its data
+
+Two files, outside every workspace, created on first launch:
+
+| platform | directory |
+|---|---|
+| Windows | `%LOCALAPPDATA%\ResearchHarness` |
+| Linux | `$XDG_DATA_HOME/research-harness`, or `~/.local/share/research-harness` when `XDG_DATA_HOME` is unset |
+
+* `projects.json` — the registry: the display name, canonical folder path, and last-opened
+  time of every project you have explicitly opened. It holds paths, never copies of your
+  work, and nothing scans your disk to fill it.
+* `app-token` — the application token, owner-only where the filesystem supports it. It is
+  regenerable runtime state; deleting it costs a relaunch and nothing else.
+
+Deleting `projects.json` empties the project list; it deletes no workspace. Neither file
+is per-workspace state, so `.research/daemon-token` and `research serve` are untouched by
+any of this.
+
 ## Windows
 
-The harness runs on Windows (PowerShell or cmd) with the same commands; two differences:
+The harness runs on Windows (PowerShell or cmd) with the same commands; three differences:
 
 - The workspace lock uses a `msvcrt` byte-range lock instead of `flock`; behaviour is the
   same (one writer at a time, waiters see who holds it).
+- `research app` stores `projects.json` and `app-token` under
+  `%LOCALAPPDATA%\ResearchHarness`, and its folder picker is the native
+  `FolderBrowserDialog`, shown by a short-lived PowerShell process.
 - Shell one-liners in this guide use POSIX syntax. The Web cockpit URL, for example, is
 
   ```powershell

@@ -7,7 +7,8 @@ is durable, private working context, and everything it produces reaches accepted
 only through the same review path as everything else.
 
 New here? [Install and first run](guide/install.md), then the quickstart in
-[README.md](../README.md).
+[README.md](../README.md). `research app` opens the multi-project application;
+`research serve -w <workspace>` is the unchanged one-workspace daemon.
 
 ## Guide
 
@@ -15,7 +16,7 @@ Task-oriented pages for using the harness.
 
 | page | when you need it |
 |---|---|
-| [Install and first run](guide/install.md) | requirements, `uv sync`, `research doctor`, creating a workspace |
+| [Install and first run](guide/install.md) | requirements, `uv sync`, `research doctor`, `research app`, creating a workspace |
 | [The workspace](guide/workspace.md) | the directory layout, the three storage tiers, Git advice, identifiers |
 | [The conversation workspace](guide/conversation.md) | `research chat`, sessions, `@` references, `Context used`, promotion, retries |
 | [Attachments](guide/attachments.md) | `research attachment`, what blocks a send, `Save to corpus` |
@@ -24,8 +25,8 @@ Task-oriented pages for using the harness.
 | [Strict review](guide/review.md) | tiers, inbox order, review actions, batch conditions, conflicts, what a model may not do |
 | [Providers](guide/providers.md) | configuring OpenAI/Anthropic/local/scripted, subscription-backed local CLIs, env vars, egress policy, `research egress`, traces, cost |
 | [Agent hosts over MCP](guide/mcp.md) | `research mcp`, Claude Desktop and Claude Code config, ChatGPT-compatible hosts, tool names, resources |
-| [The local HTTP daemon](guide/http.md) | `research serve`, the token, the routes, the error codes |
-| [The Web cockpit](guide/web.md) | the root pnpm workspace, starting the browser UI, themes and density |
+| [The local HTTP daemon](guide/http.md) | `research serve`, `research app`, the tokens, the routes, the error codes |
+| [The Web cockpit](guide/web.md) | `research app` and Project Home, the root pnpm workspace, starting the browser UI, themes and density |
 | [The VS Code extension](guide/vscode.md) | manuscript work in the editor |
 | [Rebuild and recovery](guide/rebuild-and-recovery.md) | `research rebuild`, `research doctor`, journal recovery, inconsistency, schema versions, a corrupt `.research/` |
 | [Plugins](guide/plugins.md) | authoring boundaries, the manifest, allowed capabilities, the example and the two shipped plugins |
@@ -61,6 +62,7 @@ planned in [the v1.1 implementation plan](plans/v1.1-implementation-plan.md), th
 | [LaTeX manuscript workspace](superpowers/specs/2026-09-03-latex-manuscript-workspace-design.md) | KaTeX chat rendering, owned source, real local compilation, PDF preview, and audit |
 | [ResearchGraph index](superpowers/specs/2026-09-03-research-graph-index-design.md) | rebuildable node/edge projection, stable refs, traversal, and context packs |
 | [Subscription-backed local CLI providers](superpowers/specs/2026-09-03-subscription-local-cli-providers-design.md) | declarative runtime registry, bounded subprocess engine, egress invariant, the four capabilities |
+| [Multi-project local web app](superpowers/specs/2026-09-04-multi-project-local-app-design.md) | `research app`, the project registry, the authenticated control plane, project-scoped routes, and the non-goals |
 
 ## Architecture
 
@@ -106,6 +108,7 @@ suggests violating one, the ADR and `PRODUCT.md` change explicitly.
 | [Skill audit](plans/skill-audit.md) | every asset under `skills/`, classified, and where the in-scope ones landed |
 | [v1.1 implementation plan](plans/v1.1-implementation-plan.md) | the shared contracts, waves, and task briefs the conversation-first track executed |
 | [Subscription-backed CLI providers plan](superpowers/plans/2026-09-04-subscription-local-cli-providers.md) | the runtime registry, bounded engine, capabilities, and surfaces the follow-on track executed |
+| [Multi-project local app plan](superpowers/plans/2026-09-04-multi-project-local-app.md) | the registry, lifecycle service, pickers, multi-project host, and client routing `research app` rests on |
 | [Dogfood session, 2026-09-03](plans/dogfood-2026-09-03.md) | running the harness on a real review; `docs/dogfood/structured-traffic/` is the resulting workspace |
 | [Dogfood session, v1.1](plans/dogfood-2026-09-03-v1.1.md) | the conversation-first loop end to end: chat, attachments, graph, a real LaTeX compile |
 
