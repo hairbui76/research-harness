@@ -9,12 +9,19 @@ adapter's own name in both fields: it is an entry binding on its `model` value.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from pydantic import ValidationError
 
 from research_harness.domain.conversation import (
     RUNTIME_PROVIDER_PREFIX,
     ModelIdentity,
     SessionDefaults,
 )
+from research_harness.domain.errors import CapabilityError
+
+if TYPE_CHECKING:
+    from research_harness.providers.models.router import RouterProviderConfig
 
 ENTRY_PROVIDER = "entry"
 SESSION_LABEL_PREFIX = "session:"
@@ -71,6 +78,42 @@ def binding_words(defaults: SessionDefaults) -> str:
     """The fixed wording every surface prints for a session's binding (plan ruling 4)."""
     binding = binding_of(defaults)
     return PROJECT_DEFAULT_WORDS if binding is None else binding.words
+
+
+def validation_sentence(exc: ValidationError) -> str:
+    """The first message of a pydantic error, without its `Value error, ` prefix.
+
+    Shared by every place that validates a binding as a `research.yaml` entry --
+    `ConversationService.configure` when it is stored, `WorkspaceProviders.select` when it
+    is resolved, `attachment.check_send` when it is described -- so all refuse in the
+    entry's own words.
+    """
+    message = str(exc.errors()[0]["msg"])
+    return message.removeprefix("Value error, ")
+
+
+def session_entry(binding: RuntimeBinding) -> RouterProviderConfig:
+    """The in-memory `research.yaml` entry a runtime binding stands for (spec §9).
+
+    One builder for every surface that has to answer "what would this session send to?":
+    the send that routes it, the preview that describes it, and the attachment check that
+    reports on it. It goes through the validator a hand-written entry goes through, so a
+    record whose runtime lost its bounded posture in a newer registry refuses with the
+    entry's own sentence rather than being routed.
+    """
+    from research_harness.providers.models.router import RouterProviderConfig
+
+    try:
+        return RouterProviderConfig(
+            name=binding.label,
+            kind="local_cli",
+            runtime=binding.runtime,
+            model=binding.model,
+            reasoning=binding.reasoning,
+            priority=0,
+        )
+    except ValidationError as exc:
+        raise CapabilityError(validation_sentence(exc)) from exc
 
 
 def runtime_identity(runtime: str, model: str) -> ModelIdentity:

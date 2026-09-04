@@ -34,6 +34,7 @@ from research_harness.domain.work import (
     WorkCandidate,
     WorkIdentifiers,
 )
+from tests.fixtures.cli.fakes import FakeCli
 
 MODEL_ACTOR = "vendor-a/model-x"
 ARTIFACT_BYTES = b"%PDF-1.7\n% hand-authored Gate P1 artifact bytes\n"
@@ -121,6 +122,39 @@ def project(tmp_path: Path) -> Iterator[CapabilityContext]:
     """An initialized workspace opened as the researcher."""
     result = init_project(InitProjectRequest(root=tmp_path / "project", name="gate-p1"))
     yield open_context(result.root, HUMAN_ACTOR)
+
+
+@pytest.fixture
+def codex(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> FakeCli:
+    """A fake `codex` that probes clean; nothing here ever spawns the real one.
+
+    A copy rather than an import: each suite's conftest stands on its own, and Gate P1
+    must keep holding with no runtime installed at all.
+    """
+    from research_harness.providers.cli.detection import DEFAULT_CACHE
+
+    DEFAULT_CACHE.clear()
+    fake = FakeCli.install(
+        tmp_path / "tools",
+        "codex",
+        version_stdout="codex-cli 0.150.1",
+        probes=[
+            {"args": ["login", "status"], "stdout": "Logged in using ChatGPT\n"},
+            {
+                "args": ["exec", "--help"],
+                "stdout": (
+                    "--sandbox --output-schema --json --ephemeral --skip-git-repo-check "
+                    "--ignore-user-config --ignore-rules"
+                ),
+            },
+            # An empty catalog, so the scan falls back to the runtime's declared models.
+            {"args": ["debug", "models"], "stdout": "{}"},
+        ],
+        run={"lines": []},
+    )
+    monkeypatch.setenv("PATH", str(fake.bin_dir))
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    return fake
 
 
 @pytest.fixture

@@ -7,15 +7,19 @@ import pytest
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.binding import EntryBinding, RuntimeBinding, binding_of
 from research_harness.conversation.service import ConversationService
+from research_harness.domain.conversation import Visibility
 from research_harness.domain.errors import CapabilityError
 from tests.fixtures.cli.fakes import FakeCli
+
+SHAREABLE = Visibility.PROJECT
+"""A CLI runtime is external egress, so only a shareable session may be bound to one."""
 
 
 def test_a_runtime_binding_is_stored_with_its_model_and_reasoning(
     ctx: CapabilityContext, codex: FakeCli
 ) -> None:
     service = ConversationService(ctx)
-    session = service.create("Latency study")
+    session = service.create("Latency study", visibility=SHAREABLE)
 
     record = service.configure(session.id, runtime="codex", model="gpt-5.5", reasoning="high")
 
@@ -28,7 +32,7 @@ def test_default_model_and_no_reasoning_are_accepted(
     ctx: CapabilityContext, codex: FakeCli
 ) -> None:
     service = ConversationService(ctx)
-    session = service.create("x")
+    session = service.create("x", visibility=SHAREABLE)
     record = service.configure(session.id, runtime="codex", model="default")
     assert binding_of(record.defaults) == RuntimeBinding("codex", "default", None)
 
@@ -71,9 +75,55 @@ def test_an_installed_but_logged_out_runtime_can_still_be_bound(
 
     DEFAULT_CACHE.clear()
     service = ConversationService(ctx)
-    session = service.create("x")
+    session = service.create("x", visibility=SHAREABLE)
     record = service.configure(session.id, runtime="codex", model="gpt-5.5")
     assert binding_of(record.defaults) == RuntimeBinding("codex", "gpt-5.5", None)
+
+
+def test_a_private_session_may_not_be_bound_to_a_runtime(
+    ctx: CapabilityContext, codex: FakeCli
+) -> None:
+    """Every CLI runtime is external egress, so the refusal belongs at bind time.
+
+    Storing the binding and refusing on every send would leave a session that looks
+    configured and can never answer; the daemon says so once, in the sentence the send
+    path uses.
+    """
+    service = ConversationService(ctx)
+    private = service.create("x")
+    assert private.visibility is Visibility.PRIVATE, "the default, and the case that matters"
+
+    with pytest.raises(CapabilityError) as caught:
+        service.configure(private.id, runtime="codex", model="gpt-5.5")
+
+    assert f"session {private.id} is private" in str(caught.value)
+    assert "session:codex/gpt-5.5 is an external provider" in str(caught.value)
+    assert service.store.get_session(private.id).defaults.model is None, "nothing was stored"
+    assert codex.runs() == []
+
+    shareable = service.create("x", visibility=SHAREABLE)
+    record = service.configure(shareable.id, runtime="codex", model="gpt-5.5")
+    assert binding_of(record.defaults) == RuntimeBinding("codex", "gpt-5.5", None)
+
+
+def test_a_private_session_may_still_be_bound_to_an_entry(ctx: CapabilityContext) -> None:
+    """An entry can be local, so its egress is the send path's question, not bind time's."""
+    ctx.repo.update_providers(
+        [
+            {
+                "name": "on-box",
+                "kind": "local_openai_compatible",
+                "model": "llama-test",
+                "base_url": "http://127.0.0.1:11434/v1",
+            }
+        ]
+    )
+    service = ConversationService(ctx)
+    session = service.create("x")
+
+    record = service.configure(session.id, entry="on-box")
+
+    assert binding_of(record.defaults) == EntryBinding("on-box")
 
 
 def test_an_entry_binding_needs_an_enabled_entry(ctx: CapabilityContext) -> None:
@@ -107,7 +157,7 @@ def test_clear_returns_the_session_to_the_project_default(
     ctx: CapabilityContext, codex: FakeCli
 ) -> None:
     service = ConversationService(ctx)
-    session = service.create("x", token_budget=4000)
+    session = service.create("x", token_budget=4000, visibility=SHAREABLE)
     service.configure(session.id, runtime="codex", model="gpt-5.5", reasoning="high")
     record = service.configure(session.id, clear=True)
     assert record.defaults.model is None and record.defaults.reasoning is None

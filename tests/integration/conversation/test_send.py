@@ -145,7 +145,14 @@ def test_a_stream_that_stops_part_way_keeps_what_arrived_and_says_it_is_incomple
     from research_harness.conversation.send import ProviderSelector, Selection
 
     class Selector:
-        def select(self, ctx: CapabilityContext, *, model: object, budget: object) -> Selection:
+        def select(
+            self,
+            ctx: CapabilityContext,
+            *,
+            model: object,
+            budget: object,
+            defaults: object = None,
+        ) -> Selection:
             return Selection(
                 provider=Partial(),  # type: ignore[arg-type]
                 profile=ProviderProfile(
@@ -190,7 +197,14 @@ def test_stopping_a_running_stream_marks_the_message_incomplete(
             return generate()
 
     class Selector:
-        def select(self, ctx: CapabilityContext, *, model: object, budget: object) -> Selection:
+        def select(
+            self,
+            ctx: CapabilityContext,
+            *,
+            model: object,
+            budget: object,
+            defaults: object = None,
+        ) -> Selection:
             return Selection(
                 provider=Interruptible(),  # type: ignore[arg-type]
                 profile=ProviderProfile(

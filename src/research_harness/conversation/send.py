@@ -51,6 +51,7 @@ from research_harness.domain.conversation import (
     MessageAttempt,
     MessageRole,
     ModelIdentity,
+    SessionDefaults,
     TextBlock,
     Visibility,
 )
@@ -269,7 +270,12 @@ class ProviderSelector(Protocol):
     """How a send finds its backend. Configuration, never a branch in domain code."""
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
         """The provider for this call, refusing before a request exists (Product 34)."""
 
@@ -284,8 +290,19 @@ class WorkspaceProviders:
     """
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
+        from research_harness.conversation.binding import (
+            EntryBinding,
+            RuntimeBinding,
+            binding_of,
+            session_entry,
+        )
         from research_harness.privacy.policy import load_policy
         from research_harness.privacy.traces import trace_writer_for
         from research_harness.providers.models.router import (
@@ -295,7 +312,27 @@ class WorkspaceProviders:
         )
 
         config = RouterConfig.model_validate({"providers": list(ctx.repo.config.providers)})
-        if not config.providers:
+        # A per-message `model` wins; otherwise the session's binding; otherwise the
+        # project default in priority order (binding spec §9).
+        binding = None if model is not None or defaults is None else binding_of(defaults)
+        wanted = model
+        label: str | None = None
+        if isinstance(binding, RuntimeBinding):
+            # `session:<runtime>` is the binding's own name: a hand-written entry that took
+            # it would otherwise share the tag and could outrank the session's own entry.
+            entry_config = session_entry(binding)
+            config = RouterConfig(
+                providers=[
+                    *(item for item in config.providers if item.name != entry_config.name),
+                    entry_config,
+                ]
+            )
+            wanted = label = binding.label
+        elif isinstance(binding, EntryBinding):
+            wanted = binding.name
+        if not config.providers and not isinstance(binding, EntryBinding):
+            # An entry binding names something; "no provider named ..." below says which,
+            # and an empty table is one way for that name to be gone (binding spec §9).
             raise CapabilityError(
                 "no model providers configured: add a `providers:` list to research.yaml, "
                 "or preview the context with `context.preview`"
@@ -305,13 +342,13 @@ class WorkspaceProviders:
         entries = [
             entry
             for entry in router.entries
-            if model is None or model in entry.tags or entry.provider.name == model
+            if wanted is None or wanted in entry.tags or entry.provider.name == wanted
         ]
         if not entries:
-            known = (
-                ", ".join(sorted({tag for entry in router.entries for tag in entry.tags})) or "none"
+            known = ", ".join(sorted(item.name for item in config.providers if item.enabled))
+            raise CapabilityError(
+                f"no provider named {wanted!r} in research.yaml (have: {known or 'none'})"
             )
-            raise CapabilityError(f"no provider named {model!r} in research.yaml (have: {known})")
         narrowed = ModelRouter(entries, policy=policy)
         refusal = narrowed.egress_refusal()
         if refusal is not None:
@@ -330,7 +367,10 @@ class WorkspaceProviders:
                 entry.provider, model=entry.model, trace=trace_writer_for(ctx.repo)
             ),
             profile=ProviderProfile(
-                provider=entry.provider.name,
+                # A session-bound answer is labelled `session:<runtime>` in the transcript,
+                # the receipt and the run record; the trace keeps the adapter's own name,
+                # because the trace writer records the adapter (plan ruling 2).
+                provider=label or entry.provider.name,
                 model=entry.model,
                 egress=(
                     EgressClass.LOCAL
@@ -367,9 +407,14 @@ class ScriptedProviders:
         self._model = model or str(getattr(provider, "model", "scripted-1"))
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
-        del ctx, model, budget
+        del ctx, model, budget, defaults
         return Selection(
             capabilities=self._provider.capabilities(),
             provider=streaming_provider(
@@ -511,7 +556,9 @@ class SendService:
         allowance = budget or ContextBudget(
             total=record.defaults.token_budget or ContextBudget().total
         )
-        selection = self._providers.select(self._ctx, model=model, budget=allowance)
+        selection = self._providers.select(
+            self._ctx, model=model, budget=allowance, defaults=record.defaults
+        )
         _refuse_private_egress(record, selection.profile)
         plan = self._attachment_plan(record.id, selection, attachments)
         resolved = self._assembler.resolve_references(references, text)
@@ -983,6 +1030,21 @@ def _fingerprint(inputs: Mapping[str, Any]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def private_egress_sentence(session: ConversationSessionId, label: str) -> str:
+    """Why a private session may not reach an external provider (Product 34).
+
+    One wording for two moments: the send that would disclose the transcript, and
+    `session.configure` binding a session to a runtime, which is external by definition and
+    so would refuse every send it ever made. `label` is `provider/model`.
+    """
+    return (
+        f"session {session} is private and {label} is an external provider, so nothing in "
+        "this conversation may be sent to it (Product 34; workspace design SS7). Send it "
+        "to a local provider, or make the session shareable with "
+        "`research chat new --visibility project` on a new conversation."
+    )
+
+
 def _refuse_private_egress(record: ConversationSession, profile: ProviderProfile) -> None:
     """Refuse an external send from a private session, before anything is written.
 
@@ -994,11 +1056,7 @@ def _refuse_private_egress(record: ConversationSession, profile: ProviderProfile
     if not profile.leaves_the_machine or record.visibility is not Visibility.PRIVATE:
         return
     raise EgressDeniedError(
-        f"session {record.id} is private and {profile.provider}/{profile.model} is an "
-        f"external provider, so nothing in this conversation may be sent to it "
-        "(Product 34; workspace design SS7). Send it to a local provider, or make the "
-        "session shareable with `research chat new --visibility project` on a new "
-        "conversation.",
+        private_egress_sentence(record.id, f"{profile.provider}/{profile.model}"),
         provider=profile.provider,
         endpoint_host=profile.model,
         policy_fields=("visibility",),
