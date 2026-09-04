@@ -30,7 +30,7 @@ import logging
 import threading
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.context import (
@@ -85,6 +85,9 @@ from research_harness.workflows.models import (
 )
 from research_harness.workspace.conversations import ConversationStore
 from research_harness.workspace.runs import RunNotFoundError, RunStore
+
+if TYPE_CHECKING:
+    from research_harness.providers.models.router import ProviderEntry, RouterProviderConfig
 
 __all__ = [
     "SEND_ROLE",
@@ -266,6 +269,36 @@ class Selection:
     alternatives: tuple[tuple[str, ProviderCapabilities], ...] = ()
 
 
+def _without_session_tags(config: RouterProviderConfig) -> RouterProviderConfig:
+    """The same entry with every `session:`-prefixed tag removed (binding spec §9).
+
+    `session:` is the binding's own namespace, not a label a workspace may claim: an entry
+    that wears one is otherwise indistinguishable from the session entry in `entry.tags`,
+    and would answer under the session's label.
+    """
+    from research_harness.conversation.binding import SESSION_LABEL_PREFIX
+
+    kept = [tag for tag in config.tags if not tag.startswith(SESSION_LABEL_PREFIX)]
+    return config if len(kept) == len(config.tags) else config.model_copy(update={"tags": kept})
+
+
+def _is_session_entry(entry: ProviderEntry, config: RouterProviderConfig) -> bool:
+    """Whether `entry` is the one the session's own in-memory entry produced.
+
+    Identity rather than a name or a tag lookup: the adapter is the bound runtime's, the
+    model is the bound one, and the entry carries the session label as its *only* tag --
+    which a `research.yaml` entry cannot produce once the reserved name and tag are gone.
+    """
+    from research_harness.providers.cli.errors import provider_name
+
+    assert config.runtime is not None
+    return (
+        entry.provider.name == provider_name(config.runtime)
+        and entry.model == config.model
+        and entry.tags == {config.name}
+    )
+
+
 class ProviderSelector(Protocol):
     """How a send finds its backend. Configuration, never a branch in domain code."""
 
@@ -317,13 +350,20 @@ class WorkspaceProviders:
         binding = None if model is not None or defaults is None else binding_of(defaults)
         wanted = model
         label: str | None = None
+        entry_config: RouterProviderConfig | None = None
         if isinstance(binding, RuntimeBinding):
-            # `session:<runtime>` is the binding's own name: a hand-written entry that took
-            # it would otherwise share the tag and could outrank the session's own entry.
+            # `session:<runtime>` is the binding's own name *and* a reserved tag prefix: a
+            # hand-written entry that took either would otherwise stand where the session's
+            # own entry stands, and answer under its label. Both are stripped from the
+            # per-call copy, and the session entry is then found by identity below.
             entry_config = session_entry(binding)
             config = RouterConfig(
                 providers=[
-                    *(item for item in config.providers if item.name != entry_config.name),
+                    *(
+                        _without_session_tags(item)
+                        for item in config.providers
+                        if item.name != entry_config.name
+                    ),
                     entry_config,
                 ]
             )
@@ -339,11 +379,17 @@ class WorkspaceProviders:
             )
         policy = load_policy(ctx.repo)
         router = build_router(config, policy=policy)
-        entries = [
-            entry
-            for entry in router.entries
-            if wanted is None or wanted in entry.tags or entry.provider.name == wanted
-        ]
+        if entry_config is not None:
+            # Identity, never a name or a tag: the one entry built from `entry_config`,
+            # which no `research.yaml` entry can imitate once the reserved name and tag are
+            # gone. `alternatives` still describes the whole table.
+            entries = [entry for entry in router.entries if _is_session_entry(entry, entry_config)]
+        else:
+            entries = [
+                entry
+                for entry in router.entries
+                if wanted is None or wanted in entry.tags or entry.provider.name == wanted
+            ]
         if not entries:
             known = ", ".join(sorted(item.name for item in config.providers if item.enabled))
             raise CapabilityError(

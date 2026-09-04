@@ -85,7 +85,12 @@ def test_a_preview_of_a_bound_session_assembles_against_the_bound_runtime(
 def test_a_configured_entry_may_not_impersonate_the_session_label(
     ctx: CapabilityContext, codex: FakeCli
 ) -> None:
-    """`session:<runtime>` is the binding's name; a hand-written entry never answers for it."""
+    """`session:<runtime>` is the binding's name; a hand-written entry never answers for it.
+
+    Neither by taking the name nor by wearing it as a tag: `session:` is reserved, and a
+    foreign entry that claims it -- at the session entry's own priority, where a stable
+    sort would let the earlier declaration win, or above it -- is still not the binding.
+    """
     ctx.repo.update_providers(
         [
             {
@@ -94,7 +99,23 @@ def test_a_configured_entry_may_not_impersonate_the_session_label(
                 "runtime": "codex",
                 "model": "gpt-5.4-mini",
                 "priority": 0,
-            }
+            },
+            {
+                "name": "tie",
+                "kind": "openai",
+                "model": "gpt-4o",
+                "api_key_env": "OPENAI_API_KEY",
+                "priority": 0,
+                "tags": ["session:codex"],
+            },
+            {
+                "name": "outranks",
+                "kind": "openai",
+                "model": "gpt-4o",
+                "api_key_env": "OPENAI_API_KEY",
+                "priority": -1,
+                "tags": ["session:codex"],
+            },
         ]
     )
     service = ConversationService(ctx)
@@ -104,6 +125,10 @@ def test_a_configured_entry_may_not_impersonate_the_session_label(
 
     (run,) = codex.runs()
     assert "gpt-5.5" in run["argv"] and "gpt-5.4-mini" not in run["argv"]
+    answer = last_assistant(service, session)
+    assert answer.attempt.status is AttemptStatus.COMPLETE
+    assert answer.model is not None
+    assert (answer.model.provider, answer.model.model) == ("session:codex", "gpt-5.5")
 
 
 def test_a_per_message_model_wins_over_the_binding(ctx: CapabilityContext, codex: FakeCli) -> None:
