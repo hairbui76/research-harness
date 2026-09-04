@@ -18,6 +18,7 @@ import { useMemo } from 'react';
 import type { ProvenancePathModel, SourceAnchorModel } from '@research-harness/design';
 import type { HarnessClient } from '../../../api/client';
 import type { GraphNodeKind, GraphProvenanceView, GraphVisibilityName } from '../../../api/dto';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { useAsync } from '../../../app/useAsync';
 import { anchorFrom, provenancePathFrom } from './mappers';
 
@@ -48,6 +49,7 @@ export function useProvenance(
 ): ProvenanceApi {
   const { toKind = 'artifact', session = null, enabled = true } = options;
   const visibility = (options.visibility ?? []).join(',');
+  const { href } = useProjectPaths();
 
   const state = useAsync<GraphProvenanceView | null>(async () => {
     if (!id || !enabled) return null;
@@ -59,8 +61,8 @@ export function useProvenance(
   }, [client, enabled, id, toKind, visibility]);
 
   const path = useMemo(
-    () => (state.data ? provenancePathFrom(state.data, { session }) : null),
-    [session, state.data],
+    () => (state.data ? provenancePathFrom(state.data, { session, href }) : null),
+    [href, session, state.data],
   );
   const anchor = useMemo(() => (state.data ? anchorFrom(state.data) : null), [state.data]);
 

@@ -8,10 +8,12 @@ import { FullPageWorkspace } from '@research-harness/design';
 import { Empty, ErrorBox, Field, Fields, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 export function QuestionsPage() {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   // `question.list`: one list, through the capability every host shares.
   const state = useAsync(() => client.questions(), [client]);
 
@@ -41,7 +43,7 @@ export function QuestionsPage() {
                 {question.claims.length ? (
                   <span className="rh-web-row">
                     {question.claims.map((claim) => (
-                      <ObjectRef key={claim} id={claim} kind="claim" to={`/claims/${claim}`} />
+                      <ObjectRef key={claim} id={claim} kind="claim" to={href(`/claims/${claim}`)} />
                     ))}
                   </span>
                 ) : (

@@ -32,6 +32,7 @@ import type { PromotionTarget } from '@research-harness/design';
 import { CapabilityError } from '../../api/client';
 import type { ConversationMessage, PromotionView } from '../../api/dto';
 import { useSession } from '../../app/session';
+import { useProjectPaths } from '../../app/projectPaths';
 import { entityRefFor, routeForEntity } from './mappers';
 
 export interface PromoteDialogProps {
@@ -61,6 +62,7 @@ export function PromoteDialog({
   excerpt,
 }: PromoteDialogProps) {
   const { client, canMutate, mutationBlockedReason } = useSession();
+  const { href } = useProjectPaths();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -124,7 +126,7 @@ export function PromoteDialog({
 
   const announce = (result: PromotionView): void => {
     const created = result.object_id ?? result.note_key ?? null;
-    const route = created ? routeForEntity(entityRefFor(created).kind, created) : null;
+    const route = created ? routeForEntity(entityRefFor(created).kind, created, {}, href) : null;
     toast({
       title: `${PROMOTION_TARGET_META[result.target].label} created${created ? `: ${created}` : ''}`,
       // `review` is the daemon's sentence about what still has to happen to it.

@@ -19,6 +19,7 @@ import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import type { IconName } from '@research-harness/design';
 import { Layout } from './Layout';
+import { projectHref } from './projectPaths';
 import { ClaimDetailPage, ClaimsPage } from '../views/Claims';
 import { ConversationPage } from '../views/conversation/ConversationRoute';
 import { ArtifactSourcePage } from '../views/conversation/references';
@@ -67,6 +68,27 @@ export const NAVIGATION: NavigationEntry[] = [
   { id: 'taxonomy', label: 'Taxonomy', to: '/taxonomy', icon: 'git-branch' },
   { id: 'manuscript', label: 'Manuscript', to: '/manuscript', icon: 'file-code' },
 ];
+
+/**
+ * The same navigation, pointed at one project.
+ *
+ * The rail is rendered by the shell, which is mounted inside whichever of the two route
+ * trees the host selected (`App.tsx`). Under the multi-project host every workspace screen
+ * lives below `/projects/{project_id}`, so the rail's `to` — and the extra paths an entry
+ * counts as active for — are the local paths of `NAVIGATION` run through `projectHref`
+ * exactly once. A null id is the legacy host and returns `NAVIGATION` itself, unchanged and
+ * with a stable identity, so nothing downstream re-renders for a prefix that is not there.
+ */
+export function navigationForProject(projectId: string | null): NavigationEntry[] {
+  if (!projectId) return NAVIGATION;
+  return NAVIGATION.map((entry) => ({
+    ...entry,
+    to: projectHref(projectId, entry.to),
+    ...(entry.alsoMatches
+      ? { alsoMatches: entry.alsoMatches.map((path) => projectHref(projectId, path)) }
+      : {}),
+  }));
+}
 
 /** The cockpit's routes: one per navigation entry, plus the detail screens. */
 export function AppRoutes() {

@@ -28,9 +28,11 @@ import { useCallback, useMemo, useState } from 'react';
 import type { EntityRefModel } from '@research-harness/design';
 import type { HarnessClient } from '../../../api/client';
 import type { GraphNodeKind, GraphStatusView, GraphVisibilityName } from '../../../api/dto';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { useAsync } from '../../../app/useAsync';
 import type { ReferenceProvider } from '../useReferenceQuery';
 import { refFromNode } from './mappers';
+import type { PathHref } from '../mappers';
 
 /** How many rows the picker is offered. Matches `useReferenceQuery`'s own limit. */
 const LIMIT = 12;
@@ -55,6 +57,8 @@ export interface GraphReferenceOptions {
    * `session.list` and nothing else, exactly as task W1 promised.
    */
   enabled?: boolean;
+  /** Rewrites each row's `href` for the project tree the picker is open in. */
+  href?: PathHref;
 }
 
 /**
@@ -82,7 +86,9 @@ export function graphReferenceProvider(
         });
         // Every row came out of the index, so it is `resolved` *there*; whether the
         // canonical object still agrees is `graph.resolve`'s answer, asked at send time.
-        return result.matches.map((node) => refFromNode(node));
+        return result.matches.map((node) =>
+          refFromNode(node, options.href ? { href: options.href } : {}),
+        );
       } catch {
         onFailure?.();
         return fallback.search(query);
@@ -119,6 +125,7 @@ export function useGraphReferences(
   options: GraphReferenceOptions,
 ): GraphReferencesApi {
   const { fallback, visibility, kinds, limit, enabled = true } = options;
+  const { href } = useProjectPaths();
   const status = useAsync<GraphStatusView | null>(
     async () => (enabled ? client.graphStatus() : null),
     [client, enabled],
@@ -149,11 +156,12 @@ export function useGraphReferences(
         fallback,
         available,
         onFailure,
+        href,
         ...(visibility ? { visibility } : {}),
         ...(kinds ? { kinds } : {}),
         ...(limit === undefined ? {} : { limit }),
       }),
-    [available, client, fallback, kinds, limit, onFailure, visibility],
+    [available, client, fallback, href, kinds, limit, onFailure, visibility],
   );
 
   const recheck = useCallback(() => {

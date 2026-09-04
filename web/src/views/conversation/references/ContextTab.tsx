@@ -21,6 +21,7 @@
 import { useCallback } from 'react';
 import { AsyncState } from '@research-harness/design';
 import type { EntityRefModel } from '@research-harness/design';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { useSession } from '../../../app/session';
 import { entityRefFor } from '../mappers';
 import { useConversation } from '../state';
@@ -39,6 +40,7 @@ export interface GraphContextPanelProps {
  */
 export function GraphContextPanel({ enabled = true }: GraphContextPanelProps) {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   const { selection, sessions, selectMessage, selectReference, openAnchor } = useConversation();
   const session = sessions.activeId;
   const visibility = sessions.active?.visibility ?? null;
@@ -75,7 +77,7 @@ export function GraphContextPanel({ enabled = true }: GraphContextPanelProps) {
   // it referenced, so selecting a turn shows the turn's own research neighbourhood.
   const entity =
     selection.kind === 'message'
-      ? entityRefFor(selection.messageId, { session })
+      ? entityRefFor(selection.messageId, { session, href })
       : selection.ref;
 
   return (

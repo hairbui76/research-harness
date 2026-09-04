@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { OverviewPage } from './Overview';
+import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 describe('the overview', () => {
@@ -51,5 +52,73 @@ describe('the overview', () => {
 
     await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
     await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * The same page under `research app`, where every workspace screen is inside a project.
+ *
+ * `attention[].route` is the daemon's own workspace path and stays that way in the DTO;
+ * what changes is only where the link on screen points, which is what keeps a click on
+ * "Evidence waiting for review" inside the project the researcher is reading.
+ */
+describe('the overview inside a project', () => {
+  const renderInProject = () =>
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <OverviewPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon(),
+        route: '/projects/prj_abc/overview',
+        path: '/projects/prj_abc/overview',
+      },
+    );
+
+  it('points every attention group at the active project', async () => {
+    const { container } = renderInProject();
+
+    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
+    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map((node) =>
+      node.getAttribute('href'),
+    );
+    expect(hrefs.length).toBe(FIXTURES.overview.attention.length);
+    expect(hrefs).toEqual(
+      FIXTURES.overview.attention.map((group) => `/projects/prj_abc${group.route}`),
+    );
+  });
+
+  it('points an open question at the project’s own questions screen', async () => {
+    // The exported fixture has no open question; the link is what is under test, so one is
+    // added to the daemon's own report rather than invented in the view.
+    const overview = {
+      ...FIXTURES.overview,
+      open_questions: [{ id: 'RQ0001', label: 'Does it hold out of distribution?', detail: 'open' }],
+    };
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <OverviewPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({ gets: { '/overview': overview } }),
+        route: '/projects/prj_abc/overview',
+        path: '/projects/prj_abc/overview',
+      },
+    );
+
+    await waitFor(() => expect(screen.getByText('Open questions')).toBeInTheDocument());
+    expect(
+      screen.getByRole('link', { name: 'Does it hold out of distribution?' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/questions');
+  });
+
+  it('leaves the legacy host’s links exactly where they were', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
+    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map((node) =>
+      node.getAttribute('href'),
+    );
+    expect(hrefs).toEqual(FIXTURES.overview.attention.map((group) => group.route));
   });
 });

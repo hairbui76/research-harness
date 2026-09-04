@@ -15,6 +15,7 @@
 import { useEffect, useState } from 'react';
 import { AsyncState, Badge, ConflictNotice, ContextReceipt, ErrorNotice } from '@research-harness/design';
 import type { EntityRefModel } from '@research-harness/design';
+import { useProjectPaths } from '../../app/projectPaths';
 import { useSession } from '../../app/session';
 import type { ContextPackView } from '../../api/dto';
 import { entityRefFor, toContextReceiptModel } from './mappers';
@@ -23,6 +24,7 @@ import type { ReceiptSource } from './state';
 
 export function ReceiptPanel() {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   const { receipt, sessions, openRef } = useConversation();
   const sessionId = sessions.activeId;
   const [view, setView] = useState<ContextPackView | null>(null);
@@ -94,7 +96,7 @@ export function ReceiptPanel() {
         </p>
       ) : null}
 
-      <ContextReceipt receipt={toContextReceiptModel(view)} onOpenRef={onOpen} />
+      <ContextReceipt receipt={toContextReceiptModel(view, href)} onOpenRef={onOpen} />
 
       {view.unresolved.length > 0 ? (
         <ErrorNotice
@@ -112,13 +114,14 @@ export function ReceiptPanel() {
           key={`${discrepancy.accepted}-${index}`}
           conflict={{
             accepted: {
-              ref: entityRefFor(discrepancy.accepted, { authority: 'accepted' }),
+              ref: entityRefFor(discrepancy.accepted, { authority: 'accepted', href }),
               excerpt: discrepancy.detail,
             },
             chat: {
               ref: entityRefFor(discrepancy.message, {
                 authority: 'private',
                 session: sessionId,
+                href,
               }),
               excerpt: discrepancy.message,
             },

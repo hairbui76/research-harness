@@ -11,6 +11,7 @@ import type { vi } from 'vitest';
 import { CapabilityError, HarnessClient } from './client';
 import { runEventsUrl } from './sse';
 import { CAPABILITIES } from './capabilities.gen';
+import { AppClient } from './projects';
 import { fakeAppDaemon, fakeDaemon, FIXTURES } from '../test/harness';
 
 /** One `ReviewOutcome`, as every candidate-keyed review action answers. */
@@ -556,6 +557,61 @@ describe('a project-scoped base URL', () => {
     );
     expect(runEventsUrl(project.stream.baseUrl, 'run_1')).toBe(
       'http://app.test/api/projects/prj_abc/runs/run_1/events',
+    );
+  });
+
+  it('reads attachment bytes and previews beneath the project too', async () => {
+    const daemon = fakeAppDaemon();
+    const project = new HarnessClient({
+      baseUrl: 'http://app.test',
+      token: 'app-token',
+      fetchImpl: daemon.fetch,
+    }).withBaseUrl('http://app.test/api/projects/prj_abc');
+
+    await project.sessionAttachmentBytes('CS0001', 'SA0003').catch(() => null);
+    await project.sessionAttachmentPreview('CS0001', 'SA0003', 2).catch(() => null);
+
+    expect(daemon.calls.map((call) => call.path)).toEqual([
+      '/api/projects/prj_abc/sessions/CS0001/attachments/SA0003/bytes',
+      '/api/projects/prj_abc/sessions/CS0001/attachments/SA0003/preview',
+    ]);
+  });
+
+  it('is what `AppClient.workspaceClient` hands a view, with no view-level prefixing', () => {
+    const daemon = fakeAppDaemon();
+    const app = new AppClient({
+      baseUrl: 'http://app.test',
+      token: 'app-token',
+      fetchImpl: daemon.fetch,
+    });
+
+    const project = app.workspaceClient('prj_abc');
+
+    expect(project.baseUrl).toBe('http://app.test/api/projects/prj_abc');
+    expect(project.artifactBytesUrl('A0001-1')).toBe(
+      'http://app.test/api/projects/prj_abc/artifacts/A0001-1/bytes?token=app-token',
+    );
+    expect(project.manuscriptBuildPdfUrl('latest')).toBe(
+      'http://app.test/api/projects/prj_abc/manuscript/builds/latest/pdf?token=app-token',
+    );
+    expect(runEventsUrl(project.stream.baseUrl, 'R0001')).toBe(
+      'http://app.test/api/projects/prj_abc/runs/R0001/events',
+    );
+    // An id with a slash in it can only ever be one segment of the path.
+    expect(app.workspaceClient('a/b').baseUrl).toBe('http://app.test/api/projects/a%2Fb');
+  });
+
+  it('keeps the legacy client exactly where it was', () => {
+    const legacy = new HarnessClient({ baseUrl: 'http://daemon.test', token: 'local-token' });
+
+    expect(legacy.artifactBytesUrl('A0001-1')).toBe(
+      'http://daemon.test/artifacts/A0001-1/bytes?token=local-token',
+    );
+    expect(legacy.manuscriptBuildPdfUrl('last-good')).toBe(
+      'http://daemon.test/manuscript/builds/last-good/pdf?token=local-token',
+    );
+    expect(runEventsUrl(legacy.stream.baseUrl, 'run_1')).toBe(
+      'http://daemon.test/runs/run_1/events',
     );
   });
 

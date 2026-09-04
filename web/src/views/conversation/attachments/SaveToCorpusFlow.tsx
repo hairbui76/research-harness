@@ -27,6 +27,7 @@ import type {
 } from '@research-harness/design';
 import type { HarnessClient } from '../../../api/client';
 import type { AttachmentPromotionView, AttachmentView } from '../../../api/dto';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { describePromotion, saveOptionsOf } from './mappers';
 import type { SaveOption } from './mappers';
 
@@ -72,6 +73,7 @@ export function useSaveToCorpus(
   options: SaveToCorpusOptions = {},
 ): SaveToCorpusApi {
   const { canMutate = true, blockedReason = null, onRecord } = options;
+  const { href } = useProjectPaths();
   const [slices, setSlices] = useState<Record<string, SaveSlice>>({});
 
   const patch = useCallback((id: string, next: Partial<SaveSlice>) => {
@@ -88,13 +90,13 @@ export function useSaveToCorpus(
       void client
         .resolveAttachmentIdentity(sessionId, id)
         .then((identity) => {
-          patch(id, { state: 'choose_identity', options: saveOptionsOf(identity) });
+          patch(id, { state: 'choose_identity', options: saveOptionsOf(identity, href) });
         })
         .catch((cause: unknown) => {
           patch(id, { state: 'failed', error: messageOf(cause) });
         });
     },
-    [canMutate, client, patch, sessionId],
+    [canMutate, client, href, patch, sessionId],
   );
 
   /**

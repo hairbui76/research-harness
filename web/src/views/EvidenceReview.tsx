@@ -38,9 +38,11 @@ import { ObjectRef } from '../components/ObjectRef';
 import { ReviewActions } from '../components/ReviewActions';
 import { SourcePane } from '../components/SourcePane';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 export function EvidenceReviewPage() {
+  const { href } = useProjectPaths();
   const { candidateId = '' } = useParams();
   const { client } = useSession();
   const [outcome, setOutcome] = useState<string | null>(null);
@@ -121,7 +123,7 @@ export function EvidenceReviewPage() {
                   <ObjectRef
                     id={candidate.work}
                     kind="work"
-                    to={`/corpus/${candidate.work}`}
+                    to={href(`/corpus/${candidate.work}`)}
                   />
                 </Field>
               </Fields>
@@ -162,7 +164,12 @@ export function EvidenceReviewPage() {
                 <ul className="rh-web-list rh-web-list--tight">
                   {item.competing.map((id) => (
                     <li key={id}>
-                      <ObjectRef id={id} kind="evidence" to={`/review/${id}`} authority="candidate" />
+                      <ObjectRef
+                        id={id}
+                        kind="evidence"
+                        to={href(`/review/${id}`)}
+                        authority="candidate"
+                      />
                     </li>
                   ))}
                 </ul>

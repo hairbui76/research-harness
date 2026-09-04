@@ -19,9 +19,11 @@ import { DataTable, Empty, ErrorBox, Loading, Panel } from '../components/Feedba
 import { ProposedChanges } from './EvidenceReview';
 import type { JsonObject } from '../api/dto';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 
 export function ConflictsPage() {
   const { overview, loading, error, refresh } = useSession();
+  const { href } = useProjectPaths();
 
   if (loading) return <Loading what="the conflict store" />;
   if (error) return <ErrorBox error={error} retry={refresh} />;
@@ -75,7 +77,7 @@ export function ConflictsPage() {
             </DataTable>
             <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
             {conflict.subject.startsWith('cand_') ? (
-              <Link to={`/review/${conflict.subject}`}>Review it beside the source</Link>
+              <Link to={href(`/review/${conflict.subject}`)}>Review it beside the source</Link>
             ) : null}
           </Panel>
         ))}

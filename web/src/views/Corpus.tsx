@@ -28,10 +28,12 @@ import {
 } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 export function CorpusPage() {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   // `work.list`: this view needs the corpus and nothing else on the navigation.
   const state = useAsync(() => client.works(), [client]);
 
@@ -53,7 +55,7 @@ export function CorpusPage() {
           >
             <Fields>
               <Field label="Id">
-                <ObjectRef id={work.id} kind="work" to={`/corpus/${work.id}`} />
+                <ObjectRef id={work.id} kind="work" to={href(`/corpus/${work.id}`)} />
               </Field>
               <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
               <Field label="Year">{work.year ?? '—'}</Field>
@@ -226,6 +228,7 @@ function acceptedEvidenceModel(item: EvidenceSummary): EvidenceModel {
 export function EvidencePage() {
   const { evidenceId = '' } = useParams();
   const { client } = useSession();
+  const { href } = useProjectPaths();
   const state = useAsync(() => client.object(evidenceId), [client, evidenceId]);
 
   if (state.loading) return <Loading what={`evidence ${evidenceId}`} />;
@@ -275,7 +278,7 @@ export function EvidencePage() {
               <ObjectRef
                 id={String(source.work ?? '')}
                 kind="work"
-                to={`/corpus/${String(source.work ?? '')}`}
+                to={href(`/corpus/${String(source.work ?? '')}`)}
               />
             </Field>
             <Field label="Artifact">

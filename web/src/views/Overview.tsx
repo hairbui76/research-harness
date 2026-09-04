@@ -10,9 +10,13 @@ import { Badge, FullPageWorkspace } from '@research-harness/design';
 import type { OverviewCounts } from '../api/dto';
 import { Empty, ErrorBox, Loading, Panel } from '../components/Feedback';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 
 export function OverviewPage() {
   const { overview, error, loading, refresh } = useSession();
+  // `attention[].route` is the daemon's own workspace path (`/review`, `/stale`). It stays
+  // that way in the DTO and is pointed at this project only as it is rendered.
+  const { href } = useProjectPaths();
 
   if (loading) return <Loading what="the project overview" />;
   if (error) return <ErrorBox error={error} retry={refresh} />;
@@ -33,7 +37,7 @@ export function OverviewPage() {
             {overview.attention.map((group) => (
               <li key={group.kind} data-work={group.count > 0 ? '' : undefined}>
                 <p className="rh-web-row">
-                  <Link to={group.route}>{group.label}</Link>
+                  <Link to={href(group.route)}>{group.label}</Link>
                   {group.count > 0 ? (
                     <Badge tone="warning" size="sm" icon="inbox">
                       {`${group.count} waiting`}
@@ -81,7 +85,7 @@ export function OverviewPage() {
             <ul className="rh-web-list rh-web-list--tight">
               {overview.open_questions.map((question) => (
                 <li key={question.id}>
-                  <Link to="/questions">{question.label}</Link>{' '}
+                  <Link to={href('/questions')}>{question.label}</Link>{' '}
                   <span className="rh-text-secondary">({question.detail})</span>
                 </li>
               ))}

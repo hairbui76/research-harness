@@ -22,6 +22,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { AttachmentModel, ComposerBlockedReason } from '@research-harness/design';
 import type { HarnessClient } from '../../../api/client';
 import type { AttachmentSendItem, AttachmentView, SessionAttachmentRecord } from '../../../api/dto';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { useAttachmentUrls } from '../useAttachmentUrls';
 import type { AttachmentUrls } from '../useAttachmentUrls';
 import { attachmentModelOf, pendingModelOf, toSendability } from './mappers';
@@ -99,6 +100,8 @@ export function useAttachments(
   const [removed, setRemoved] = useState<ReadonlySet<string>>(() => new Set<string>());
   const [busy, setBusy] = useState(false);
   const nextKey = useRef(0);
+  // A saved attachment's corpus chips are real links into this project's own screens.
+  const { href } = useProjectPaths();
 
   const applyRecord = useCallback((record: AttachmentView) => {
     setLocal((previous) => ({ ...previous, [record.id]: record }));
@@ -212,8 +215,11 @@ export function useAttachments(
   );
 
   const allModels = useMemo(
-    () => visible.map((record) => attachmentModelOf(record, { urls: urls.get(record.id) ?? {} })),
-    [urls, visible],
+    () =>
+      visible.map((record) =>
+        attachmentModelOf(record, { urls: urls.get(record.id) ?? {}, href }),
+      ),
+    [href, urls, visible],
   );
 
   /*

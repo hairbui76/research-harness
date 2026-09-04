@@ -22,6 +22,7 @@ import {
   toMessageModel,
 } from './mappers';
 import { parseDeepLink } from '../../render';
+import { projectHref } from '../../app/projectPaths';
 
 const PAGE = transcript as unknown as SessionTranscript;
 const INTERRUPTED = incomplete as unknown as SessionTranscript;
@@ -74,6 +75,103 @@ describe('stable ids', () => {
       label: 'a quote',
       href: '/evidence/E0482',
     });
+  });
+});
+
+/**
+ * The same routes, under the multi-project host.
+ *
+ * Nothing here decides which host it is talking to: the caller passes the transform it got
+ * from `useProjectPaths()`, and these tests state the two answers it can be — the identity
+ * (`research serve`) and `projectHref` (`research app`) — plus the one rule that keeps them
+ * honest, which is that the transform is applied once per route and never to a null.
+ */
+describe('routes under a project prefix', () => {
+  const inProject = (path: string) => projectHref('prj_abc', path);
+
+  it('keeps every entity route inside the active project, query and all', () => {
+    expect(routeForEntity('claim', 'C0001', {}, inProject)).toBe('/projects/prj_abc/claims/C0001');
+    expect(routeForEntity('artifact', 'A0017-3', {}, inProject)).toBe(
+      '/projects/prj_abc/corpus/W0017',
+    );
+    expect(routeForEntity('evidence', 'E0482', {}, inProject)).toBe(
+      '/projects/prj_abc/evidence/E0482',
+    );
+    expect(routeForEntity('question', 'RQ0002', {}, inProject)).toBe('/projects/prj_abc/questions');
+    expect(routeForEntity('session', 'CS0001', {}, inProject)).toBe(
+      '/projects/prj_abc/?session=CS0001',
+    );
+    expect(routeForEntity('message', 'M0042', { session: 'CS0001' }, inProject)).toBe(
+      '/projects/prj_abc/?session=CS0001&message=M0042',
+    );
+  });
+
+  it('leaves a route it has none of alone: null is not a path to prefix', () => {
+    expect(routeForEntity('message', 'M0042', {}, inProject)).toBeNull();
+  });
+
+  it('applies the transform exactly once to each route', () => {
+    let calls = 0;
+    const once = (path: string): string => {
+      calls += 1;
+      return `/p${path}`;
+    };
+
+    expect(routeForEntity('claim', 'C0001', {}, once)).toBe('/p/claims/C0001');
+    expect(calls).toBe(1);
+
+    calls = 0;
+    const claim = parseDeepLink('rh://claim/C0041');
+    expect(claim && routeForDeepLink(claim, once)).toBe('/p/claims/C0041');
+    expect(calls).toBe(1);
+  });
+
+  it('prefixes a deep link and keeps the query that addresses the exact place', () => {
+    const session = parseDeepLink('rh://session/CS0001?message=M0042');
+    expect(session && routeForDeepLink(session, inProject)).toBe(
+      '/projects/prj_abc/?session=CS0001&message=M0042',
+    );
+    const manuscript = parseDeepLink('rh://manuscript/main.tex?line=120');
+    expect(manuscript && routeForDeepLink(manuscript, inProject)).toBe(
+      '/projects/prj_abc/manuscript',
+    );
+  });
+
+  it('gives a reference chip the project route as its href', () => {
+    expect(entityRefFor('E0482', { label: 'a quote', href: inProject }).href).toBe(
+      '/projects/prj_abc/evidence/E0482',
+    );
+    // Without one, the chip is exactly the chip it has always been.
+    expect(entityRefFor('E0482', { label: 'a quote' }).href).toBe('/evidence/E0482');
+  });
+
+  it('routes a whole receipt through the project it was read in', () => {
+    const receipt = toContextReceiptModel(PACK, inProject);
+    const hrefs = [...receipt.included, ...receipt.omitted]
+      .map((item) => item.ref.href)
+      .filter((href): href is string => href !== undefined);
+
+    expect(hrefs.length).toBeGreaterThan(0);
+    expect(hrefs.every((href) => href.startsWith('/projects/prj_abc/'))).toBe(true);
+    // And the legacy receipt is unchanged.
+    expect(
+      toContextReceiptModel(PACK)
+        .included.map((item) => item.ref.href)
+        .some((href) => href?.startsWith('/projects/')),
+    ).toBe(false);
+  });
+
+  it('gives every reference in a message the project route', () => {
+    const message = PAGE.messages.find((entry) =>
+      entry.blocks.some((block) => block.kind === 'reference'),
+    ) as ConversationMessage;
+    const model = toMessageModel(message, { href: inProject });
+    const refs = model.blocks.filter(
+      (block): block is Extract<typeof block, { kind: 'reference' }> => block.kind === 'reference',
+    );
+
+    expect(refs.length).toBeGreaterThan(0);
+    expect(refs.every((block) => block.ref.href?.startsWith('/projects/prj_abc/'))).toBe(true);
   });
 });
 

@@ -9,6 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ClaimDetailPage, ClaimsPage } from './Claims';
+import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
 const CLAIM = 'C0001';
@@ -178,5 +179,60 @@ describe('the claim detail', () => {
 
     await waitFor(() => expect(screen.getByText('Requested strength')).toBeInTheDocument());
     await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * The claim screens under `research app`, where a workspace path is not the URL.
+ *
+ * The Claim → Evidence → Work chain is the navigation this screen exists for, so every
+ * step of it has to stay inside the project: a middle-clicked `E0001` that landed on the
+ * legacy `/evidence/E0001` would leave the project entirely.
+ */
+describe('the claim screens inside a project', () => {
+  it('points each row of the list at the project’s own claim page', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimsPage />
+      </ProjectPathProvider>,
+      { daemon: daemonFor(), route: '/projects/prj_abc/claims', path: '/projects/prj_abc/claims' },
+    );
+
+    await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument());
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'));
+    expect(hrefs).toContain(`/projects/prj_abc/claims/${CLAIM}`);
+    expect(hrefs.every((href) => href?.startsWith('/projects/prj_abc/'))).toBe(true);
+  });
+
+  it('keeps every step of the provenance chain inside the project', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimDetailPage />
+      </ProjectPathProvider>,
+      {
+        daemon: daemonFor(),
+        route: `/projects/prj_abc/claims/${CLAIM}`,
+        path: '/projects/prj_abc/claims/:claimId',
+      },
+    );
+
+    await waitFor(() => expect(screen.getByText(/Supporting \(1\)/)).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: 'E0001' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/evidence/E0001',
+    );
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'));
+    expect(hrefs).toContain(`/projects/prj_abc/claims/${CLAIM}`);
+    expect(hrefs).toContain('/projects/prj_abc/corpus/W0001');
+  });
+
+  it('leaves the legacy chain exactly where it was', async () => {
+    renderDetail();
+
+    await waitFor(() => expect(screen.getByText(/Supporting \(1\)/)).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: 'E0001' })).toHaveAttribute(
+      'href',
+      '/evidence/E0001',
+    );
   });
 });

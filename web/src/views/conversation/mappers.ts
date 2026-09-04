@@ -91,17 +91,39 @@ export interface RouteContext {
 }
 
 /**
+ * A path transformer: what the legacy host does to a workspace-local path, which is nothing.
+ *
+ * Every route built here is workspace-local — `/claims/C0001` — and stays that way in the
+ * DTOs and the storage it passes through. The multi-project prefix is applied by the caller
+ * that is about to render or navigate it, by passing `useProjectPaths().href` in, and it is
+ * applied exactly once per result.
+ */
+export type PathHref = (path: string) => string;
+
+const SAME: PathHref = (path) => path;
+
+/**
  * The cockpit route a reference opens.
  *
  * `EntityRef` renders a real `<a href>` when it has one — middle-clickable, readable by
  * assistive technology — and calls `onOpen` for the plain left click, exactly as
  * `components/ObjectRef.tsx` does for the research pages.
+ *
+ * `href` rewrites the finished path for the tree this is being rendered in (`projectPaths`).
+ * It defaults to the identity, so a caller that has not been taught about projects still
+ * produces the paths it always produced.
  */
 export function routeForEntity(
   kind: EntityKind,
   id: string,
   context: RouteContext = {},
+  href: PathHref = SAME,
 ): string | null {
+  const local = localRouteForEntity(kind, id, context);
+  return local === null ? null : href(local);
+}
+
+function localRouteForEntity(kind: EntityKind, id: string, context: RouteContext): string | null {
   switch (kind) {
     case 'work':
       return `/corpus/${encodeURIComponent(id)}`;
@@ -145,20 +167,22 @@ export const CONVERSATION_PATH = '/';
  * in its query. Returns null for a link this cockpit has no screen for, so the caller can
  * say so rather than navigate somewhere plausible.
  */
-export function routeForDeepLink(link: DeepLink): string | null {
+export function routeForDeepLink(link: DeepLink, href: PathHref = SAME): string | null {
   const message = link.params.get('message');
   switch (link.kind) {
     case 'session':
-      return `${CONVERSATION_PATH}?session=${encodeURIComponent(link.id)}${
-        message ? `&message=${encodeURIComponent(message)}` : ''
-      }`;
+      return href(
+        `${CONVERSATION_PATH}?session=${encodeURIComponent(link.id)}${
+          message ? `&message=${encodeURIComponent(message)}` : ''
+        }`,
+      );
     case 'manuscript':
-      return '/manuscript';
+      return href('/manuscript');
     case 'attachment':
       return null;
     default: {
       const kind = entityKindOf(link.id) ?? kindFromDeepLink(link.kind);
-      return kind === null ? null : routeForEntity(kind, link.id);
+      return kind === null ? null : routeForEntity(kind, link.id, {}, href);
     }
   }
 }
@@ -183,6 +207,8 @@ export interface EntityRefOptions {
   authority?: AuthorityLabel | null;
   resolution?: ResolutionState;
   session?: string | null;
+  /** Rewrites the chip's `href` for the project tree it is rendered in. */
+  href?: PathHref;
 }
 
 /**
@@ -195,7 +221,7 @@ export interface EntityRefOptions {
  */
 export function entityRefFor(id: string, options: EntityRefOptions = {}): EntityRefModel {
   const kind = entityKindOf(id) ?? 'block';
-  const href = routeForEntity(kind, id, { session: options.session ?? null });
+  const href = routeForEntity(kind, id, { session: options.session ?? null }, options.href ?? SAME);
   return {
     id,
     kind,
@@ -280,6 +306,8 @@ export interface MessageOptions {
   /** Which attempt of its turn this is, and how many there are. */
   attempt?: number;
   attempts?: number;
+  /** Rewrites every reference chip's `href` for the project tree the transcript is in. */
+  href?: PathHref;
 }
 
 /** One transcript entry as the Design System's `Message` takes it. */
@@ -333,6 +361,7 @@ function toMessageBlock(
           authority: block.authority ?? null,
           resolution: options.unresolved?.has(block.target) === true ? 'unresolved' : 'resolved',
           session,
+          ...(options.href ? { href: options.href } : {}),
         }),
       };
     case 'attachment': {
@@ -430,10 +459,19 @@ const RESOLUTION_BY_OMISSION: Partial<Record<OmissionReason, ResolutionState>> =
   stale: 'stale',
 };
 
-function contextRef(item: ContextItemView, resolution: ResolutionState): EntityRefModel {
+function contextRef(
+  item: ContextItemView,
+  resolution: ResolutionState,
+  href: PathHref,
+): EntityRefModel {
   const id = item.id ?? ID_IN_POINTER.exec(item.source)?.[1] ?? null;
   if (id !== null && entityKindOf(id) !== null) {
-    return entityRefFor(id, { label: item.label ?? null, authority: item.authority, resolution });
+    return entityRefFor(id, {
+      label: item.label ?? null,
+      authority: item.authority,
+      resolution,
+      href,
+    });
   }
   return {
     id: item.label ?? item.source,
@@ -443,9 +481,9 @@ function contextRef(item: ContextItemView, resolution: ResolutionState): EntityR
   };
 }
 
-function toContextItem(item: ContextItemView): ContextItem {
+function toContextItem(item: ContextItemView, href: PathHref): ContextItem {
   return {
-    ref: contextRef(item, 'resolved'),
+    ref: contextRef(item, 'resolved', href),
     cls: item.context_class,
     authority: item.authority,
     tokens: item.tokens,
@@ -453,10 +491,10 @@ function toContextItem(item: ContextItemView): ContextItem {
   };
 }
 
-function toOmittedItem(item: OmittedContextItemView): OmittedContextItem {
+function toOmittedItem(item: OmittedContextItemView, href: PathHref): OmittedContextItem {
   return {
-    ...toContextItem(item),
-    ref: contextRef(item, RESOLUTION_BY_OMISSION[item.reason] ?? 'resolved'),
+    ...toContextItem(item, href),
+    ref: contextRef(item, RESOLUTION_BY_OMISSION[item.reason] ?? 'resolved', href),
     reason: item.reason,
     ...(item.detail ? { detail: item.detail } : {}),
   };
@@ -470,7 +508,10 @@ function toOmittedItem(item: OmittedContextItemView): OmittedContextItem {
  * Design System's `EgressClass` has two members and both of them are claims about where
  * the request went; there is no third one to invent here.
  */
-export function toContextReceiptModel(view: ContextPackView): ContextReceiptModel {
+export function toContextReceiptModel(
+  view: ContextPackView,
+  href: PathHref = SAME,
+): ContextReceiptModel {
   const pack = view.pack;
   const allocation: ContextAllocation[] = Object.entries(view.tokens_by_class).map(
     ([cls, tokens]) => ({ cls: cls as ContextClass, tokens }),
@@ -482,8 +523,8 @@ export function toContextReceiptModel(view: ContextPackView): ContextReceiptMode
     egressClass: pack.egress === 'external' ? 'external' : 'local',
     tokenBudget: pack.token_budget ?? view.tokens,
     allocation,
-    included: pack.receipt.included.map(toContextItem),
-    omitted: pack.receipt.omitted.map(toOmittedItem),
+    included: pack.receipt.included.map((item) => toContextItem(item, href)),
+    omitted: pack.receipt.omitted.map((item) => toOmittedItem(item, href)),
   };
 }
 

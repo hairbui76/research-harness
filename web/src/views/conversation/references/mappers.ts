@@ -38,6 +38,7 @@ import type {
 } from '../../../api/dto';
 import { SCIENTIFIC_EDGE_KINDS } from '../../../api/dto';
 import { entityKindOf, entityRefFor } from '../mappers';
+import type { PathHref } from '../mappers';
 
 /* ------------------------------------------------------------------------- */
 /* nodes                                                                      */
@@ -85,6 +86,11 @@ export interface NodeRefOptions {
   resolution?: ResolutionState;
   /** The session a message or attachment id is read in, so its route can be built. */
   session?: string | null;
+  /**
+   * Rewrites the chip's `href` for the project tree it is rendered in
+   * (`app/projectPaths.tsx`). Absent is the legacy host, where a workspace path is the URL.
+   */
+  href?: PathHref;
 }
 
 /**
@@ -101,6 +107,7 @@ export function refFromNode(node: GraphNodeView, options: NodeRefOptions = {}): 
     authority: node.authority,
     ...(options.resolution ? { resolution: options.resolution } : {}),
     session: options.session ?? sessionOf(node.metadata),
+    ...(options.href ? { href: options.href } : {}),
   });
   // `entityRefFor` reads the kind off the id's prefix; the graph knows better for the
   // identities that carry no prefix at all (`file:main.tex`, `anchor:…`, a block id).
@@ -167,6 +174,7 @@ export function refFromResolved(
     resolution,
     authority: view.authority,
     session: options.session ?? null,
+    ...(options.href ? { href: options.href } : {}),
   });
 }
 

@@ -250,4 +250,48 @@ describe('runEventsUrl', () => {
     );
     expect(runEventsUrl('', 'R0001')).toBe('/runs/R0001/events');
   });
+
+  /**
+   * A project-scoped stream is one base URL and no other change.
+   *
+   * `HarnessClient.stream.baseUrl` is already `/api/projects/{id}` under the multi-project
+   * host (design §6), so the run stream reaches the right workspace without any caller
+   * knowing a project exists. These pin that the prefix is carried and that the legacy
+   * answer is untouched.
+   */
+  it('carries a project prefix into the stream URL', () => {
+    expect(runEventsUrl('http://app.test/api/projects/prj_abc', 'R0001')).toBe(
+      'http://app.test/api/projects/prj_abc/runs/R0001/events',
+    );
+    expect(runEventsUrl('http://app.test/api/projects/prj_abc/', 'R0001')).toBe(
+      'http://app.test/api/projects/prj_abc/runs/R0001/events',
+    );
+  });
+});
+
+describe('subscribeRunEvents under a project-scoped base URL', () => {
+  it('reads the project’s own run route and nothing else', async () => {
+    const { fetchImpl, calls } = daemon(streamOf(DELTA('hello'), STATUS('succeeded')));
+    const { events, handlers } = collector();
+
+    await subscribeRunEvents(
+      'http://app.test/api/projects/prj_abc',
+      'app-token',
+      'R0001',
+      handlers,
+      { fetchImpl },
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe('http://app.test/api/projects/prj_abc/runs/R0001/events');
+    expect(events.map((event) => event.kind)).toEqual(['delta', 'status']);
+  });
+
+  it('reads the bare run route when there is no project', async () => {
+    const { fetchImpl, calls } = daemon(streamOf(STATUS('succeeded')));
+
+    await subscribeRunEvents('http://daemon.test', 'local-token', 'R0001', {}, { fetchImpl });
+
+    expect(calls[0]!.url).toBe('http://daemon.test/runs/R0001/events');
+  });
 });

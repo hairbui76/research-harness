@@ -29,6 +29,7 @@ import type {
   SessionAttachmentRecord,
 } from '../../../api/dto';
 import { entityRefFor, toAttachmentModel } from '../mappers';
+import type { PathHref } from '../mappers';
 
 /** The byte URLs one attachment can be drawn from, all of them object URLs for this tab. */
 export interface AttachmentUrlSet {
@@ -66,12 +67,15 @@ export function toSendability(item: AttachmentSendItem): AttachmentSendability {
 }
 
 /** Where an attachment ended up in the corpus, once it was explicitly promoted. */
-export function toCorpusLinks(record: AttachmentView): AttachmentCorpusLinks | null {
+export function toCorpusLinks(
+  record: AttachmentView,
+  href: PathHref = (path) => path,
+): AttachmentCorpusLinks | null {
   if (!record.work || !record.version || !record.artifact) return null;
   return {
-    work: entityRefFor(record.work, { authority: 'accepted' }),
-    version: entityRefFor(record.version, { authority: 'accepted' }),
-    artifact: entityRefFor(record.artifact, { authority: 'accepted' }),
+    work: entityRefFor(record.work, { authority: 'accepted', href }),
+    version: entityRefFor(record.version, { authority: 'accepted', href }),
+    artifact: entityRefFor(record.artifact, { authority: 'accepted', href }),
   };
 }
 
@@ -85,10 +89,10 @@ export function toCorpusLinks(record: AttachmentView): AttachmentCorpusLinks | n
  */
 export function attachmentModelOf(
   record: SessionAttachmentRecord | AttachmentView,
-  options: { urls?: AttachmentUrlSet; send?: AttachmentSendItem } = {},
+  options: { urls?: AttachmentUrlSet; send?: AttachmentSendItem; href?: PathHref } = {},
 ): AttachmentModel {
   const base = toAttachmentModel(record as SessionAttachmentRecord, options.urls ?? {});
-  const corpus = toCorpusLinks(record);
+  const corpus = toCorpusLinks(record, options.href ?? ((path) => path));
   return {
     ...base,
     ...(options.send ? { sendability: toSendability(options.send) } : {}),
@@ -148,15 +152,20 @@ export interface SaveOption {
  * needs the researcher, and it is offered as the two things the capability accepts —
  * attach to the Work it partially matched, or register a new one. Nothing is preselected.
  */
-export function saveOptionsOf(identity: AttachmentIdentityView): SaveOption[] {
+export function saveOptionsOf(
+  identity: AttachmentIdentityView,
+  href: PathHref = (path) => path,
+): SaveOption[] {
   const detail = identity.reasons.join(' ') || undefined;
   const refs = {
-    ...(identity.work ? { work: entityRefFor(identity.work, { authority: 'accepted' }) } : {}),
+    ...(identity.work
+      ? { work: entityRefFor(identity.work, { authority: 'accepted', href }) }
+      : {}),
     ...(identity.version
-      ? { version: entityRefFor(identity.version, { authority: 'accepted' }) }
+      ? { version: entityRefFor(identity.version, { authority: 'accepted', href }) }
       : {}),
     ...(identity.artifact
-      ? { artifact: entityRefFor(identity.artifact, { authority: 'accepted' }) }
+      ? { artifact: entityRefFor(identity.artifact, { authority: 'accepted', href }) }
       : {}),
   };
   switch (identity.choice) {

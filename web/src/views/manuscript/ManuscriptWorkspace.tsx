@@ -38,6 +38,7 @@ import {
 import type { EditorFrameState, PaneSizes } from '@research-harness/design';
 import type { CursorPosition, LatexEditorHandle } from '../../editor';
 import { ErrorBox, Loading } from '../../components/Feedback';
+import { useProjectPaths } from '../../app/projectPaths';
 import { useSession } from '../../app/session';
 import { AuditPane } from './AuditPane';
 import { EditorPane } from './EditorPane';
@@ -102,6 +103,7 @@ function conflictMessage(refusal: string, path: string): string {
 
 export function ManuscriptPage() {
   const { client, canMutate, mutationBlockedReason } = useSession();
+  const { href } = useProjectPaths();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -434,7 +436,7 @@ export function ManuscriptPage() {
             onOpenSource={(file, line) => void openAt(file, line)}
             onNavigate={(target) => {
               if (target.kind === 'claim') {
-                navigate(`/claims/${target.id}`);
+                navigate(href(`/claims/${target.id}`));
                 return;
               }
               const at = target.id.lastIndexOf(':');

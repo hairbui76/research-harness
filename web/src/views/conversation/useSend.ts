@@ -22,13 +22,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CapabilityError } from '../../api/client';
 import type { HarnessClient } from '../../api/client';
 import type { SendStarted, SessionTranscript } from '../../api/dto';
+import { useProjectPaths } from '../../app/projectPaths';
 import { subscribeRunEvents } from '../../api/sse';
 import type { RunState } from '../../api/sse';
 
 const RUN_PREFIX = 'research-harness.conversation.run';
 
-function runKey(sessionId: string): string {
-  return `${RUN_PREFIX}.${sessionId}`;
+/**
+ * Where the open run of one session is remembered, so a reload resubscribes to it.
+ *
+ * Keyed by project as well as session for the same reason the draft is: one browser origin
+ * now holds every project, and `CS0001` names a different conversation in each. A null
+ * project is the legacy host and keeps the key it has always used, so a `research serve`
+ * window mid-stream still finds its run after a reload.
+ */
+export function runKey(sessionId: string, projectId: string | null = null): string {
+  return projectId ? `${RUN_PREFIX}.${projectId}.${sessionId}` : `${RUN_PREFIX}.${sessionId}`;
 }
 
 interface StoredRun {
@@ -37,10 +46,10 @@ interface StoredRun {
   attempt: number;
 }
 
-function readRun(sessionId: string | null): StoredRun | null {
+function readRun(sessionId: string | null, projectId: string | null): StoredRun | null {
   if (!sessionId) return null;
   try {
-    const raw = window.localStorage.getItem(runKey(sessionId));
+    const raw = window.localStorage.getItem(runKey(sessionId, projectId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredRun>;
     return typeof parsed.runId === 'string' && typeof parsed.messageId === 'string'
@@ -51,10 +60,10 @@ function readRun(sessionId: string | null): StoredRun | null {
   }
 }
 
-function writeRun(sessionId: string, run: StoredRun | null): void {
+function writeRun(sessionId: string, projectId: string | null, run: StoredRun | null): void {
   try {
-    if (run) window.localStorage.setItem(runKey(sessionId), JSON.stringify(run));
-    else window.localStorage.removeItem(runKey(sessionId));
+    if (run) window.localStorage.setItem(runKey(sessionId, projectId), JSON.stringify(run));
+    else window.localStorage.removeItem(runKey(sessionId, projectId));
   } catch {
     /* without storage a reload simply falls back to `session.get`, which already has it */
   }
@@ -111,6 +120,7 @@ export function useSend(
   options: SendOptions,
 ): SendApi {
   const { reconcile, canMutate = true, enabled = true } = options;
+  const { projectId } = useProjectPaths();
   const [streaming, setStreaming] = useState<Streaming | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +151,7 @@ export function useSend(
       const controller = new AbortController();
       abort.current?.abort();
       abort.current = controller;
-      writeRun(session, {
+      writeRun(session, projectId, {
         runId: started.runId,
         messageId: started.messageId,
         attempt: started.attempt,
@@ -175,22 +185,22 @@ export function useSend(
 
       // Terminal, dropped or aborted — all three end the same way: the transcript on disk
       // is the answer, so read it and stop pretending to hold one.
-      writeRun(session, null);
+      writeRun(session, projectId, null);
       if (!live.current) return;
       setStreaming(null);
       await reconcileRef.current();
     },
-    [client],
+    [client, projectId],
   );
 
   // A reload mid-stream: resubscribe to the run this session was following. A run that has
   // since finished replays its whole answer and then its terminal status, which reconciles.
   useEffect(() => {
     if (!sessionId || !enabled) return;
-    const stored = readRun(sessionId);
+    const stored = readRun(sessionId, projectId);
     if (!stored) return;
     void follow(sessionId, stored);
-  }, [enabled, follow, sessionId]);
+  }, [enabled, follow, projectId, sessionId]);
 
   const begin = useCallback(
     async (session: string, call: () => Promise<SendStarted>): Promise<boolean> => {

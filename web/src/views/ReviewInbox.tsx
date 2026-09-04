@@ -12,6 +12,7 @@ import { FullPageWorkspace, SourceAnchor } from '@research-harness/design';
 import type { ReviewItem } from '../api/dto';
 import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 /** The queue order itself; an item's category is the server's own word for why it is here. */
@@ -65,10 +66,11 @@ export function ReviewInboxPage() {
 }
 
 export function ReviewRow({ item }: { item: ReviewItem }) {
+  const { href } = useProjectPaths();
   return (
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
-        <Link to={`/review/${item.candidate_id}`}>
+        <Link to={href(`/review/${item.candidate_id}`)}>
           <span className="rh-web-queue__field">{item.field}</span>
           <span className="rh-text-secondary"> · {item.work}</span>
         </Link>

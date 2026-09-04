@@ -32,6 +32,8 @@ import type { HarnessClient } from '../../../api/client';
 import type { GraphResolvedView } from '../../../api/dto';
 import type { DeepLink } from '../../../render';
 import { CONVERSATION_PATH, routeForDeepLink } from '../mappers';
+import type { PathHref } from '../mappers';
+import { useProjectPaths } from '../../../app/projectPaths';
 
 /** Where one artifact's own bytes are read at an exact page and block. */
 export const SOURCE_PATH = '/source';
@@ -55,32 +57,35 @@ export function routeForResolvedLink(
   link: DeepLink,
   view: GraphResolvedView | null,
   context: DeepLinkContext = {},
+  href: PathHref = (path) => path,
 ): string | null {
   switch (link.kind) {
     case 'artifact': {
       const page = link.params.get('page');
       const block = link.params.get('block');
-      if (!page && !block) return routeForDeepLink(link);
+      if (!page && !block) return routeForDeepLink(link, href);
       const query = new URLSearchParams();
       if (page) query.set('page', page);
       if (block) query.set('block', block);
-      return `${SOURCE_PATH}/${encodeURIComponent(link.id)}?${query.toString()}`;
+      return href(`${SOURCE_PATH}/${encodeURIComponent(link.id)}?${query.toString()}`);
     }
     case 'attachment': {
       const session = sessionOfAttachment(view) ?? context.session ?? null;
       return session === null
         ? null
-        : `${CONVERSATION_PATH}?session=${encodeURIComponent(session)}` +
-            `&attachment=${encodeURIComponent(link.id)}`;
+        : href(
+            `${CONVERSATION_PATH}?session=${encodeURIComponent(session)}` +
+              `&attachment=${encodeURIComponent(link.id)}`,
+          );
     }
     case 'manuscript': {
       const query = new URLSearchParams({ file: link.id });
       const line = link.params.get('line');
       if (line) query.set('line', line);
-      return `${MANUSCRIPT_PATH}?${query.toString()}`;
+      return href(`${MANUSCRIPT_PATH}?${query.toString()}`);
     }
     default:
-      return routeForDeepLink(link);
+      return routeForDeepLink(link, href);
   }
 }
 
@@ -133,6 +138,9 @@ export interface DeepLinkApi {
  */
 export function useDeepLinks(client: HarnessClient, context: DeepLinkContext = {}): DeepLinkApi {
   const navigate = useNavigate();
+  // The route a resolved link opens is a workspace path; which tree it is opened in is this
+  // window's business, not the link's, so the prefix is applied here and nowhere upstream.
+  const { href: prefix } = useProjectPaths();
   const [opening, setOpening] = useState(false);
   const [problem, setProblem] = useState<DeepLinkProblem | null>(null);
   const session = context.session ?? null;
@@ -144,7 +152,7 @@ export function useDeepLinks(client: HarnessClient, context: DeepLinkContext = {
       client
         .resolveReference(link.href)
         .then((view) => {
-          const href = routeForResolvedLink(link, view, { session });
+          const href = routeForResolvedLink(link, view, { session }, prefix);
           if (followable(view) && href !== null) {
             navigate(href);
             return;
@@ -170,7 +178,7 @@ export function useDeepLinks(client: HarnessClient, context: DeepLinkContext = {
         })
         .finally(() => setOpening(false));
     },
-    [client, navigate, session],
+    [client, navigate, prefix, session],
   );
 
   const openAnyway = useCallback(() => {

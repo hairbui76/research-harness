@@ -23,6 +23,7 @@ import type { EntityRefModel } from '@research-harness/design';
 import type { HarnessClient } from '../../api/client';
 import { authorityOf } from '../../components/Feedback';
 import { entityRefFor } from './mappers';
+import type { PathHref } from './mappers';
 
 /** How many rows the picker is offered. Beyond this, typing more is the better answer. */
 const LIMIT = 12;
@@ -51,7 +52,10 @@ interface Candidate {
  * stale, private, contested — carries the label the listing reported, never one derived
  * here.
  */
-export function indexReferenceProvider(client: HarnessClient): ReferenceProvider {
+export function indexReferenceProvider(
+  client: HarnessClient,
+  href: PathHref = (path) => path,
+): ReferenceProvider {
   let loaded: Promise<Candidate[]> | null = null;
 
   const load = async (): Promise<Candidate[]> => {
@@ -64,7 +68,7 @@ export function indexReferenceProvider(client: HarnessClient): ReferenceProvider
     const candidates: Candidate[] = [];
     const add = (id: string, label: string, authority?: EntityRefModel['authority']): void => {
       candidates.push({
-        ref: entityRefFor(id, { label, ...(authority ? { authority } : {}) }),
+        ref: entityRefFor(id, { label, href, ...(authority ? { authority } : {}) }),
         haystack: `${id} ${label}`.toLowerCase(),
       });
     };

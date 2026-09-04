@@ -38,6 +38,7 @@ import {
 } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 const CLAIM_STATUSES = [
@@ -58,6 +59,7 @@ const SCOPES = [
 
 export function ClaimsPage() {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   // `claim.list` rather than the whole index: this view needs one list, and the capability
   // is the surface every host shares (it returns the same `ClaimSummary` objects).
   const state = useAsync(() => client.claims(), [client]);
@@ -89,7 +91,7 @@ export function ClaimsPage() {
               <ObjectRef
                 id={claim.id}
                 kind="claim"
-                to={`/claims/${claim.id}`}
+                to={href(`/claims/${claim.id}`)}
                 authority={authorityOf(claim.status, claim.stale === 'stale')}
               />
               <div className="rh-text-secondary">{claim.statement}</div>
@@ -326,6 +328,7 @@ function RelationList({
   }[];
 }) {
   const navigate = useNavigate();
+  const { href } = useProjectPaths();
   return (
     <section className="rh-web-stack rh-web-stack--tight">
       <h3 className="rh-text-h4">
@@ -349,7 +352,7 @@ function RelationList({
                         id: claimId,
                         kind: 'claim',
                         resolution: 'resolved',
-                        href: `/claims/${claimId}`,
+                        href: href(`/claims/${claimId}`),
                       },
                     },
                     {
@@ -361,7 +364,7 @@ function RelationList({
                         id: link.evidence,
                         kind: 'evidence',
                         resolution: link.status === null ? 'unresolved' : 'resolved',
-                        href: `/evidence/${link.evidence}`,
+                        href: href(`/evidence/${link.evidence}`),
                       },
                     },
                     ...(link.work
@@ -372,7 +375,7 @@ function RelationList({
                               id: link.work,
                               kind: 'work' as const,
                               resolution: 'resolved' as const,
-                              href: `/corpus/${link.work}`,
+                              href: href(`/corpus/${link.work}`),
                             },
                           },
                         ]

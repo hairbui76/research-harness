@@ -12,6 +12,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReviewItem } from '../api/dto';
 import { EvidenceReviewPage, ProposedChanges } from './EvidenceReview';
+import { ProjectPathProvider } from '../app/projectPaths';
 import { splitAround } from '../components/SourcePane';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
@@ -345,5 +346,36 @@ describe('the screen a researcher spends their day on', () => {
       await user.tab();
       expect(screen.getByRole('button', { name: next })).toHaveFocus();
     }
+  });
+});
+
+describe('the review screen inside a project', () => {
+  it('links the Work it is reviewing to the project’s own corpus page', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <EvidenceReviewPage />
+      </ProjectPathProvider>,
+      {
+        daemon: daemonFor(),
+        route: `/projects/prj_abc/review/${ITEM.candidate_id}`,
+        path: '/projects/prj_abc/review/:candidateId',
+      },
+    );
+
+    await waitFor(() => expect(screen.getByText('Proposal')).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: ITEM.work })).toHaveAttribute(
+      'href',
+      `/projects/prj_abc/corpus/${ITEM.work}`,
+    );
+  });
+
+  it('keeps the legacy corpus link when there is no project', async () => {
+    renderReview();
+
+    await waitFor(() => expect(screen.getByText('Proposal')).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: ITEM.work })).toHaveAttribute(
+      'href',
+      `/corpus/${ITEM.work}`,
+    );
   });
 });

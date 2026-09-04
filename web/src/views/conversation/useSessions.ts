@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ConversationSession, SessionMatch } from '../../api/dto';
 import type { HarnessClient } from '../../api/client';
+import { useProjectPaths } from '../../app/projectPaths';
 import { CapabilityError } from '../../api/client';
 
 const LAST_SESSION = 'research-harness.conversation.last-session';
@@ -69,6 +70,9 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
   const { project = null, canMutate = true } = options;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
+  // The conversation is `/` in this tree — bare under `research serve`, below
+  // `/projects/{id}` under `research app` — and the session travels in the query either way.
+  const { href } = useProjectPaths();
   const [sessions, setSessions] = useState<ConversationSession[]>([]);
   const [matches, setMatches] = useState<SessionMatch[] | null>(null);
   const [query, setQuery] = useState('');
@@ -131,9 +135,9 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
   const open = useCallback(
     (sessionId: string) => {
       writeLastSession(project, sessionId);
-      navigate(`/?session=${encodeURIComponent(sessionId)}`);
+      navigate(href(`/?session=${encodeURIComponent(sessionId)}`));
     },
-    [navigate, project],
+    [href, navigate, project],
   );
 
   /**

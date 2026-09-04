@@ -14,11 +14,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider, ToastProvider } from '@research-harness/design';
 import { HarnessClient } from '../../api/client';
 import { SessionProvider } from '../../app/session';
 import { AppRoutes } from '../../app/routes';
+import { ProjectPathProvider } from '../../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon } from '../../test/harness';
 import type { FakeDaemon } from '../../test/harness';
 import contextPack from '../../test/fixtures/conversation/context-pack.json';
@@ -812,5 +813,118 @@ describe('accessibility', () => {
     (tabs[0] as HTMLElement).focus();
     await user.keyboard('{ArrowRight}{Enter}');
     await waitFor(() => expect(tabs[1]).toHaveAttribute('aria-selected', 'true'));
+  });
+});
+
+/* -- the same workspace, inside one project (design §4.5) ------------------ */
+
+/** Where the router actually is, so a navigation can be read rather than inferred. */
+function LocationProbe() {
+  const location = useLocation();
+  return <span data-testid="location">{`${location.pathname}${location.search}`}</span>;
+}
+
+/**
+ * The conversation mounted the way `App.tsx` mounts it under `research app`.
+ *
+ * `AppRoutes` is the same route table either way; all that differs is the splat it hangs
+ * under and the `ProjectPathProvider` above it. Nothing in these tests configures a view.
+ */
+function renderInProject(options: { daemon: FakeDaemon; route: string; projectId?: string }) {
+  const projectId = options.projectId ?? 'prj_abc';
+  // The client's own base URL is `AppClient.workspaceClient`'s business and is pinned in
+  // `api/client.test.ts`; what these tests are about is where the *links* point, so the
+  // fake daemon is addressed exactly as it is in every other test in this file.
+  const client = new HarnessClient({
+    baseUrl: 'http://daemon.test',
+    token: 'local-token',
+    fetchImpl: options.daemon.fetch,
+  });
+  return render(
+    <ThemeProvider defaultTheme="dark" storageKey={null}>
+      <ToastProvider>
+        <MemoryRouter
+          initialEntries={[options.route]}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <LocationProbe />
+          <Routes>
+            <Route
+              path="projects/:projectId/*"
+              element={
+                <ProjectPathProvider projectId={projectId}>
+                  <SessionProvider client={client}>
+                    <AppRoutes />
+                  </SessionProvider>
+                </ProjectPathProvider>
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </ToastProvider>
+    </ThemeProvider>,
+  );
+}
+
+describe('the conversation inside a project', () => {
+  it('opens the session a project deep link names, message and all', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    renderInProject({
+      daemon,
+      route: `/projects/prj_abc/?session=${SESSION}&message=M0042`,
+    });
+
+    await transcriptReady();
+    expect(screen.getByRole('heading', { name: 'Latency study' })).toBeInTheDocument();
+    expect(daemon.capabilityCalls().find((call) => call.name === 'session.get')?.request)
+      .toMatchObject({ session: SESSION });
+    // The URL is untouched by the render: a deep link is not rewritten on arrival.
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      `/projects/prj_abc/?session=${SESSION}&message=M0042`,
+    );
+  });
+
+  it('keeps a session picked in the rail inside the project', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderInProject({ daemon, route: '/projects/prj_abc/claims' });
+
+    await screen.findByRole('button', { name: /^Screening pass/ });
+    await user.click(screen.getByRole('button', { name: /^Screening pass/ }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('location')).toHaveTextContent(
+        '/projects/prj_abc/?session=CS0002',
+      ),
+    );
+  });
+
+  it('points every reference chip in the transcript at the project', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const { container } = renderInProject({
+      daemon,
+      route: `/projects/prj_abc/?session=${SESSION}`,
+    });
+
+    await transcriptReady();
+    const hrefs = Array.from(container.querySelectorAll('a[href^="/"]')).map((node) =>
+      node.getAttribute('href'),
+    );
+    expect(hrefs.length).toBeGreaterThan(0);
+    expect(hrefs.every((href) => href?.startsWith('/projects/prj_abc/'))).toBe(true);
+  });
+
+  it('keys the draft by the project as well as the session', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderInProject({ daemon, route: `/projects/prj_abc/?session=${SESSION}` });
+
+    await transcriptReady();
+    await user.type(screen.getByRole('textbox', { name: /message/i }), 'a draft');
+
+    await waitFor(() =>
+      expect(window.localStorage.getItem(draftKey(SESSION, 'prj_abc'))).toContain('a draft'),
+    );
+    expect(window.localStorage.getItem(draftKey(SESSION))).toBeNull();
   });
 });

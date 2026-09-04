@@ -18,6 +18,7 @@ import type { ConversationMessage } from '../../api/dto';
 import { renderMarkdown } from '../../render';
 import type { DeepLink } from '../../render';
 import { SaveToCorpusFlow } from './attachments/SaveToCorpusFlow';
+import { useProjectPaths } from '../../app/projectPaths';
 import { groupAttempts, toMessageModel } from './mappers';
 import type { MessageTurn } from './mappers';
 import { useConversation } from './state';
@@ -78,6 +79,8 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
   }, [send.streaming, transcript]);
 
   const unresolved = useMemo(() => new Set(send.unresolved), [send.unresolved]);
+  // Reference chips in a message are real links; they point inside the project on screen.
+  const { href } = useProjectPaths();
 
   /*
    * `rh://` in a message is a question, not a URL (task W3).
@@ -132,6 +135,7 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
     const model = toMessageModel(message, {
       attachments,
       unresolved,
+      href,
       attempt: index + 1,
       attempts: turn.attempts.length,
       ...(streaming

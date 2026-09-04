@@ -23,6 +23,7 @@ import type {
   GraphVisibilityName,
   SessionVisibility,
 } from '../../../api/dto';
+import { useProjectPaths } from '../../../app/projectPaths';
 import { useAsync } from '../../../app/useAsync';
 import type { Async } from '../../../app/useAsync';
 import { neighbourGroups } from './mappers';
@@ -73,6 +74,8 @@ export function useNeighbourhood(
 ): NeighbourhoodApi {
   const { session = null, enabled = true, limit = LIMIT } = options;
   const visibility = (options.visibility ?? []).join(',');
+  // Neighbour chips are real links, so they are built for the tree this pane is mounted in.
+  const { href } = useProjectPaths();
 
   const state = useAsync<GraphNeighbourhoodView | null>(async () => {
     if (!id || !enabled) return null;
@@ -86,8 +89,8 @@ export function useNeighbourhood(
   }, [client, enabled, id, limit, visibility]);
 
   const groups = useMemo(
-    () => (state.data ? neighbourGroups(state.data, { session }) : []),
-    [session, state.data],
+    () => (state.data ? neighbourGroups(state.data, { session, href }) : []),
+    [href, session, state.data],
   );
 
   return {

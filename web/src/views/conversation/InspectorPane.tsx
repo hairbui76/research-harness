@@ -35,6 +35,7 @@ import { useSession } from '../../app/session';
 import { useAsync } from '../../app/useAsync';
 import { authorityOf } from '../../components/Feedback';
 import { AttachmentViewer } from './attachments/AttachmentViewer';
+import { useProjectPaths } from '../../app/projectPaths';
 import { entityRefFor, messagesReferencing } from './mappers';
 import { GraphContextPanel } from './references';
 import { ReceiptPanel } from './ReceiptPanel';
@@ -239,6 +240,7 @@ interface TabProps {
 }
 
 function EvidenceTab({ client, onOpen }: TabProps) {
+  const { href } = useProjectPaths();
   const state = useAsync(() => client.evidence(), [client]);
   if (state.loading) return <AsyncState kind="loading" compact title="Reading accepted evidence" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
@@ -255,6 +257,7 @@ function EvidenceTab({ client, onOpen }: TabProps) {
             entity={entityRefFor(item.id, {
               label: item.exact_text,
               authority: authorityOf(item.status, item.stale === 'stale'),
+              href,
             })}
             onOpen={onOpen}
           />
@@ -265,6 +268,7 @@ function EvidenceTab({ client, onOpen }: TabProps) {
 }
 
 function ClaimsTab({ client, onOpen }: TabProps) {
+  const { href } = useProjectPaths();
   const state = useAsync(() => client.claims(), [client]);
   if (state.loading) return <AsyncState kind="loading" compact title="Reading claims" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
@@ -279,6 +283,7 @@ function ClaimsTab({ client, onOpen }: TabProps) {
             entity={entityRefFor(claim.id, {
               label: claim.statement,
               authority: authorityOf(claim.status, claim.stale === 'stale'),
+              href,
             })}
             onOpen={onOpen}
           />
@@ -295,6 +300,7 @@ function ReviewTab({
   client: HarnessClient;
   onOpen: (ref: { kind: string; id: string; href?: string }) => void;
 }) {
+  const { href } = useProjectPaths();
   const state = useAsync(() => client.reviewInbox(), [client]);
   if (state.loading) return <AsyncState kind="loading" compact title="Reading the review queue" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
@@ -312,7 +318,7 @@ function ReviewTab({
               onOpen({
                 kind: 'candidate',
                 id: item.candidate_id,
-                href: `/review/${item.candidate_id}`,
+                href: href(`/review/${item.candidate_id}`),
               })
             }
           >
@@ -343,6 +349,7 @@ function ConflictsTab({ overview }: { overview: OverviewReport | null }) {
 }
 
 function StaleTab({ client, onOpen }: TabProps) {
+  const { href } = useProjectPaths();
   const state = useAsync(() => client.stale(50), [client]);
   if (state.loading) return <AsyncState kind="loading" compact title="Reading the stale set" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
@@ -354,7 +361,7 @@ function StaleTab({ client, onOpen }: TabProps) {
         <li key={`${mark.object_id}:${mark.source_change}`}>
           <EntityRef
             size="sm"
-            entity={entityRefFor(mark.object_id, { authority: 'stale' })}
+            entity={entityRefFor(mark.object_id, { authority: 'stale', href })}
             onOpen={onOpen}
           />{' '}
           <span className="rh-text-secondary">{mark.reason}</span>

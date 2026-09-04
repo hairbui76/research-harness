@@ -148,10 +148,13 @@ export interface ConversationProviderProps {
 
 export function ConversationProvider({ children, referenceProvider }: ConversationProviderProps) {
   const { client, overview, canMutate, mutationBlockedReason } = useSession();
-  const { projectId } = useProjectPaths();
+  const { projectId, href } = useProjectPaths();
   const location = useLocation();
   const navigate = useNavigate();
-  const active = location.pathname === CONVERSATION_PATH;
+  // `/` under the legacy host, `/projects/{id}/` under the multi-project one — the same
+  // screen either way, so the comparison is made against this tree's own conversation path
+  // rather than against a literal. A trailing slash is not a different route.
+  const active = samePath(location.pathname, href(CONVERSATION_PATH));
 
   // Keyed by the stable project id under a multi-project host, so relocating a project
   // changes its root without discarding the session it remembered (design §11); the legacy
@@ -176,7 +179,7 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
    * the projection holds, and W1's `indexReferenceProvider` stays mounted behind it as the
    * fallback `graph.status` selects when the index is absent, rebuilding or unreadable
    * (graph spec §8). A host may still pass its own provider, which then wins outright. */
-  const fallbackProvider = useMemo(() => indexReferenceProvider(client), [client]);
+  const fallbackProvider = useMemo(() => indexReferenceProvider(client, href), [client, href]);
   const sessionVisibility = sessions.active?.visibility ?? null;
   const graphVisibility = useMemo(
     () => (sessionVisibility === 'project' ? (['project'] as const) : undefined),
@@ -242,10 +245,10 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
       if (anchor.block !== undefined) query.set('block', anchor.block);
       const suffix = query.toString();
       navigate(
-        `${SOURCE_PATH}/${encodeURIComponent(anchor.artifactId)}${suffix ? `?${suffix}` : ''}`,
+        href(`${SOURCE_PATH}/${encodeURIComponent(anchor.artifactId)}${suffix ? `?${suffix}` : ''}`),
       );
     },
-    [navigate],
+    [href, navigate],
   );
 
   const selectMessage = useCallback((messageId: string) => {
@@ -267,7 +270,7 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
   const openRef = useCallback(
     (ref: EntityRefModel) => {
       if (ref.kind === 'session') {
-        navigate(routeForEntity('session', ref.id) ?? CONVERSATION_PATH);
+        navigate(routeForEntity('session', ref.id, {}, href) ?? href(CONVERSATION_PATH));
         return;
       }
       if (ref.kind === 'message') {
@@ -280,18 +283,20 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
       setTab(ref.kind === 'claim' ? 'claims' : ref.kind === 'evidence' ? 'evidence' : 'context');
       setInspectorOpen(true);
     },
-    [navigate, selectMessage, selectReference],
+    [href, navigate, selectMessage, selectReference],
   );
 
   const navigateTo = useCallback(
     (ref: InspectorRef) => {
-      const href =
+      // `ref.href` was built for this tree by whoever produced the chip, so it is taken as
+      // it is; only the route derived here has to be prefixed, and exactly once.
+      const target =
         ref.href ??
-        routeForEntity(entityRefFor(ref.id).kind, ref.id, { session: sessionId }) ??
+        routeForEntity(entityRefFor(ref.id).kind, ref.id, { session: sessionId }, href) ??
         null;
-      if (href) navigate(href);
+      if (target) navigate(target);
     },
-    [navigate, sessionId],
+    [href, navigate, sessionId],
   );
 
   const showReceipt = useCallback((source: ReceiptSource | null) => {
@@ -341,6 +346,12 @@ export function useConversation(): ConversationState {
   const state = useContext(Context);
   if (!state) throw new Error('useConversation must be used inside a ConversationProvider');
   return state;
+}
+
+/** Two in-app paths naming the same route; a trailing slash is not a difference. */
+function samePath(a: string, b: string): boolean {
+  const trim = (path: string): string => (path.length > 1 ? path.replace(/\/$/, '') : path);
+  return trim(a) === trim(b);
 }
 
 /** The same state, or null — for a shell slot that renders on every route. */

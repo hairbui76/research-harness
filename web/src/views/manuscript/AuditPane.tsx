@@ -33,6 +33,7 @@ import {
   StatusBadge,
 } from '../../components/Feedback';
 import { ObjectRef } from '../../components/ObjectRef';
+import { useProjectPaths } from '../../app/projectPaths';
 import { useSession } from '../../app/session';
 import { useAsync } from '../../app/useAsync';
 import type { Async } from '../../app/useAsync';
@@ -130,6 +131,7 @@ function AnchorsTab({
   onOpenSource: (file: string, line: number) => void;
 }) {
   const { client, canMutate, mutationBlockedReason, refresh } = useSession();
+  const { href } = useProjectPaths();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,7 +217,7 @@ function AnchorsTab({
                   <p>{anchor.sentence}</p>
                   <p className="rh-web-row rh-text-secondary">
                     asserts
-                    <ObjectRef id={anchor.claim} kind="claim" to={`/claims/${anchor.claim}`} />
+                    <ObjectRef id={anchor.claim} kind="claim" to={href(`/claims/${anchor.claim}`)} />
                     {anchor.citation_keys.length ? (
                       <span>cites {anchor.citation_keys.join(', ')}</span>
                     ) : null}
@@ -278,6 +280,7 @@ function TracePanel({
   onClose: () => void;
 }) {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   const state = useAsync(
     () => client.traceManuscript(where.file, where.line, null, entryFile),
     [client, entryFile, where.file, where.line],
@@ -302,7 +305,11 @@ function TracePanel({
             <Field label="Anchor">{state.data.anchor ?? '— this sentence carries none'}</Field>
             <Field label="Claim">
               {state.data.claim ? (
-                <ObjectRef id={state.data.claim} kind="claim" to={`/claims/${state.data.claim}`} />
+                <ObjectRef
+                  id={state.data.claim}
+                  kind="claim"
+                  to={href(`/claims/${state.data.claim}`)}
+                />
               ) : (
                 '— none'
               )}
