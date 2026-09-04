@@ -386,6 +386,7 @@ export type {
   AttachmentCorpusLinks,
   PromotionTarget,
   ModelOption,
+  ModelOptionGroup,
   SessionSummary,
   ComposerValue,
   ComposerBlockedReason,

@@ -79,6 +79,14 @@
   font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
 }
 
+.rh-session-list__binding {
+  overflow: hidden;
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .rh-session-list__preview {
   overflow: hidden;
   color: var(--rh-text-secondary);

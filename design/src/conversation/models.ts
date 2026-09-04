@@ -106,10 +106,18 @@ export interface ModelOption {
   egressClass: EgressClass;
   /** Whether the model reads images. */
   vision: boolean;
-  contextTokens: number;
+  /** Declared context window in tokens; `null` when the source declares none. */
+  contextTokens: number | null;
   available: boolean;
   /** Why it cannot be selected. Incompatible options stay visible with this reason. */
   unavailableReason?: string;
+}
+
+/** A labelled set of options, rendered as one accessible group in the selector. */
+export interface ModelOptionGroup {
+  id: string;
+  label: string;
+  options: readonly ModelOption[];
 }
 
 export interface SessionSummary {
@@ -120,6 +128,11 @@ export interface SessionSummary {
   messageCount: number;
   visibility: Visibility;
   preview?: string;
+  /**
+   * The session's binding words, composed by the client from the record; absent for the
+   * project default.
+   */
+  binding?: string;
 }
 
 /**

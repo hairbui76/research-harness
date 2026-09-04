@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
@@ -59,6 +59,79 @@ describe('ModelSelector', () => {
     await user.click(screen.getByRole('button', { name: /Model:/ }));
     await user.click(screen.getByRole('menuitem', { name: /Vision preview/ }));
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('renders groups with their label as the accessible name and keeps disabled reasons', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <ModelSelector
+        options={SAMPLE_MODELS.slice(0, 1)}
+        groups={[
+          {
+            id: 'codex',
+            label: 'Codex CLI 0.150.1',
+            options: [
+              {
+                id: 'runtime:codex:gpt-5.5',
+                label: 'gpt-5.5',
+                provider: 'Codex CLI',
+                egressClass: 'external',
+                vision: true,
+                contextTokens: null,
+                available: true,
+              },
+              {
+                id: 'runtime:cursor-agent',
+                label: 'Cursor Agent 1.4.0',
+                provider: 'Cursor Agent',
+                egressClass: 'external',
+                vision: false,
+                contextTokens: null,
+                available: false,
+                unavailableReason:
+                  'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
+              },
+            ],
+          },
+        ]}
+        value="claude-opus-5"
+        onChange={onChange}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Model:/ }));
+    const group = screen.getByRole('group', { name: 'Codex CLI 0.150.1' });
+    expect(within(group).getByRole('menuitem', { name: /gpt-5\.5/ })).toBeEnabled();
+    const blocked = within(group).getByRole('menuitem', { name: /Cursor Agent 1\.4\.0/ });
+    expect(blocked).toHaveAttribute('aria-disabled', 'true');
+    expect(within(group).getByText(/has no tested bounded/)).toBeInTheDocument();
+    await user.click(within(group).getByRole('menuitem', { name: /gpt-5\.5/ }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'runtime:codex:gpt-5.5' }),
+    );
+  });
+
+  it('renders a model with no declared context window without a token count', async () => {
+    const user = userEvent.setup();
+    render(
+      <ModelSelector
+        options={[
+          {
+            id: 'runtime:codex:gpt-5.5',
+            label: 'gpt-5.5',
+            provider: 'Codex CLI',
+            egressClass: 'external',
+            vision: true,
+            contextTokens: null,
+            available: true,
+          },
+        ]}
+        value="runtime:codex:gpt-5.5"
+        onChange={() => undefined}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Model:/ }));
+    expect(screen.queryByText(/ctx|tokens|k\b/)).not.toBeInTheDocument();
   });
 
   it('has no accessibility violations', async () => {
