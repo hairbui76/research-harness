@@ -406,7 +406,9 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                                          answer it; project lets the selected        │
 │                                          external provider see it.                   │
 │                                          [default: private]                          │
-│ --model               <str>              Default provider/model for this session.    │
+│ --model               <str>              Bind the new session to this entry name     │
+│                                          from research.yaml (see `research chat      │
+│                                          configure`).                                │
 │ --budget              <int>              Token budget for the assembled context.     │
 │ --json                                   Print the result as JSON instead of text.   │
 │ --help                                   Show this message and exit.                 │

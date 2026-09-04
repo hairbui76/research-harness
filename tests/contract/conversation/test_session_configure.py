@@ -84,7 +84,14 @@ def test_an_entry_binding_needs_an_enabled_entry(ctx: CapabilityContext) -> None
                 "kind": "openai",
                 "model": "gpt-5.4-mini",
                 "api_key_env": "OPENAI_API_KEY",
-            }
+            },
+            {
+                "name": "retired",
+                "kind": "openai",
+                "model": "gpt-5.4-mini",
+                "api_key_env": "OPENAI_API_KEY",
+                "enabled": False,
+            },
         ]
     )
     service = ConversationService(ctx)
@@ -92,6 +99,8 @@ def test_an_entry_binding_needs_an_enabled_entry(ctx: CapabilityContext) -> None
     assert binding_of(service.configure(session.id, entry="fast").defaults) == EntryBinding("fast")
     with pytest.raises(CapabilityError, match="no provider named 'slow'"):
         service.configure(session.id, entry="slow")
+    with pytest.raises(CapabilityError, match="no provider named 'retired'"):
+        service.configure(session.id, entry="retired")
 
 
 def test_clear_returns_the_session_to_the_project_default(
@@ -117,5 +126,9 @@ def test_exactly_one_target_is_required(ctx: CapabilityContext) -> None:
 
 
 def test_create_stores_a_model_argument_as_an_entry_binding(ctx: CapabilityContext) -> None:
-    session = ConversationService(ctx).create("x", model="fast")
-    assert binding_of(session.defaults) == EntryBinding("fast")
+    # A slash-bearing name separates the two behaviours: `create` used to split on "/" and
+    # store `provider="openai", model="gpt-4"`, which the legacy read turns into
+    # `EntryBinding("gpt-4")`. The whole string is now the entry name.
+    session = ConversationService(ctx).create("x", model="openai/gpt-4")
+    assert session.defaults.model is not None and session.defaults.model.provider == "entry"
+    assert binding_of(session.defaults) == EntryBinding("openai/gpt-4")

@@ -168,7 +168,11 @@ class ConversationService:
         routable right now is accepted: the send refuses with the scan's sentence until it
         is. Nothing here writes `research.yaml` or sends a request.
         """
-        from research_harness.conversation.binding import entry_identity, runtime_identity
+        from research_harness.conversation.binding import (
+            SESSION_LABEL_PREFIX,
+            entry_identity,
+            runtime_identity,
+        )
         from research_harness.providers.models.router import RouterConfig, RouterProviderConfig
 
         chosen = sum((runtime is not None, entry is not None, clear))
@@ -192,12 +196,13 @@ class ConversationService:
                 )
             defaults = record.defaults.touch(model=entry_identity(entry), reasoning=None)
             return self._store.update_session(session, defaults=defaults)
-        assert runtime is not None
+        if runtime is None:  # unreachable: `chosen == 1` and neither entry nor clear
+            raise CapabilityError("give exactly one of runtime, entry, or clear")
         if model is None:
             raise CapabilityError("model is required with runtime")
         try:
             RouterProviderConfig(
-                name=f"session:{runtime}",
+                name=f"{SESSION_LABEL_PREFIX}{runtime}",
                 kind="local_cli",
                 runtime=runtime,
                 model=model,
