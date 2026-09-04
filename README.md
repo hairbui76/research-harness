@@ -298,8 +298,12 @@ content travels on stdin and never argv; and the provider is still *external* eg
 the process starts here, the model is the vendor's. Five runtimes are detected but not
 routable in this release: Cursor Agent, Amp, DeepSeek Harness, and Pi document no bounded
 mode, and OpenCode's is injected through the environment rather than proved by a flag, so
-it stays unproven until a version with recorded fixtures is verified. See
-[providers](docs/guide/providers.md#subscription-backed-local-clis) and
+it stays unproven until a version with recorded fixtures is verified. A single
+conversation can also name a runtime without an entry — `research chat configure`, or the
+cockpit's composer, binds one session to a runtime, model, and effort level that the daemon
+stores and refuses through exactly the gates a configured entry passes, except that a
+private session may not be bound to one at all, because a CLI runtime is external egress.
+See [providers](docs/guide/providers.md#subscription-backed-local-clis) and
 [ADR-030](docs/decisions/ADR-030-cli-backed-providers-are-bounded-external-workers.md).
 
 Known gaps are recorded where they matter rather than hidden: see

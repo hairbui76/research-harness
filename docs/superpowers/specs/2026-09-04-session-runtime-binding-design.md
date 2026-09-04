@@ -102,7 +102,7 @@ A session created with a `model` argument today stores it as an entry binding (`
 
 ### `session.configure`
 
-Permission `MUTATE`, not human-only, like `session.rename`. Request:
+Permission `MUTATE`, which the registry treats as human-only, like `session.rename` (`capabilities/registry.py` derives `human_only` from `MUTATE`/`ADMIN`). Request:
 
 ```python
 class ConfigureSessionRequest(CapabilityRequest):
@@ -119,9 +119,12 @@ Exactly one of `runtime`, `entry`, `clear` is given; `model` is required with `r
 1. Loads the session or refuses with the existing not-found error.
 2. For `entry`: refuses unless an enabled entry of that name exists in `research.yaml`, with the same sentence a stale per-message `model` gets today.
 3. For `runtime`: builds `RouterProviderConfig(kind="local_cli", name="session:<runtime>", runtime=…, model=…, reasoning=…)` and lets its validator refuse an unknown runtime, a runtime with no proven bounded posture, or a reasoning level the runtime does not offer, with the sentences `research providers add` prints. It then reads the cached scan for that runtime and refuses a model that is neither `default` nor in the scan's `models` list, with `"<runtime> does not list model '<model>'; run research providers scan"`. A runtime that is installed but not routable right now is **accepted** at binding time, so a researcher can bind a session before logging in; the send refuses with the scan's sentence until the runtime is routable.
-4. Stores the binding on the session record under the session lock and answers with the updated `SessionView`.
+4. Refuses a **private** session a runtime binding, with the send path's own private-egress sentence (`conversation/send.py::private_egress_sentence`). Every CLI runtime is external egress, so a runtime binding on a private session would leave a session that looks configured and can never answer. The check comes *after* the entry is validated, in the order the send path refuses, so an invalid binding is still refused in the entry's own words first. An **entry** binding is unaffected: an entry may name a local provider.
+5. Stores the binding on the session record under the session lock and answers with the updated `SessionView`.
 
 For `clear`, it stores `model = None`, `reasoning = None`.
+
+Visibility is decided at creation and **no capability changes it afterwards**: `session.create` (and `research chat new`) defaults to `private`, and there is no `session.set_visibility`. A session that is to use a bound runtime is therefore created as a project session — `research chat new --visibility project` — and the same is true of the Web, whose New session flow sends a title and nothing else today.
 
 The response is the existing `SessionView`, whose `defaults` now carry the binding. `session.get`, `session.list`, and `session.search` return the same record and need no change beyond the new field.
 
@@ -190,6 +193,8 @@ Output: the egress sentence for the runtime before the change, then the resultin
 - A binding names a runtime, a model, and an effort level; none of them is a secret. The session record gains no credential material.
 - The egress invariant of the CLI providers specification §4 holds: a session provider is external egress with the runtime's declared host; it is never `local`.
 - The privacy policy is asked before the runtime on every send, including bound ones; a refusal raises before a run exists and the session gains nothing.
+- A private session may not be bound to a runtime at all. `session.configure` refuses it at bind time with the send path's private-egress sentence, so the refusal arrives where the choice was made rather than on the first send. An entry binding is unaffected.
+- Visibility is a creation-time decision and no capability changes it, so the way to use a bound runtime is `research chat new --visibility project` on a new conversation — which is exactly what the private-egress sentence already tells the researcher to do.
 - The binding's label appears in the transcript, the receipt, and the trace; those already exclude prompts, tokens, and paths.
 - No new log line, diagnostic, or fixture may contain a token, a credential path, a home path, or an e-mail.
 
@@ -215,10 +220,10 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 **Domain and capability**
 - `SessionDefaults` accepts the three shapes of §7 and refuses `reasoning` without a runtime provider.
 - `session.configure` stores a runtime binding, an entry binding, and a clear; refuses an unknown runtime, a posture-`none` runtime, an unlisted model, an unoffered reasoning level, and a missing entry, each with the sentence of §13; accepts an installed but logged-out runtime.
-- The permission table marks it `MUTATE`, not human-only; the parity test maps it to `session configure`.
+- The permission table marks it `MUTATE`, which the registry treats as human-only, so an agent host is refused it on every transport; the parity test maps it to `research chat configure`.
 
 **Routing**
-- A bound session with no per-message `model` spawns the fake with the bound model and reasoning in argv, and the transcript and trace record `session:codex/gpt-5.5`.
+- A bound session with no per-message `model` spawns the fake with the bound model and reasoning in argv; the transcript records `session:codex` with the bound model, and the trace records `local_cli:codex`, because the trace writer records the adapter rather than the entry (§9).
 - A per-message `model` wins over the binding.
 - A binding whose runtime the fake now reports logged out fails before any run process with `login_missing` and the scan's sentence; `fake.runs() == []`.
 - `external_models: disabled` refuses a bound send before any spawn.

@@ -304,13 +304,74 @@ one — a research pane that covers the draft on load is the thing §9 forbids.
 | `Context used` on an answer | `context.get` |
 | `Preview context` on a draft | `context.preview` with `persist: false` |
 | Promotion | `session.promote` |
-| The model selector | `provider.list` |
+| The model selector, and the binding it writes | `provider.list`, `provider.cli.scan`, `session.configure` |
 | Inspector tabs | `evidence.list`, `claim.list`, `review.inbox`, `state.stale`, `GET /overview` |
 | Attachments | the byte route and the four `attachment.*` capabilities — see **Attachments** below |
 
 Every write is `MUTATE` and therefore researcher-only. An agent host reads the transcript,
 opens receipts and browses the inspector; Send, New session, Rename and Promote are absent or
 disabled with the daemon's own reason (PRODUCT §29, ADR-007).
+
+### The model picker binds the session
+
+The composer's `ModelSelector` is a grouped picker (`src/views/conversation/ComposerPane.tsx`),
+and in a window that may write, picking in it is a *write to the session record* rather than
+a choice about one message. `useModels.ts` reads `provider.list` and `provider.cli.scan`
+beside each other and keeps them apart: the catalogue becomes the **Configured entries**
+group, and the scan becomes one group per installed runtime, titled with the daemon's
+runtime name and version and listing the scan's own models with its `model_source` word
+beside them (`toRuntimeGroup` in `mappers.ts`). A runtime the daemon will not route to is
+kept as one disabled row carrying `unavailable_reason` verbatim, so the picker never hides
+why a runtime is absent; a scan that fails leaves the entries exactly as they were and
+simply offers no runtime groups, because a binding is the extra a researcher can do
+without. Above both groups sits a **Session** heading with a single **Project default**
+row, which borrows the daemon's `default` entry's own facts — provider, egress class,
+vision, context window — and, when picked, calls `session.configure` with `clear`
+(`toProjectDefaultOption`). Its availability is deliberately *not* borrowed: a researcher
+whose default entry is refused is exactly the one who needs to unbind.
+
+**The value on screen is the record's.** `bindingOptionId(session.defaults)` reads the
+selector value out of the session the daemon returned, so a second window and a reload
+agree about it and `ComposerPane` keeps no binding state of its own. A pick goes through
+`useSessions.configure` → `client.configureSession` → `session.configure`, and the value
+changes only when the record does. The session rail shows the same words through
+`toSessionSummary`, and `bindingWords` in `mappers.ts` composes exactly the string
+`conversation/binding.py` composes in Python — `session:<runtime>/<model>`, with
+` (reasoning <level>)` when the record carries one, or `entry <name>` — with a test on each
+side pinning it. The reasoning control beside the selector appears only for a runtime
+binding and is filled by `reasoningChoicesFor`: the model's own effort list when the scan
+published one, the runtime's only as the fallback, because a model that publishes a shorter
+list has *narrowed* the runtime's.
+
+**Disclosure.** A runtime is an external destination, so the first runtime binding in a
+session opens a `Dialog` carrying the scan's own `notice` and the runtime's name before
+anything is stored. That a session has seen it is remembered in `localStorage` under
+`rh.binding-disclosed.<session>` as a convenience only: storage that throws shows the notice
+again, which is the safe way for it to fail, and the receipt panel still states each
+message's egress class, so the destination is never visible only here. A refusal remembers
+nothing — nothing was bound, so the next attempt discloses again.
+
+**A read-only window keeps today's behaviour exactly.** Without `canMutate` a pick sets the
+per-message `model` and changes nothing durable; the runtime rows are rendered disabled
+carrying the session's own `mutationBlockedReason`, and the reasoning control is disabled
+with the same sentence. The rows are disabled rather than dropped, so the researcher is
+told what this window cannot do instead of guessing why the runtimes are missing.
+
+**Refusals stay where the pick was made.** A binding the daemon will not store — a private
+session pointed at a runtime, an entry that has been removed, a runtime with no proven
+posture — comes back as the daemon's sentence and is rendered in an `ErrorNotice` inside
+the composer, beside the control that asked; the selector stays on the stored binding,
+because nothing changed. Moving to another session clears it, so a refusal never names a
+conversation the researcher has left.
+
+`ConversationRoute.test.tsx` covers this from the browser side — the groups and the
+disclosure ("discloses the egress before the first binding, then configures the session"),
+the effort list ("offers the runtime's own reasoning levels and sends the one picked"), the
+stored value ("shows the stored binding on reopening, in the selector and on the session
+row"), the read-only window ("leaves a read-only window the per-message choice and binds
+nothing"), unbinding ("clears the binding back to the project default"), and the private
+refusal ("refuses to bind a private session to an external runtime, in the daemon's
+words") — and `mappers.test.ts` pins the words themselves.
 
 ### Streaming, and why the client never owns the answer
 
@@ -778,5 +839,13 @@ candidates carry, naming `work.update_metadata` as what applies one. Both are `r
 agent host may show a proposal and only the researcher may write it. Nothing is recomputed
 client-side, which is what §5 P10 forbids. *Wanted now: the Corpus view that fetches
 `search_run.get` and offers the proposal.*
+
+**A new session is always private, so the cockpit cannot open one it can bind to a
+runtime.** `useSessions.create` calls `session.create` with a title and nothing else, and
+`session.create` defaults to `private`; no capability changes a session's visibility
+afterwards. A runtime binding is external egress and is refused on a private session, so a
+conversation that will be answered by a CLI runtime is opened from the terminal today with
+`research chat new --visibility project`. *Wanted now: a visibility choice in the New
+session flow.*
 
 **Server-side id allocation, over HTTP.** `claim.create`, `question.create`, `decision.accept`, and `search_run.record` allocate ids under the workspace lock on every transport. `server/app.py::_invoke` takes `ctx.repo.lock()` around every `mutate`/`admin` capability and the allocating handlers take it again; `WorkspaceRepository.lock()` nests within one repository (only the outermost context releases the OS lock), so the cockpit posts no id anywhere and the Override control writes its Decision over HTTP. `tests/e2e/test_web_gate.py` asserts the same id sequence over HTTP and in process.
