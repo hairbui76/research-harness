@@ -311,6 +311,9 @@ export function ComposerPane() {
     pending?.runtime ??
     '';
 
+  /** Where the pending runtime sends, as the scan reports it; null when it said nothing. */
+  const pendingDestination = pending ? (models.destinations[pending.runtime] ?? null) : null;
+
   /**
    * Confirming the disclosure: bound, and remembered only if it was stored.
    *
@@ -484,8 +487,12 @@ export function ComposerPane() {
         The disclosure, before a session's first binding to an external destination.
 
         `alertdialog`, because it is a decision about where research content goes and it is
-        answered before anything happens. The body is the scan's own `notice`: this cockpit
-        does not write its own sentence about egress.
+        answered before anything happens. The body names the destination and then gives the
+        scan's own `notice` verbatim. Every fact in it is the daemon's — the runtime's name
+        and its `egress_host` from `provider.cli.scan`, in the sentence
+        `cli/commands/provider.py::egress_sentence` builds from the same two fields — so the
+        cockpit decides nothing about egress and cannot drift from what the CLI discloses.
+        The `notice` alone says only that content leaves the machine, never where to.
       */}
       <Dialog
         open={pending !== null}
@@ -495,6 +502,12 @@ export function ComposerPane() {
       >
         <Dialog.Header>{`Bind this session to ${pendingRuntimeName}`}</Dialog.Header>
         <Dialog.Body>
+          {pendingDestination !== null && (
+            <p>
+              {`This session sends research content to ${pendingDestination.egressHost} ` +
+                `through ${pendingDestination.name}.`}
+            </p>
+          )}
           <p className="rh-text-secondary">{models.notice}</p>
         </Dialog.Body>
         <Dialog.Footer>

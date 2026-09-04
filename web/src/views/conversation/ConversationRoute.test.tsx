@@ -982,9 +982,14 @@ describe('binding the session to a CLI runtime', () => {
     const menu = await openMenu(user);
     await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.4-mini \(live\)/ }));
 
-    // The daemon's own notice, before anything is bound.
+    // The daemon's own notice, before anything is bound — and the destination it does not
+    // name, from the scan's own `egress_host` and runtime name, so the disclosure says
+    // where the content goes rather than only that it goes (review finding 3).
     const dialog = await screen.findByRole('alertdialog');
     expect(within(dialog).getByText(cliScan.notice)).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(/research content to chatgpt\.com through Codex CLI/),
+    ).toBeInTheDocument();
     expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
 
     await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));

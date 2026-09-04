@@ -359,8 +359,14 @@ published one, the runtime's only as the fallback, because a model that publishe
 list has *narrowed* the runtime's.
 
 **Disclosure.** A runtime is an external destination, so the first runtime binding in a
-session opens a `Dialog` carrying the scan's own `notice` and the runtime's name before
-anything is stored. That a session has seen it is remembered in `localStorage` under
+session opens a `Dialog` naming that destination before anything is stored: the runtime's
+own `name` and `egress_host` from the scan, in the sentence
+`cli/commands/provider.py::egress_sentence` builds from the same two fields, and then the
+scan's `notice` verbatim. Every fact in it is the daemon's, and `useModels` carries the two
+per-runtime fields beside the option groups (`destinations`) rather than inside the design
+system's `ModelOptionGroup`, which is about rows in a picker. The `notice` alone says only
+that research content leaves the machine, never where to — which is the one thing a person
+answering this dialog is deciding. That a session has seen it is remembered in `localStorage` under
 `rh.binding-disclosed.<session>` as a convenience only: storage that throws shows the notice
 again, which is the safe way for it to fail, and the receipt panel still states each
 message's egress class, so the destination is never visible only here. A refusal remembers

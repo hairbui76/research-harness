@@ -23,6 +23,20 @@ import type { CliScanReport, ProviderModel } from '../../api/dto';
 import { groupRuntimes } from '../../app/settings/mappers';
 import { reasoningChoicesFor, toModelOption, toRuntimeGroup } from './mappers';
 
+/**
+ * Where one runtime sends, as the scan reports it.
+ *
+ * Kept beside `groups` rather than folded into the design system's `ModelOptionGroup`: a
+ * destination is a fact about the runtime, not a property of a row in a picker, and the
+ * cockpit decides none of it — both fields are the daemon's `CliRuntimeStatus`.
+ */
+export interface RuntimeDestination {
+  /** The runtime's own display name (`CliRuntimeStatus.name`), e.g. `Codex CLI`. */
+  name: string;
+  /** The host its requests reach (`CliRuntimeStatus.egress_host`), e.g. `chatgpt.com`. */
+  egressHost: string;
+}
+
 export interface ModelsApi {
   options: ModelOption[];
   /**
@@ -37,6 +51,13 @@ export interface ModelsApi {
   reasoningChoices: (runtime: string, model: string) => string[];
   /** The scan's egress sentence, shown before a session is first bound to a runtime. */
   notice: string | null;
+  /**
+   * Every scanned runtime's destination, keyed by runtime id.
+   *
+   * The `notice` says content leaves the machine; this says where to, so the disclosure a
+   * researcher answers names the host the CLI's own `egress_sentence` names.
+   */
+  destinations: Record<string, RuntimeDestination>;
   /** The daemon's default model, when it named one. */
   defaultId: string | null;
   loading: boolean;
@@ -101,6 +122,12 @@ export function useModels(client: HarnessClient, options: { enabled?: boolean } 
         return status ? reasoningChoicesFor(status, model) : [];
       },
       notice: scan?.notice ?? null,
+      destinations: Object.fromEntries(
+        runtimes.map((status) => [
+          status.runtime,
+          { name: status.name, egressHost: status.egress_host },
+        ]),
+      ),
       defaultId: models?.find((model) => model.default)?.id ?? models?.[0]?.id ?? null,
       loading,
       unavailable,
