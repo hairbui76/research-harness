@@ -95,6 +95,48 @@ sensitive-corpus switch that ADR-018 puts at provider selection.
 - Provider neutrality holds: no workflow, capability, or domain module knows a runtime exists
   (PRODUCT §20, §42 (A); ADR-005; spec §24 (5), (13)).
 
+## Addendum, 2026-09-04: a session binding is a second way to name a CLI provider
+
+**Source:** `docs/superpowers/specs/2026-09-04-session-runtime-binding-design.md` §5, §8, §9;
+implemented in `conversation/binding.py`, `conversation/service.py::ConversationService.configure`,
+`conversation/send.py::WorkspaceProviders.select`, `capabilities/conversation.py`
+(`session.configure`), `cli/commands/session.py` (`research chat configure`), and the
+conversation composer under `web/src/views/conversation/`.
+
+A conversation session may name a runtime, a model, and an effort level without an entry in
+`research.yaml`. The binding is stored on the session record — `defaults.model` as
+`local_cli:<runtime>` plus `defaults.reasoning` — never in project configuration, and it is
+resolved on every send into one in-memory `RouterProviderConfig` named `session:<runtime>`,
+appended to a copy of the routing table for that call alone.
+
+This changes nothing in the decision above. The binding goes through the *same* validator a
+hand-written entry goes through (`RouterProviderConfig`), so an unknown runtime, a runtime
+with no proven bounded posture, and an effort name the runtime does not offer are refused
+with the entry's own sentences; and the resolved call passes the same gates in the same
+order — the privacy policy first, then the run-time runtime gate in `CliModelProvider._run`
+with `bounded_mode_unsupported`, `version_blocked`, `login_missing`, or
+`executable_missing`. No gate is added, none is bypassed, and the `availability` injection
+point is never passed. Every invariant listed above therefore applies to a binding exactly
+as it applies to an entry.
+
+Two consequences worth stating:
+
+- **It is still external egress.** A private session may not be bound to a runtime at all:
+  `session.configure` refuses with the send path's own private-egress sentence, because a
+  binding that could never answer is not a binding worth storing. Visibility is decided at
+  creation and no capability changes it, so a session that will use a bound runtime is
+  opened with `research chat new --visibility project`.
+- **The label says which path answered.** `ProviderProfile.provider` — and so the
+  transcript, the receipt, and the run record — carries `session:<runtime>` with the bound
+  model; the trace keeps the adapter's own `local_cli:<runtime>`, because the trace writer
+  records the adapter rather than the entry. A reader can tell a session-bound answer from
+  one routed through a configured entry.
+
+Enforced by `tests/contract/conversation/test_session_configure.py`,
+`tests/integration/conversation/test_send_session_binding.py`,
+`tests/unit/conversation/test_binding.py`, `tests/e2e/test_chat_configure_command.py`, and
+`web/src/views/conversation/{ConversationRoute.test.tsx,mappers.test.ts}`.
+
 ## Rejected alternatives
 
 - **Run Open Design's daemon as a service.** A second authority model, a Node runtime in the

@@ -59,6 +59,8 @@ def workspace(tmp_path: Path) -> Path:
 def test_configure_prints_egress_then_the_binding_and_list_and_show_repeat_it(
     workspace: Path, codex: FakeCli
 ) -> None:
+    # A project session, because a runtime binding is external egress and a private
+    # session is refused one at bind time (binding spec §8; `conversation/service.py`).
     created = json.loads(
         runner.invoke(
             app,

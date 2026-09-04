@@ -231,6 +231,86 @@ because answering a request never probes for one. Errors name the runtime, model
 — `version unknown` when none was probed — and a next action (run `codex login`); they never
 contain a token, a credential path, or the raw process output.
 
+### Binding a session instead of configuring the project
+
+An entry in `research.yaml` is project-wide and persisted. One conversation can name a
+runtime without one: `research chat configure` stores the choice on the *session record*
+and writes nothing to `research.yaml`.
+
+```console
+$ research chat configure CS0001 --runtime codex --model gpt-5.5 --reasoning high
+egress: session CS0001 sends research content to chatgpt.com through Codex CLI
+bound to: session:codex/gpt-5.5 (reasoning high)
+
+$ research chat configure CS0001 --entry codex-sub
+bound to: entry codex-sub
+
+$ research chat configure CS0001 --clear
+bound to: project default
+```
+
+`--model` is a model id from `research providers scan`, or `default` for the CLI's own
+configured model; `--reasoning` is the runtime's own effort name and is accepted only with
+`--runtime`. Exactly one of `--runtime`, `--entry`, `--clear` is given. The egress sentence
+is printed before the change, because a binding decides where the conversation will go.
+
+The binding's words are the same on every surface: `research chat list` puts them in
+brackets after the row, `research chat show` prints them as its second line, and the Web
+cockpit's session rail and composer show the identical string —
+`session:<runtime>/<model>`, with ` (reasoning <level>)` when one is set, or `entry <name>`,
+or `project default`.
+
+In the cockpit the binding *is* the composer's model picker: configured entries in one
+group, one group per installed runtime, and a **Project default** row that clears it. The
+Settings → *Models & providers* tab is not needed and is not the same act — that tab writes
+a project entry, and a binding is never one.
+
+**Precedence.** A per-message model wins over the binding, and the binding wins over the
+project default: `research chat send CS0001 "…" --provider codex-sub` sends through
+`codex-sub` whatever the session is bound to, and `--clear` returns the session to the
+project default. A retry with no model follows the binding as it is at retry time.
+
+**What is refused, and when.** A binding goes through the validator a hand-written entry
+goes through, so it is refused in the entry's own words: `unknown runtime 'nope' (known:
+codex, claude, cursor-agent, …)`, `runtime 'pi' has no proven bounded (no-tools, read-only)
+mode and cannot be configured; …`, and `reasoning 'turbo' is not an effort name 'codex'
+accepts (low, medium, high, xhigh)`. One sentence is the binding's own:
+`codex does not list model 'gpt-9'`, which ends by telling you to run
+`research providers scan`. An `--entry` naming something that is not an enabled entry is
+refused with the same `no provider named '…' in research.yaml (have: …)` a stale
+`--provider` gets.
+
+A runtime that is installed but *not routable right now* is accepted, so a session can be
+bound before `codex login` is run; the send is what refuses, with the scan's own sentence —
+`bounded_mode_unsupported`, `version_blocked`, `login_missing`, or `executable_missing` —
+and `privacy.external_models: disabled` refuses a bound send before any process exists,
+exactly as it does for a configured entry.
+
+**A private session cannot be bound to a runtime.** Every CLI runtime is external egress,
+so binding one onto a private session would leave a conversation that looks configured and
+can never answer. `session.configure` refuses it with the sentence the send path uses:
+
+```console
+$ research chat configure CS0001 --runtime codex --model gpt-5.5
+egress: session CS0001 sends research content to chatgpt.com through Codex CLI
+error: session CS0001 is private and session:codex/gpt-5.5 is an external provider, so
+       nothing in this conversation may be sent to it (Product 34; workspace design SS7).
+       Send it to a local provider, or make the session shareable with `research chat new
+       --visibility project` on a new conversation.
+```
+
+Sessions are private by default — `session.create` and `research chat new` both default to
+`private` — and **there is no capability that changes a session's visibility after it is
+created**. So the way to use a bound runtime is to open the conversation as a project
+session in the first place: `research chat new "…" --visibility project`. The cockpit asks
+the same question rather than deciding it: its **New session** button opens a small dialog
+whose *Visibility* list offers `Private (default)` and `Project`, over one sentence saying
+that only a project session can be bound to a CLI runtime, that a private session never
+sends to an external model, and that visibility cannot be changed once the session exists.
+Leaving the default alone sends no `visibility` at all, so the daemon's own default stays
+the default. An `--entry` binding is not affected:
+an entry may name a local provider, so a private session may be bound to one.
+
 ## The scripted provider
 
 `--provider scripted --script <file>` runs a provider that sends nothing anywhere and
