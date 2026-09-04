@@ -310,7 +310,22 @@ one — a research pane that covers the draft on load is the thing §9 forbids.
 
 Every write is `MUTATE` and therefore researcher-only. An agent host reads the transcript,
 opens receipts and browses the inspector; Send, New session, Rename and Promote are absent or
-disabled with the daemon's own reason (PRODUCT §29, ADR-007).
+disabled with the daemon's own reason (PRODUCT §29, ADR-007). `session.configure` is a
+`MUTATE` too, so the same window keeps only the *per-message* model choice the composer has
+always had: its picker's runtime groups are rendered as disabled rows carrying the session's
+`mutationBlockedReason`, and the Reasoning control beside them is disabled with that same
+sentence. The rows are disabled rather than dropped, so the reason is on screen instead of
+the runtimes simply being missing.
+
+**A new session asks what kind it is.** Visibility is fixed at creation — no capability
+changes it afterwards — and it decides what the session may later be bound to, so the rail's
+**New session** button opens a small dialog (`NewSessionDialog.tsx`) whose *Visibility*
+`Select` offers `Private (default)` and `Project` over one sentence: only a project session
+can be bound to a CLI runtime, a private session never sends to an external model, and
+visibility cannot be changed once the session exists. Leaving the default alone sends no
+`visibility` field at all, so the request is the one the cockpit has always made and the
+default stays the daemon's rather than being asserted by the browser; `useSessions.create`
+passes `visibility` through only when there is one to pass.
 
 ### The model picker binds the session
 
@@ -840,12 +855,11 @@ agent host may show a proposal and only the researcher may write it. Nothing is 
 client-side, which is what §5 P10 forbids. *Wanted now: the Corpus view that fetches
 `search_run.get` and offers the proposal.*
 
-**A new session is always private, so the cockpit cannot open one it can bind to a
-runtime.** `useSessions.create` calls `session.create` with a title and nothing else, and
-`session.create` defaults to `private`; no capability changes a session's visibility
-afterwards. A runtime binding is external egress and is refused on a private session, so a
-conversation that will be answered by a CLI runtime is opened from the terminal today with
-`research chat new --visibility project`. *Wanted now: a visibility choice in the New
-session flow.*
+**Change a session's visibility after it exists.** There is no capability for it: a
+runtime binding is external egress and is refused on a private session, so the choice is
+made once, when the session is opened. The cockpit asks for it in the New-session dialog
+rather than deciding it (above), which is as far as a client can go. *Wanted, if it is ever
+wanted: a daemon capability that re-labels a session, with whatever review that would need —
+it is a change of what a transcript may disclose, not a preference.*
 
 **Server-side id allocation, over HTTP.** `claim.create`, `question.create`, `decision.accept`, and `search_run.record` allocate ids under the workspace lock on every transport. `server/app.py::_invoke` takes `ctx.repo.lock()` around every `mutate`/`admin` capability and the allocating handlers take it again; `WorkspaceRepository.lock()` nests within one repository (only the outermost context releases the OS lock), so the cockpit posts no id anywhere and the Override control writes its Decision over HTTP. `tests/e2e/test_web_gate.py` asserts the same id sequence over HTTP and in process.

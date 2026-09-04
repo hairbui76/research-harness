@@ -195,7 +195,7 @@ Output: the egress sentence for the runtime before the change, then the resultin
 - The privacy policy is asked before the runtime on every send, including bound ones; a refusal raises before a run exists and the session gains nothing.
 - A private session may not be bound to a runtime at all. `session.configure` refuses it at bind time with the send path's private-egress sentence, so the refusal arrives where the choice was made rather than on the first send. An entry binding is unaffected.
 - Visibility is a creation-time decision and no capability changes it, so the way to use a bound runtime is `research chat new --visibility project` on a new conversation — which is exactly what the private-egress sentence already tells the researcher to do.
-- The binding's label appears in the transcript, the receipt, and the trace; those already exclude prompts, tokens, and paths.
+- The transcript, the receipt, and the run record carry `session:<runtime>` with the bound model; the trace keeps the adapter's own `local_cli:<runtime>`, because the trace writer records the adapter rather than the entry (§9, §14). All four already exclude prompts, tokens, and paths.
 - No new log line, diagnostic, or fixture may contain a token, a credential path, a home path, or an e-mail.
 
 ## 13. Error model

@@ -302,11 +302,14 @@ error: session CS0001 is private and session:codex/gpt-5.5 is an external provid
 Sessions are private by default — `session.create` and `research chat new` both default to
 `private` — and **there is no capability that changes a session's visibility after it is
 created**. So the way to use a bound runtime is to open the conversation as a project
-session in the first place: `research chat new "…" --visibility project`. The cockpit's
-**New session** button sends a title and nothing else (`useSessions.create` calls
-`session.create` with no `visibility`), so a session that is going to be bound to a CLI
-runtime is opened from the terminal today. An `--entry` binding is not affected: an entry
-may name a local provider, so a private session may be bound to one.
+session in the first place: `research chat new "…" --visibility project`. The cockpit asks
+the same question rather than deciding it: its **New session** button opens a small dialog
+whose *Visibility* list offers `Private (default)` and `Project`, over one sentence saying
+that only a project session can be bound to a CLI runtime, that a private session never
+sends to an external model, and that visibility cannot be changed once the session exists.
+Leaving the default alone sends no `visibility` at all, so the daemon's own default stays
+the default. An `--entry` binding is not affected:
+an entry may name a local provider, so a private session may be bound to one.
 
 ## The scripted provider
 
