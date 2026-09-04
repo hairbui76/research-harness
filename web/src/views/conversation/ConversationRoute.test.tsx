@@ -26,6 +26,7 @@ import promotion from '../../test/fixtures/conversation/promotion.json';
 import providers from '../../test/fixtures/conversation/providers.json';
 import sendStarted from '../../test/fixtures/conversation/send-started.json';
 import sessions from '../../test/fixtures/conversation/sessions.json';
+import cliScan from '../../test/fixtures/providers/cli-scan.json';
 import transcript from '../../test/fixtures/conversation/transcript.json';
 import incompleteTranscript from '../../test/fixtures/conversation/transcript-incomplete.json';
 import attachmentTranscript from '../../test/fixtures/conversation/transcript-attachment.json';
@@ -782,6 +783,214 @@ describe('an agent host', () => {
 
     expect(within(dialog).getByText('This window may not promote')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Promote' })).toBeDisabled();
+  });
+});
+
+
+/* -- session runtime binding (binding spec §10, plan rulings 4-6) --------- */
+
+describe('binding the session to a CLI runtime', () => {
+  const BOUND = 'CS0002';
+  const BOUND_ROUTE = `/?session=${BOUND}`;
+
+  /** The record `session.configure` answers with, bound as the daemon would store it. */
+  function boundTo(
+    id: string,
+    model: { provider: string; model: string } | null,
+    reasoning: string | null = null,
+  ) {
+    const record = sessions.sessions.find((session) => session.id === id);
+    return {
+      session: { ...record, defaults: { mode: null, token_budget: null, model, reasoning } },
+    };
+  }
+
+  const withScan = (extra: Answers = {}) => answers({ 'provider.cli.scan': cliScan, ...extra });
+
+  async function openMenu(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('button', { name: /^Model:/ }));
+    return screen.findByRole('menu', { name: 'Model' });
+  }
+
+  it('lists the configured entries and every installed runtime the scan found', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    // The entries the router already has, and one group per installed runtime.
+    expect(within(menu).getByText('Configured entries')).toBeInTheDocument();
+    const codex = within(menu).getByRole('group', { name: 'Codex CLI 0.150.1' });
+    expect(within(codex).getByText('gpt-5.5 (live)')).toBeInTheDocument();
+
+    // A runtime the daemon will not route to is one disabled row carrying its reason.
+    const cursor = within(menu).getByRole('group', { name: 'Cursor Agent 1.4.0' });
+    expect(
+      within(cursor).getByText(
+        'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
+      ),
+    ).toBeInTheDocument();
+    expect(within(cursor).getAllByRole('menuitem')).toHaveLength(1);
+
+    // A runtime the scan did not find is not offered at all.
+    expect(within(menu).queryByRole('group', { name: /^Amp/ })).not.toBeInTheDocument();
+  });
+
+  it('discloses the egress before the first binding, then configures the session', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(SESSION, { provider: 'local_cli:codex', model: 'gpt-5.5' }),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /gpt-5\.5 \(live\)/ }));
+
+    // The daemon's own notice, before anything is bound.
+    const dialog = await screen.findByRole('alertdialog');
+    expect(within(dialog).getByText(cliScan.notice)).toBeInTheDocument();
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: SESSION, runtime: 'codex', model: 'gpt-5.5' }),
+    );
+    // The value is read back from the record the daemon answered with.
+    await screen.findByRole('button', { name: 'Model: gpt-5.5 (live)' });
+  });
+
+  it('offers the runtime\'s own reasoning levels and sends the one picked', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(
+          BOUND,
+          { provider: 'local_cli:codex', model: 'gpt-5.5' },
+          'low',
+        ),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const reasoning = await screen.findByRole('combobox', { name: 'Reasoning' });
+    expect(
+      Array.from(reasoning.querySelectorAll('option')).map((option) => option.value),
+    ).toEqual(['', 'low', 'medium', 'high', 'xhigh']);
+    expect(reasoning).toHaveValue('high');
+
+    await user.selectOptions(reasoning, 'low');
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, runtime: 'codex', model: 'gpt-5.5', reasoning: 'low' }),
+    );
+  });
+
+  it('asks once per session: a second pick binds without another confirmation', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(SESSION, { provider: 'local_cli:codex', model: 'gpt-5.5' }),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /gpt-5\.5 \(live\)/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+    await screen.findByRole('button', { name: 'Model: gpt-5.5 (live)' });
+
+    const again = await openMenu(user);
+    await user.click(within(again).getByRole('menuitem', { name: /gpt-5\.4-mini \(live\)/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().filter((call) => call.name === 'session.configure'),
+      ).toHaveLength(2),
+    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('shows the stored binding on reopening, in the selector and on the session row', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    await screen.findByRole('button', { name: 'Model: gpt-5.5 (live)' });
+    // The rail states the binding in the one format every surface uses.
+    expect(screen.getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
+  });
+
+  it('leaves a read-only window the per-message choice and binds nothing', async () => {
+    const asHost = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
+    const daemon = fakeDaemon({ gets: { '/overview': asHost }, capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon, token: null, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    const codex = within(menu).getByRole('group', { name: 'Codex CLI 0.150.1' });
+    // Every runtime row carries the session's own mutation-blocked reason.
+    expect(
+      within(codex).getAllByText(/connected without the local token/).length,
+    ).toBeGreaterThan(0);
+    expect(within(codex).getByRole('menuitem', { name: /gpt-5\.5 \(live\)/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+
+    // An entry still sets the per-message model, exactly as before.
+    await user.click(within(menu).getByRole('menuitem', { name: /Local small/ }));
+    await screen.findByRole('button', { name: 'Model: Local small' });
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
+  });
+
+  it('renders a refused binding in the daemon\'s words and keeps the previous value', async () => {
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /gpt-5\.5 \(live\)/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+
+    expect(await screen.findByText(refusal)).toBeInTheDocument();
+    // CS0001's own default is still what the selector says.
+    expect(screen.getByRole('button', { name: 'Model: Local small' })).toBeInTheDocument();
+  });
+
+  it('has no automatically detectable violation with the groups and the reasoning control', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    await screen.findByRole('combobox', { name: 'Reasoning' });
+    await openMenu(user);
+    await expectNoAxeViolations(document.body);
   });
 });
 

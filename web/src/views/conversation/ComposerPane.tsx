@@ -14,15 +14,71 @@
  * `graph.autocomplete`, and the two strips above the box are theirs: which index is
  * answering when it is not the graph, and the draft's references the resolver could not
  * confirm — marked, and still sendable.
+ *
+ * The model picker binds the session (binding spec §10). Its groups are the configured
+ * entries and one per CLI runtime the daemon's scan found installed, and picking one calls
+ * `session.configure`, so the value on screen is read back from the record the daemon
+ * stored rather than from anything held here — a second window and a reload agree about
+ * it. A runtime is an external destination, so the first binding in a session shows the
+ * scan's own egress notice first. A window that may not write keeps exactly today's
+ * behaviour instead: the pick is this message's model, and the runtime rows are disabled
+ * with the session's mutation-blocked sentence (plan ruling 5).
  */
-import { useCallback, useMemo } from 'react';
-import { Button, Composer, ErrorNotice, ModelSelector } from '@research-harness/design';
-import type { ComposerBlockedReason, ComposerSendState } from '@research-harness/design';
+import { useCallback, useMemo, useState } from 'react';
+import {
+  Button,
+  Composer,
+  Dialog,
+  ErrorNotice,
+  ModelSelector,
+  Select,
+} from '@research-harness/design';
+import type {
+  ComposerBlockedReason,
+  ComposerSendState,
+  ModelOption,
+  ModelOptionGroup,
+} from '@research-harness/design';
+import { useSession } from '../../app/session';
 import { AttachmentTrayPane } from './attachments/AttachmentTrayPane';
+import { bindingOptionId, parseRuntimeOptionId } from './mappers';
 import { GraphStatusNotice, ReferenceMarks } from './references';
 import { useConversation } from './state';
 
+/**
+ * Where this browser remembers that a session's egress disclosure has been read.
+ *
+ * A convenience and nothing more: the daemon's receipt panel still states each message's
+ * egress class, so the destination is never visible only here (binding spec §10). Storage
+ * that throws — a private window, a browser with site data off — simply means the notice
+ * is shown again, which is the safe way for this to fail.
+ */
+const DISCLOSED_PREFIX = 'rh.binding-disclosed.';
+
+function disclosureRead(sessionId: string): boolean {
+  try {
+    return window.localStorage.getItem(`${DISCLOSED_PREFIX}${sessionId}`) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function rememberDisclosure(sessionId: string): void {
+  try {
+    window.localStorage.setItem(`${DISCLOSED_PREFIX}${sessionId}`, 'read');
+  } catch {
+    /* the notice is simply shown again next time */
+  }
+}
+
+/** The catalogue's own heading in the picker; the runtime groups follow it (spec §10). */
+const ENTRY_GROUP = 'Configured entries';
+
+/** The reasoning option that sends nothing, so the runtime applies its own default. */
+const RUNTIME_DEFAULT_REASONING = '';
+
 export function ComposerPane() {
+  const { canMutate, mutationBlockedReason } = useSession();
   const {
     sessions,
     draft,
@@ -41,6 +97,8 @@ export function ComposerPane() {
     draftReferences,
   } = useConversation();
   const session = sessions.active;
+  /** The runtime pick waiting on the egress disclosure, when one is. */
+  const [pending, setPending] = useState<{ runtime: string; model: string } | null>(null);
 
   const sendState: ComposerSendState = send.sending
     ? 'sending'
@@ -120,7 +178,108 @@ export function ComposerPane() {
     });
   }, [draft.value, model, session, showReceipt]);
 
-  const selectedModel = model ?? models.defaultId ?? '';
+  /**
+   * What the selector says, and where the answer comes from.
+   *
+   * The session record first: the binding is the daemon's, read back from what it stored,
+   * so a second window and a reload agree about it (binding spec §10). `model` is the
+   * per-message choice a read-only window still has (plan ruling 5) and is never set in a
+   * window that binds, so the two never fight.
+   */
+  const bound = session ? bindingOptionId(session.defaults) : null;
+  const selectedModel = model ?? bound ?? models.defaultId ?? '';
+
+  /** The runtime binding on the record, when the record carries one. */
+  const runtimeBinding = useMemo(
+    () => (bound === null ? null : parseRuntimeOptionId(bound)),
+    [bound],
+  );
+
+  /**
+   * The picker's groups: the catalogue first, then one per installed runtime.
+   *
+   * A window that may not bind sees the runtime rows disabled with the session's own
+   * mutation-blocked sentence rather than not at all — the researcher is told what this
+   * cockpit cannot do here, not left to guess why the runtimes are missing.
+   */
+  const groups = useMemo<ModelOptionGroup[]>(() => {
+    const runtimes = canMutate
+      ? models.groups
+      : models.groups.map((group) => ({
+          ...group,
+          options: group.options.map((option) => ({
+            ...option,
+            available: false,
+            ...(mutationBlockedReason ? { unavailableReason: mutationBlockedReason } : {}),
+          })),
+        }));
+    return [
+      ...(models.options.length > 0
+        ? [{ id: 'entries', label: ENTRY_GROUP, options: models.options }]
+        : []),
+      ...runtimes,
+    ];
+  }, [canMutate, models.groups, models.options, mutationBlockedReason]);
+
+  /**
+   * Picking a model.
+   *
+   * In a window that may write, a pick *binds the session*: the daemon stores it and the
+   * value comes back from the record. A runtime is an external destination, so the first
+   * one in a session is disclosed first, in the scan's own sentence. A read-only window
+   * keeps exactly today's behaviour — the pick is this message's model and nothing
+   * durable changes (plan ruling 5).
+   */
+  const onPickModel = useCallback(
+    (option: ModelOption) => {
+      if (send.error !== null) send.dismissError();
+      if (!session || !canMutate) {
+        setModel(option.id);
+        return;
+      }
+      const runtime = parseRuntimeOptionId(option.id);
+      if (runtime === null) {
+        void sessions.configure(session.id, { entry: option.id });
+        return;
+      }
+      if (!disclosureRead(session.id)) {
+        setPending(runtime);
+        return;
+      }
+      void sessions.configure(session.id, runtime);
+    },
+    [canMutate, send, session, sessions, setModel],
+  );
+
+  /** The runtime's name as the scan gave it, for the disclosure's heading. */
+  const pendingRuntimeName =
+    (pending && models.groups.find((group) => group.id === pending.runtime)?.label) ??
+    pending?.runtime ??
+    '';
+
+  /** Confirming the disclosure: remembered for this session, then bound. */
+  const onConfirmBinding = useCallback(() => {
+    if (!session || pending === null) return;
+    rememberDisclosure(session.id);
+    setPending(null);
+    void sessions.configure(session.id, pending);
+  }, [pending, session, sessions]);
+
+  /** Changing the effort level rebinds the same runtime and model with it. */
+  const onPickReasoning = useCallback(
+    (value: string) => {
+      if (!session || runtimeBinding === null) return;
+      void sessions.configure(session.id, {
+        ...runtimeBinding,
+        ...(value === RUNTIME_DEFAULT_REASONING ? {} : { reasoning: value }),
+      });
+    },
+    [runtimeBinding, session, sessions],
+  );
+
+  const reasoningChoices = runtimeBinding
+    ? models.reasoningChoices(runtimeBinding.runtime)
+    : [];
 
   return (
     <div className="rh-web-composer">
@@ -179,14 +338,35 @@ export function ComposerPane() {
         {...(models.options.length > 0
           ? {
               modelSelector: (
-                <ModelSelector
-                  options={models.options}
-                  value={selectedModel}
-                  onChange={(option) => {
-                    setModel(option.id);
-                    if (send.error !== null) send.dismissError();
-                  }}
-                />
+                <span className="rh-web-composer__model">
+                  {/* Everything is a labelled group: the catalogue has a heading of its
+                      own so the runtimes below it read as the alternatives they are. */}
+                  <ModelSelector
+                    options={[]}
+                    groups={groups}
+                    value={selectedModel}
+                    onChange={onPickModel}
+                  />
+                  {/* The effort level belongs to a runtime binding and to nothing else, so
+                      it is here only while one is in force, with the runtime's own words. */}
+                  {runtimeBinding !== null && reasoningChoices.length > 0 ? (
+                    <Select
+                      label="Reasoning"
+                      hideLabel
+                      size="sm"
+                      value={session?.defaults.reasoning ?? RUNTIME_DEFAULT_REASONING}
+                      disabled={!canMutate}
+                      onChange={(event) => onPickReasoning(event.target.value)}
+                    >
+                      <option value={RUNTIME_DEFAULT_REASONING}>Runtime default</option>
+                      {reasoningChoices.map((choice) => (
+                        <option key={choice} value={choice}>
+                          {choice}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : null}
+                </span>
               ),
             }
           : {})}
@@ -202,6 +382,32 @@ export function ComposerPane() {
           </Button>
         }
       />
+      {/*
+        The disclosure, before a session's first binding to an external destination.
+
+        `alertdialog`, because it is a decision about where research content goes and it is
+        answered before anything happens. The body is the scan's own `notice`: this cockpit
+        does not write its own sentence about egress.
+      */}
+      <Dialog
+        open={pending !== null}
+        onOpenChange={(open) => !open && setPending(null)}
+        role="alertdialog"
+        size="sm"
+      >
+        <Dialog.Header>{`Bind this session to ${pendingRuntimeName}`}</Dialog.Header>
+        <Dialog.Body>
+          <p className="rh-text-secondary">{models.notice}</p>
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Button variant="ghost" onClick={() => setPending(null)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={onConfirmBinding}>
+            Use this runtime
+          </Button>
+        </Dialog.Footer>
+      </Dialog>
     </div>
   );
 }
