@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from pydantic import ValidationError
+
 from research_harness.domain.conversation import (
     RUNTIME_PROVIDER_PREFIX,
     ModelIdentity,
@@ -71,6 +73,17 @@ def binding_words(defaults: SessionDefaults) -> str:
     """The fixed wording every surface prints for a session's binding (plan ruling 4)."""
     binding = binding_of(defaults)
     return PROJECT_DEFAULT_WORDS if binding is None else binding.words
+
+
+def validation_sentence(exc: ValidationError) -> str:
+    """The first message of a pydantic error, without its `Value error, ` prefix.
+
+    Shared by the two places that validate a binding as a `research.yaml` entry --
+    `ConversationService.configure` when it is stored, and `WorkspaceProviders.select`
+    when it is resolved -- so both refuse in the entry's own words.
+    """
+    message = str(exc.errors()[0]["msg"])
+    return message.removeprefix("Value error, ")
 
 
 def runtime_identity(runtime: str, model: str) -> ModelIdentity:

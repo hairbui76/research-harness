@@ -79,12 +79,6 @@ DEFAULT_PAGE_SIZE = 50
 """Messages one `session.get` returns when the caller names no limit."""
 
 
-def _validation_sentence(exc: ValidationError) -> str:
-    """The first message of a pydantic error, without its `Value error, ` prefix."""
-    message = str(exc.errors()[0]["msg"])
-    return message.removeprefix("Value error, ")
-
-
 @dataclass(frozen=True, slots=True)
 class SessionPage:
     """One page of a transcript, plus everything needed to resume the session."""
@@ -172,6 +166,7 @@ class ConversationService:
             SESSION_LABEL_PREFIX,
             entry_identity,
             runtime_identity,
+            validation_sentence,
         )
         from research_harness.providers.models.router import RouterConfig, RouterProviderConfig
 
@@ -210,7 +205,7 @@ class ConversationService:
                 priority=0,
             )
         except ValidationError as exc:
-            raise CapabilityError(_validation_sentence(exc)) from exc
+            raise CapabilityError(validation_sentence(exc)) from exc
         from research_harness.providers.cli.detection import detect_cached
         from research_harness.providers.cli.registry import get_runtime
 

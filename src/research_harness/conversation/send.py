@@ -32,6 +32,8 @@ from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from pydantic import ValidationError
+
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.context import (
     AssembledContext,
@@ -51,6 +53,7 @@ from research_harness.domain.conversation import (
     MessageAttempt,
     MessageRole,
     ModelIdentity,
+    SessionDefaults,
     TextBlock,
     Visibility,
 )
@@ -269,7 +272,12 @@ class ProviderSelector(Protocol):
     """How a send finds its backend. Configuration, never a branch in domain code."""
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
         """The provider for this call, refusing before a request exists (Product 34)."""
 
@@ -284,18 +292,56 @@ class WorkspaceProviders:
     """
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
+        from research_harness.conversation.binding import (
+            EntryBinding,
+            RuntimeBinding,
+            binding_of,
+            validation_sentence,
+        )
         from research_harness.privacy.policy import load_policy
         from research_harness.privacy.traces import trace_writer_for
         from research_harness.providers.models.router import (
             ModelRouter,
             RouterConfig,
+            RouterProviderConfig,
             build_router,
         )
 
         config = RouterConfig.model_validate({"providers": list(ctx.repo.config.providers)})
-        if not config.providers:
+        # A per-message `model` wins; otherwise the session's binding; otherwise the
+        # project default in priority order (binding spec §9).
+        binding = None if model is not None or defaults is None else binding_of(defaults)
+        wanted = model
+        label: str | None = None
+        if isinstance(binding, RuntimeBinding):
+            # Validated exactly as the `research.yaml` entry it stands in for, so a record
+            # whose runtime lost its bounded posture in a newer registry refuses with the
+            # entry's own sentence rather than spawning.
+            try:
+                session_entry = RouterProviderConfig(
+                    name=binding.label,
+                    kind="local_cli",
+                    runtime=binding.runtime,
+                    model=binding.model,
+                    reasoning=binding.reasoning,
+                    priority=0,
+                )
+            except ValidationError as exc:
+                raise CapabilityError(validation_sentence(exc)) from exc
+            config = RouterConfig(providers=[*config.providers, session_entry])
+            wanted = label = binding.label
+        elif isinstance(binding, EntryBinding):
+            wanted = binding.name
+        if not config.providers and not isinstance(binding, EntryBinding):
+            # An entry binding names something; "no provider named ..." below says which,
+            # and an empty table is one way for that name to be gone (binding spec §9).
             raise CapabilityError(
                 "no model providers configured: add a `providers:` list to research.yaml, "
                 "or preview the context with `context.preview`"
@@ -305,13 +351,13 @@ class WorkspaceProviders:
         entries = [
             entry
             for entry in router.entries
-            if model is None or model in entry.tags or entry.provider.name == model
+            if wanted is None or wanted in entry.tags or entry.provider.name == wanted
         ]
         if not entries:
-            known = (
-                ", ".join(sorted({tag for entry in router.entries for tag in entry.tags})) or "none"
+            known = ", ".join(sorted(item.name for item in config.providers if item.enabled))
+            raise CapabilityError(
+                f"no provider named {wanted!r} in research.yaml (have: {known or 'none'})"
             )
-            raise CapabilityError(f"no provider named {model!r} in research.yaml (have: {known})")
         narrowed = ModelRouter(entries, policy=policy)
         refusal = narrowed.egress_refusal()
         if refusal is not None:
@@ -330,7 +376,10 @@ class WorkspaceProviders:
                 entry.provider, model=entry.model, trace=trace_writer_for(ctx.repo)
             ),
             profile=ProviderProfile(
-                provider=entry.provider.name,
+                # A session-bound answer is labelled `session:<runtime>` in the transcript,
+                # the receipt and the run record; the trace keeps the adapter's own name,
+                # because the trace writer records the adapter (plan ruling 2).
+                provider=label or entry.provider.name,
                 model=entry.model,
                 egress=(
                     EgressClass.LOCAL
@@ -367,9 +416,14 @@ class ScriptedProviders:
         self._model = model or str(getattr(provider, "model", "scripted-1"))
 
     def select(
-        self, ctx: CapabilityContext, *, model: str | None, budget: ContextBudget
+        self,
+        ctx: CapabilityContext,
+        *,
+        model: str | None,
+        budget: ContextBudget,
+        defaults: SessionDefaults | None = None,
     ) -> Selection:
-        del ctx, model, budget
+        del ctx, model, budget, defaults
         return Selection(
             capabilities=self._provider.capabilities(),
             provider=streaming_provider(
@@ -511,7 +565,9 @@ class SendService:
         allowance = budget or ContextBudget(
             total=record.defaults.token_budget or ContextBudget().total
         )
-        selection = self._providers.select(self._ctx, model=model, budget=allowance)
+        selection = self._providers.select(
+            self._ctx, model=model, budget=allowance, defaults=record.defaults
+        )
         _refuse_private_egress(record, selection.profile)
         plan = self._attachment_plan(record.id, selection, attachments)
         resolved = self._assembler.resolve_references(references, text)
