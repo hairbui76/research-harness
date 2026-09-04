@@ -24,7 +24,7 @@
  * behaviour instead: the pick is this message's model, and the runtime rows are disabled
  * with the session's mutation-blocked sentence (plan ruling 5).
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Button,
   Composer,
@@ -115,9 +115,16 @@ export function ComposerPane() {
    * Both of those are about *this* session, so neither survives a move to another one: a
    * refusal that named the session you just left, or a disclosure you never answered, would
    * be a statement about the wrong conversation.
+   *
+   * The ref is the same rule for an answer still in flight. `session.configure` is a round
+   * trip, and the researcher can change conversation while it is out; the sentence that
+   * comes back is about the session it was asked for, so it is dropped rather than planted
+   * on whichever session happens to be open when it lands.
    */
   const sessionId = session?.id ?? null;
+  const openSession = useRef(sessionId);
   useEffect(() => {
+    openSession.current = sessionId;
     setPending(null);
     setRefusal(null);
   }, [sessionId]);
@@ -259,10 +266,13 @@ export function ComposerPane() {
    * keeps exactly today's behaviour — the pick is this message's model and nothing
    * durable changes (plan ruling 5).
    */
-  /** Bind, and keep the daemon's sentence here when it would not. */
+  /** Bind, and keep the daemon's sentence here when it would not — for this session only. */
   const bind = useCallback(
-    (sessionId: string, input: Parameters<typeof sessions.configure>[1]) => {
-      void sessions.configure(sessionId, input).then(setRefusal);
+    (target: string, input: Parameters<typeof sessions.configure>[1]) => {
+      void sessions.configure(target, input).then((message) => {
+        if (openSession.current !== target) return;
+        setRefusal(message);
+      });
     },
     [sessions],
   );
@@ -310,10 +320,14 @@ export function ComposerPane() {
    */
   const onConfirmBinding = useCallback(() => {
     if (!session || pending === null) return;
-    const sessionId_ = session.id;
+    const target = session.id;
     setPending(null);
-    void sessions.configure(sessionId_, pending).then((message) => {
-      if (message === null) rememberDisclosure(sessionId_);
+    void sessions.configure(target, pending).then((message) => {
+      // The answer belongs to the session it was asked for. A researcher who has moved on
+      // is told nothing, and nothing is remembered on their behalf — the next visit to that
+      // session asks again, which is the safe way for this to be wrong.
+      if (openSession.current !== target) return;
+      if (message === null) rememberDisclosure(target);
       setRefusal(message);
     });
   }, [pending, session, sessions]);
@@ -412,8 +426,10 @@ export function ComposerPane() {
         onReferenceQuery={references.search}
         {/* A project with no `providers:` table has an empty catalogue and may still have a
             CLI to bind to — which is the whole point of the feature — so the picker follows
-            either source. */
-        ...(models.options.length > 0 || models.groups.length > 0
+            either source. A session that is already bound keeps it whatever the catalogue
+            and the scan say: the trigger has the binding words to state, and the row that
+            unbinds has to stay reachable. */
+        ...(models.options.length > 0 || models.groups.length > 0 || bound !== null
           ? {
               modelSelector: (
                 <span className="rh-web-composer__model">

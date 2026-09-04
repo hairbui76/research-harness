@@ -94,6 +94,22 @@ function withRun(daemon: FakeDaemon, chunks: string[], open = false): FakeDaemon
   return { ...daemon, fetch: fetchImpl as unknown as typeof fetch };
 }
 
+/**
+ * The same daemon, with one capability's answer held until the test lets it go.
+ *
+ * Layered here rather than in the shared harness for the same reason `withRun` is: a
+ * scripted delay belongs to the test that scripts it. It is how a researcher who picks a
+ * model and then changes session before the daemon answers is reproduced.
+ */
+function withHeld(daemon: FakeDaemon, capability: string, gate: Promise<void>): FakeDaemon {
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const url = new URL(String(input), 'http://daemon.test');
+    if (url.pathname === `/capabilities/${capability}`) await gate;
+    return daemon.fetch(input, init);
+  };
+  return { ...daemon, fetch: fetchImpl as unknown as typeof fetch };
+}
+
 interface Answers {
   [capability: string]: unknown;
 }
@@ -738,6 +754,26 @@ describe('sending', () => {
     await transcriptReady();
 
     expect(await screen.findByText(/model catalogue is unavailable/)).toBeInTheDocument();
+    // Nothing can be offered, but `CS0001` is bound and the record still says where its
+    // next message goes, so the trigger states that rather than disappearing.
+    expect(
+      screen.getByRole('button', { name: 'Model: entry local-small' }),
+    ).toBeInTheDocument();
+  });
+
+  it('offers no model control at all for a session with no binding and nothing to offer', async () => {
+    const unbound = {
+      ...sessions,
+      sessions: sessions.sessions.map((session) =>
+        session.id === SESSION ? { ...session, defaults: {} } : session,
+      ),
+    };
+    const capabilities = answers({ 'session.list': unbound });
+    delete capabilities['provider.list'];
+    renderConversation({ daemon: fakeDaemon({ capabilities }) });
+    await transcriptReady();
+
+    await screen.findByText(/model catalogue is unavailable/);
     expect(screen.queryByRole('button', { name: /^Model:/ })).not.toBeInTheDocument();
   });
 });
@@ -1168,6 +1204,81 @@ describe('binding the session to a CLI runtime', () => {
 
     await user.click(screen.getByRole('button', { name: /^Screening pass/ }));
     await waitFor(() => expect(screen.queryByText(refusal)).not.toBeInTheDocument());
+  });
+
+
+  it('drops an answer that arrives after the researcher has moved on', async () => {
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    let release = () => undefined as void;
+    const held = new Promise<void>((resolve) => {
+      release = () => resolve();
+    });
+    const base = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon: withHeld(base, 'session.configure', held) });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', {
+        name: 'Use this runtime',
+      }),
+    );
+
+    // The daemon has not answered yet; the researcher goes to another conversation.
+    await user.click(screen.getByRole('button', { name: /^Screening pass/ }));
+    await screen.findByRole('heading', { name: 'Screening pass' });
+    release();
+
+    // The sentence was about the session that was left, so it is not said about this one.
+    await waitFor(() =>
+      expect(
+        base.capabilityCalls().some((call) => call.name === 'session.configure'),
+      ).toBe(true),
+    );
+    expect(screen.queryByText(refusal)).not.toBeInTheDocument();
+  });
+
+  it('keeps the picker for a bound session with no catalogue and no readable scan', async () => {
+    const daemon = fakeDaemon({
+      capabilities: answers({
+        'provider.list': { count: 0, models: [] },
+        'provider.cli.scan': {
+          capability: 'provider.cli.scan',
+          ok: false,
+          error: { code: 'unavailable', message: 'the runtime scan could not be read' },
+        },
+        'session.configure': boundTo(BOUND, null),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    // Nothing to offer, and still something true to say — and a way back out of it.
+    const trigger = await screen.findByRole('button', {
+      name: 'Model: session:codex/gpt-5.5 (reasoning high)',
+    });
+    await user.click(trigger);
+    const menu = await screen.findByRole('menu', { name: 'Model' });
+    within(menu).getByRole('group', { name: 'Session' });
+    await user.click(within(menu).getByRole('menuitem', { name: /^Project default/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, clear: true }),
+    );
   });
 
   it('has no automatically detectable violation with the groups and the reasoning control', async () => {

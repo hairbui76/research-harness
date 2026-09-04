@@ -634,11 +634,15 @@ export const PROJECT_DEFAULT_OPTION = 'binding:project-default';
  * the one who needs to unbind, and inheriting the entry's `available: false` would lock
  * them into the binding. The entry's own row keeps its reason and stays unpickable.
  *
- * With no default row it says only that the router decides, which is all that is known:
- * inventing a destination for an empty catalogue would be the one claim this file must not
- * make. In practice that branch is unreachable while the selector is on screen — the
- * composer renders it only when the catalogue has rows, and `defaultId` then always names
- * one — so it is a floor, not a state a researcher reaches.
+ * With no default row there is nothing to borrow, and that branch is a shipped path, not a
+ * defensive one: a project with no `providers:` table has an empty catalogue, and the
+ * composer still offers the picker whenever a runtime is installed or the session is bound.
+ * So what it says is chosen carefully. `chosen by the router` is a statement of ignorance
+ * standing where a provider name would go — this file does not know the destination, and
+ * naming one would be the single claim it must never make. `egressClass: 'external'` and
+ * `vision: false` are conservative floors, not facts the daemon stated: `EgressClass` has
+ * two members and neither of them is "unknown", so the reading that overstates safety is
+ * the one that must not be picked.
  */
 export function toProjectDefaultOption(entry: ModelOption | null): ModelOption {
   if (entry === null) {
