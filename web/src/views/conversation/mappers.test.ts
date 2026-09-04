@@ -259,6 +259,27 @@ describe('the project default row', () => {
     expect(option.available).toBe(true);
   });
 
+  it('stays pickable even when the entry it names is not', () => {
+    // Clearing is a session mutation, not a call to that entry: a researcher whose default
+    // entry is refused by policy or missing a credential is exactly who needs to unbind.
+    const refused = {
+      id: 'fast',
+      label: 'fast/gpt-5.4-mini',
+      provider: 'openai',
+      egressClass: 'external' as const,
+      vision: false,
+      contextTokens: 272000,
+      available: false,
+      unavailableReason: 'This session is private, so the egress policy will not send it off the machine.',
+    };
+    const option = toProjectDefaultOption(refused);
+    expect(option.available).toBe(true);
+    expect(option.unavailableReason).toBeUndefined();
+    // The label and the egress facts are still the entry's own.
+    expect(option.label).toBe('Project default (fast/gpt-5.4-mini)');
+    expect(option.egressClass).toBe('external');
+  });
+
   it('says only that the router decides when the daemon named no default', () => {
     const option = toProjectDefaultOption(null);
     expect(option.label).toBe('Project default');

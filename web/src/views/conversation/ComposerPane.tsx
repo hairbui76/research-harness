@@ -24,7 +24,7 @@
  * behaviour instead: the pick is this message's model, and the runtime rows are disabled
  * with the session's mutation-blocked sentence (plan ruling 5).
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Composer,
@@ -44,6 +44,7 @@ import { AttachmentTrayPane } from './attachments/AttachmentTrayPane';
 import {
   PROJECT_DEFAULT_OPTION,
   bindingOptionId,
+  bindingWords,
   parseRuntimeOptionId,
   toProjectDefaultOption,
 } from './mappers';
@@ -76,6 +77,9 @@ function rememberDisclosure(sessionId: string): void {
   }
 }
 
+/** The row that unbinds has a heading of its own: it is about the session, not a provider. */
+const SESSION_GROUP = 'Session';
+
 /** The catalogue's own heading in the picker; the runtime groups follow it (spec §10). */
 const ENTRY_GROUP = 'Configured entries';
 
@@ -106,6 +110,17 @@ export function ComposerPane() {
   const [pending, setPending] = useState<{ runtime: string; model: string } | null>(null);
   /** The daemon's sentence about a binding it would not store, beside the control that asked. */
   const [refusal, setRefusal] = useState<string | null>(null);
+
+  /**
+   * Both of those are about *this* session, so neither survives a move to another one: a
+   * refusal that named the session you just left, or a disclosure you never answered, would
+   * be a statement about the wrong conversation.
+   */
+  const sessionId = session?.id ?? null;
+  useEffect(() => {
+    setPending(null);
+    setRefusal(null);
+  }, [sessionId]);
 
   const sendState: ComposerSendState = send.sending
     ? 'sending'
@@ -220,15 +235,16 @@ export function ComposerPane() {
             ...(mutationBlockedReason ? { unavailableReason: mutationBlockedReason } : {}),
           })),
         }));
-    // The project default leads the catalogue: it is the row that unbinds, and it names
-    // where the router would send instead, so it belongs with the entries rather than on
-    // its own (spec §10).
+    // The row that unbinds leads, in a heading of its own: it is an answer about the
+    // session, not an entry in the catalogue, and a project with no `providers:` table at
+    // all still has to be able to clear a runtime binding.
     const projectDefault = toProjectDefaultOption(
       models.options.find((option) => option.id === models.defaultId) ?? null,
     );
     return [
+      { id: 'session', label: SESSION_GROUP, options: [projectDefault] },
       ...(models.options.length > 0
-        ? [{ id: 'entries', label: ENTRY_GROUP, options: [projectDefault, ...models.options] }]
+        ? [{ id: 'entries', label: ENTRY_GROUP, options: models.options }]
         : []),
       ...runtimes,
     ];
@@ -285,13 +301,22 @@ export function ComposerPane() {
     pending?.runtime ??
     '';
 
-  /** Confirming the disclosure: remembered for this session, then bound. */
+  /**
+   * Confirming the disclosure: bound, and remembered only if it was stored.
+   *
+   * A refusal means nothing left the machine and nothing was bound, so there is nothing to
+   * have disclosed — the next attempt asks again rather than skipping the notice on the
+   * strength of an answer the daemon rejected.
+   */
   const onConfirmBinding = useCallback(() => {
     if (!session || pending === null) return;
-    rememberDisclosure(session.id);
+    const sessionId_ = session.id;
     setPending(null);
-    bind(session.id, pending);
-  }, [bind, pending, session]);
+    void sessions.configure(sessionId_, pending).then((message) => {
+      if (message === null) rememberDisclosure(sessionId_);
+      setRefusal(message);
+    });
+  }, [pending, session, sessions]);
 
   /** Changing the effort level rebinds the same runtime and model with it. */
   const onPickReasoning = useCallback(
@@ -309,6 +334,16 @@ export function ComposerPane() {
   const reasoningChoices = runtimeBinding
     ? models.reasoningChoices(runtimeBinding.runtime, runtimeBinding.model)
     : [];
+
+  /**
+   * What the trigger says when the binding names no row the picker was given.
+   *
+   * A scan that failed, a runtime that is gone, an entry removed from `research.yaml`: the
+   * record is still bound, and "Select a model" would be a false statement about it. The
+   * binding words go on the trigger — the same ones the rail shows — and no option is
+   * synthesised to carry them, because an option is a claim that it can be chosen.
+   */
+  const bindingLabel = session ? (bindingWords(session.defaults) ?? '') : '';
 
   return (
     <div className="rh-web-composer">
@@ -375,7 +410,10 @@ export function ComposerPane() {
         referenceResults={references.results}
         referenceLoading={references.loading}
         onReferenceQuery={references.search}
-        {...(models.options.length > 0
+        {/* A project with no `providers:` table has an empty catalogue and may still have a
+            CLI to bind to — which is the whole point of the feature — so the picker follows
+            either source. */
+        ...(models.options.length > 0 || models.groups.length > 0
           ? {
               modelSelector: (
                 <span className="rh-web-composer__model">
@@ -385,6 +423,7 @@ export function ComposerPane() {
                     options={[]}
                     groups={groups}
                     value={selectedModel}
+                    {...(bindingLabel ? { fallbackLabel: bindingLabel } : {})}
                     onChange={onPickModel}
                   />
                   {/* The effort level belongs to a runtime binding and to nothing else, so
@@ -396,6 +435,9 @@ export function ComposerPane() {
                       size="sm"
                       value={session?.defaults.reasoning ?? RUNTIME_DEFAULT_REASONING}
                       disabled={!canMutate}
+                      {...(!canMutate && mutationBlockedReason
+                        ? { description: mutationBlockedReason }
+                        : {})}
                       onChange={(event) => onPickReasoning(event.target.value)}
                     >
                       <option value={RUNTIME_DEFAULT_REASONING}>Runtime default</option>

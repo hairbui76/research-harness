@@ -624,9 +624,15 @@ export const PROJECT_DEFAULT_OPTION = 'binding:project-default';
  * The row that unbinds a session, named after where the project default actually goes.
  *
  * Given the catalogue row the daemon marked `default`, it borrows that row's own facts —
- * provider, egress class, vision, context window, availability — because clearing a
- * binding sends the next message exactly there. Nothing is re-decided; the label is the
- * daemon's own `<entry>/<model>` label in parentheses.
+ * provider, egress class, vision, context window — because clearing a binding sends the
+ * next message exactly there. Nothing is re-decided; the label is the daemon's own
+ * `<entry>/<model>` label in parentheses.
+ *
+ * Its availability is *not* borrowed. Picking this row calls `session.configure` with
+ * `clear`, which is a mutation of the session record and not a request through that entry;
+ * a researcher whose default entry is refused by policy or missing a credential is exactly
+ * the one who needs to unbind, and inheriting the entry's `available: false` would lock
+ * them into the binding. The entry's own row keeps its reason and stays unpickable.
  *
  * With no default row it says only that the router decides, which is all that is known:
  * inventing a destination for an empty catalogue would be the one claim this file must not
@@ -647,9 +653,13 @@ export function toProjectDefaultOption(entry: ModelOption | null): ModelOption {
     };
   }
   return {
-    ...entry,
     id: PROJECT_DEFAULT_OPTION,
     label: `Project default (${entry.label})`,
+    provider: entry.provider,
+    egressClass: entry.egressClass,
+    vision: entry.vision,
+    contextTokens: entry.contextTokens,
+    available: true,
   };
 }
 

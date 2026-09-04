@@ -28,7 +28,7 @@
       "updated_at": "2026-08-20T11:40:00Z",
       "provenance": { "source": "human", "actor": "human" },
       "title": "Screening pass",
-      "visibility": "private",
+      "visibility": "project",
       "defaults": {
         "model": { "provider": "local_cli:codex", "model": "gpt-5.5" },
         "mode": null,
