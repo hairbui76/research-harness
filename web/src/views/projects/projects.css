@@ -1,0 +1,144 @@
+/*
+ * Project Home and the lifecycle dialogs.
+ *
+ * This is the one screen the cockpit draws before any workspace exists, so it cannot use
+ * the shell: no rail, no inspector, just a column of rows on the application background.
+ * Everything below is layout — every colour, space and type value is a Design System token.
+ */
+
+.rh-projects {
+  inline-size: 100%;
+  max-inline-size: 60rem;
+  margin-inline: auto;
+  padding: var(--rh-space-6) var(--rh-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-5);
+  min-block-size: 100%;
+  overflow-y: auto;
+}
+
+.rh-projects__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+}
+
+.rh-projects__title {
+  margin: 0;
+  font-size: var(--rh-type-h1-size);
+  font-weight: var(--rh-type-h1-weight);
+  line-height: var(--rh-type-h1-lh);
+}
+
+.rh-projects__lede {
+  margin: var(--rh-space-1) 0 0;
+  color: var(--rh-text-muted);
+}
+
+.rh-projects__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2);
+}
+
+.rh-projects__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+}
+
+.rh-projects__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rh-space-4);
+}
+
+.rh-projects__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-inline-size: 16rem;
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.rh-projects__name {
+  margin: 0;
+  font-size: var(--rh-type-h4-size);
+  font-weight: var(--rh-type-h4-weight);
+  line-height: var(--rh-type-h4-lh);
+}
+
+.rh-projects__path {
+  font-family: var(--rh-font-mono);
+  overflow-wrap: anywhere;
+}
+
+.rh-projects__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-projects__detail {
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-projects__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+}
+
+/* The dialogs --------------------------------------------------------------------- */
+
+.rh-projects__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+}
+
+.rh-projects__picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-3);
+}
+
+.rh-projects__picked {
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rh-projects__prose {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.rh-projects__files {
+  margin: 0;
+  padding-inline-start: var(--rh-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}

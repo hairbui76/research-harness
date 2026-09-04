@@ -22,6 +22,7 @@ import type {
   InspectorTab,
   SourceAnchorModel,
 } from '@research-harness/design';
+import { useProjectPaths } from '../../app/projectPaths';
 import { useSession } from '../../app/session';
 import { CONVERSATION_PATH, entityRefFor, routeForEntity } from './mappers';
 /* References and the graph (task W3): completion, token resolution and `rh://` links. */
@@ -147,12 +148,16 @@ export interface ConversationProviderProps {
 
 export function ConversationProvider({ children, referenceProvider }: ConversationProviderProps) {
   const { client, overview, canMutate, mutationBlockedReason } = useSession();
+  const { projectId } = useProjectPaths();
   const location = useLocation();
   const navigate = useNavigate();
   const active = location.pathname === CONVERSATION_PATH;
 
+  // Keyed by the stable project id under a multi-project host, so relocating a project
+  // changes its root without discarding the session it remembered (design §11); the legacy
+  // host has no id and keys by the workspace path exactly as before.
   const sessions = useSessions(client, {
-    project: overview?.workspace ?? null,
+    project: projectId ?? overview?.workspace ?? null,
     canMutate,
   });
   const sessionId = sessions.activeId;
