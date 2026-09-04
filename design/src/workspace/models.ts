@@ -19,12 +19,50 @@ export interface RailItem {
   active?: boolean;
 }
 
+/**
+ * Whether the host can open a project right now.
+ *
+ * The rail only renders these; deciding which one a project is in belongs to the
+ * application (a missing folder, a schema it cannot read, a lock somebody else holds).
+ */
+export type ProjectAvailability =
+  | 'available'
+  | 'unavailable'
+  | 'invalid'
+  | 'incompatible'
+  | 'busy';
+
 export interface ProjectModel {
   id: string;
   name: string;
   /** Absolute path of the workspace on this machine. */
   path?: string;
+  /** Defaults to `available`. Anything else is stated in words, never colour alone. */
+  availability?: ProjectAvailability;
+  /** One line saying why: the folder that moved, the validation error, the lock holder. */
+  detail?: string;
+  /** Workflows still running in this project. Rendered as "N active". */
+  activeRuns?: number;
 }
+
+/** What the per-project actions menu can ask the application to do. */
+export type ProjectAction = 'reveal' | 'locate' | 'rename' | 'forget';
+
+export const PROJECT_AVAILABILITY_META: Record<
+  ProjectAvailability,
+  {
+    /** Visible text beside the name. `null` for `available`: a working project says nothing. */
+    label: string | null;
+    icon: IconName;
+    tone: 'success' | 'warning' | 'error' | 'neutral';
+  }
+> = {
+  available: { label: null, icon: 'folder', tone: 'neutral' },
+  unavailable: { label: 'Unavailable', icon: 'link-2-off', tone: 'error' },
+  invalid: { label: 'Invalid', icon: 'alert-triangle', tone: 'error' },
+  incompatible: { label: 'Incompatible', icon: 'alert-circle', tone: 'warning' },
+  busy: { label: 'Busy', icon: 'lock', tone: 'warning' },
+};
 
 export interface ProviderStatus {
   label: string;

@@ -63,8 +63,54 @@ button.rh-project-rail__project[data-state='open'] {
   white-space: nowrap;
 }
 
-.rh-project-rail__collapse {
+.rh-project-rail__collapse,
+.rh-project-rail__head-control {
   flex: none;
+}
+
+/* Availability and background work beside the open project's name, as words. */
+.rh-project-rail__project-state,
+.rh-project-rail__option-state {
+  flex: none;
+  font-size: var(--rh-type-body-sm-size);
+  font-weight: var(--rh-type-body-weight);
+  color: var(--rh-text-muted);
+}
+
+.rh-project-rail__project-state[data-tone='success'],
+.rh-project-rail__option-state[data-tone='success'] {
+  color: var(--rh-feedback-success-fg);
+}
+
+.rh-project-rail__project-state[data-tone='warning'],
+.rh-project-rail__option-state[data-tone='warning'] {
+  color: var(--rh-feedback-warning-fg);
+}
+
+.rh-project-rail__project-state[data-tone='error'],
+.rh-project-rail__option-state[data-tone='error'] {
+  color: var(--rh-feedback-error-fg);
+}
+
+.rh-project-rail__option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
+
+.rh-project-rail__option-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rh-project-rail__option-runs {
+  flex: none;
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-muted);
 }
 
 .rh-project-rail__new {

@@ -16,6 +16,7 @@ export type { ManuscriptWorkspaceProps, ManuscriptView } from './ManuscriptWorks
 export {
   INSPECTOR_TABS,
   INSPECTOR_TAB_META,
+  PROJECT_AVAILABILITY_META,
   PROVIDER_STATE_META,
   SELECTION_KIND_META,
   mergePaneSizes,
@@ -26,6 +27,8 @@ export type {
   InspectorSelection,
   InspectorTab,
   PaneSizes,
+  ProjectAction,
+  ProjectAvailability,
   ProjectModel,
   ProviderStatus,
   RailItem,

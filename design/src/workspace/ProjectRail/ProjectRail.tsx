@@ -5,18 +5,56 @@ import { useControllable } from '../../utils/useControllable';
 import { useId } from '../../hooks/useId';
 import { Button } from '../../primitives/Button';
 import { Icon } from '../../primitives/Icon';
+import type { IconName } from '../../primitives/Icon';
 import { IconButton } from '../../primitives/IconButton';
 import { Menu } from '../../primitives/Menu';
 import { ScrollArea } from '../../primitives/ScrollArea';
 import { Tooltip } from '../../primitives/Tooltip';
-import { PROVIDER_STATE_META } from '../models';
-import type { ProjectModel, ProviderStatus, RailItem } from '../models';
+import { PROJECT_AVAILABILITY_META, PROVIDER_STATE_META } from '../models';
+import type {
+  ProjectAction,
+  ProjectAvailability,
+  ProjectModel,
+  ProviderStatus,
+  RailItem,
+} from '../models';
+
+/** The actions menu, in the order it is read out. Labels are the accessible names. */
+const PROJECT_ACTIONS: readonly { action: ProjectAction; label: string; icon: IconName }[] = [
+  { action: 'reveal', label: 'Show in file manager', icon: 'folder-open' },
+  { action: 'locate', label: 'Locate folder', icon: 'search' },
+  { action: 'rename', label: 'Rename', icon: 'pen-line' },
+  { action: 'forget', label: 'Forget project', icon: 'trash-2' },
+];
+
+/** States in which selecting the project cannot succeed, so the switcher refuses it. */
+const BLOCKED: readonly ProjectAvailability[] = ['unavailable', 'invalid', 'incompatible'];
+
+/**
+ * What the rail says about a project besides its name: why it cannot be opened, and how
+ * much of the researcher's work is still running in it.
+ */
+function statusParts(project: ProjectModel): string[] {
+  const parts: string[] = [];
+  const label = PROJECT_AVAILABILITY_META[project.availability ?? 'available'].label;
+  if (label !== null) parts.push(label);
+  if (project.activeRuns !== undefined && project.activeRuns > 0) {
+    parts.push(`${project.activeRuns} active`);
+  }
+  return parts;
+}
 
 export interface ProjectRailProps extends HTMLAttributes<HTMLElement> {
   project: ProjectModel;
   /** Every project the switcher offers. Omit for a single-project host. */
   projects?: readonly ProjectModel[];
   onSelectProject?: (projectId: string) => void;
+  /** Adds "Add project" to the switcher, or a rail control when there is no switcher. */
+  onAddProject?: () => void;
+  /** Adds "All projects" at the top of the switcher. */
+  onOpenProjectHome?: () => void;
+  /** Adds a "Project actions" menu for the open project. The host performs the action. */
+  onProjectAction?: (projectId: string, action: ProjectAction) => void;
   onNewSession?: () => void;
   newSessionLabel?: string;
   /** The session history — `SessionList` in the Web client. */
@@ -62,6 +100,9 @@ export const ProjectRail = forwardRef<HTMLElement, ProjectRailProps>(function Pr
     project,
     projects,
     onSelectProject,
+    onAddProject,
+    onOpenProjectHome,
+    onProjectAction,
     onNewSession,
     newSessionLabel = 'New session',
     sessionList,
@@ -88,6 +129,23 @@ export const ProjectRail = forwardRef<HTMLElement, ProjectRailProps>(function Pr
   });
   const switchable = projects !== undefined && projects.length > 0;
   const provider = providerStatus ? PROVIDER_STATE_META[providerStatus.state] : undefined;
+  const openStatus = statusParts(project);
+  const openTone = PROJECT_AVAILABILITY_META[project.availability ?? 'available'].tone;
+  const openStatusText = openStatus.join(' · ');
+  // Collapsed, the name and its status live in the tooltip and the accessible name.
+  const projectTooltip =
+    openStatus.length > 0 ? `${project.name} — ${openStatusText}` : project.name;
+  const switchLabel =
+    openStatus.length > 0
+      ? `Project: ${project.name}. ${openStatus.join('. ')}. Switch project`
+      : `Project: ${project.name}. Switch project`;
+
+  const openStatusNode =
+    openStatus.length > 0 ? (
+      <span className="rh-project-rail__project-state" data-tone={openTone}>
+        {openStatusText}
+      </span>
+    ) : null;
 
   return (
     <nav
@@ -101,47 +159,122 @@ export const ProjectRail = forwardRef<HTMLElement, ProjectRailProps>(function Pr
       <div className="rh-project-rail__head">
         {switchable ? (
           <Menu placement="bottom" align="start">
-            <MaybeTooltip collapsed={isCollapsed} content={project.name}>
-              <Menu.Trigger
-                className="rh-project-rail__project"
-                aria-label={`Project: ${project.name}. Switch project`}
-              >
+            <MaybeTooltip collapsed={isCollapsed} content={projectTooltip}>
+              <Menu.Trigger className="rh-project-rail__project" aria-label={switchLabel}>
                 <Icon name="folder" size={16} />
                 {isCollapsed ? null : (
                   <>
                     <span className="rh-project-rail__project-name">{project.name}</span>
+                    {openStatusNode}
                     <Icon name="chevron-down" size={14} />
                   </>
                 )}
               </Menu.Trigger>
             </MaybeTooltip>
             <Menu.Content aria-label="Projects">
-              <Menu.Group label="Projects">
-                {projects.map((candidate) => (
+              {onOpenProjectHome ? (
+                <>
                   <Menu.Item
-                    key={candidate.id}
-                    icon={
-                      <Icon name={candidate.id === project.id ? 'check' : 'folder'} size={14} />
-                    }
-                    hint={candidate.path}
-                    onSelect={() => onSelectProject?.(candidate.id)}
+                    icon={<Icon name="list" size={14} />}
+                    onSelect={() => onOpenProjectHome()}
                   >
-                    {candidate.name}
+                    All projects
                   </Menu.Item>
-                ))}
+                  <Menu.Separator />
+                </>
+              ) : null}
+              <Menu.Group label="Projects">
+                {projects.map((candidate) => {
+                  const availability = candidate.availability ?? 'available';
+                  const meta = PROJECT_AVAILABILITY_META[availability];
+                  const isOpen = candidate.id === project.id;
+                  const blocked = BLOCKED.includes(availability);
+                  const runs = candidate.activeRuns ?? 0;
+                  return (
+                    <Menu.Item
+                      key={candidate.id}
+                      icon={<Icon name={isOpen ? 'check' : meta.icon} size={14} />}
+                      hint={candidate.detail ?? candidate.path}
+                      disabled={blocked}
+                      aria-current={isOpen ? true : undefined}
+                      onSelect={() => onSelectProject?.(candidate.id)}
+                    >
+                      <span className="rh-project-rail__option">
+                        <span className="rh-project-rail__option-name">{candidate.name}</span>
+                        {meta.label === null ? null : (
+                          <span className="rh-project-rail__option-state" data-tone={meta.tone}>
+                            {meta.label}
+                          </span>
+                        )}
+                        {runs > 0 ? (
+                          <span className="rh-project-rail__option-runs">{`${runs} active`}</span>
+                        ) : null}
+                      </span>
+                    </Menu.Item>
+                  );
+                })}
               </Menu.Group>
+              {onAddProject ? (
+                <>
+                  <Menu.Separator />
+                  <Menu.Item icon={<Icon name="plus" size={14} />} onSelect={() => onAddProject()}>
+                    Add project
+                  </Menu.Item>
+                </>
+              ) : null}
             </Menu.Content>
           </Menu>
         ) : (
           <p className="rh-project-rail__project" title={project.path}>
             <Icon name="folder" size={16} />
             {isCollapsed ? (
-              <span className="rh-visually-hidden">{project.name}</span>
+              <span className="rh-visually-hidden">
+                {openStatus.length > 0 ? `${project.name}. ${openStatus.join('. ')}` : project.name}
+              </span>
             ) : (
-              <span className="rh-project-rail__project-name">{project.name}</span>
+              <>
+                <span className="rh-project-rail__project-name">{project.name}</span>
+                {openStatusNode}
+              </>
             )}
           </p>
         )}
+
+        {!switchable && onAddProject ? (
+          <MaybeTooltip collapsed={isCollapsed} content="Add project">
+            <IconButton
+              className="rh-project-rail__head-control"
+              icon="plus"
+              label="Add project"
+              size="sm"
+              onClick={onAddProject}
+            />
+          </MaybeTooltip>
+        ) : null}
+
+        {onProjectAction ? (
+          <Menu placement="bottom" align="end">
+            <Menu.Trigger asChild>
+              <IconButton
+                className="rh-project-rail__head-control"
+                icon="more-horizontal"
+                label="Project actions"
+                size="sm"
+              />
+            </Menu.Trigger>
+            <Menu.Content aria-label={`Actions for ${project.name}`}>
+              {PROJECT_ACTIONS.map(({ action, label: actionLabel, icon }) => (
+                <Menu.Item
+                  key={action}
+                  icon={<Icon name={icon} size={14} />}
+                  onSelect={() => onProjectAction(project.id, action)}
+                >
+                  {actionLabel}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu>
+        ) : null}
 
         <IconButton
           className="rh-project-rail__collapse"

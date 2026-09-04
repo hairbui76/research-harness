@@ -9,6 +9,24 @@ import type { ProjectModel, RailItem } from '../models';
 const project: ProjectModel = { id: 'P1', name: 'Thermal tolerance', path: '/home/r/thermal' };
 const projects: ProjectModel[] = [project, { id: 'P2', name: 'Reef survey' }];
 
+/** The registry as the application sees it on a bad day: one open, one gone, one locked. */
+const mixedProjects: ProjectModel[] = [
+  { ...project, activeRuns: 2 },
+  {
+    id: 'P2',
+    name: 'Reef survey',
+    availability: 'unavailable',
+    detail: 'Folder not found',
+  },
+  {
+    id: 'P3',
+    name: 'Kelp forest',
+    path: '/home/r/kelp',
+    availability: 'busy',
+    detail: 'Another window holds the lock',
+  },
+];
+
 const items: RailItem[] = [
   { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library' },
   { id: 'claims', label: 'Claims', to: '/claims', icon: 'bookmark', active: true },
@@ -104,6 +122,134 @@ describe('ProjectRail', () => {
     expect(onNavigate).toHaveBeenCalledWith(items[2]);
   });
 
+  it('shows project availability and background work in the switcher', async () => {
+    const user = userEvent.setup();
+    const onSelectProject = vi.fn();
+    render(
+      <ProjectRail
+        project={mixedProjects[0] as ProjectModel}
+        projects={mixedProjects}
+        onSelectProject={onSelectProject}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Switch project/ }));
+
+    // `toBeDisabled` only reads the `disabled` attribute, and an ARIA menu item is not a
+    // form control: the menu pattern's disabled state is `aria-disabled`.
+    const unavailable = screen.getByRole('menuitem', { name: /Reef survey.*Unavailable/ });
+    expect(unavailable).toHaveAttribute('aria-disabled', 'true');
+    await user.click(unavailable);
+    expect(onSelectProject).not.toHaveBeenCalled();
+
+    expect(
+      screen.getByRole('menuitem', { name: /Thermal tolerance.*2 active/ }),
+    ).toHaveAttribute('aria-current', 'true');
+
+    // Busy is stated in words too, and stays selectable — the work is somebody else's.
+    const busy = screen.getByRole('menuitem', { name: /Kelp forest.*Busy/ });
+    expect(busy).not.toHaveAttribute('aria-disabled');
+    await user.click(busy);
+    expect(onSelectProject).toHaveBeenCalledWith('P3');
+  });
+
+  it('states the open project availability and running work beside its name', () => {
+    render(
+      <ProjectRail project={mixedProjects[1] as ProjectModel} projects={mixedProjects} />,
+    );
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Project: Reef survey. Unavailable. Switch project' }),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the status in the tooltip and the name when collapsed', () => {
+    render(
+      <ProjectRail
+        project={mixedProjects[0] as ProjectModel}
+        projects={mixedProjects}
+        defaultCollapsed
+      />,
+    );
+    const trigger = screen.getByRole('button', {
+      name: 'Project: Thermal tolerance. 2 active. Switch project',
+    });
+    expect(trigger).toBeInTheDocument();
+    expect(screen.queryByText('2 active')).not.toBeInTheDocument();
+  });
+
+  it('emits presentation-only project actions', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    render(<ProjectRail project={project} projects={[project]} onProjectAction={onAction} />);
+    await user.click(screen.getByRole('button', { name: 'Project actions' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Show in file manager',
+      'Locate folder',
+      'Rename',
+      'Forget project',
+    ]);
+    await user.click(screen.getByRole('menuitem', { name: 'Show in file manager' }));
+    expect(onAction).toHaveBeenCalledWith('P1', 'reveal');
+  });
+
+  it.each([
+    ['Locate folder', 'locate'],
+    ['Rename', 'rename'],
+    ['Forget project', 'forget'],
+  ] as const)('emits %s as the %s action', async (itemLabel, action) => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    render(<ProjectRail project={project} projects={projects} onProjectAction={onAction} />);
+    await user.click(screen.getByRole('button', { name: 'Project actions' }));
+    await user.click(screen.getByRole('menuitem', { name: itemLabel }));
+    expect(onAction).toHaveBeenCalledWith('P1', action);
+  });
+
+  it('offers no actions menu when the host cannot act on the project', () => {
+    render(<ProjectRail project={project} projects={projects} />);
+    expect(screen.queryByRole('button', { name: 'Project actions' })).not.toBeInTheDocument();
+  });
+
+  it('adds a project from the switcher', async () => {
+    const user = userEvent.setup();
+    const onAddProject = vi.fn();
+    render(<ProjectRail project={project} projects={projects} onAddProject={onAddProject} />);
+    await user.click(screen.getByRole('button', { name: /Switch project/ }));
+    await user.click(screen.getByRole('menuitem', { name: 'Add project' }));
+    expect(onAddProject).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds a project from the rail when there is no switcher', async () => {
+    const user = userEvent.setup();
+    const onAddProject = vi.fn();
+    render(<ProjectRail project={project} onAddProject={onAddProject} />);
+    await user.click(screen.getByRole('button', { name: 'Add project' }));
+    expect(onAddProject).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens project home from the top of the switcher', async () => {
+    const user = userEvent.setup();
+    const onOpenProjectHome = vi.fn();
+    render(
+      <ProjectRail
+        project={project}
+        projects={mixedProjects}
+        onOpenProjectHome={onOpenProjectHome}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Switch project/ }));
+    const items = screen.getAllByRole('menuitem');
+    expect(items[0]).toHaveTextContent('All projects');
+    await user.click(screen.getByRole('menuitem', { name: 'All projects' }));
+    expect(onOpenProjectHome).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the single-project rail free of switcher markup', () => {
+    const { container } = render(<ProjectRail project={project} />);
+    expect(screen.queryByRole('button', { name: /Switch project/ })).not.toBeInTheDocument();
+    expect(container.querySelector('button.rh-project-rail__project')).toBeNull();
+  });
+
   it('has no axe violations', async () => {
     const { container } = render(
       <ProjectRail
@@ -119,11 +265,47 @@ describe('ProjectRail', () => {
     );
     await expectNoAxeViolations(container);
   });
+
+  it('has no axe violations with the switcher and the actions menu open', async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectRail
+        project={mixedProjects[0] as ProjectModel}
+        projects={mixedProjects}
+        onSelectProject={vi.fn()}
+        onAddProject={vi.fn()}
+        onOpenProjectHome={vi.fn()}
+        onProjectAction={vi.fn()}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Switch project/ }));
+    await expectNoAxeViolations(document.body);
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: 'Project actions' }));
+    await expectNoAxeViolations(document.body);
+  });
 });
 
 describeThemeDensitySnapshots('ProjectRail', () => (
   <ProjectRail
     project={project}
+    items={items}
+    onNavigate={() => undefined}
+    onNewSession={() => undefined}
+    onOpenSettings={() => undefined}
+    providerStatus={{ label: 'Local Ollama', state: 'ok' }}
+  />
+));
+
+
+describeThemeDensitySnapshots('ProjectRail multi-project', () => (
+  <ProjectRail
+    project={mixedProjects[0] as ProjectModel}
+    projects={mixedProjects}
+    onSelectProject={() => undefined}
+    onAddProject={() => undefined}
+    onOpenProjectHome={() => undefined}
+    onProjectAction={() => undefined}
     items={items}
     onNavigate={() => undefined}
     onNewSession={() => undefined}
