@@ -25,12 +25,14 @@ import type {
   MessageModel,
   MessageStatus,
   ModelOption,
+  ModelOptionGroup,
   OmissionReason,
   OmittedContextItem,
   ResolutionState,
   SessionSummary,
 } from '@research-harness/design';
 import type {
+  CliRuntimeStatus,
   ContentBlock,
   ContextItemView,
   ContextPackView,
@@ -39,6 +41,7 @@ import type {
   OmittedContextItemView,
   ProviderModel,
   SessionAttachmentRecord,
+  SessionDefaults,
 } from '../../api/dto';
 import type { DeepLink } from '../../render';
 
@@ -215,6 +218,7 @@ export function toSessionSummary(
   session: ConversationSession,
   preview?: string | null,
 ): SessionSummary {
+  const words = bindingWords(session.defaults);
   return {
     id: session.id,
     title: session.title,
@@ -222,6 +226,7 @@ export function toSessionSummary(
     messageCount: session.message_count,
     visibility: session.visibility,
     ...(preview ? { preview } : {}),
+    ...(words ? { binding: words } : {}),
   };
 }
 
@@ -502,5 +507,112 @@ export function toModelOption(model: ProviderModel): ModelOption {
     contextTokens: model.context_tokens,
     available: model.available,
     ...(model.unavailable_reason ? { unavailableReason: model.unavailable_reason } : {}),
+  };
+}
+
+/* ------------------------------------------------------------------------- */
+/* the session binding                                                        */
+/* ------------------------------------------------------------------------- */
+
+/** `defaults.model.provider` for a runtime binding; the runtime id follows it. */
+const RUNTIME_PROVIDER_PREFIX = 'local_cli:';
+
+/** The composer's own view key for a runtime model row (plan ruling 6). */
+const RUNTIME_OPTION_PREFIX = 'runtime:';
+
+/**
+ * The session's binding, in the one format every surface uses (plan ruling 4).
+ *
+ * `session:<runtime>/<model>`, with ` (reasoning <level>)` when the record carries one;
+ * `entry <name>` otherwise; `null` for the project default. This is composition, not
+ * judgement: the runtime id, the model and the effort word are the daemon's, and the CLI
+ * builds the same strings from the same fields in `conversation/binding.py`.
+ *
+ * A record written before bindings existed names its entry in both halves of the identity
+ * (`provider == model`), so the `entry` branch reads it correctly without a migration.
+ */
+export function bindingWords(defaults: SessionDefaults): string | null {
+  const identity = defaults.model;
+  if (!identity) return null;
+  if (identity.provider.startsWith(RUNTIME_PROVIDER_PREFIX)) {
+    const runtime = identity.provider.slice(RUNTIME_PROVIDER_PREFIX.length);
+    const base = `session:${runtime}/${identity.model}`;
+    return defaults.reasoning ? `${base} (reasoning ${defaults.reasoning})` : base;
+  }
+  return `entry ${identity.model}`;
+}
+
+/** The selector row for one runtime model. A view key only; the daemon never sees it. */
+export function runtimeOptionId(runtime: string, model: string): string {
+  return `${RUNTIME_OPTION_PREFIX}${runtime}:${model}`;
+}
+
+/** The runtime and model a selector row names, or null when the row is not one. */
+export function parseRuntimeOptionId(id: string): { runtime: string; model: string } | null {
+  if (!id.startsWith(RUNTIME_OPTION_PREFIX)) return null;
+  const rest = id.slice(RUNTIME_OPTION_PREFIX.length);
+  const at = rest.indexOf(':');
+  return at <= 0 ? null : { runtime: rest.slice(0, at), model: rest.slice(at + 1) };
+}
+
+/**
+ * The runtime option id for a session's binding, when it has a runtime one.
+ *
+ * An entry binding names the entry, which is already the catalogue's own option id, so it
+ * needs no key of its own.
+ */
+export function bindingOptionId(defaults: SessionDefaults): string | null {
+  const identity = defaults.model;
+  if (!identity) return null;
+  if (identity.provider.startsWith(RUNTIME_PROVIDER_PREFIX)) {
+    return runtimeOptionId(identity.provider.slice(RUNTIME_PROVIDER_PREFIX.length), identity.model);
+  }
+  return identity.model;
+}
+
+/**
+ * One scanned runtime as a group of selector rows.
+ *
+ * Every word is the scan's: the runtime name and version in the title, the model labels
+ * with the daemon's own `model_source` beside them, and — for a runtime the daemon says it
+ * will not route to — the single disabled row carrying `unavailable_reason` verbatim. The
+ * row is kept rather than dropped so the picker never hides why a runtime is absent
+ * (spec §10); which runtimes reach here at all is `groupRuntimes`, on `available`.
+ *
+ * `egressClass` is `external` because every CLI runtime the daemon scans talks to a
+ * vendor; `vision` is false because the scan declares no image support for any of them.
+ */
+export function toRuntimeGroup(status: CliRuntimeStatus): ModelOptionGroup {
+  const title = status.version ? `${status.name} ${status.version}` : status.name;
+  if (!status.routable) {
+    return {
+      id: status.runtime,
+      label: title,
+      options: [
+        {
+          id: `${RUNTIME_OPTION_PREFIX}${status.runtime}`,
+          label: title,
+          provider: `${RUNTIME_PROVIDER_PREFIX}${status.runtime}`,
+          egressClass: 'external',
+          vision: false,
+          contextTokens: null,
+          available: false,
+          ...(status.unavailable_reason ? { unavailableReason: status.unavailable_reason } : {}),
+        },
+      ],
+    };
+  }
+  return {
+    id: status.runtime,
+    label: title,
+    options: status.models.map((model) => ({
+      id: runtimeOptionId(status.runtime, model.id),
+      label: `${model.label} (${status.model_source})`,
+      provider: `${RUNTIME_PROVIDER_PREFIX}${status.runtime}`,
+      egressClass: 'external' as const,
+      vision: false,
+      contextTokens: model.context_tokens ?? null,
+      available: true,
+    })),
   };
 }

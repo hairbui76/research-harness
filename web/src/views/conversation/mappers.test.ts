@@ -10,22 +10,37 @@ import { describe, expect, it } from 'vitest';
 import contextPack from '../../test/fixtures/conversation/context-pack.json';
 import transcript from '../../test/fixtures/conversation/transcript.json';
 import incomplete from '../../test/fixtures/conversation/transcript-incomplete.json';
-import type { ContextPackView, ConversationMessage, SessionTranscript } from '../../api/dto';
+import scan from '../../test/fixtures/providers/cli-scan.json';
+import sessions from '../../test/fixtures/conversation/sessions.json';
+import type {
+  CliScanReport,
+  ContextPackView,
+  ConversationMessage,
+  ConversationSession,
+  SessionTranscript,
+} from '../../api/dto';
 import {
+  bindingWords,
   entityKindOf,
   entityRefFor,
   groupAttempts,
   messagesReferencing,
+  parseRuntimeOptionId,
   routeForDeepLink,
   routeForEntity,
+  runtimeOptionId,
   toContextReceiptModel,
   toMessageModel,
+  toRuntimeGroup,
+  toSessionSummary,
 } from './mappers';
 import { parseDeepLink } from '../../render';
 
 const PAGE = transcript as unknown as SessionTranscript;
 const INTERRUPTED = incomplete as unknown as SessionTranscript;
 const PACK = contextPack as unknown as ContextPackView;
+const SCAN = scan as unknown as CliScanReport;
+const SESSIONS = sessions.sessions as unknown as ConversationSession[];
 
 describe('stable ids', () => {
   it('dispatches on the longest prefix, as the domain does', () => {
@@ -148,5 +163,68 @@ describe('the context receipt', () => {
     const policy = receipt.included.find((item) => item.cls === 'policy');
     expect(policy?.ref.id).toBe('Research assistant policy');
     expect(policy?.sourcePointer).toBe('policy/system.md');
+  });
+});
+
+/* -- the session binding (plan ruling 4, ruling 6) ------------------------ */
+
+describe('the session binding', () => {
+  it('composes the binding words in the fixed format the CLI uses', () => {
+    expect(
+      bindingWords({ model: { provider: 'local_cli:codex', model: 'gpt-5.5' }, reasoning: 'high' }),
+    ).toBe('session:codex/gpt-5.5 (reasoning high)');
+    expect(bindingWords({ model: { provider: 'local_cli:claude', model: 'default' } })).toBe(
+      'session:claude/default',
+    );
+    expect(bindingWords({ model: { provider: 'entry', model: 'codex-sub' } })).toBe(
+      'entry codex-sub',
+    );
+    expect(bindingWords({ model: { provider: 'fast', model: 'fast' } })).toBe('entry fast');
+    expect(bindingWords({ model: null })).toBeNull();
+  });
+
+  it('round-trips a runtime option id', () => {
+    expect(parseRuntimeOptionId(runtimeOptionId('codex', 'gpt-5.5'))).toEqual({
+      runtime: 'codex',
+      model: 'gpt-5.5',
+    });
+    expect(parseRuntimeOptionId('codex-sub')).toBeNull();
+  });
+
+  it('puts the binding words on the session row, and nothing on the project default', () => {
+    const bound = SESSIONS.find((session) => session.id === 'CS0002');
+    const unbound = SESSIONS.find((session) => session.id === 'CS0001');
+    expect(toSessionSummary(bound as ConversationSession).binding).toBe(
+      'session:codex/gpt-5.5 (reasoning high)',
+    );
+    expect(toSessionSummary({ ...(unbound as ConversationSession), defaults: {} }).binding).toBe(
+      undefined,
+    );
+  });
+
+  it('offers the scan\'s models under a routable runtime, with the daemon\'s source word', () => {
+    const codex = SCAN.runtimes.find((item) => item.runtime === 'codex');
+    const group = toRuntimeGroup(codex as (typeof SCAN)['runtimes'][number]);
+    expect(group.label).toBe('Codex CLI 0.150.1');
+    expect(group.options.map((option) => option.id)).toEqual([
+      'runtime:codex:default',
+      'runtime:codex:gpt-5.5',
+      'runtime:codex:gpt-5.4-mini',
+    ]);
+    const model = group.options.find((option) => option.id === 'runtime:codex:gpt-5.5');
+    expect(model?.label).toBe('gpt-5.5 (live)');
+    expect(model?.contextTokens).toBe(272000);
+    expect(model?.available).toBe(true);
+  });
+
+  it('shows a runtime the daemon will not route to as one row with its reason', () => {
+    const cursor = SCAN.runtimes.find((item) => item.runtime === 'cursor-agent');
+    const group = toRuntimeGroup(cursor as (typeof SCAN)['runtimes'][number]);
+    expect(group.label).toBe('Cursor Agent 1.4.0');
+    expect(group.options).toHaveLength(1);
+    expect(group.options[0]?.available).toBe(false);
+    expect(group.options[0]?.unavailableReason).toBe(
+      'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
+    );
   });
 });
