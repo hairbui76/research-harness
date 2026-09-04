@@ -49,6 +49,19 @@
   gap: var(--rh-space-2);
 }
 
+/*
+ * The model picker and, while a runtime binding is in force, its effort level.
+ *
+ * One cluster, so the two controls read as one decision about where this session's next
+ * message goes; it wraps rather than pushing the send button off a narrow toolbar.
+ */
+.rh-web-composer__model {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
 /* Why there is no model selector, when there is none. */
 .rh-web-composer__note {
   margin: 0;

@@ -23,7 +23,13 @@ import type {
   SourceAnchorModel,
 } from '@research-harness/design';
 import { useSession } from '../../app/session';
-import { CONVERSATION_PATH, entityRefFor, routeForEntity } from './mappers';
+import {
+  CONVERSATION_PATH,
+  bindingOptionId,
+  entityRefFor,
+  parseRuntimeOptionId,
+  routeForEntity,
+} from './mappers';
 /* References and the graph (task W3): completion, token resolution and `rh://` links. */
 import { SOURCE_PATH, useDeepLinks, useGraphReferences, useResolveReferences } from './references';
 import type { DeepLinkApi, GraphReferencesApi, ResolveReferencesApi } from './references';
@@ -192,6 +198,22 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
   const [receipt, setReceipt] = useState<ReceiptSource | null>(null);
   const [model, setModel] = useState<string | null>(null);
 
+  /**
+   * Where the next message would actually go, for the attachment check.
+   *
+   * The per-message model when a read-only window chose one; otherwise the session's own
+   * binding, which is what the router would resolve. An entry binding names a configured
+   * entry, which is what `attachment.check_send` matches on. A *runtime* binding names no
+   * configured entry — the daemon builds that route itself on send (plan ruling 2) — so
+   * the check is asked with no provider at all, which is the request that means "the entry
+   * the router would choose". Naming one here would be this cockpit deciding routing.
+   */
+  const destination = useMemo(() => {
+    if (model) return model;
+    const bound = sessions.active ? bindingOptionId(sessions.active.defaults) : null;
+    return bound === null || parseRuntimeOptionId(bound) !== null ? null : bound;
+  }, [model, sessions.active]);
+
   /* Attachments (task W2). The transcript's records are the list's starting point, so an
      upload and a re-read of the session converge on one set of files rather than two; the
      ids past messages already carry belong to those turns and are not offered again. */
@@ -204,7 +226,7 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
     usedIds: attachmentsInTranscript,
     canMutate,
     blockedReason: mutationBlockedReason,
-    model,
+    model: destination,
     enabled: active,
   });
   const renderAttachmentPage = usePdfPageRenderer(client, sessionId);

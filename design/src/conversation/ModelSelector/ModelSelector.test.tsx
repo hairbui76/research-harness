@@ -134,6 +134,31 @@ describe('ModelSelector', () => {
     expect(screen.getByRole('button', { name: /Model: gpt-5\.5/ })).toBeInTheDocument();
   });
 
+  it('says what the host is on when the value names no option it was given', () => {
+    // A session bound to a runtime the scan could not read this time: the binding is real,
+    // and "Select a model" would be a false statement about it.
+    render(
+      <ModelSelector
+        options={SAMPLE_MODELS.slice(0, 1)}
+        value="runtime:codex:gpt-5.5"
+        fallbackLabel="session:codex/gpt-5.5 (reasoning high)"
+        onChange={() => undefined}
+      />,
+    );
+    const trigger = screen.getByRole('button', {
+      name: 'Model: session:codex/gpt-5.5 (reasoning high)',
+    });
+    expect(within(trigger).getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
+  });
+
+  it('still offers to select a model when nothing is selected and nothing was named', () => {
+    render(
+      <ModelSelector options={SAMPLE_MODELS.slice(0, 1)} value="nope" onChange={() => undefined} />,
+    );
+    expect(screen.getByRole('button', { name: 'Model: none selected' })).toBeInTheDocument();
+    expect(screen.getByText('Select a model')).toBeInTheDocument();
+  });
+
   it('renders a model with no declared context window without a token count', async () => {
     const user = userEvent.setup();
     render(

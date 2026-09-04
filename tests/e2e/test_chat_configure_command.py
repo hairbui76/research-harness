@@ -104,7 +104,9 @@ def test_configure_refuses_with_the_entry_sentence_and_exits_non_zero(
     workspace: Path, codex: FakeCli
 ) -> None:
     created = json.loads(
-        runner.invoke(app, ["chat", "new", "x", "-w", str(workspace), "--json"]).stdout
+        runner.invoke(
+            app, ["chat", "new", "x", "--visibility", "project", "-w", str(workspace), "--json"]
+        ).stdout
     )
     session = created["session"]["id"]
     result = runner.invoke(

@@ -556,10 +556,24 @@ describe('choosing an incompatible model', () => {
     expect(within(intake()).getAllByText('Ready')).toHaveLength(2);
   });
 
-  it('re-asks the daemon when the model changes, and lets the send through', async () => {
+  it('re-asks the daemon when the binding changes, and lets the send through', async () => {
+    // Picking a model in a window that may write *binds the session* (plan ruling 5), so
+    // the daemon answers with the record and the check is re-asked against it.
+    const bound = {
+      session: {
+        ...sessions.sessions[0],
+        defaults: {
+          model: { provider: 'entry', model: 'vendor-vision' },
+          mode: null,
+          token_budget: 8000,
+          reasoning: null,
+        },
+      },
+    };
     const capabilities = answers({
       'attachment.check_send': check(checkBlocked),
       'session.send': sendStarted,
+      'session.configure': bound,
     });
     const daemon = withAttachments(fakeDaemon({ capabilities }), {
       uploads: { 'figure-3-latency.png': imageReady },
@@ -571,11 +585,16 @@ describe('choosing an incompatible model', () => {
     await drop(IMAGE());
     await screen.findByText(/This message cannot be sent yet/);
 
-    // A model that takes images. The check is asked again, naming the chosen entry.
+    // A model that takes images. The check is asked again, naming the bound entry.
     capabilities['attachment.check_send'] = check(checkOk);
     await user.click(screen.getByRole('button', { name: /^Model:/ }));
     await user.click(await screen.findByRole('menuitem', { name: /vendor-vision/ }));
 
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: 'CS0001', entry: 'vendor-vision' }),
+    );
     await waitFor(() =>
       expect(screen.queryByText(/This message cannot be sent yet/)).not.toBeInTheDocument(),
     );
@@ -589,7 +608,8 @@ describe('choosing an incompatible model', () => {
     await waitFor(() => {
       const send = daemon.capabilityCalls().find((call) => call.name === 'session.send');
       expect(send?.request.attachments).toEqual(['SA0001']);
-      expect(send?.request.model).toBe('vendor-vision');
+      // No per-message model: the session's own binding is what the daemon resolves.
+      expect(send?.request.model).toBeUndefined();
     });
   });
 });

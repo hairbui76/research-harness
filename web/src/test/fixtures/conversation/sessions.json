@@ -28,8 +28,13 @@
       "updated_at": "2026-08-20T11:40:00Z",
       "provenance": { "source": "human", "actor": "human" },
       "title": "Screening pass",
-      "visibility": "private",
-      "defaults": { "model": null, "mode": null, "token_budget": null },
+      "visibility": "project",
+      "defaults": {
+        "model": { "provider": "local_cli:codex", "model": "gpt-5.5" },
+        "mode": null,
+        "token_budget": null,
+        "reasoning": "high"
+      },
       "message_count": 6,
       "last_message": "M0012",
       "last_message_at": "2026-08-20T11:40:00Z",
