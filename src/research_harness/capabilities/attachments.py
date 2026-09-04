@@ -420,8 +420,8 @@ def check_attachment_send(
                 f"attachment.check_send: session {request.session} has no {', '.join(missing)}"
             )
         attachments = [item for item in attachments if item.id in wanted]
-    models = configured_models(ctx)
-    selected, alternatives = _select_model(models, request.provider, request.model)
+    models, provider = _session_target(ctx, request)
+    selected, alternatives = _select_model(models, provider, request.model)
     check = sendability(
         attachments,
         provider=selected[0].split("/", 1)[0],
@@ -482,6 +482,45 @@ def configured_models(ctx: CapabilityContext) -> list[tuple[str, ProviderCapabil
         )
     entries.sort(key=lambda item: (item[0], item[1]))
     return [(label, capabilities) for _, label, capabilities in entries]
+
+
+def _session_target(
+    ctx: CapabilityContext, request: CheckAttachmentSendRequest
+) -> tuple[list[tuple[str, ProviderCapabilities]], str | None]:
+    """The models this check may pick from, and the one the session is bound to.
+
+    A check must describe the send that would actually happen (binding spec §9). A named
+    `provider`/`model` wins, exactly as a per-message model wins on send; otherwise a
+    runtime binding contributes its in-memory entry -- which is the whole target when
+    `research.yaml` has no `providers:` list -- and an entry binding narrows to its name,
+    so a binding to an entry that is gone is refused here as it is there.
+    """
+    from research_harness.conversation.binding import (
+        EntryBinding,
+        RuntimeBinding,
+        binding_of,
+        session_entry,
+    )
+    from research_harness.providers.models.router import entry_capabilities
+
+    models = configured_models(ctx)
+    if request.provider is not None or request.model is not None:
+        return models, request.provider
+    store = ConversationStore.for_repository(ctx.repo)
+    binding = binding_of(store.get_session(request.session).defaults)
+    if isinstance(binding, EntryBinding):
+        return models, binding.name
+    if not isinstance(binding, RuntimeBinding):
+        return models, None
+    entry = session_entry(binding)
+    label = f"{entry.name}/{entry.model}"
+    return (
+        [
+            (label, entry_capabilities(entry)),
+            *(item for item in models if item[0] != label),
+        ],
+        None,
+    )
 
 
 def _select_model(

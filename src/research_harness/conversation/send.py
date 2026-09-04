@@ -32,8 +32,6 @@ from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from pydantic import ValidationError
-
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.context import (
     AssembledContext,
@@ -303,14 +301,13 @@ class WorkspaceProviders:
             EntryBinding,
             RuntimeBinding,
             binding_of,
-            validation_sentence,
+            session_entry,
         )
         from research_harness.privacy.policy import load_policy
         from research_harness.privacy.traces import trace_writer_for
         from research_harness.providers.models.router import (
             ModelRouter,
             RouterConfig,
-            RouterProviderConfig,
             build_router,
         )
 
@@ -321,21 +318,15 @@ class WorkspaceProviders:
         wanted = model
         label: str | None = None
         if isinstance(binding, RuntimeBinding):
-            # Validated exactly as the `research.yaml` entry it stands in for, so a record
-            # whose runtime lost its bounded posture in a newer registry refuses with the
-            # entry's own sentence rather than spawning.
-            try:
-                session_entry = RouterProviderConfig(
-                    name=binding.label,
-                    kind="local_cli",
-                    runtime=binding.runtime,
-                    model=binding.model,
-                    reasoning=binding.reasoning,
-                    priority=0,
-                )
-            except ValidationError as exc:
-                raise CapabilityError(validation_sentence(exc)) from exc
-            config = RouterConfig(providers=[*config.providers, session_entry])
+            # `session:<runtime>` is the binding's own name: a hand-written entry that took
+            # it would otherwise share the tag and could outrank the session's own entry.
+            entry_config = session_entry(binding)
+            config = RouterConfig(
+                providers=[
+                    *(item for item in config.providers if item.name != entry_config.name),
+                    entry_config,
+                ]
+            )
             wanted = label = binding.label
         elif isinstance(binding, EntryBinding):
             wanted = binding.name
@@ -1039,6 +1030,21 @@ def _fingerprint(inputs: Mapping[str, Any]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def private_egress_sentence(session: ConversationSessionId, label: str) -> str:
+    """Why a private session may not reach an external provider (Product 34).
+
+    One wording for two moments: the send that would disclose the transcript, and
+    `session.configure` binding a session to a runtime, which is external by definition and
+    so would refuse every send it ever made. `label` is `provider/model`.
+    """
+    return (
+        f"session {session} is private and {label} is an external provider, so nothing in "
+        "this conversation may be sent to it (Product 34; workspace design SS7). Send it "
+        "to a local provider, or make the session shareable with "
+        "`research chat new --visibility project` on a new conversation."
+    )
+
+
 def _refuse_private_egress(record: ConversationSession, profile: ProviderProfile) -> None:
     """Refuse an external send from a private session, before anything is written.
 
@@ -1050,11 +1056,7 @@ def _refuse_private_egress(record: ConversationSession, profile: ProviderProfile
     if not profile.leaves_the_machine or record.visibility is not Visibility.PRIVATE:
         return
     raise EgressDeniedError(
-        f"session {record.id} is private and {profile.provider}/{profile.model} is an "
-        f"external provider, so nothing in this conversation may be sent to it "
-        "(Product 34; workspace design SS7). Send it to a local provider, or make the "
-        "session shareable with `research chat new --visibility project` on a new "
-        "conversation.",
+        private_egress_sentence(record.id, f"{profile.provider}/{profile.model}"),
         provider=profile.provider,
         endpoint_host=profile.model,
         policy_fields=("visibility",),

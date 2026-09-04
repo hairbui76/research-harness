@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import pytest
@@ -10,12 +11,14 @@ from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.service import ConversationService
 from research_harness.domain.conversation import (
     AttemptStatus,
+    EgressClass,
     Message,
     MessageRole,
     Visibility,
 )
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import ConversationSessionId
+from research_harness.privacy.policy import EgressDeniedError, EgressPolicy
 from research_harness.providers.cli.detection import DEFAULT_CACHE
 from tests.fixtures.cli.fakes import FakeCli
 
@@ -23,6 +26,15 @@ from tests.fixtures.cli.fakes import FakeCli
 def last_assistant(service: ConversationService, session: ConversationSessionId) -> Message:
     page = service.transcript(session, limit=500)
     return [message for message in page.messages if message.role is MessageRole.ASSISTANT][-1]
+
+
+def traces(ctx: CapabilityContext) -> list[dict[str, Any]]:
+    """Every completion trace this workspace wrote, oldest name first."""
+    root = ctx.repo.layout.research_dir / "traces"
+    return [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(root.glob("*/completion-*.json"))
+    ]
 
 
 def bound_session(service: ConversationService, **binding: Any) -> ConversationSessionId:
@@ -49,6 +61,49 @@ def test_a_bound_session_spawns_the_runtime_with_its_model_and_reasoning(
     answer = last_assistant(service, session)
     assert answer.model is not None
     assert (answer.model.provider, answer.model.model) == ("session:codex", "gpt-5.5")
+    # The transcript names the binding; the trace names the adapter that ran, because the
+    # trace writer records `provider.name` (plan ruling 2).
+    (trace,) = traces(ctx)
+    assert (trace["provider"], trace["model"]) == ("local_cli:codex", "gpt-5.5")
+
+
+def test_a_preview_of_a_bound_session_assembles_against_the_bound_runtime(
+    ctx: CapabilityContext, codex: FakeCli
+) -> None:
+    """`context.preview` shows what *would* be sent, so it must see the binding too."""
+    service = ConversationService(ctx)
+    session = bound_session(service, runtime="codex", model="gpt-5.5")
+
+    _, assembled = service.preview(session, "What does Table 3 say?", persist=False)
+
+    profile = assembled.profile
+    assert (profile.provider, profile.model) == ("session:codex", "gpt-5.5")
+    assert profile.egress is EgressClass.EXTERNAL
+    assert codex.runs() == [], "a preview sends nothing"
+
+
+def test_a_configured_entry_may_not_impersonate_the_session_label(
+    ctx: CapabilityContext, codex: FakeCli
+) -> None:
+    """`session:<runtime>` is the binding's name; a hand-written entry never answers for it."""
+    ctx.repo.update_providers(
+        [
+            {
+                "name": "session:codex",
+                "kind": "local_cli",
+                "runtime": "codex",
+                "model": "gpt-5.4-mini",
+                "priority": 0,
+            }
+        ]
+    )
+    service = ConversationService(ctx)
+    session = bound_session(service, runtime="codex", model="gpt-5.5")
+
+    service.send(session, "hello", background=False)
+
+    (run,) = codex.runs()
+    assert "gpt-5.5" in run["argv"] and "gpt-5.4-mini" not in run["argv"]
 
 
 def test_a_per_message_model_wins_over_the_binding(ctx: CapabilityContext, codex: FakeCli) -> None:
@@ -98,13 +153,11 @@ def test_a_bound_runtime_that_is_logged_out_is_refused_before_any_run(
 def test_the_policy_refuses_a_bound_session_before_any_spawn(
     ctx: CapabilityContext, codex: FakeCli
 ) -> None:
-    from research_harness.privacy.policy import EgressPolicy
-
     service = ConversationService(ctx)
     session = bound_session(service, runtime="codex", model="gpt-5.5")
     ctx.repo.update_config(EgressPolicy(external_models="disabled"))
 
-    with pytest.raises(Exception, match="external"):
+    with pytest.raises(EgressDeniedError, match="external"):
         service.send(session, "hello", background=False)
     assert codex.runs() == []
 
