@@ -260,6 +260,12 @@ cockpit's session rail and composer show the identical string —
 `session:<runtime>/<model>`, with ` (reasoning <level>)` when one is set, or `entry <name>`,
 or `project default`.
 
+A session opened *before* bindings existed is **not bound**. `research chat new --model X`
+stored a `defaults.model` that nothing on the send path ever read, so it named no
+`research.yaml` entry and decided nothing; such a session reads as `project default` on
+every surface and sends through the project default in priority order, until the first
+`research chat configure` on it stores a real binding. Nothing is rewritten in the meantime.
+
 In the cockpit the binding *is* the composer's model picker: configured entries in one
 group, one group per installed runtime, and a **Project default** row that clears it. The
 Settings → *Models & providers* tab is not needed and is not the same act — that tab writes

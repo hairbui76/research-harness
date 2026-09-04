@@ -93,6 +93,7 @@ class SessionDefaults(DomainModel):
 | runtime | `local_cli:<runtime id>` | model id from the scan, or `default` | a value from the runtime's `reasoning_choices`, or `None` for the runtime's default |
 | entry | `entry` | the entry's name in `research.yaml` | `None` |
 | none | `None` | | `None` |
+| none (pre-binding record) | anything else | anything | `None` |
 
 The domain validates only shape: `provider` and `model` are non-empty strings; `reasoning` is `None` unless `provider` starts with `local_cli:`. Which runtimes, models, and reasoning levels exist is decided by the capability layer at binding time and by the routing layer at send time.
 
@@ -247,7 +248,7 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 
 ## 15. Compatibility and migration
 
-- Sessions written before this change have `defaults.model` either `None` or a `ModelIdentity` naming an entry with the adapter's own provider name. On first read, a `ModelIdentity` whose `provider` is neither `entry` nor `local_cli:*` is treated as an entry binding on its `model` value; nothing is rewritten until the session is next configured.
+- Sessions written before this change have `defaults.model` either `None` or a `ModelIdentity` written by `create --model X`, which stored whatever it was handed — `provider == model == X`, or the two halves of an `openai/gpt-4`. `defaults.model` was never read on the send path then, so such a record bound nothing; it binds nothing now. A `ModelIdentity` whose `provider` is neither `entry` nor `local_cli:*` is **no binding**: `binding_of` returns `None`, every surface says `project default`, and the session sends through the project default in priority order. Reading it as an entry binding on its `model` value would instead refuse every send of an old session with `no provider named 'gpt-4'`, on a name that never named a `research.yaml` entry. Nothing is rewritten; the next `session.configure` stores a real binding.
 - The `SessionDefaults` schema gains an optional field with a default. The repository has no object schema-version convention beyond the constant every canonical object carries, and an additive optional field loads every existing session file, so no version bump ships with this change.
 - Generated artifacts are regenerated, never hand-edited: `docs/guide/capabilities.md`, `docs/guide/cli-reference.md`, `web/capabilities.json`, `web/openapi.json`, `web/src/api/capabilities.gen.ts`, and the Web DTO for `SessionDefaults`.
 - The acceptance matrix and ROADMAP gain rows for the criteria in §16; ADR-030 gains the addendum of §5.

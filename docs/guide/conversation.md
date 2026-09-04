@@ -53,9 +53,12 @@ CS0001     3 msg  private  Encoder choices for encrypted traffic  [entry codex-s
 ```
 
 A per-message `--provider` on `chat send` still wins over the binding, and `--clear` returns
-the session to the project default. A binding to a *runtime* — `--runtime codex --model
-gpt-5.5 --reasoning high`, shown as `session:codex/gpt-5.5 (reasoning high)` — is external
-egress, so it is refused on a private session; see
+the session to the project default. A session opened before `chat configure` existed is not
+bound: the `--model` `chat new` stored was never read on the send path, so such a session
+says `project default` and sends through it until it is configured. A binding to a
+*runtime* — `--runtime codex --model gpt-5.5 --reasoning high`, shown as
+`session:codex/gpt-5.5 (reasoning high)` — is external egress, so it is refused on a
+private session; see
 [Providers](providers.md#binding-a-session-instead-of-configuring-the-project).
 
 Sessions live in `conversations/CS0001/` — outside `.research/`, and listed in the

@@ -1,9 +1,13 @@
 """What a session's `defaults.model` means for routing (binding spec §7, §9, §15).
 
 The domain stores two opaque labels; this module is the one place that reads them. A
-provider of `local_cli:<runtime>` is a runtime binding, `entry` is an entry binding, and any
-other provider is a record written before bindings existed, when `create` stored the
-adapter's own name in both fields: it is an entry binding on its `model` value.
+provider of `local_cli:<runtime>` is a runtime binding and `entry` is an entry binding.
+Every other provider is a record written before bindings existed, when `defaults.model`
+was never read on the send path and `create --model X` stored whatever it was handed --
+`provider == model == X`, or the two halves of an `openai/gpt-4`. Such a record bound
+nothing then and binds nothing now: it is no binding, and the session sends through the
+project default, because reading it would refuse every send of an old session on a name
+that never named a `research.yaml` entry (spec §15).
 """
 
 from __future__ import annotations
@@ -62,6 +66,11 @@ Binding = EntryBinding | RuntimeBinding
 
 
 def binding_of(defaults: SessionDefaults) -> Binding | None:
+    """The binding a session record states, or `None` for the project default.
+
+    Only the two providers this branch writes bind: anything else is a pre-binding record,
+    which means the project default (see the module docstring).
+    """
     identity = defaults.model
     if identity is None:
         return None
@@ -71,7 +80,9 @@ def binding_of(defaults: SessionDefaults) -> Binding | None:
             model=identity.model,
             reasoning=defaults.reasoning,
         )
-    return EntryBinding(name=identity.model)
+    if identity.provider == ENTRY_PROVIDER:
+        return EntryBinding(name=identity.model)
+    return None
 
 
 def binding_words(defaults: SessionDefaults) -> str:

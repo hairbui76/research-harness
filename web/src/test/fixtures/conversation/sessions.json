@@ -10,7 +10,7 @@
       "title": "Latency study",
       "visibility": "private",
       "defaults": {
-        "model": { "provider": "local", "model": "local-small" },
+        "model": { "provider": "entry", "model": "local-small" },
         "mode": null,
         "token_budget": 8000
       },

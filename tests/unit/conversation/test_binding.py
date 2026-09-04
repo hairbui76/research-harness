@@ -33,7 +33,17 @@ def test_no_binding_means_the_project_default() -> None:
     assert binding_words(SessionDefaults()) == "project default"
 
 
-def test_a_record_written_before_bindings_is_an_entry_binding_on_its_model_value() -> None:
-    # `ConversationService.create` used to store provider == model == the entry name.
+def test_a_record_written_before_bindings_is_no_binding() -> None:
+    """Only `entry` and `local_cli:<runtime>` bind; every other provider is a stale label.
+
+    `defaults.model` was never read on the send path before bindings existed, and `create
+    --model X` stored whatever it was given -- `provider == model == X`, or the two halves
+    of an `openai/gpt-4`. Reading either as a binding would fail every send of an old
+    session on a name that never named a `research.yaml` entry (spec §15).
+    """
     old = SessionDefaults(model=ModelIdentity(provider="fast", model="fast"))
-    assert binding_of(old) == EntryBinding(name="fast")
+    assert binding_of(old) is None
+    assert binding_words(old) == "project default"
+    split = SessionDefaults(model=ModelIdentity(provider="openai", model="gpt-4"))
+    assert binding_of(split) is None
+    assert binding_words(split) == "project default"

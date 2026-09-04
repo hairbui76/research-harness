@@ -14,12 +14,15 @@ from research_harness.domain.conversation import (
     EgressClass,
     Message,
     MessageRole,
+    ModelIdentity,
+    SessionDefaults,
     Visibility,
 )
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import ConversationSessionId
 from research_harness.privacy.policy import EgressDeniedError, EgressPolicy
 from research_harness.providers.cli.detection import DEFAULT_CACHE
+from research_harness.workspace.conversations import ConversationStore
 from tests.fixtures.cli.fakes import FakeCli
 
 
@@ -129,6 +132,34 @@ def test_a_configured_entry_may_not_impersonate_the_session_label(
     assert answer.attempt.status is AttemptStatus.COMPLETE
     assert answer.model is not None
     assert (answer.model.provider, answer.model.model) == ("session:codex", "gpt-5.5")
+
+
+def test_a_record_written_before_bindings_sends_through_the_project_default(
+    ctx: CapabilityContext, codex: FakeCli
+) -> None:
+    """An old `create --model openai/gpt-4` record bound nothing then, and binds nothing now.
+
+    `defaults.model` was write-only before this branch. Reading its provider half as an
+    entry name would refuse every send of such a session with "no provider named 'gpt-4'",
+    so a shape that is neither `entry` nor `local_cli:<runtime>` is no binding (spec §15).
+    """
+    ctx.repo.update_providers(
+        [{"name": "house", "kind": "local_cli", "runtime": "codex", "model": "gpt-5.5"}]
+    )
+    service = ConversationService(ctx)
+    session = service.create("Latency study", visibility=Visibility.PROJECT).id
+    ConversationStore.for_repository(ctx.repo).update_session(
+        session, defaults=SessionDefaults(model=ModelIdentity(provider="openai", model="gpt-4"))
+    )
+
+    service.send(session, "hello", background=False)
+
+    (run,) = codex.runs()
+    assert "gpt-5.5" in run["argv"]
+    answer = last_assistant(service, session)
+    assert answer.attempt.status is AttemptStatus.COMPLETE
+    assert answer.model is not None
+    assert (answer.model.provider, answer.model.model) == ("local_cli:codex", "gpt-5.5")
 
 
 def test_a_per_message_model_wins_over_the_binding(ctx: CapabilityContext, codex: FakeCli) -> None:

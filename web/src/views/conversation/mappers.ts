@@ -517,6 +517,9 @@ export function toModelOption(model: ProviderModel): ModelOption {
 /** `defaults.model.provider` for a runtime binding; the runtime id follows it. */
 const RUNTIME_PROVIDER_PREFIX = 'local_cli:';
 
+/** The provider half an entry binding stores (`conversation/binding.py::ENTRY_PROVIDER`). */
+const ENTRY_PROVIDER = 'entry';
+
 /** The composer's own view key for a runtime model row (plan ruling 6). */
 const RUNTIME_OPTION_PREFIX = 'runtime:';
 
@@ -524,12 +527,15 @@ const RUNTIME_OPTION_PREFIX = 'runtime:';
  * The session's binding, in the one format every surface uses (plan ruling 4).
  *
  * `session:<runtime>/<model>`, with ` (reasoning <level>)` when the record carries one;
- * `entry <name>` otherwise; `null` for the project default. This is composition, not
- * judgement: the runtime id, the model and the effort word are the daemon's, and the CLI
- * builds the same strings from the same fields in `conversation/binding.py`.
+ * `entry <name>` for an entry binding; `null` for the project default. This is
+ * composition, not judgement: the runtime id, the model and the effort word are the
+ * daemon's, and the CLI builds the same strings from the same fields in
+ * `conversation/binding.py`.
  *
- * A record written before bindings existed names its entry in both halves of the identity
- * (`provider == model`), so the `entry` branch reads it correctly without a migration.
+ * A record written before bindings existed carries some other provider — `create --model
+ * X` stored `provider == model == X`, or the two halves of an `openai/gpt-4`. It never
+ * named a `research.yaml` entry, so it is no binding and reads as the project default,
+ * exactly as `binding_of` reads it (spec §15).
  */
 export function bindingWords(defaults: SessionDefaults): string | null {
   const identity = defaults.model;
@@ -539,7 +545,7 @@ export function bindingWords(defaults: SessionDefaults): string | null {
     const base = `session:${runtime}/${identity.model}`;
     return defaults.reasoning ? `${base} (reasoning ${defaults.reasoning})` : base;
   }
-  return `entry ${identity.model}`;
+  return identity.provider === ENTRY_PROVIDER ? `entry ${identity.model}` : null;
 }
 
 /** The selector row for one runtime model. A view key only; the daemon never sees it. */
@@ -559,7 +565,8 @@ export function parseRuntimeOptionId(id: string): { runtime: string; model: stri
  * The runtime option id for a session's binding, when it has a runtime one.
  *
  * An entry binding names the entry, which is already the catalogue's own option id, so it
- * needs no key of its own.
+ * needs no key of its own. A pre-binding record is no binding (`bindingWords`), so it
+ * selects nothing and the composer shows the project default.
  */
 export function bindingOptionId(defaults: SessionDefaults): string | null {
   const identity = defaults.model;
@@ -567,7 +574,7 @@ export function bindingOptionId(defaults: SessionDefaults): string | null {
   if (identity.provider.startsWith(RUNTIME_PROVIDER_PREFIX)) {
     return runtimeOptionId(identity.provider.slice(RUNTIME_PROVIDER_PREFIX.length), identity.model);
   }
-  return identity.model;
+  return identity.provider === ENTRY_PROVIDER ? identity.model : null;
 }
 
 /**

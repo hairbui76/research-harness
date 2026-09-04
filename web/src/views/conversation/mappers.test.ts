@@ -21,6 +21,7 @@ import type {
   SessionTranscript,
 } from '../../api/dto';
 import {
+  bindingOptionId,
   bindingWords,
   entityKindOf,
   entityRefFor,
@@ -183,8 +184,15 @@ describe('the session binding', () => {
     expect(bindingWords({ model: { provider: 'entry', model: 'codex-sub' } })).toBe(
       'entry codex-sub',
     );
-    expect(bindingWords({ model: { provider: 'fast', model: 'fast' } })).toBe('entry fast');
     expect(bindingWords({ model: null })).toBeNull();
+  });
+
+  it('reads a record written before bindings as the project default', () => {
+    // `create --model X` stored `provider == model == X`, or the two halves of an
+    // `openai/gpt-4`. Neither ever named a `research.yaml` entry (spec §15).
+    expect(bindingWords({ model: { provider: 'fast', model: 'fast' } })).toBeNull();
+    expect(bindingWords({ model: { provider: 'openai', model: 'gpt-4' } })).toBeNull();
+    expect(bindingOptionId({ model: { provider: 'openai', model: 'gpt-4' } })).toBeNull();
   });
 
   it('round-trips a runtime option id', () => {
