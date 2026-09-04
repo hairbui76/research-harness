@@ -157,7 +157,11 @@ def probe_existing_app(
     try:
         with httpx.Client(transport=transport, timeout=timeout, trust_env=False) as client:
             response = client.get(url)
-    except httpx.ConnectError:
+    except (httpx.ConnectError, httpx.ConnectTimeout):
+        # Refused, or never accepted at all: on Windows a closed loopback port can time out
+        # instead of refusing when a firewall or VPN filter drops the SYN. Either way nothing
+        # is there to join; starting our own server is the right next step, and a port that
+        # really is held fails loudly at bind time.
         return False
     except httpx.TransportError as exc:
         raise PortOccupiedError(

@@ -381,3 +381,18 @@ def test_the_loopback_probe_ignores_proxy_variables(monkeypatch: pytest.MonkeyPa
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_probe_reports_a_connect_timeout_as_nothing_listening() -> None:
+    """A SYN that is dropped rather than refused is still "nobody there".
+
+    On Windows a closed loopback port can time out instead of refusing when a firewall or
+    VPN filter drops the packet; treating that as "something is listening" made
+    `research app` give up on every port. A port that is genuinely held still fails
+    loudly at bind time.
+    """
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectTimeout("timed out", request=request)
+
+    assert probe_existing_app(8765, transport=transport(handler)) is False
