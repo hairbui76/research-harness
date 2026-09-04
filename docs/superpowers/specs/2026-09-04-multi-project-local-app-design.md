@@ -1,6 +1,6 @@
 # Multi-project Local Web App — Design Specification
 
-**Status:** Design approved in conversation; awaiting review of this written specification.
+**Status:** Written specification approved; implementation is governed by the linked plan.
 
 **Scope:** Product and architecture design only. This document does not authorize implementation.
 
@@ -213,10 +213,14 @@ must not duplicate capability handlers, domain rules, DTOs, or response mapping.
 The control-plane API is:
 
 ```text
+POST   /api/app/bootstrap
+POST   /api/app/session
 GET    /api/projects
 POST   /api/projects/create
 POST   /api/projects/open
+POST   /api/projects/initialize
 POST   /api/projects/{project_id}/locate
+POST   /api/projects/{project_id}/reveal
 PATCH  /api/projects/{project_id}
 DELETE /api/projects/{project_id}
 POST   /api/dialogs/folder
@@ -241,6 +245,13 @@ is always scoped to the selected runtime; a run from another project is reported
 
 Folder paths are accepted only by authenticated control-plane operations associated with a
 human selection or typed-path fallback. No capability request may override its resolved root.
+`initialize` applies the existing `project.init` behavior to a selected ordinary folder only
+after explicit confirmation. `reveal` opens the registered root in Explorer or the Linux file
+manager and never accepts a caller-supplied path.
+
+`bootstrap` is a CLI-only, app-token-authenticated request that mints a short-lived one-time
+nonce. The browser receives that nonce in the launch URL and exchanges it once through
+same-origin `session`; only the resulting app token is retained in browser `sessionStorage`.
 
 ## 7. Folder-picker adapters
 
@@ -480,3 +491,5 @@ After review, implementation can be requested with:
 > test-driven development while preserving single-workspace CLI, MCP, and HTTP behavior.
 
 That later request authorizes implementation; this design document by itself does not.
+
+Implementation roadmap: [2026-09-04-multi-project-local-app.md](../plans/2026-09-04-multi-project-local-app.md).
