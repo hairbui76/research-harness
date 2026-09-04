@@ -44,7 +44,7 @@ from research_harness import __version__
 from research_harness.capabilities.context import CapabilityContext, open_context
 from research_harness.capabilities.extra_handlers import ReviewInbox, StaleReport
 from research_harness.capabilities.permissions import Permission, Principal
-from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
+from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.claims.service import next_decision_id
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
@@ -70,6 +70,7 @@ from research_harness.domain.ids import (
 from research_harness.domain.manuscript import ManuscriptAnchor
 from research_harness.domain.work import Artifact, Work
 from research_harness.evidence.conflicts import ConflictRecord, ConflictStore
+from research_harness.local_app.runtime import LEGACY_PROJECT_ID, WorkspaceRuntime
 from research_harness.protocol.dto import (
     ArtifactBlocks,
     AttentionGroup,
@@ -101,7 +102,9 @@ __all__ = [
     "DEV_ORIGINS",
     "WEB_DIST_ENV",
     "SpaStaticFiles",
+    "bearer_token",
     "create_app",
+    "create_workspace_app",
     "dev_mode",
     "ensure_token",
     "token_path",
@@ -170,12 +173,38 @@ def create_app(
     registry: CapabilityRegistry | None = None,
     principal_resolver: PrincipalResolver | None = None,
 ) -> FastAPI:
-    """The daemon for one workspace. Nothing here writes canonical state directly."""
+    """The daemon for one workspace. Nothing here writes canonical state directly.
+
+    `research serve` runs one workspace, so it owns the token file and serves the built
+    bundle; the routes themselves come from :func:`create_workspace_app`, which the
+    multi-project host mounts once per opened project.
+    """
     root = Path(workspace_root)
-    catalog = registry if registry is not None else build_default_registry()
     token = ensure_token(root)
+    runtime = WorkspaceRuntime.create(LEGACY_PROJECT_ID, root, catalog=registry)
     resolve = principal_resolver or _default_resolver(token)
-    mutation_gate = threading.Lock()
+    app = create_workspace_app(runtime, principal_resolver=resolve, serve_bundle=True)
+    app.state.token_path = token_path(root)
+    return app
+
+
+def create_workspace_app(
+    runtime: WorkspaceRuntime,
+    *,
+    principal_resolver: PrincipalResolver,
+    serve_bundle: bool,
+) -> FastAPI:
+    """Every workspace route over one runtime, as a plain ASGI app.
+
+    The one-workspace daemon and each project of the multi-project host publish exactly
+    these routes: there is one implementation, so the two modes cannot drift. Nothing is
+    read from a module-level global, so several of these can serve different workspaces in
+    one process; `serve_bundle` is False for a mounted project app, whose SPA is served by
+    the host that mounted it.
+    """
+    root = runtime.root
+    catalog = runtime.catalog
+    mutation_gate = runtime.mutation_gate
 
     app = FastAPI(
         title="Research Harness daemon",
@@ -184,8 +213,8 @@ def create_app(
     )
     app.state.workspace_root = root
     app.state.registry = catalog
-    app.state.token_path = token_path(root)
-    app.state.principal_resolver = resolve
+    app.state.principal_resolver = principal_resolver
+    app.state.runtime = runtime
 
     @app.get("/health", response_model=HealthReport)
     def health() -> HealthReport:
@@ -284,7 +313,8 @@ def create_app(
     register_manuscript_routes(app, root)
     register_attachment_routes(app, root)
     register_session_routes(app, root)
-    _serve_bundle(app)
+    if serve_bundle:
+        _serve_bundle(app)
     _allow_dev_origins(app)
     return app
 
@@ -360,14 +390,22 @@ def _default_resolver(token: str) -> PrincipalResolver:
     return resolve
 
 
-def _bearer(authorization: str | None) -> str | None:
-    """The token out of an ``Authorization: Bearer <token>`` header."""
+def bearer_token(authorization: str | None) -> str | None:
+    """The token out of an ``Authorization: Bearer <token>`` header.
+
+    Public because every host that resolves a principal - this daemon and the
+    multi-project app - must read the header the same way.
+    """
     if not authorization:
         return None
     scheme, _, value = authorization.partition(" ")
     if scheme.lower() != "bearer":
         return None
     return value.strip() or None
+
+
+_bearer = bearer_token
+"""The name `server/app.py` used before the multi-project host needed the same reader."""
 
 
 # -- typed object reads ------------------------------------------------------
