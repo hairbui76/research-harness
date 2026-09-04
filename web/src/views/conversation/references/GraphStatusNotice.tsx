@@ -15,9 +15,13 @@
  * spinner and its "Index rebuild" bar; an index that was never built is `index-absent`,
  * and one that cannot be read is `index-unreadable` — both `partial`, because completion
  * *is* answering, from a narrower source, and no bar is ever going to fill.
+ *
+ * Those two also carry the action their own wording asks for: `state.rebuild`, which is
+ * the cockpit's `research rebuild`. It is admin and human-only, so a window that may not
+ * write is offered `Check again` alone, and a daemon that refuses says so in its own words.
  */
 import { ResearchState } from '@research-harness/design';
-import type { ResearchStateCase } from '@research-harness/design';
+import type { ResearchStateCase, StateAction } from '@research-harness/design';
 import type { GraphDegradation } from './graphReferenceProvider';
 
 export interface GraphStatusNoticeProps {
@@ -27,6 +31,17 @@ export interface GraphStatusNoticeProps {
   answering: string;
   /** Ask `graph.status` again. A rebuild finishes and the picker should notice. */
   onRecheck?: () => void;
+  /**
+   * Run `state.rebuild`, then read the status again.
+   *
+   * Omitted when the window may not write, which is what leaves a read-only cockpit with
+   * `Check again` alone rather than with a button the daemon would only refuse.
+   */
+  onRebuild?: () => void;
+  /** True while that rebuild is out. The action is disabled, not withdrawn. */
+  rebuilding?: boolean;
+  /** The daemon's own sentence about a rebuild it refused or could not finish. */
+  rebuildError?: string | null;
 }
 
 /** What each degradation is, and what it means for the picker, in the researcher's terms. */
@@ -63,18 +78,38 @@ export function GraphStatusNotice({
   degradation,
   answering,
   onRecheck,
+  onRebuild,
+  rebuilding = false,
+  rebuildError = null,
 }: GraphStatusNoticeProps) {
   if (degradation === null) return null;
   const wording = WORDING[degradation];
+  // A rebuild that is already running is not started again from here.
+  const offerRebuild = onRebuild !== undefined && degradation !== 'rebuilding';
+  const actions: StateAction[] = [];
+  if (onRecheck) {
+    actions.push({ label: 'Check again', onClick: onRecheck, iconStart: 'refresh-cw' });
+  }
+  if (offerRebuild) {
+    actions.push({
+      label: 'Rebuild the index',
+      onClick: onRebuild,
+      iconStart: 'hard-drive',
+      disabled: rebuilding,
+    });
+  }
   return (
     <ResearchState
       state={wording.state}
       compact
       title={wording.title}
       description={`${wording.description} (Completing from ${answering}.)`}
-      {...(onRecheck
-        ? { actions: [{ label: 'Check again', onClick: onRecheck, iconStart: 'refresh-cw' }] }
-        : {})}
-    />
+      {...(actions.length > 0 ? { actions } : {})}
+    >
+      {/* The daemon's sentence, verbatim: why a rebuild was refused is its answer to give. */}
+      {rebuildError !== null ? (
+        <p className="rh-web-graph__rebuild-refusal">{rebuildError}</p>
+      ) : null}
+    </ResearchState>
   );
 }

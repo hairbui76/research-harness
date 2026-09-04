@@ -600,6 +600,24 @@ describe('privacy during traversal', () => {
 
 /* -- graph spec §8: direct canonical reads when the graph cannot answer ----- */
 
+/** `state.rebuild`'s own report, trimmed to the fields the cockpit never reads. */
+const rebuildDone = {
+  ok: true,
+  objects: 41,
+  objects_by_type: { claim: 6, evidence: 12 },
+  stale_marks: 0,
+  fts_rows: 41,
+  canonical_digest: 'sha256:6f1cd0a2',
+  duration_ms: 812,
+  invalid_files: [],
+  summary: '41 objects, 0 stale marks in 812 ms',
+};
+
+/** A refusal is the daemon's sentence, and the cockpit may not paraphrase it. */
+const REFUSAL =
+  'state.rebuild is an admin capability and this token is not the researcher; run ' +
+  '`research rebuild` in the workspace instead.';
+
 describe('when the graph is not answering', () => {
   it('falls back to the project listings and says so, once, in the composer', async () => {
     const daemon = withGraph(
@@ -664,5 +682,84 @@ describe('when the graph is not answering', () => {
     expect(within(notice as HTMLElement).queryByRole('progressbar')).toBeNull();
     expect(notice).not.toHaveTextContent('Loading');
     expect(notice).toHaveTextContent(/Completing from state.index/);
+  });
+
+  it('runs the rebuild its own wording asks for, and the notice goes when the index is there', async () => {
+    const capabilities = answers({ 'graph.status': statusAbsent, 'state.rebuild': rebuildDone });
+    const daemon = withGraph(fakeDaemon({ capabilities }), { resolve: {} });
+    const user = userEvent.setup();
+    renderCockpit({ daemon });
+    await transcriptReady();
+    await screen.findByText('The research index has not been built yet');
+
+    // The rebuild the daemon is about to run is the one that makes the index answer.
+    capabilities['graph.status'] = statusAvailable;
+    await user.click(screen.getByRole('button', { name: 'Rebuild the index' }));
+
+    await waitFor(() =>
+      expect(screen.queryByText('The research index has not been built yet')).toBeNull(),
+    );
+    const names = daemon.capabilityCalls().map((call) => call.name);
+    const rebuiltAt = names.indexOf('state.rebuild');
+    expect(rebuiltAt).toBeGreaterThanOrEqual(0);
+    // The status is read again afterwards; the notice does not simply hide itself.
+    expect(names.slice(rebuiltAt + 1)).toContain('graph.status');
+  });
+
+  it('offers no rebuild in a window that may not write', async () => {
+    const asHost = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
+    const daemon = withGraph(
+      fakeDaemon({
+        gets: { '/overview': asHost },
+        capabilities: answers({ 'graph.status': statusAbsent, 'state.rebuild': rebuildDone }),
+      }),
+      { resolve: {} },
+    );
+    renderCockpit({ daemon });
+    await transcriptReady();
+
+    const notice = (
+      await screen.findByText('The research index has not been built yet')
+    ).closest('.rh-state')!;
+    expect(within(notice as HTMLElement).getByRole('button', { name: 'Check again' })).toBeInTheDocument();
+    expect(within(notice as HTMLElement).queryByRole('button', { name: 'Rebuild the index' })).toBeNull();
+  });
+
+  it('renders the daemon’s own sentence when a rebuild is refused, and keeps the notice', async () => {
+    const refusal = {
+      capability: 'state.rebuild',
+      ok: false,
+      error: { code: 'permission_denied', message: REFUSAL },
+    };
+    const daemon = withGraph(
+      fakeDaemon({
+        capabilities: answers({ 'graph.status': statusAbsent, 'state.rebuild': refusal }),
+      }),
+      { resolve: {} },
+    );
+    const user = userEvent.setup();
+    renderCockpit({ daemon });
+    await transcriptReady();
+    await screen.findByText('The research index has not been built yet');
+
+    await user.click(screen.getByRole('button', { name: 'Rebuild the index' }));
+
+    expect(await screen.findByText(REFUSAL)).toBeInTheDocument();
+    // Nothing was built, so the notice is still the truth about the index.
+    expect(screen.getByText('The research index has not been built yet')).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations with the rebuild offered', async () => {
+    const daemon = withGraph(
+      fakeDaemon({
+        capabilities: answers({ 'graph.status': statusAbsent, 'state.rebuild': rebuildDone }),
+      }),
+      { resolve: {} },
+    );
+    const { container } = renderCockpit({ daemon });
+    await transcriptReady();
+    await screen.findByRole('button', { name: 'Rebuild the index' });
+
+    await expectNoAxeViolations(container);
   });
 });

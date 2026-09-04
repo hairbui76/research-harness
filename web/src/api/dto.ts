@@ -92,6 +92,25 @@ export interface StaleReport {
   marks: { object_id: string; reason: string; priority: number; source_change: string }[];
 }
 
+/**
+ * `state.rebuild`: what the rebuild read, wrote and refused.
+ *
+ * Written out here rather than taken from `types.gen.ts` for the same reason `StaleReport`
+ * above is: `state.rebuild` has no route of its own, so its response model never reaches
+ * the daemon's OpenAPI document and the generator never sees it.
+ */
+export interface StateRebuildReport {
+  ok: boolean;
+  objects: number;
+  objects_by_type: Record<string, number>;
+  stale_marks: number;
+  fts_rows: number;
+  canonical_digest: string;
+  duration_ms: number;
+  invalid_files: { path: string; error: string }[];
+  summary: string;
+}
+
 /** `claim.find_support`: every claim-evidence edge, grouped by what it does. */
 export interface ClaimSupport {
   claim: string;

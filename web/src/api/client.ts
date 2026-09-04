@@ -85,6 +85,7 @@ import type {
   SessionTranscript,
   SessionView,
   StaleReport,
+  StateRebuildReport,
   SuggestionCandidate,
   SuggestionRequest,
   SynctexView,
@@ -253,6 +254,17 @@ export class HarnessClient {
   /** Everything the navigation lists, summarised, in one read (`GET /index`'s twin). */
   index(): Promise<WorkspaceIndex> {
     return this.call<WorkspaceIndex>('state.index', {});
+  }
+
+  /**
+   * Rebuild the deletable projection from the canonical files — `research rebuild`'s twin.
+   *
+   * `admin` and human-only, so an agent host is refused by the daemon and the callers do
+   * not offer it; the projection and the research graph it carries are regenerable, and no
+   * canonical file is written. It answers when the rebuild is done, not when it starts.
+   */
+  rebuildState(): Promise<StateRebuildReport> {
+    return this.call<StateRebuildReport>('state.rebuild', {});
   }
 
   /** The claims a filter selects. One list, so the Claims view does not read the rest. */

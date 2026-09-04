@@ -367,11 +367,16 @@ export function ComposerPane() {
       {/* References and the graph (task W3). Completion falls back to the project listings
           when `graph.status` says the index is absent, rebuilding or unreadable, and this
           is the one place that says so — once, beside the composer, in the Design System's
-          own wording (graph spec §8). */}
+          own wording (graph spec §8). An index that is absent or unreadable also carries
+          the rebuild its wording asks for; a window that may not write is offered `Check
+          again` alone, because `state.rebuild` is admin and human-only. */}
       <GraphStatusNotice
         degradation={graph.degradation}
         answering={graph.answering}
         onRecheck={graph.recheck}
+        rebuilding={graph.rebuilding}
+        rebuildError={graph.rebuildError}
+        {...(canMutate ? { onRebuild: graph.rebuild } : {})}
       />
       {/* References and the graph (task W3). Every token in the draft is resolved against
           canonical state; the ones that did not come back clean are marked here, with the

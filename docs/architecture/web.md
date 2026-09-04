@@ -477,7 +477,11 @@ rebuild that is running, `index-absent` for an index nobody has built, `index-un
 for one that will not open. Only the first is a `loading` state with a progress bar; the
 other two are `partial`, because completion *is* answering, from the project listings, and
 a bar that can never fill is a lie about work in flight. All three offer *Check again*,
-which re-reads the status when a rebuild finishes. A `graph.autocomplete` call that
+which re-reads the status; the two that a rebuild would fix also offer *Rebuild the index*,
+which calls `state.rebuild` — the cockpit's `research rebuild` — and then re-reads the
+status, so the notice goes when the index is there. `state.rebuild` is `admin` and
+human-only, so a window the daemon treats as an agent host is offered *Check again* alone,
+and a refusal is rendered as the daemon's own sentence. A `graph.autocomplete` call that
 fails after the check falls back for that query rather than emptying the picker.
 
 **Every token is resolved before it is sent.** `graph.resolve` is the one `graph.*` read

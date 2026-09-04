@@ -42,6 +42,19 @@
 }
 
 /*
+ * A refused rebuild, in the daemon's own words, inside the notice that offered it.
+ *
+ * The same treatment `__problems` gives the resolver's sentences: the daemon's text, at the
+ * notice's own secondary weight, with no framing of ours around it.
+ */
+.rh-web-graph__rebuild-refusal {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+/*
  * A refused deep link is a strip above the transcript, not a dialog over it.
  *
  * The frame keeps the transcript filling whatever is left: it is a flex column, so the

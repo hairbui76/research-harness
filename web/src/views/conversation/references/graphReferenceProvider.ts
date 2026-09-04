@@ -20,6 +20,9 @@
  * - A `graph.autocomplete` call that fails *after* that check falls back for that query and
  *   marks the status for re-reading, so a graph that dies mid-session degrades to the
  *   listings rather than to an empty picker.
+ * - An index that is absent or unreadable can be built from here: `state.rebuild` is the
+ *   cockpit's `research rebuild`, and the status is read again when it answers, so the
+ *   notice goes because the index is there and not because a button was pressed.
  *
  * Nothing here filters, ranks or re-labels a match. The daemon applies the visibility
  * filter it was asked for and returns rows carrying their own authority; the picker draws
@@ -112,6 +115,19 @@ export interface GraphReferencesApi {
   answering: string;
   /** Ask `graph.status` again — a rebuild finishes, and the picker should notice. */
   recheck: () => void;
+  /**
+   * Run `state.rebuild`, then read the status again.
+   *
+   * The notice's `absent` wording tells the researcher to run a rebuild, and until now the
+   * cockpit gave them no way to: `research rebuild -w <workspace>` in a terminal was the
+   * only one. This is that capability, called by name, with the status re-read afterwards
+   * so the notice goes when the index is there rather than because the button was pressed.
+   */
+  rebuild: () => void;
+  /** True while a rebuild started here is out. */
+  rebuilding: boolean;
+  /** The daemon's own sentence about a rebuild it refused or could not finish. */
+  rebuildError: string | null;
 }
 
 /**
@@ -170,12 +186,40 @@ export function useGraphReferences(
     status.reload();
   }, [status]);
 
+  const [rebuilding, setRebuilding] = useState(false);
+  const [rebuildError, setRebuildError] = useState<string | null>(null);
+
+  /**
+   * The rebuild, and then the same re-read `recheck` does.
+   *
+   * `state.rebuild` answers when the projection is written, not when it starts, so there is
+   * exactly one status read to make afterwards. A refusal keeps the daemon's own sentence
+   * and nothing else: why an admin capability said no is not something to guess at here.
+   */
+  const rebuild = useCallback(() => {
+    setRebuilding(true);
+    setRebuildError(null);
+    void client
+      .rebuildState()
+      .then(() => {
+        setFailed(false);
+        status.reload();
+      })
+      .catch((cause: unknown) => {
+        setRebuildError(cause instanceof Error ? cause.message : String(cause));
+      })
+      .finally(() => setRebuilding(false));
+  }, [client, status]);
+
   return {
     provider,
     status: status.data,
     degradation,
     answering: answerable ? provider.id : fallback.id,
     recheck,
+    rebuild,
+    rebuilding,
+    rebuildError,
   };
 }
 
