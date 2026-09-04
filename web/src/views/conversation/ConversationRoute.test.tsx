@@ -221,18 +221,70 @@ describe('reopening a session', () => {
     await transcriptReady();
 
     await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
 
     await waitFor(() =>
       expect(
         daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
       ).toMatchObject({ title: 'New session' }),
     );
+    // The daemon owns the default visibility, so the request that means "the usual kind of
+    // session" is the request that says nothing about it — exactly what it has always been.
+    expect(
+      daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+    ).not.toHaveProperty('visibility');
     // No id was posted; the one the daemon named is the one the URL now carries.
     await waitFor(() =>
       expect(
         daemon.capabilityCalls().some((call) => call.request?.session === 'CS0003'),
       ).toBe(true),
     );
+  });
+
+
+  it('creates a project session, which is the kind a runtime may be bound to', async () => {
+    const created = {
+      ...sessions.sessions[1],
+      id: 'CS0003',
+      title: 'New session',
+      visibility: 'project',
+      defaults: {},
+      message_count: 0,
+      last_message: null,
+      last_message_at: null,
+    };
+    const daemon = fakeDaemon({
+      capabilities: answers({ 'session.create': { session: created } }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session', visibility: 'project' }),
+    );
+  });
+
+  it('says what the choice costs, and that it is the only chance to make it', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    expect(within(dialog).getByRole('combobox', { name: 'Visibility' })).toHaveAccessibleDescription(
+      /cannot be changed/,
+    );
+    await expectNoAxeViolations(document.body);
   });
 
   it('renames a session without touching its transcript', async () => {

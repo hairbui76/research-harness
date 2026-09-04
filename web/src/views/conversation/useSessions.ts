@@ -13,7 +13,12 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { ConfigureSessionRequest, ConversationSession, SessionMatch } from '../../api/dto';
+import type {
+  ConfigureSessionRequest,
+  ConversationSession,
+  SessionMatch,
+  SessionVisibility,
+} from '../../api/dto';
 import type { HarnessClient } from '../../api/client';
 import { CapabilityError } from '../../api/client';
 
@@ -49,7 +54,11 @@ export interface SessionsApi {
   activeId: string | null;
   active: ConversationSession | null;
   open: (sessionId: string) => void;
-  create: (title?: string) => Promise<ConversationSession | null>;
+  /**
+   * Open a session. `visibility` is the daemon's own vocabulary and is sent only when the
+   * researcher chose one — omitting it leaves the default where it belongs, on the daemon.
+   */
+  create: (title?: string, visibility?: SessionVisibility) => Promise<ConversationSession | null>;
   rename: (sessionId: string, title: string) => Promise<void>;
   /**
    * Bind this session to a runtime and model, to an entry, or clear it.
@@ -182,11 +191,17 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
   }, [project, urlSession]);
 
   const create = useCallback(
-    async (title = 'New session'): Promise<ConversationSession | null> => {
+    async (
+      title = 'New session',
+      visibility?: SessionVisibility,
+    ): Promise<ConversationSession | null> => {
       if (!canMutate) return null;
       setRefusal(null);
       try {
-        const session = await client.createSession({ title });
+        const session = await client.createSession({
+          title,
+          ...(visibility ? { visibility } : {}),
+        });
         setSessions((previous) => [...previous, session]);
         open(session.id);
         return session;
