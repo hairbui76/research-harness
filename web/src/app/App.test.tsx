@@ -152,10 +152,19 @@ describe('resuming the last project', () => {
 
   it('does not resume a URL that named something else', async () => {
     window.localStorage.setItem(LAST_PROJECT_KEY, 'prj_abc');
-    renderMulti('/?bootstrap=stripped');
+    renderMulti('/?session=CS0001');
 
     expect(
       await screen.findByRole('heading', { name: 'Your research projects' }),
     ).toBeInTheDocument();
+  });
+
+  it('resumes through the launch URL, whose only query is the consumed bootstrap', async () => {
+    window.localStorage.setItem(LAST_PROJECT_KEY, 'prj_abc');
+    const { daemon } = renderMulti('/?bootstrap=stripped');
+
+    await waitFor(() =>
+      expect(daemon.calls.map((call) => call.path)).toContain('/api/projects/prj_abc/overview'),
+    );
   });
 });

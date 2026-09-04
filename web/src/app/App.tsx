@@ -115,6 +115,18 @@ export function ProjectWorkspaceRoute() {
  * afterwards, or arriving on any other URL, is left alone. A project that is no longer
  * listed, or is not available, is not resumed.
  */
+/**
+ * True when the query names nothing the researcher chose. The launch URL from
+ * `research app` is `/?bootstrap=<nonce>`; the nonce is consumed and stripped by
+ * `readBootstrap` before the router sees it, but the router keeps the search it was mounted
+ * with, so the entry decision must ignore that one parameter or resumption never fires.
+ */
+function isBareEntry(search: string): boolean {
+  const params = new URLSearchParams(search);
+  params.delete('bootstrap');
+  return params.toString() === '';
+}
+
 function useResumeLastProject(): void {
   const host = useHost();
   const location = useLocation();
@@ -124,7 +136,7 @@ function useResumeLastProject(): void {
   useEffect(() => {
     if (resumed.current) return;
     resumed.current = true;
-    if (location.pathname !== '/' || location.search) return;
+    if (location.pathname !== '/' || !isBareEntry(location.search)) return;
     const remembered = readLastProject();
     if (!remembered) return;
     const project = host.projects.find((candidate) => candidate.project_id === remembered);
