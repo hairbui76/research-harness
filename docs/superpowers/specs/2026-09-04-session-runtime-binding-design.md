@@ -124,7 +124,7 @@ Exactly one of `runtime`, `entry`, `clear` is given; `model` is required with `r
 
 For `clear`, it stores `model = None`, `reasoning = None`.
 
-Visibility is decided at creation and **no capability changes it afterwards**: `session.create` (and `research chat new`) defaults to `private`, and there is no `session.set_visibility`. A session that is to use a bound runtime is therefore created as a project session — `research chat new --visibility project` — and the same is true of the Web, whose New session flow sends a title and nothing else today.
+Visibility is decided at creation and **no capability changes it afterwards**: `session.create` (and `research chat new`) defaults to `private`, and there is no `session.set_visibility`. A session that is to use a bound runtime is therefore created as a project session — `research chat new --visibility project` — or, in the Web cockpit, by choosing `Project` in the New session dialog, which sends `visibility: "project"` on `session.create` and otherwise sends no visibility at all.
 
 The response is the existing `SessionView`, whose `defaults` now carry the binding. `session.get`, `session.list`, and `session.search` return the same record and need no change beyond the new field.
 

@@ -438,7 +438,7 @@ uv run pytest -q tests/unit/domain/test_session_defaults.py \
                  tests/contract/capabilities/test_attachments.py \
                  tests/contract/protocol/test_new_capability_parity.py \
                  tests/e2e/test_cli_capability_parity.py
-# the browser half (the whole Web suite: 21 files, 333 tests):
+# the browser half (the whole Web suite: 21 files, 336 tests):
 pnpm --filter research-harness-web test
 ```
 
