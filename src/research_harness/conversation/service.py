@@ -13,9 +13,12 @@ would be a second place for the rules to disagree (ADR-004).
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
+
+from pydantic import ValidationError
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.conversation.context import (
@@ -52,6 +55,7 @@ from research_harness.domain.conversation import (
     Visibility,
 )
 from research_harness.domain.enums import DecisionType
+from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import (
     ContextPackId,
     ConversationSessionId,
@@ -73,6 +77,12 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_PAGE_SIZE = 50
 """Messages one `session.get` returns when the caller names no limit."""
+
+
+def _validation_sentence(exc: ValidationError) -> str:
+    """The first message of a pydantic error, without its `Value error, ` prefix."""
+    message = str(exc.errors()[0]["msg"])
+    return message.removeprefix("Value error, ")
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,12 +140,9 @@ class ConversationService:
         token_budget: int | None = None,
     ) -> ConversationSession:
         """Open a session. Private by default: conversation is local working context."""
-        from research_harness.domain.conversation import ModelIdentity
+        from research_harness.conversation.binding import entry_identity
 
-        identity = None
-        if model is not None:
-            provider, _, name = model.partition("/")
-            identity = ModelIdentity(provider=provider, model=name or provider)
+        identity = None if model is None else entry_identity(model)
         defaults = SessionDefaults(model=identity, mode=mode, token_budget=token_budget)
         return self._store.create_session(
             title=title,
@@ -143,6 +150,79 @@ class ConversationService:
             visibility=visibility,
             defaults=defaults,
         )
+
+    def configure(
+        self,
+        session: ConversationSessionId,
+        *,
+        runtime: str | None = None,
+        model: str | None = None,
+        reasoning: str | None = None,
+        entry: str | None = None,
+        clear: bool = False,
+    ) -> ConversationSession:
+        """Bind a session to a runtime and model, or to an entry, or clear it (spec §8).
+
+        A runtime binding is validated exactly as a `research.yaml` entry would be, then
+        checked against the cached scan's model list. An installed runtime that is not
+        routable right now is accepted: the send refuses with the scan's sentence until it
+        is. Nothing here writes `research.yaml` or sends a request.
+        """
+        from research_harness.conversation.binding import (
+            SESSION_LABEL_PREFIX,
+            entry_identity,
+            runtime_identity,
+        )
+        from research_harness.providers.models.router import RouterConfig, RouterProviderConfig
+
+        chosen = sum((runtime is not None, entry is not None, clear))
+        if chosen != 1:
+            raise CapabilityError("give exactly one of runtime, entry, or clear")
+        if runtime is None and (model is not None or reasoning is not None):
+            raise CapabilityError("model and reasoning are only for a runtime binding")
+        record = self._store.get_session(session)
+        if clear:
+            defaults = record.defaults.touch(model=None, reasoning=None)
+            return self._store.update_session(session, defaults=defaults)
+        if entry is not None:
+            table = RouterConfig.model_validate(
+                {"providers": list(self._ctx.repo.config.providers)}
+            )
+            names = [item.name for item in table.providers if item.enabled]
+            if entry not in names:
+                known = ", ".join(sorted(names)) or "none"
+                raise CapabilityError(
+                    f"no provider named {entry!r} in research.yaml (have: {known})"
+                )
+            defaults = record.defaults.touch(model=entry_identity(entry), reasoning=None)
+            return self._store.update_session(session, defaults=defaults)
+        if runtime is None:  # unreachable: `chosen == 1` and neither entry nor clear
+            raise CapabilityError("give exactly one of runtime, entry, or clear")
+        if model is None:
+            raise CapabilityError("model is required with runtime")
+        try:
+            RouterProviderConfig(
+                name=f"{SESSION_LABEL_PREFIX}{runtime}",
+                kind="local_cli",
+                runtime=runtime,
+                model=model,
+                reasoning=reasoning,
+                priority=0,
+            )
+        except ValidationError as exc:
+            raise CapabilityError(_validation_sentence(exc)) from exc
+        from research_harness.providers.cli.detection import detect_cached
+        from research_harness.providers.cli.registry import get_runtime
+
+        status = detect_cached(get_runtime(runtime), env=os.environ)
+        if model != "default" and model not in {item.id for item in status.models}:
+            raise CapabilityError(
+                f"{runtime} does not list model {model!r}; run `research providers scan`"
+            )
+        defaults = record.defaults.touch(
+            model=runtime_identity(runtime, model), reasoning=reasoning
+        )
+        return self._store.update_session(session, defaults=defaults)
 
     def rename(self, session: ConversationSessionId, title: str) -> ConversationSession:
         """Give a session a new title; ids, transcript, and attachments are untouched."""

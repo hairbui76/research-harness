@@ -123,7 +123,14 @@ def session_new(
         ),
     ] = Visibility.PRIVATE,
     model: Annotated[
-        str | None, typer.Option("--model", help="Default provider/model for this session.")
+        str | None,
+        typer.Option(
+            "--model",
+            help=(
+                "Bind the new session to this entry name from research.yaml "
+                "(see `research chat configure`)."
+            ),
+        ),
     ] = None,
     budget: BudgetOption = None,
     as_json: JsonOption = False,
