@@ -472,8 +472,12 @@ than hidden. `indexReferenceProvider` (task W1, over `state.index` and `evidence
 stays mounted behind it. `graph.status` picks: `available: false`, `rebuilding: true`, or a
 status read that fails at all, and the fallback answers instead. That is graph spec §8's
 *direct canonical reads remain possible if the graph is unavailable or rebuilding*, and the
-composer says so once, in the Design System's own `index-rebuilding` wording, with a *Check
-again* that re-reads the status when a rebuild finishes. A `graph.autocomplete` call that
+composer says so once, in the Design System's own wording — `index-rebuilding` for a
+rebuild that is running, `index-absent` for an index nobody has built, `index-unreadable`
+for one that will not open. Only the first is a `loading` state with a progress bar; the
+other two are `partial`, because completion *is* answering, from the project listings, and
+a bar that can never fill is a lie about work in flight. All three offer *Check again*,
+which re-reads the status when a rebuild finishes. A `graph.autocomplete` call that
 fails after the check falls back for that query rather than emptying the picker.
 
 **Every token is resolved before it is sent.** `graph.resolve` is the one `graph.*` read

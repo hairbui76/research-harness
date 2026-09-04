@@ -15,7 +15,8 @@
  *   on the researcher's cursor. `available: false` — no database, or one
  *   written by a schema version this build does not read — or `rebuilding: true` means the
  *   index cannot answer completely, so the fallback answers instead and the composer says
- *   so once, in the Design System's own "rebuilding the research index" state.
+ *   so once, in the Design System's own state for what is actually true of the index —
+ *   rebuilding, absent, or there but unreadable.
  * - A `graph.autocomplete` call that fails *after* that check falls back for that query and
  *   marks the status for re-reading, so a graph that dies mid-session degrades to the
  *   listings rather than to an empty picker.

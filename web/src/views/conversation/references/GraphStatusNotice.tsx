@@ -8,12 +8,16 @@
  * be told why, once, beside the composer they are typing in — not left to wonder whether a
  * missing reference means the object is gone.
  *
- * The wording is the Design System's own `index-rebuilding` research state, so the graph
- * pane, the composer and the search surface all describe a rebuild in the same words, and
- * the safety line says the thing that actually matters: the index is derived and
- * disposable, and no accepted object changes while it is being rebuilt.
+ * All three degradations speak the Design System's one vocabulary for the index, so the
+ * graph pane, the composer and the search surface describe the same fact in the same
+ * words. What they must not share is the *kind*: a state that is not in progress may not
+ * look like one. Only a rebuild that is actually running is `index-rebuilding`, with its
+ * spinner and its "Index rebuild" bar; an index that was never built is `index-absent`,
+ * and one that cannot be read is `index-unreadable` — both `partial`, because completion
+ * *is* answering, from a narrower source, and no bar is ever going to fill.
  */
 import { ResearchState } from '@research-harness/design';
+import type { ResearchStateCase } from '@research-harness/design';
 import type { GraphDegradation } from './graphReferenceProvider';
 
 export interface GraphStatusNoticeProps {
@@ -25,9 +29,13 @@ export interface GraphStatusNoticeProps {
   onRecheck?: () => void;
 }
 
-/** What each degradation means for the picker, in the researcher's terms. */
-const WORDING: Record<GraphDegradation, { title: string; description: string }> = {
+/** What each degradation is, and what it means for the picker, in the researcher's terms. */
+const WORDING: Record<
+  GraphDegradation,
+  { state: ResearchStateCase; title: string; description: string }
+> = {
   rebuilding: {
+    state: { case: 'index-rebuilding' },
     title: 'Rebuilding the research index',
     description:
       'Reference completion is answering from the project listings until the rebuild ' +
@@ -36,12 +44,14 @@ const WORDING: Record<GraphDegradation, { title: string; description: string }> 
       'canonical files when you send.',
   },
   absent: {
+    state: { case: 'index-absent' },
     title: 'The research index has not been built yet',
     description:
       'Reference completion is answering from the project listings. Run a rebuild to ' +
       'complete over sessions, messages, attachments and manuscript files as well.',
   },
   unreadable: {
+    state: { case: 'index-unreadable' },
     title: 'The research index is not answering',
     description:
       'Reference completion is answering from the project listings instead. Nothing is ' +
@@ -58,7 +68,7 @@ export function GraphStatusNotice({
   const wording = WORDING[degradation];
   return (
     <ResearchState
-      state={{ case: 'index-rebuilding' }}
+      state={wording.state}
       compact
       title={wording.title}
       description={`${wording.description} (Completing from ${answering}.)`}

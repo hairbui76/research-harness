@@ -46,6 +46,7 @@ import resolvePrivate from '../../../test/fixtures/graph/resolve-private.json';
 import resolveSession from '../../../test/fixtures/graph/resolve-session-link.json';
 import resolveStale from '../../../test/fixtures/graph/resolve-stale.json';
 import resolveUnresolved from '../../../test/fixtures/graph/resolve-unresolved.json';
+import statusAbsent from '../../../test/fixtures/graph/status-absent.json';
 import statusAvailable from '../../../test/fixtures/graph/status-available.json';
 import statusRebuilding from '../../../test/fixtures/graph/status-rebuilding.json';
 import manuscriptBuild from '../../../test/fixtures/manuscript-workspace/build-unavailable.json';
@@ -630,5 +631,38 @@ describe('when the graph is not answering', () => {
     await transcriptReady();
 
     expect(await screen.findByText('The research index is not answering')).toBeInTheDocument();
+  });
+
+  it('says a rebuild is in progress only while one actually is', async () => {
+    const daemon = withGraph(
+      fakeDaemon({ capabilities: answers({ 'graph.status': statusRebuilding }) }),
+      { resolve: {} },
+    );
+    renderCockpit({ daemon });
+    await transcriptReady();
+
+    const notice = (await screen.findByText('Rebuilding the research index')).closest('.rh-state')!;
+    expect(notice).toHaveAttribute('data-kind', 'loading');
+    expect(notice).toHaveAttribute('aria-busy', 'true');
+    expect(within(notice as HTMLElement).getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('does not dress an index that was never built as one being built', async () => {
+    const daemon = withGraph(
+      fakeDaemon({ capabilities: answers({ 'graph.status': statusAbsent }) }),
+      { resolve: {} },
+    );
+    renderCockpit({ daemon });
+    await transcriptReady();
+
+    const notice = (
+      await screen.findByText('The research index has not been built yet')
+    ).closest('.rh-state')!;
+    // The Windows report: a spinner, LOADING and an "Index rebuild" bar, with nothing running.
+    expect(notice).toHaveAttribute('data-kind', 'partial');
+    expect(notice).not.toHaveAttribute('aria-busy');
+    expect(within(notice as HTMLElement).queryByRole('progressbar')).toBeNull();
+    expect(notice).not.toHaveTextContent('Loading');
+    expect(notice).toHaveTextContent(/Completing from state.index/);
   });
 });
