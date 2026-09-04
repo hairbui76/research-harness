@@ -17,11 +17,13 @@ from research_harness.server.app import (
     ensure_token,
     token_path,
 )
+from research_harness.server.multi_app import create_multi_project_app
 
 __all__ = [
     "DAEMON_TOKEN_FILENAME",
     "bearer_token",
     "create_app",
+    "create_multi_project_app",
     "create_workspace_app",
     "ensure_token",
     "token_path",
