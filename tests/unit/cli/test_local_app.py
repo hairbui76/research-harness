@@ -339,3 +339,45 @@ def test_typer_is_imported_for_the_command_module() -> None:
     local_app.register(application)
 
     assert application.registered_commands[0].name == "app"
+
+
+# -- the loopback probe and the shell's proxy variables -------------------------
+
+
+def test_the_loopback_probe_ignores_proxy_variables(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A proxy in the shell must not capture a request to 127.0.0.1.
+
+    `httpx` honours `HTTP_PROXY` by default, so with one set the health probe would go to
+    the proxy instead of the loopback app and either time out or fail to connect — reported
+    as "something is listening but did not answer", on every port. The probe talks to a
+    loopback socket the process itself may have started; it never wants a proxy.
+    """
+    import json
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Health(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:
+            body = json.dumps({"ok": True, "kind": "multi_project", "version": "0"}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, format: str, *args: Any) -> None:
+            del format, args
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Health)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        for name in ("HTTP_PROXY", "http_proxy", "ALL_PROXY", "all_proxy"):
+            monkeypatch.setenv(name, "http://127.0.0.1:9")  # a port nothing answers on
+        for name in ("NO_PROXY", "no_proxy"):
+            monkeypatch.delenv(name, raising=False)
+
+        assert probe_existing_app(server.server_address[1]) is True
+    finally:
+        server.shutdown()
+        server.server_close()

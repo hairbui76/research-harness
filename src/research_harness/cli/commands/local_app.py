@@ -155,7 +155,7 @@ def probe_existing_app(
     """
     url = f"http://{LOOPBACK}:{port}{HEALTH_PATH}"
     try:
-        with httpx.Client(transport=transport, timeout=timeout) as client:
+        with httpx.Client(transport=transport, timeout=timeout, trust_env=False) as client:
             response = client.get(url)
     except httpx.ConnectError:
         return False
@@ -202,7 +202,7 @@ def request_bootstrap(
     """
     url = f"http://{LOOPBACK}:{port}{BOOTSTRAP_PATH}"
     try:
-        with httpx.Client(transport=transport, timeout=timeout) as client:
+        with httpx.Client(transport=transport, timeout=timeout, trust_env=False) as client:
             response = client.post(url, headers={"Authorization": f"Bearer {token}"})
     except httpx.TransportError as exc:
         raise AppLaunchError(
