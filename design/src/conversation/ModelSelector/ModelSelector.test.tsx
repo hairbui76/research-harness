@@ -3,8 +3,41 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
 import { describeThemeDensitySnapshots } from '../../../tests/variants';
+import type { ModelOption, ModelOptionGroup } from '../models';
 import { SAMPLE_MODELS } from '../samples';
 import { ModelSelector } from './ModelSelector';
+
+/** A model whose source declares no context window. */
+const GPT_5_5: ModelOption = {
+  id: 'runtime:codex:gpt-5.5',
+  label: 'gpt-5.5',
+  provider: 'Codex CLI',
+  egressClass: 'external',
+  vision: true,
+  contextTokens: null,
+  available: true,
+};
+
+/** One detected CLI runtime: a usable model and one the host has ruled out. */
+const RUNTIME_GROUPS: readonly ModelOptionGroup[] = [
+  {
+    id: 'codex',
+    label: 'Codex CLI 0.150.1',
+    options: [
+      GPT_5_5,
+      {
+        id: 'runtime:cursor-agent',
+        label: 'Cursor Agent 1.4.0',
+        provider: 'Cursor Agent',
+        egressClass: 'external',
+        vision: false,
+        contextTokens: null,
+        available: false,
+        unavailableReason: 'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
+      },
+    ],
+  },
+];
 
 describe('ModelSelector', () => {
   it('names the current model and where its requests go', () => {
@@ -67,71 +100,52 @@ describe('ModelSelector', () => {
     render(
       <ModelSelector
         options={SAMPLE_MODELS.slice(0, 1)}
-        groups={[
-          {
-            id: 'codex',
-            label: 'Codex CLI 0.150.1',
-            options: [
-              {
-                id: 'runtime:codex:gpt-5.5',
-                label: 'gpt-5.5',
-                provider: 'Codex CLI',
-                egressClass: 'external',
-                vision: true,
-                contextTokens: null,
-                available: true,
-              },
-              {
-                id: 'runtime:cursor-agent',
-                label: 'Cursor Agent 1.4.0',
-                provider: 'Cursor Agent',
-                egressClass: 'external',
-                vision: false,
-                contextTokens: null,
-                available: false,
-                unavailableReason:
-                  'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
-              },
-            ],
-          },
-        ]}
+        groups={RUNTIME_GROUPS}
         value="claude-opus-5"
         onChange={onChange}
       />,
     );
     await user.click(screen.getByRole('button', { name: /Model:/ }));
     const group = screen.getByRole('group', { name: 'Codex CLI 0.150.1' });
-    expect(within(group).getByRole('menuitem', { name: /gpt-5\.5/ })).toBeEnabled();
+    expect(within(group).getByRole('menuitem', { name: /gpt-5\.5/ })).not.toHaveAttribute(
+      'aria-disabled',
+    );
     const blocked = within(group).getByRole('menuitem', { name: /Cursor Agent 1\.4\.0/ });
     expect(blocked).toHaveAttribute('aria-disabled', 'true');
     expect(within(group).getByText(/has no tested bounded/)).toBeInTheDocument();
+    // A grouped option the host ruled out is no more selectable than a flat one.
+    await user.click(blocked);
+    expect(onChange).not.toHaveBeenCalled();
     await user.click(within(group).getByRole('menuitem', { name: /gpt-5\.5/ }));
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'runtime:codex:gpt-5.5' }),
     );
   });
 
+  it('names a selected grouped model on the trigger', () => {
+    render(
+      <ModelSelector
+        options={SAMPLE_MODELS.slice(0, 1)}
+        groups={RUNTIME_GROUPS}
+        value="runtime:codex:gpt-5.5"
+        onChange={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('button', { name: /Model: gpt-5\.5/ })).toBeInTheDocument();
+  });
+
   it('renders a model with no declared context window without a token count', async () => {
     const user = userEvent.setup();
     render(
       <ModelSelector
-        options={[
-          {
-            id: 'runtime:codex:gpt-5.5',
-            label: 'gpt-5.5',
-            provider: 'Codex CLI',
-            egressClass: 'external',
-            vision: true,
-            contextTokens: null,
-            available: true,
-          },
-        ]}
+        options={[GPT_5_5]}
         value="runtime:codex:gpt-5.5"
         onChange={() => undefined}
       />,
     );
     await user.click(screen.getByRole('button', { name: /Model:/ }));
-    expect(screen.queryByText(/ctx|tokens|k\b/)).not.toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /gpt-5\.5/ })).toBeInTheDocument();
+    expect(document.querySelectorAll('.rh-model-selector__context')).toHaveLength(0);
   });
 
   it('has no accessibility violations', async () => {
