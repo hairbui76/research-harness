@@ -38,7 +38,7 @@ Two alternatives were considered and rejected:
 
 - **Entry**: one item of the `providers:` table in `research.yaml`, named, persisted, project-wide.
 - **Binding**: a session's stored choice of what answers its messages: either an entry name, or a runtime with a model and a reasoning level. Never persisted in `research.yaml`.
-- **Session provider**: the in-memory provider entry the daemon builds from a runtime binding for one call, labelled `session:<runtime>/<model>`.
+- **Session provider**: the in-memory provider entry the daemon builds from a runtime binding for one call, named `session:<runtime>`; its words on every surface are `session:<runtime>/<model>`, followed by ` (reasoning <level>)` when one is set.
 - **Project default**: the entry the router selects for an unconstrained call, in priority order; `provider.list` marks it `default`.
 - **Routable runtime**: a runtime whose cached scan reports it installed, logged in with a subscription, provably bounded, and not version-blocked, as defined by the CLI providers specification §10 and §11.
 
@@ -150,7 +150,7 @@ For a **runtime binding**, the selector builds one `RouterProviderConfig` of kin
 
 No gate is added and none is bypassed. The `availability` injection point on `CliModelProvider` is never passed here.
 
-The label recorded for a bound call in the transcript, the receipt, and the trace is `session:<runtime>/<model>`, so a reader can tell a session-bound answer from one routed through a configured entry. Reasoning travels the way the adapter already takes it: `--effort` for Claude Code, `-c model_reasoning_effort="…"` for Codex, screened by the run-time argv check.
+The transcript, the receipt, and the run record carry the provider label `session:<runtime>` with the bound model, so a reader can tell a session-bound answer from one routed through a configured entry; the trace keeps the adapter's own name, `local_cli:<runtime>`, with the same model, because the trace writer records the adapter, not the entry. Reasoning travels the way the adapter already takes it: `--effort` for Claude Code, `-c model_reasoning_effort="…"` for Codex, screened by the run-time argv check.
 
 ## 10. Web experience
 
@@ -165,25 +165,25 @@ The selector shows the current binding as its value: the entry row for an entry 
 
 **Disclosure.** Before a session's first binding to an external destination, the composer shows the daemon's egress sentence for that runtime, the `notice` `provider.cli.scan` returns, and proceeds only after the researcher confirms. The confirmation is remembered per session in the browser only as a convenience; the daemon's receipt panel keeps showing each message's egress class as today, so the disclosure is not the only place the destination is visible.
 
-**Read-only windows.** A window without `canMutate` sees the picker disabled with the daemon's reason; the per-message override stays available because it changes nothing durable.
+**Read-only windows.** A window without `canMutate` keeps today's selector behaviour exactly: a pick sets the per-message `model` and changes nothing durable. Its runtime groups are shown disabled with the session's mutation-blocked reason. A mutating window's pick binds the session; there is no separate per-message control in the composer.
 
-**Session list.** Each session row shows its binding as the daemon words it: `session:codex/gpt-5.5 · high`, `entry codex-sub`, or nothing for the project default.
+**Session list.** Each session row shows its binding in the fixed format every surface uses, composed from the record's fields: `session:codex/gpt-5.5 (reasoning high)`, `entry codex-sub`, or nothing for the project default. The CLI composes the same strings from the same fields; a test on each side pins them.
 
 The badge and state mappers of the Settings section are reused; no new client rule decides availability, routability, or wording. Components come from `@research-harness/design`; token and contrast checks apply as for the Settings section.
 
 ## 11. CLI experience
 
-The parity rule requires a terminal command for every capability:
+The parity rule requires a terminal command for every capability. The `session.*` capabilities live under `research chat` (the `research session` name belongs to the working-session summary), so the command is:
 
 ```console
-research session configure S0001 --runtime codex --model gpt-5.5 --reasoning high
-research session configure S0001 --entry codex-sub
-research session configure S0001 --clear
+research chat configure CS0001 --runtime codex --model gpt-5.5 --reasoning high
+research chat configure CS0001 --entry codex-sub
+research chat configure CS0001 --clear
 ```
 
 Output: the egress sentence for the runtime before the change, then the resulting binding, as `bound to: session:codex/gpt-5.5 (reasoning high)`, `bound to: entry codex-sub`, or `bound to: project default`. Exit non-zero on refusal with the daemon's sentence. `--json` prints the `SessionView`.
 
-`research session list` and `research session get` print the binding with the same words. `research doctor` is unchanged: a session binding is not project configuration.
+`research chat list` and `research chat show` print the binding with the same words. `research doctor` is unchanged: a session binding is not project configuration.
 
 ## 12. Privacy, credentials, and logging
 
@@ -243,7 +243,7 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 ## 15. Compatibility and migration
 
 - Sessions written before this change have `defaults.model` either `None` or a `ModelIdentity` naming an entry with the adapter's own provider name. On first read, a `ModelIdentity` whose `provider` is neither `entry` nor `local_cli:*` is treated as an entry binding on its `model` value; nothing is rewritten until the session is next configured.
-- The `SessionDefaults` schema gains an optional field; the canonical object's schema version is bumped per the repository's convention for additive fields, with the reader accepting both.
+- The `SessionDefaults` schema gains an optional field with a default. The repository has no object schema-version convention beyond the constant every canonical object carries, and an additive optional field loads every existing session file, so no version bump ships with this change.
 - Generated artifacts are regenerated, never hand-edited: `docs/guide/capabilities.md`, `docs/guide/cli-reference.md`, `web/capabilities.json`, `web/openapi.json`, `web/src/api/capabilities.gen.ts`, and the Web DTO for `SessionDefaults`.
 - The acceptance matrix and ROADMAP gain rows for the criteria in §16; ADR-030 gains the addendum of §5.
 
@@ -253,7 +253,7 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 2. A bound session's messages route through that runtime and model with the chosen reasoning, and the transcript names `session:<runtime>/<model>`.
 3. Every refusal a configured entry would get applies to a binding, in the same order and with the same sentence: policy, posture, login, version, executable.
 4. A per-message override wins over the binding, and clearing the binding returns the session to the project default.
-5. Web and CLI can both bind, show, and clear a binding, and show identical words.
+5. Web and CLI can both bind, show, and clear a binding, and show identical words in the fixed format of §4.
 6. The picker's runtime groups, model lists, reasoning lists, and reasons are the daemon's; no client code decides availability.
 7. Egress is disclosed before the first external binding of a session.
 8. Default CI needs no installed CLI, login, key, or network, and no credential material appears in any new fixture, message, or log line.
