@@ -190,10 +190,10 @@ def test_no_binding_means_the_project_default() -> None:
     assert binding_words(SessionDefaults()) == "project default"
 
 
-def test_a_record_written_before_bindings_is_an_entry_binding_on_its_model_value() -> None:
+def test_a_record_written_before_bindings_is_no_binding() -> None:
     # `ConversationService.create` used to store provider == model == the entry name.
     old = SessionDefaults(model=ModelIdentity(provider="fast", model="fast"))
-    assert binding_of(old) == EntryBinding(name="fast")
+    assert binding_of(old) is None, "it never routed anything before, and routes nothing now"
 ```
 
 - [ ] **Step 6: Run it red**
@@ -210,7 +210,7 @@ Run: `uv run pytest tests/unit/conversation/test_binding.py -q` — Expected: FA
 The domain stores two opaque labels; this module is the one place that reads them. A
 provider of `local_cli:<runtime>` is a runtime binding, `entry` is an entry binding, and any
 other provider is a record written before bindings existed, when `create` stored the
-adapter's own name in both fields: it is an entry binding on its `model` value.
+adapter's own name in both fields: it never routed anything and is no binding (ruling 3).
 """
 
 from __future__ import annotations
