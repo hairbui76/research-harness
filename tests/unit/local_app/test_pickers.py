@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +24,10 @@ from research_harness.local_app.pickers import (
     folder_picker,
 )
 from research_harness.local_app.pickers import base as picker_base
-from research_harness.local_app.pickers.windows import WINDOWS_PICKER_SCRIPT
+from research_harness.local_app.pickers.windows import (
+    WINDOWS_PICKER_SCRIPT,
+    WINDOWS_TITLE_ENV,
+)
 
 Runner = Callable[[Sequence[str]], "subprocess.CompletedProcess[str]"]
 
@@ -47,9 +50,14 @@ def recorder(
     returncode: int = 0,
     stdout: str = "",
     stderr: str = "",
+    envs: list[Mapping[str, str] | None] | None = None,
 ) -> Runner:
-    def run(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    def run(
+        argv: Sequence[str], *, env: Mapping[str, str] | None = None
+    ) -> subprocess.CompletedProcess[str]:
         calls.append(list(argv))
+        if envs is not None:
+            envs.append(env)
         return completed(argv, returncode=returncode, stdout=stdout, stderr=stderr)
 
     return run
@@ -62,7 +70,9 @@ def only(name: str, executable: str) -> Callable[[str], str | None]:
     return which
 
 
-def refuse(_argv: Sequence[str]) -> subprocess.CompletedProcess[str]:  # pragma: no cover
+def refuse(  # pragma: no cover
+    _argv: Sequence[str], *, env: Mapping[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
     raise AssertionError("the picker must not spawn a process in this case")
 
 
@@ -194,7 +204,9 @@ def test_picker_error_diagnostic_is_bounded() -> None:
 
 
 def test_timeout_becomes_a_picker_error() -> None:
-    def time_out(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    def time_out(
+        argv: Sequence[str], *, env: Mapping[str, str] | None = None
+    ) -> subprocess.CompletedProcess[str]:
         raise subprocess.TimeoutExpired(cmd=list(argv), timeout=600.0)
 
     picker = LinuxFolderPicker(which=only("zenity", "/usr/bin/zenity"), run=time_out)
@@ -206,11 +218,18 @@ def test_timeout_becomes_a_picker_error() -> None:
 # --- Windows ---------------------------------------------------------------
 
 
-def test_windows_argv_shape_passes_the_title_as_a_positional_argument() -> None:
+def test_windows_passes_the_title_in_the_environment_not_in_the_command() -> None:
+    """`-Command` joins trailing arguments into the command text.
+
+    PowerShell binds `$args` for `-File`, not for `-Command`: a title passed positionally
+    is appended to the script, which then fails to parse, and the host exits 1 -- which
+    the caller reads as a cancellation, so nothing opens and nothing is reported.
+    """
     calls: list[list[str]] = []
+    envs: list[Mapping[str, str] | None] = []
     picker = WindowsFolderPicker(
         which=only("pwsh", r"C:\pwsh.exe"),
-        run=recorder(calls, stdout="C:\\research\\project"),
+        run=recorder(calls, stdout="C:\\research\\project", envs=envs),
     )
 
     result = picker.select_folder("Choose a project")
@@ -222,11 +241,36 @@ def test_windows_argv_shape_passes_the_title_as_a_positional_argument() -> None:
             "-NonInteractive",
             "-Command",
             WINDOWS_PICKER_SCRIPT,
-            "Choose a project",
         ]
     ]
+    assert envs == [{WINDOWS_TITLE_ENV: "Choose a project"}]
     assert result.method == "native"
     assert result.path == Path("C:\\research\\project")
+
+
+def test_windows_never_lets_a_title_extend_the_script() -> None:
+    """The script is a constant: no caller's text becomes source."""
+    calls: list[list[str]] = []
+    envs: list[Mapping[str, str] | None] = []
+    picker = WindowsFolderPicker(
+        which=only("pwsh", r"C:\pwsh.exe"),
+        run=recorder(calls, stdout="C:\\x", envs=envs),
+    )
+
+    picker.select_folder("'; Remove-Item C:\\ -Recurse; '")
+
+    assert calls[0][-1] == WINDOWS_PICKER_SCRIPT
+    assert "Remove-Item" not in " ".join(calls[0])
+    assert envs == [{WINDOWS_TITLE_ENV: "'; Remove-Item C:\\ -Recurse; '"}]
+
+
+def test_the_windows_script_reads_the_title_and_reports_a_failure_apart_from_a_cancel() -> None:
+    """A dialog that never opened must not look like someone pressing Cancel."""
+    assert f"$env:{WINDOWS_TITLE_ENV}" in WINDOWS_PICKER_SCRIPT
+    assert "BrowseForFolder" in WINDOWS_PICKER_SCRIPT, (
+        "a WinForms dialog needs a single-threaded apartment, which PowerShell 7 is not"
+    )
+    assert "exit 3" in WINDOWS_PICKER_SCRIPT and "exit 1" in WINDOWS_PICKER_SCRIPT
 
 
 def test_windows_prefers_pwsh_over_powershell() -> None:
@@ -273,9 +317,11 @@ def test_windows_cancel_is_not_an_error() -> None:
 
 
 def test_windows_script_is_a_fixed_single_command_without_interpolation() -> None:
-    assert "$args[0]" in WINDOWS_PICKER_SCRIPT
-    assert "FolderBrowserDialog" in WINDOWS_PICKER_SCRIPT
     assert WINDOWS_PICKER_SCRIPT.strip() == WINDOWS_PICKER_SCRIPT
+    for placeholder in ("{}", "{0}", "{title}", "%s", "$args"):
+        assert placeholder not in WINDOWS_PICKER_SCRIPT, (
+            "the script takes no substitution: the title arrives in the environment"
+        )
 
 
 # --- Manual picker and factory ---------------------------------------------

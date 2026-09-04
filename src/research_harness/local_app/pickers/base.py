@@ -7,10 +7,11 @@ Linux agree on what counts as a selection, a cancellation, and a failure.
 
 from __future__ import annotations
 
+import os
 import platform
 import shutil
 import subprocess
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Protocol, runtime_checkable
@@ -39,8 +40,17 @@ __all__ = [
 PickerMethod = Literal["native", "zenity", "kdialog", "manual"]
 """How a folder was chosen, or `manual` when the UI must ask for a typed path."""
 
-SubprocessRunner = Callable[[Sequence[str]], "subprocess.CompletedProcess[str]"]
 WhichFunction = Callable[[str], str | None]
+
+
+@runtime_checkable
+class SubprocessRunner(Protocol):
+    """Runs one picker helper. `env` names variables to add to the child's own."""
+
+    def __call__(
+        self, argv: Sequence[str], *, env: Mapping[str, str] | None = None
+    ) -> subprocess.CompletedProcess[str]: ...
+
 
 DIALOG_TIMEOUT_SECONDS = 600.0
 """A dialog waits for a human, so the bound is generous; it only stops a wedged helper."""
@@ -81,8 +91,15 @@ def default_which(name: str) -> str | None:
     return shutil.which(name)
 
 
-def default_runner(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    """Run a picker helper as an argument array: never a shell, never inheriting stdin."""
+def default_runner(
+    argv: Sequence[str], *, env: Mapping[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
+    """Run a picker helper as an argument array: never a shell, never inheriting stdin.
+
+    A helper that reads a variable still needs the rest of the environment -- a
+    PowerShell host without `SystemRoot` does not start -- so `env` is added to this
+    process' own rather than replacing it.
+    """
     return subprocess.run(
         list(argv),
         capture_output=True,
@@ -90,6 +107,7 @@ def default_runner(argv: Sequence[str]) -> subprocess.CompletedProcess[str]:
         check=False,
         stdin=subprocess.DEVNULL,
         timeout=DIALOG_TIMEOUT_SECONDS,
+        env=None if env is None else {**os.environ, **env},
     )
 
 
@@ -102,10 +120,12 @@ def run_folder_dialog(
     argv: Sequence[str],
     method: PickerMethod,
     run: SubprocessRunner,
+    *,
+    env: Mapping[str, str] | None = None,
 ) -> FolderSelection:
     """Execute a picker helper and classify its exit code."""
     try:
-        completed = run(argv)
+        completed = run(argv, env=env)
     except subprocess.TimeoutExpired as error:
         raise FolderPickerError(
             _bounded(f"the {method} folder dialog timed out after {DIALOG_TIMEOUT_SECONDS:.0f}s")
