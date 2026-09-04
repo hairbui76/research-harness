@@ -13,7 +13,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { ConversationSession, SessionMatch } from '../../api/dto';
+import type { ConfigureSessionRequest, ConversationSession, SessionMatch } from '../../api/dto';
 import type { HarnessClient } from '../../api/client';
 import { CapabilityError } from '../../api/client';
 
@@ -51,6 +51,19 @@ export interface SessionsApi {
   open: (sessionId: string) => void;
   create: (title?: string) => Promise<ConversationSession | null>;
   rename: (sessionId: string, title: string) => Promise<void>;
+  /**
+   * Bind this session to a runtime and model, to an entry, or clear it.
+   *
+   * The record the daemon answers with replaces the one in `sessions`, so every surface
+   * reads the binding back from the daemon rather than from a local guess (binding spec
+   * §10). A refusal is *returned* rather than put in `refusal`: the pick was made in the
+   * composer, so the daemon's sentence belongs beside the selector and not in the rail's
+   * notice about the session history. `null` means it was stored.
+   */
+  configure: (
+    sessionId: string,
+    input: Omit<ConfigureSessionRequest, 'session'>,
+  ) => Promise<string | null>;
   loading: boolean;
   error: string | null;
   reload: () => void;
@@ -201,6 +214,25 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
     [canMutate, client],
   );
 
+  const configure = useCallback(
+    async (
+      sessionId: string,
+      input: Omit<ConfigureSessionRequest, 'session'>,
+    ): Promise<string | null> => {
+      if (!canMutate) return null;
+      try {
+        const session = await client.configureSession({ session: sessionId, ...input });
+        setSessions((previous) =>
+          previous.map((entry) => (entry.id === session.id ? session : entry)),
+        );
+        return null;
+      } catch (cause) {
+        return cause instanceof CapabilityError ? cause.message : String(cause);
+      }
+    },
+    [canMutate, client],
+  );
+
   const active = useMemo(
     () => sessions.find((session) => session.id === urlSession) ?? null,
     [sessions, urlSession],
@@ -216,6 +248,7 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
     open,
     create,
     rename,
+    configure,
     loading,
     error,
     reload,

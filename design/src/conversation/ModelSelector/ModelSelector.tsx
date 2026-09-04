@@ -17,6 +17,16 @@ export interface ModelSelectorProps {
   groups?: readonly ModelOptionGroup[];
   /** Selected model id. */
   value: string;
+  /**
+   * What the trigger says when `value` names none of the options given.
+   *
+   * A host whose selection is real but whose catalogue is momentarily incomplete — a
+   * session bound to a runtime whose scan failed — has something true to say about where
+   * the next message goes, and "Select a model" would not be it. The words are the host's;
+   * the option is still not in the menu, because an option is a claim that it can be
+   * chosen. Nothing is stated about egress, because nothing about it is known here.
+   */
+  fallbackLabel?: string;
   onChange: (option: ModelOption) => void;
   /** Accessible name for the control. Defaults to "Model". */
   label?: string;
@@ -40,6 +50,7 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
       options,
       groups = [],
       value,
+      fallbackLabel,
       onChange,
       label = 'Model',
       disabled = false,
@@ -110,10 +121,12 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
             size={size}
             iconEnd="chevron-down"
             disabled={disabled}
-            aria-label={`${label}: ${selected?.label ?? 'none selected'}`}
+            aria-label={`${label}: ${selected?.label ?? fallbackLabel ?? 'none selected'}`}
           >
             <span className="rh-model-selector__current">
-              <span className="rh-model-selector__name">{selected?.label ?? 'Select a model'}</span>
+              <span className="rh-model-selector__name">
+                {selected?.label ?? fallbackLabel ?? 'Select a model'}
+              </span>
               {selectedEgress ? (
                 <span className="rh-model-selector__egress">
                   <Icon name={selectedEgress.icon} size={14} />
