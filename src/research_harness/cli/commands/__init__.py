@@ -20,6 +20,7 @@ from research_harness.cli.commands import (
     evidence,
     graph,
     init,
+    local_app,
     manuscript,
     privacy,
     provider,
@@ -50,6 +51,7 @@ COMMAND_MODULES: tuple[ModuleType, ...] = (
     provider,
     privacy,
     serve,
+    local_app,
 )
 
 

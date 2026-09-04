@@ -81,6 +81,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │               needed.                                                                │
 │ capabilities  List the named capabilities this build exposes, and the ones it does   │
 │               not yet.                                                               │
+│ app           Open the multi-project application in a browser, starting it if it is  │
+│               not running.                                                           │
 │ work          Inspect the corpus.                                                    │
 │ review        Answer the review queue: accept, qualify, edit, split, reject, defer,  │
 │               request more.                                                          │
@@ -122,6 +124,26 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                              [env var: RESEARCH_WORKSPACE]                           │
 │ --json                       Print the result as JSON instead of text.               │
 │ --help                       Show this message and exit.                             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### `research app`
+
+```text
+
+ Usage: research app [OPTIONS]
+
+ Open the multi-project application in a browser, starting it if it is not running.
+
+ Independent of the current directory: the app manages projects through its own
+ registry, so this command reads no research.yaml and takes no --workspace. It
+ binds loopback only, and the URL it opens carries a one-time nonce, never the
+ app token. `research serve -w <workspace>` is unchanged.
+
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --port           <int>  Loopback port the application listens on. [default: 8765]    │
+│ --no-open               Do not launch a browser; print the URL instead.              │
+│ --help                  Show this message and exit.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
