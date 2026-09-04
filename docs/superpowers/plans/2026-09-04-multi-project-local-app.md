@@ -98,7 +98,7 @@ rules.
 - Produces: `ProjectRegistry(path: Path)` with `list()`, `get()`, `find_by_root()`, `add()`, `replace()`, and `remove()`
 - Consumes: existing `ResearchHarnessError` and timezone-aware datetimes
 
-- [ ] **Step 1: Write failing platform-path and containment tests**
+- [x] **Step 1: Write failing platform-path and containment tests**
 
 ```python
 def test_windows_uses_local_app_data(tmp_path: Path) -> None:
@@ -121,13 +121,13 @@ def test_a_resolved_child_must_remain_beneath_the_root(tmp_path: Path) -> None:
         assert_beneath(root, tmp_path / "outside.txt")
 ```
 
-- [ ] **Step 2: Run the path tests and confirm the missing-module failure**
+- [x] **Step 2: Run the path tests and confirm the missing-module failure**
 
 Run: `uv run pytest tests/unit/local_app/test_paths.py -v`
 
 Expected: FAIL during collection because `research_harness.local_app.paths` does not exist.
 
-- [ ] **Step 3: Implement the focused platform path boundary**
+- [x] **Step 3: Implement the focused platform path boundary**
 
 ```python
 class ProjectPathError(ResearchHarnessError):
@@ -163,7 +163,7 @@ def assert_beneath(root: Path, candidate: Path) -> Path:
     return resolved
 ```
 
-- [ ] **Step 4: Write failing registry round-trip, deduplication, ordering, and corruption tests**
+- [x] **Step 4: Write failing registry round-trip, deduplication, ordering, and corruption tests**
 
 ```python
 def record(root: Path, project_id: str, name: str, opened: datetime) -> ProjectRecord:
@@ -196,7 +196,7 @@ def test_corrupt_registry_is_preserved_and_reported(tmp_path: Path) -> None:
     assert path.read_text(encoding="utf-8") == "not json"
 ```
 
-- [ ] **Step 5: Implement immutable records and atomic registry replacement**
+- [x] **Step 5: Implement immutable records and atomic registry replacement**
 
 ```python
 class ProjectAvailability(StrEnum):
@@ -269,7 +269,7 @@ Implement `_save()` with a same-directory `.tmp-<uuid>` file, `flush()`, `os.fsy
 `os.replace()`, and best-effort directory fsync, mirroring the durability pattern in
 `workspace/runs.py` without importing its private helpers.
 
-- [ ] **Step 6: Run focused tests, type checks, and lint**
+- [x] **Step 6: Run focused tests, type checks, and lint**
 
 Run: `uv run pytest tests/unit/local_app/test_paths.py tests/unit/local_app/test_registry.py -v`
 
@@ -279,7 +279,7 @@ Run: `uv run ruff check src/research_harness/local_app tests/unit/local_app`
 
 Expected: all commands PASS.
 
-- [ ] **Step 7: Commit the registry foundation**
+- [x] **Step 7: Commit the registry foundation**
 
 ```bash
 git add src/research_harness/local_app tests/unit/local_app
@@ -301,7 +301,7 @@ git commit -m "feat(app): add persistent local project registry"
 - Produces: `create(parent, name, policy)`, `open(root)`, `initialize(root, name, policy)`, `locate(project_id, root)`, `rename(project_id, display_name)`, `forget(project_id)`, `reveal(project_id)`, `list_projects()`
 - Produces errors: `ProjectNotFoundError`, `ProjectNeedsInitializationError`, `ProjectActiveRunsError`, `ProjectLifecycleError`
 
-- [ ] **Step 1: Write failing create/open/deduplicate tests**
+- [x] **Step 1: Write failing create/open/deduplicate tests**
 
 ```python
 def test_create_initializes_a_safe_child_and_registers_it(tmp_path: Path) -> None:
@@ -329,13 +329,13 @@ def test_opening_the_same_root_returns_the_existing_project_id(tmp_path: Path) -
     assert second.project_id == first.project_id
 ```
 
-- [ ] **Step 2: Run the lifecycle tests and confirm failure**
+- [x] **Step 2: Run the lifecycle tests and confirm failure**
 
 Run: `uv run pytest tests/unit/local_app/test_manager.py -v`
 
 Expected: FAIL because `ProjectManager` is not defined.
 
-- [ ] **Step 3: Implement safe folder naming and create/open/initialize**
+- [x] **Step 3: Implement safe folder naming and create/open/initialize**
 
 ```python
 def safe_folder_name(name: str) -> str:
@@ -371,7 +371,7 @@ class ProjectManager:
 Use `secrets.token_hex(8)` for `prj_<16 hex>`, inject the clock and ID factory in tests, and
 never register until initialization/open validation has succeeded.
 
-- [ ] **Step 4: Write failing locate/rename/forget/reveal and availability tests**
+- [x] **Step 4: Write failing locate/rename/forget/reveal and availability tests**
 
 ```python
 def test_forget_never_deletes_the_workspace(tmp_path: Path) -> None:
@@ -398,7 +398,7 @@ def test_locate_keeps_the_project_id_and_updates_only_after_validation(tmp_path:
     assert moved.path == new_root.resolve()
 ```
 
-- [ ] **Step 5: Implement lifecycle updates and derived status views**
+- [x] **Step 5: Implement lifecycle updates and derived status views**
 
 `list_projects()` must open each root defensively and return one of these exact mappings:
 
@@ -418,13 +418,13 @@ else:
 `reveal(project_id)` passes only the registered root to an injected platform action. `rename`
 changes only `display_name`; it must not edit `research.yaml`.
 
-- [ ] **Step 6: Run manager tests and the existing init tests**
+- [x] **Step 6: Run manager tests and the existing init tests**
 
 Run: `uv run pytest tests/unit/local_app/test_manager.py tests/e2e/test_cli_init_ingest_parse.py -v`
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit project lifecycle behavior**
+- [x] **Step 7: Commit project lifecycle behavior**
 
 ```bash
 git add src/research_harness/local_app tests/unit/local_app/test_manager.py
@@ -448,7 +448,7 @@ git commit -m "feat(app): add project lifecycle manager"
 - Produces: `folder_picker(system: str | None = None) -> FolderPicker`
 - Consumes: subprocess runner injected as `Callable[[Sequence[str]], CompletedProcess[str]]`
 
-- [ ] **Step 1: Write failing adapter-selection and cancellation tests**
+- [x] **Step 1: Write failing adapter-selection and cancellation tests**
 
 ```python
 def test_linux_prefers_zenity(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -472,13 +472,13 @@ def test_cancel_is_not_an_error() -> None:
     assert picker.select_folder("Open").cancelled is True
 ```
 
-- [ ] **Step 2: Run picker tests and confirm failure**
+- [x] **Step 2: Run picker tests and confirm failure**
 
 Run: `uv run pytest tests/unit/local_app/test_pickers.py -v`
 
 Expected: FAIL because picker modules do not exist.
 
-- [ ] **Step 3: Implement Linux argument-array invocation**
+- [x] **Step 3: Implement Linux argument-array invocation**
 
 ```python
 class LinuxFolderPicker:
@@ -493,7 +493,7 @@ class LinuxFolderPicker:
 Treat exit code `0` with a non-empty stdout path as selection, exit code `1` as cancellation,
 and every other exit as `FolderPickerError` with a bounded diagnostic. Never use `shell=True`.
 
-- [ ] **Step 4: Implement the Windows native adapter through a fixed PowerShell script**
+- [x] **Step 4: Implement the Windows native adapter through a fixed PowerShell script**
 
 The adapter passes the title as a positional argument and keeps the script constant:
 
@@ -516,7 +516,7 @@ argv = [powershell, "-NoProfile", "-NonInteractive", "-Command", WINDOWS_PICKER_
 Resolve `pwsh` first and `powershell.exe` second. Execute in a short-lived process and use the
 same result classifier as Linux.
 
-- [ ] **Step 5: Run unit tests and manual opt-in smoke commands**
+- [x] **Step 5: Run unit tests and manual opt-in smoke commands**
 
 Run: `uv run pytest tests/unit/local_app/test_pickers.py -v`
 
@@ -526,7 +526,7 @@ Run on Linux manually: the same command; verify `zenity`, `kdialog`, or `fallbac
 
 Expected automated result: PASS. Manual smoke tests may be skipped in CI.
 
-- [ ] **Step 6: Commit folder picker adapters**
+- [x] **Step 6: Commit folder picker adapters**
 
 ```bash
 git add src/research_harness/local_app/pickers tests/unit/local_app/test_pickers.py
@@ -550,7 +550,7 @@ git commit -m "feat(app): add Windows and Linux folder pickers"
 - Produces: `require_control_mutation(request: Request) -> None`
 - Consumes: existing `_bearer` semantics or an extracted public bearer parser, `Principal.human()`, `Principal.agent_host()`
 
-- [ ] **Step 1: Write failing token persistence and permission tests**
+- [x] **Step 1: Write failing token persistence and permission tests**
 
 ```python
 def test_app_token_is_stable_and_not_stored_in_the_registry(tmp_path: Path) -> None:
@@ -575,13 +575,13 @@ def test_bootstrap_is_short_lived_and_single_use() -> None:
     assert store.exchange(nonce) is False
 ```
 
-- [ ] **Step 2: Run tests and confirm failure**
+- [x] **Step 2: Run tests and confirm failure**
 
 Run: `uv run pytest tests/unit/local_app/test_auth.py -v`
 
 Expected: FAIL because `local_app.auth` does not exist.
 
-- [ ] **Step 3: Implement owner-restricted token storage and principal resolution**
+- [x] **Step 3: Implement owner-restricted token storage and principal resolution**
 
 ```python
 APP_TOKEN_FILENAME = "app-token"
@@ -603,7 +603,7 @@ Use the same human/agent-host permission sets as the existing daemon; do not cre
 authority model. Store only SHA-256 digests of bootstrap nonces in memory, prune expired entries
 on issue/exchange, and never persist a nonce.
 
-- [ ] **Step 4: Write failing HTTP dependency tests for token and Origin**
+- [x] **Step 4: Write failing HTTP dependency tests for token and Origin**
 
 ```python
 def test_control_read_requires_the_bearer_token(app_request: RequestFactory, token: str) -> None:
@@ -617,20 +617,20 @@ def test_control_mutation_requires_same_origin(app_request: RequestFactory, toke
         require_control_mutation(request)
 ```
 
-- [ ] **Step 5: Implement exact origin policy**
+- [x] **Step 5: Implement exact origin policy**
 
 Allow the request origin only when it equals `http://127.0.0.1:<effective-port>` or, in
 existing development mode, one of `DEV_ORIGINS`. A missing Origin is refused for browser-facing
 control mutations. Control reads require bearer authentication but not Origin. Project-scoped
 workspace reads retain the legacy behavior where no token means agent host.
 
-- [ ] **Step 6: Run authentication tests and existing daemon authority tests**
+- [x] **Step 6: Run authentication tests and existing daemon authority tests**
 
 Run: `uv run pytest tests/unit/local_app/test_auth.py tests/contract/protocol/test_http.py -v`
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit app authentication**
+- [x] **Step 7: Commit app authentication**
 
 ```bash
 git add src/research_harness/local_app/auth.py src/research_harness/local_app/models.py tests/unit/local_app/test_auth.py
@@ -653,7 +653,7 @@ git commit -m "feat(app): secure the local project control plane"
 - Produces: `ProjectRuntimePool(registry, *, catalog_factory, clock)` with `get(project_id)`, `evict(project_id)`, `has_active_runs(project_id)`, `status(project_id)`, `evict_idle(before)`
 - Consumes: `RunStore`, `RunStatus.pending`, `RunStatus.running`, `WorkspaceRepository.open()`
 
-- [ ] **Step 1: Write failing isolation, active-run, eviction, and relocated-root tests**
+- [x] **Step 1: Write failing isolation, active-run, eviction, and relocated-root tests**
 
 ```python
 def test_projects_get_distinct_mutation_gates(two_projects: RegisteredProjects) -> None:
@@ -676,13 +676,13 @@ def test_idle_eviction_reopens_the_same_root(project: RegisteredProject) -> None
     assert second.root == first.root
 ```
 
-- [ ] **Step 2: Run runtime tests and confirm failure**
+- [x] **Step 2: Run runtime tests and confirm failure**
 
 Run: `uv run pytest tests/unit/local_app/test_runtime.py -v`
 
 Expected: FAIL because runtime classes do not exist.
 
-- [ ] **Step 3: Implement runtime construction and active-run checks**
+- [x] **Step 3: Implement runtime construction and active-run checks**
 
 ```python
 @dataclass(slots=True)
@@ -703,7 +703,7 @@ class WorkspaceRuntime:
 `WorkspaceRepository.open()`, creates one runtime per project ID, and updates last access. It
 must never trust a stale root passed by a caller.
 
-- [ ] **Step 4: Connect the manager's active-run and locate/forget eviction hooks**
+- [x] **Step 4: Connect the manager's active-run and locate/forget eviction hooks**
 
 Construct `ProjectManager` with:
 
@@ -717,13 +717,13 @@ manager = ProjectManager(
 
 Call `on_root_changed(project_id)` only after a successful locate or forget registry commit.
 
-- [ ] **Step 5: Run runtime and manager tests**
+- [x] **Step 5: Run runtime and manager tests**
 
 Run: `uv run pytest tests/unit/local_app/test_runtime.py tests/unit/local_app/test_manager.py -v`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit runtime isolation**
+- [x] **Step 6: Commit runtime isolation**
 
 ```bash
 git add src/research_harness/local_app/runtime.py src/research_harness/local_app/manager.py tests/unit/local_app
@@ -745,7 +745,7 @@ git commit -m "feat(app): isolate workspace runtimes per project"
 - Preserves: `create_app(workspace_root, *, registry=None, principal_resolver=None) -> FastAPI`
 - Preserves: the exact `EXPECTED_ROUTES` set for `create_app()`
 
-- [ ] **Step 1: Add a failing parity test around the new factory**
+- [x] **Step 1: Add a failing parity test around the new factory**
 
 ```python
 def test_runtime_app_and_legacy_app_publish_the_same_workspace_routes(workspace: Path) -> None:
@@ -755,13 +755,13 @@ def test_runtime_app_and_legacy_app_publish_the_same_workspace_routes(workspace:
     assert api_routes(extracted) == api_routes(legacy)
 ```
 
-- [ ] **Step 2: Run the parity and current contract tests**
+- [x] **Step 2: Run the parity and current contract tests**
 
 Run: `uv run pytest tests/unit/server/test_workspace_runtime_app.py tests/contract/protocol/test_http.py -v`
 
 Expected: the new test FAILS because `create_workspace_app` is missing; all pre-existing tests PASS.
 
-- [ ] **Step 3: Extract the current closure state into the runtime factory**
+- [x] **Step 3: Extract the current closure state into the runtime factory**
 
 ```python
 def create_app(workspace_root, *, registry=None, principal_resolver=None) -> FastAPI:
@@ -792,13 +792,13 @@ Do not change endpoint bodies or DTOs. Keep attachment, manuscript, and session 
 functions accepting a concrete root; the runtime factory supplies it. Add `serve_bundle=False`
 only at the shared-factory boundary so a dispatched project app cannot serve the SPA fallback.
 
-- [ ] **Step 4: Assert legacy token placement, authority, routes, bytes, and SSE still pass**
+- [x] **Step 4: Assert legacy token placement, authority, routes, bytes, and SSE still pass**
 
 Run: `uv run pytest tests/contract/protocol/test_http.py tests/contract/protocol/test_web_routes.py tests/contract/protocol/test_session_events.py tests/contract/capabilities/test_attachments.py -v`
 
 Expected: PASS with no changes to existing expected payloads or route names.
 
-- [ ] **Step 5: Run static checks**
+- [x] **Step 5: Run static checks**
 
 Run: `uv run mypy src/research_harness/server src/research_harness/local_app/runtime.py`
 
@@ -806,7 +806,7 @@ Run: `uv run ruff check src/research_harness/server src/research_harness/local_a
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit the no-behavior-change extraction**
+- [x] **Step 6: Commit the no-behavior-change extraction**
 
 ```bash
 git add src/research_harness/server src/research_harness/local_app/runtime.py tests/contract/protocol/test_http.py tests/unit/server/test_workspace_runtime_app.py
@@ -829,7 +829,7 @@ git commit -m "refactor(server): share workspace app construction"
 - Produces: `ProjectDispatcher(pool, principal_resolver)` ASGI app mounted at `/api/projects`
 - Consumes: `ProjectManager`, `ProjectRuntimePool`, `FolderPicker`, `create_workspace_app()`
 
-- [ ] **Step 1: Write the failing control-plane route and auth contract tests**
+- [x] **Step 1: Write the failing control-plane route and auth contract tests**
 
 ```python
 EXPECTED_CONTROL_ROUTES = {
@@ -860,13 +860,13 @@ def test_cross_origin_control_mutation_is_refused(authenticated_multi_client: Te
     assert response.status_code == 403
 ```
 
-- [ ] **Step 2: Run contract tests and confirm failure**
+- [x] **Step 2: Run contract tests and confirm failure**
 
 Run: `uv run pytest tests/contract/protocol/test_multi_project_http.py -v`
 
 Expected: FAIL because `create_multi_project_app` does not exist.
 
-- [ ] **Step 3: Implement control-plane DTOs and routes**
+- [x] **Step 3: Implement control-plane DTOs and routes**
 
 Use closed Pydantic request models:
 
@@ -896,7 +896,7 @@ The folder-dialog response is `{path, method, cancelled, fallback_required}`.
 from `BootstrapStore.issue()`. `POST /api/app/session` requires a same-origin request carrying
 `{"bootstrap": "<nonce>"}`; it consumes the nonce and returns the app token once. A replay is 401.
 
-- [ ] **Step 4: Implement the mounted project dispatcher**
+- [x] **Step 4: Implement the mounted project dispatcher**
 
 Mount after exact control-plane routes:
 
@@ -910,7 +910,7 @@ segment, validates the ID through `pool.get(project_id)`, rewrites `scope["path"
 `create_workspace_app(runtime, principal_resolver=resolve, serve_bundle=False)`. Locate and
 forget evict both the runtime and cached sub-app after the registry mutation succeeds.
 
-- [ ] **Step 5: Write and run cross-project isolation tests**
+- [x] **Step 5: Write and run cross-project isolation tests**
 
 ```python
 def test_same_object_id_is_resolved_inside_the_selected_project(two_projects_client) -> None:
@@ -928,7 +928,7 @@ Run: `uv run pytest tests/contract/protocol/test_multi_project_http.py tests/e2e
 
 Expected: PASS.
 
-- [ ] **Step 6: Verify the SPA is served only by the outer app**
+- [x] **Step 6: Verify the SPA is served only by the outer app**
 
 Add a built-bundle fixture and assert `/projects/<id>/overview` returns `index.html`, while an
 unknown `/api/projects/<id>/not-an-api-route` returns an API 404 and never HTML.
@@ -937,7 +937,7 @@ Run: `uv run pytest tests/contract/protocol/test_multi_project_http.py -v -k "sp
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit the multi-project server**
+- [x] **Step 7: Commit the multi-project server**
 
 ```bash
 git add src/research_harness/server src/research_harness/local_app/models.py tests/contract/protocol/test_multi_project_http.py tests/e2e/test_multi_project_gate.py
@@ -960,7 +960,7 @@ git commit -m "feat(server): serve isolated project workspaces from one app"
 - Produces: `probe_existing_app(port: int) -> bool`
 - Consumes: `app_data_dir()`, `ensure_app_token()`, `create_multi_project_app()`, `uvicorn.run()`, `webbrowser.open()`
 
-- [ ] **Step 1: Write failing CLI tests with all external effects injected/mocked**
+- [x] **Step 1: Write failing CLI tests with all external effects injected/mocked**
 
 ```python
 def test_app_does_not_resolve_the_current_workspace(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -984,13 +984,13 @@ def test_no_open_starts_the_server_without_launching_a_browser() -> None:
     run_server.assert_called_once()
 ```
 
-- [ ] **Step 2: Run CLI tests and confirm the missing-command failure**
+- [x] **Step 2: Run CLI tests and confirm the missing-command failure**
 
 Run: `uv run pytest tests/unit/cli/test_local_app.py -v`
 
 Expected: FAIL because Typer has no `app` command.
 
-- [ ] **Step 3: Implement the launcher**
+- [x] **Step 3: Implement the launcher**
 
 ```python
 def app_command(
@@ -1018,7 +1018,7 @@ nonce. `probe_existing_app()` performs a short-timeout
 GET to `/api/app/health` and accepts only `{ok: true, kind: "multi_project", version: ...}`.
 An occupied port serving anything else exits with a clear error instead of launching it.
 
-- [ ] **Step 4: Register the command and verify help/legacy commands**
+- [x] **Step 4: Register the command and verify help/legacy commands**
 
 Run: `uv run research app --help`
 
@@ -1026,7 +1026,7 @@ Run: `uv run pytest tests/unit/cli/test_local_app.py tests/unit/cli/test_ergonom
 
 Expected: help lists `--port` and `--no-open`; tests PASS; `serve`, `mcp`, and `shell` remain registered.
 
-- [ ] **Step 5: Commit the launcher**
+- [x] **Step 5: Commit the launcher**
 
 ```bash
 git add src/research_harness/cli/commands tests/unit/cli/test_local_app.py
@@ -1055,7 +1055,7 @@ git commit -m "feat(cli): launch the multi-project web app"
 - Produces: `readBootstrap()` for the one-time query value and `storeAppToken()` backed by `sessionStorage`, leaving existing workspace `readToken()` behavior intact
 - Modifies: `HarnessClient.withBaseUrl(baseUrl: string) -> HarnessClient`
 
-- [ ] **Step 1: Write failing API path and session-token tests**
+- [x] **Step 1: Write failing API path and session-token tests**
 
 ```typescript
 it('scopes a workspace client beneath the opaque project id', async () => {
@@ -1073,13 +1073,13 @@ it('reads and strips the one-time bootstrap without persisting it', () => {
 });
 ```
 
-- [ ] **Step 2: Run Web API tests and confirm failure**
+- [x] **Step 2: Run Web API tests and confirm failure**
 
 Run: `pnpm --filter research-harness-web test -- src/api/projects.test.ts src/api/client.test.ts`
 
 Expected: FAIL because `AppClient`, `readBootstrap`, and `storeAppToken` do not exist.
 
-- [ ] **Step 3: Implement `AppClient` with exact request bodies**
+- [x] **Step 3: Implement `AppClient` with exact request bodies**
 
 ```typescript
 workspaceClient(projectId: string): HarnessClient {
@@ -1101,7 +1101,7 @@ Every control-plane request carries `Authorization: Bearer <app token>`. Mutatio
 `Content-Type: application/json`; the browser supplies the same-origin Origin header. Do not
 attempt to set Origin manually.
 
-- [ ] **Step 4: Implement host detection without breaking legacy mode**
+- [x] **Step 4: Implement host detection without breaking legacy mode**
 
 `HostProvider` calls `/api/app/health` once. A valid multi-project response selects `multi`,
 exchanges a query bootstrap at `/api/app/session`, stores the returned app token in
@@ -1112,7 +1112,7 @@ they must not be misclassified as the legacy daemon.
 Move `SessionProvider` out of `main.tsx`; the route tree will mount it in Task 10 with either a
 legacy client or a project-scoped client.
 
-- [ ] **Step 5: Run API, host, and existing Web tests**
+- [x] **Step 5: Run API, host, and existing Web tests**
 
 Run: `pnpm --filter research-harness-web test -- src/api/projects.test.ts src/api/client.test.ts src/app/host.test.tsx`
 
@@ -1120,7 +1120,7 @@ Run: `pnpm --filter research-harness-web typecheck`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Web host plumbing**
+- [x] **Step 6: Commit Web host plumbing**
 
 ```bash
 git add web/src/api web/src/app/host.tsx web/src/app/host.test.tsx web/src/main.tsx web/src/test/harness.tsx
@@ -1152,7 +1152,7 @@ git commit -m "feat(web): detect and connect to multi-project hosts"
 - Produces: `ProjectHome` and all lifecycle dialogs
 - Consumes: `HostProvider`, `useHost()`, and `AppClient.workspaceClient(projectId)`
 
-- [ ] **Step 1: Write failing path, first-run, recent-project, and accessibility tests**
+- [x] **Step 1: Write failing path, first-run, recent-project, and accessibility tests**
 
 ```typescript
 it('prefixes a workspace path and preserves its query', () => {
@@ -1173,20 +1173,20 @@ it('has no axe violations', async () => {
 });
 ```
 
-- [ ] **Step 2: Run project-shell tests and confirm failure**
+- [x] **Step 2: Run project-shell tests and confirm failure**
 
 Run: `pnpm --filter research-harness-web test -- src/app/projectPaths.test.tsx src/views/projects/ProjectHome.test.tsx`
 
 Expected: FAIL because the project shell and Project Home do not exist.
 
-- [ ] **Step 3: Implement Project Home states**
+- [x] **Step 3: Implement Project Home states**
 
 Use existing `Button`, `Card`, `Badge`, `AsyncState`, `ErrorNotice`, and `Dialog` components.
 Render availability in text, not color alone. Disable opening unavailable, invalid, and
 incompatible projects; offer Locate for unavailable entries. A busy project remains openable.
 Keep the server's most-recent-first ordering unchanged.
 
-- [ ] **Step 4: Write failing lifecycle dialog tests**
+- [x] **Step 4: Write failing lifecycle dialog tests**
 
 ```typescript
 it('creates from the parent returned by the native picker', async () => {
@@ -1211,7 +1211,7 @@ it('states that Forget does not delete local files', async () => {
 });
 ```
 
-- [ ] **Step 5: Implement dialogs and stable error handling**
+- [x] **Step 5: Implement dialogs and stable error handling**
 
 Dialogs retain entered values after server errors, restore focus to the opening control, and
 show the server message. Linux `fallback_required` reveals an authenticated path input.
@@ -1219,7 +1219,7 @@ Cancellation performs no mutation. Successful create/open/initialize navigates t
 `projectHref(result.project_id, '/')`; Locate refreshes the current project; Rename refreshes
 the list; Forget returns to Project Home.
 
-- [ ] **Step 6: Implement the dual route shell**
+- [x] **Step 6: Implement the dual route shell**
 
 ```tsx
 export function AppRoutes() {
@@ -1241,7 +1241,7 @@ export function AppRoutes() {
 Routes`. `LegacyWorkspaceRoutes` mounts the current `SessionProvider -> Layout -> workspace
 Routes` without a prefix. An unknown project ID renders Project Home with a not-found notice.
 
-- [ ] **Step 7: Run project shell tests, type checks, and lint**
+- [x] **Step 7: Run project shell tests, type checks, and lint**
 
 Run: `pnpm --filter research-harness-web test -- src/app/projectPaths.test.tsx src/views/projects src/app/host.test.tsx`
 
@@ -1251,7 +1251,7 @@ Run: `pnpm --filter research-harness-web lint`
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit the project shell**
+- [x] **Step 8: Commit the project shell**
 
 ```bash
 git add web/src/app web/src/views/projects web/src/main.tsx web/src/styles.css
@@ -1287,7 +1287,7 @@ git commit -m "feat(web): add project home and workspace route shell"
 - Produces: every internal link remains within the active `/projects/{projectId}` route
 - Preserves: all legacy route targets when `ProjectPathProvider` has no project ID
 
-- [ ] **Step 1: Write failing rail, deep-link, byte, and SSE assertions**
+- [x] **Step 1: Write failing rail, deep-link, byte, and SSE assertions**
 
 ```typescript
 it('keeps rail navigation inside the active project', async () => {
@@ -1305,13 +1305,13 @@ it('scopes every non-JSON URL through the project client', () => {
 });
 ```
 
-- [ ] **Step 2: Run affected tests and confirm links escape to legacy roots**
+- [x] **Step 2: Run affected tests and confirm links escape to legacy roots**
 
 Run: `pnpm --filter research-harness-web test -- src/app/Layout.test.tsx src/api/client.test.ts src/api/sse.test.ts`
 
 Expected: FAIL because current absolute links omit the project prefix.
 
-- [ ] **Step 3: Prefix navigation at the application boundary**
+- [x] **Step 3: Prefix navigation at the application boundary**
 
 Use this exact pattern in hook-capable components:
 
@@ -1336,7 +1336,7 @@ export function routeForEntity(
 Add `navigationForProject(projectId: string | null)` and transform Overview's server-provided
 route through `href()`. Do not persist already-prefixed paths in DTOs or local storage.
 
-- [ ] **Step 4: Prefix conversation/session navigation and `rh://` deep links**
+- [x] **Step 4: Prefix conversation/session navigation and `rh://` deep links**
 
 Pass `href` into `routeForEntity`, conversation-session routes, manuscript routes, and artifact
 source routes. Preserve query parameters for session/message and file/line targets. Add tests for
@@ -1344,13 +1344,13 @@ source routes. Preserve query parameters for session/message and file/line targe
 `/manuscript?file=main.tex&line=23` in both host modes. Verify the last-session storage key uses
 the stable project ID, so Locate changes the root without discarding the remembered session.
 
-- [ ] **Step 5: Verify bytes and SSE need no view-level prefix logic**
+- [x] **Step 5: Verify bytes and SSE need no view-level prefix logic**
 
 The scoped `HarnessClient.baseUrl` must make artifact bytes, attachment bytes/previews,
 manuscript PDFs, and `subscribeRunEvents` use `/api/projects/{id}` automatically. Keep the old
 URL assertions for a legacy client and add parallel scoped assertions.
 
-- [ ] **Step 6: Run all affected Web tests and static checks**
+- [x] **Step 6: Run all affected Web tests and static checks**
 
 Run: `pnpm --filter research-harness-web test -- src/app src/views src/api/client.test.ts src/api/sse.test.ts`
 
@@ -1358,7 +1358,7 @@ Run: `pnpm --filter research-harness-web typecheck`
 
 Expected: PASS in legacy and multi-project fixtures.
 
-- [ ] **Step 7: Commit project-aware navigation**
+- [x] **Step 7: Commit project-aware navigation**
 
 ```bash
 git add web/src/app web/src/views web/src/api/client.test.ts web/src/api/sse.test.ts
@@ -1386,7 +1386,7 @@ git commit -m "feat(web): keep navigation inside the active project"
 - Defines `ProjectAction = 'reveal' | 'locate' | 'rename' | 'forget'`
 - Consumes: project path helper and lifecycle dialogs from Tasks 10–11
 
-- [ ] **Step 1: Write failing Design System interaction tests**
+- [x] **Step 1: Write failing Design System interaction tests**
 
 ```typescript
 it('shows project availability and background work in the switcher', async () => {
@@ -1405,20 +1405,20 @@ it('emits presentation-only project actions', async () => {
 });
 ```
 
-- [ ] **Step 2: Run rail tests and confirm failure**
+- [x] **Step 2: Run rail tests and confirm failure**
 
 Run: `pnpm --filter @research-harness/design test -- src/workspace/ProjectRail/ProjectRail.test.tsx`
 
 Expected: FAIL because new props/status presentation do not exist.
 
-- [ ] **Step 3: Implement presentation-only switcher changes**
+- [x] **Step 3: Implement presentation-only switcher changes**
 
 The Design System may render status labels, action menus, and add buttons, but it must receive
 all data and callbacks as props. It must not import Web API modules or navigate itself. Keep
 keyboard behavior, tooltips in collapsed mode, real links/buttons, and existing single-project
 rendering.
 
-- [ ] **Step 4: Connect Web layout to current and recent projects**
+- [x] **Step 4: Connect Web layout to current and recent projects**
 
 In multi mode:
 
@@ -1437,7 +1437,7 @@ In legacy mode, continue passing only the single `overview`-derived project and 
 lifecycle callbacks. Poll `refreshProjects()` every five seconds only while at least one project
 reports active runs; stop the timer when none do and on unmount.
 
-- [ ] **Step 5: Test switch, unavailable, reveal, rename, forget, and background indicators**
+- [x] **Step 5: Test switch, unavailable, reveal, rename, forget, and background indicators**
 
 Run: `pnpm --filter research-harness-web test -- src/app/Layout.test.tsx`
 
@@ -1447,14 +1447,14 @@ Run: `pnpm -r --workspace-concurrency=1 typecheck`
 
 Expected: PASS.
 
-- [ ] **Step 6: Refresh intentional snapshots and inspect the diff**
+- [x] **Step 6: Refresh intentional snapshots and inspect the diff**
 
 Run: `pnpm --filter @research-harness/design test -- -u src/workspace/ProjectRail/ProjectRail.test.tsx`
 
 Inspect only the four theme/density snapshots. Confirm project status/action markup is expected
 and no unrelated component snapshot changed.
 
-- [ ] **Step 7: Commit the project switcher**
+- [x] **Step 7: Commit the project switcher**
 
 ```bash
 git add design/src/workspace web/src/app/Layout.tsx web/src/app/Layout.test.tsx web/src/app/host.tsx
@@ -1475,7 +1475,7 @@ git commit -m "feat(web): switch and manage projects from the rail"
 - Consumes: completed backend and Web behavior from Tasks 1–12
 - Produces: one regression gate covering every critical multi-project invariant
 
-- [ ] **Step 1: Add concurrent-write isolation tests**
+- [x] **Step 1: Add concurrent-write isolation tests**
 
 ```python
 def test_project_a_lock_does_not_block_project_b(multi_client, blocking_registry) -> None:
@@ -1489,7 +1489,7 @@ def test_project_a_lock_does_not_block_project_b(multi_client, blocking_registry
         assert left.result(timeout=5).status_code == 200
 ```
 
-- [ ] **Step 2: Add traversal, path-disclosure, duplicate, and forget safety tests**
+- [x] **Step 2: Add traversal, path-disclosure, duplicate, and forget safety tests**
 
 Assert all of the following:
 
@@ -1504,13 +1504,13 @@ successful forget -> research.yaml and all corpus files remain byte-identical
 locate invalid root -> old registry root remains unchanged
 ```
 
-- [ ] **Step 3: Add restart and durable-run tests**
+- [x] **Step 3: Add restart and durable-run tests**
 
 Start one app with a temporary data directory, register two projects, persist a running/incomplete
 run, close the TestClient, create a second app against the same data directory, and assert project
 IDs/order plus run status survive. Do not reuse in-memory manager or pool objects across restart.
 
-- [ ] **Step 4: Add a Web end-to-end test against a stateful fake multi-project daemon**
+- [x] **Step 4: Add a Web end-to-end test against a stateful fake multi-project daemon**
 
 ```typescript
 it('creates, switches, refreshes, locates, and forgets without crossing project data', async () => {
@@ -1526,7 +1526,7 @@ it('creates, switches, refreshes, locates, and forgets without crossing project 
 Also assert browser refresh/deep-link restoration at `/projects/{id}/claims/C0001`, native-picker
 cancellation, Linux manual fallback, unavailable Locate, and Forget copy.
 
-- [ ] **Step 5: Run the focused complete feature gate**
+- [x] **Step 5: Run the focused complete feature gate**
 
 Run: `uv run pytest tests/unit/local_app tests/unit/cli/test_local_app.py tests/unit/server/test_workspace_runtime_app.py tests/contract/protocol/test_multi_project_http.py tests/e2e/test_multi_project_gate.py -v`
 
@@ -1534,7 +1534,7 @@ Run: `pnpm --filter research-harness-web test -- src/app/MultiProjectApp.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit the feature gate**
+- [x] **Step 6: Commit the feature gate**
 
 ```bash
 git add tests web/src/app/MultiProjectApp.test.tsx web/src/test/harness.tsx
@@ -1558,7 +1558,7 @@ git commit -m "test(app): gate multi-project isolation and recovery"
 - Documents: `research app`, Project Home, create/open/initialize/locate/forget, Windows/Linux picker behavior, token location, legacy `research serve`, and explicit non-goals
 - Consumes: final command names, response codes, and UI copy from implementation
 
-- [ ] **Step 1: Add a docs assertion before changing documentation**
+- [x] **Step 1: Add a docs assertion before changing documentation**
 
 Extend an existing docs/link test or add `tests/unit/test_docs_multi_project.py`:
 
@@ -1572,13 +1572,13 @@ def test_readme_and_guides_name_both_app_modes() -> None:
     assert "does not delete" in web
 ```
 
-- [ ] **Step 2: Run the docs test and confirm failure**
+- [x] **Step 2: Run the docs test and confirm failure**
 
 Run: `uv run pytest tests/unit/test_docs_multi_project.py -v`
 
 Expected: FAIL until the new command and safety language are documented.
 
-- [ ] **Step 3: Update user documentation**
+- [x] **Step 3: Update user documentation**
 
 Document this quick start verbatim in meaning:
 
@@ -1592,7 +1592,7 @@ Describe app registry locations on Windows/Linux, loopback binding, session-scop
 folder-picker fallback, unavailable/locate behavior, and that Forget removes no files. Keep the
 single-project daemon section and explain when CLI/MCP users still prefer it.
 
-- [ ] **Step 4: Regenerate checked-in references through repository scripts**
+- [x] **Step 4: Regenerate checked-in references through repository scripts**
 
 Run: `uv run python docs/guide/gen_cli_reference.py`
 
@@ -1601,7 +1601,7 @@ app schema is intentionally included in checked-in generated types. If control-p
 manual in `web/src/api/projects.ts`, verify the existing one-workspace generated snapshot is
 unchanged.
 
-- [ ] **Step 5: Run complete Python verification**
+- [x] **Step 5: Run complete Python verification**
 
 Run: `uv run pytest`
 
@@ -1611,7 +1611,7 @@ Run: `uv run mypy`
 
 Expected: PASS.
 
-- [ ] **Step 6: Run complete JavaScript verification**
+- [x] **Step 6: Run complete JavaScript verification**
 
 Run: `pnpm -r --workspace-concurrency=1 test`
 
@@ -1623,7 +1623,7 @@ Run: `pnpm -r --workspace-concurrency=1 build`
 
 Expected: PASS.
 
-- [ ] **Step 7: Perform Windows and Linux smoke checks**
+- [x] **Step 7: Perform Windows and Linux smoke checks**
 
 On each platform:
 
@@ -1641,7 +1641,7 @@ On each platform:
 Record platform, Python version, picker used, and pass/fail in the implementing agent's final
 handoff. Linux must exercise either `zenity` or `kdialog` plus the manual fallback test.
 
-- [ ] **Step 8: Inspect the final diff for scope and secrets**
+- [x] **Step 8: Inspect the final diff for scope and secrets**
 
 Run: `git diff --check`
 
@@ -1652,7 +1652,7 @@ Run: `rg -n "app-token|Bearer [A-Za-z0-9_-]{20,}|LOCALAPPDATA.*projects.json" . 
 Expected: no real token, no user-specific absolute path, no unrelated untracked file staged, and
 no whitespace errors.
 
-- [ ] **Step 9: Commit documentation and final generated artifacts**
+- [x] **Step 9: Commit documentation and final generated artifacts**
 
 ```bash
 git add README.md docs web/src/api tests/unit/test_docs_multi_project.py
@@ -1674,3 +1674,58 @@ Before claiming completion, the implementing agent must report:
 - confirmation that cross-project object and run lookups were refused or correctly isolated;
 - any intentionally deferred item, which must be outside the accepted spec rather than an
   unfinished requirement.
+
+---
+
+## Handoff record (2026-09-04)
+
+**Commit range:** `566685a..HEAD` on `main` (17 commits, one per task plus the scaffold and the
+Web gate; see `git log --oneline 566685a..`).
+
+**Verification (Task 14 Steps 5–6), all green at the final commit:**
+
+| Command | Result |
+|---|---|
+| `uv run pytest` | 4778 passed, 42 skipped |
+| `uv run ruff check src tests` / `ruff format --check .` | clean |
+| `uv run mypy` | clean, 252 source files |
+| `pnpm -r --workspace-concurrency=1 test` | design 937, web 464, vscode 97 passed |
+| `pnpm -r --workspace-concurrency=1 typecheck` / `lint` / `build` | clean (token and contrast lints included) |
+| `git diff --check`, secret scan | clean; only test placeholders and doc mentions of the `app-token` filename |
+
+**Linux smoke (Step 7), performed against a live `research app --no-open --data-dir <tmp>` on
+Linux 5.14 / Python 3.12.13, no `zenity` or `kdialog` installed:**
+
+1. Started outside any workspace; `/api/app/health` answered `multi_project`; the SPA served at `/`;
+   `GET /api/projects` without a token was 401 with no path; `app-token` was created mode 0600.
+2. Bootstrap → session exchange returned the app token once; a replay was 401; a create from
+   `Origin: https://evil.test` was 403.
+3. Created `Độ trễ mạng` into `do-tre-mang/`; opening a plain folder returned
+   `project_needs_initialization`; initializing it registered it; opening the same root spelled
+   `/.` returned the same project id.
+4. Dispatched `/api/projects/{id}/health` and `/overview` served the right workspace; no token
+   meant `agent_host`, the app token meant `human`.
+5. `%2e%2e` as a project id was a JSON 404; an unknown sub-route under a project was a JSON 404;
+   `/projects/{id}/overview` returned the SPA.
+6. Rename changed the display name and left `research.yaml` untouched.
+7. Renaming the folder made the project `unavailable` ("Folder not found"); Locate to the new
+   folder kept the id and made it `available`.
+8. Forget returned 204 and the project tree hashed byte-identical before and after.
+9. `/api/dialogs/folder` returned `fallback_required: true` (manual path) as documented.
+10. A second `research app` joined the running instance without starting a server; against a
+    legacy `research serve` daemon on another port it exited 1 with the `--port` hint; a new
+    instance over the same data directory listed the persisted project.
+
+Windows smoke (Step 7) was **not** performed in this environment (Linux host). Windows behaviour
+is covered by the picker adapter unit tests, the `LOCALAPPDATA` path tests, and the msvcrt
+workspace lock added earlier; the first Windows run should walk the same ten steps and report
+the picker used.
+
+**Contracts confirmed:** `create_app` publishes exactly `EXPECTED_ROUTES` (unchanged file);
+a mounted project publishes the same set; `research serve -w`, `research mcp -w`, `-w`
+commands and `.research/daemon-token` are untouched. Forget was tested without deleting
+workspace files (unit, contract, e2e, Web, and live). Cross-project object and run lookups are
+isolated (404 from the other project).
+
+**Deliberately outside the accepted spec:** desktop shell, project discovery scan, cloud
+registry sync, general-purpose file agent (spec §3). No requirement was left unfinished.
