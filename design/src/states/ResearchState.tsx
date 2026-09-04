@@ -23,8 +23,12 @@ export type ResearchStateCase =
   | { case: 'attachment-omitted'; filename?: string; reason?: string }
   /** A privacy or egress rule refused to let the content leave the workspace. */
   | { case: 'egress-blocked'; policy?: string }
-  /** The disposable graph/search index is being rebuilt. */
+  /** The disposable graph/search index is being rebuilt right now. */
   | { case: 'index-rebuilding'; progress?: number }
+  /** No index has been built yet, so the narrower canonical reads are answering. */
+  | { case: 'index-absent' }
+  /** An index exists but cannot be read, so the narrower canonical reads are answering. */
+  | { case: 'index-unreadable' }
   /** The document moved under a recorded source anchor. */
   | { case: 'anchor-stale'; anchor?: string }
   /** The manuscript failed to compile. */
@@ -101,6 +105,34 @@ export function describeResearchState(state: ResearchStateCase): ResearchStatePr
         description:
           'Search and graph results are incomplete until the rebuild finishes. Accepted research objects are not affected - the index is derived and disposable.',
         safety: { source: 'safe', note: 'No accepted claim, evidence or artifact changes during a rebuild.' },
+      };
+    case 'index-absent':
+      return {
+        kind: 'partial',
+        icon: 'hard-drive',
+        title: 'The research index has not been built yet',
+        description:
+          'Search and graph results are answering from the canonical files, which cover less ' +
+          'than the index does. Nothing is missing from the workspace - the index is derived ' +
+          'and disposable, and has simply never been built here.',
+        safety: {
+          source: 'safe',
+          note: 'Building it changes no accepted claim, evidence or artifact.',
+        },
+      };
+    case 'index-unreadable':
+      return {
+        kind: 'partial',
+        icon: 'circle-dashed',
+        title: 'The research index is not answering',
+        description:
+          'Search and graph results are answering from the canonical files instead. Nothing is ' +
+          'lost: the index is derived and disposable, and a rebuild produces it again from ' +
+          'those files.',
+        safety: {
+          source: 'safe',
+          note: 'No accepted claim, evidence or artifact is affected.',
+        },
       };
     case 'anchor-stale':
       return {

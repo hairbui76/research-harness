@@ -13,6 +13,8 @@ const CASES: ResearchStateCase[] = [
   { case: 'attachment-omitted', filename: 'appendix.pdf' },
   { case: 'egress-blocked', policy: 'The private session class' },
   { case: 'index-rebuilding', progress: 40 },
+  { case: 'index-absent' },
+  { case: 'index-unreadable' },
   { case: 'anchor-stale', anchor: 'p12:b3' },
   { case: 'latex-compile-failed', lastGoodPdf: true },
   { case: 'read-only-host' },
@@ -21,7 +23,7 @@ const CASES: ResearchStateCase[] = [
 
 describe('ResearchState', () => {
   it('covers every named research case from the design spec', () => {
-    expect(CASES).toHaveLength(10);
+    expect(CASES).toHaveLength(12);
     for (const state of CASES) {
       const presentation = describeResearchState(state);
       expect(presentation.title.length).toBeGreaterThan(0);
@@ -67,6 +69,23 @@ describe('ResearchState', () => {
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '40');
     expect(screen.getByRole('status')).toHaveTextContent('derived and disposable');
   });
+
+  it.each(['index-absent', 'index-unreadable'] as const)(
+    'presents %s as partial rather than as work in progress',
+    (name) => {
+      render(<ResearchState state={{ case: name }} />);
+      const state = screen.getByRole('status');
+      // The defect this exists to prevent: an index that is not being built must not be
+      // dressed up as one that is - no LOADING, no spinner, no bar that never finishes.
+      expect(state).toHaveAttribute('data-kind', 'partial');
+      expect(state).not.toHaveAttribute('aria-busy');
+      expect(state).toHaveTextContent('Partial');
+      expect(state).not.toHaveTextContent('Loading');
+      expect(screen.queryByRole('progressbar')).toBeNull();
+      // It still says the thing that matters: the index is derived, and nothing accepted moved.
+      expect(state).toHaveTextContent('derived and disposable');
+    },
+  );
 
   it('marks a stale anchor without claiming the evidence changed', () => {
     render(<ResearchState state={{ case: 'anchor-stale', anchor: 'p12:b3' }} />);
