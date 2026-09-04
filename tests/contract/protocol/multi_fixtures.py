@@ -11,18 +11,25 @@ Task 13 extends these fixtures; keep them free of assertions about behaviour und
 from __future__ import annotations
 
 import itertools
+import threading
 from collections.abc import Callable, Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 from fastapi import FastAPI
+from pydantic import BaseModel
 from starlette.testclient import TestClient
 
-from research_harness.capabilities.context import open_context
+from research_harness.capabilities.context import CapabilityContext, open_context
 from research_harness.capabilities.dto import CreateClaimRequest, InitProjectRequest
 from research_harness.capabilities.handlers import create_claim, init_project
+from research_harness.capabilities.registry import (
+    CapabilityHandler,
+    CapabilityRegistry,
+    build_default_registry,
+)
 from research_harness.domain.transitions import HUMAN_ACTOR
 from research_harness.local_app.manager import ProjectManager
 from research_harness.local_app.paths import registry_path
@@ -48,6 +55,12 @@ LEFT_STATEMENT = "left claim"
 RIGHT_STATEMENT = "right claim"
 
 MOMENT = datetime(2026, 1, 1, tzinfo=UTC)
+
+NOTE_CAPABILITY = "note.add"
+"""The mutation the concurrency tests hold open: the cheapest write there is."""
+
+GATE_TIMEOUT = 10.0
+"""How long a gated handler waits to be released before it fails the test that forgot it."""
 
 
 def sequential_ids() -> Callable[[], str]:
@@ -86,6 +99,50 @@ def cancelled() -> FolderSelection:
     return FolderSelection(path=None, method="native", cancelled=True, fallback_required=False)
 
 
+@dataclass
+class GatedNotes:
+    """A capability catalog whose `note.add` waits for the test before it writes.
+
+    A mutation gate is only observable while something holds it, so the concurrency tests
+    park a real capability call inside the gate: the handler announces that it started and
+    then waits for the test to release it. Only notes whose text was registered with
+    :meth:`gate` wait; every other call, and every other capability, is the real one.
+    """
+
+    gates: dict[str, tuple[threading.Event, threading.Event]] = field(default_factory=dict)
+
+    def gate(self, note: str) -> tuple[threading.Event, threading.Event]:
+        """The `(started, release)` pair a `note.add` with this text will wait on."""
+        pair = (threading.Event(), threading.Event())
+        self.gates[note] = pair
+        return pair
+
+    def catalog(self) -> CapabilityRegistry:
+        """The default catalog with the gated `note.add` swapped in for the real one."""
+        source = build_default_registry()
+        catalog = CapabilityRegistry()
+        catalog.register_all(
+            replace(spec, handler=self._gated(spec.handler))
+            if spec.name == NOTE_CAPABILITY
+            else spec
+            for spec in source
+        )
+        for capability in source.planned():
+            catalog.plan(capability.name, capability.reason)
+        return catalog
+
+    def _gated(self, handler: CapabilityHandler) -> CapabilityHandler:
+        def gated(ctx: CapabilityContext, request: BaseModel) -> BaseModel:
+            pair = self.gates.get(str(getattr(request, "text", "")))
+            if pair is not None:
+                started, release = pair
+                started.set()
+                assert release.wait(timeout=GATE_TIMEOUT), "the test never released the note"
+            return handler(ctx, request)
+
+        return gated
+
+
 @dataclass(frozen=True)
 class MultiHarness:
     """One multi-project app and the collaborators the tests inspect."""
@@ -99,15 +156,31 @@ class MultiHarness:
     revealed: list[Path]
 
 
-def build_multi_app(data_dir: Path, *, picker: FakePicker | None = None) -> MultiHarness:
-    """The host as `research app` builds it, with the two platform effects faked out."""
+def build_multi_app(
+    data_dir: Path,
+    *,
+    picker: FakePicker | None = None,
+    catalog_factory: Callable[[], CapabilityRegistry] | None = None,
+    id_factory: Callable[[], str] | None = None,
+) -> MultiHarness:
+    """The host as `research app` builds it, with the two platform effects faked out.
+
+    `catalog_factory` is what the pool builds each project's capability catalog with; the
+    concurrency tests pass one whose `note.add` can be held open (see :class:`GatedNotes`).
+    `id_factory` restarts the deterministic id counter unless a caller continues it, which
+    a restart test must do: the registry on disk already holds `prj_...0001`.
+    """
     store = ProjectRegistry(registry_path(data_dir))
-    pool = ProjectRuntimePool(store)
+    pool = (
+        ProjectRuntimePool(store)
+        if catalog_factory is None
+        else ProjectRuntimePool(store, catalog_factory=catalog_factory)
+    )
     revealed: list[Path] = []
     dialogs = picker if picker is not None else FakePicker()
     manager = ProjectManager(
         store,
-        id_factory=sequential_ids(),
+        id_factory=id_factory if id_factory is not None else sequential_ids(),
         active_runs=pool.active_run_ids,
         reveal=revealed.append,
         on_root_changed=pool.evict,
@@ -156,6 +229,13 @@ def persist_run(root: Path, status: RunStatus = RunStatus.running) -> str:
         )
     )
     return run_id
+
+
+def finish_run(root: Path, run_id: str, status: RunStatus = RunStatus.succeeded) -> None:
+    """Move a durable run to a terminal status, so the project stops counting as busy."""
+    repo = WorkspaceRepository.open(root)
+    store = RunStore(repo.layout.research_dir)
+    store.save(store.load(run_id).model_copy(update={"status": status}))
 
 
 def authenticate(client: TestClient) -> TestClient:
@@ -227,6 +307,45 @@ def two_projects_client(two_projects: TwoProjects) -> TestClient:
 def left_run_id(two_projects: TwoProjects) -> str:
     """A run that is still running in `LEFT`, recorded durably rather than started."""
     return persist_run(two_projects.left_root)
+
+
+@dataclass(frozen=True)
+class GatedProjects:
+    """`LEFT` and `RIGHT` again, over a host whose `note.add` the test can hold open."""
+
+    client: TestClient
+    harness: MultiHarness
+    gates: GatedNotes
+    left_root: Path
+    right_root: Path
+
+
+@pytest.fixture
+def gated_projects(tmp_path: Path) -> Iterator[GatedProjects]:
+    """Two projects on one host, with a capability the test can park inside a mutation gate."""
+    gates = GatedNotes()
+    harness = build_multi_app(tmp_path / "appdata", catalog_factory=gates.catalog)
+    left_root = populated_workspace(tmp_path / "left", "left", LEFT_STATEMENT)
+    right_root = populated_workspace(tmp_path / "right", "right", RIGHT_STATEMENT)
+    with TestClient(harness.app) as client:
+        authenticate(client)
+        for root, project_id in ((left_root, LEFT), (right_root, RIGHT)):
+            response = client.post("/api/projects/open", json={"path": str(root)})
+            assert response.status_code == 200, response.text
+            assert response.json()["project_id"] == project_id
+        try:
+            yield GatedProjects(
+                client=client,
+                harness=harness,
+                gates=gates,
+                left_root=left_root,
+                right_root=right_root,
+            )
+        finally:
+            # A failed assertion must not leave a handler parked in the gate: releasing
+            # every gate here means the client can always shut down.
+            for _started, release in gates.gates.values():
+                release.set()
 
 
 @pytest.fixture

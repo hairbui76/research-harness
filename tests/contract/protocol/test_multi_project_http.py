@@ -19,9 +19,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.testclient import TestClient
 
 from research_harness import __version__
+from research_harness.capabilities.permissions import Principal
 from research_harness.local_app.pickers.base import FolderPickerError
+from research_harness.local_app.registry import ProjectRegistry
 from research_harness.server import create_multi_project_app
-from research_harness.server.app import DEV_ENV
+from research_harness.server.app import DEV_ENV, create_app, create_workspace_app
 from research_harness.server.multi_app import MULTI_PROJECT_KIND
 from tests.contract.protocol import multi_fixtures
 from tests.contract.protocol.conftest import CLAIM
@@ -41,6 +43,7 @@ from tests.contract.protocol.multi_fixtures import (
     populated_workspace,
     selected,
 )
+from tests.contract.protocol.test_http import EXPECTED_ROUTES
 
 # The shared fixtures, bound here so pytest resolves them by name in this module. They are
 # re-bound rather than imported so that a test parameter of the same name does not read as a
@@ -72,6 +75,10 @@ EXPECTED_CONTROL_ROUTES: set[tuple[str, frozenset[str]]] = {
 }
 
 DOCUMENTATION_ROUTES = ("/openapi", "/docs", "/redoc")
+
+#: The canonical subtrees a lifecycle operation must never touch. Forget is a registry edit,
+#: so every one of these is compared byte for byte across it.
+CANONICAL_SUBTREES = ("corpus", "claims", "decisions", "events")
 
 
 def control_routes(app: Any) -> set[tuple[str, frozenset[str]]]:
@@ -670,3 +677,181 @@ def test_development_mode_lets_the_dev_server_drive_the_host(
             headers={"Origin": "https://research.example.com"},
         )
         assert refused.status_code == 403
+
+
+# -- cross-project safety ----------------------------------------------------
+
+
+def canonical_digests(root: Path) -> dict[str, str]:
+    """`research.yaml` and every file under the canonical subtrees, by digest."""
+    listed = {"research.yaml": hashlib.sha256((root / "research.yaml").read_bytes()).hexdigest()}
+    for name in CANONICAL_SUBTREES:
+        directory = root / name
+        assert directory.is_dir(), f"{name}/ is missing"
+        listed.update(
+            {
+                str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in sorted(directory.rglob("*"))
+                if path.is_file()
+            }
+        )
+    return listed
+
+
+def test_the_project_list_is_hidden_from_an_unauthenticated_caller_that_projects_exist_for(
+    multi_client: TestClient, two_projects: TwoProjects
+) -> None:
+    """Not the paths, not the ids, not the names: an unauthenticated caller learns nothing."""
+    response = multi_client.get("/api/projects")
+    assert response.status_code == 401
+    assert code_of(response) == "control_permission_denied"
+    for secret in (
+        str(two_projects.left_root),
+        str(two_projects.right_root),
+        str(two_projects.left_root.parent),
+        LEFT,
+        RIGHT,
+        "left",
+        "right",
+    ):
+        assert secret not in response.text
+
+
+@pytest.mark.parametrize("root_field", ["workspace", "root", "workspace_root"])
+def test_a_project_scoped_capability_cannot_be_pointed_at_another_root(
+    two_projects_client: TestClient, two_projects: TwoProjects, root_field: str
+) -> None:
+    """A capability takes no root: the only thing that selects a workspace is the opaque id."""
+    before = digests(two_projects.right_root)
+    response = two_projects_client.post(
+        f"/api/projects/{LEFT}/capabilities/note.add",
+        json={"text": "a note", root_field: str(two_projects.right_root)},
+    )
+    assert response.status_code == 422
+    body = response.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "invalid_request"
+    assert RIGHT_STATEMENT not in response.text
+    assert digests(two_projects.right_root) == before
+
+
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        "objects/..",
+        "objects/%2e%2e",
+        "objects/%2e%2e%2f%2e%2e%2fclaims%2fC0001.yaml",
+        "artifacts/..%2f..%2f..%2fetc%2fpasswd/bytes",
+        "artifacts/%2e%2e%2f%2e%2e%2fresearch.yaml/bytes",
+        f"%2e%2e/{RIGHT}/objects/{CLAIM}",
+        f"..%2f{RIGHT}/objects/{CLAIM}",
+    ],
+)
+def test_a_traversal_beneath_a_project_is_a_404_that_is_never_html(
+    two_projects_client: TestClient, suffix: str
+) -> None:
+    response = two_projects_client.get(f"/api/projects/{LEFT}/{suffix}")
+    assert response.status_code == 404
+    assert response.headers["content-type"].startswith("application/json")
+    assert "<html" not in response.text.lower()
+    assert RIGHT_STATEMENT not in response.text
+    assert LEFT_STATEMENT not in response.text
+
+
+def test_the_same_canonical_root_spelled_differently_is_always_one_project(
+    authenticated_multi_client: TestClient, tmp_path: Path
+) -> None:
+    """Identity is the resolved directory, never the syntax the researcher typed."""
+    root = populated_workspace(tmp_path / "one", "one", "a claim")
+    first = authenticated_multi_client.post("/api/projects/open", json={"path": str(root)})
+    assert first.status_code == 200, first.text
+    project_id = first.json()["project_id"]
+
+    spellings = [str(root) + "/", str(root / "."), str(tmp_path / "." / "one" / ".")]
+    alias = tmp_path / "alias"
+    try:
+        alias.symlink_to(root, target_is_directory=True)
+    except OSError:  # pragma: no cover - Windows without the symlink privilege
+        pass
+    else:
+        spellings.append(str(alias))
+
+    for spelling in spellings:
+        again = authenticated_multi_client.post("/api/projects/open", json={"path": spelling})
+        assert again.status_code == 200, f"{spelling}: {again.text}"
+        assert again.json()["project_id"] == project_id
+        assert Path(again.json()["path"]) == root
+
+    assert len(authenticated_multi_client.get("/api/projects").json()["projects"]) == 1
+
+
+def test_locate_to_a_missing_folder_leaves_the_registry_file_byte_identical(
+    authenticated_multi_client: TestClient, multi_harness: MultiHarness, tmp_path: Path
+) -> None:
+    root = populated_workspace(tmp_path / "one", "one", "a claim")
+    project_id = authenticated_multi_client.post(
+        "/api/projects/open", json={"path": str(root)}
+    ).json()["project_id"]
+    before = multi_harness.registry.path.read_bytes()
+
+    response = authenticated_multi_client.post(
+        f"/api/projects/{project_id}/locate", json={"path": str(tmp_path / "never-existed")}
+    )
+    assert response.status_code == 422
+    assert code_of(response) == "project_invalid"
+    assert multi_harness.registry.path.read_bytes() == before
+
+    reread = ProjectRegistry(multi_harness.registry.path).get(project_id)
+    assert reread is not None
+    assert reread.canonical_root == root
+    assert authenticated_multi_client.get(f"/api/projects/{project_id}/health").status_code == 200
+
+
+def test_forget_leaves_the_canonical_subtrees_of_a_served_project_byte_identical(
+    two_projects_client: TestClient, two_projects: TwoProjects
+) -> None:
+    """Forget is a registry edit. Even a project whose runtime is open loses no byte."""
+    assert two_projects_client.get(f"/api/projects/{LEFT}/objects/{CLAIM}").status_code == 200
+    assert two_projects.harness.pool.status(LEFT).loaded is True
+    before = canonical_digests(two_projects.left_root)
+    assert "claims/C0001.yaml" in before
+    assert "events/research.jsonl" in before
+
+    assert two_projects_client.delete(f"/api/projects/{LEFT}").status_code == 204
+    assert two_projects.harness.registry.get(LEFT) is None
+    assert canonical_digests(two_projects.left_root) == before
+    assert two_projects.left_root.is_dir()
+
+
+def test_locate_serves_the_new_root_even_when_the_old_one_still_exists(
+    authenticated_multi_client: TestClient, tmp_path: Path
+) -> None:
+    """The cached sub-application is bound to a runtime, not to a project id."""
+    first_home = populated_workspace(tmp_path / "first", "one", "first home")
+    second_home = populated_workspace(tmp_path / "second", "one", "second home")
+    project_id = authenticated_multi_client.post(
+        "/api/projects/open", json={"path": str(first_home)}
+    ).json()["project_id"]
+    served = authenticated_multi_client.get(f"/api/projects/{project_id}/objects/{CLAIM}")
+    assert served.json()["object"]["statement"] == "first home"
+
+    moved = authenticated_multi_client.post(
+        f"/api/projects/{project_id}/locate", json={"path": str(second_home)}
+    )
+    assert moved.status_code == 200, moved.text
+
+    served = authenticated_multi_client.get(f"/api/projects/{project_id}/objects/{CLAIM}")
+    assert served.json()["object"]["statement"] == "second home"
+    assert (first_home / "claims" / "C0001.yaml").is_file()
+
+
+def test_a_mounted_project_publishes_exactly_the_one_workspace_route_contract(
+    two_projects: TwoProjects,
+) -> None:
+    """There is one implementation of the workspace routes, so the two hosts cannot drift."""
+    runtime = two_projects.harness.pool.get(LEFT)
+    mounted = create_workspace_app(
+        runtime, principal_resolver=lambda _presented: Principal.human(), serve_bundle=False
+    )
+    assert control_routes(mounted) == EXPECTED_ROUTES
+    assert control_routes(create_app(two_projects.right_root)) == EXPECTED_ROUTES
