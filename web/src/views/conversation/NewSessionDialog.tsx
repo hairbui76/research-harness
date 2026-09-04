@@ -2,23 +2,24 @@
  * Opening a session: the one decision that cannot be taken back.
  *
  * A session's visibility is fixed when it is created — there is no capability that changes
- * it afterwards — and it decides what the session may later be bound to: `private` never
- * leaves the machine unless policy allows it, so a runtime or an entry that would send it
- * to a vendor is refused, while `project` may reach the selected provider under the egress
- * policy. A rail button that created a private session in silence made that choice on the
- * researcher's behalf and closed off the composer's binding for good, which is why the
- * click now asks.
+ * it afterwards — and it decides what the session may later be bound to. A `private`
+ * session is refused a CLI runtime binding outright, at bind time; an entry binding is
+ * stored, and refused at send time if that entry is external. Either way a private session
+ * never reaches an external model, which is the whole point of it. A rail button that
+ * created a private session in silence made that choice on the researcher's behalf and
+ * closed off the composer's binding for good, which is why the click now asks.
  *
- * The default is not restated: leaving the choice alone sends no `visibility` at all, so
- * the daemon applies its own default rather than the browser asserting one. Both words in
- * the list are the daemon's, and they are the same two the session rail already shows.
+ * The default is not restated on the wire: choosing `private` — the value the dialog opens
+ * on — sends no `visibility` at all, so the daemon applies its own default rather than the
+ * browser asserting one. Both option values are the daemon's own words, so nothing here
+ * encodes a third state that would have to be translated somewhere else.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Dialog, Select } from '@research-harness/design';
 import type { SessionVisibility } from '../../api/dto';
 
-/** The empty value means "say nothing", which is how the daemon's default stays the default. */
-const DAEMON_DEFAULT = '';
+/** The two words the daemon uses, and the one the session rail already shows as a badge. */
+const DEFAULT_VISIBILITY: SessionVisibility = 'private';
 
 export interface NewSessionDialogProps {
   open: boolean;
@@ -28,22 +29,37 @@ export interface NewSessionDialogProps {
 }
 
 export function NewSessionDialog({ open, onOpenChange, onCreate }: NewSessionDialogProps) {
-  const [visibility, setVisibility] = useState<string>(DAEMON_DEFAULT);
+  const [visibility, setVisibility] = useState<SessionVisibility>(DEFAULT_VISIBILITY);
+  const choice = useRef<HTMLSelectElement>(null);
+
+  /**
+   * Each opening is its own question.
+   *
+   * The dialog stays mounted between openings, so without this a choice abandoned on the
+   * way out would be waiting, already made, the next time — and this is the one choice that
+   * cannot be corrected after the fact.
+   */
+  useEffect(() => {
+    if (!open) return;
+    setVisibility(DEFAULT_VISIBILITY);
+  }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} size="sm">
+    <Dialog open={open} onOpenChange={onOpenChange} size="sm" initialFocusRef={choice}>
       <Dialog.Header>New session</Dialog.Header>
       <Dialog.Body>
         <Select
+          ref={choice}
           label="Visibility"
           value={visibility}
           description={
-            'Only a project session can be bound to an external runtime or entry, and ' +
-            'visibility cannot be changed once the session exists.'
+            'Only a project session can be bound to a CLI runtime; a private session never ' +
+            'sends to an external model, and visibility cannot be changed once the session ' +
+            'exists.'
           }
-          onChange={(event) => setVisibility(event.target.value)}
+          onChange={(event) => setVisibility(event.target.value as SessionVisibility)}
         >
-          <option value={DAEMON_DEFAULT}>Private (default)</option>
+          <option value="private">Private (default)</option>
           <option value="project">Project</option>
         </Select>
       </Dialog.Body>
@@ -54,7 +70,9 @@ export function NewSessionDialog({ open, onOpenChange, onCreate }: NewSessionDia
         <Button
           variant="primary"
           onClick={() => {
-            onCreate(visibility === DAEMON_DEFAULT ? undefined : (visibility as SessionVisibility));
+            // The daemon's default is the daemon's to apply: the usual session is still the
+            // request that says nothing about visibility.
+            onCreate(visibility === DEFAULT_VISIBILITY ? undefined : visibility);
             onOpenChange(false);
           }}
         >

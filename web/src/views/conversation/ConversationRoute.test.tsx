@@ -273,6 +273,37 @@ describe('reopening a session', () => {
     );
   });
 
+  it('forgets a choice that was never made, and creates nothing on the way out', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    // Chosen, then abandoned. The choice was about a session that was never opened.
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const first = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(first).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.click(within(first).getByRole('button', { name: 'Cancel' }));
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.create')).toBe(false);
+
+    // Escape is the same answer.
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    await screen.findByRole('dialog', { name: 'New session' });
+    await user.keyboard('{Escape}');
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.create')).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const again = await screen.findByRole('dialog', { name: 'New session' });
+    expect(within(again).getByRole('combobox', { name: 'Visibility' })).toHaveValue('private');
+    await user.click(within(again).getByRole('button', { name: 'Create session' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session' }),
+    );
+  });
+
   it('says what the choice costs, and that it is the only chance to make it', async () => {
     const daemon = fakeDaemon({ capabilities: answers() });
     const user = userEvent.setup();
@@ -281,9 +312,19 @@ describe('reopening a session', () => {
 
     await user.click(screen.getByRole('button', { name: 'New session' }));
     const dialog = await screen.findByRole('dialog', { name: 'New session' });
-    expect(within(dialog).getByRole('combobox', { name: 'Visibility' })).toHaveAccessibleDescription(
-      /cannot be changed/,
-    );
+    const choice = within(dialog).getByRole('combobox', { name: 'Visibility' });
+    // The decision is what the dialog is for, so it is where the keyboard lands.
+    await waitFor(() => expect(choice).toHaveFocus());
+    // The values on the wire are the daemon's own two words, not a local encoding of them.
+    expect(Array.from(choice.querySelectorAll('option')).map((option) => option.value)).toEqual([
+      'private',
+      'project',
+    ]);
+    // A private session's limit is about sending, and only a runtime binding is refused
+    // outright — the sentence says both, and that the choice is final.
+    expect(choice).toHaveAccessibleDescription(/bound to a CLI runtime/);
+    expect(choice).toHaveAccessibleDescription(/never sends to an external model/);
+    expect(choice).toHaveAccessibleDescription(/cannot be changed/);
     await expectNoAxeViolations(document.body);
   });
 
