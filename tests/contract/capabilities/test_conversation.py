@@ -357,3 +357,38 @@ def test_a_decision_candidate_is_drafted_and_not_accepted(
     with pytest.raises(ObjectNotFoundError):
         ctx.repo.get_decision(DecisionId(str(result.object_id)))
     assert len(list(ctx.repo.iter_notes())) == 1, "the proposal is durable as a note"
+
+
+def test_a_session_binding_round_trips_through_the_registry(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    ctx.repo.update_providers(
+        [
+            {
+                "name": "fast",
+                "kind": "openai",
+                "model": "gpt-5.4-mini",
+                "api_key_env": "OPENAI_API_KEY",
+            }
+        ]
+    )
+    created = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    session = str(created.session.id)
+
+    bound = invoke(registry, ctx, "session.configure", {"session": session, "entry": "fast"})
+    assert bound.session.defaults.model is not None
+    assert bound.session.defaults.model.model_dump() == {
+        "provider": "entry",
+        "model": "fast",
+        "request_fingerprint": None,
+    }
+
+    cleared = invoke(registry, ctx, "session.configure", {"session": session, "clear": True})
+    assert cleared.session.defaults.model is None
+
+    with pytest.raises(Exception, match="exactly one of"):
+        invoke(registry, ctx, "session.configure", {"session": session})
+    with pytest.raises(Exception, match="only for a runtime binding"):
+        invoke(
+            registry, ctx, "session.configure", {"session": session, "entry": "fast", "model": "x"}
+        )

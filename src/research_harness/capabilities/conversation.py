@@ -22,7 +22,7 @@ from collections.abc import Callable, Mapping
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.capabilities.dto import CapabilityRequest
@@ -53,6 +53,7 @@ if TYPE_CHECKING:  # imported lazily at runtime so this layer stays provider-fre
 __all__ = [
     "CONVERSATION_CAPABILITIES",
     "CONVERSATION_CAPABILITY_HANDLERS",
+    "ConfigureSessionRequest",
     "ContextGetRequest",
     "ContextPackView",
     "ContextPreviewRequest",
@@ -99,6 +100,31 @@ class RenameSessionRequest(CapabilityRequest):
 
     session: ConversationSessionId
     title: str
+
+
+class ConfigureSessionRequest(CapabilityRequest):
+    """`session.configure`: bind a session to a runtime and model, or to an entry, or clear.
+
+    Exactly one of `runtime`, `entry`, `clear`; `model` is required with `runtime`;
+    `reasoning` is allowed only with `runtime`. Nothing is written to `research.yaml`.
+    """
+
+    session: ConversationSessionId
+    runtime: str | None = None
+    model: str | None = None
+    reasoning: str | None = None
+    entry: str | None = None
+    clear: bool = False
+
+    @model_validator(mode="after")
+    def _exactly_one_target(self) -> ConfigureSessionRequest:
+        if sum((self.runtime is not None, self.entry is not None, self.clear)) != 1:
+            raise ValueError("give exactly one of runtime, entry, or clear")
+        if self.runtime is not None and self.model is None:
+            raise ValueError("model is required with runtime")
+        if self.runtime is None and (self.model is not None or self.reasoning is not None):
+            raise ValueError("model and reasoning are only for a runtime binding")
+        return self
 
 
 class ListSessionsRequest(CapabilityRequest):
@@ -345,6 +371,20 @@ def rename_session(ctx: CapabilityContext, request: RenameSessionRequest) -> Ses
     return SessionView(session=_service(ctx).rename(request.session, request.title))
 
 
+def configure_session(ctx: CapabilityContext, request: ConfigureSessionRequest) -> SessionView:
+    """`session.configure`: the binding changes, and nothing else does (binding spec §8)."""
+    return SessionView(
+        session=_service(ctx).configure(
+            request.session,
+            runtime=request.runtime,
+            model=request.model,
+            reasoning=request.reasoning,
+            entry=request.entry,
+            clear=request.clear,
+        )
+    )
+
+
 def list_sessions(ctx: CapabilityContext, request: ListSessionsRequest) -> SessionList:
     """`session.list`: every session in this project."""
     del request
@@ -529,6 +569,7 @@ CONVERSATION_CAPABILITY_HANDLERS: Mapping[str, Callable[[CapabilityContext, Any]
         {
             "session.create": create_session,
             "session.rename": rename_session,
+            "session.configure": configure_session,
             "session.list": list_sessions,
             "session.get": get_session,
             "session.search": search_sessions,
@@ -589,6 +630,17 @@ def conversation_specs() -> list[CapabilitySpec]:
             semantics=working,
             permission=Permission.MUTATE,
             request_model=RenameSessionRequest,
+            response_model=SessionView,
+        ),
+        spec(
+            "session.configure",
+            summary=(
+                "Bind a session to a runtime and model, or to a research.yaml entry, or clear "
+                "it; research.yaml is untouched."
+            ),
+            semantics=working,
+            permission=Permission.MUTATE,
+            request_model=ConfigureSessionRequest,
             response_model=SessionView,
         ),
         spec(

@@ -104,6 +104,7 @@ NEW_MUTATIONS: dict[str, dict[str, Any]] = {
     # promote out of one, on either transport.
     "session.create": {"title": "from a host"},
     "session.rename": {"session": "CS0001", "title": "renamed"},
+    "session.configure": {"session": "CS0001", "clear": True},
     "session.summarize": {"session": "CS0001"},
     "session.send": {"session": "CS0001", "text": "hello"},
     "session.stop": {"run_id": "run_20260101T000000Z_deadbeef"},

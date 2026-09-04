@@ -27860,24 +27860,18 @@
     {
       "human_only": true,
       "long_running": false,
-      "name": "session.create",
+      "name": "session.configure",
       "permission": "mutate",
       "request_schema": {
-        "$defs": {
-          "Visibility": {
-            "description": "Whether an object may leave the machine at all under the egress policy.",
-            "enum": [
-              "private",
-              "project"
-            ],
-            "title": "Visibility",
-            "type": "string"
-          }
-        },
         "additionalProperties": false,
-        "description": "`session.create`: open a durable, private conversation bound to this project.",
+        "description": "`session.configure`: bind a session to a runtime and model, or to an entry, or clear.\n\nExactly one of `runtime`, `entry`, `clear`; `model` is required with `runtime`;\n`reasoning` is allowed only with `runtime`. Nothing is written to `research.yaml`.",
         "properties": {
-          "mode": {
+          "clear": {
+            "default": false,
+            "title": "Clear",
+            "type": "boolean"
+          },
+          "entry": {
             "anyOf": [
               {
                 "type": "string"
@@ -27887,7 +27881,7 @@
               }
             ],
             "default": null,
-            "title": "Mode"
+            "title": "Entry"
           },
           "model": {
             "anyOf": [
@@ -27901,32 +27895,40 @@
             "default": null,
             "title": "Model"
           },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "token_budget": {
+          "reasoning": {
             "anyOf": [
               {
-                "minimum": 0,
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
-            "title": "Token Budget"
+            "title": "Reasoning"
           },
-          "visibility": {
-            "$ref": "#/$defs/Visibility",
-            "default": "private"
+          "runtime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Runtime"
+          },
+          "session": {
+            "pattern": "^CS\\d{4,}$",
+            "title": "Session",
+            "type": "string"
           }
         },
         "required": [
-          "title"
+          "session"
         ],
-        "title": "CreateSessionRequest",
+        "title": "ConfigureSessionRequest",
         "type": "object"
       },
       "response_schema": {
@@ -27945,6 +27947,7 @@
                 "default": {
                   "mode": null,
                   "model": null,
+                  "reasoning": null,
                   "token_budget": null
                 }
               },
@@ -28188,6 +28191,405 @@
                 ],
                 "default": null
               },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
+              },
+              "token_budget": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Token Budget"
+              }
+            },
+            "title": "SessionDefaults",
+            "type": "object"
+          },
+          "Visibility": {
+            "description": "Whether an object may leave the machine at all under the egress policy.",
+            "enum": [
+              "private",
+              "project"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "One session record, verbatim.",
+        "properties": {
+          "session": {
+            "$ref": "#/$defs/ConversationSession"
+          }
+        },
+        "required": [
+          "session"
+        ],
+        "title": "SessionView",
+        "type": "object"
+      },
+      "scientific_semantics": "writes private working context; creates no accepted scientific state",
+      "summary": "Bind a session to a runtime and model, or to a research.yaml entry, or clear it; research.yaml is untouched."
+    },
+    {
+      "human_only": true,
+      "long_running": false,
+      "name": "session.create",
+      "permission": "mutate",
+      "request_schema": {
+        "$defs": {
+          "Visibility": {
+            "description": "Whether an object may leave the machine at all under the egress policy.",
+            "enum": [
+              "private",
+              "project"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "`session.create`: open a durable, private conversation bound to this project.",
+        "properties": {
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mode"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "token_budget": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Token Budget"
+          },
+          "visibility": {
+            "$ref": "#/$defs/Visibility",
+            "default": "private"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "CreateSessionRequest",
+        "type": "object"
+      },
+      "response_schema": {
+        "$defs": {
+          "ConversationSession": {
+            "additionalProperties": false,
+            "description": "A durable, private conversation bound to one project (Product 39).\n\nDeriving from `CanonicalObject` fixes the record *shape* -- schema version, stable id,\ntimestamps, provenance -- and says nothing about scientific authority: a session is\nworking context, is excluded from Git publication by default, and never outranks\naccepted Evidence, Claims, or Decisions (Product 8.2).\n\nThe counters (`message_count`, `last_message`) are part of the durable record so the\nnext `M####` can be allocated without reading every transcript, and so a workspace\nwhose `.research/` was deleted still knows where it was.",
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "title": "Created At",
+                "type": "string"
+              },
+              "defaults": {
+                "$ref": "#/$defs/SessionDefaults",
+                "default": {
+                  "mode": null,
+                  "model": null,
+                  "reasoning": null,
+                  "token_budget": null
+                }
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "last_message": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Last Message"
+              },
+              "last_message_at": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Last Message At"
+              },
+              "message_count": {
+                "default": 0,
+                "minimum": 0,
+                "title": "Message Count",
+                "type": "integer"
+              },
+              "provenance": {
+                "$ref": "#/$defs/Provenance"
+              },
+              "reserved_messages": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Reserved Messages",
+                "type": "array"
+              },
+              "schema_version": {
+                "default": 1,
+                "minimum": 1,
+                "title": "Schema Version",
+                "type": "integer"
+              },
+              "summarized_through": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Summarized Through"
+              },
+              "summary_updated_at": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Summary Updated At"
+              },
+              "title": {
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "title": "Updated At",
+                "type": "string"
+              },
+              "visibility": {
+                "$ref": "#/$defs/Visibility",
+                "default": "private"
+              }
+            },
+            "required": [
+              "id",
+              "provenance",
+              "title"
+            ],
+            "title": "ConversationSession",
+            "type": "object"
+          },
+          "ModelIdentity": {
+            "additionalProperties": false,
+            "description": "Which model answered, in provider-neutral terms (Product 20.5).\n\n`provider` is the adapter's own name and `model` the model it served; the domain\ntreats both as opaque labels and never branches on their values.",
+            "properties": {
+              "model": {
+                "minLength": 1,
+                "title": "Model",
+                "type": "string"
+              },
+              "provider": {
+                "minLength": 1,
+                "title": "Provider",
+                "type": "string"
+              },
+              "request_fingerprint": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Request Fingerprint"
+              }
+            },
+            "required": [
+              "provider",
+              "model"
+            ],
+            "title": "ModelIdentity",
+            "type": "object"
+          },
+          "Provenance": {
+            "additionalProperties": false,
+            "description": "Who/what produced a record, and under which workflow run.\n\n``actor`` is an opaque string (``\"human\"``, ``\"human:alice\"``, ``\"vendor-a/model-x\"``,\n``\"local/model-y\"``). The domain never interprets it as a provider vocabulary and\ndefines no provider names of its own.",
+            "properties": {
+              "actor": {
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Note"
+              },
+              "run_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Run Id"
+              },
+              "source": {
+                "$ref": "#/$defs/ProvenanceSource"
+              },
+              "template_version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Template Version"
+              },
+              "workflow": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Workflow"
+              }
+            },
+            "required": [
+              "source",
+              "actor"
+            ],
+            "title": "Provenance",
+            "type": "object"
+          },
+          "ProvenanceSource": {
+            "description": "Who produced a record. Never a provider or host name; see `Provenance.actor`.",
+            "enum": [
+              "human",
+              "model",
+              "system",
+              "external_metadata"
+            ],
+            "title": "ProvenanceSource",
+            "type": "string"
+          },
+          "SessionDefaults": {
+            "additionalProperties": false,
+            "description": "What a new message in this session uses unless the composer overrides it.",
+            "properties": {
+              "mode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Mode"
+              },
+              "model": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ModelIdentity"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
+              },
               "token_budget": {
                 "anyOf": [
                   {
@@ -28352,6 +28754,7 @@
                 "default": {
                   "mode": null,
                   "model": null,
+                  "reasoning": null,
                   "token_budget": null
                 }
               },
@@ -29002,6 +29405,18 @@
                 ],
                 "default": null
               },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
+              },
               "token_budget": {
                 "anyOf": [
                   {
@@ -29152,6 +29567,7 @@
                 "default": {
                   "mode": null,
                   "model": null,
+                  "reasoning": null,
                   "token_budget": null
                 }
               },
@@ -29394,6 +29810,18 @@
                   }
                 ],
                 "default": null
+              },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
               },
               "token_budget": {
                 "anyOf": [
@@ -29797,6 +30225,7 @@
                 "default": {
                   "mode": null,
                   "model": null,
+                  "reasoning": null,
                   "token_budget": null
                 }
               },
@@ -30039,6 +30468,18 @@
                   }
                 ],
                 "default": null
+              },
+              "reasoning": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Reasoning"
               },
               "token_budget": {
                 "anyOf": [
