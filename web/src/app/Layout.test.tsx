@@ -33,6 +33,7 @@ import { SessionProvider } from './session';
 import { PROJECT_POLL_INTERVAL_MS } from './useProjectPolling';
 import { AppClient } from '../api/projects';
 import type { FolderSelection, ProjectView } from '../api/projects';
+import sessions from '../test/fixtures/conversation/sessions.json';
 import {
   FIXTURES,
   expectNoAxeViolations,
@@ -199,6 +200,8 @@ interface MultiOptions {
   projects?: readonly ProjectView[];
   route?: string;
   folder?: FolderSelection;
+  /** Capability answers for the workspace routes beneath `/api/projects/prj_abc`. */
+  workspace?: Record<string, unknown>;
 }
 
 /**
@@ -214,6 +217,7 @@ function setupMulti(options: MultiOptions = {}) {
     projects,
     lifecycleResult: OPEN,
     ...(options.folder ? { folder: options.folder } : {}),
+    ...(options.workspace ? { workspace: { capabilities: options.workspace } } : {}),
   });
   const appClient = new AppClient({
     baseUrl: 'http://app.test',
@@ -467,6 +471,50 @@ describe('the project rail on a multi-project host', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  /**
+   * The switcher rail is still the session rail.
+   *
+   * The two features that met in this file both rewrote the rail: one made it the project
+   * switcher, the other made its New-session button ask what kind of session is being
+   * opened. A rail that switched projects but created a private session in silence would
+   * have passed both features' own tests and still be wrong, so the seam is asserted here:
+   * the click asks, and the answer reaches the daemon under the project the URL names.
+   */
+  it('asks what kind of session to open, and creates it in the project the URL names', async () => {
+    const created = {
+      ...sessions.sessions[1],
+      id: 'CS0009',
+      title: 'New session',
+      visibility: 'project',
+      message_count: 0,
+      last_message: null,
+      last_message_at: null,
+    };
+    const user = userEvent.setup();
+    const view = setupMulti({ workspace: { 'session.create': { session: created } } });
+
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
+
+    const create = await waitFor(() => {
+      const call = view.daemon.calls.find(
+        (entry) => entry.path === '/api/projects/prj_abc/capabilities/session.create',
+      );
+      expect(call).toBeDefined();
+      return call;
+    });
+    expect(create?.body).toEqual({ title: 'New session', visibility: 'project' });
+
+    // And the session the daemon named is opened, below this project's prefix.
+    await waitFor(() =>
+      expect(screen.getByTestId('path')).toHaveTextContent('/projects/prj_abc/?session=CS0009'),
+    );
   });
 
   it('has no automatically detectable accessibility violation', async () => {
