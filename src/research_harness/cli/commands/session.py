@@ -27,12 +27,14 @@ import typer
 
 from research_harness.capabilities.context import CapabilityContext
 from research_harness.cli.context import JsonOption, WorkspaceOption, cli_errors, context_for, emit
+from research_harness.conversation.binding import binding_of, binding_words
 from research_harness.conversation.context import ContextBudget
 from research_harness.conversation.promote import ClaimProposal, PromotionService
 from research_harness.conversation.send import ScriptedProviders, SendOutcome
 from research_harness.conversation.service import ConversationService
 from research_harness.domain.conversation import (
     ContextPack,
+    ConversationSession,
     PromotionRequest,
     PromotionTarget,
     Visibility,
@@ -153,11 +155,7 @@ def session_list(workspace: WorkspaceOption = None, as_json: JsonOption = False)
         sessions = _service(workspace).sessions()
         emit(
             {"sessions": [item.model_dump(mode="json") for item in sessions]},
-            [
-                f"{item.id}  {item.message_count:>4} msg  {item.visibility.value:<7}  {item.title}"
-                for item in sessions
-            ]
-            or ["no sessions yet"],
+            [_session_row(item) for item in sessions] or ["no sessions yet"],
             as_json=as_json,
         )
 
@@ -175,7 +173,11 @@ def session_show(
         page = _service(workspace).transcript(
             ConversationSessionId(session), offset=offset, limit=limit
         )
-        lines = [f"{page.session.id}  {page.session.title}", ""]
+        lines = [
+            f"{page.session.id}  {page.session.title}",
+            f"bound to: {binding_words(page.session.defaults)}",
+            "",
+        ]
         for message in page.messages:
             flag = " (incomplete)" if message.incomplete else ""
             lines.append(f"{message.id}  {message.role.value}{flag}")
@@ -210,6 +212,62 @@ def session_rename(
         emit(
             {"session": record.model_dump(mode="json")},
             [f"{record.id}  {record.title}"],
+            as_json=as_json,
+        )
+
+
+@session_app.command("configure")
+def session_configure(
+    session: SessionArgument,
+    workspace: WorkspaceOption = None,
+    runtime: Annotated[
+        str | None,
+        typer.Option("--runtime", help="Runtime id from `research providers scan`."),
+    ] = None,
+    model: Annotated[
+        str | None,
+        typer.Option("--model", help="Model id from the scan, or `default`."),
+    ] = None,
+    reasoning: Annotated[
+        str | None,
+        typer.Option("--reasoning", help="The runtime's own effort name."),
+    ] = None,
+    entry: Annotated[
+        str | None,
+        typer.Option("--entry", help="An entry name in research.yaml."),
+    ] = None,
+    clear: Annotated[
+        bool,
+        typer.Option("--clear", help="Return the session to the project default."),
+    ] = False,
+    as_json: JsonOption = False,
+) -> None:
+    """Bind a session to a runtime and model, or an entry, or clear it (`session.configure`).
+
+    Nothing is written to research.yaml: the binding lives on the session
+    record, and every gate a configured entry passes still applies when the
+    session next sends. The egress line comes first because a binding decides
+    where this conversation will go.
+    """
+    from research_harness.cli.commands.provider import egress_sentence
+    from research_harness.providers.cli.registry import RUNTIMES
+
+    with cli_errors():
+        # An id no registry knows is refused below, in the daemon's own words; the sentence
+        # is printed only for a runtime there is a destination to name.
+        if runtime is not None and runtime in RUNTIMES and not as_json:
+            typer.echo(egress_sentence(runtime, subject=f"session {session}"))
+        record = _service(workspace).configure(
+            ConversationSessionId(session),
+            runtime=runtime,
+            model=model,
+            reasoning=reasoning,
+            entry=entry,
+            clear=clear,
+        )
+        emit(
+            {"session": record.model_dump(mode="json")},
+            [f"bound to: {binding_words(record.defaults)}"],
             as_json=as_json,
         )
 
@@ -470,6 +528,14 @@ def session_promote(
 
 def _service(workspace: Path | None) -> ConversationService:
     return ConversationService(context_for(workspace))
+
+
+def _session_row(item: ConversationSession) -> str:
+    """One `chat list` row, with the binding in brackets when the session has one."""
+    row = f"{item.id}  {item.message_count:>4} msg  {item.visibility.value:<7}  {item.title}"
+    if binding_of(item.defaults) is None:
+        return row
+    return f"{row}  [{binding_words(item.defaults)}]"
 
 
 def _service_for(
