@@ -56,13 +56,18 @@ export interface SessionsApi {
    *
    * The record the daemon answers with replaces the one in `sessions`, so every surface
    * reads the binding back from the daemon rather than from a local guess (binding spec
-   * §10). A refusal lands in `refusal`, in the daemon's own sentence.
+   * §10). A refusal is *returned* rather than put in `refusal`: the pick was made in the
+   * composer, so the daemon's sentence belongs beside the selector and not in the rail's
+   * notice about the session history. `null` means it was stored.
    */
-  configure: (sessionId: string, input: Omit<ConfigureSessionRequest, 'session'>) => Promise<void>;
+  configure: (
+    sessionId: string,
+    input: Omit<ConfigureSessionRequest, 'session'>,
+  ) => Promise<string | null>;
   loading: boolean;
   error: string | null;
   reload: () => void;
-  /** Set by a failed create, rename or configure; rendered by the rail, never inferred. */
+  /** Set by a failed create or rename; rendered by the rail, never inferred. */
   refusal: string | null;
 }
 
@@ -213,16 +218,16 @@ export function useSessions(client: HarnessClient, options: SessionsOptions = {}
     async (
       sessionId: string,
       input: Omit<ConfigureSessionRequest, 'session'>,
-    ): Promise<void> => {
-      if (!canMutate) return;
-      setRefusal(null);
+    ): Promise<string | null> => {
+      if (!canMutate) return null;
       try {
         const session = await client.configureSession({ session: sessionId, ...input });
         setSessions((previous) =>
           previous.map((entry) => (entry.id === session.id ? session : entry)),
         );
+        return null;
       } catch (cause) {
-        setRefusal(cause instanceof CapabilityError ? cause.message : String(cause));
+        return cause instanceof CapabilityError ? cause.message : String(cause);
       }
     },
     [canMutate, client],

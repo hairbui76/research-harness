@@ -616,3 +616,52 @@ export function toRuntimeGroup(status: CliRuntimeStatus): ModelOptionGroup {
     })),
   };
 }
+
+/** The picker's row for "no binding at all". A view key, like `runtime:` (ruling 6). */
+export const PROJECT_DEFAULT_OPTION = 'binding:project-default';
+
+/**
+ * The row that unbinds a session, named after where the project default actually goes.
+ *
+ * Given the catalogue row the daemon marked `default`, it borrows that row's own facts —
+ * provider, egress class, vision, context window, availability — because clearing a
+ * binding sends the next message exactly there. Nothing is re-decided; the label is the
+ * daemon's own `<entry>/<model>` label in parentheses.
+ *
+ * With no default row it says only that the router decides, which is all that is known:
+ * inventing a destination for an empty catalogue would be the one claim this file must not
+ * make. In practice that branch is unreachable while the selector is on screen — the
+ * composer renders it only when the catalogue has rows, and `defaultId` then always names
+ * one — so it is a floor, not a state a researcher reaches.
+ */
+export function toProjectDefaultOption(entry: ModelOption | null): ModelOption {
+  if (entry === null) {
+    return {
+      id: PROJECT_DEFAULT_OPTION,
+      label: 'Project default',
+      provider: 'chosen by the router',
+      egressClass: 'external',
+      vision: false,
+      contextTokens: null,
+      available: true,
+    };
+  }
+  return {
+    ...entry,
+    id: PROJECT_DEFAULT_OPTION,
+    label: `Project default (${entry.label})`,
+  };
+}
+
+/**
+ * The effort levels one model of a runtime offers.
+ *
+ * The model's own list when the scan published one, and the runtime's only as the fallback
+ * — the same order `RuntimeCard` reads them in. A model that publishes a shorter list has
+ * *narrowed* the runtime's, so preferring the runtime's would offer a level the model does
+ * not take and earn a refusal on send. Both lists are the daemon's; neither is edited here.
+ */
+export function reasoningChoicesFor(status: CliRuntimeStatus, model: string): string[] {
+  const own = status.models.find((item) => item.id === model)?.reasoning ?? [];
+  return own.length > 0 ? own : status.reasoning_choices;
+}

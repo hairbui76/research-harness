@@ -21,7 +21,7 @@ import type { ModelOption, ModelOptionGroup } from '@research-harness/design';
 import type { HarnessClient } from '../../api/client';
 import type { CliScanReport, ProviderModel } from '../../api/dto';
 import { groupRuntimes } from '../../app/settings/mappers';
-import { toModelOption, toRuntimeGroup } from './mappers';
+import { reasoningChoicesFor, toModelOption, toRuntimeGroup } from './mappers';
 
 export interface ModelsApi {
   options: ModelOption[];
@@ -30,8 +30,11 @@ export interface ModelsApi {
    * scan's own models. Empty when the scan could not be read (binding spec §10).
    */
   groups: ModelOptionGroup[];
-  /** The runtime's own effort names, as the scan reports them; empty when it offers none. */
-  reasoningChoices: (runtime: string) => string[];
+  /**
+   * The effort names one model of a runtime offers, as the scan reports them: the model's
+   * own list when it published one, the runtime's otherwise. Empty when neither offers any.
+   */
+  reasoningChoices: (runtime: string, model: string) => string[];
   /** The scan's egress sentence, shown before a session is first bound to a runtime. */
   notice: string | null;
   /** The daemon's default model, when it named one. */
@@ -93,8 +96,10 @@ export function useModels(client: HarnessClient, options: { enabled?: boolean } 
     return {
       options: (models ?? []).map(toModelOption),
       groups: scan ? groupRuntimes(scan).installed.map(toRuntimeGroup) : [],
-      reasoningChoices: (runtime: string) =>
-        runtimes.find((item) => item.runtime === runtime)?.reasoning_choices ?? [],
+      reasoningChoices: (runtime: string, model: string) => {
+        const status = runtimes.find((item) => item.runtime === runtime);
+        return status ? reasoningChoicesFor(status, model) : [];
+      },
       notice: scan?.notice ?? null,
       defaultId: models?.find((model) => model.default)?.id ?? models?.[0]?.id ?? null,
       loading,

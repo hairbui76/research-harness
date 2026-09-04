@@ -951,9 +951,30 @@ describe('binding the session to a CLI runtime', () => {
     );
 
     // An entry still sets the per-message model, exactly as before.
-    await user.click(within(menu).getByRole('menuitem', { name: /Local small/ }));
+    await user.click(within(menu).getByRole('menuitem', { name: /^Local small/ }));
     await screen.findByRole('button', { name: 'Model: Local small' });
     expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
+  });
+
+  it('clears the binding back to the project default', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({ 'session.configure': boundTo(BOUND, null) }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^Project default/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, clear: true }),
+    );
+    // The value follows the record the daemon answered with, which now binds nothing.
+    await screen.findByRole('button', { name: 'Model: Project default (Local small)' });
+    expect(screen.queryByText('session:codex/gpt-5.5 (reasoning high)')).not.toBeInTheDocument();
   });
 
   it('renders a refused binding in the daemon\'s words and keeps the previous value', async () => {
@@ -977,8 +998,13 @@ describe('binding the session to a CLI runtime', () => {
     const dialog = await screen.findByRole('alertdialog');
     await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
 
-    expect(await screen.findByText(refusal)).toBeInTheDocument();
-    // CS0001's own default is still what the selector says.
+    // The refusal belongs where the pick was made, not to the rail's session history.
+    const composer = document.querySelector('.rh-web-composer') as HTMLElement;
+    expect(await within(composer).findByText(refusal)).toBeInTheDocument();
+    expect(
+      screen.queryByText('That change to the session history was refused'),
+    ).not.toBeInTheDocument();
+    // CS0001's own binding is still what the selector says.
     expect(screen.getByRole('button', { name: 'Model: Local small' })).toBeInTheDocument();
   });
 

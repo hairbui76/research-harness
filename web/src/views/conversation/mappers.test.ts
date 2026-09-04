@@ -13,6 +13,7 @@ import incomplete from '../../test/fixtures/conversation/transcript-incomplete.j
 import scan from '../../test/fixtures/providers/cli-scan.json';
 import sessions from '../../test/fixtures/conversation/sessions.json';
 import type {
+  CliRuntimeStatus,
   CliScanReport,
   ContextPackView,
   ConversationMessage,
@@ -26,13 +27,16 @@ import {
   groupAttempts,
   messagesReferencing,
   parseRuntimeOptionId,
+  reasoningChoicesFor,
   routeForDeepLink,
   routeForEntity,
   runtimeOptionId,
   toContextReceiptModel,
   toMessageModel,
+  toProjectDefaultOption,
   toRuntimeGroup,
   toSessionSummary,
+  PROJECT_DEFAULT_OPTION,
 } from './mappers';
 import { parseDeepLink } from '../../render';
 
@@ -226,5 +230,69 @@ describe('the session binding', () => {
     expect(group.options[0]?.unavailableReason).toBe(
       'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
     );
+  });
+});
+
+/* -- clearing, and the effort levels one model offers ---------------------- */
+
+describe('the project default row', () => {
+  const codex = SCAN.runtimes.find((item) => item.runtime === 'codex') as CliRuntimeStatus;
+  const claude = SCAN.runtimes.find((item) => item.runtime === 'claude') as CliRuntimeStatus;
+
+  it('names the entry the daemon marked default, and claims nothing of its own', () => {
+    const entry = {
+      id: 'fast',
+      label: 'fast/gpt-5.4-mini',
+      provider: 'openai',
+      egressClass: 'external' as const,
+      vision: false,
+      contextTokens: 272000,
+      available: true,
+    };
+    const option = toProjectDefaultOption(entry);
+    expect(option.id).toBe(PROJECT_DEFAULT_OPTION);
+    expect(option.label).toBe('Project default (fast/gpt-5.4-mini)');
+    // Where it goes is where that entry goes; nothing is re-decided here.
+    expect(option.provider).toBe('openai');
+    expect(option.egressClass).toBe('external');
+    expect(option.contextTokens).toBe(272000);
+    expect(option.available).toBe(true);
+  });
+
+  it('says only that the router decides when the daemon named no default', () => {
+    const option = toProjectDefaultOption(null);
+    expect(option.label).toBe('Project default');
+    expect(option.available).toBe(true);
+  });
+
+  it('offers the effort levels of the model, and the runtime\'s only as the fallback', () => {
+    // `gpt-5.5` publishes its own list; `gpt-5.4-mini` publishes none.
+    expect(reasoningChoicesFor(codex, 'gpt-5.5')).toEqual(['low', 'medium', 'high', 'xhigh']);
+    expect(reasoningChoicesFor(codex, 'gpt-5.4-mini')).toEqual([
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+    ]);
+    expect(reasoningChoicesFor(claude, 'sonnet')).toEqual([
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+      'max',
+    ]);
+  });
+
+  it('lets a model narrow the runtime\'s list rather than widening it', () => {
+    // The same exported runtime row, with the one model publishing a shorter list — which
+    // is the case the fallback must not paper over.
+    const narrowed: CliRuntimeStatus = {
+      ...codex,
+      models: codex.models.map((model) =>
+        model.id === 'gpt-5.4-mini' ? { ...model, reasoning: ['low'] } : model,
+      ),
+    };
+    expect(reasoningChoicesFor(narrowed, 'gpt-5.4-mini')).toEqual(['low']);
+    expect(reasoningChoicesFor(narrowed, 'gpt-5.5')).toEqual(['low', 'medium', 'high', 'xhigh']);
   });
 });

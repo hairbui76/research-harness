@@ -41,7 +41,12 @@ import type {
 } from '@research-harness/design';
 import { useSession } from '../../app/session';
 import { AttachmentTrayPane } from './attachments/AttachmentTrayPane';
-import { bindingOptionId, parseRuntimeOptionId } from './mappers';
+import {
+  PROJECT_DEFAULT_OPTION,
+  bindingOptionId,
+  parseRuntimeOptionId,
+  toProjectDefaultOption,
+} from './mappers';
 import { GraphStatusNotice, ReferenceMarks } from './references';
 import { useConversation } from './state';
 
@@ -99,6 +104,8 @@ export function ComposerPane() {
   const session = sessions.active;
   /** The runtime pick waiting on the egress disclosure, when one is. */
   const [pending, setPending] = useState<{ runtime: string; model: string } | null>(null);
+  /** The daemon's sentence about a binding it would not store, beside the control that asked. */
+  const [refusal, setRefusal] = useState<string | null>(null);
 
   const sendState: ComposerSendState = send.sending
     ? 'sending'
@@ -187,7 +194,7 @@ export function ComposerPane() {
    * window that binds, so the two never fight.
    */
   const bound = session ? bindingOptionId(session.defaults) : null;
-  const selectedModel = model ?? bound ?? models.defaultId ?? '';
+  const selectedModel = model ?? bound ?? PROJECT_DEFAULT_OPTION;
 
   /** The runtime binding on the record, when the record carries one. */
   const runtimeBinding = useMemo(
@@ -213,13 +220,19 @@ export function ComposerPane() {
             ...(mutationBlockedReason ? { unavailableReason: mutationBlockedReason } : {}),
           })),
         }));
+    // The project default leads the catalogue: it is the row that unbinds, and it names
+    // where the router would send instead, so it belongs with the entries rather than on
+    // its own (spec §10).
+    const projectDefault = toProjectDefaultOption(
+      models.options.find((option) => option.id === models.defaultId) ?? null,
+    );
     return [
       ...(models.options.length > 0
-        ? [{ id: 'entries', label: ENTRY_GROUP, options: models.options }]
+        ? [{ id: 'entries', label: ENTRY_GROUP, options: [projectDefault, ...models.options] }]
         : []),
       ...runtimes,
     ];
-  }, [canMutate, models.groups, models.options, mutationBlockedReason]);
+  }, [canMutate, models.defaultId, models.groups, models.options, mutationBlockedReason]);
 
   /**
    * Picking a model.
@@ -230,25 +243,40 @@ export function ComposerPane() {
    * keeps exactly today's behaviour — the pick is this message's model and nothing
    * durable changes (plan ruling 5).
    */
+  /** Bind, and keep the daemon's sentence here when it would not. */
+  const bind = useCallback(
+    (sessionId: string, input: Parameters<typeof sessions.configure>[1]) => {
+      void sessions.configure(sessionId, input).then(setRefusal);
+    },
+    [sessions],
+  );
+
   const onPickModel = useCallback(
     (option: ModelOption) => {
       if (send.error !== null) send.dismissError();
+      setRefusal(null);
       if (!session || !canMutate) {
-        setModel(option.id);
+        // The row that unbinds means "no per-message model" here: the message goes wherever
+        // the session's own default sends it, which is what a read-only window may not change.
+        setModel(option.id === PROJECT_DEFAULT_OPTION ? null : option.id);
+        return;
+      }
+      if (option.id === PROJECT_DEFAULT_OPTION) {
+        bind(session.id, { clear: true });
         return;
       }
       const runtime = parseRuntimeOptionId(option.id);
       if (runtime === null) {
-        void sessions.configure(session.id, { entry: option.id });
+        bind(session.id, { entry: option.id });
         return;
       }
       if (!disclosureRead(session.id)) {
         setPending(runtime);
         return;
       }
-      void sessions.configure(session.id, runtime);
+      bind(session.id, runtime);
     },
-    [canMutate, send, session, sessions, setModel],
+    [bind, canMutate, send, session, setModel],
   );
 
   /** The runtime's name as the scan gave it, for the disclosure's heading. */
@@ -262,23 +290,24 @@ export function ComposerPane() {
     if (!session || pending === null) return;
     rememberDisclosure(session.id);
     setPending(null);
-    void sessions.configure(session.id, pending);
-  }, [pending, session, sessions]);
+    bind(session.id, pending);
+  }, [bind, pending, session]);
 
   /** Changing the effort level rebinds the same runtime and model with it. */
   const onPickReasoning = useCallback(
     (value: string) => {
       if (!session || runtimeBinding === null) return;
-      void sessions.configure(session.id, {
+      setRefusal(null);
+      bind(session.id, {
         ...runtimeBinding,
         ...(value === RUNTIME_DEFAULT_REASONING ? {} : { reasoning: value }),
       });
     },
-    [runtimeBinding, session, sessions],
+    [bind, runtimeBinding, session],
   );
 
   const reasoningChoices = runtimeBinding
-    ? models.reasoningChoices(runtimeBinding.runtime)
+    ? models.reasoningChoices(runtimeBinding.runtime, runtimeBinding.model)
     : [];
 
   return (
@@ -303,6 +332,17 @@ export function ComposerPane() {
       />
       {models.unavailable ? (
         <p className="rh-web-composer__note rh-text-secondary">{models.unavailable}</p>
+      ) : null}
+      {/* A binding the daemon would not store, in its own words, where the pick was made.
+          Nothing durable changed, so the selector is still on the stored binding. */}
+      {refusal !== null ? (
+        <ErrorNotice
+          kind="blocked"
+          title="That model was not bound to this session"
+          description={refusal}
+          safety={{ draft: 'safe', note: 'Your message is exactly where you left it.' }}
+          onDismiss={() => setRefusal(null)}
+        />
       ) : null}
       {send.error !== null && send.retryable ? (
         <ErrorNotice
