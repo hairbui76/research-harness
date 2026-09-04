@@ -315,7 +315,9 @@ def test_the_router_builds_a_cli_provider_from_configuration(
     response = router.complete(model_request)
     assert response.parsed == EXPECTED_VERDICT and response.provider == "local_cli:codex"
     assert 'model_reasoning_effort="high"' in codex.runs()[0]["argv"]
-    assert "codex-sub" in router.entries[0].tags
+    assert router.entries[0].tags == {"codex-sub"}, (
+        "an entry's only seeded tag is its own name: a bound send picks the session entry by it"
+    )
 
 
 # -- streaming -----------------------------------------------------------------

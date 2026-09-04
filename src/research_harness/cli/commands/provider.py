@@ -49,10 +49,10 @@ from research_harness.cli.context import (
     context_for,
     emit,
 )
-from research_harness.providers.cli.registry import RUNTIME_IDS, RUNTIMES
+from research_harness.providers.cli.registry import RUNTIME_IDS, RUNTIMES, get_runtime
 from research_harness.providers.cli.types import CliRuntimeStatus, unavailable_reason
 
-__all__ = ["register"]
+__all__ = ["egress_sentence", "register"]
 
 providers_app = typer.Typer(
     name="providers",
@@ -64,6 +64,21 @@ providers_app = typer.Typer(
 def register(app: typer.Typer) -> None:
     """Add the `research providers ...` family to ``app``."""
     app.add_typer(providers_app, name="providers")
+
+
+def egress_sentence(runtime_id: str, *, subject: str) -> str:
+    """Name where a runtime sends research content, before anything is sent there.
+
+    `providers test` says it about the entry it is about to exercise and `research chat
+    configure` about the session it is about to bind, so the two commands cannot drift
+    apart on what a runtime sends where. The caller checks `runtime_id in RUNTIMES` first:
+    an id no registry knows is the daemon's refusal to word, not this transport's.
+    """
+    definition = get_runtime(runtime_id)
+    return (
+        f"egress: {subject} sends research content to {definition.egress_host} "
+        f"through {definition.name}"
+    )
 
 
 @providers_app.command("list")
@@ -166,13 +181,9 @@ def providers_test(
     with cli_errors():
         ctx = context_for(workspace)
         entry = next((item for item in ctx.repo.config.providers if item.get("name") == name), None)
-        if entry is not None and not as_json:
-            definition = RUNTIMES.get(str(entry.get("runtime")))
-            if definition is not None:
-                typer.echo(
-                    f"egress: {name} sends research content to {definition.egress_host} "
-                    f"through {definition.name}"
-                )
+        runtime = "" if entry is None else str(entry.get("runtime"))
+        if runtime in RUNTIMES and not as_json:
+            typer.echo(egress_sentence(runtime, subject=name))
         report = test_cli_provider(ctx, TestCliProviderRequest(name=name))
         emit(report.model_dump(mode="json"), _test_lines(report), as_json=as_json)
         if not report.ok:

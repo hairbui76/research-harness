@@ -36,6 +36,7 @@ import type {
   CliProviderTestReport,
   CliScanReport,
   ComparisonView,
+  ConfigureSessionRequest,
   ConflictResolution,
   ContextPackView,
   ContextPreviewRequest,
@@ -671,6 +672,24 @@ export class HarnessClient {
   /** Retitle a session. Its id and transcript are untouched. */
   async renameSession(session: string, title: string): Promise<ConversationSession> {
     return (await this.call<SessionView>('session.rename', { session, title })).session;
+  }
+
+  /**
+   * Bind a session to a runtime and model, to an entry, or clear it.
+   *
+   * `research.yaml` is untouched: the binding lives on the session record, and the daemon
+   * resolves it through the same validator and gates a configured entry passes. Exactly
+   * one of `runtime`, `entry` and `clear` is sent, and the daemon refuses anything else in
+   * its own words.
+   */
+  async configureSession(input: ConfigureSessionRequest): Promise<ConversationSession> {
+    const request: Record<string, Json> = { session: input.session };
+    if (input.runtime !== undefined) request.runtime = input.runtime;
+    if (input.model !== undefined) request.model = input.model;
+    if (input.reasoning !== undefined) request.reasoning = input.reasoning;
+    if (input.entry !== undefined) request.entry = input.entry;
+    if (input.clear !== undefined) request.clear = input.clear;
+    return (await this.call<SessionView>('session.configure', request)).session;
   }
 
   /** Every conversation session in this project, ordered by id. */

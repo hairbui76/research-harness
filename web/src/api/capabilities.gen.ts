@@ -88,6 +88,7 @@ export type CapabilityName =
   | "search_run.get"
   | "search_run.list"
   | "search_run.record"
+  | "session.configure"
   | "session.create"
   | "session.get"
   | "session.list"
@@ -684,6 +685,13 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     longRunning: false,
     summary: "Persist a reproducible discovery operation.",
     semantics: "records what was searched, where, and when; adds nothing to the corpus",
+  },
+  "session.configure": {
+    permission: "mutate",
+    humanOnly: true,
+    longRunning: false,
+    summary: "Bind a session to a runtime and model, or to a research.yaml entry, or clear it; research.yaml is untouched.",
+    semantics: "writes private working context; creates no accepted scientific state",
   },
   "session.create": {
     permission: "mutate",

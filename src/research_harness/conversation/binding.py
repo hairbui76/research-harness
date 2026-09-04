@@ -1,0 +1,135 @@
+"""What a session's `defaults.model` means for routing (binding spec §7, §9, §15).
+
+The domain stores two opaque labels; this module is the one place that reads them. A
+provider of `local_cli:<runtime>` is a runtime binding and `entry` is an entry binding.
+Every other provider is a record written before bindings existed, when `defaults.model`
+was never read on the send path and `create --model X` stored whatever it was handed --
+`provider == model == X`, or the two halves of an `openai/gpt-4`. Such a record bound
+nothing then and binds nothing now: it is no binding, and the session sends through the
+project default, because reading it would refuse every send of an old session on a name
+that never named a `research.yaml` entry (spec §15).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from pydantic import ValidationError
+
+from research_harness.domain.conversation import (
+    RUNTIME_PROVIDER_PREFIX,
+    ModelIdentity,
+    SessionDefaults,
+)
+from research_harness.domain.errors import CapabilityError
+
+if TYPE_CHECKING:
+    from research_harness.providers.models.router import RouterProviderConfig
+
+ENTRY_PROVIDER = "entry"
+SESSION_LABEL_PREFIX = "session:"
+PROJECT_DEFAULT_WORDS = "project default"
+
+
+@dataclass(frozen=True, slots=True)
+class EntryBinding:
+    """The session sends through one named `research.yaml` entry."""
+
+    name: str
+
+    @property
+    def words(self) -> str:
+        return f"entry {self.name}"
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeBinding:
+    """The session sends through a runtime and model with no `research.yaml` entry."""
+
+    runtime: str
+    model: str
+    reasoning: str | None
+
+    @property
+    def label(self) -> str:
+        """The in-memory entry's name, and the transcript's provider label."""
+        return f"{SESSION_LABEL_PREFIX}{self.runtime}"
+
+    @property
+    def words(self) -> str:
+        base = f"{self.label}/{self.model}"
+        return base if self.reasoning is None else f"{base} (reasoning {self.reasoning})"
+
+
+Binding = EntryBinding | RuntimeBinding
+
+
+def binding_of(defaults: SessionDefaults) -> Binding | None:
+    """The binding a session record states, or `None` for the project default.
+
+    Only the two providers this branch writes bind: anything else is a pre-binding record,
+    which means the project default (see the module docstring).
+    """
+    identity = defaults.model
+    if identity is None:
+        return None
+    if identity.provider.startswith(RUNTIME_PROVIDER_PREFIX):
+        return RuntimeBinding(
+            runtime=identity.provider[len(RUNTIME_PROVIDER_PREFIX) :],
+            model=identity.model,
+            reasoning=defaults.reasoning,
+        )
+    if identity.provider == ENTRY_PROVIDER:
+        return EntryBinding(name=identity.model)
+    return None
+
+
+def binding_words(defaults: SessionDefaults) -> str:
+    """The fixed wording every surface prints for a session's binding (plan ruling 4)."""
+    binding = binding_of(defaults)
+    return PROJECT_DEFAULT_WORDS if binding is None else binding.words
+
+
+def validation_sentence(exc: ValidationError) -> str:
+    """The first message of a pydantic error, without its `Value error, ` prefix.
+
+    Shared by every place that validates a binding as a `research.yaml` entry --
+    `ConversationService.configure` when it is stored, `WorkspaceProviders.select` when it
+    is resolved, `attachment.check_send` when it is described -- so all refuse in the
+    entry's own words.
+    """
+    message = str(exc.errors()[0]["msg"])
+    return message.removeprefix("Value error, ")
+
+
+def session_entry(binding: RuntimeBinding) -> RouterProviderConfig:
+    """The in-memory `research.yaml` entry a runtime binding stands for (spec §9).
+
+    One builder for every surface that has to answer "what would this session send to?":
+    the send that routes it, the preview that describes it, and the attachment check that
+    reports on it. It goes through the validator a hand-written entry goes through, so a
+    record whose runtime lost its bounded posture in a newer registry refuses with the
+    entry's own sentence rather than being routed.
+    """
+    from research_harness.providers.models.router import RouterProviderConfig
+
+    try:
+        return RouterProviderConfig(
+            name=binding.label,
+            kind="local_cli",
+            runtime=binding.runtime,
+            model=binding.model,
+            reasoning=binding.reasoning,
+            priority=0,
+        )
+    except ValidationError as exc:
+        raise CapabilityError(validation_sentence(exc)) from exc
+
+
+def runtime_identity(runtime: str, model: str) -> ModelIdentity:
+    return ModelIdentity(provider=f"{RUNTIME_PROVIDER_PREFIX}{runtime}", model=model)
+
+
+def entry_identity(name: str) -> ModelIdentity:
+    return ModelIdentity(provider=ENTRY_PROVIDER, model=name)

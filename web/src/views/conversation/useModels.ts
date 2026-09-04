@@ -1,5 +1,6 @@
 /**
- * The models this project may send to (`provider.list`).
+ * The models this project may send to (`provider.list`), and the CLI runtimes it may bind
+ * a session to (`provider.cli.scan`).
  *
  * The catalogue is derived server-side from the router configuration and the egress
  * report, so the selector shows what the daemon says exists — including the models it
@@ -10,15 +11,53 @@
  * invent an option from the session defaults: an entry in a model selector is a claim
  * about where a request would go, and a client is not entitled to make that claim. The
  * composer then sends without a `model`, which is exactly what the session default means.
+ *
+ * The scan is read beside the catalogue rather than instead of it, and the two are kept
+ * apart: a scan that fails leaves the entries exactly as they were and simply offers no
+ * runtime groups, because a runtime binding is the extra the researcher can do without.
  */
 import { useEffect, useMemo, useState } from 'react';
-import type { ModelOption } from '@research-harness/design';
+import type { ModelOption, ModelOptionGroup } from '@research-harness/design';
 import type { HarnessClient } from '../../api/client';
-import type { ProviderModel } from '../../api/dto';
-import { toModelOption } from './mappers';
+import type { CliScanReport, ProviderModel } from '../../api/dto';
+import { groupRuntimes } from '../../app/settings/mappers';
+import { reasoningChoicesFor, toModelOption, toRuntimeGroup } from './mappers';
+
+/**
+ * Where one runtime sends, as the scan reports it.
+ *
+ * Kept beside `groups` rather than folded into the design system's `ModelOptionGroup`: a
+ * destination is a fact about the runtime, not a property of a row in a picker, and the
+ * cockpit decides none of it — both fields are the daemon's `CliRuntimeStatus`.
+ */
+export interface RuntimeDestination {
+  /** The runtime's own display name (`CliRuntimeStatus.name`), e.g. `Codex CLI`. */
+  name: string;
+  /** The host its requests reach (`CliRuntimeStatus.egress_host`), e.g. `chatgpt.com`. */
+  egressHost: string;
+}
 
 export interface ModelsApi {
   options: ModelOption[];
+  /**
+   * One group per installed CLI runtime, in the daemon's registry order, each listing the
+   * scan's own models. Empty when the scan could not be read (binding spec §10).
+   */
+  groups: ModelOptionGroup[];
+  /**
+   * The effort names one model of a runtime offers, as the scan reports them: the model's
+   * own list when it published one, the runtime's otherwise. Empty when neither offers any.
+   */
+  reasoningChoices: (runtime: string, model: string) => string[];
+  /** The scan's egress sentence, shown before a session is first bound to a runtime. */
+  notice: string | null;
+  /**
+   * Every scanned runtime's destination, keyed by runtime id.
+   *
+   * The `notice` says content leaves the machine; this says where to, so the disclosure a
+   * researcher answers names the host the CLI's own `egress_sentence` names.
+   */
+  destinations: Record<string, RuntimeDestination>;
   /** The daemon's default model, when it named one. */
   defaultId: string | null;
   loading: boolean;
@@ -29,6 +68,7 @@ export interface ModelsApi {
 export function useModels(client: HarnessClient, options: { enabled?: boolean } = {}): ModelsApi {
   const enabled = options.enabled ?? true;
   const [models, setModels] = useState<ProviderModel[] | null>(null);
+  const [scan, setScan] = useState<CliScanReport | null>(null);
   const [loading, setLoading] = useState(enabled);
   const [unavailable, setUnavailable] = useState<string | null>(null);
 
@@ -57,13 +97,40 @@ export function useModels(client: HarnessClient, options: { enabled?: boolean } 
     };
   }, [client, enabled]);
 
-  return useMemo(
-    () => ({
+  // The scan is its own read: on a daemon that has no `provider.cli.scan`, or a workstation
+  // where detection failed, the entries above are still the whole selector and nothing here
+  // is said about it twice.
+  useEffect(() => {
+    if (!enabled) return;
+    let live = true;
+    client
+      .providerCliScan()
+      .then((report) => live && setScan(report))
+      .catch(() => live && setScan(null));
+    return () => {
+      live = false;
+    };
+  }, [client, enabled]);
+
+  return useMemo(() => {
+    const runtimes = scan?.runtimes ?? [];
+    return {
       options: (models ?? []).map(toModelOption),
+      groups: scan ? groupRuntimes(scan).installed.map(toRuntimeGroup) : [],
+      reasoningChoices: (runtime: string, model: string) => {
+        const status = runtimes.find((item) => item.runtime === runtime);
+        return status ? reasoningChoicesFor(status, model) : [];
+      },
+      notice: scan?.notice ?? null,
+      destinations: Object.fromEntries(
+        runtimes.map((status) => [
+          status.runtime,
+          { name: status.name, egressHost: status.egress_host },
+        ]),
+      ),
       defaultId: models?.find((model) => model.default)?.id ?? models?.[0]?.id ?? null,
       loading,
       unavailable,
-    }),
-    [loading, models, unavailable],
-  );
+    };
+  }, [loading, models, scan, unavailable]);
 }

@@ -35,13 +35,15 @@ from research_harness.capabilities.attachments import (
 from research_harness.capabilities.context import CapabilityContext, open_context
 from research_harness.capabilities.permissions import Permission
 from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
+from research_harness.conversation.service import ConversationService
 from research_harness.domain.base import Provenance
-from research_harness.domain.conversation import ConversationSession
+from research_harness.domain.conversation import ConversationSession, Visibility
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.transitions import HUMAN_ACTOR
 from research_harness.server.app import create_app, ensure_token
 from research_harness.workspace.conversations import ConversationStore
 from tests.fixtures.attachments import TINY_PDF, TINY_PNG, pdf_bytes, png_bytes
+from tests.fixtures.cli.fakes import FakeCli
 
 ATTACHMENT_CAPABILITIES = (
     "attachment.add",
@@ -215,6 +217,28 @@ def test_the_send_check_answers_per_item_against_the_configured_models(
     assert sighted.ok is False  # the PDF: a vision override does not add document input
     assert blind.ok is False
     assert next(item.suggested_model for item in blind.items) == "local-vision/vision-1"
+
+
+def test_the_send_check_answers_for_a_session_bound_to_a_runtime(
+    project: CapabilityContext, codex: FakeCli
+) -> None:
+    """A bound session has a target even with an empty `providers:` table (binding spec §9).
+
+    The check must resolve it the way the send does, or a bound composer is told there is
+    no configured model for a send that would in fact go through.
+    """
+    store = ConversationStore.for_repository(project.repo)
+    bound = store.create_session(title="reading", provenance=HUMAN, visibility=Visibility.PROJECT)
+    add_attachment(
+        project, AddAttachmentRequest(session=bound.id, path=TINY_PDF, filename="paper.pdf")
+    )
+    ConversationService(project).configure(bound.id, runtime="codex", model="gpt-5.5")
+
+    check = check_attachment_send(project, CheckAttachmentSendRequest(session=bound.id))
+
+    assert (check.provider, check.model) == ("session:codex", "gpt-5.5")
+    assert len(check.items) == 1, "the check answers, rather than refusing for want of a table"
+    assert codex.runs() == [], "a check spawns nothing"
 
 
 def test_the_send_check_says_so_when_no_model_is_configured(

@@ -1,16 +1,32 @@
 import { forwardRef } from 'react';
+import type { ReactElement } from 'react';
 import { Badge } from '../../primitives/Badge';
 import { Button } from '../../primitives/Button';
 import { Icon } from '../../primitives/Icon';
 import { Menu } from '../../primitives/Menu';
 import { EGRESS_META } from '../../research/models';
 import { cx } from '../../utils/cx';
-import type { ModelOption } from '../models';
+import type { ModelOption, ModelOptionGroup } from '../models';
 
 export interface ModelSelectorProps {
   options: readonly ModelOption[];
+  /**
+   * Labelled sets of further options, rendered after the flat `options`. Each group is one
+   * accessible group in the menu, named by its label — a runtime and the models it offers.
+   */
+  groups?: readonly ModelOptionGroup[];
   /** Selected model id. */
   value: string;
+  /**
+   * What the trigger says when `value` names none of the options given.
+   *
+   * A host whose selection is real but whose catalogue is momentarily incomplete — a
+   * session bound to a runtime whose scan failed — has something true to say about where
+   * the next message goes, and "Select a model" would not be it. The words are the host's;
+   * the option is still not in the menu, because an option is a claim that it can be
+   * chosen. Nothing is stated about egress, because nothing about it is known here.
+   */
+  fallbackLabel?: string;
   onChange: (option: ModelOption) => void;
   /** Accessible name for the control. Defaults to "Model". */
   label?: string;
@@ -30,11 +46,70 @@ export interface ModelSelectorProps {
  */
 export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
   function ModelSelector(
-    { options, value, onChange, label = 'Model', disabled = false, size = 'sm', className },
+    {
+      options,
+      groups = [],
+      value,
+      fallbackLabel,
+      onChange,
+      label = 'Model',
+      disabled = false,
+      size = 'sm',
+      className,
+    },
     ref,
   ) {
-    const selected = options.find((option) => option.id === value);
+    // The trigger names whatever is selected, wherever it lives: a grouped runtime model is
+    // as much "the current model" as a flat one.
+    const selected =
+      options.find((option) => option.id === value) ??
+      groups.flatMap((group) => group.options).find((option) => option.id === value);
     const selectedEgress = selected ? EGRESS_META[selected.egressClass] : undefined;
+
+    const renderItem = (option: ModelOption): ReactElement => {
+      const egress = EGRESS_META[option.egressClass];
+      return (
+        <Menu.Item
+          key={option.id}
+          disabled={!option.available}
+          data-model={option.id}
+          data-selected={option.id === value || undefined}
+          icon={<Icon name={option.id === value ? 'check' : 'circle-dashed'} size={16} />}
+          onSelect={() => onChange(option)}
+        >
+          <span className="rh-model-selector__option">
+            <span className="rh-model-selector__option-head">
+              <span className="rh-model-selector__name">{option.label}</span>
+              <span className="rh-model-selector__provider">{option.provider}</span>
+            </span>
+            <span className="rh-model-selector__facts">
+              <Badge
+                tone={option.egressClass === 'external' ? 'warning' : 'neutral'}
+                icon={egress.icon}
+                size="sm"
+              >
+                {egress.label}
+              </Badge>
+              <Badge tone="neutral" icon={option.vision ? 'image' : 'eye-off'} size="sm">
+                {option.vision ? 'Reads images' : 'Text only'}
+              </Badge>
+              {/* A source that declares no context window says nothing rather than zero. */}
+              {option.contextTokens === null ? null : (
+                <span className="rh-model-selector__context">
+                  {option.contextTokens.toLocaleString('en-US')} tok context
+                </span>
+              )}
+            </span>
+            {!option.available ? (
+              <span className="rh-model-selector__unavailable">
+                <Icon name="shield-off" size={14} />
+                <span>{option.unavailableReason ?? 'Not available here.'}</span>
+              </span>
+            ) : null}
+          </span>
+        </Menu.Item>
+      );
+    };
 
     return (
       <Menu placement="top" align="start">
@@ -46,10 +121,12 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
             size={size}
             iconEnd="chevron-down"
             disabled={disabled}
-            aria-label={`${label}: ${selected?.label ?? 'none selected'}`}
+            aria-label={`${label}: ${selected?.label ?? fallbackLabel ?? 'none selected'}`}
           >
             <span className="rh-model-selector__current">
-              <span className="rh-model-selector__name">{selected?.label ?? 'Select a model'}</span>
+              <span className="rh-model-selector__name">
+                {selected?.label ?? fallbackLabel ?? 'Select a model'}
+              </span>
               {selectedEgress ? (
                 <span className="rh-model-selector__egress">
                   <Icon name={selectedEgress.icon} size={14} />
@@ -60,53 +137,12 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
           </Button>
         </Menu.Trigger>
         <Menu.Content aria-label={label} className="rh-model-selector__menu">
-          {options.map((option) => {
-            const egress = EGRESS_META[option.egressClass];
-            return (
-              <Menu.Item
-                key={option.id}
-                disabled={!option.available}
-                data-model={option.id}
-                data-selected={option.id === value || undefined}
-                icon={
-                  <Icon name={option.id === value ? 'check' : 'circle-dashed'} size={16} />
-                }
-                onSelect={() => onChange(option)}
-              >
-                <span className="rh-model-selector__option">
-                  <span className="rh-model-selector__option-head">
-                    <span className="rh-model-selector__name">{option.label}</span>
-                    <span className="rh-model-selector__provider">{option.provider}</span>
-                  </span>
-                  <span className="rh-model-selector__facts">
-                    <Badge
-                      tone={option.egressClass === 'external' ? 'warning' : 'neutral'}
-                      icon={egress.icon}
-                      size="sm"
-                    >
-                      {egress.label}
-                    </Badge>
-                    <Badge
-                      tone="neutral"
-                      icon={option.vision ? 'image' : 'eye-off'}
-                      size="sm"
-                    >
-                      {option.vision ? 'Reads images' : 'Text only'}
-                    </Badge>
-                    <span className="rh-model-selector__context">
-                      {option.contextTokens.toLocaleString('en-US')} tok context
-                    </span>
-                  </span>
-                  {!option.available ? (
-                    <span className="rh-model-selector__unavailable">
-                      <Icon name="shield-off" size={14} />
-                      <span>{option.unavailableReason ?? 'Not available here.'}</span>
-                    </span>
-                  ) : null}
-                </span>
-              </Menu.Item>
-            );
-          })}
+          {options.map(renderItem)}
+          {groups.map((group) => (
+            <Menu.Group key={group.id} label={group.label}>
+              {group.options.map(renderItem)}
+            </Menu.Group>
+          ))}
         </Menu.Content>
       </Menu>
     );

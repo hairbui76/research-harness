@@ -38,7 +38,7 @@ Two alternatives were considered and rejected:
 
 - **Entry**: one item of the `providers:` table in `research.yaml`, named, persisted, project-wide.
 - **Binding**: a session's stored choice of what answers its messages: either an entry name, or a runtime with a model and a reasoning level. Never persisted in `research.yaml`.
-- **Session provider**: the in-memory provider entry the daemon builds from a runtime binding for one call, labelled `session:<runtime>/<model>`.
+- **Session provider**: the in-memory provider entry the daemon builds from a runtime binding for one call, named `session:<runtime>`; its words on every surface are `session:<runtime>/<model>`, followed by ` (reasoning <level>)` when one is set.
 - **Project default**: the entry the router selects for an unconstrained call, in priority order; `provider.list` marks it `default`.
 - **Routable runtime**: a runtime whose cached scan reports it installed, logged in with a subscription, provably bounded, and not version-blocked, as defined by the CLI providers specification §10 and §11.
 
@@ -93,6 +93,7 @@ class SessionDefaults(DomainModel):
 | runtime | `local_cli:<runtime id>` | model id from the scan, or `default` | a value from the runtime's `reasoning_choices`, or `None` for the runtime's default |
 | entry | `entry` | the entry's name in `research.yaml` | `None` |
 | none | `None` | | `None` |
+| none (pre-binding record) | anything else | anything | `None` |
 
 The domain validates only shape: `provider` and `model` are non-empty strings; `reasoning` is `None` unless `provider` starts with `local_cli:`. Which runtimes, models, and reasoning levels exist is decided by the capability layer at binding time and by the routing layer at send time.
 
@@ -102,7 +103,7 @@ A session created with a `model` argument today stores it as an entry binding (`
 
 ### `session.configure`
 
-Permission `MUTATE`, not human-only, like `session.rename`. Request:
+Permission `MUTATE`, which the registry treats as human-only, like `session.rename` (`capabilities/registry.py` derives `human_only` from `MUTATE`/`ADMIN`). Request:
 
 ```python
 class ConfigureSessionRequest(CapabilityRequest):
@@ -119,9 +120,12 @@ Exactly one of `runtime`, `entry`, `clear` is given; `model` is required with `r
 1. Loads the session or refuses with the existing not-found error.
 2. For `entry`: refuses unless an enabled entry of that name exists in `research.yaml`, with the same sentence a stale per-message `model` gets today.
 3. For `runtime`: builds `RouterProviderConfig(kind="local_cli", name="session:<runtime>", runtime=…, model=…, reasoning=…)` and lets its validator refuse an unknown runtime, a runtime with no proven bounded posture, or a reasoning level the runtime does not offer, with the sentences `research providers add` prints. It then reads the cached scan for that runtime and refuses a model that is neither `default` nor in the scan's `models` list, with `"<runtime> does not list model '<model>'; run research providers scan"`. A runtime that is installed but not routable right now is **accepted** at binding time, so a researcher can bind a session before logging in; the send refuses with the scan's sentence until the runtime is routable.
-4. Stores the binding on the session record under the session lock and answers with the updated `SessionView`.
+4. Refuses a **private** session a runtime binding, with the send path's own private-egress sentence (`conversation/send.py::private_egress_sentence`). Every CLI runtime is external egress, so a runtime binding on a private session would leave a session that looks configured and can never answer. The check comes *after* the entry is validated, in the order the send path refuses, so an invalid binding is still refused in the entry's own words first. An **entry** binding is unaffected: an entry may name a local provider.
+5. Stores the binding on the session record under the session lock and answers with the updated `SessionView`.
 
 For `clear`, it stores `model = None`, `reasoning = None`.
+
+Visibility is decided at creation and **no capability changes it afterwards**: `session.create` (and `research chat new`) defaults to `private`, and there is no `session.set_visibility`. A session that is to use a bound runtime is therefore created as a project session — `research chat new --visibility project` — or, in the Web cockpit, by choosing `Project` in the New session dialog, which sends `visibility: "project"` on `session.create` and otherwise sends no visibility at all.
 
 The response is the existing `SessionView`, whose `defaults` now carry the binding. `session.get`, `session.list`, and `session.search` return the same record and need no change beyond the new field.
 
@@ -150,7 +154,7 @@ For a **runtime binding**, the selector builds one `RouterProviderConfig` of kin
 
 No gate is added and none is bypassed. The `availability` injection point on `CliModelProvider` is never passed here.
 
-The label recorded for a bound call in the transcript, the receipt, and the trace is `session:<runtime>/<model>`, so a reader can tell a session-bound answer from one routed through a configured entry. Reasoning travels the way the adapter already takes it: `--effort` for Claude Code, `-c model_reasoning_effort="…"` for Codex, screened by the run-time argv check.
+The transcript, the receipt, and the run record carry the provider label `session:<runtime>` with the bound model, so a reader can tell a session-bound answer from one routed through a configured entry; the trace keeps the adapter's own name, `local_cli:<runtime>`, with the same model, because the trace writer records the adapter, not the entry. Reasoning travels the way the adapter already takes it: `--effort` for Claude Code, `-c model_reasoning_effort="…"` for Codex, screened by the run-time argv check.
 
 ## 10. Web experience
 
@@ -165,32 +169,34 @@ The selector shows the current binding as its value: the entry row for an entry 
 
 **Disclosure.** Before a session's first binding to an external destination, the composer shows the daemon's egress sentence for that runtime, the `notice` `provider.cli.scan` returns, and proceeds only after the researcher confirms. The confirmation is remembered per session in the browser only as a convenience; the daemon's receipt panel keeps showing each message's egress class as today, so the disclosure is not the only place the destination is visible.
 
-**Read-only windows.** A window without `canMutate` sees the picker disabled with the daemon's reason; the per-message override stays available because it changes nothing durable.
+**Read-only windows.** A window without `canMutate` keeps today's selector behaviour exactly: a pick sets the per-message `model` and changes nothing durable. Its runtime groups are shown disabled with the session's mutation-blocked reason. A mutating window's pick binds the session; there is no separate per-message control in the composer.
 
-**Session list.** Each session row shows its binding as the daemon words it: `session:codex/gpt-5.5 · high`, `entry codex-sub`, or nothing for the project default.
+**Session list.** Each session row shows its binding in the fixed format every surface uses, composed from the record's fields: `session:codex/gpt-5.5 (reasoning high)`, `entry codex-sub`, or nothing for the project default. The CLI composes the same strings from the same fields; a test on each side pins them.
 
 The badge and state mappers of the Settings section are reused; no new client rule decides availability, routability, or wording. Components come from `@research-harness/design`; token and contrast checks apply as for the Settings section.
 
 ## 11. CLI experience
 
-The parity rule requires a terminal command for every capability:
+The parity rule requires a terminal command for every capability. The `session.*` capabilities live under `research chat` (the `research session` name belongs to the working-session summary), so the command is:
 
 ```console
-research session configure S0001 --runtime codex --model gpt-5.5 --reasoning high
-research session configure S0001 --entry codex-sub
-research session configure S0001 --clear
+research chat configure CS0001 --runtime codex --model gpt-5.5 --reasoning high
+research chat configure CS0001 --entry codex-sub
+research chat configure CS0001 --clear
 ```
 
 Output: the egress sentence for the runtime before the change, then the resulting binding, as `bound to: session:codex/gpt-5.5 (reasoning high)`, `bound to: entry codex-sub`, or `bound to: project default`. Exit non-zero on refusal with the daemon's sentence. `--json` prints the `SessionView`.
 
-`research session list` and `research session get` print the binding with the same words. `research doctor` is unchanged: a session binding is not project configuration.
+`research chat list` and `research chat show` print the binding with the same words. `research doctor` is unchanged: a session binding is not project configuration.
 
 ## 12. Privacy, credentials, and logging
 
 - A binding names a runtime, a model, and an effort level; none of them is a secret. The session record gains no credential material.
 - The egress invariant of the CLI providers specification §4 holds: a session provider is external egress with the runtime's declared host; it is never `local`.
 - The privacy policy is asked before the runtime on every send, including bound ones; a refusal raises before a run exists and the session gains nothing.
-- The binding's label appears in the transcript, the receipt, and the trace; those already exclude prompts, tokens, and paths.
+- A private session may not be bound to a runtime at all. `session.configure` refuses it at bind time with the send path's private-egress sentence, so the refusal arrives where the choice was made rather than on the first send. An entry binding is unaffected.
+- Visibility is a creation-time decision and no capability changes it, so the way to use a bound runtime is `research chat new --visibility project` on a new conversation — which is exactly what the private-egress sentence already tells the researcher to do.
+- The transcript, the receipt, and the run record carry `session:<runtime>` with the bound model; the trace keeps the adapter's own `local_cli:<runtime>`, because the trace writer records the adapter rather than the entry (§9, §14). All four already exclude prompts, tokens, and paths.
 - No new log line, diagnostic, or fixture may contain a token, a credential path, a home path, or an e-mail.
 
 ## 13. Error model
@@ -215,10 +221,10 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 **Domain and capability**
 - `SessionDefaults` accepts the three shapes of §7 and refuses `reasoning` without a runtime provider.
 - `session.configure` stores a runtime binding, an entry binding, and a clear; refuses an unknown runtime, a posture-`none` runtime, an unlisted model, an unoffered reasoning level, and a missing entry, each with the sentence of §13; accepts an installed but logged-out runtime.
-- The permission table marks it `MUTATE`, not human-only; the parity test maps it to `session configure`.
+- The permission table marks it `MUTATE`, which the registry treats as human-only, so an agent host is refused it on every transport; the parity test maps it to `research chat configure`.
 
 **Routing**
-- A bound session with no per-message `model` spawns the fake with the bound model and reasoning in argv, and the transcript and trace record `session:codex/gpt-5.5`.
+- A bound session with no per-message `model` spawns the fake with the bound model and reasoning in argv; the transcript records `session:codex` with the bound model, and the trace records `local_cli:codex`, because the trace writer records the adapter rather than the entry (§9).
 - A per-message `model` wins over the binding.
 - A binding whose runtime the fake now reports logged out fails before any run process with `login_missing` and the scan's sentence; `fake.runs() == []`.
 - `external_models: disabled` refuses a bound send before any spawn.
@@ -242,8 +248,8 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 
 ## 15. Compatibility and migration
 
-- Sessions written before this change have `defaults.model` either `None` or a `ModelIdentity` naming an entry with the adapter's own provider name. On first read, a `ModelIdentity` whose `provider` is neither `entry` nor `local_cli:*` is treated as an entry binding on its `model` value; nothing is rewritten until the session is next configured.
-- The `SessionDefaults` schema gains an optional field; the canonical object's schema version is bumped per the repository's convention for additive fields, with the reader accepting both.
+- Sessions written before this change have `defaults.model` either `None` or a `ModelIdentity` written by `create --model X`, which stored whatever it was handed — `provider == model == X`, or the two halves of an `openai/gpt-4`. `defaults.model` was never read on the send path then, so such a record bound nothing; it binds nothing now. A `ModelIdentity` whose `provider` is neither `entry` nor `local_cli:*` is **no binding**: `binding_of` returns `None`, every surface says `project default`, and the session sends through the project default in priority order. Reading it as an entry binding on its `model` value would instead refuse every send of an old session with `no provider named 'gpt-4'`, on a name that never named a `research.yaml` entry. Nothing is rewritten; the next `session.configure` stores a real binding.
+- The `SessionDefaults` schema gains an optional field with a default. The repository has no object schema-version convention beyond the constant every canonical object carries, and an additive optional field loads every existing session file, so no version bump ships with this change.
 - Generated artifacts are regenerated, never hand-edited: `docs/guide/capabilities.md`, `docs/guide/cli-reference.md`, `web/capabilities.json`, `web/openapi.json`, `web/src/api/capabilities.gen.ts`, and the Web DTO for `SessionDefaults`.
 - The acceptance matrix and ROADMAP gain rows for the criteria in §16; ADR-030 gains the addendum of §5.
 
@@ -253,7 +259,7 @@ All offline, with the fake CLI under `tests/fixtures/cli/fakes.py`; the real `co
 2. A bound session's messages route through that runtime and model with the chosen reasoning, and the transcript names `session:<runtime>/<model>`.
 3. Every refusal a configured entry would get applies to a binding, in the same order and with the same sentence: policy, posture, login, version, executable.
 4. A per-message override wins over the binding, and clearing the binding returns the session to the project default.
-5. Web and CLI can both bind, show, and clear a binding, and show identical words.
+5. Web and CLI can both bind, show, and clear a binding, and show identical words in the fixed format of §4.
 6. The picker's runtime groups, model lists, reasoning lists, and reasons are the daemon's; no client code decides availability.
 7. Egress is disclosed before the first external binding of a session.
 8. Default CI needs no installed CLI, login, key, or network, and no credential material appears in any new fixture, message, or log line.

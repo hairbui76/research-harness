@@ -786,6 +786,24 @@ export interface SessionDefaults {
   model?: ModelIdentity | null;
   mode?: string | null;
   token_budget?: number | null;
+  /** The runtime's own effort name for a runtime binding; absent otherwise. */
+  reasoning?: string | null;
+}
+
+/**
+ * `session.configure`: exactly one of `runtime`, `entry`, `clear`.
+ *
+ * `model` is required with `runtime`, and `reasoning` is allowed only with `runtime`. The
+ * daemon enforces all three and refuses in its own sentence; nothing here re-decides them.
+ * `research.yaml` is never touched — the binding lives on the session record.
+ */
+export interface ConfigureSessionRequest {
+  session: string;
+  runtime?: string;
+  model?: string;
+  reasoning?: string;
+  entry?: string;
+  clear?: boolean;
 }
 
 /** `domain/conversation.py::ConversationSession` — the durable session record. */

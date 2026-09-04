@@ -288,6 +288,10 @@ class ModelIdentity(DomainModel):
 # ---------------------------------------------------------------------------
 
 
+RUNTIME_PROVIDER_PREFIX = "local_cli:"
+"""A `defaults.model` whose provider starts with this names a runtime binding (spec §7)."""
+
+
 class SessionDefaults(DomainModel):
     """What a new message in this session uses unless the composer overrides it."""
 
@@ -295,6 +299,18 @@ class SessionDefaults(DomainModel):
     mode: str | None = None
     """Opaque composer mode label (a role or task preset), never interpreted here."""
     token_budget: int | None = Field(default=None, ge=0)
+    reasoning: str | None = None
+    """The runtime's own effort name for a runtime binding; `None` otherwise."""
+
+    @model_validator(mode="after")
+    def _reasoning_needs_a_runtime_binding(self) -> SessionDefaults:
+        # The one shape rule the domain enforces (binding spec §7): what runtimes, models
+        # and effort names exist is decided by the capability and routing layers.
+        if self.reasoning is not None and not (
+            self.model is not None and self.model.provider.startswith(RUNTIME_PROVIDER_PREFIX)
+        ):
+            raise ValueError("reasoning is only for a runtime binding (provider local_cli:<id>)")
+        return self
 
 
 class ConversationSession(CanonicalObject):

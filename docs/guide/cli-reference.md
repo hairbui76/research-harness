@@ -344,6 +344,8 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ list       Every session in this project (`session.list`).                           │
 │ show       Reopen a session with its transcript intact (`session.get`).              │
 │ rename     Retitle a session (`session.rename`).                                     │
+│ configure  Bind a session to a runtime and model, or an entry, or clear it           │
+│            (`session.configure`).                                                    │
 │ search     Search titles and transcripts (`session.search`). Works with `.research/` │
 │            deleted.                                                                  │
 │ summarize  Regenerate the derived summary (`session.summarize`). No model call.      │
@@ -354,6 +356,36 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │            incomplete.                                                               │
 │ retry      Answer again as a new attempt (`session.retry`); the failed one is kept.  │
 │ promote    Promote an excerpt into reviewable state (`session.promote`).             │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+#### `research chat configure`
+
+```text
+
+ Usage: research chat configure [OPTIONS] {session}
+
+ Bind a session to a runtime and model, or an entry, or clear it (`session.configure`).
+
+ Nothing is written to research.yaml: the binding lives on the session
+ record, and every gate a configured entry passes still applies when the
+ session next sends. The egress line comes first because a binding decides
+ where this conversation will go.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────╮
+│ *    session      <str>  Session id, e.g. CS0001. [required]                         │
+╰──────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────╮
+│ --workspace  -w      <path>  Workspace root; defaults to the nearest research.yaml   │
+│                              above the current directory.                            │
+│                              [env var: RESEARCH_WORKSPACE]                           │
+│ --runtime            <str>   Runtime id from `research providers scan`.              │
+│ --model              <str>   Model id from the scan, or `default`.                   │
+│ --reasoning          <str>   The runtime's own effort name.                          │
+│ --entry              <str>   An entry name in research.yaml.                         │
+│ --clear                      Return the session to the project default.              │
+│ --json                       Print the result as JSON instead of text.               │
+│ --help                       Show this message and exit.                             │
 ╰──────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -428,7 +460,9 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │                                          answer it; project lets the selected        │
 │                                          external provider see it.                   │
 │                                          [default: private]                          │
-│ --model               <str>              Default provider/model for this session.    │
+│ --model               <str>              Bind the new session to this entry name     │
+│                                          from research.yaml (see `research chat      │
+│                                          configure`).                                │
 │ --budget              <int>              Token budget for the assembled context.     │
 │ --json                                   Print the result as JSON instead of text.   │
 │ --help                                   Show this message and exit.                 │

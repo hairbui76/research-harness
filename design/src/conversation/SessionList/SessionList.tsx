@@ -110,6 +110,11 @@ function SessionRow({
         onClick={() => onSelect?.(session.id)}
       >
         <span className="rh-session-list__title">{session.title}</span>
+        {/* What this session is bound to, in the host's words — a fact about the record, so
+            it sits with the title rather than in the metadata run. */}
+        {session.binding !== undefined ? (
+          <span className="rh-session-list__binding rh-text-secondary">{session.binding}</span>
+        ) : null}
         <span className="rh-session-list__meta">
           <span className="rh-session-list__id">{session.id}</span>
           <time dateTime={session.updatedAt}>{formatTime(session.updatedAt)}</time>

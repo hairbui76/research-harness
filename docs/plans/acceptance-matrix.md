@@ -5,7 +5,9 @@ Written for ROADMAP Tasks 17.1 and 17.2 and for Gate P17 ("all end-to-end invari
 pass"), and extended for the conversation-first track's Gates DS and P18–P21
 ([§ The v1.1 gates](#the-v11-gates-ds-and-p18p21)) and for the v1.1 follow-on's fifteen
 criteria ([§ Subscription-backed local CLI
-providers](#subscription-backed-local-cli-providers-spec-24)). Counts are the tests each
+providers](#subscription-backed-local-cli-providers-spec-24)) and the eight of the session
+runtime binding that follows it
+([§ Session runtime binding](#session-runtime-binding-spec-16)). Counts are the tests each
 module collects, including parametrized cases.
 
 Run the whole thing with:
@@ -416,6 +418,77 @@ Second, five of the seven runtimes are detected but not routable in this release
 Agent, Amp, DeepSeek Harness, and Pi have no documented bounded mode, and OpenCode's
 environment-injected posture is unproven until a version with recorded fixtures is verified
 — so (4) covers Codex CLI and Claude Code, which are the two runtimes the release routes.
+
+## Session runtime binding (spec §16)
+
+The follow-on of `docs/superpowers/specs/2026-09-04-session-runtime-binding-design.md`: one
+conversation names a CLI runtime, model, and effort level from the composer or the terminal,
+without an entry in `research.yaml`, and the daemon resolves that binding through the same
+validator and gates a configured entry passes (ADR-030 addendum, 2026-09-04). The spec
+states eight acceptance criteria; each one below names the test that demonstrates it. Run
+them with:
+
+```bash
+uv run pytest -q tests/unit/domain/test_session_defaults.py \
+                 tests/unit/conversation/test_binding.py \
+                 tests/contract/conversation/test_session_configure.py \
+                 tests/integration/conversation/test_send_session_binding.py \
+                 tests/e2e/test_chat_configure_command.py \
+                 tests/contract/capabilities/test_conversation.py \
+                 tests/contract/capabilities/test_attachments.py \
+                 tests/contract/protocol/test_new_capability_parity.py \
+                 tests/e2e/test_cli_capability_parity.py
+# the browser half (the whole Web suite: 21 files, 336 tests):
+pnpm --filter research-harness-web test
+```
+
+| # | criterion | what demonstrates it | where it lives | holds today |
+|---|---|---|---|---|
+| 1 | A session can be bound to a routable runtime and model from the composer without editing `research.yaml`, and the binding survives reload and a second window | the capability stores the runtime, model, and effort on the session record and the store reads the same values back; the same call round-trips through the registry every transport shares; in the cockpit a pick calls `session.configure` and the selector value is read back from the record the daemon returned, so reopening the session shows it; and a session opened in the cockpit can be a project session, because the New-session dialog asks for the visibility that decides whether it may be bound at all | `tests/contract/conversation/test_session_configure.py::test_a_runtime_binding_is_stored_with_its_model_and_reasoning`; `tests/contract/capabilities/test_conversation.py::test_a_session_binding_round_trips_through_the_registry`; `web/src/views/conversation/ConversationRoute.test.tsx` ("discloses the egress before the first binding, then configures the session"; "shows the stored binding on reopening, in the selector and on the session row"; "creates a project session, which is the kind a runtime may be bound to"; "says what the choice costs, and that it is the only chance to make it") | holds. Two things the tests do not literally do: none asserts the `providers:` table is byte-identical after a bind — `ConversationService.configure` writes only through `ConversationStore.update_session`, which is structural rather than pinned — and "a second window" is the same read of the same record, demonstrated by the reopen test rather than by two windows |
+| 2 | A bound session's messages route through that runtime and model with the chosen reasoning, and the transcript names `session:<runtime>/<model>` | the fake runtime is spawned with `--model gpt-5.5` and `-c model_reasoning_effort="high"` in argv and the question in none of it; the transcript's `ModelIdentity` is `session:codex`/`gpt-5.5` while the trace keeps the adapter's `local_cli:codex`; a preview assembles the same profile without spawning; a hand-written entry named `session:codex` never answers for the binding | `tests/integration/conversation/test_send_session_binding.py::test_a_bound_session_spawns_the_runtime_with_its_model_and_reasoning`, `::test_a_preview_of_a_bound_session_assembles_against_the_bound_runtime`, `::test_a_configured_entry_may_not_impersonate_the_session_label` | holds |
+| 3 | Every refusal a configured entry would get applies to a binding, in the same order and with the same sentence: policy, posture, login, version, executable | `external_models: disabled` refuses a bound send before any spawn; a runtime the fake reports logged out fails with the scan's sentence and no run process; a posture-`none` runtime, an unknown runtime, an unlisted model, and an effort name the runtime does not offer are refused at bind time in the entry's own words; an entry binding to a removed entry fails like a stale `--provider` | `tests/integration/conversation/test_send_session_binding.py::test_the_policy_refuses_a_bound_session_before_any_spawn`, `::test_a_bound_runtime_that_is_logged_out_is_refused_before_any_run`, `::test_an_entry_binding_to_a_removed_entry_fails_like_a_stale_name`; `tests/contract/conversation/test_session_configure.py::test_a_runtime_with_no_proven_posture_is_refused_with_the_entry_sentence`, `::test_an_unknown_runtime_an_unlisted_model_and_an_unoffered_reasoning_are_refused`, `::test_an_entry_binding_needs_an_enabled_entry` | holds for policy, posture, and login. `executable_missing` has no binding-specific test but is the same run-time gate a configured entry passes, pinned by `tests/contract/providers/test_cli_provider.py::test_a_missing_executable_is_a_transport_error`. **`version_blocked` is untested outright**: no test reaches the branch that raises it (`providers/cli/provider.py:460`). What is pinned is the input that gate reads — the compatibility table, by `tests/unit/providers/cli/test_detection.py::test_compatibility_is_a_table_of_versions` (`verified` / `warning` / `blocked` / `unknown`, including the below-minimum case). Neither gap is binding-specific: a binding reaches both through the identical `RouterProviderConfig`, so they sit in the CLI providers layer |
+| 4 | A per-message override wins over the binding, and clearing the binding returns the session to the project default | a send that names a model routes there whatever the session is bound to; `clear` puts `defaults.model` back to `None`; a retry with no model follows the binding as it is at retry time, not as it was; the cockpit's **Project default** row calls `session.configure` with `clear` | `tests/integration/conversation/test_send_session_binding.py::test_a_per_message_model_wins_over_the_binding`, `::test_a_retry_follows_the_binding_at_retry_time`; `tests/contract/conversation/test_session_configure.py::test_clear_returns_the_session_to_the_project_default`; `web/src/views/conversation/ConversationRoute.test.tsx` ("clears the binding back to the project default") | holds |
+| 5 | Web and CLI can both bind, show, and clear a binding, and show identical words in the fixed format of §4 | the terminal prints the egress sentence, then `bound to: session:codex/gpt-5.5 (reasoning high)`, and `chat list` and `chat show` repeat it, and `--clear` prints `bound to: project default`; the Python composer of those words is pinned for all three shapes; `mappers.ts` composes the same strings in the browser; the parity tables map `session.configure` to `research chat configure` and both transports advertise one request schema | `tests/e2e/test_chat_configure_command.py::test_configure_prints_egress_then_the_binding_and_list_and_show_repeat_it`; `tests/unit/conversation/test_binding.py::test_a_runtime_binding_names_the_runtime_model_and_reasoning`, `::test_an_entry_binding_names_the_entry`, `::test_no_binding_means_the_project_default`; `tests/e2e/test_cli_capability_parity.py::test_the_counterpart_table_covers_every_v11_capability` and `::test_every_v11_capability_has_a_command_in_the_terminal`; `tests/contract/protocol/test_new_capability_parity.py::test_the_two_transports_advertise_the_same_request_schema` (parametrized; `session.configure` is one of the names); `web/src/views/conversation/mappers.test.ts` ("composes the binding words in the fixed format the CLI uses"; "puts the binding words on the session row, and nothing on the project default") | holds. The two sides are pinned separately against the same literal strings; no single test compares one to the other |
+| 6 | The picker's runtime groups, model lists, reasoning lists, and reasons are the daemon's; no client code decides availability | the browser maps the scan into groups without deciding anything: the models carry the daemon's `model_source` word, a runtime the daemon will not route to is one disabled row carrying `unavailable_reason` verbatim, and the effort list is the model's own when the scan published one and the runtime's otherwise; on the daemon side a model that is neither `default` nor in the cached scan is refused at bind time | `web/src/views/conversation/mappers.test.ts` ("offers the scan's models under a routable runtime, with the daemon's source word"; "shows a runtime the daemon will not route to as one row with its reason"; "offers the effort levels of the model, and the runtime's only as the fallback"; "lets a model narrow the runtime's list rather than widening it"); `web/src/views/conversation/ConversationRoute.test.tsx` ("lists the configured entries and every installed runtime the scan found"); `tests/contract/conversation/test_session_configure.py::test_an_unknown_runtime_an_unlisted_model_and_an_unoffered_reasoning_are_refused` | holds |
+| 7 | Egress is disclosed before the first external binding of a session | the composer shows the scan's own notice before the first runtime binding and stores nothing until it is confirmed, does not ask again for the same session, and asks again after a refusal because nothing was bound; the terminal prints the egress sentence as its first line, before the binding it made | `web/src/views/conversation/ConversationRoute.test.tsx` ("discloses the egress before the first binding, then configures the session"; "asks once per session: a second pick binds without another confirmation"; "asks again after a refusal: nothing was disclosed that was not bound"); `tests/e2e/test_chat_configure_command.py::test_configure_prints_egress_then_the_binding_and_list_and_show_repeat_it` | holds |
+| 8 | Default CI needs no installed CLI, login, key, or network, and no credential material appears in any new fixture, message, or log line | every new Python test drives `tests/fixtures/cli/fakes.py` — a fake executable replaying sanitized fixtures — with `PATH` pointed at it and `HOME` at a temp directory, and the parity suite empties `PATH` altogether; this work added no fixture file of its own, and no new message, test name, or log line carries a token, a credential path, a home path, or an e-mail | `tests/contract/conversation/conftest.py` and `tests/integration/conversation/conftest.py` (both install `FakeCli` and never spawn a real runtime); `tests/e2e/test_chat_configure_command.py` (the same fixture); `tests/contract/protocol/test_new_capability_parity.py` (sets `PATH` to `""`) | holds; the repository-wide secret scan behind criterion (15) of the section above covers these files too |
+
+Supporting: `tests/unit/domain/test_session_defaults.py` and
+`tests/unit/conversation/test_binding.py` pin the record shape and the words;
+`tests/contract/capabilities/test_attachments.py::test_the_send_check_answers_for_a_session_bound_to_a_runtime`
+pins that `attachment.check_send` describes the send that would actually happen. The
+decision is ADR-030 with its 2026-09-04 addendum; the researcher-facing text is
+[the providers guide](../guide/providers.md#binding-a-session-instead-of-configuring-the-project)
+and [the conversation guide](../guide/conversation.md), and the cockpit half is
+[`docs/architecture/web.md`](../architecture/web.md).
+
+**What this table does not claim.** All eight rows hold, but two of the sentences behind
+them rest on less than a test of their own, and both are said in the cells rather than only
+here: criterion (1)'s "no `research.yaml` was edited" is structural (`configure` writes only
+through `update_session`), and criterion (3)'s `version_blocked` branch is reached by no
+test at all — only the compatibility table it reads is pinned. Both gaps are inherited from
+the CLI providers layer rather than introduced here.
+
+A third gap is not a missing test but a missing record: the **reasoning level a bound answer
+actually used is written to no durable artefact**. The transcript, the receipt, the run
+record and the completion trace all carry provider and model only, so nothing on disk
+distinguishes an answer produced at `high` from the same question answered at `low`, and a
+binding whose effort changed between two messages leaves no trace of the change. It is
+disclosed by every *live* surface — `bound to: session:codex/gpt-5.5 (reasoning high)` — but
+that is the binding as it is now, not the one an old answer ran under. A follow-on carries
+the effort on `ProviderProfile`, for bindings and configured entries alike, which is the one
+place all four artefacts read from. Deferred deliberately: it is a schema addition to the
+reproducibility record, not a fix to this feature.
+
+And one fact no criterion states that every reader needs: a **private** session cannot be
+bound to a runtime at all — `session.configure` refuses with the send path's private-egress
+sentence, because every CLI runtime is external egress — and no capability changes a
+session's visibility after creation. So the choice is made once, when the session is opened:
+`research chat new --visibility project` in the terminal, or the *Visibility* list in the
+cockpit's New-session dialog. That refusal is pinned by
+`tests/contract/conversation/test_session_configure.py::test_a_private_session_may_not_be_bound_to_a_runtime`,
+and an entry binding is unaffected
+(`::test_a_private_session_may_still_be_bound_to_an_entry`).
 
 ## Open items
 

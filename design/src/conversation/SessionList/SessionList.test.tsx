@@ -23,6 +23,28 @@ describe('SessionList', () => {
     expect(screen.getByText('24 messages')).toBeInTheDocument();
   });
 
+  it('shows a session binding under the title when the record has one', () => {
+    render(
+      <SessionList
+        sessions={[
+          {
+            id: 'CS0001',
+            title: 'Stiffness threshold for C0041',
+            updatedAt: '2026-09-03T14:20:38Z',
+            messageCount: 24,
+            visibility: 'project',
+            binding: 'session:codex/gpt-5.5 (reasoning high)',
+          },
+        ]}
+        activeId={null}
+        onSelect={() => undefined}
+        query=""
+        onQueryChange={() => undefined}
+      />,
+    );
+    expect(screen.getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
+  });
+
   it('marks a private session so local-only data says so', () => {
     const { container } = render(<SessionList sessions={SAMPLE_SESSIONS} />);
     const badges = container.querySelectorAll('[data-status="private"]');

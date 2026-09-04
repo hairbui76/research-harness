@@ -250,6 +250,7 @@ def test_the_token_command_prints_a_path_and_not_the_secret(
 V11_CLI_COUNTERPARTS: dict[str, tuple[str, ...]] = {
     "session.create": ("chat", "new"),
     "session.rename": ("chat", "rename"),
+    "session.configure": ("chat", "configure"),
     "session.list": ("chat", "list"),
     "session.get": ("chat", "show"),
     "session.search": ("chat", "search"),

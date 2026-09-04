@@ -52,6 +52,7 @@ import { SettingsDialog } from "./SettingsDialog";
 import { TokenBar } from "./TokenBar";
 import { useProjectPolling } from "./useProjectPolling";
 import { InspectorPane } from "../views/conversation/InspectorPane";
+import { NewSessionDialog } from "../views/conversation/NewSessionDialog";
 import { SessionListPane } from "../views/conversation/SessionListPane";
 import {
   ConversationProvider,
@@ -91,6 +92,7 @@ function Shell() {
   const { projectId } = useProjectPaths();
   const [railOpen, setRailOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [newSessionOpen, setNewSessionOpen] = useState(false);
   const routeRailClick = useRailRouting();
 
   // The multi-project host, or null for `research serve` and for a shell mounted on its own.
@@ -154,10 +156,10 @@ function Shell() {
     onOpenSettings: () => setSettingsOpen(true),
     ...(providerStatus ? { providerStatus } : {}),
     // Opening a session is a mutation, so a window that may only read is not offered the
-    // control; the history below it is a read and stays.
-    ...(canMutate
-      ? { onNewSession: () => void conversation.sessions.create() }
-      : {}),
+    // control; the history below it is a read and stays. The click asks first: visibility
+    // is fixed at creation and decides what the session may later be bound to, so it is
+    // not a choice to make on someone's behalf.
+    ...(canMutate ? { onNewSession: () => setNewSessionOpen(true) } : {}),
     sessionList: <SessionListPane />,
   };
 
@@ -202,6 +204,11 @@ function Shell() {
         }
       />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <NewSessionDialog
+        open={newSessionOpen}
+        onOpenChange={setNewSessionOpen}
+        onCreate={(visibility) => void conversation.sessions.create(undefined, visibility)}
+      />
     </>
   );
 }

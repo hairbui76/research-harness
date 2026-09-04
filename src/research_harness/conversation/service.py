@@ -13,6 +13,7 @@ would be a second place for the rules to disagree (ADR-004).
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -52,6 +53,7 @@ from research_harness.domain.conversation import (
     Visibility,
 )
 from research_harness.domain.enums import DecisionType
+from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import (
     ContextPackId,
     ConversationSessionId,
@@ -130,12 +132,9 @@ class ConversationService:
         token_budget: int | None = None,
     ) -> ConversationSession:
         """Open a session. Private by default: conversation is local working context."""
-        from research_harness.domain.conversation import ModelIdentity
+        from research_harness.conversation.binding import entry_identity
 
-        identity = None
-        if model is not None:
-            provider, _, name = model.partition("/")
-            identity = ModelIdentity(provider=provider, model=name or provider)
+        identity = None if model is None else entry_identity(model)
         defaults = SessionDefaults(model=identity, mode=mode, token_budget=token_budget)
         return self._store.create_session(
             title=title,
@@ -143,6 +142,81 @@ class ConversationService:
             visibility=visibility,
             defaults=defaults,
         )
+
+    def configure(
+        self,
+        session: ConversationSessionId,
+        *,
+        runtime: str | None = None,
+        model: str | None = None,
+        reasoning: str | None = None,
+        entry: str | None = None,
+        clear: bool = False,
+    ) -> ConversationSession:
+        """Bind a session to a runtime and model, or to an entry, or clear it (spec §8).
+
+        A runtime binding is validated exactly as a `research.yaml` entry would be, then
+        checked against the cached scan's model list. An installed runtime that is not
+        routable right now is accepted: the send refuses with the scan's sentence until it
+        is. Nothing here writes `research.yaml` or sends a request.
+
+        A private session is refused a runtime binding, in the order the send path refuses:
+        the entry is validated first, and only a *valid* binding is then measured against
+        the session's visibility. Every CLI runtime is external egress, so storing one on a
+        private session would leave a session that looks configured and can never answer.
+        """
+        from research_harness.conversation.binding import (
+            RuntimeBinding,
+            entry_identity,
+            runtime_identity,
+            session_entry,
+        )
+        from research_harness.conversation.send import private_egress_sentence
+        from research_harness.providers.models.router import RouterConfig
+
+        chosen = sum((runtime is not None, entry is not None, clear))
+        if chosen != 1:
+            raise CapabilityError("give exactly one of runtime, entry, or clear")
+        if runtime is None and (model is not None or reasoning is not None):
+            raise CapabilityError("model and reasoning are only for a runtime binding")
+        record = self._store.get_session(session)
+        if clear:
+            defaults = record.defaults.touch(model=None, reasoning=None)
+            return self._store.update_session(session, defaults=defaults)
+        if entry is not None:
+            table = RouterConfig.model_validate(
+                {"providers": list(self._ctx.repo.config.providers)}
+            )
+            names = [item.name for item in table.providers if item.enabled]
+            if entry not in names:
+                known = ", ".join(sorted(names)) or "none"
+                raise CapabilityError(
+                    f"no provider named {entry!r} in research.yaml (have: {known})"
+                )
+            defaults = record.defaults.touch(model=entry_identity(entry), reasoning=None)
+            return self._store.update_session(session, defaults=defaults)
+        if runtime is None:  # unreachable: `chosen == 1` and neither entry nor clear
+            raise CapabilityError("give exactly one of runtime, entry, or clear")
+        if model is None:
+            raise CapabilityError("model is required with runtime")
+        binding = RuntimeBinding(runtime=runtime, model=model, reasoning=reasoning)
+        session_entry(binding)
+        from research_harness.providers.cli.detection import detect_cached
+        from research_harness.providers.cli.registry import get_runtime
+
+        status = detect_cached(get_runtime(runtime), env=os.environ)
+        if model != "default" and model not in {item.id for item in status.models}:
+            raise CapabilityError(
+                f"{runtime} does not list model {model!r}; run `research providers scan`"
+            )
+        if record.visibility is Visibility.PRIVATE:
+            raise CapabilityError(
+                private_egress_sentence(record.id, f"{binding.label}/{binding.model}")
+            )
+        defaults = record.defaults.touch(
+            model=runtime_identity(runtime, model), reasoning=reasoning
+        )
+        return self._store.update_session(session, defaults=defaults)
 
     def rename(self, session: ConversationSessionId, title: str) -> ConversationSession:
         """Give a session a new title; ids, transcript, and attachments are untouched."""
@@ -207,7 +281,7 @@ class ConversationService:
         shows exactly what that provider would have been refused, and then records
         `egress = none`, because nothing was sent.
         """
-        selection = self._preview_selection(model, budget)
+        selection = self._preview_selection(session, model, budget)
         profile = ProviderProfile() if selection is None else selection.profile
         assembled = self.assembler().assemble(
             session,
@@ -359,18 +433,32 @@ class ConversationService:
         return self._policy if self._policy is not None else load_policy(self._ctx.repo)
 
     def _preview_selection(
-        self, model: str | None, budget: ContextBudget | None
+        self,
+        session: ConversationSessionId,
+        model: str | None,
+        budget: ContextBudget | None,
     ) -> Selection | None:
         """The provider a preview assembles against, or `None` when there is none.
 
         A workspace with no provider configured still previews: the pack then describes a
-        call to nobody, which is the honest answer to "what would you send?".
+        call to nobody, which is the honest answer to "what would you send?". A *bound*
+        session has a target even with no `providers:` table, so the empty-table shortcut
+        applies only when there is no binding to resolve (binding spec §9).
         """
-        if self._providers is None and not self._ctx.repo.config.providers:
+        from research_harness.conversation.binding import binding_of
+
+        defaults = self._store.get_session(session).defaults
+        if (
+            self._providers is None
+            and not self._ctx.repo.config.providers
+            and binding_of(defaults) is None
+        ):
             return None
         try:
             selector = self._providers or _default_selector()
-            return selector.select(self._ctx, model=model, budget=budget or ContextBudget())
+            return selector.select(
+                self._ctx, model=model, budget=budget or ContextBudget(), defaults=defaults
+            )
         except Exception as exc:  # a preview must work when sending would not
             logger.info("context.preview has no usable provider: %s", exc)
             return None

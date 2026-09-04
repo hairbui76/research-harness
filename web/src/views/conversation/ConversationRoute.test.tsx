@@ -27,6 +27,7 @@ import promotion from '../../test/fixtures/conversation/promotion.json';
 import providers from '../../test/fixtures/conversation/providers.json';
 import sendStarted from '../../test/fixtures/conversation/send-started.json';
 import sessions from '../../test/fixtures/conversation/sessions.json';
+import cliScan from '../../test/fixtures/providers/cli-scan.json';
 import transcript from '../../test/fixtures/conversation/transcript.json';
 import incompleteTranscript from '../../test/fixtures/conversation/transcript-incomplete.json';
 import attachmentTranscript from '../../test/fixtures/conversation/transcript-attachment.json';
@@ -89,6 +90,22 @@ function withRun(daemon: FakeDaemon, chunks: string[], open = false): FakeDaemon
         headers: { 'Content-Type': 'text/event-stream' },
       });
     }
+    return daemon.fetch(input, init);
+  };
+  return { ...daemon, fetch: fetchImpl as unknown as typeof fetch };
+}
+
+/**
+ * The same daemon, with one capability's answer held until the test lets it go.
+ *
+ * Layered here rather than in the shared harness for the same reason `withRun` is: a
+ * scripted delay belongs to the test that scripts it. It is how a researcher who picks a
+ * model and then changes session before the daemon answers is reproduced.
+ */
+function withHeld(daemon: FakeDaemon, capability: string, gate: Promise<void>): FakeDaemon {
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const url = new URL(String(input), 'http://daemon.test');
+    if (url.pathname === `/capabilities/${capability}`) await gate;
     return daemon.fetch(input, init);
   };
   return { ...daemon, fetch: fetchImpl as unknown as typeof fetch };
@@ -205,18 +222,111 @@ describe('reopening a session', () => {
     await transcriptReady();
 
     await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
 
     await waitFor(() =>
       expect(
         daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
       ).toMatchObject({ title: 'New session' }),
     );
+    // The daemon owns the default visibility, so the request that means "the usual kind of
+    // session" is the request that says nothing about it — exactly what it has always been.
+    expect(
+      daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+    ).not.toHaveProperty('visibility');
     // No id was posted; the one the daemon named is the one the URL now carries.
     await waitFor(() =>
       expect(
         daemon.capabilityCalls().some((call) => call.request?.session === 'CS0003'),
       ).toBe(true),
     );
+  });
+
+
+  it('creates a project session, which is the kind a runtime may be bound to', async () => {
+    const created = {
+      ...sessions.sessions[1],
+      id: 'CS0003',
+      title: 'New session',
+      visibility: 'project',
+      defaults: {},
+      message_count: 0,
+      last_message: null,
+      last_message_at: null,
+    };
+    const daemon = fakeDaemon({
+      capabilities: answers({ 'session.create': { session: created } }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session', visibility: 'project' }),
+    );
+  });
+
+  it('forgets a choice that was never made, and creates nothing on the way out', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    // Chosen, then abandoned. The choice was about a session that was never opened.
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const first = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(first).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.click(within(first).getByRole('button', { name: 'Cancel' }));
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.create')).toBe(false);
+
+    // Escape is the same answer.
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    await screen.findByRole('dialog', { name: 'New session' });
+    await user.keyboard('{Escape}');
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.create')).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const again = await screen.findByRole('dialog', { name: 'New session' });
+    expect(within(again).getByRole('combobox', { name: 'Visibility' })).toHaveValue('private');
+    await user.click(within(again).getByRole('button', { name: 'Create session' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session' }),
+    );
+  });
+
+  it('says what the choice costs, and that it is the only chance to make it', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    const choice = within(dialog).getByRole('combobox', { name: 'Visibility' });
+    // The decision is what the dialog is for, so it is where the keyboard lands.
+    await waitFor(() => expect(choice).toHaveFocus());
+    // The values on the wire are the daemon's own two words, not a local encoding of them.
+    expect(Array.from(choice.querySelectorAll('option')).map((option) => option.value)).toEqual([
+      'private',
+      'project',
+    ]);
+    // A private session's limit is about sending, and only a runtime binding is refused
+    // outright — the sentence says both, and that the choice is final.
+    expect(choice).toHaveAccessibleDescription(/bound to a CLI runtime/);
+    expect(choice).toHaveAccessibleDescription(/never sends to an external model/);
+    expect(choice).toHaveAccessibleDescription(/cannot be changed/);
+    await expectNoAxeViolations(document.body);
   });
 
   it('renames a session without touching its transcript', async () => {
@@ -738,6 +848,26 @@ describe('sending', () => {
     await transcriptReady();
 
     expect(await screen.findByText(/model catalogue is unavailable/)).toBeInTheDocument();
+    // Nothing can be offered, but `CS0001` is bound and the record still says where its
+    // next message goes, so the trigger states that rather than disappearing.
+    expect(
+      screen.getByRole('button', { name: 'Model: entry local-small' }),
+    ).toBeInTheDocument();
+  });
+
+  it('offers no model control at all for a session with no binding and nothing to offer', async () => {
+    const unbound = {
+      ...sessions,
+      sessions: sessions.sessions.map((session) =>
+        session.id === SESSION ? { ...session, defaults: {} } : session,
+      ),
+    };
+    const capabilities = answers({ 'session.list': unbound });
+    delete capabilities['provider.list'];
+    renderConversation({ daemon: fakeDaemon({ capabilities }) });
+    await transcriptReady();
+
+    await screen.findByText(/model catalogue is unavailable/);
     expect(screen.queryByRole('button', { name: /^Model:/ })).not.toBeInTheDocument();
   });
 });
@@ -783,6 +913,482 @@ describe('an agent host', () => {
 
     expect(within(dialog).getByText('This window may not promote')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Promote' })).toBeDisabled();
+  });
+});
+
+
+/* -- session runtime binding (binding spec §10, plan rulings 4-6) --------- */
+
+describe('binding the session to a CLI runtime', () => {
+  const BOUND = 'CS0002';
+  const BOUND_ROUTE = `/?session=${BOUND}`;
+
+  /** The record `session.configure` answers with, bound as the daemon would store it. */
+  function boundTo(
+    id: string,
+    model: { provider: string; model: string } | null,
+    reasoning: string | null = null,
+  ) {
+    const record = sessions.sessions.find((session) => session.id === id);
+    return {
+      session: { ...record, defaults: { mode: null, token_budget: null, model, reasoning } },
+    };
+  }
+
+  const withScan = (extra: Answers = {}) => answers({ 'provider.cli.scan': cliScan, ...extra });
+
+  async function openMenu(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('button', { name: /^Model:/ }));
+    return screen.findByRole('menu', { name: 'Model' });
+  }
+
+  it('lists the configured entries and every installed runtime the scan found', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    // The entries the router already has, and one group per installed runtime.
+    expect(within(menu).getByText('Configured entries')).toBeInTheDocument();
+    const codex = within(menu).getByRole('group', { name: 'Codex CLI 0.150.1' });
+    expect(within(codex).getByText('gpt-5.5 (live)')).toBeInTheDocument();
+
+    // A runtime the daemon will not route to is one disabled row carrying its reason.
+    const cursor = within(menu).getByRole('group', { name: 'Cursor Agent 1.4.0' });
+    expect(
+      within(cursor).getByText(
+        'cursor-agent 1.4.0 has no tested bounded (no-tools, read-only) mode',
+      ),
+    ).toBeInTheDocument();
+    expect(within(cursor).getAllByRole('menuitem')).toHaveLength(1);
+
+    // A runtime the scan did not find is not offered at all.
+    expect(within(menu).queryByRole('group', { name: /^Amp/ })).not.toBeInTheDocument();
+  });
+
+  it('discloses the egress before the first binding, then configures the session', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(BOUND, {
+          provider: 'local_cli:codex',
+          model: 'gpt-5.4-mini',
+        }),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.4-mini \(live\)/ }));
+
+    // The daemon's own notice, before anything is bound — and the destination it does not
+    // name, from the scan's own `egress_host` and runtime name, so the disclosure says
+    // where the content goes rather than only that it goes (review finding 3).
+    const dialog = await screen.findByRole('alertdialog');
+    expect(within(dialog).getByText(cliScan.notice)).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(/research content to chatgpt\.com through Codex CLI/),
+    ).toBeInTheDocument();
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, runtime: 'codex', model: 'gpt-5.4-mini' }),
+    );
+    // The value is read back from the record the daemon answered with.
+    await screen.findByRole('button', { name: 'Model: gpt-5.4-mini (live)' });
+  });
+
+  it('offers the runtime\'s own reasoning levels and sends the one picked', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(
+          BOUND,
+          { provider: 'local_cli:codex', model: 'gpt-5.5' },
+          'low',
+        ),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const reasoning = await screen.findByRole('combobox', { name: 'Reasoning' });
+    expect(
+      Array.from(reasoning.querySelectorAll('option')).map((option) => option.value),
+    ).toEqual(['', 'low', 'medium', 'high', 'xhigh']);
+    expect(reasoning).toHaveValue('high');
+
+    await user.selectOptions(reasoning, 'low');
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, runtime: 'codex', model: 'gpt-5.5', reasoning: 'low' }),
+    );
+  });
+
+  it('asks once per session: a second pick binds without another confirmation', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': boundTo(BOUND, {
+          provider: 'local_cli:codex',
+          model: 'gpt-5.4-mini',
+        }),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.4-mini \(live\)/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+    await screen.findByRole('button', { name: 'Model: gpt-5.4-mini (live)' });
+
+    const again = await openMenu(user);
+    await user.click(within(again).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().filter((call) => call.name === 'session.configure'),
+      ).toHaveLength(2),
+    );
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('shows the stored binding on reopening, in the selector and on the session row', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    await screen.findByRole('button', { name: 'Model: gpt-5.5 (live)' });
+    // The rail states the binding in the one format every surface uses.
+    expect(screen.getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
+  });
+
+  it('leaves a read-only window the per-message choice and binds nothing', async () => {
+    const asHost = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
+    const daemon = fakeDaemon({ gets: { '/overview': asHost }, capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon, token: null, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    const codex = within(menu).getByRole('group', { name: 'Codex CLI 0.150.1' });
+    // Every runtime row carries the session's own mutation-blocked reason.
+    expect(
+      within(codex).getAllByText(/connected without the local token/).length,
+    ).toBeGreaterThan(0);
+    expect(within(codex).getByRole('menuitem', { name: /gpt-5\.5 \(live\)/ })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+
+    // The effort control is disabled for the same reason, and says so rather than sitting
+    // grey with nothing beside it.
+    const reasoning = screen.getByRole('combobox', { name: 'Reasoning' });
+    expect(reasoning).toBeDisabled();
+    expect(reasoning).toHaveAccessibleDescription(/connected without the local token/);
+
+    // An entry still sets the per-message model, exactly as before.
+    await user.click(within(menu).getByRole('menuitem', { name: /^Local small/ }));
+    await screen.findByRole('button', { name: 'Model: Local small' });
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(false);
+  });
+
+  it('clears the binding back to the project default', async () => {
+    const daemon = fakeDaemon({
+      capabilities: withScan({ 'session.configure': boundTo(BOUND, null) }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^Project default/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, clear: true }),
+    );
+    // The value follows the record the daemon answered with, which now binds nothing.
+    await screen.findByRole('button', { name: 'Model: Project default (Local small)' });
+    expect(screen.queryByText('session:codex/gpt-5.5 (reasoning high)')).not.toBeInTheDocument();
+  });
+
+  it('refuses to bind a private session to an external runtime, in the daemon\'s words', async () => {
+    // `CS0001` is private, and Task 3's rule refuses a runtime binding on it. The sentence
+    // is the daemon's; nothing here decides it, and the pick simply does not take.
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+
+    // The refusal belongs where the pick was made, not to the rail's session history.
+    const composer = document.querySelector('.rh-web-composer') as HTMLElement;
+    expect(await within(composer).findByText(refusal)).toBeInTheDocument();
+    expect(
+      screen.queryByText('That change to the session history was refused'),
+    ).not.toBeInTheDocument();
+    // CS0001's own binding is still what the selector says.
+    expect(screen.getByRole('button', { name: 'Model: Local small' })).toBeInTheDocument();
+  });
+
+
+  it('offers the runtimes to a project that has configured no providers at all', async () => {
+    // The motivating case: no `providers:` table, so the catalogue is empty and the CLI the
+    // researcher already has is the only thing there is to bind to.
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'provider.list': { count: 0, models: [] },
+        'session.configure': boundTo(BOUND, {
+          provider: 'local_cli:codex',
+          model: 'gpt-5.4-mini',
+        }),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    expect(within(menu).queryByText('Configured entries')).not.toBeInTheDocument();
+    const codex = within(menu).getByRole('group', { name: 'Codex CLI 0.150.1' });
+    await user.click(within(codex).getByRole('menuitem', { name: /^gpt-5\.4-mini \(live\)/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Use this runtime' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, runtime: 'codex', model: 'gpt-5.4-mini' }),
+    );
+  });
+
+  it('lets a session be cleared even when the default entry itself is refused', async () => {
+    // The entry the project defaults to is unavailable, with the daemon's own reason. That
+    // is precisely when unbinding matters, and unbinding is not a request through it.
+    const blocked = providers.models[1];
+    const refusedDefault = {
+      ...providers,
+      models: providers.models.map((entry) =>
+        entry.default
+          ? { ...entry, available: false, unavailable_reason: blocked?.unavailable_reason ?? null }
+          : entry,
+      ),
+    };
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'provider.list': refusedDefault,
+        'session.configure': boundTo(BOUND, null),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    const clear = within(menu).getByRole('menuitem', { name: /^Project default/ });
+    expect(clear).not.toHaveAttribute('aria-disabled', 'true');
+    await user.click(clear);
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, clear: true }),
+    );
+  });
+
+  it('states the binding it cannot offer as an option when the scan is unreadable', async () => {
+    const daemon = fakeDaemon({
+      capabilities: answers({
+        'provider.cli.scan': {
+          capability: 'provider.cli.scan',
+          ok: false,
+          error: { code: 'unavailable', message: 'the runtime scan could not be read' },
+        },
+      }),
+    });
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    // The record is bound; saying "Select a model" would be false about it. The words are
+    // the same ones the rail shows, and no option was invented to carry them.
+    await screen.findByRole('button', { name: 'Model: session:codex/gpt-5.5 (reasoning high)' });
+    // The rail says the same thing about the same record.
+    const rail = Array.from(document.querySelectorAll('.rh-session-list__binding')).map(
+      (node) => node.textContent,
+    );
+    expect(rail).toContain('session:codex/gpt-5.5 (reasoning high)');
+  });
+
+  it('asks again after a refusal: nothing was disclosed that was not bound', async () => {
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', {
+        name: 'Use this runtime',
+      }),
+    );
+    await screen.findByText(refusal);
+
+    // The disclosure is remembered for a binding that happened, not for one that did not.
+    const again = await openMenu(user);
+    await user.click(within(again).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+  });
+
+  it('leaves a refusal behind when the researcher moves to another session', async () => {
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    const daemon = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', {
+        name: 'Use this runtime',
+      }),
+    );
+    await screen.findByText(refusal);
+
+    await user.click(screen.getByRole('button', { name: /^Screening pass/ }));
+    await waitFor(() => expect(screen.queryByText(refusal)).not.toBeInTheDocument());
+  });
+
+
+  it('drops an answer that arrives after the researcher has moved on', async () => {
+    const refusal =
+      'This session is private, so it may not be bound to a runtime that leaves the machine.';
+    let release = () => undefined as void;
+    const held = new Promise<void>((resolve) => {
+      release = () => resolve();
+    });
+    const base = fakeDaemon({
+      capabilities: withScan({
+        'session.configure': {
+          capability: 'session.configure',
+          ok: false,
+          error: { code: 'policy_refused', message: refusal },
+        },
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon: withHeld(base, 'session.configure', held) });
+    await transcriptReady();
+
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^gpt-5\.5 \(live\)/ }));
+    await user.click(
+      within(await screen.findByRole('alertdialog')).getByRole('button', {
+        name: 'Use this runtime',
+      }),
+    );
+
+    // The daemon has not answered yet; the researcher goes to another conversation.
+    await user.click(screen.getByRole('button', { name: /^Screening pass/ }));
+    await screen.findByRole('heading', { name: 'Screening pass' });
+    release();
+
+    // The sentence was about the session that was left, so it is not said about this one.
+    await waitFor(() =>
+      expect(
+        base.capabilityCalls().some((call) => call.name === 'session.configure'),
+      ).toBe(true),
+    );
+    expect(screen.queryByText(refusal)).not.toBeInTheDocument();
+  });
+
+  it('keeps the picker for a bound session with no catalogue and no readable scan', async () => {
+    const daemon = fakeDaemon({
+      capabilities: answers({
+        'provider.list': { count: 0, models: [] },
+        'provider.cli.scan': {
+          capability: 'provider.cli.scan',
+          ok: false,
+          error: { code: 'unavailable', message: 'the runtime scan could not be read' },
+        },
+        'session.configure': boundTo(BOUND, null),
+      }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    // Nothing to offer, and still something true to say — and a way back out of it.
+    const trigger = await screen.findByRole('button', {
+      name: 'Model: session:codex/gpt-5.5 (reasoning high)',
+    });
+    await user.click(trigger);
+    const menu = await screen.findByRole('menu', { name: 'Model' });
+    within(menu).getByRole('group', { name: 'Session' });
+    await user.click(within(menu).getByRole('menuitem', { name: /^Project default/ }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.configure')?.request,
+      ).toEqual({ session: BOUND, clear: true }),
+    );
+  });
+
+  it('has no automatically detectable violation with the groups and the reasoning control', async () => {
+    const daemon = fakeDaemon({ capabilities: withScan() });
+    const user = userEvent.setup();
+    renderConversation({ daemon, route: BOUND_ROUTE });
+    await transcriptReady();
+
+    await screen.findByRole('combobox', { name: 'Reasoning' });
+    await openMenu(user);
+    await expectNoAxeViolations(document.body);
   });
 });
 
