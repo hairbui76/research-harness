@@ -300,6 +300,34 @@ body,
   padding: var(--rh-space-3) var(--rh-space-5) 0;
 }
 
+/*
+ * Which project this screen belongs to (design §4.5, §11 item 6). One quiet line above the
+ * route: the rail says the same thing, but below the shell's breakpoint the rail is a
+ * drawer, and the name has to be readable without opening one.
+ */
+.rh-web-project-bar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rh-space-2);
+  padding: var(--rh-space-2) var(--rh-space-5);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-web-project-bar__name {
+  font-weight: var(--rh-type-h4-weight);
+  color: var(--rh-text-primary);
+}
+
+.rh-web-project-bar__path {
+  font-family: var(--rh-font-mono);
+  color: var(--rh-text-muted);
+  overflow-wrap: anywhere;
+}
+
 .rh-web-token-form {
   display: flex;
   flex-wrap: wrap;

@@ -148,6 +148,18 @@ export function useHost(): Host {
 }
 
 /**
+ * The host when there is one, and null when there is not.
+ *
+ * The shell is the one place that has to work both ways. `research app` always mounts a
+ * provider, but the same `Layout` is rendered by `research serve`'s tree and by every test
+ * that exercises a single workspace on its own — and for those the honest answer is "there
+ * is no registry here" rather than a thrown error.
+ */
+export function useOptionalHost(): Host | null {
+  return useContext(HostContext);
+}
+
+/**
  * Ask the host what it is, and — if it is the multi-project one — sign in and list.
  *
  * Runs exactly once per provider. Every failure it can name becomes a state rather than a

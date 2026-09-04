@@ -12,12 +12,36 @@
  * the shell mounts the conversation state (`views/conversation/state.tsx`) above it. A
  * daemon that answers no `session.list` — every fixture below — leaves the history empty
  * and changes nothing else about the rail.
+ *
+ * The second half of the file is the multi-project host of design §4.5. The rail becomes
+ * the switcher, and the two rules that make switching safe are asserted rather than assumed:
+ * selecting a project is a *navigation*, so the URL — not a variable — says which project a
+ * screen belongs to; and every lifecycle action either writes nothing (Show in file manager)
+ * or asks first, in the dialogs of `views/projects`. The legacy shell is asserted to have
+ * gained none of it, because `research serve` owns one workspace and has no list to change.
  */
-import { describe, expect, it } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { ThemeProvider, ToastProvider } from '@research-harness/design';
 import { Layout } from './Layout';
-import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
+import { HostProvider } from './host';
+import type { Host } from './host';
+import { ProjectPathProvider } from './projectPaths';
+import { SessionProvider } from './session';
+import { PROJECT_POLL_INTERVAL_MS } from './useProjectPolling';
+import { AppClient } from '../api/projects';
+import type { FolderSelection, ProjectView } from '../api/projects';
+import {
+  FIXTURES,
+  expectNoAxeViolations,
+  fakeAppDaemon,
+  fakeDaemon,
+  hostValue,
+  projectView,
+  renderView,
+} from '../test/harness';
 
 /** `path: '*'` keeps the shell mounted while a rail link changes the route under it. */
 function renderShell(daemon = fakeDaemon(), token: string | null = 'local-token') {
@@ -95,6 +119,20 @@ describe('the project rail', () => {
     );
     expect(screen.getByText('Degraded')).toBeInTheDocument();
   });
+
+  it('offers no switcher and no project actions on a single-workspace host', async () => {
+    renderShell();
+
+    // `research serve` owns exactly one workspace and holds no registry: there is nothing
+    // to switch to, add, or forget, so none of those controls exists to be pressed.
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    expect(screen.getByText(FIXTURES.overview.project)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Switch project/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Project actions' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Add project' })).not.toBeInTheDocument();
+    expect(document.querySelector('.rh-web-project-bar')).toBeNull();
+    expect(screen.getByRole('link', { name: /Review inbox/ })).toHaveAttribute('href', '/review');
+  });
 });
 
 describe('the shell', () => {
@@ -125,6 +163,314 @@ describe('the shell', () => {
 
   it('has no automatically detectable accessibility violation', async () => {
     const { container } = renderShell();
+
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    await expectNoAxeViolations(container);
+  });
+});
+
+// -- the multi-project host ------------------------------------------------------------
+
+const OPEN = projectView({
+  project_id: 'prj_abc',
+  display_name: 'Latency study',
+  path: '/research/latency-study',
+});
+const RUNNING = projectView({
+  project_id: 'prj_thermal',
+  display_name: 'Thermal tolerance',
+  path: '/research/thermal',
+  active_runs: 2,
+});
+const MOVED = projectView({
+  project_id: 'prj_reef',
+  display_name: 'Reef survey',
+  path: '/mnt/usb/reef-survey',
+  availability: 'unavailable',
+  detail: 'The folder /mnt/usb/reef-survey is not readable from here.',
+});
+
+function LocationProbe() {
+  const location = useLocation();
+  return <p data-testid="path">{`${location.pathname}${location.search}`}</p>;
+}
+
+interface MultiOptions {
+  projects?: readonly ProjectView[];
+  route?: string;
+  folder?: FolderSelection;
+}
+
+/**
+ * The shell as `research app` mounts it: one project's workspace, under the registry.
+ *
+ * This is `App.tsx`'s multi-project tree written out — the host, the path prefix and a
+ * workspace client scoped to `prj_abc` — because the shell is the piece that reads all
+ * three, and a test that stubbed any of them would prove nothing about how they meet.
+ */
+function setupMulti(options: MultiOptions = {}) {
+  const projects = options.projects ?? [OPEN, RUNNING, MOVED];
+  const daemon = fakeAppDaemon({
+    projects,
+    lifecycleResult: OPEN,
+    ...(options.folder ? { folder: options.folder } : {}),
+  });
+  const appClient = new AppClient({
+    baseUrl: 'http://app.test',
+    token: 'app-token',
+    fetchImpl: daemon.fetch,
+  });
+  const spies = {
+    revealProject: vi.spyOn(appClient, 'revealProject'),
+    renameProject: vi.spyOn(appClient, 'renameProject'),
+    forgetProject: vi.spyOn(appClient, 'forgetProject'),
+    openProject: vi.spyOn(appClient, 'openProject'),
+  };
+  const refreshProjects = vi.fn(async () => {});
+  const client = appClient.workspaceClient('prj_abc');
+
+  function Tree({ host }: { host: Host }) {
+    return (
+      <ThemeProvider defaultTheme="dark" storageKey={null}>
+        <ToastProvider>
+          <MemoryRouter
+            initialEntries={[options.route ?? '/projects/prj_abc/review']}
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
+            <HostProvider value={host}>
+              <ProjectPathProvider projectId="prj_abc">
+                <SessionProvider client={client}>
+                  <Routes>
+                    <Route
+                      path="*"
+                      element={
+                        <>
+                          <Layout />
+                          <LocationProbe />
+                        </>
+                      }
+                    />
+                  </Routes>
+                </SessionProvider>
+              </ProjectPathProvider>
+            </HostProvider>
+          </MemoryRouter>
+        </ToastProvider>
+      </ThemeProvider>
+    );
+  }
+
+  const host = (registry: readonly ProjectView[]): Host =>
+    hostValue({ mode: 'multi', projects: registry, appClient, refreshProjects });
+  const view = render(<Tree host={host(projects)} />);
+
+  return {
+    ...view,
+    daemon,
+    appClient,
+    refreshProjects,
+    spies,
+    /** The registry as a later poll found it. */
+    setProjects: (next: readonly ProjectView[]) => view.rerender(<Tree host={host(next)} />),
+  };
+}
+
+/** The switcher, opened. */
+async function openSwitcher(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  await user.click(await screen.findByRole('button', { name: /Switch project/ }));
+}
+
+/** The per-project actions menu, opened. */
+async function openActions(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  await user.click(await screen.findByRole('button', { name: 'Project actions' }));
+}
+
+describe('the project rail on a multi-project host', () => {
+  it('names the open project in the rail, in the header, and in every rail link', async () => {
+    setupMulti();
+
+    expect(
+      await screen.findByRole('button', { name: 'Project: Latency study. Switch project' }),
+    ).toBeInTheDocument();
+
+    // Spec §4.5 / §11 item 6: the name stays readable in `main`, where it survives the rail
+    // becoming a drawer below the shell's breakpoint.
+    const header = document.querySelector('.rh-web-project-bar');
+    expect(header).not.toBeNull();
+    expect(within(header as HTMLElement).getByText('Latency study')).toBeInTheDocument();
+    expect(within(header as HTMLElement).getByText('/research/latency-study')).toBeInTheDocument();
+
+    // Every workspace screen lives below `/projects/{project_id}`, and the daemon's counts
+    // are still keyed by the unprefixed route it reported.
+    const review = screen.getByRole('link', { name: /Review inbox/ });
+    expect(review).toHaveAttribute('href', '/projects/prj_abc/review');
+    expect(review).toHaveAttribute('aria-current', 'page');
+    expect(review.textContent).toContain('2');
+    expect(screen.getByRole('link', { name: /Conversation/ })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/',
+    );
+  });
+
+  it('switches project by navigating, so the URL says which one is open', async () => {
+    const user = userEvent.setup();
+    setupMulti();
+
+    await openSwitcher(user);
+    await user.click(screen.getByRole('menuitem', { name: /Thermal tolerance/ }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('path')).toHaveTextContent('/projects/prj_thermal/'),
+    );
+  });
+
+  it('refuses a project the host cannot open, and says why in words', async () => {
+    const user = userEvent.setup();
+    setupMulti();
+
+    await openSwitcher(user);
+    const moved = screen.getByRole('menuitem', { name: /Reef survey.*Unavailable/ });
+    // An ARIA menu item is not a form control, so the disabled state is `aria-disabled`.
+    expect(moved).toHaveAttribute('aria-disabled', 'true');
+
+    await user.click(moved);
+    expect(screen.getByTestId('path')).toHaveTextContent('/projects/prj_abc/review');
+  });
+
+  it('shows what is still running in a project nobody is looking at', async () => {
+    const user = userEvent.setup();
+    setupMulti();
+
+    await openSwitcher(user);
+    // Switching projects leaves the other project's workflow running (spec §10); the rail
+    // is where that is visible.
+    expect(
+      screen.getByRole('menuitem', { name: /Thermal tolerance.*2 active/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('reveals the open project in the file manager, writing nothing', async () => {
+    const user = userEvent.setup();
+    const { spies } = setupMulti();
+
+    await openActions(user);
+    await user.click(screen.getByRole('menuitem', { name: 'Show in file manager' }));
+
+    await waitFor(() => expect(spies.revealProject).toHaveBeenCalledWith('prj_abc'));
+    // Nothing to confirm and nothing written, so no dialog appears.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('renames the open project through the dialog, then re-reads the registry', async () => {
+    const user = userEvent.setup();
+    const { spies, refreshProjects } = setupMulti();
+
+    await openActions(user);
+    await user.click(screen.getByRole('menuitem', { name: 'Rename' }));
+
+    await screen.findByRole('dialog', { name: 'Rename project' });
+    const field = screen.getByLabelText('Display name');
+    await user.clear(field);
+    await user.type(field, 'Latency study II');
+    await user.click(screen.getByRole('button', { name: 'Rename project' }));
+
+    await waitFor(() =>
+      expect(spies.renameProject).toHaveBeenCalledWith('prj_abc', 'Latency study II'),
+    );
+    expect(refreshProjects).toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('forgets the open project only after saying the files remain on disk', async () => {
+    const user = userEvent.setup();
+    const { spies } = setupMulti();
+
+    await openActions(user);
+    await user.click(screen.getByRole('menuitem', { name: 'Forget project' }));
+
+    const dialog = await screen.findByRole('alertdialog', { name: 'Forget project' });
+    expect(within(dialog).getByText(/files remain on disk/)).toBeInTheDocument();
+    expect(spies.forgetProject).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Forget project' }));
+
+    await waitFor(() => expect(spies.forgetProject).toHaveBeenCalledWith('prj_abc'));
+    // The project this window was in no longer exists, so the window goes to Project Home.
+    await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/'));
+  });
+
+  it('adds a project by asking the host for a folder, never by typing a path for it', async () => {
+    const user = userEvent.setup();
+    const { spies, daemon } = setupMulti({
+      folder: {
+        path: '/research/new-study',
+        method: 'zenity',
+        cancelled: false,
+        fallback_required: false,
+      },
+    });
+
+    await openSwitcher(user);
+    await user.click(screen.getByRole('menuitem', { name: 'Add project' }));
+
+    await waitFor(() =>
+      expect(daemon.calls.some((call) => call.path === '/api/dialogs/folder')).toBe(true),
+    );
+    await waitFor(() => expect(spies.openProject).toHaveBeenCalledWith('/research/new-study'));
+  });
+
+  it('leaves the workspace for Project Home from the top of the switcher', async () => {
+    const user = userEvent.setup();
+    setupMulti();
+
+    await openSwitcher(user);
+    await user.click(screen.getByRole('menuitem', { name: 'All projects' }));
+
+    await waitFor(() => expect(screen.getByTestId('path')).toHaveTextContent('/'));
+  });
+
+  it('re-reads the registry only while some project is still running', async () => {
+    vi.useFakeTimers();
+    try {
+      const view = setupMulti({ projects: [OPEN, RUNNING] });
+      expect(view.refreshProjects).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(PROJECT_POLL_INTERVAL_MS);
+      });
+      expect(view.refreshProjects).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(PROJECT_POLL_INTERVAL_MS);
+      });
+      expect(view.refreshProjects).toHaveBeenCalledTimes(2);
+
+      // The run finished. Nothing else can change the registry behind our back, so the
+      // timer stops rather than asking forever for an answer that is already correct.
+      view.setProjects([OPEN, { ...RUNNING, active_runs: 0 }]);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(PROJECT_POLL_INTERVAL_MS * 3);
+      });
+      expect(view.refreshProjects).toHaveBeenCalledTimes(2);
+
+      // And it stops on unmount, so a closed workspace polls nothing.
+      view.setProjects([OPEN, RUNNING]);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(PROJECT_POLL_INTERVAL_MS);
+      });
+      expect(view.refreshProjects).toHaveBeenCalledTimes(3);
+      view.unmount();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(PROJECT_POLL_INTERVAL_MS * 3);
+      });
+      expect(view.refreshProjects).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = setupMulti();
 
     await screen.findByRole('navigation', { name: 'Project navigation' });
     await expectNoAxeViolations(container);

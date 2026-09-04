@@ -21,19 +21,47 @@
  *
  * The workspace state itself is a context mounted here rather than props threaded through
  * `Outlet`, because three parts of the tree — rail, route, inspector — share one session.
+ *
+ * The shell is also where the two hosts of design §11 differ, and the only place they do.
+ * Under `research serve` there is one workspace and no such thing as a project, so the rail
+ * shows the name `GET /overview` reported and offers nothing to do to it. Under
+ * `research app` the same rail becomes the project switcher: every registered project, what
+ * the host says about each one, what is still running in the ones nobody is looking at, and
+ * the five lifecycle actions — which are performed by `useProjectLifecycle` and confirmed
+ * by `ProjectDialogs`, never by this file.
  */
-import { useCallback, useMemo, useState } from 'react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { AppShell, ProjectRail } from '@research-harness/design';
-import type { ProjectModel, ProviderStatus, RailItem } from '@research-harness/design';
-import { useSession } from './session';
-import { NAVIGATION } from './routes';
-import { SettingsDialog } from './SettingsDialog';
-import { TokenBar } from './TokenBar';
-import { InspectorPane } from '../views/conversation/InspectorPane';
-import { SessionListPane } from '../views/conversation/SessionListPane';
-import { ConversationProvider, useConversation } from '../views/conversation/state';
+import { useCallback, useMemo, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { AppShell, ProjectRail, useToast } from "@research-harness/design";
+import type {
+  ProjectAction,
+  ProjectModel,
+  ProjectRailProps,
+  ProviderStatus,
+  RailItem,
+} from "@research-harness/design";
+import type { ProjectView } from "../api/projects";
+import { useOptionalHost } from "./host";
+import type { Host } from "./host";
+import { projectHref, useProjectPaths } from "./projectPaths";
+import { NAVIGATION, navigationForProject } from "./routes";
+import type { NavigationEntry } from "./routes";
+import { useSession } from "./session";
+import { SettingsDialog } from "./SettingsDialog";
+import { TokenBar } from "./TokenBar";
+import { useProjectPolling } from "./useProjectPolling";
+import { InspectorPane } from "../views/conversation/InspectorPane";
+import { SessionListPane } from "../views/conversation/SessionListPane";
+import {
+  ConversationProvider,
+  useConversation,
+} from "../views/conversation/state";
+import {
+  ProjectDialogs,
+  useProjectLifecycle,
+} from "../views/projects/ProjectDialogs";
+import type { ProjectDialog } from "../views/projects/ProjectDialogs";
 
 /** The shell, wrapped in the conversation state its rail and inspector both read. */
 export function Layout() {
@@ -44,44 +72,94 @@ export function Layout() {
   );
 }
 
+/** Every rail prop that is the same whichever host is on the other end. */
+type WorkspaceRailProps = Pick<
+  ProjectRailProps,
+  | "items"
+  | "onNavigate"
+  | "onOpenSettings"
+  | "providerStatus"
+  | "onNewSession"
+  | "sessionList"
+>;
+
 function Shell() {
   const { overview, canMutate, error, loading } = useSession();
   const conversation = useConversation();
   const location = useLocation();
+  const host = useOptionalHost();
+  const { projectId } = useProjectPaths();
   const [railOpen, setRailOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const routeRailClick = useRailRouting();
 
+  // The multi-project host, or null for `research serve` and for a shell mounted on its own.
+  const registry = host?.mode === "multi" ? host : null;
+  useProjectPolling(registry);
+
+  // The registry's own row for the project this tree is mounted in. `App` validates the id
+  // against the registry before it mounts the workspace, so this is null only for a legacy
+  // window — or, briefly, for a project that was forgotten in another tab.
+  const active =
+    registry && projectId
+      ? (registry.projects.find(
+          (candidate) => candidate.project_id === projectId,
+        ) ?? null)
+      : null;
+
   const project: ProjectModel = {
-    id: overview?.workspace ?? 'unconnected',
-    name: overview?.project ?? 'not connected',
+    id: overview?.workspace ?? "unconnected",
+    name: overview?.project ?? "not connected",
     ...(overview?.workspace ? { path: overview.workspace } : {}),
   };
 
-  const items = useMemo<RailItem[]>(
-    () =>
-      NAVIGATION.map((entry) => {
-        // The count the daemon reported for this surface, when it reported one. The
-        // cockpit never counts anything itself (PRODUCT §5 P10).
-        const group = overview?.attention.find((attention) => attention.route === entry.to);
-        const active =
-          (entry.end
-            ? location.pathname === entry.to
-            : location.pathname === entry.to || location.pathname.startsWith(`${entry.to}/`)) ||
-          (entry.alsoMatches?.includes(location.pathname) ?? false);
-        return {
-          id: entry.id,
-          label: entry.label,
-          to: entry.to,
-          icon: entry.icon,
-          ...(group && group.count > 0 ? { count: group.count } : {}),
-          ...(active ? { active: true } : {}),
-        };
-      }),
-    [location.pathname, overview],
-  );
+  const items = useMemo<RailItem[]>(() => {
+    // `overview.attention[].route` names the workspace-local path — `/review`, never
+    // `/projects/prj_abc/review` — because a daemon behind a project prefix does not know
+    // it is behind one. So an entry's `href` may be rewritten for a project while its count
+    // is still looked up under the route the daemon reported. (Built here rather than at
+    // module scope: `routes.tsx` imports this file, so `NAVIGATION` is not populated yet
+    // while this module is being evaluated.)
+    const daemonRoutes = new Map(
+      NAVIGATION.map((entry) => [entry.id, entry.to]),
+    );
+    return navigationForProject(projectId).map((entry) => {
+      // The count the daemon reported for this surface, when it reported one. The cockpit
+      // never counts anything itself (PRODUCT §5 P10).
+      const route = daemonRoutes.get(entry.id) ?? entry.to;
+      const group = overview?.attention.find(
+        (attention) => attention.route === route,
+      );
+      return {
+        id: entry.id,
+        label: entry.label,
+        to: entry.to,
+        icon: entry.icon,
+        ...(group && group.count > 0 ? { count: group.count } : {}),
+        ...(isActive(entry, location.pathname) ? { active: true } : {}),
+      };
+    });
+  }, [location.pathname, overview, projectId]);
 
-  const providerStatus = principalStatus({ loading, error, canMutate, principal: overview?.principal });
+  const providerStatus = principalStatus({
+    loading,
+    error,
+    canMutate,
+    principal: overview?.principal,
+  });
+
+  const rail: WorkspaceRailProps = {
+    items,
+    onNavigate: () => setRailOpen(false),
+    onOpenSettings: () => setSettingsOpen(true),
+    ...(providerStatus ? { providerStatus } : {}),
+    // Opening a session is a mutation, so a window that may only read is not offered the
+    // control; the history below it is a read and stays.
+    ...(canMutate
+      ? { onNewSession: () => void conversation.sessions.create() }
+      : {}),
+    sessionList: <SessionListPane />,
+  };
 
   return (
     <>
@@ -101,23 +179,21 @@ function Shell() {
           // The click handler routes the rail's links; it adds no behaviour of its own,
           // so the interactive elements are still the rail's own buttons and links.
           <div className="rh-web-rail" onClick={routeRailClick}>
-            <ProjectRail
-              project={project}
-              items={items}
-              onNavigate={() => setRailOpen(false)}
-              onOpenSettings={() => setSettingsOpen(true)}
-              {...(providerStatus ? { providerStatus } : {})}
-              // Opening a session is a mutation, so a window that may only read is not
-              // offered the control; the history below it is a read and stays.
-              {...(canMutate
-                ? { onNewSession: () => void conversation.sessions.create() }
-                : {})}
-              sessionList={<SessionListPane />}
-            />
+            {registry ? (
+              <ProjectSwitcherRail
+                host={registry}
+                active={active}
+                fallback={project}
+                rail={rail}
+              />
+            ) : (
+              <ProjectRail project={project} {...rail} />
+            )}
           </div>
         }
         main={
           <>
+            {active ? <WorkspaceHeader project={active} /> : null}
             <TokenBar />
             <div className="rh-web-route">
               <Outlet />
@@ -128,6 +204,133 @@ function Shell() {
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
+}
+
+/**
+ * Which project this screen belongs to, said in `main` and not only in the rail.
+ *
+ * Spec §4.5 asks for the active project name to stay visible in the workspace header, and
+ * §11 item 6 makes it a requirement rather than a nicety: below the shell's breakpoint the
+ * rail — where the name otherwise lives — is a drawer, and a researcher with two projects
+ * open in two tabs must never have to open a drawer to find out which one they are about to
+ * accept evidence into.
+ */
+function WorkspaceHeader({ project }: { project: ProjectView }) {
+  return (
+    <header className="rh-web-project-bar">
+      <span className="rh-web-project-bar__name">{project.display_name}</span>
+      <span className="rh-web-project-bar__path">{project.path}</span>
+    </header>
+  );
+}
+
+interface ProjectSwitcherRailProps {
+  host: Host;
+  /** The registry's row for the open project, when it still has one. */
+  active: ProjectView | null;
+  /** What the daemon itself says this workspace is; used only if the registry has lost it. */
+  fallback: ProjectModel;
+  rail: WorkspaceRailProps;
+}
+
+/**
+ * The rail as the project switcher of design §4.5.
+ *
+ * It performs nothing itself. Selecting a project is a navigation — the URL owns which
+ * project is open, so switching cannot silently retarget the one you were in — and every
+ * lifecycle action is either a control-plane call through `useProjectLifecycle` or a dialog
+ * that asks first. "Add project" opens the same Open-folder dialog Project Home offers,
+ * because a folder path may only reach the host from a picker a human answered; creating a
+ * new project stays on Project Home, one click away through "All projects".
+ */
+function ProjectSwitcherRail({
+  host,
+  active,
+  fallback,
+  rail,
+}: ProjectSwitcherRailProps) {
+  const navigate = useNavigate();
+  const lifecycle = useProjectLifecycle();
+  const { toast } = useToast();
+  const [dialog, setDialog] = useState<ProjectDialog>(null);
+
+  const projects = useMemo(
+    () => host.projects.map(toProjectModel),
+    [host.projects],
+  );
+  const project = active ? toProjectModel(active) : fallback;
+
+  const reveal = lifecycle.reveal;
+  const act = useCallback(
+    (projectId: string, action: ProjectAction) => {
+      const view = host.projects.find(
+        (candidate) => candidate.project_id === projectId,
+      );
+      if (!view) return;
+      if (action === "reveal") {
+        // The one action with no form and nothing to confirm: it opens a file manager and
+        // writes nothing. A host that could not is worth one sentence, not a dialog.
+        void reveal(projectId).catch((cause: unknown) => {
+          toast({
+            tone: "error",
+            title: "Could not open the folder",
+            description: cause instanceof Error ? cause.message : String(cause),
+          });
+        });
+        return;
+      }
+      setDialog({ kind: action, project: view });
+    },
+    [host.projects, reveal, toast],
+  );
+
+  return (
+    <>
+      <ProjectRail
+        project={project}
+        projects={projects}
+        onSelectProject={(id) => navigate(projectHref(id, "/"))}
+        onOpenProjectHome={() => navigate("/")}
+        onAddProject={() => setDialog({ kind: "open" })}
+        onProjectAction={act}
+        {...rail}
+      />
+      <ProjectDialogs
+        dialog={dialog}
+        onClose={() => setDialog(null)}
+        onDialog={setDialog}
+      />
+    </>
+  );
+}
+
+/** One registry row as the rail's view model; only the field names differ. */
+function toProjectModel(view: ProjectView): ProjectModel {
+  return {
+    id: view.project_id,
+    name: view.display_name,
+    path: view.path,
+    availability: view.availability,
+    ...(view.detail ? { detail: view.detail } : {}),
+    activeRuns: view.active_runs,
+  };
+}
+
+/**
+ * Whether this entry is the screen currently on show.
+ *
+ * The conversation is `/` under the legacy host and `/projects/{id}/` under the multi-project
+ * one, so the trailing slash a project prefix leaves behind is matched as well as trimmed:
+ * `/projects/prj_abc` and `/projects/prj_abc/` are the same screen.
+ */
+function isActive(entry: NavigationEntry, pathname: string): boolean {
+  const base =
+    entry.to.length > 1 && entry.to.endsWith("/")
+      ? entry.to.slice(0, -1)
+      : entry.to;
+  if (pathname === entry.to || pathname === base) return true;
+  if (!entry.end && pathname.startsWith(`${base}/`)) return true;
+  return entry.alsoMatches?.includes(pathname) ?? false;
 }
 
 /**
@@ -144,15 +347,15 @@ function principalStatus(input: {
   principal: string | undefined;
 }): ProviderStatus | undefined {
   if (input.error) {
-    return { label: 'Daemon', state: 'offline', detail: input.error };
+    return { label: "Daemon", state: "offline", detail: input.error };
   }
   if (input.loading || input.principal === undefined) return undefined;
   if (input.canMutate) {
-    return { label: 'Daemon', state: 'ok', detail: 'Researcher — may accept' };
+    return { label: "Daemon", state: "ok", detail: "Researcher — may accept" };
   }
   return {
-    label: 'Daemon',
-    state: 'degraded',
+    label: "Daemon",
+    state: "degraded",
     detail: `${input.principal} — reads and proposes only`,
   };
 }
@@ -171,14 +374,20 @@ function useRailRouting(): (event: ReactMouseEvent<HTMLDivElement>) => void {
   return useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
       if (event.defaultPrevented) return;
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
         return;
       }
       const target = event.target;
       if (!(target instanceof Element)) return;
-      const anchor = target.closest('a[href]');
+      const anchor = target.closest("a[href]");
       if (!(anchor instanceof HTMLAnchorElement)) return;
-      if (anchor.target && anchor.target !== '_self') return;
+      if (anchor.target && anchor.target !== "_self") return;
       if (anchor.origin !== window.location.origin) return;
       event.preventDefault();
       navigate(`${anchor.pathname}${anchor.search}${anchor.hash}`);
