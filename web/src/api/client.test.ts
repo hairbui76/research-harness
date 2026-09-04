@@ -9,8 +9,9 @@
 import { describe, expect, it } from 'vitest';
 import type { vi } from 'vitest';
 import { CapabilityError, HarnessClient } from './client';
+import { runEventsUrl } from './sse';
 import { CAPABILITIES } from './capabilities.gen';
-import { fakeDaemon, FIXTURES } from '../test/harness';
+import { fakeAppDaemon, fakeDaemon, FIXTURES } from '../test/harness';
 
 /** One `ReviewOutcome`, as every candidate-keyed review action answers. */
 function outcome(evidence: string | null, status = 'reviewed') {
@@ -480,5 +481,89 @@ describe('subscription-backed CLI providers', () => {
     const daemon = fakeDaemon({ capabilities: { 'provider.cli.configure': { capability: 'provider.cli.configure', ok: false, error: { code: 'permission_denied', message: 'human only' } } } });
     const client = new HarnessClient({ baseUrl: 'http://daemon.test', token: null, fetchImpl: daemon.fetch });
     await expect(client.providerCliConfigure({ name: 'x', runtime: 'codex' })).rejects.toThrow('human only');
+  });
+});
+
+
+/**
+ * Task 9: the same client, rooted under a project prefix.
+ *
+ * The multi-project host serves every workspace route below `/api/projects/{project_id}`
+ * and changed nothing beneath it (design §6), so the whole of the cockpit's project
+ * awareness is one re-based client. These tests pin that: the prefix reaches the reads, the
+ * capability posts, both byte links and the run event stream, and it never reaches a
+ * request body.
+ */
+describe('a project-scoped base URL', () => {
+  const scoped = () =>
+    new HarnessClient({
+      baseUrl: 'http://app.test',
+      token: 'app-token',
+      fetchImpl: fakeDaemon().fetch,
+    }).withBaseUrl('http://app.test/api/projects/prj_abc');
+
+  it('keeps the token and the transport when it changes where it points', async () => {
+    const daemon = fakeDaemon();
+    const legacy = new HarnessClient({
+      baseUrl: 'http://daemon.test',
+      token: 'local-token',
+      fetchImpl: daemon.fetch,
+    });
+
+    const project = legacy.withBaseUrl('http://daemon.test/api/projects/prj_abc');
+
+    expect(project.baseUrl).toBe('http://daemon.test/api/projects/prj_abc');
+    expect(project.authenticated).toBe(true);
+    expect(legacy.baseUrl).toBe('http://daemon.test');
+    expect(project.stream).toEqual({
+      baseUrl: 'http://daemon.test/api/projects/prj_abc',
+      token: 'local-token',
+      fetchImpl: daemon.fetch,
+    });
+  });
+
+  it('reads beneath the prefix and sends the same body it always sent', async () => {
+    const daemon = fakeAppDaemon({
+      workspace: {
+        gets: { '/overview': FIXTURES.overview },
+        capabilities: { 'claim.list': { count: 0, claims: [] } },
+      },
+    });
+    const project = new HarnessClient({
+      baseUrl: 'http://app.test',
+      token: 'app-token',
+      fetchImpl: daemon.fetch,
+    }).withBaseUrl('http://app.test/api/projects/prj_abc');
+
+    await project.overview();
+    await project.claims({ status: 'supported' });
+
+    expect(daemon.calls.map((call) => call.path)).toEqual([
+      '/api/projects/prj_abc/overview',
+      '/api/projects/prj_abc/capabilities/claim.list',
+    ]);
+    expect(daemon.calls[1]!.body).toEqual({ status: 'supported' });
+  });
+
+  it('points every link and stream at the project, token and all', () => {
+    const project = scoped();
+
+    expect(project.artifactBytesUrl('A0001-1')).toBe(
+      'http://app.test/api/projects/prj_abc/artifacts/A0001-1/bytes?token=app-token',
+    );
+    expect(project.manuscriptBuildPdfUrl('last-good')).toBe(
+      'http://app.test/api/projects/prj_abc/manuscript/builds/last-good/pdf?token=app-token',
+    );
+    expect(runEventsUrl(project.stream.baseUrl, 'run_1')).toBe(
+      'http://app.test/api/projects/prj_abc/runs/run_1/events',
+    );
+  });
+
+  it('drops a trailing slash so a prefix never doubles it', () => {
+    expect(
+      new HarnessClient({ baseUrl: 'http://app.test' }).withBaseUrl(
+        'http://app.test/api/projects/prj_abc/',
+      ).baseUrl,
+    ).toBe('http://app.test/api/projects/prj_abc');
   });
 });

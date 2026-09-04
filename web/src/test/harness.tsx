@@ -12,6 +12,10 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { ThemeProvider, ToastProvider } from '@research-harness/design';
 import { HarnessClient } from '../api/client';
+import type { FolderSelection, ProjectView } from '../api/projects';
+import { AppClient } from '../api/projects';
+import { HostProvider } from '../app/host';
+import type { Host, HostMode } from '../app/host';
 import { SessionProvider } from '../app/session';
 
 import blocks from './fixtures/blocks.json';
@@ -42,6 +46,8 @@ export interface RecordedCall {
   method: string;
   path: string;
   body: unknown;
+  /** The request headers, for the tests that care that the token rode along. */
+  headers?: Record<string, string>;
 }
 
 export interface FakeDaemon {
@@ -116,9 +122,9 @@ function isEnvelope(value: unknown): boolean {
   return 'ok' in (value as object) && 'capability' in (value as object);
 }
 
-function jsonResponse(body: unknown): Response {
+function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
-    status: 200,
+    status,
     headers: { 'Content-Type': 'application/json' },
   });
 }
@@ -201,4 +207,175 @@ export async function expectNoAxeViolations(
       .join('\n');
     throw new Error(`Expected no accessibility violations, found:\n${summary}`);
   }
+}
+
+/** The headers a recorded call carried, normalised out of whatever shape `init` used. */
+function headersOf(init?: RequestInit): Record<string, string> {
+  const headers = init?.headers;
+  if (!headers) return {};
+  if (headers instanceof Headers) return Object.fromEntries(headers.entries());
+  if (Array.isArray(headers)) return Object.fromEntries(headers);
+  return { ...(headers as Record<string, string>) };
+}
+
+// -- the multi-project host ---------------------------------------------------
+
+/** The health body a multi-project host answers with (`AppClient.health`). */
+export const APP_HEALTH = { ok: true, kind: 'multi_project', version: '0.3.0' };
+
+/** One available project, for the tests that need a row rather than a registry. */
+export function projectView(overrides: Partial<ProjectView> = {}): ProjectView {
+  return {
+    project_id: 'prj_abc',
+    display_name: 'Latency study',
+    path: '/research/latency-study',
+    availability: 'available',
+    detail: null,
+    active_runs: 0,
+    last_opened_at: '2026-09-01T10:00:00Z',
+    ...overrides,
+  };
+}
+
+export interface FakeAppDaemonOptions {
+  /** The `/api/app/health` body. `null` answers 404, as the legacy daemon does. */
+  health?: unknown;
+  healthStatus?: number;
+  /** The registry `/api/projects` answers with. */
+  projects?: readonly ProjectView[];
+  /** What `/api/app/session` returns for a nonce; a `sessionStatus` makes it refuse. */
+  token?: string;
+  sessionStatus?: number;
+  folder?: FolderSelection;
+  /** The project a lifecycle route answers with; defaults to the first registered one. */
+  lifecycleResult?: ProjectView;
+  /** Workspace routes served beneath `/api/projects/{project_id}`. */
+  workspace?: { gets?: Record<string, unknown>; capabilities?: Record<string, unknown> };
+}
+
+export interface FakeAppDaemon {
+  fetch: typeof fetch;
+  calls: RecordedCall[];
+  /** The fake workspace daemon the project-scoped routes are delegated to. */
+  workspace: FakeDaemon;
+}
+
+/** The control-plane paths that are operations rather than project ids. */
+const LIFECYCLE_PATHS = new Set(['/create', '/open', '/initialize']);
+
+/**
+ * A fake multi-project host: the control plane, plus every workspace route beneath a
+ * project id delegated to an ordinary `fakeDaemon`.
+ *
+ * That delegation is the point. A view tested through `AppClient.workspaceClient('prj_abc')`
+ * makes exactly the calls it makes against the legacy daemon, and this fake answers them
+ * from the same fixtures — so a test proves the prefix is applied without restating the API.
+ */
+export function fakeAppDaemon(options: FakeAppDaemonOptions = {}): FakeAppDaemon {
+  const calls: RecordedCall[] = [];
+  const workspace = fakeDaemon(options.workspace ?? {});
+  const projects = options.projects ?? [];
+  const health = 'health' in options ? options.health : APP_HEALTH;
+
+  const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input), 'http://app.test');
+    const path = url.pathname;
+    const method = init?.method ?? 'GET';
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    calls.push({ method, path, body, headers: headersOf(init) });
+
+    if (path === '/api/app/health') {
+      if (health === null || health === undefined) return new Response('not found', { status: 404 });
+      return jsonResponse(health, options.healthStatus ?? 200);
+    }
+    if (path === '/api/app/session') {
+      const status = options.sessionStatus ?? 200;
+      if (status !== 200) {
+        return jsonResponse(
+          { detail: { code: 'control_permission_denied', message: 'bootstrap already used' } },
+          status,
+        );
+      }
+      return jsonResponse({ token: options.token ?? 'app-token' });
+    }
+    if (path === '/api/dialogs/folder') {
+      return jsonResponse(
+        options.folder ?? { path: null, method: null, cancelled: true, fallback_required: false },
+      );
+    }
+    if (path === '/api/projects' && method === 'GET') return jsonResponse({ projects });
+
+    const scoped = /^\/api\/projects(\/[^/]+)(\/.*)?$/.exec(path);
+    if (scoped) {
+      const [, first, rest] = scoped as unknown as [string, string, string | undefined];
+      const result = options.lifecycleResult ?? projects[0] ?? projectView();
+      if (LIFECYCLE_PATHS.has(first) && !rest) return jsonResponse(result);
+      if (!rest || rest === '/locate' || rest === '/reveal') {
+        if (method === 'DELETE') return new Response(null, { status: 204 });
+        return jsonResponse(result);
+      }
+      return workspace.fetch(`${url.origin}${rest}${url.search}`, init);
+    }
+    return new Response('not found', { status: 404 });
+  });
+
+  return { fetch: fetchImpl as unknown as typeof fetch, calls, workspace };
+}
+
+export interface HostOptions {
+  mode?: HostMode;
+  projects?: readonly ProjectView[];
+  appClient?: AppClient | null;
+  error?: string | null;
+  authRequired?: boolean;
+  refreshProjects?: () => Promise<void>;
+  setProjects?: (projects: ProjectView[]) => void;
+}
+
+/** A ready-made `Host`, so a view test states the host it wants instead of faking detection. */
+export function hostValue(options: HostOptions = {}): Host {
+  const mode = options.mode ?? 'multi';
+  return {
+    mode,
+    error: options.error ?? null,
+    appClient:
+      options.appClient === undefined
+        ? mode === 'multi'
+          ? new AppClient({ baseUrl: 'http://app.test', token: 'app-token' })
+          : null
+        : options.appClient,
+    projects: [...(options.projects ?? [])],
+    authRequired: options.authRequired ?? false,
+    refreshProjects: options.refreshProjects ?? (async () => {}),
+    setProjects: options.setProjects ?? (() => {}),
+  };
+}
+
+export interface RenderWithHostOptions {
+  host?: HostOptions;
+  route?: string;
+  path?: string;
+}
+
+/** Render one surface inside the providers `main.tsx` mounts, against a chosen host state. */
+export function renderWithHost(ui: ReactElement, options: RenderWithHostOptions = {}) {
+  const host = hostValue(options.host);
+  const route = options.route ?? '/';
+  const path = options.path ?? route;
+  return render(
+    <ThemeProvider defaultTheme="dark" storageKey={null}>
+      <ToastProvider>
+        <MemoryRouter
+          initialEntries={[route]}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <HostProvider value={host}>
+            <Routes>
+              <Route path={path} element={ui} />
+            </Routes>
+          </HostProvider>
+        </MemoryRouter>
+      </ToastProvider>
+    </ThemeProvider>,
+  );
 }

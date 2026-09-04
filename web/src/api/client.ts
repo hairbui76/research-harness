@@ -138,7 +138,8 @@ export function defaultBaseUrl(): string {
 }
 
 export class HarnessClient {
-  private readonly baseUrl: string;
+  /** Where this client's routes hang; a project-scoped client carries the project prefix. */
+  readonly baseUrl: string;
   private readonly token: string | null;
   private readonly http: typeof fetch;
 
@@ -156,6 +157,17 @@ export class HarnessClient {
   /** A copy of this client carrying a different token; used when the researcher pastes one. */
   withToken(token: string | null): HarnessClient {
     return new HarnessClient({ baseUrl: this.baseUrl, token, fetchImpl: this.http });
+  }
+
+  /**
+   * A copy of this client rooted somewhere else, keeping the token and the transport.
+   *
+   * The multi-project host serves every workspace route below
+   * `/api/projects/{project_id}`; re-basing one client is the whole of what the views need
+   * to know about that, because the paths beneath the prefix did not change (design §6).
+   */
+  withBaseUrl(baseUrl: string): HarnessClient {
+    return new HarnessClient({ baseUrl, token: this.token, fetchImpl: this.http });
   }
 
   // -- reads -----------------------------------------------------------------
