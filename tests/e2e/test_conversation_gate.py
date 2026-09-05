@@ -163,11 +163,11 @@ def test_a_prior_session_excerpt_is_retrieved_locally_and_withheld_from_an_exter
     ctx: CapabilityContext,
 ) -> None:
     earlier = talking(ctx, "Recorded.", egress=EgressClass.LOCAL)
-    prior = earlier.create("Pilot corpus measurements")
+    prior = earlier.create("Pilot corpus measurements", visibility=Visibility.PRIVATE)
     earlier.send(prior.id, PILOT, background=False)
 
     local = talking(ctx, ANSWER, egress=EgressClass.LOCAL)
-    here = local.create("Writing up")
+    here = local.create("Writing up", visibility=Visibility.PRIVATE)
     local_send = local.send(
         here.id, "What did the pilot corpus show about tail latency?", background=False
     )
@@ -214,7 +214,7 @@ def test_a_private_session_refuses_an_external_provider_instead_of_sending_nothi
     from research_harness.privacy.policy import EgressDeniedError
 
     external = talking(ctx, ANSWER, egress=EgressClass.EXTERNAL)
-    session = external.create("Private study")
+    session = external.create("Private study", visibility=Visibility.PRIVATE)
 
     with pytest.raises(EgressDeniedError, match="private"):
         external.send(session.id, "What did we learn?", background=False)
@@ -366,6 +366,51 @@ def test_an_excerpt_is_promoted_through_the_cli_without_bypassing_review(
     shown = json.loads(run(cli, "chat", "show", session, "-w", str(workspace), "--json").stdout)
     assert [message["id"] for message in shown["messages"]] == ["M0001", "M0002"]
     assert shown["messages"][1]["blocks"][0]["text"] == ANSWER
+
+
+def test_chat_new_opens_a_project_session_and_private_is_still_one_flag_away(
+    cli: typer.Typer, workspace: Path, ctx: CapabilityContext
+) -> None:
+    """The CLI's default is `project`; `--visibility private` still means what it meant.
+
+    A subscription CLI runtime is external egress, so the session a researcher opens
+    without naming a visibility has to be the kind that can reach one. Nothing about
+    `private` is removed: the flag still opens a private session, and that session still
+    refuses an external provider in the daemon's own sentence, before anything is written.
+    """
+    from research_harness.domain.ids import ConversationSessionId
+    from research_harness.privacy.policy import EgressDeniedError
+
+    default = json.loads(
+        run(cli, "chat", "new", "Latency study", "-w", str(workspace), "--json").stdout
+    )
+    assert default["session"]["visibility"] == "project"
+
+    kept = run(cli, "chat", "new", "Private study", "--visibility", "private", "-w", str(workspace))
+    private = json.loads(
+        run(
+            cli,
+            "chat",
+            "new",
+            "Private study, again",
+            "--visibility",
+            "private",
+            "-w",
+            str(workspace),
+            "--json",
+        ).stdout
+    )
+    assert kept.stdout.split()[1] == "private", "the text line still names the class it opened"
+    assert private["session"]["visibility"] == "private"
+
+    external = talking(ctx, ANSWER, egress=EgressClass.EXTERNAL)
+    session = ConversationSessionId(private["session"]["id"])
+    with pytest.raises(EgressDeniedError) as refused:
+        external.send(session, "What did we learn?", background=False)
+
+    assert f"session {session} is private" in str(refused.value)
+    assert "may be sent to it" in str(refused.value)
+    assert external.transcript(session).total == 0, "and nothing was written"
 
 
 def test_promoting_prose_to_evidence_is_refused_and_names_the_anchor(

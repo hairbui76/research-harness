@@ -697,7 +697,7 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     permission: "mutate",
     humanOnly: true,
     longRunning: false,
-    summary: "Open a durable, private conversation session.",
+    summary: "Open a durable conversation session bound to this project.",
     semantics: "writes private working context; creates no accepted scientific state",
   },
   "session.get": {

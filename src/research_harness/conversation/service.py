@@ -126,12 +126,22 @@ class ConversationService:
         self,
         title: str,
         *,
-        visibility: Visibility = Visibility.PRIVATE,
+        visibility: Visibility = Visibility.PROJECT,
         model: str | None = None,
         mode: str | None = None,
         token_budget: int | None = None,
     ) -> ConversationSession:
-        """Open a session. Private by default: conversation is local working context."""
+        """Open a session. `project` by default, so the session can reach a chosen provider.
+
+        Every subscription CLI runtime is external egress -- the process is local, the model
+        is the vendor's -- so a `private` default meant the session a researcher opened
+        without thinking could never use the provider they installed the harness for.
+        `private` is unchanged and still one argument away, and it is still decided once:
+        no capability changes a session's visibility after it is created. The *record's*
+        fallback stays `private` (`domain/conversation.py`): a stored session that does not
+        say is read fail-closed. What is `project` here is only what a new session is
+        opened as.
+        """
         from research_harness.conversation.binding import entry_identity
 
         identity = None if model is None else entry_identity(model)

@@ -9,17 +9,22 @@
  * created a private session in silence made that choice on the researcher's behalf and
  * closed off the composer's binding for good, which is why the click now asks.
  *
- * The default is not restated on the wire: choosing `private` — the value the dialog opens
+ * The default is not restated on the wire: choosing `project` — the value the dialog opens
  * on — sends no `visibility` at all, so the daemon applies its own default rather than the
  * browser asserting one. Both option values are the daemon's own words, so nothing here
  * encodes a third state that would have to be translated somewhere else.
+ *
+ * The daemon's default is `project`, because every subscription CLI runtime is external
+ * egress and a private session may not be bound to one: a dialog that opened on `private`
+ * pre-selected the answer that closes the composer's binding. `private` is unchanged and
+ * one click away, and it still cannot be undone afterwards.
  */
 import { useEffect, useRef, useState } from 'react';
 import { Button, Dialog, Select } from '@research-harness/design';
 import type { SessionVisibility } from '../../api/dto';
 
-/** The two words the daemon uses, and the one the session rail already shows as a badge. */
-const DEFAULT_VISIBILITY: SessionVisibility = 'private';
+/** The daemon's own default, mirrored here only so the dialog opens on the same word. */
+const DEFAULT_VISIBILITY: SessionVisibility = 'project';
 
 export interface NewSessionDialogProps {
   open: boolean;
@@ -59,8 +64,8 @@ export function NewSessionDialog({ open, onOpenChange, onCreate }: NewSessionDia
           }
           onChange={(event) => setVisibility(event.target.value as SessionVisibility)}
         >
-          <option value="private">Private (default)</option>
-          <option value="project">Project</option>
+          <option value="private">Private</option>
+          <option value="project">Project (default)</option>
         </Select>
       </Dialog.Body>
       <Dialog.Footer>

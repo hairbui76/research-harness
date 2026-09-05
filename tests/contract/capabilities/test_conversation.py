@@ -26,7 +26,12 @@ from research_harness.capabilities.permissions import (
 )
 from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
 from research_harness.conversation.promote import EvidenceRequiresAnchorError
-from research_harness.domain.conversation import AttemptStatus, MessageRole, PromotionTarget
+from research_harness.domain.conversation import (
+    AttemptStatus,
+    MessageRole,
+    PromotionTarget,
+    Visibility,
+)
 from research_harness.domain.enums import ClaimStatus, DecisionStatus
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import ClaimId, DecisionId
@@ -135,6 +140,27 @@ def test_a_session_round_trips_through_the_registry(
 
     summarized = invoke(registry, ctx, "session.summarize", {"session": str(session)})
     assert "Latency, revisited" in summarized.summary
+
+
+def test_a_new_session_is_a_project_session_and_private_is_still_one_field_away(
+    registry: CapabilityRegistry, ctx: CapabilityContext
+) -> None:
+    """The default a researcher lands on is the one that can reach a subscription CLI.
+
+    Every subscription CLI runtime is external egress, so a `private` default meant the
+    session a researcher opened without thinking could never use the provider they
+    installed the harness for. `private` is unchanged and still one field away; what moved
+    is only which of the two words applies when the request does not say.
+    """
+    default = invoke(registry, ctx, "session.create", {"title": "Latency study"})
+    assert default.session.visibility is Visibility.PROJECT
+
+    kept = invoke(
+        registry, ctx, "session.create", {"title": "Pilot notes", "visibility": "private"}
+    )
+    assert kept.session.visibility is Visibility.PRIVATE
+    read = invoke(registry, ctx, "session.get", {"session": str(kept.session.id)})
+    assert read.session.visibility is Visibility.PRIVATE, "stored visibility is read as written"
 
 
 def test_context_preview_records_that_nothing_was_sent(

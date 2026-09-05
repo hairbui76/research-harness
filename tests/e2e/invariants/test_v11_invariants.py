@@ -200,7 +200,7 @@ def test_m_a_private_prior_session_never_reaches_an_external_provider(
 ) -> None:
     """§42 M: "policy-allowed" is the operative word, and the receipt names the refusal."""
     earlier = talking(conversation_ctx, "Recorded.", egress=EgressClass.LOCAL)
-    prior = earlier.create("Pilot corpus measurements")
+    prior = earlier.create("Pilot corpus measurements", visibility=Visibility.PRIVATE)
     earlier.send(prior.id, PILOT, background=False)
 
     external = talking(conversation_ctx, ANSWER, egress=EgressClass.EXTERNAL)

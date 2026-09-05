@@ -663,7 +663,7 @@ export class HarnessClient {
   // one (`capabilities/conversation.py`). `session.send` is the *only* way a message is
   // written; the run's events are a read stream, not a second write surface.
 
-  /** Open a durable session. Private by default; the daemon allocates the `CS####`. */
+  /** Open a durable session. `project` by default; the daemon allocates the `CS####`. */
   async createSession(input: {
     title: string;
     visibility?: 'private' | 'project';

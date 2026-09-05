@@ -28264,7 +28264,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "`session.create`: open a durable, private conversation bound to this project.",
+        "description": "`session.create`: open a durable conversation bound to this project.\n\n`visibility` defaults to `project`, the class that may reach the selected provider;\n`private` keeps the transcript on this machine and is asked for by name.",
         "properties": {
           "mode": {
             "anyOf": [
@@ -28309,7 +28309,7 @@
           },
           "visibility": {
             "$ref": "#/$defs/Visibility",
-            "default": "private"
+            "default": "project"
           }
         },
         "required": [
@@ -28631,7 +28631,7 @@
         "type": "object"
       },
       "scientific_semantics": "writes private working context; creates no accepted scientific state",
-      "summary": "Open a durable, private conversation session."
+      "summary": "Open a durable conversation session bound to this project."
     },
     {
       "human_only": false,

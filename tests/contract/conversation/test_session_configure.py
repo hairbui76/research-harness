@@ -12,7 +12,14 @@ from research_harness.domain.errors import CapabilityError
 from tests.fixtures.cli.fakes import FakeCli
 
 SHAREABLE = Visibility.PROJECT
-"""A CLI runtime is external egress, so only a shareable session may be bound to one."""
+"""A CLI runtime is external egress, so only a shareable session may be bound to one.
+
+It is also what `create` opens by default now, and is passed explicitly here anyway: a
+binding test should say which of the two classes it is about rather than inherit it.
+"""
+
+LOCAL_ONLY = Visibility.PRIVATE
+"""The class that refuses external egress. Still supported, now asked for by name."""
 
 
 def test_a_runtime_binding_is_stored_with_its_model_and_reasoning(
@@ -90,8 +97,8 @@ def test_a_private_session_may_not_be_bound_to_a_runtime(
     path uses.
     """
     service = ConversationService(ctx)
-    private = service.create("x")
-    assert private.visibility is Visibility.PRIVATE, "the default, and the case that matters"
+    private = service.create("x", visibility=LOCAL_ONLY)
+    assert private.visibility is Visibility.PRIVATE, "asked for by name, and still honoured"
 
     with pytest.raises(CapabilityError) as caught:
         service.configure(private.id, runtime="codex", model="gpt-5.5")
@@ -119,7 +126,7 @@ def test_a_private_session_may_still_be_bound_to_an_entry(ctx: CapabilityContext
         ]
     )
     service = ConversationService(ctx)
-    session = service.create("x")
+    session = service.create("x", visibility=LOCAL_ONLY)
 
     record = service.configure(session.id, entry="on-box")
 

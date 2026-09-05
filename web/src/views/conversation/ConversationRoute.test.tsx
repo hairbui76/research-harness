@@ -185,7 +185,7 @@ describe('reopening a session', () => {
     // Both turns are there, oldest first, with their stable ids.
     expect(screen.getByText('M0041')).toBeInTheDocument();
     expect(screen.getByText('M0042')).toBeInTheDocument();
-    // Conversation data is private by default and the workspace keeps saying so.
+    // This session was opened private, and the workspace keeps saying so on every screen.
     expect(screen.getAllByText('Private').length).toBeGreaterThan(0);
 
     const read = daemon.capabilityCalls().find((call) => call.name === 'session.get');
@@ -232,6 +232,7 @@ describe('reopening a session', () => {
     );
     // The daemon owns the default visibility, so the request that means "the usual kind of
     // session" is the request that says nothing about it — exactly what it has always been.
+    // That default is now `project`, which is the kind a CLI runtime may be bound to.
     expect(
       daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
     ).not.toHaveProperty('visibility');
@@ -264,13 +265,52 @@ describe('reopening a session', () => {
 
     await user.click(screen.getByRole('button', { name: 'New session' }));
     const dialog = await screen.findByRole('dialog', { name: 'New session' });
-    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'project');
+    // Project is what the dialog opens on, so accepting it is the whole interaction — and
+    // the request still says nothing, because the default is the daemon's to apply.
+    expect(within(dialog).getByRole('combobox', { name: 'Visibility' })).toHaveValue('project');
     await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
 
     await waitFor(() =>
       expect(
         daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
-      ).toEqual({ title: 'New session', visibility: 'project' }),
+      ).toEqual({ title: 'New session' }),
+    );
+    // And the session the daemon answered with — a project one — is the one now open.
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().some((call) => call.request?.session === 'CS0003')).toBe(
+        true,
+      ),
+    );
+  });
+
+  it('creates a private session, which is the choice the dialog still carries', async () => {
+    const created = {
+      ...sessions.sessions[0],
+      id: 'CS0003',
+      title: 'New session',
+      visibility: 'private',
+      defaults: {},
+      message_count: 0,
+      last_message: null,
+      last_message_at: null,
+    };
+    const daemon = fakeDaemon({
+      capabilities: answers({ 'session.create': { session: created } }),
+    });
+    const user = userEvent.setup();
+    renderConversation({ daemon });
+    await transcriptReady();
+
+    await user.click(screen.getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'private');
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
+
+    // `private` is no longer the default, so it is the word that has to travel.
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session', visibility: 'private' }),
     );
   });
 
@@ -283,7 +323,7 @@ describe('reopening a session', () => {
     // Chosen, then abandoned. The choice was about a session that was never opened.
     await user.click(screen.getByRole('button', { name: 'New session' }));
     const first = await screen.findByRole('dialog', { name: 'New session' });
-    await user.selectOptions(within(first).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.selectOptions(within(first).getByRole('combobox', { name: 'Visibility' }), 'private');
     await user.click(within(first).getByRole('button', { name: 'Cancel' }));
     expect(daemon.capabilityCalls().some((call) => call.name === 'session.create')).toBe(false);
 
@@ -295,7 +335,7 @@ describe('reopening a session', () => {
 
     await user.click(screen.getByRole('button', { name: 'New session' }));
     const again = await screen.findByRole('dialog', { name: 'New session' });
-    expect(within(again).getByRole('combobox', { name: 'Visibility' })).toHaveValue('private');
+    expect(within(again).getByRole('combobox', { name: 'Visibility' })).toHaveValue('project');
     await user.click(within(again).getByRole('button', { name: 'Create session' }));
 
     await waitFor(() =>
@@ -321,6 +361,12 @@ describe('reopening a session', () => {
       'private',
       'project',
     ]);
+    // And the option marked "(default)" is the one the dialog actually opens on, so the
+    // label and the pre-selection cannot drift apart.
+    expect(choice).toHaveValue('project');
+    expect(Array.from(choice.querySelectorAll('option')).map((option) => option.textContent)).toEqual(
+      ['Private', 'Project (default)'],
+    );
     // A private session's limit is about sending, and only a runtime binding is refused
     // outright — the sentence says both, and that the choice is final.
     expect(choice).toHaveAccessibleDescription(/bound to a CLI runtime/);

@@ -21,6 +21,7 @@ from research_harness.domain.conversation import (
     MessageRole,
     OmissionReason,
     ReferenceBlock,
+    Visibility,
 )
 from research_harness.domain.errors import CapabilityError
 from research_harness.domain.ids import MessageId
@@ -316,10 +317,8 @@ def test_a_send_with_no_provider_configured_fails_before_it_writes_a_run(
 
 
 def test_an_omitted_item_is_explained_rather_than_dropped(ctx: CapabilityContext) -> None:
-    from research_harness.domain.conversation import Visibility
-
     service = service_for(ctx, ScriptedProvider([{"text": ANSWER}]), egress=EgressClass.EXTERNAL)
-    earlier = service.create("Private earlier work")
+    earlier = service.create("Private earlier work", visibility=Visibility.PRIVATE)
     service.store.append_message(
         earlier.id, say(earlier.id, "unreleased latency numbers from the pilot corpus")
     )
@@ -342,7 +341,7 @@ def test_a_private_session_refuses_an_external_provider(ctx: CapabilityContext) 
     from research_harness.privacy.policy import EgressDeniedError
 
     service = service_for(ctx, ScriptedProvider([{"text": ANSWER}]), egress=EgressClass.EXTERNAL)
-    session = service.create("Private study")
+    session = service.create("Private study", visibility=Visibility.PRIVATE)
 
     with pytest.raises(EgressDeniedError, match="visibility project"):
         service.send(session.id, "what did we learn", background=False)

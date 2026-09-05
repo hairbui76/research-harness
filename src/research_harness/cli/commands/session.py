@@ -119,11 +119,12 @@ def session_new(
         typer.Option(
             "--visibility",
             help=(
-                "private keeps the conversation on this machine, so only a local provider "
-                "may answer it; project lets the selected external provider see it."
+                "project (the default) lets the selected external provider see the "
+                "transcript; private keeps the conversation on this machine, so only a "
+                "local provider may answer it. Decided once: nothing changes it after."
             ),
         ),
-    ] = Visibility.PRIVATE,
+    ] = Visibility.PROJECT,
     model: Annotated[
         str | None,
         typer.Option(

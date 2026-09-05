@@ -84,10 +84,14 @@ DEFAULT_PAGE_SIZE = 50
 
 
 class CreateSessionRequest(CapabilityRequest):
-    """`session.create`: open a durable, private conversation bound to this project."""
+    """`session.create`: open a durable conversation bound to this project.
+
+    `visibility` defaults to `project`, the class that may reach the selected provider;
+    `private` keeps the transcript on this machine and is asked for by name.
+    """
 
     title: str
-    visibility: Visibility = Visibility.PRIVATE
+    visibility: Visibility = Visibility.PROJECT
     model: str | None = None
     """Default provider entry for this session, as `research.yaml` names it."""
 
@@ -354,7 +358,7 @@ class PromotionView(_View):
 
 
 def create_session(ctx: CapabilityContext, request: CreateSessionRequest) -> SessionView:
-    """`session.create`: open a session. Private by default (Product 39)."""
+    """`session.create`: open a session. `project` by default; `private` is asked for."""
     return SessionView(
         session=_service(ctx).create(
             request.title,
@@ -618,7 +622,7 @@ def conversation_specs() -> list[CapabilitySpec]:
     return [
         spec(
             "session.create",
-            summary="Open a durable, private conversation session.",
+            summary="Open a durable conversation session bound to this project.",
             semantics=working,
             permission=Permission.MUTATE,
             request_model=CreateSessionRequest,

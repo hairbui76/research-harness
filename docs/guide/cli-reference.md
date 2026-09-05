@@ -455,11 +455,13 @@ A command that fails prints one `error: ...` line on stderr and exits 1.
 │ --workspace   -w      <path>             Workspace root; defaults to the nearest     │
 │                                          research.yaml above the current directory.  │
 │                                          [env var: RESEARCH_WORKSPACE]               │
-│ --visibility          <private|project>  private keeps the conversation on this      │
+│ --visibility          <private|project>  project (the default) lets the selected     │
+│                                          external provider see the transcript;       │
+│                                          private keeps the conversation on this      │
 │                                          machine, so only a local provider may       │
-│                                          answer it; project lets the selected        │
-│                                          external provider see it.                   │
-│                                          [default: private]                          │
+│                                          answer it. Decided once: nothing changes it │
+│                                          after.                                      │
+│                                          [default: project]                          │
 │ --model               <str>              Bind the new session to this entry name     │
 │                                          from research.yaml (see `research chat      │
 │                                          configure`).                                │

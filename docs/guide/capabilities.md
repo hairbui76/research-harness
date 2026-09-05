@@ -124,7 +124,7 @@ mapping — a host that has seen `claim.audit` in the catalog knows to call `cla
 | `search_run.list` | `search_run_list` | `read` |  | Recorded discovery runs with their funnel counts, newest first. reads canonical state; changes nothing. |
 | `search_run.record` | `search_run_record` | `mutate` | yes | Persist a reproducible discovery operation. records what was searched, where, and when; adds nothing to the corpus. |
 | `session.configure` | `session_configure` | `mutate` | yes | Bind a session to a runtime and model, or to a research.yaml entry, or clear it; research.yaml is untouched. writes private working context; creates no accepted scientific state. |
-| `session.create` | `session_create` | `mutate` | yes | Open a durable, private conversation session. writes private working context; creates no accepted scientific state. |
+| `session.create` | `session_create` | `mutate` | yes | Open a durable conversation session bound to this project. writes private working context; creates no accepted scientific state. |
 | `session.get` | `session_get` | `read` |  | One session's transcript, attachments, and recorded receipts. reads durable private working context; changes nothing. |
 | `session.list` | `session_list` | `read` |  | Every conversation session in this project. reads durable private working context; changes nothing. |
 | `session.promote` | `session_promote` | `mutate` | yes | Promote an excerpt to a note, question, claim, or decision candidate. copies an excerpt into reviewable state with provenance to the session and message; the message is untouched, review is not bypassed, and evidence from prose is refused. |

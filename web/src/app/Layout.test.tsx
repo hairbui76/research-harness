@@ -484,10 +484,10 @@ describe('the project rail on a multi-project host', () => {
    */
   it('asks what kind of session to open, and creates it in the project the URL names', async () => {
     const created = {
-      ...sessions.sessions[1],
+      ...sessions.sessions[0],
       id: 'CS0009',
       title: 'New session',
-      visibility: 'project',
+      visibility: 'private',
       message_count: 0,
       last_message: null,
       last_message_at: null,
@@ -498,8 +498,10 @@ describe('the project rail on a multi-project host', () => {
     await screen.findByRole('navigation', { name: 'Project navigation' });
     await user.click(screen.getByRole('button', { name: 'New session' }));
 
+    // `private` is the answer that is no longer the default, so it is the one that has to
+    // survive the trip through the project-scoped client.
     const dialog = await screen.findByRole('dialog', { name: 'New session' });
-    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'project');
+    await user.selectOptions(within(dialog).getByRole('combobox', { name: 'Visibility' }), 'private');
     await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
 
     const create = await waitFor(() => {
@@ -509,7 +511,7 @@ describe('the project rail on a multi-project host', () => {
       expect(call).toBeDefined();
       return call;
     });
-    expect(create?.body).toEqual({ title: 'New session', visibility: 'project' });
+    expect(create?.body).toEqual({ title: 'New session', visibility: 'private' });
 
     // And the session the daemon named is opened, below this project's prefix.
     await waitFor(() =>
