@@ -7,6 +7,7 @@ no SQLite, no parser, and no model provider anywhere in the flow.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -389,12 +390,16 @@ def test_capability_layer_imports_no_parser_and_no_provider() -> None:
         "print(','.join(banned))"
     )
     # Fixed argv, no shell, no network: the probe only imports and reports sys.modules.
+    environment = {"PYTHONPATH": str(source_root), "PATH": "/usr/bin:/bin"}
+    environment.update(
+        {name: os.environ[name] for name in ("SYSTEMROOT", "WINDIR") if name in os.environ}
+    )
     completed = subprocess.run(
         [sys.executable, "-c", probe],
         capture_output=True,
         text=True,
         check=True,
-        env={"PYTHONPATH": str(source_root), "PATH": "/usr/bin:/bin"},
+        env=environment,
     )
     assert completed.stdout.strip() == ""
 

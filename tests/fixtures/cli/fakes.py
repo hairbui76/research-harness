@@ -83,6 +83,12 @@ class FakeCli:
 
     @property
     def executable(self) -> Path:
+        suffix = ".CMD" if os.name == "nt" else ""
+        return self.bin_dir / f"{self.name}{suffix}"
+
+    @property
+    def program(self) -> Path:
+        """Python program behind the platform's executable entry point."""
         return self.bin_dir / self.name
 
     @classmethod
@@ -99,12 +105,14 @@ class FakeCli:
     ) -> FakeCli:
         fake = cls(root=root, name=name)
         fake.bin_dir.mkdir(parents=True, exist_ok=True)
-        fake.executable.write_text(
+        fake.program.write_text(
             PROGRAM.replace("#!/usr/bin/env python3", f"#!{sys.executable}", 1), encoding="utf-8"
         )
-        fake.executable.chmod(
-            fake.executable.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-        )
+        fake.program.chmod(fake.program.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        if os.name == "nt":
+            fake.executable.write_text(
+                f'@echo off\n"{sys.executable}" "%~dp0{fake.name}" %*\n', encoding="utf-8"
+            )
         fake.write_script(
             {
                 "version_stdout": version_stdout,

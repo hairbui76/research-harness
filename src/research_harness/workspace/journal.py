@@ -344,7 +344,7 @@ class Transaction:
         expected = intent.expected_length_before or 0
         data = self._staged_bytes(record, _NEW, intent.path)
         target.parent.mkdir(parents=True, exist_ok=True)
-        fd = os.open(target, os.O_RDWR | os.O_CREAT, 0o644)
+        fd = os.open(target, os.O_RDWR | os.O_CREAT | getattr(os, "O_BINARY", 0), 0o644)
         try:
             size = os.fstat(fd).st_size
             if redo:

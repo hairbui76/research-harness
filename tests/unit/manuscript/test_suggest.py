@@ -109,8 +109,8 @@ def ctx(tmp_path: Path) -> Iterator[CapabilityContext]:
 
     manuscript = root / "manuscript"
     manuscript.mkdir(parents=True, exist_ok=True)
-    (manuscript / "main.tex").write_text(MAIN_TEX, encoding="utf-8")
-    (manuscript / "references.bib").write_text(REFERENCES_BIB, encoding="utf-8")
+    (manuscript / "main.tex").write_bytes(MAIN_TEX.encode("utf-8"))
+    (manuscript / "references.bib").write_bytes(REFERENCES_BIB.encode("utf-8"))
     ManuscriptService(context).attach(("main.tex", ANCHOR_LINE), CLAIM)
     yield context
 

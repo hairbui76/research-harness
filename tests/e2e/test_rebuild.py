@@ -172,5 +172,5 @@ def test_research_rebuild_exits_non_zero_on_an_invalid_canonical_file(
     result = CliRunner().invoke(cli(), ["rebuild", "--workspace", str(repo.root)])
 
     assert result.exit_code == 1
-    assert "claims/C0041.yaml" in result.output
+    assert "claims/C0041.yaml" in result.output.replace("\\", "/")
     assert not repo.layout.database_file.exists()

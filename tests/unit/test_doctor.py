@@ -199,9 +199,10 @@ def test_doctor_catches_the_hand_edit_a_marker_based_open_waves_through(
     assert created.exit_code == 0, created.output
     claim_file = workspace / "claims" / "C0001.yaml"
     before = claim_file.stat()
-    edited = claim_file.read_text(encoding="utf-8").replace("must not", "must NOT")
-    assert len(edited) == len(claim_file.read_text(encoding="utf-8"))
-    claim_file.write_text(edited, encoding="utf-8")
+    original = claim_file.read_bytes()
+    edited = original.replace(b"must not", b"must NOT")
+    assert len(edited) == len(original)
+    claim_file.write_bytes(edited)
     os.utime(claim_file, ns=(before.st_atime_ns, before.st_mtime_ns))
 
     cached = WorkspaceRepository.open(workspace, repair=True)

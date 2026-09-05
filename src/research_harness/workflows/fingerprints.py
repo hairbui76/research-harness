@@ -69,7 +69,7 @@ def canonical(value: object) -> Any:
     if isinstance(value, bytes | bytearray | memoryview):
         return bytes(value).hex()
     if isinstance(value, PurePath):
-        return str(value)
+        return value.as_posix()
     if isinstance(value, datetime | date | time):
         return value.isoformat()
     if isinstance(value, Decimal | UUID):

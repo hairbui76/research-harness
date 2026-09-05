@@ -22,7 +22,6 @@ import logging
 import os
 import platform
 import pstats
-import resource
 import shutil
 import statistics
 import sys
@@ -82,6 +81,38 @@ from research_harness.workspace.events import clear_consistency_marker
 from research_harness.workspace.layout import WorkspaceLayout
 from research_harness.workspace.repository import WorkspaceConfig, WorkspaceRepository
 from research_harness.workspace.serialization import read_yaml
+
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import wintypes
+
+    class _ProcessMemoryCounters(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", ctypes.c_size_t),
+            ("WorkingSetSize", ctypes.c_size_t),
+            ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+            ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+            ("PagefileUsage", ctypes.c_size_t),
+            ("PeakPagefileUsage", ctypes.c_size_t),
+        ]
+
+    _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    _psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    _get_current_process = _kernel32.GetCurrentProcess
+    _get_current_process.restype = wintypes.HANDLE
+    _get_process_memory_info = _psapi.GetProcessMemoryInfo
+    _get_process_memory_info.argtypes = [
+        wintypes.HANDLE,
+        ctypes.POINTER(_ProcessMemoryCounters),
+        wintypes.DWORD,
+    ]
+    _get_process_memory_info.restype = wintypes.BOOL
+else:
+    import resource
 
 __all__ = [
     "DEFAULT_CANDIDATES",
@@ -305,7 +336,15 @@ def _latency_measurement(
 
 
 def _peak_rss_bytes() -> int:
-    """Peak resident set size of this process; ``ru_maxrss`` is KiB on Linux."""
+    """Peak resident set size of this process in bytes."""
+    if sys.platform == "win32":
+        counters = _ProcessMemoryCounters()
+        counters.cb = ctypes.sizeof(counters)
+        if not _get_process_memory_info(
+            _get_current_process(), ctypes.byref(counters), counters.cb
+        ):
+            raise ctypes.WinError(ctypes.get_last_error())
+        return int(counters.PeakWorkingSetSize)
     usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return int(usage) * (1 if sys.platform == "darwin" else 1024)
 

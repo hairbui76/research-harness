@@ -16,6 +16,7 @@ from research_harness.providers.cli.registry import FORBIDDEN_ARGS, RUNTIMES, va
 from research_harness.providers.cli.types import CliInvocation, ProbeOutcome
 
 PROBES = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "cli" / "probes"
+CWD = Path("/tmp/rh-cli-x")
 
 
 def outcome(name: str, exit_code: int = 0) -> ProbeOutcome:
@@ -28,13 +29,12 @@ def outcome(name: str, exit_code: int = 0) -> ProbeOutcome:
 
 
 def invocation(model: str | None = None, reasoning: str | None = None) -> CliInvocation:
-    cwd = Path("/tmp/rh-cli-x")
     return CliInvocation(
         model=model,
         reasoning=reasoning,
-        cwd=cwd,
+        cwd=CWD,
         request_id="req-1",
-        schema_path=cwd / "response.schema.json",
+        schema_path=CWD / "response.schema.json",
     )
 
 
@@ -54,9 +54,9 @@ def test_codex_argv_is_read_only_never_approves_and_delivers_the_schema_by_file(
     assert 'approval_policy="never"' in args
     assert "--ephemeral" in args and "--skip-git-repo-check" in args
     assert "--ignore-user-config" in args
-    assert args[args.index("-C") : args.index("-C") + 2] == ("-C", "/tmp/rh-cli-x")
+    assert args[args.index("-C") : args.index("-C") + 2] == ("-C", str(CWD))
     schema_at = args.index("--output-schema")
-    schema = "/tmp/rh-cli-x/response.schema.json"
+    schema = str(CWD / "response.schema.json")
     assert args[schema_at : schema_at + 2] == ("--output-schema", schema)
     assert args[args.index("--model") : args.index("--model") + 2] == ("--model", "gpt-5.5")
     assert 'model_reasoning_effort="high"' in args

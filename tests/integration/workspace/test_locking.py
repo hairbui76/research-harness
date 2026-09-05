@@ -27,7 +27,7 @@ from research_harness.workspace.repository import WorkspaceRepository
 from tests.unit.domain.strategies import make_claim
 
 JOIN_TIMEOUT = 30.0
-CONTEXT = mp.get_context("fork")
+CONTEXT = mp.get_context("fork" if "fork" in mp.get_all_start_methods() else "spawn")
 
 
 def hold_the_lock(root: str, acquired: EventType, release: EventType, order: Any) -> None:

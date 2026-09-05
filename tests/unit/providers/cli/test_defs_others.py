@@ -34,6 +34,7 @@ from research_harness.providers.cli.registry import (
 from research_harness.providers.cli.types import UNKNOWN_EXTERNAL_HOST, CliInvocation, ProbeOutcome
 
 PROBES = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "cli" / "probes"
+CWD = Path("/tmp/rh-cli-x")
 
 
 def outcome(name: str, exit_code: int = 0) -> ProbeOutcome:
@@ -46,9 +47,7 @@ def outcome(name: str, exit_code: int = 0) -> ProbeOutcome:
 
 
 def invocation(model: str | None = None, reasoning: str | None = None) -> CliInvocation:
-    return CliInvocation(
-        model=model, reasoning=reasoning, cwd=Path("/tmp/rh-cli-x"), request_id="req-1"
-    )
+    return CliInvocation(model=model, reasoning=reasoning, cwd=CWD, request_id="req-1")
 
 
 def test_all_seven_runtimes_are_registered_in_display_order() -> None:
@@ -88,7 +87,7 @@ def test_cursor_argv_and_probes() -> None:
     )
     assert args[args.index("--workspace") : args.index("--workspace") + 2] == (
         "--workspace",
-        "/tmp/rh-cli-x",
+        str(CWD),
     )
     assert args[-2:] == ("--model", "sonnet-4")
     assert "--force" not in args and "--trust" not in args
@@ -161,7 +160,7 @@ def test_dsh_argv_probes_and_version_policy() -> None:
 
 def test_opencode_argv_env_and_models() -> None:
     args = opencode_args(invocation(model="openai/gpt-5"))
-    assert args[:3] == ("run", "--format", "json") and args[3:5] == ("--dir", "/tmp/rh-cli-x")
+    assert args[:3] == ("run", "--format", "json") and args[3:5] == ("--dir", str(CWD))
     assert args[-2:] == ("-m", "openai/gpt-5") and "--variant" not in args
     assert "--dangerously-skip-permissions" not in args
     permission = json.loads(OPENCODE.env_set["OPENCODE_CONFIG_CONTENT"])["permission"]

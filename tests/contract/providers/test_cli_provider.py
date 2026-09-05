@@ -415,7 +415,9 @@ def test_the_trace_records_runtime_version_protocol_and_model(
     assert cli["runtime"] == "codex" and cli["protocol"] == "json_events"
     assert cli["transport"] == "stdin_text" and cli["model"] == "gpt-5.5"
     assert cli["version"] is None, "the provider never probes a version itself"
-    assert isinstance(cli["executable"], str) and cli["executable"].endswith("bin/codex")
+    assert isinstance(cli["executable"], str)
+    executable = Path(cli["executable"])
+    assert executable.parent.name == "bin" and executable.stem == "codex"
     assert "sk-metered" not in json.dumps(sink.payloads)
 
 

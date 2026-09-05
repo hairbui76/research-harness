@@ -11,7 +11,7 @@ from research_harness.providers.cli.environment import ALWAYS_DROP, FIXED_ENV, b
 from tests.unit.providers.cli.test_registry import definition
 
 BASE = {
-    "PATH": "/usr/bin:/bin",
+    "PATH": os.pathsep.join(("/usr/bin", "/bin")),
     "HOME": "/home/alice",
     "USER": "alice",
     "LANG": "en_US.UTF-8",
@@ -66,9 +66,10 @@ def test_a_definition_may_drop_and_set_variables() -> None:
     assert env["OPENCODE_DISABLE_PROJECT_CONFIG"] == "true"
 
 
-def test_the_executable_directory_leads_path() -> None:
-    env = bounded_environment(definition(), BASE, executable=Path("/opt/tools/bin/fake"))
-    assert env["PATH"].split(":")[0] == "/opt/tools/bin"
+def test_the_executable_directory_leads_path(tmp_path: Path) -> None:
+    executable = tmp_path / "tools" / "bin" / "fake"
+    env = bounded_environment(definition(), BASE, executable=executable)
+    assert env["PATH"].split(os.pathsep)[0] == str(executable.parent)
 
 
 def test_a_relative_executable_never_leads_path() -> None:

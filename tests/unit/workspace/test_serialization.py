@@ -252,8 +252,9 @@ def test_an_unknown_key_fails_with_a_workspace_error_naming_the_file(tmp_path: P
 def test_a_missing_required_field_fails_with_a_workspace_error(tmp_path: Path) -> None:
     path = tmp_path / "RQ0003.yaml"
     path.write_text("schema_version: 1\nid: RQ0003\n", encoding="utf-8")
-    with pytest.raises(WorkspaceSerializationError, match=str(path)):
+    with pytest.raises(WorkspaceSerializationError) as raised:
         read_yaml(path, ResearchQuestion)
+    assert str(path) in str(raised.value)
 
 
 def test_invalid_yaml_names_the_file(tmp_path: Path) -> None:

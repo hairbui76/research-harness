@@ -43,7 +43,10 @@ def test_canonical_directory_resolves_symlinks_and_relative_syntax(tmp_path: Pat
     real = tmp_path / "real"
     real.mkdir()
     link = tmp_path / "link"
-    link.symlink_to(real, target_is_directory=True)
+    try:
+        link.symlink_to(real, target_is_directory=True)
+    except OSError:
+        pytest.skip("this Windows account cannot create directory symlinks")
     assert canonical_directory(link) == real.resolve()
     assert canonical_directory(real / "." / ".." / "real") == real.resolve()
 
@@ -82,7 +85,10 @@ def test_a_symlink_leaving_the_root_is_refused(tmp_path: Path) -> None:
     outside = tmp_path / "secret.txt"
     outside.write_text("x", encoding="utf-8")
     escape = root / "secret.txt"
-    escape.symlink_to(outside)
+    try:
+        escape.symlink_to(outside)
+    except OSError:
+        pytest.skip("this Windows account cannot create file symlinks")
     with pytest.raises(ProjectPathError):
         assert_beneath(root, escape)
 

@@ -16,6 +16,8 @@ from research_harness.providers.cli.transport import (
 from research_harness.providers.cli.types import CliInvocation
 from tests.unit.providers.cli.test_registry import definition
 
+CWD = Path("/tmp/rh-cli-x")
+
 
 class FakeProcess:
     def __init__(self) -> None:
@@ -33,7 +35,7 @@ def invocation(**overrides: object) -> CliInvocation:
     values: dict[str, object] = {
         "model": None,
         "reasoning": None,
-        "cwd": Path("/tmp/rh-cli-x"),
+        "cwd": CWD,
         "request_id": "req-1",
     }
     values.update(overrides)
@@ -93,7 +95,7 @@ def test_dsh_waits_for_ready_then_sends_execute_with_no_mcp_servers() -> None:
         "v": 1,
         "type": "execute",
         "request_id": "req-1",
-        "cwd": "/tmp/rh-cli-x",
+        "cwd": str(CWD),
         "prompt": "the prompt",
         "mcp_servers": [],
         "model": {"provider": "deepseek", "id": "deepseek-v3"},

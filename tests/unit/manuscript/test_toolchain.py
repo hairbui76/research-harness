@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -23,7 +24,7 @@ def bin_dir(root: Path, *names: str) -> str:
     directory = root / "bin"
     directory.mkdir(parents=True, exist_ok=True)
     for name in names:
-        executable = directory / name
+        executable = directory / f"{name}{'.CMD' if os.name == 'nt' else ''}"
         executable.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
         executable.chmod(0o755)
     return str(directory)
@@ -52,8 +53,9 @@ def test_discovery_never_runs_an_engine_to_learn_that_it_exists(tmp_path: Path) 
     """The executable is not even readable as a program; discovery is filesystem-only."""
     directory = tmp_path / "bin"
     directory.mkdir()
-    (directory / "pdflatex").write_bytes(b"\x00\x01\x02")
-    (directory / "pdflatex").chmod(0o755)
+    executable = directory / f"pdflatex{'.CMD' if os.name == 'nt' else ''}"
+    executable.write_bytes(b"\x00\x01\x02")
+    executable.chmod(0o755)
 
     found = discover_engines(path=str(directory))
 

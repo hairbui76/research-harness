@@ -29,9 +29,9 @@ def files(tmp_path: Path) -> ManuscriptFiles:
     layout = WorkspaceLayout(tmp_path)
     root = layout.manuscript_dir
     (root / "sections").mkdir(parents=True)
-    (root / "main.tex").write_text("\\input{sections/intro.tex}\n", encoding="utf-8")
-    (root / "sections" / "intro.tex").write_text(BODY, encoding="utf-8")
-    (root / "references.bib").write_text("@article{a2019,}\n", encoding="utf-8")
+    (root / "main.tex").write_bytes(b"\\input{sections/intro.tex}\n")
+    (root / "sections" / "intro.tex").write_bytes(BODY.encode("utf-8"))
+    (root / "references.bib").write_bytes(b"@article{a2019,}\n")
     return ManuscriptFiles(layout)
 
 
@@ -150,7 +150,10 @@ def test_a_symlink_pointing_out_of_the_manuscript_directory_is_refused(
 ) -> None:
     outside = tmp_path / "outside.tex"
     outside.write_text("secret\n", encoding="utf-8")
-    os.symlink(outside, files.root / "link.tex")
+    try:
+        os.symlink(outside, files.root / "link.tex")
+    except OSError:
+        pytest.skip("this Windows account cannot create file symlinks")
 
     with pytest.raises(ManuscriptPathError):
         files.read("link.tex")
@@ -184,7 +187,7 @@ def test_a_save_against_a_stale_hash_is_refused_and_leaves_the_file_untouched(
 ) -> None:
     snapshot = files.read("sections/intro.tex")
     outside_edit = "Edited in another editor.\n"
-    (files.root / "sections" / "intro.tex").write_text(outside_edit, encoding="utf-8")
+    (files.root / "sections" / "intro.tex").write_bytes(outside_edit.encode("utf-8"))
 
     with pytest.raises(ManuscriptConflictError) as error:
         files.write("sections/intro.tex", "Our version.\n", snapshot.content_hash)

@@ -16,4 +16,21 @@
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { expect } from 'vitest';
 
+// Node 25 exposes an incomplete process-level `localStorage` unless it is given a
+// persistence file. Vitest 2 copies that object over jsdom's implementation. Recover
+// the browser-compatible Storage object from a fresh same-origin window so tests keep
+// exercising the web API on every supported Node version.
+if (typeof window.localStorage.clear !== 'function') {
+  const frame = document.createElement('iframe');
+  document.documentElement.appendChild(frame);
+  const storage = frame.contentWindow?.localStorage;
+  frame.remove();
+  if (storage !== undefined) {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: storage,
+    });
+  }
+}
+
 expect.extend(matchers);

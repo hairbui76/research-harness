@@ -8,4 +8,19 @@
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { expect } from 'vitest';
 
+// Node 25's process-level `localStorage` can replace jsdom's complete implementation in
+// Vitest 2. Recover a browser-compatible Storage object from a same-origin window.
+if (typeof window.localStorage.clear !== 'function') {
+  const frame = document.createElement('iframe');
+  document.documentElement.appendChild(frame);
+  const storage = frame.contentWindow?.localStorage;
+  frame.remove();
+  if (storage !== undefined) {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: storage,
+    });
+  }
+}
+
 expect.extend(matchers);

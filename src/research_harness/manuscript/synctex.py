@@ -428,10 +428,16 @@ def _read_text(path: Path) -> str:
 def _normalize_root(source_root: Path | str | None) -> str | None:
     if source_root is None:
         return None
+    candidate = Path(source_root)
+    portable = candidate.as_posix()
+    if portable.startswith("/") and not candidate.is_absolute():
+        # A recorded POSIX root remains meaningful when its fixture is parsed on Windows;
+        # resolving it there would silently attach the current drive.
+        return portable.rstrip("/")
     try:
-        return Path(source_root).resolve().as_posix()
+        return candidate.resolve().as_posix()
     except OSError:  # pragma: no cover - unresolvable root
-        return Path(source_root).as_posix()
+        return portable
 
 
 def _relative_to(name: str, root: str | None) -> str:

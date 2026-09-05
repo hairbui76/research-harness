@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -28,6 +29,23 @@ def fake(tmp_path: Path) -> FakeCli:
     )
 
 
+def process_exists(pid: int) -> bool:
+    """Whether one process id is live, using the host's native query."""
+    if os.name == "nt":
+        result = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        return f'"{pid}"' in result.stdout
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    return True
+
+
 def test_run_probe_captures_exit_code_and_both_streams(fake: FakeCli) -> None:
     outcome = run_probe((str(fake.executable), "--version"), env=fake.env(), timeout=5)
     assert outcome.started and outcome.exit_code == 0
@@ -43,7 +61,8 @@ def test_run_probe_reports_a_non_executable_file(tmp_path: Path) -> None:
     path = tmp_path / "plain"
     path.write_text("not a program", encoding="utf-8")
     outcome = run_probe((str(path), "--version"), env={"PATH": ""}, timeout=5)
-    assert not outcome.started and outcome.os_error and "EACCES" in outcome.os_error
+    assert not outcome.started and outcome.os_error
+    assert any(code in outcome.os_error for code in ("EACCES", "ENOEXEC"))
 
 
 def test_run_probe_times_out_and_kills(fake: FakeCli) -> None:
@@ -131,8 +150,7 @@ def test_cancel_terminates_grandchildren(tmp_path: Path) -> None:
         pid = int(marker.read_text())
         process.cancel(grace=0.2)
     time.sleep(0.3)
-    with pytest.raises(ProcessLookupError):
-        os.kill(pid, 0)
+    assert not process_exists(pid)
 
 
 def test_exiting_the_context_cancels_a_running_process(fake: FakeCli, tmp_path: Path) -> None:
@@ -148,6 +166,9 @@ def test_the_default_grace_is_short() -> None:
     assert CANCEL_GRACE_SECONDS == 2.0
 
 
+@pytest.mark.skipif(
+    os.name == "nt", reason="Windows taskkill cannot find descendants after their parent exits"
+)
 def test_exiting_is_bounded_when_a_grandchild_inherits_the_pipes(tmp_path: Path) -> None:
     """The child exits at once but a grandchild holds stdout/stderr open (spec §14).
 
@@ -175,11 +196,10 @@ def test_exiting_is_bounded_when_a_grandchild_inherits_the_pipes(tmp_path: Path)
         # Pin the exact state the bug needs: the direct child is definitively reaped while
         # the grandchild is still alive holding the inherited pipes open.
         assert process.wait(5) == 0
-        assert os.kill(pid, 0) is None
+        assert process_exists(pid)
     assert time.monotonic() - started < 5
     time.sleep(0.3)
-    with pytest.raises(ProcessLookupError):
-        os.kill(pid, 0)
+    assert not process_exists(pid)
 
 
 def test_one_enormous_line_is_capped_before_it_is_buffered(fake: FakeCli, tmp_path: Path) -> None:

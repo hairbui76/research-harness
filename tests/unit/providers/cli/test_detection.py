@@ -100,6 +100,7 @@ def test_windows_resolution_uses_pathext(tmp_path: Path) -> None:
     assert resolve_executable(definition(), env, platform="linux") is None
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX executable bits do not exist on Windows")
 def test_a_non_executable_file_is_not_a_resolution(tmp_path: Path) -> None:
     plain = tmp_path / "fake"
     plain.write_text("x", encoding="utf-8")
@@ -139,9 +140,9 @@ def test_an_installed_logged_in_runtime_is_fully_described(tmp_path: Path) -> No
         now=datetime(2026, 9, 4, tzinfo=UTC),
     )
     assert status.available and status.version == "fake 1.2.3"
-    assert status.executable == "~/bin/fake" or status.executable == str(fake.executable), (
-        "home is replaced by ~"
-    )
+    assert status.executable is not None and status.executable.startswith("~")
+    displayed = Path(status.executable)
+    assert displayed.parent.name == "bin" and displayed.stem == "fake", "home is replaced by ~"
     assert status.auth_status == "ok" and status.bounded_mode == "safe"
     assert [item.id for item in status.models] == ["default", "fake-large", "fake-small"]
     assert status.models[0] == DEFAULT_MODEL_OPTION.as_view()
@@ -272,6 +273,7 @@ def test_a_diagnostic_never_carries_a_home_path_or_a_token(tmp_path: Path) -> No
 # -- probes that fail ----------------------------------------------------------
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX executable bits do not exist on Windows")
 def test_a_file_that_cannot_be_executed_is_unavailable(tmp_path: Path) -> None:
     fake = installed(tmp_path)
     fake.executable.chmod(0o644)
@@ -280,6 +282,7 @@ def test_a_file_that_cannot_be_executed_is_unavailable(tmp_path: Path) -> None:
     assert status.diagnostics == ("fake is not installed: no 'fake' on PATH",)
 
 
+@pytest.mark.skipif(os.name == "nt", reason="this test corrupts a POSIX shebang")
 def test_an_executable_that_will_not_start_is_unavailable_and_says_why(tmp_path: Path) -> None:
     fake = installed(tmp_path)
     body = fake.executable.read_text(encoding="utf-8").split("\n", 1)[1]

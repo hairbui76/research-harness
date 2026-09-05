@@ -690,7 +690,7 @@ def canonical_digests(root: Path) -> dict[str, str]:
         assert directory.is_dir(), f"{name}/ is missing"
         listed.update(
             {
-                str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
                 for path in sorted(directory.rglob("*"))
                 if path.is_file()
             }
