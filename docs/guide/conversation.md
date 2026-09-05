@@ -20,10 +20,10 @@ Two sentences are worth having in mind before the commands:
 
 ```console
 $ research chat new "Encoder choices for encrypted traffic"
-CS0001  private  Encoder choices for encrypted traffic
+CS0001  project  Encoder choices for encrypted traffic
 
 $ research chat list
-CS0001     3 msg  private  Encoder choices for encrypted traffic
+CS0001     3 msg  project  Encoder choices for encrypted traffic
 
 $ research chat rename CS0001 "Encoder choices, week 2"
 $ research chat show CS0001
@@ -33,11 +33,16 @@ $ research chat show CS0001
 
 | visibility | what it means |
 |---|---|
-| `private` (default) | the transcript never leaves this machine. A send to an external provider is refused rather than trimmed. |
-| `project` | the transcript may reach the selected external provider, subject to the egress policy ([Providers](providers.md)). |
+| `project` (default) | the transcript may reach the selected external provider, subject to the egress policy ([Providers](providers.md)). |
+| `private` | the transcript never leaves this machine. A send to an external provider is refused rather than trimmed. |
 
-Visibility is decided once: no capability changes it afterwards, so a conversation that
-will be answered by an external provider is opened with `--visibility project`.
+Visibility is decided once: no capability changes it afterwards. A new session is opened
+`project`, because the provider a session is answered by is usually an external one — every
+subscription CLI runtime is external egress, and a private session may not even be bound to
+one — so a `private` default would have meant every conversation started as the kind that
+cannot use the provider that was configured. A conversation whose transcript must stay on
+this machine is opened with `--visibility private`, and it stays private for good: the flag
+is the only moment the choice can be made.
 
 **What answers this session.** `research chat configure` binds one session to a CLI runtime
 and model, or to a `providers:` entry, without touching `research.yaml`. `research chat
@@ -49,7 +54,7 @@ $ research chat configure CS0001 --entry codex-sub
 bound to: entry codex-sub
 
 $ research chat list
-CS0001     3 msg  private  Encoder choices for encrypted traffic  [entry codex-sub]
+CS0001     3 msg  project  Encoder choices for encrypted traffic  [entry codex-sub]
 ```
 
 A per-message `--provider` on `chat send` still wins over the binding, and `--clear` returns

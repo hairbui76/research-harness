@@ -305,17 +305,20 @@ error: session CS0001 is private and session:codex/gpt-5.5 is an external provid
        --visibility project` on a new conversation.
 ```
 
-Sessions are private by default — `session.create` and `research chat new` both default to
-`private` — and **there is no capability that changes a session's visibility after it is
-created**. So the way to use a bound runtime is to open the conversation as a project
-session in the first place: `research chat new "…" --visibility project`. The cockpit asks
-the same question rather than deciding it: its **New session** button opens a small dialog
-whose *Visibility* list offers `Private (default)` and `Project`, over one sentence saying
-that only a project session can be bound to a CLI runtime, that a private session never
-sends to an external model, and that visibility cannot be changed once the session exists.
-Leaving the default alone sends no `visibility` at all, so the daemon's own default stays
-the default. An `--entry` binding is not affected:
-an entry may name a local provider, so a private session may be bound to one.
+A new session is a *project* session — `session.create` and `research chat new` both
+default to `project` — precisely because every CLI runtime is external egress: a `private`
+default meant the conversation a researcher opened without thinking could never use the
+subscription they had just configured. The CS0001 above is one opened with
+`research chat new "…" --visibility private`, which is still exactly what it was: the
+transcript never leaves the machine, the send refuses by name, and **there is no capability
+that changes a session's visibility after it is created**, so the refusal above is
+permanent for that conversation. The cockpit asks the same question rather than deciding
+it: its **New session** button opens a small dialog whose *Visibility* list offers `Private`
+and `Project (default)`, over one sentence saying that only a project session can be bound
+to a CLI runtime, that a private session never sends to an external model, and that
+visibility cannot be changed once the session exists. Leaving the default alone sends no
+`visibility` at all, so the daemon's own default stays the default. An `--entry` binding is
+not affected: an entry may name a local provider, so a private session may be bound to one.
 
 ## The scripted provider
 

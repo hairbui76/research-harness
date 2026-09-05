@@ -258,8 +258,8 @@ on a new conversation.
 
 A private session is private: the send is refused rather than trimmed to whatever happened
 to be shareable. A session's visibility is fixed at creation, so the fix is either a local
-provider or a new `--visibility project` session
-([conversation workspace](conversation.md#sessions)).
+provider or a new session — new sessions are `project` unless `--visibility private` says
+otherwise ([conversation workspace](conversation.md#sessions)).
 
 ```text
 error: no conversation session CS9999 in /home/you/projects/traffic-survey

@@ -320,12 +320,14 @@ the runtimes simply being missing.
 **A new session asks what kind it is.** Visibility is fixed at creation — no capability
 changes it afterwards — and it decides what the session may later be bound to, so the rail's
 **New session** button opens a small dialog (`NewSessionDialog.tsx`) whose *Visibility*
-`Select` offers `Private (default)` and `Project` over one sentence: only a project session
+`Select` offers `Private` and `Project (default)` over one sentence: only a project session
 can be bound to a CLI runtime, a private session never sends to an external model, and
-visibility cannot be changed once the session exists. Leaving the default alone sends no
-`visibility` field at all, so the request is the one the cockpit has always made and the
-default stays the daemon's rather than being asserted by the browser; `useSessions.create`
-passes `visibility` through only when there is one to pass.
+visibility cannot be changed once the session exists. The dialog opens on `Project` because
+that is the daemon's default and the only class a CLI runtime may be bound to; `Private` is
+one selection away and unchanged. Leaving the default alone sends no `visibility` field at
+all, so the request is the one the cockpit has always made and the default stays the
+daemon's rather than being asserted by the browser; `useSessions.create` passes
+`visibility` through only when there is one to pass.
 
 ### The model picker binds the session
 

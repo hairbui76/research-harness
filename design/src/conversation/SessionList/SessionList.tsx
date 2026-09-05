@@ -144,9 +144,10 @@ function SessionRow({
  * The session history: search, switch, rename, start a new one.
  *
  * Every session shows its stable `CS####` id and, where it applies, a `Private` marker —
- * conversation data is local and private by default, and the list is the place that has to
- * keep saying so. Long histories render through `VirtualList` so a project with a thousand
- * sessions scrolls like one with ten.
+ * a private session's transcript never leaves the machine and may not be bound to a CLI
+ * runtime, and the list is the place that has to keep saying which sessions those are.
+ * Long histories render through `VirtualList` so a project with a thousand sessions
+ * scrolls like one with ten.
  */
 export const SessionList = forwardRef<HTMLDivElement, SessionListProps>(function SessionList(
   {

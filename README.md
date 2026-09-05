@@ -309,7 +309,7 @@ capability layer with its HTTP daemon and MCP server, the Web cockpit, the VS Co
 extension, the plugin SPI, and Phase 17 hardening.
 
 The **v1.1 conversation-first track** (ROADMAP Phases 18–21 and the Design System
-foundation) is built on top of it: durable private sessions with token- and privacy-bounded
+foundation) is built on top of it: durable sessions with token- and privacy-bounded
 context packs and visible `Context used` receipts; session-only attachments with an explicit
 `Save to corpus`; the rebuildable ResearchGraph behind `@` references and `rh://` deep
 links; a manuscript workspace that compiles owned LaTeX source with a real local engine and
