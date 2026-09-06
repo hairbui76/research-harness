@@ -1,5 +1,5 @@
 .rh-tooltip {
-  z-index: 70;
+  z-index: var(--rh-z-popover);
   max-width: 22rem;
   padding: var(--rh-space-2) var(--rh-space-3);
   background: var(--rh-surface-inverse);

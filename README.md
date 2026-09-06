@@ -348,6 +348,10 @@ behaviour rests on today, and the "known gaps" sections of
 
 ## Development
 
+Every coding task uses the shared [verification and repair loop](docs/guide/task-verification.md).
+Run `pnpm run task:check` before completion; Git's installed pre-push hook reruns the full
+gate before publishing a clean commit. See the guide for browser setup and other agents.
+
 ```bash
 uv run pytest -q
 uv run ruff check .

@@ -1,5 +1,5 @@
 .rh-popover {
-  z-index: 65;
+  z-index: var(--rh-z-popover);
   min-width: 12rem;
   max-width: min(28rem, calc(100vw - var(--rh-space-8)));
   max-height: min(28rem, calc(100vh - var(--rh-space-8)));

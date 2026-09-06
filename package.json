@@ -7,10 +7,21 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "pnpm -r --workspace-concurrency=1 build",
+    "build": "pnpm -r --workspace-concurrency=1 build && pnpm --filter research-harness compile",
     "test": "pnpm -r test",
-    "test:pre-push": "uv run python scripts/pre_push.py",
+    "test:pre-push": "uv run python scripts/task_gate.py check",
+    "test:browser": "playwright test",
+    "task:check": "uv run python scripts/task_gate.py check",
+    "task:status": "uv run python scripts/task_gate.py status",
+    "task:loop": "uv run python scripts/task_gate.py loop",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "postinstall": "node scripts/install-hooks.mjs",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
+    "@types/node": "22.20.1"
   }
 }

@@ -92,6 +92,11 @@
   display: flex;
 }
 
+/* The author display rule must not override the native hidden state. */
+.rh-app-shell__drawer[hidden] {
+  display: none;
+}
+
 .rh-app-shell__drawer--end {
   justify-content: flex-end;
 }

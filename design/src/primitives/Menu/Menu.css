@@ -1,5 +1,5 @@
 .rh-menu {
-  z-index: 65;
+  z-index: var(--rh-z-popover);
   min-width: 12rem;
   max-width: 22rem;
   max-height: min(24rem, calc(100vh - var(--rh-space-8)));

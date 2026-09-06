@@ -1,0 +1,3 @@
+#!/bin/sh
+# Git runs pre-push at the worktree root and supplies ref updates on stdin.
+exec uv run python scripts/task_gate.py push-hook

@@ -45,7 +45,6 @@ strength of a `--version` call."""
 STDERR_TAIL_BYTES = 16 * 1024
 CANCEL_GRACE_SECONDS = 2.0
 _CHUNK_BYTES = 64 * 1024
-_WINDOWS = sys.platform == "win32"
 
 
 class ProcessTimeout(Exception):  # noqa: N818 - the spec names this interface; callers import it
@@ -68,10 +67,10 @@ def _popen_kwargs() -> dict[str, Any]:
 
     `Any` values because the two platform branches spread into different `Popen` overloads.
     """
-    if _WINDOWS:  # pragma: no cover - exercised on Windows only
-        # Only defined in the Windows build, so typeshed hides it from a POSIX check.
-        return {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}  # type: ignore[attr-defined]
-    return {"start_new_session": True}
+    if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
+        return {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
+    else:
+        return {"start_new_session": True}
 
 
 def _group_id(process: subprocess.Popen[bytes]) -> int | None:
@@ -84,30 +83,31 @@ def _group_id(process: subprocess.Popen[bytes]) -> int | None:
     as a pgid, so the id captured here stays reserved for as long as anything in the tree
     lives -- the stale-pid window is closed by construction. Windows kills by pid instead.
     """
-    if _WINDOWS:  # pragma: no cover - exercised on Windows only
+    if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
         return None
-    try:
-        return os.getpgid(process.pid)
-    except ProcessLookupError:  # pragma: no cover - unreachable before the first reap
-        return process.pid
+    else:
+        try:
+            return os.getpgid(process.pid)
+        except ProcessLookupError:  # pragma: no cover - unreachable before the first reap
+            return process.pid
 
 
 def _kill_tree(process: subprocess.Popen[bytes], pgid: int | None, *, force: bool) -> None:
     if process.poll() is not None and not force:
         return
-    if _WINDOWS:  # pragma: no cover - exercised on Windows only
+    if sys.platform == "win32":  # pragma: no cover - exercised on Windows only
         flag = ["/F"] if force else []
         subprocess.run(
             ["taskkill", "/T", *flag, "/PID", str(process.pid)], capture_output=True, check=False
         )
-        return
-    sig = signal.SIGKILL if force else signal.SIGTERM
-    try:
-        os.killpg(pgid if pgid is not None else process.pid, sig)
-    except ProcessLookupError:
-        return  # every member of the group is already gone
-    except PermissionError:  # pragma: no cover - a foreign group; fall back to the child
-        process.send_signal(sig)
+    else:
+        sig = signal.SIGKILL if force else signal.SIGTERM
+        try:
+            os.killpg(pgid if pgid is not None else process.pid, sig)
+        except ProcessLookupError:
+            return  # every member of the group is already gone
+        except PermissionError:  # pragma: no cover - a foreign group; fall back to the child
+            process.send_signal(sig)
 
 
 class _CappedReader(threading.Thread):

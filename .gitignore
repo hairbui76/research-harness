@@ -21,3 +21,8 @@ dist/
 # JS workspace (pnpm)
 node_modules/
 *.tsbuildinfo
+
+# Verification evidence and disposable browser artifacts (one set per worktree)
+.task-gate/
+playwright-report/
+test-results/
