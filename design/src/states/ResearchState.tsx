@@ -44,6 +44,14 @@ export interface ResearchStatePresentation {
   description: string;
   safety: SafetyNote;
   icon?: IconName;
+  /**
+   * Overrides the kind's own politeness for the cases where the kind is right and the
+   * announcement is not. A `blocked` state is normally assertive because it is a refusal
+   * of something the researcher just did; a *standing* condition of the window is not an
+   * event, and interrupting on every page for as long as it lasts trains the reader to
+   * ignore the assertive channel.
+   */
+  urgent?: boolean;
 }
 
 /** Maps a case to its wording. Exported so tests and docs can enumerate every state. */
@@ -162,6 +170,9 @@ export function describeResearchState(state: ResearchStateCase): ResearchStatePr
       return {
         kind: 'blocked',
         icon: 'lock',
+        // Every page in a read-only window renders this, for as long as the window is
+        // open. It is a condition, not an event, so it is announced politely.
+        urgent: false,
         title: 'This workspace is read-only here',
         description:
           state.reason ??
@@ -216,6 +227,7 @@ export const ResearchState = forwardRef<HTMLDivElement, ResearchStateProps>(
         title={title ?? presentation.title}
         description={description ?? presentation.description}
         safety={presentation.safety}
+        {...(presentation.urgent === undefined ? {} : { urgent: presentation.urgent })}
         data-case={state.case}
         progress={
           state.case === 'index-rebuilding'

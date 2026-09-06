@@ -103,9 +103,18 @@ describe('ResearchState', () => {
     );
   });
 
-  it('warns that a draft is at risk on a read-only host', () => {
+  it('warns that a draft is at risk on a read-only host, politely', () => {
     render(<ResearchState state={{ case: 'read-only-host' }} />);
-    expect(screen.getByRole('alert')).toHaveTextContent('Your draft is not saved yet.');
+    // Announced as `status`, not `alert`. A read-only host is a standing condition of the
+    // whole window, on every page for as long as it lasts — not an event that just
+    // happened. `alert` interrupts whatever the reader is doing, and this notice would
+    // interrupt them on each navigation, which teaches them to ignore the one assertive
+    // channel the product has. The words are unchanged; only the politeness is.
+    const state = screen.getByRole('status');
+    expect(state).toHaveAttribute('data-case', 'read-only-host');
+    expect(state).toHaveAttribute('data-kind', 'blocked');
+    expect(state).toHaveTextContent('Your draft is not saved yet.');
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('passes actions through without performing them', async () => {

@@ -20,3 +20,17 @@
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
 }
+
+/*
+ * What the decision under the pointer or the caret would record.
+ *
+ * The line keeps its height when nothing is focused, so hovering along the bar does not
+ * shift the buttons out from under the pointer.
+ */
+.rh-review-decision-bar__hint {
+  margin: 0;
+  min-block-size: calc(var(--rh-type-body-sm-size) * var(--rh-type-body-sm-lh));
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
