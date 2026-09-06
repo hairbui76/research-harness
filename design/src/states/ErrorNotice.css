@@ -6,21 +6,25 @@
   background: var(--rh-surface-pane);
   color: var(--rh-text-primary);
   border: 1px solid var(--rh-border-default);
-  border-left: 3px solid var(--rh-border-strong);
   border-radius: var(--rh-radius-control);
   font-family: var(--rh-font-sans);
 }
 
+/*
+ * The tone tints the whole hairline rather than a thick rule down one edge: a coloured
+ * side tab is a decoration the notice does not need, and the kind is written out in words
+ * beside the icon anyway.
+ */
 .rh-error-notice[data-tone='warning'] {
-  border-left-color: var(--rh-feedback-warning-border);
+  border-color: var(--rh-feedback-warning-border);
 }
 
 .rh-error-notice[data-tone='error'] {
-  border-left-color: var(--rh-feedback-error-border);
+  border-color: var(--rh-feedback-error-border);
 }
 
 .rh-error-notice[data-tone='info'] {
-  border-left-color: var(--rh-feedback-info-border);
+  border-color: var(--rh-feedback-info-border);
 }
 
 .rh-error-notice__icon {

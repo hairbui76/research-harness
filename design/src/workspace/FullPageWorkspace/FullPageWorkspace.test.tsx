@@ -49,6 +49,24 @@ describe('FullPageWorkspace', () => {
     expect(container.firstChild).toHaveAttribute('data-side', 'start');
   });
 
+  it('marks the content region busy while the body is still arriving', () => {
+    const { container, rerender } = render(
+      <FullPageWorkspace title="Corpus" busy>
+        <p>a skeleton</p>
+      </FullPageWorkspace>,
+    );
+    // The frame stays: the heading a screen-reader user lands on is there before the data.
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(container.querySelector('.rh-full-page__content')).toHaveAttribute('aria-busy', 'true');
+
+    rerender(
+      <FullPageWorkspace title="Corpus">
+        <p>the rows</p>
+      </FullPageWorkspace>,
+    );
+    expect(container.querySelector('.rh-full-page__content')).not.toHaveAttribute('aria-busy');
+  });
+
   it('has no axe violations', async () => {
     const { container } = render(
       <FullPageWorkspace

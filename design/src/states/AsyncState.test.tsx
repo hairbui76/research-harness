@@ -95,6 +95,14 @@ describe('AsyncState', () => {
     expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
   });
 
+  it('drops its own frame when it sits inside one', () => {
+    const { container, rerender } = render(<AsyncState kind="empty" title="No claims yet" flat />);
+    expect(container.firstElementChild).toHaveAttribute('data-flat');
+
+    rerender(<AsyncState kind="empty" title="No claims yet" />);
+    expect(container.firstElementChild).not.toHaveAttribute('data-flat');
+  });
+
   it('has no axe violations for any kind', async () => {
     for (const kind of KINDS) {
       const { container, unmount } = render(

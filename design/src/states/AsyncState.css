@@ -112,3 +112,13 @@
 .rh-state__progress {
   margin-top: var(--rh-space-1);
 }
+
+/*
+ * Inside a panel the state is already framed, so it drops its own box rather than drawing
+ * a second one within the first. The icon and the written kind still carry the state.
+ */
+.rh-state[data-flat] {
+  padding: 0;
+  background: none;
+  border-color: transparent;
+}

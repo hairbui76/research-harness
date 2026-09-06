@@ -27,6 +27,12 @@ export interface AsyncStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   progress?: { value?: number; max?: number; label?: string };
   /** A single row, for inline use inside a list or a pane header. */
   compact?: boolean;
+  /**
+   * Drop the card treatment, for a state that already sits inside a `Card` or a panel. The
+   * icon, the written kind and the copy are unchanged; only the box around them goes, so a
+   * panel does not end up holding a second, smaller panel.
+   */
+  flat?: boolean;
   /** Force the live-region politeness rather than taking it from the kind. */
   urgent?: boolean;
 }
@@ -65,6 +71,7 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
     retainedLabel = 'Showing the last result that succeeded',
     progress,
     compact = false,
+    flat = false,
     urgent,
     className,
     children,
@@ -83,6 +90,7 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
       data-kind={kind}
       data-tone={meta.tone}
       data-compact={compact ? '' : undefined}
+      data-flat={flat ? '' : undefined}
       className={cx('rh-state', className)}
       {...rest}
     >
