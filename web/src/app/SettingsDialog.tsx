@@ -9,7 +9,13 @@
  * Models & providers is the other kind entirely: it reads and writes the project's
  * provider configuration through the daemon. It decides nothing itself — every state word
  * on that screen is one the daemon sent (spec §18).
+ *
+ * A panel is mounted lazily and then kept: the providers panel scans on mount, so it must
+ * not start before the researcher opens it, and once it is open a half-typed entry name
+ * must survive a glance at Appearance. Unmounting on a tab change threw that away, which
+ * is the one thing a settings screen must never do to something the researcher typed.
  */
+import { useState } from 'react';
 import {
   Dialog,
   DialogBody,
@@ -31,6 +37,7 @@ export interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { theme, density, setTheme, setDensity } = useTheme();
+  const [opened, setOpened] = useState<readonly string[]>(['appearance']);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} size="lg">
@@ -38,12 +45,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       <DialogBody>
         {/* `manual`: the providers panel scans on mount, so arrowing past a tab must not
             start a scan the researcher did not ask for. */}
-        <Tabs defaultValue="appearance" activation="manual">
+        <Tabs
+          defaultValue="appearance"
+          activation="manual"
+          onValueChange={(value) =>
+            setOpened((seen) => (seen.includes(value) ? seen : [...seen, value]))
+          }
+        >
           <TabList aria-label="Settings sections">
             <Tab value="appearance">Appearance</Tab>
             <Tab value="providers">Models &amp; providers</Tab>
           </TabList>
-          <TabPanel value="appearance">
+          <TabPanel value="appearance" keepMounted>
             <div className="rh-web-stack rh-web-stack--tight">
               <Select
                 label="Theme"
@@ -65,7 +78,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </Select>
             </div>
           </TabPanel>
-          <TabPanel value="providers">
+          <TabPanel value="providers" keepMounted={opened.includes('providers')}>
             <ProvidersSettings />
           </TabPanel>
         </Tabs>

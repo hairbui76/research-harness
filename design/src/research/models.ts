@@ -372,8 +372,16 @@ export const EGRESS_META: Record<EgressClass, { label: string; icon: IconName; h
 export interface ReviewDecisionMeta {
   label: string;
   icon: IconName;
-  /** Button variant. `accept` is the primary action; `reject` is destructive. */
-  variant: 'primary' | 'secondary' | 'ghost' | 'danger';
+  /**
+   * Button variant. `accept` is the primary action, and `primary` is the neutral inverse
+   * fill rather than the accent or any scientific status colour: an accent that said
+   * "true" would be the one thing the token contract forbids.
+   *
+   * `danger` is absent from this union on purpose. Every decision here is a considered,
+   * recoverable record — rejecting marks the candidate reviewed and destroys nothing that
+   * was accepted — so none of them may wear the colour that means "this loses work".
+   */
+  variant: 'primary' | 'secondary' | 'ghost';
   description: string;
 }
 
@@ -399,7 +407,7 @@ export const REVIEW_DECISION_META: Record<ReviewDecision, ReviewDecisionMeta> = 
   reject: {
     label: 'Reject',
     icon: 'circle-x',
-    variant: 'danger',
+    variant: 'secondary',
     description: 'Record that this was considered and not accepted.',
   },
   defer: {

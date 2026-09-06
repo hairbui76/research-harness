@@ -14,10 +14,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
       class="rh-review-decision-bar__buttons"
     >
       <button
+        aria-describedby="rh-review-decision-rp-accept"
         class="rh-button rh-button--primary rh-button--sm"
         data-decision="accept"
         data-variant="primary"
-        title="Add this to the project’s accepted scientific state."
         type="button"
       >
         <span
@@ -55,10 +55,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rp-qualify"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="qualify"
         data-variant="secondary"
-        title="Accept it with a stated condition or scope limit."
         type="button"
       >
         <span
@@ -99,10 +99,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rp-edit"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="edit"
         data-variant="secondary"
-        title="Change the wording before deciding."
         type="button"
       >
         <span
@@ -138,10 +138,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
         </span>
       </button>
       <button
-        class="rh-button rh-button--danger rh-button--sm"
+        aria-describedby="rh-review-decision-rp-reject"
+        class="rh-button rh-button--secondary rh-button--sm"
         data-decision="reject"
-        data-variant="danger"
-        title="Record that this was considered and not accepted."
+        data-variant="secondary"
         type="button"
       >
         <span
@@ -182,10 +182,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rp-defer"
         class="rh-button rh-button--ghost rh-button--sm"
         data-decision="defer"
         data-variant="ghost"
-        title="Leave it in the queue for later."
         type="button"
       >
         <span
@@ -223,10 +223,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rp-request_more_evidence"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="request_more_evidence"
         data-variant="secondary"
-        title="Send it back for a stronger source before deciding."
         type="button"
       >
         <span
@@ -263,6 +263,45 @@ exports[`ReviewDecisionBar theme x density > matches the dark / comfortable snap
           </span>
         </span>
       </button>
+    </div>
+    <p
+      aria-hidden="true"
+      class="rh-review-decision-bar__hint"
+      data-testid="rh-review-decision-hint"
+    />
+    <div
+      class="rh-visually-hidden"
+    >
+      <span
+        id="rh-review-decision-rp-accept"
+      >
+        Add this to the project’s accepted scientific state.
+      </span>
+      <span
+        id="rh-review-decision-rp-qualify"
+      >
+        Accept it with a stated condition or scope limit.
+      </span>
+      <span
+        id="rh-review-decision-rp-edit"
+      >
+        Change the wording before deciding.
+      </span>
+      <span
+        id="rh-review-decision-rp-reject"
+      >
+        Record that this was considered and not accepted.
+      </span>
+      <span
+        id="rh-review-decision-rp-defer"
+      >
+        Leave it in the queue for later.
+      </span>
+      <span
+        id="rh-review-decision-rp-request_more_evidence"
+      >
+        Send it back for a stronger source before deciding.
+      </span>
     </div>
   </div>
 </div>
@@ -282,10 +321,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
       class="rh-review-decision-bar__buttons"
     >
       <button
+        aria-describedby="rh-review-decision-rr-accept"
         class="rh-button rh-button--primary rh-button--sm"
         data-decision="accept"
         data-variant="primary"
-        title="Add this to the project’s accepted scientific state."
         type="button"
       >
         <span
@@ -323,10 +362,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rr-qualify"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="qualify"
         data-variant="secondary"
-        title="Accept it with a stated condition or scope limit."
         type="button"
       >
         <span
@@ -367,10 +406,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rr-edit"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="edit"
         data-variant="secondary"
-        title="Change the wording before deciding."
         type="button"
       >
         <span
@@ -406,10 +445,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
         </span>
       </button>
       <button
-        class="rh-button rh-button--danger rh-button--sm"
+        aria-describedby="rh-review-decision-rr-reject"
+        class="rh-button rh-button--secondary rh-button--sm"
         data-decision="reject"
-        data-variant="danger"
-        title="Record that this was considered and not accepted."
+        data-variant="secondary"
         type="button"
       >
         <span
@@ -450,10 +489,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rr-defer"
         class="rh-button rh-button--ghost rh-button--sm"
         data-decision="defer"
         data-variant="ghost"
-        title="Leave it in the queue for later."
         type="button"
       >
         <span
@@ -491,10 +530,10 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rr-request_more_evidence"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="request_more_evidence"
         data-variant="secondary"
-        title="Send it back for a stronger source before deciding."
         type="button"
       >
         <span
@@ -531,6 +570,45 @@ exports[`ReviewDecisionBar theme x density > matches the dark / compact snapshot
           </span>
         </span>
       </button>
+    </div>
+    <p
+      aria-hidden="true"
+      class="rh-review-decision-bar__hint"
+      data-testid="rh-review-decision-hint"
+    />
+    <div
+      class="rh-visually-hidden"
+    >
+      <span
+        id="rh-review-decision-rr-accept"
+      >
+        Add this to the project’s accepted scientific state.
+      </span>
+      <span
+        id="rh-review-decision-rr-qualify"
+      >
+        Accept it with a stated condition or scope limit.
+      </span>
+      <span
+        id="rh-review-decision-rr-edit"
+      >
+        Change the wording before deciding.
+      </span>
+      <span
+        id="rh-review-decision-rr-reject"
+      >
+        Record that this was considered and not accepted.
+      </span>
+      <span
+        id="rh-review-decision-rr-defer"
+      >
+        Leave it in the queue for later.
+      </span>
+      <span
+        id="rh-review-decision-rr-request_more_evidence"
+      >
+        Send it back for a stronger source before deciding.
+      </span>
     </div>
   </div>
 </div>
@@ -550,10 +628,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
       class="rh-review-decision-bar__buttons"
     >
       <button
+        aria-describedby="rh-review-decision-rt-accept"
         class="rh-button rh-button--primary rh-button--sm"
         data-decision="accept"
         data-variant="primary"
-        title="Add this to the project’s accepted scientific state."
         type="button"
       >
         <span
@@ -591,10 +669,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rt-qualify"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="qualify"
         data-variant="secondary"
-        title="Accept it with a stated condition or scope limit."
         type="button"
       >
         <span
@@ -635,10 +713,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rt-edit"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="edit"
         data-variant="secondary"
-        title="Change the wording before deciding."
         type="button"
       >
         <span
@@ -674,10 +752,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
       <button
-        class="rh-button rh-button--danger rh-button--sm"
+        aria-describedby="rh-review-decision-rt-reject"
+        class="rh-button rh-button--secondary rh-button--sm"
         data-decision="reject"
-        data-variant="danger"
-        title="Record that this was considered and not accepted."
+        data-variant="secondary"
         type="button"
       >
         <span
@@ -718,10 +796,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rt-defer"
         class="rh-button rh-button--ghost rh-button--sm"
         data-decision="defer"
         data-variant="ghost"
-        title="Leave it in the queue for later."
         type="button"
       >
         <span
@@ -759,10 +837,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rt-request_more_evidence"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="request_more_evidence"
         data-variant="secondary"
-        title="Send it back for a stronger source before deciding."
         type="button"
       >
         <span
@@ -800,6 +878,45 @@ exports[`ReviewDecisionBar theme x density > matches the light / comfortable sna
         </span>
       </button>
     </div>
+    <p
+      aria-hidden="true"
+      class="rh-review-decision-bar__hint"
+      data-testid="rh-review-decision-hint"
+    />
+    <div
+      class="rh-visually-hidden"
+    >
+      <span
+        id="rh-review-decision-rt-accept"
+      >
+        Add this to the project’s accepted scientific state.
+      </span>
+      <span
+        id="rh-review-decision-rt-qualify"
+      >
+        Accept it with a stated condition or scope limit.
+      </span>
+      <span
+        id="rh-review-decision-rt-edit"
+      >
+        Change the wording before deciding.
+      </span>
+      <span
+        id="rh-review-decision-rt-reject"
+      >
+        Record that this was considered and not accepted.
+      </span>
+      <span
+        id="rh-review-decision-rt-defer"
+      >
+        Leave it in the queue for later.
+      </span>
+      <span
+        id="rh-review-decision-rt-request_more_evidence"
+      >
+        Send it back for a stronger source before deciding.
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -818,10 +935,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
       class="rh-review-decision-bar__buttons"
     >
       <button
+        aria-describedby="rh-review-decision-rv-accept"
         class="rh-button rh-button--primary rh-button--sm"
         data-decision="accept"
         data-variant="primary"
-        title="Add this to the project’s accepted scientific state."
         type="button"
       >
         <span
@@ -859,10 +976,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rv-qualify"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="qualify"
         data-variant="secondary"
-        title="Accept it with a stated condition or scope limit."
         type="button"
       >
         <span
@@ -903,10 +1020,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rv-edit"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="edit"
         data-variant="secondary"
-        title="Change the wording before deciding."
         type="button"
       >
         <span
@@ -942,10 +1059,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
         </span>
       </button>
       <button
-        class="rh-button rh-button--danger rh-button--sm"
+        aria-describedby="rh-review-decision-rv-reject"
+        class="rh-button rh-button--secondary rh-button--sm"
         data-decision="reject"
-        data-variant="danger"
-        title="Record that this was considered and not accepted."
+        data-variant="secondary"
         type="button"
       >
         <span
@@ -986,10 +1103,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rv-defer"
         class="rh-button rh-button--ghost rh-button--sm"
         data-decision="defer"
         data-variant="ghost"
-        title="Leave it in the queue for later."
         type="button"
       >
         <span
@@ -1027,10 +1144,10 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
         </span>
       </button>
       <button
+        aria-describedby="rh-review-decision-rv-request_more_evidence"
         class="rh-button rh-button--secondary rh-button--sm"
         data-decision="request_more_evidence"
         data-variant="secondary"
-        title="Send it back for a stronger source before deciding."
         type="button"
       >
         <span
@@ -1067,6 +1184,45 @@ exports[`ReviewDecisionBar theme x density > matches the light / compact snapsho
           </span>
         </span>
       </button>
+    </div>
+    <p
+      aria-hidden="true"
+      class="rh-review-decision-bar__hint"
+      data-testid="rh-review-decision-hint"
+    />
+    <div
+      class="rh-visually-hidden"
+    >
+      <span
+        id="rh-review-decision-rv-accept"
+      >
+        Add this to the project’s accepted scientific state.
+      </span>
+      <span
+        id="rh-review-decision-rv-qualify"
+      >
+        Accept it with a stated condition or scope limit.
+      </span>
+      <span
+        id="rh-review-decision-rv-edit"
+      >
+        Change the wording before deciding.
+      </span>
+      <span
+        id="rh-review-decision-rv-reject"
+      >
+        Record that this was considered and not accepted.
+      </span>
+      <span
+        id="rh-review-decision-rv-defer"
+      >
+        Leave it in the queue for later.
+      </span>
+      <span
+        id="rh-review-decision-rv-request_more_evidence"
+      >
+        Send it back for a stronger source before deciding.
+      </span>
     </div>
   </div>
 </div>

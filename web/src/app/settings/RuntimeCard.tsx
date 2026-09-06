@@ -6,8 +6,14 @@
  * decides nothing: the Add/Update control is disabled by the daemon's own `routable`
  * verdict and repeats the daemon's own `unavailable_reason` beside it, so a browser never
  * gets a second opinion about whether a CLI is safe to use (spec §18).
+ *
+ * Removing asks first. `provider.cli.remove` drops one `local_cli` entry from
+ * `research.yaml` and does nothing else — the CLI stays installed, the subscription login
+ * is untouched, and no session, transcript or accepted object moves — but a researcher
+ * cannot know that from a button that acts on one press, and forgetting a project already
+ * asks. The confirmation states that consequence rather than asking "Are you sure?".
  */
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Badge, Button, Input, Select, useToast } from '@research-harness/design';
 import type {
   CliProviderConfigureRequest,
@@ -69,6 +75,14 @@ export function RuntimeCard({
   // Held as the field's own text, so that a half-typed or cleared value stays on screen
   // exactly as the researcher left it instead of being coerced to a number behind them.
   const [priority, setPriority] = useState(String(configured?.priority ?? 10));
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false);
+  const confirmRemoval = useRef<HTMLButtonElement | null>(null);
+
+  // The confirmation is a question, so it takes the caret: Enter answers it and Escape
+  // abandons it without hunting for either control.
+  useEffect(() => {
+    if (confirmingRemoval) confirmRemoval.current?.focus();
+  }, [confirmingRemoval]);
 
   const modelReasoning = status.models.find((item) => item.id === model)?.reasoning ?? [];
   const reasoningChoices = modelReasoning.length > 0 ? modelReasoning : status.reasoning_choices;
@@ -250,17 +264,61 @@ export function RuntimeCard({
                 Test
               </Button>
               {/* Removing an entry only edits research.yaml, so it is always offered: a
-                  researcher must be able to take out a provider that stopped working. */}
+                  researcher must be able to take out a provider that stopped working. The
+                  press opens the question; the answer below it does the writing. */}
               <Button
-                variant="danger"
+                variant="secondary"
                 size="sm"
-                disabled={!canMutate || working}
-                onClick={() => void act(() => onRemove(configured.name))}
+                disabled={!canMutate || working || confirmingRemoval}
+                onClick={() => setConfirmingRemoval(true)}
               >
                 Remove
               </Button>
             </>
           ) : null}
+        </div>
+      ) : null}
+
+      {configured && confirmingRemoval ? (
+        <div
+          role="group"
+          aria-label={`Confirm removing ${configured.name}`}
+          className="rh-runtime-card__confirm"
+          onKeyDown={(event) => {
+            if (event.key !== 'Escape') return;
+            event.stopPropagation();
+            setConfirmingRemoval(false);
+          }}
+        >
+          <p className="rh-runtime-card__confirm-text">
+            {`Remove ${configured.name} from research.yaml. Requests stop routing through it and ` +
+              'it leaves the model picker. ' +
+              (status.available
+                ? `${status.name} stays installed and logged in on this workstation. `
+                : `${status.name} is not installed here in any case. `) +
+              'No session, transcript or accepted object changes, and adding it again ' +
+              'restores the entry.'}
+          </p>
+          <div className="rh-runtime-card__actions">
+            <Button
+              ref={confirmRemoval}
+              variant="danger"
+              size="sm"
+              disabled={!canMutate || working}
+              onClick={() =>
+                void act(async () => {
+                  const receipt = await onRemove(configured.name);
+                  setConfirmingRemoval(false);
+                  return receipt;
+                })
+              }
+            >
+              {`Remove ${configured.name}`}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setConfirmingRemoval(false)}>
+              Cancel
+            </Button>
+          </div>
         </div>
       ) : null}
 

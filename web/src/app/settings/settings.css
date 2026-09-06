@@ -150,3 +150,23 @@
 .rh-runtime-card__diagnostic {
   color: var(--rh-text-muted);
 }
+
+/*
+ * The question a removal asks before it writes.
+ *
+ * Inline, inside the card it is about, so the entry's name, model and priority stay on
+ * screen while the researcher reads what removing it does. A dialog would cover them.
+ */
+.rh-runtime-card__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  padding-block-start: var(--rh-space-2);
+  border-top: var(--rh-border-width) dashed var(--rh-border-subtle);
+}
+
+.rh-runtime-card__confirm-text {
+  margin: 0;
+  color: var(--rh-text-primary);
+  font-size: var(--rh-type-body-sm-size);
+}
