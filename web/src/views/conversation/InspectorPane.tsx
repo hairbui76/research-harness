@@ -42,7 +42,7 @@ import { ReceiptPanel } from './ReceiptPanel';
 import { useConversation } from './state';
 
 export function InspectorPane() {
-  const { client, overview } = useSession();
+  const { client, overview, error: overviewError, refresh } = useSession();
   const {
     selection,
     following,
@@ -128,7 +128,9 @@ export function InspectorPane() {
           </Stack>
         ),
         review: <ReviewTab client={client} onOpen={navigateTo} />,
-        conflicts: <ConflictsTab overview={overview} />,
+        conflicts: (
+          <ConflictsTab overview={overview} error={overviewError} retry={refresh} />
+        ),
         stale: <StaleTab client={client} onOpen={openRef} />,
       }}
     />
@@ -333,7 +335,25 @@ function ReviewTab({
   );
 }
 
-function ConflictsTab({ overview }: { overview: OverviewReport | null }) {
+/**
+ * The open conflicts, and — unlike the other five tabs — the failure of the read behind
+ * them.
+ *
+ * This tab does not fetch: it renders what `GET /overview` already returned. When that
+ * read failed there are no conflicts to show, and saying "No open conflicts" would report
+ * agreement the daemon never claimed. So the refusal is shown instead, with the same retry
+ * the rest of the cockpit offers.
+ */
+function ConflictsTab({
+  overview,
+  error,
+  retry,
+}: {
+  overview: OverviewReport | null;
+  error: string | null;
+  retry: () => void;
+}) {
+  if (error) return <Failed error={error} retry={retry} />;
   const conflicts = overview?.conflicts ?? [];
   if (conflicts.length === 0) return <AsyncState kind="empty" compact title="No open conflicts" />;
   return (
