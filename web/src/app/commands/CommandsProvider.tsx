@@ -36,11 +36,17 @@ import { CommandPalette } from './CommandPalette';
 import { ShortcutHelp } from './ShortcutHelp';
 import './commands.css';
 
-/** A navigation destination the palette can take the researcher to. */
+/**
+ * A navigation destination the palette can take the researcher to.
+ *
+ * The shape is the rail's own `RailItem`, so the shell hands over the list it already
+ * built rather than a second navigation model. `to` is optional there — an entry with no
+ * route is a heading, not a destination — and one without it is simply not offered.
+ */
 export interface CommandDestination {
   id: string;
   label: string;
-  to: string;
+  to?: string | undefined;
 }
 
 export interface CommandsApi {
@@ -100,12 +106,16 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
   }, []);
 
   const commands = useMemo<Command[]>(() => {
-    const goTo = destinations.map<Command>((destination) => ({
-      id: `go:${destination.id}`,
-      label: destination.label,
-      group: 'Go to',
-      run: () => navigate(destination.to),
-    }));
+    const goTo = destinations
+      .filter((destination): destination is CommandDestination & { to: string } =>
+        Boolean(destination.to),
+      )
+      .map<Command>((destination) => ({
+        id: `go:${destination.id}`,
+        label: destination.label,
+        group: 'Go to',
+        run: () => navigate(destination.to),
+      }));
     return [...goTo, ...pages.flatMap((entry) => entry.commands)];
   }, [destinations, navigate, pages]);
 

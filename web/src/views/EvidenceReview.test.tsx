@@ -7,11 +7,13 @@
  * the local token every review control is disabled and says why: an agent host reads and
  * proposes, and the researcher accepts (Product 29, ADR-007).
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 import type { ReviewItem } from '../api/dto';
-import { EvidenceReviewPage, ProposedChanges } from './EvidenceReview';
+import { AUTO_ADVANCE_KEY, EvidenceReviewPage, ProposedChanges, neighbours } from './EvidenceReview';
+import { CommandsProvider } from '../app/commands';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { splitAround } from '../components/SourcePane';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
@@ -51,14 +53,23 @@ function daemonFor(overview: unknown = FIXTURES.overview) {
   });
 }
 
+/** The review screen inside the shortcut layer, which is where the shell mounts it. */
+function withShell(ui: ReactElement): ReactElement {
+  return <CommandsProvider>{ui}</CommandsProvider>;
+}
+
 function renderReview(daemon = daemonFor(), token: string | null = 'local-token') {
-  return renderView(<EvidenceReviewPage />, {
+  return renderView(withShell(<EvidenceReviewPage />), {
     daemon,
     token,
     route: `/review/${ITEM.candidate_id}`,
     path: '/review/:candidateId',
   });
 }
+
+beforeEach(() => {
+  window.localStorage.clear();
+});
 
 describe('source beside decision', () => {
   it('shows the exact span, the block it sits in, and the field it answers', async () => {
@@ -352,9 +363,11 @@ describe('the screen a researcher spends their day on', () => {
 describe('the review screen inside a project', () => {
   it('links the Work it is reviewing to the project’s own corpus page', async () => {
     renderView(
-      <ProjectPathProvider projectId="prj_abc">
-        <EvidenceReviewPage />
-      </ProjectPathProvider>,
+      withShell(
+        <ProjectPathProvider projectId="prj_abc">
+          <EvidenceReviewPage />
+        </ProjectPathProvider>,
+      ),
       {
         daemon: daemonFor(),
         route: `/projects/prj_abc/review/${ITEM.candidate_id}`,
@@ -377,5 +390,189 @@ describe('the review screen inside a project', () => {
       'href',
       `/corpus/${ITEM.work}`,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------------------
+// Decide and move on.
+//
+// Reviewing is a queue, and the critique's finding was that the cockpit made it a series of
+// page loads. The order a researcher moves through is the server's — the same ranking the
+// inbox draws — remembered once so that a candidate leaving the queue behind them does not
+// renumber what "next" means halfway through an afternoon.
+// ---------------------------------------------------------------------------------------
+
+const SECOND = QUEUE.items[1]!;
+
+/** The Decide panel, so an outcome is read where it is recorded rather than in a toast. */
+function decidePanel(): HTMLElement {
+  return screen.getByRole('heading', { name: 'Decide' }).closest('section') as HTMLElement;
+}
+
+/** The daemon with both of the first two candidates readable, so `next` can be opened. */
+function daemonForQueue() {
+  return fakeDaemon({
+    gets: {
+      '/overview': FIXTURES.overview,
+      [`/candidates/${ITEM.candidate_id}`]: FIXTURES.candidate,
+      [`/candidates/${SECOND.candidate_id}`]: {
+        ...(FIXTURES.candidate as object),
+        candidate_id: SECOND.candidate_id,
+        field: SECOND.field,
+        work: SECOND.work,
+      },
+      [`/blocks/${ITEM.artifact}`]: FIXTURES.blocks,
+    },
+    capabilities: {
+      'review.inbox': FIXTURES.reviewInbox,
+      'review.defer': outcome('defer', null, 'deferred'),
+      'review.accept': outcome('accept', 'E0001'),
+    },
+  });
+}
+
+describe('the queue’s own neighbours', () => {
+  it('reads them off the order the server sent, and stops at both ends', () => {
+    expect(neighbours(QUEUE.items, ITEM.candidate_id)).toEqual({
+      previous: null,
+      next: QUEUE.items[1],
+    });
+    expect(neighbours(QUEUE.items, QUEUE.items[1]!.candidate_id)).toEqual({
+      previous: QUEUE.items[0],
+      next: QUEUE.items[2],
+    });
+    expect(neighbours(QUEUE.items, QUEUE.items[2]!.candidate_id).next).toBeNull();
+  });
+
+  it('offers nothing for a candidate the remembered queue never held', () => {
+    expect(neighbours(QUEUE.items, 'cand_absent')).toEqual({ previous: null, next: null });
+  });
+});
+
+describe('decide and next', () => {
+  it('names the next candidate by its field and its work, as a link', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    expect(
+      screen.getByRole('link', { name: `Next: ${SECOND.field} · ${SECOND.work}` }),
+    ).toHaveAttribute('href', `/review/${SECOND.candidate_id}`);
+    expect(screen.queryByRole('link', { name: /^Previous:/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps the outcome on screen and still offers the way forward', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Defer' }));
+    fireEvent.change(screen.getByLabelText('Why this is being put aside'), {
+      target: { value: 'waiting for the appendix' },
+    });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
+
+    // The panel keeps the outcome; the toast that also announced it is transient.
+    await waitFor(() => expect(decidePanel()).toHaveTextContent('Candidate deferred.'));
+    expect(screen.getByRole('link', { name: /^Next:/ })).toBeInTheDocument();
+  });
+
+  it('stays on the candidate unless auto-advance was asked for', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    expect(screen.getByRole('switch', { name: /next candidate/i })).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Defer' }));
+    fireEvent.change(screen.getByLabelText('Why this is being put aside'), {
+      target: { value: 'waiting for the appendix' },
+    });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
+
+    await waitFor(() => expect(decidePanel()).toHaveTextContent('Candidate deferred.'));
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field);
+  });
+
+  it('opens the next one when it was, and remembers the choice for next time', async () => {
+    const user = userEvent.setup();
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    await user.click(screen.getByRole('switch', { name: /next candidate/i }));
+    expect(window.localStorage.getItem(AUTO_ADVANCE_KEY)).toBe('true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Defer' }));
+    fireEvent.change(screen.getByLabelText('Why this is being put aside'), {
+      target: { value: 'waiting for the appendix' },
+    });
+    fireEvent.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(SECOND.field),
+    );
+  });
+
+  it('keeps the page frame while it is still reading the candidate', () => {
+    renderReview(daemonForQueue());
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.candidate_id);
+    expect(screen.getByText(/Reading candidate/)).toBeInTheDocument();
+  });
+});
+
+describe('the review keyboard', () => {
+  it('presses the decision the key stands for, rather than calling the daemon itself', async () => {
+    const user = userEvent.setup();
+    const daemon = daemonForQueue();
+    renderReview(daemon);
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    await user.keyboard('d');
+
+    // `d` is Defer, and Defer asks for its sentence before anything is recorded.
+    expect(screen.getByLabelText('Why this is being put aside')).toBeInTheDocument();
+    expect(daemon.capabilityCalls().map((call) => call.name)).not.toContain('review.defer');
+  });
+
+  it('stays out of the sentence a decision is being recorded with', async () => {
+    const user = userEvent.setup();
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: 'Defer' }));
+    const note = screen.getByLabelText('Why this is being put aside');
+    await user.click(note);
+    await user.keyboard('needs a decision about anchors');
+
+    expect(note).toHaveValue('needs a decision about anchors');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field);
+  });
+
+  it('moves to the next candidate on n and back on p', async () => {
+    const user = userEvent.setup();
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    await user.keyboard('n');
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(SECOND.field),
+    );
+
+    await user.keyboard('p');
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field),
+    );
+  });
+
+  it('lists its keys in the help sheet, so they can be found without being guessed', async () => {
+    const user = userEvent.setup();
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    await user.keyboard('?');
+
+    const sheet = screen.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    expect(sheet).toHaveTextContent('Accept');
+    expect(sheet).toHaveTextContent('Request more evidence');
+    expect(sheet).toHaveTextContent('Next candidate');
   });
 });
