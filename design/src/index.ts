@@ -108,7 +108,7 @@ export type {
 export { Progress } from './primitives/Progress';
 export type { ProgressProps, ProgressSize, ProgressTone } from './primitives/Progress';
 export { Skeleton } from './primitives/Skeleton';
-export type { SkeletonProps, SkeletonShape } from './primitives/Skeleton';
+export type { SkeletonDirection, SkeletonProps, SkeletonShape } from './primitives/Skeleton';
 export { ScrollArea } from './primitives/ScrollArea';
 export type { ScrollAreaProps, ScrollAreaOrientation } from './primitives/ScrollArea';
 export { PaneGroup, Pane, PaneHandle, resizeAt } from './primitives/ResizablePane';

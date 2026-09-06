@@ -3,9 +3,13 @@
  *
  * `synthesis.compare` reads an existing matrix; it proposes no new facts. An empty cell
  * means "not recorded", never "the work lacks the property" — the table says so, because
- * reading absence out of a blank cell is exactly the mistake PRODUCT §11 is about.
+ * reading absence out of a blank cell is exactly the mistake this product is built against.
+ *
+ * The frame is mounted before the read resolves, and so is the compare form: a field can
+ * be compared while the matrix list is still arriving, or after it failed.
  */
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, FullPageWorkspace, Input } from '@research-harness/design';
 import type { JsonObject } from '../api/dto';
 import {
@@ -19,10 +23,12 @@ import {
   StatusBadge,
 } from '../components/Feedback';
 import { useSession } from '../app/session';
+import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
 export function SynthesisPage() {
   const { client } = useSession();
+  const { href } = useProjectPaths();
   const [field, setField] = useState('');
   const [requested, setRequested] = useState<string | null>(null);
 
@@ -32,18 +38,25 @@ export function SynthesisPage() {
     [client, requested],
   );
 
-  if (matrices.loading) return <Loading what="the synthesis matrices" />;
-  if (matrices.error) return <ErrorBox error={matrices.error} retry={matrices.reload} />;
-
   const built = matrices.data?.matrices ?? [];
   return (
     <FullPageWorkspace
+      busy={matrices.loading}
       title="Synthesis"
       description="A matrix reads what was recorded; it proposes no new facts."
     >
       <div className="rh-web-stack">
-        {built.length === 0 ? (
-          <Empty>No synthesis matrix has been built.</Empty>
+        {matrices.loading ? (
+          <Loading what="the synthesis matrices" shape="cards" />
+        ) : matrices.error ? (
+          <ErrorBox error={matrices.error} retry={matrices.reload} />
+        ) : built.length === 0 ? (
+          <Empty
+            description="A matrix lines the works of the corpus up against the fields that were recorded for them, so one property can be read across all of them at once. It is built from accepted evidence; there is nothing for it to read yet."
+            action={<Link to={href('/corpus')}>See the works a matrix would read</Link>}
+          >
+            No synthesis matrix has been built yet
+          </Empty>
         ) : (
           built.map((matrix) => (
             <Panel
@@ -85,17 +98,30 @@ export function SynthesisPage() {
             </Button>
           </form>
 
-          {requested && comparison.loading ? <Loading what={requested} /> : null}
-          {comparison.error ? <ErrorBox error={comparison.error} /> : null}
-          {comparison.data ? <ComparisonTable rows={comparison.data.rows} /> : null}
+          {requested && comparison.loading ? <Loading what={requested} shape="table" /> : null}
+          {comparison.error ? (
+            <ErrorBox error={comparison.error} retry={comparison.reload} />
+          ) : null}
+          {comparison.data ? (
+            <ComparisonTable rows={comparison.data.rows} {...(requested ? { field: requested } : {})} />
+          ) : null}
         </Panel>
       </div>
     </FullPageWorkspace>
   );
 }
 
-export function ComparisonTable({ rows }: { rows: JsonObject[] }) {
-  if (rows.length === 0) return <Empty>No rows for that field.</Empty>;
+export function ComparisonTable({ rows, field }: { rows: JsonObject[]; field?: string }) {
+  if (rows.length === 0) {
+    return (
+      <Empty
+        flat
+        description="No matrix has a value recorded under that name. That is a gap in what has been recorded, not a statement about the works — check the field's spelling against a matrix above."
+      >
+        {field ? `Nothing recorded under “${field}”` : 'Nothing recorded under that field'}
+      </Empty>
+    );
+  }
   const columns = Object.keys(rows[0] ?? {});
   return (
     <>

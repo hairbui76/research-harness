@@ -13,10 +13,11 @@
  */
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
-import { CorpusPage, EvidencePage } from './Corpus';
+import { CorpusPage, EvidencePage, WorkPage } from './Corpus';
 import { QuestionsPage } from './Questions';
 import { ProjectPathProvider } from '../app/projectPaths';
-import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
+import type { FakeDaemon } from '../test/harness';
 
 const WORK = FIXTURES.index.works[0]!;
 const ARTIFACT = WORK.artifacts[0]!;
@@ -170,5 +171,117 @@ describe('the questions screen', () => {
       'href',
       '/claims/C0001',
     );
+  });
+});
+
+/**
+ * The corpus in the three states that are not "here are the works".
+ *
+ * Returning the state instead of the page used to take the `h1` off the screen with it, so
+ * the shell's skip link had nowhere to land and a researcher could not tell which page had
+ * failed. The frame is asserted first in each of these, the state second.
+ */
+const REFUSAL = 'the workspace lock is held by another process';
+
+/** A daemon that has not answered yet, so the page stays in its loading state. */
+function pendingDaemon(): FakeDaemon {
+  return {
+    fetch: (() => new Promise<Response>(() => undefined)) as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
+
+function refusingDaemon(capability: string): FakeDaemon {
+  return fakeDaemon({
+    capabilities: {
+      [capability]: {
+        capability,
+        ok: false,
+        error: { code: 'unavailable', message: REFUSAL },
+      },
+    },
+  });
+}
+
+describe('the corpus before, without, and after its read', () => {
+  it('keeps its heading and draws panels while the read is in flight', () => {
+    const { container } = renderView(<CorpusPage />, { daemon: pendingDaemon() });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(container.querySelector('.rh-full-page__content')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('Reading the corpus…');
+    expect(container.querySelectorAll('.rh-web-skeleton-card').length).toBeGreaterThan(1);
+    expect(container.textContent).not.toMatch(/\d+ works\./);
+  });
+
+  it('keeps its heading when the read is refused, and offers the retry', async () => {
+    renderView(<CorpusPage />, { daemon: refusingDaemon('work.list') });
+
+    await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('says what the corpus is for and how a source enters it when it is empty', async () => {
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({ capabilities: { 'work.list': { count: 0, works: [] } } }),
+        route: '/projects/prj_abc/corpus',
+        path: '/projects/prj_abc/corpus',
+      },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('No works in the corpus yet')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(screen.getByText(/whether a file has a stored parse/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to attach a source' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+    await expectNoAxeViolations(container);
+  });
+
+  it('states a file size in the units the rest of the product uses', async () => {
+    renderView(<CorpusPage />, { daemon: corpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByText(WORK.title)).toBeInTheDocument());
+    // `formatFileSize` is the package's own wording, so a file reads the same here as it
+    // does in the composer's attachment tray. A raw byte count is not a size a reader has.
+    expect(screen.queryByText(`${ARTIFACT.size_bytes} bytes`)).not.toBeInTheDocument();
+    expect(screen.getByText(/\d+(\.\d)? (B|kB|MB|GB|TB)$/)).toBeInTheDocument();
+  });
+});
+
+describe('a work that is not in this corpus', () => {
+  it('keeps the page and offers the way back rather than a bare sentence', async () => {
+    const daemon = fakeDaemon({
+      capabilities: {
+        'evidence.list': { count: 0, evidence: [] },
+        'work.get': {
+          capability: 'work.get',
+          ok: false,
+          error: { code: 'not_found', message: REFUSAL },
+        },
+      },
+    });
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <WorkPage />
+      </ProjectPathProvider>,
+      {
+        daemon,
+        route: '/projects/prj_abc/corpus/W9999',
+        path: '/projects/prj_abc/corpus/:workId',
+      },
+    );
+
+    // A refusal is a refusal, not an absence: the page says which one it is.
+    await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1, name: 'W9999' })).toBeInTheDocument();
   });
 });

@@ -1,11 +1,36 @@
 /**
  * The presentation every research page shares, expressed in the Design System.
  *
- * Nothing here is a new primitive: `Loading`/`Empty` are `AsyncState`, `ErrorBox` is
- * `ErrorNotice`, `Panel` is a `Card`, and `StatusBadge` is `AuthorityBadge` when the word
- * the daemon used *is* an authority label and a toned `Badge` otherwise. They exist so
- * that eleven views spell the same thing the same way, not to re-implement anything the
- * package owns (DS spec §12.7).
+ * Nothing here is a new primitive: `Loading`/`Empty` are `AsyncState` and `Skeleton`,
+ * `ErrorBox` is `ErrorNotice`, `Panel` is a `Card`, and `StatusBadge` is `AuthorityBadge`
+ * when the word the daemon used *is* an authority label and a toned `Badge` otherwise.
+ * They exist so that eleven views spell the same thing the same way, not to re-implement
+ * anything the package owns (DS spec §12.7).
+ *
+ * ## How a research page uses these
+ *
+ * The frame is mounted first and the state goes *inside* it — never in front of it:
+ *
+ * ```tsx
+ * return (
+ *   <FullPageWorkspace busy={state.loading} title="Claims" description={…}>
+ *     {state.loading ? <Loading what="the claims" shape="table" />
+ *      : state.error ? <ErrorBox error={state.error} retry={state.reload} />
+ *      : rows.length === 0 ? <Empty description="…" action={…}>No claims yet</Empty>
+ *      : <DataTable …>{…}</DataTable>}
+ *   </FullPageWorkspace>
+ * );
+ * ```
+ *
+ * A page that returns `<Loading/>` instead of itself has no `h1` while it loads, so the
+ * shell's skip link lands nowhere and a researcher cannot tell which page they are on. The
+ * frame carries the identity; the body carries the state; `busy` marks the content region
+ * while the body is a skeleton. A description that quotes a count says the part that is
+ * true without the data until the data arrives.
+ *
+ * These three are the contract the research views share, so they only ever grow: existing
+ * props keep their names and their meaning, new ones are optional, and a caller that
+ * passes nothing new renders what it rendered before.
  *
  * `StatusBadge` never signals with colour alone: every badge renders the daemon's own word
  * beside its glyph (DS spec §12.6).
@@ -18,12 +43,57 @@ import {
   Card,
   ErrorNotice,
   ScrollArea,
+  Skeleton,
   AUTHORITY_LABELS,
 } from '@research-harness/design';
 import type { AuthorityLabel, BadgeProps, IconName } from '@research-harness/design';
 
-export function Loading({ what }: { what: string }) {
-  return <AsyncState kind="loading" title={`Reading ${what}…`} />;
+/**
+ * What is about to arrive, so the placeholder can be shaped like it: a table of rows, a
+ * run of panels, a list of short entries, or a paragraph.
+ */
+export type LoadingShape = 'text' | 'list' | 'table' | 'cards';
+
+/** The columns a table skeleton draws. Five, because that is the narrowest research table. */
+const TABLE_COLUMNS = ['26%', '14%', '16%', '12%', '20%'] as const;
+
+/**
+ * Waiting for a read, drawn as the content that is coming rather than as a spinner.
+ *
+ * The skeleton is hidden from assistive technology and the wait is announced once,
+ * politely, in words: a screen reader hears "Reading the claims…" and nothing else, while
+ * the page keeps its heading and its shape.
+ */
+export function Loading({ what, shape = 'text' }: { what: string; shape?: LoadingShape }) {
+  return (
+    <div className="rh-web-loading">
+      <p className="rh-visually-hidden" role="status">{`Reading ${what}…`}</p>
+      {shape === 'table' ? (
+        <div className="rh-web-skeleton-table">
+          {Array.from({ length: 6 }, (_unused, row) => (
+            <Skeleton key={row} direction="row" widths={TABLE_COLUMNS} />
+          ))}
+        </div>
+      ) : shape === 'cards' ? (
+        <div className="rh-web-stack">
+          {Array.from({ length: 3 }, (_unused, card) => (
+            <div key={card} className="rh-web-skeleton-card">
+              <Skeleton width="40%" />
+              <Skeleton lines={3} />
+            </div>
+          ))}
+        </div>
+      ) : shape === 'list' ? (
+        <div className="rh-web-stack">
+          {Array.from({ length: 5 }, (_unused, row) => (
+            <Skeleton key={row} lines={2} />
+          ))}
+        </div>
+      ) : (
+        <Skeleton lines={3} />
+      )}
+    </div>
+  );
 }
 
 export function ErrorBox({ error, retry }: { error: string; retry?: () => void }) {
@@ -38,8 +108,41 @@ export function ErrorBox({ error, retry }: { error: string; retry?: () => void }
   );
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return <AsyncState kind="empty" title={children} />;
+/**
+ * Nothing to show, and what to do about it.
+ *
+ * The title is the fact ("No claims yet"); `description` says what this page is for and
+ * how the objects on it come to exist; `action` is one real next step — a link to where
+ * the object is created, or a button that asks again. An empty state with none of that
+ * teaches nothing, which is the state most of these pages were in.
+ *
+ * `flat` is for an empty that already sits inside a `Panel`, so a card does not end up
+ * holding a smaller card.
+ */
+export function Empty({
+  children,
+  description,
+  action,
+  flat,
+}: {
+  children: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+  flat?: boolean;
+}) {
+  return (
+    <AsyncState
+      kind="empty"
+      // Every title below names the state in the page's own words, so the kind's generic
+      // label above it would be a kicker repeating what the sentence already says.
+      hideKind
+      title={children}
+      {...(description === undefined ? {} : { description })}
+      {...(flat ? { flat: true } : {})}
+    >
+      {action === undefined ? null : <div className="rh-web-row">{action}</div>}
+    </AsyncState>
+  );
 }
 
 export function Panel({

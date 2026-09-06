@@ -11,10 +11,14 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ClaimDetailPage, ClaimsPage } from './Claims';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
+import type { FakeDaemon } from '../test/harness';
 
 const CLAIM = 'C0001';
 
-function daemonFor(overview: unknown = FIXTURES.overview) {
+function daemonFor(
+  overview: unknown = FIXTURES.overview,
+  extraCapabilities: Record<string, unknown> = {},
+) {
   return fakeDaemon({
     gets: {
       '/overview': overview,
@@ -30,6 +34,7 @@ function daemonFor(overview: unknown = FIXTURES.overview) {
       'claim.relate': { capability: 'claim.relate', objects: [CLAIM] },
       'decision.accept': { capability: 'decision.accept', objects: ['D0001'] },
       'claim.override_strength': { capability: 'claim.override_strength', objects: [CLAIM] },
+      ...extraCapabilities,
     },
   });
 }
@@ -234,5 +239,112 @@ describe('the claim screens inside a project', () => {
       'href',
       '/evidence/E0001',
     );
+  });
+});
+
+/**
+ * The claim screens in the states that are not "here is the claim".
+ *
+ * Both used to return the state instead of the page, which took the `h1` — the claim's own
+ * id — off the screen exactly when a researcher needed to know which claim had failed to
+ * load. The frame is asserted first in each of these, the state second.
+ */
+const CLAIM_REFUSAL = 'the workspace lock is held by another process';
+
+/** A daemon that has not answered yet, so the page stays in its loading state. */
+function pendingDaemon(): FakeDaemon {
+  return {
+    fetch: (() => new Promise<Response>(() => undefined)) as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
+
+describe('the claim list before, without, and after its read', () => {
+  it('keeps its heading and draws table rows while the read is in flight', () => {
+    const { container } = renderView(<ClaimsPage />, { daemon: pendingDaemon() });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Claims' })).toBeInTheDocument();
+    expect(container.querySelector('.rh-full-page__content')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('Reading the claims…');
+    expect(
+      container.querySelectorAll('.rh-skeleton-group[data-direction="row"]').length,
+    ).toBeGreaterThan(1);
+    expect(container.textContent).not.toMatch(/\d+ registered/);
+  });
+
+  it('keeps its heading when the read is refused, and offers the retry', async () => {
+    renderView(<ClaimsPage />, {
+      daemon: fakeDaemon({
+        capabilities: {
+          'claim.list': {
+            capability: 'claim.list',
+            ok: false,
+            error: { code: 'unavailable', message: CLAIM_REFUSAL },
+          },
+        },
+      }),
+    });
+
+    await waitFor(() => expect(screen.getByText(CLAIM_REFUSAL)).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1, name: 'Claims' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('says what a claim is and where one comes from when there are none', async () => {
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimsPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({ capabilities: { 'claim.list': { count: 0, claims: [] } } }),
+        route: '/projects/prj_abc/claims',
+        path: '/projects/prj_abc/claims',
+      },
+    );
+
+    await waitFor(() => expect(screen.getByText('No claims registered yet')).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1, name: 'Claims' })).toBeInTheDocument();
+    expect(screen.getByText(/held against the strength its evidence allows/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to promote a claim' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+    await expectNoAxeViolations(container);
+  });
+});
+
+describe('one claim that could not be read', () => {
+  it('keeps the claim id as the heading and offers the retry', async () => {
+    renderView(<ClaimDetailPage />, {
+      daemon: fakeDaemon({
+        capabilities: {
+          'claim.find_support': FIXTURES.claimSupport,
+          'decision.list': { count: 0, decisions: [] },
+          'anchor.list': { count: 0, anchors: [] },
+        },
+        gets: { [`/objects/${CLAIM}`]: undefined as never },
+      }),
+      route: `/claims/${CLAIM}`,
+      path: '/claims/:claimId',
+    });
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('heading', { level: 1, name: CLAIM })).toBeInTheDocument();
+  });
+
+  it('teaches nothing it cannot know: no evidence relation is reported as absent', async () => {
+    const noSupport = { supporting: [], qualifying: [], contradicting: [], other: [] };
+    renderView(<ClaimDetailPage />, {
+      daemon: daemonFor(FIXTURES.overview, { 'claim.find_support': noSupport }),
+      route: `/claims/${CLAIM}`,
+      path: '/claims/:claimId',
+    });
+
+    await waitFor(() => expect(screen.getByText(/Supporting \(0\)/)).toBeInTheDocument());
+    expect(
+      screen.getByText('No evidence is related to this claim as supporting.'),
+    ).toBeInTheDocument();
   });
 });

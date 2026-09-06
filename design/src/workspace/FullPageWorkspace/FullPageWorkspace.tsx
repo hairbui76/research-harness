@@ -16,6 +16,12 @@ export interface FullPageWorkspaceProps extends Omit<HTMLAttributes<HTMLElement>
   /** Which edge the side panel sits on. Default `end`. */
   sidePanelPosition?: 'start' | 'end';
   footer?: ReactNode;
+  /**
+   * Whether the body is still waiting for its first content. The frame is unaffected — the
+   * heading, description, toolbar and footer stay exactly where they are — and only the
+   * content region is marked `aria-busy`, so a page can load without disappearing.
+   */
+  busy?: boolean;
   children?: ReactNode;
 }
 
@@ -26,6 +32,11 @@ export interface FullPageWorkspaceProps extends Omit<HTMLAttributes<HTMLElement>
  * The header is sticky so the page's identity and its actions survive a long scroll, and
  * the title is the page's `h1`, which is what a screen-reader user lands on after the
  * shell's skip link.
+ *
+ * That is why loading, empty and failure belong *inside* this frame rather than in place
+ * of it: a page that returns its state instead of itself has no heading for the skip link
+ * to reach, and a researcher who was reading Claims cannot tell that they still are. The
+ * body carries the state; `busy` marks the content region while it does.
  */
 export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>(
   function FullPageWorkspace(
@@ -37,6 +48,7 @@ export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>
       sidePanelLabel = 'Page panel',
       sidePanelPosition = 'end',
       footer,
+      busy = false,
       children,
       className,
       id,
@@ -71,7 +83,9 @@ export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>
         </header>
 
         <div className="rh-full-page__body">
-          <div className="rh-full-page__content">{children}</div>
+          <div className="rh-full-page__content" aria-busy={busy ? true : undefined}>
+            {children}
+          </div>
           {sidePanel === undefined ? null : (
             <aside className="rh-full-page__side" aria-label={sidePanelLabel}>
               {sidePanel}

@@ -10,6 +10,27 @@ import { screen, waitFor } from '@testing-library/react';
 import { OverviewPage } from './Overview';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
+import type { FakeDaemon } from '../test/harness';
+
+const REFUSAL = 'the workspace lock is held by another process';
+
+/** A daemon that has not answered yet, so the page stays in its loading state. */
+function pendingDaemon(): FakeDaemon {
+  return {
+    fetch: (() => new Promise<Response>(() => undefined)) as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
+
+/** A daemon that refuses the one read this page is built on. */
+function refusingDaemon(): FakeDaemon {
+  return {
+    fetch: (async () => new Response(REFUSAL, { status: 503 })) as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
 
 describe('the overview', () => {
   it('states the project and its size the way Product 26 asks', async () => {
@@ -120,5 +141,58 @@ describe('the overview inside a project', () => {
       node.getAttribute('href'),
     );
     expect(hrefs).toEqual(FIXTURES.overview.attention.map((group) => group.route));
+  });
+});
+
+/**
+ * The three states the page can be in that are not "here is the project".
+ *
+ * The page used to return each of them *instead of* itself, which left the h1 — the
+ * project's own name — off the screen exactly when a researcher needed to know which
+ * project had failed to load. The frame is the assertion here.
+ */
+describe('the overview before, without, and after its read', () => {
+  it('keeps a heading and marks the body busy while the read is in flight', () => {
+    const { container } = renderView(<OverviewPage />, { daemon: pendingDaemon() });
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument();
+    expect(container.querySelector('.rh-full-page__content')).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('Reading the project overview…');
+    expect(container.querySelector('.rh-skeleton')).toBeInTheDocument();
+    // The description cannot quote counts it does not have, so it says what it does know.
+    expect(container.textContent).not.toMatch(/\d+ works ·/);
+  });
+
+  it('keeps the heading when the daemon refuses, and offers the retry', async () => {
+    renderView(<OverviewPage />, { daemon: refusingDaemon() });
+
+    await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('teaches what claims and questions are when there are none, and where they come from', async () => {
+    const bare = { ...FIXTURES.overview, claim_health: [], open_questions: [] };
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <OverviewPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({ gets: { '/overview': bare } }),
+        route: '/projects/prj_abc/overview',
+        path: '/projects/prj_abc/overview',
+      },
+    );
+
+    await waitFor(() => expect(screen.getByText('No claims registered yet')).toBeInTheDocument());
+    expect(screen.getByText(/A claim states what this project asserts/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to promote a claim' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+    expect(screen.getByText('No open questions')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to promote a question' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+    await expectNoAxeViolations(container);
   });
 });

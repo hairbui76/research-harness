@@ -60,8 +60,13 @@
   text-transform: uppercase;
 }
 
+/*
+ * A state sits in whatever it is given, and a research page is wide. Both lines are prose,
+ * so both are capped at a reading measure rather than running the width of a table.
+ */
 .rh-state__title {
   margin: 0;
+  max-inline-size: 68ch;
   color: var(--rh-text-primary);
   font-size: var(--rh-type-body-size);
   line-height: var(--rh-type-body-lh);
@@ -70,6 +75,7 @@
 
 .rh-state__description {
   margin: 0;
+  max-inline-size: 68ch;
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
@@ -111,4 +117,14 @@
 
 .rh-state__progress {
   margin-top: var(--rh-space-1);
+}
+
+/*
+ * Inside a panel the state is already framed, so it drops its own box rather than drawing
+ * a second one within the first. The icon and the written kind still carry the state.
+ */
+.rh-state[data-flat] {
+  padding: 0;
+  background: none;
+  border-color: transparent;
 }
