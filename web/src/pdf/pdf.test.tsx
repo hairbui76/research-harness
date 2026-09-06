@@ -10,6 +10,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { PdfPage } from './PdfPage';
+import type { PdfHighlight } from './PdfPage';
 import { usePdfDocument } from './usePdfDocument';
 import type { PdfDocumentState } from './usePdfDocument';
 import { resetPdfjs } from './worker';
@@ -187,7 +188,7 @@ function Harness(props: {
   scale?: number;
   index?: number;
   textLayer?: boolean;
-  highlights?: { rect: [number, number, number, number]; label?: string; kind?: 'anchor' }[];
+  highlights?: readonly PdfHighlight[];
   onDoubleClick?: (page: number, x: number, y: number) => void;
 }) {
   const document = useDocument();
@@ -250,6 +251,34 @@ describe('PdfPage', () => {
     expect(highlight.style.height).toBe('40px');
     expect(highlight).toHaveAttribute('data-kind', 'anchor');
     expect(highlight).toHaveAccessibleName('SyncTeX target, line 120');
+  });
+
+  it('names the kind of every highlight it draws, so each gets its own paper tint', async () => {
+    // Three meanings, three marks: where SyncTeX just landed, an accepted source anchor,
+    // and a search hit. The stylesheet keys the tint off `data-kind`, so an unnamed
+    // highlight has to fall to `sync` rather than to no kind at all.
+    render(
+      <Harness
+        highlights={[
+          { rect: [72, 700, 172, 720] },
+          { rect: [72, 660, 172, 680], kind: 'sync' },
+          { rect: [72, 620, 172, 640], kind: 'anchor', label: 'Accepted span' },
+          { rect: [72, 580, 172, 600], kind: 'match', label: 'Search hit 1 of 4' },
+        ]}
+      />,
+    );
+    await screen.findByRole('img', { name: 'page 1' });
+
+    const drawn = await screen.findAllByTestId('pdf-highlight');
+    expect(drawn.map((mark) => mark.getAttribute('data-kind'))).toEqual([
+      'sync',
+      'sync',
+      'anchor',
+      'match',
+    ]);
+    for (const mark of drawn) expect(mark).toHaveClass('rh-pdf__highlight');
+    expect(drawn[2]).toHaveAccessibleName('Accepted span');
+    expect(drawn[3]).toHaveAccessibleName('Search hit 1 of 4');
   });
 
   it('renders the text layer only when it is asked for', async () => {

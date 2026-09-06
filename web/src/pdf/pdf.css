@@ -2,9 +2,10 @@
  * The PDF page and what is drawn over it.
  *
  * The page itself is the one surface that stays near-white in both themes — a preview must
- * look like the paper it will be printed on — which is what `--rh-surface-paper` and the
- * `--rh-text-on-paper*` inks are for. Everything else comes from the same semantic tokens
- * as the rest of the cockpit; there is no literal colour here.
+ * look like the paper it will be printed on — which is what `--rh-surface-paper`, the
+ * `--rh-text-on-paper*` inks and the `--rh-highlight-on-paper*` marks are for: everything
+ * drawn on the page is stated in paper's own tokens, not the theme's. Everything else comes
+ * from the same semantic tokens as the rest of the cockpit; there is no literal colour here.
  */
 
 .rh-pdf {
@@ -52,24 +53,30 @@
 
 /* A rectangle the caller gave in PDF coordinates: a SyncTeX target, an accepted anchor,
    or a search hit. Colour is never the only signal — each carries a `data-kind` and, when
-   the caller names it, an accessible label. */
+   the caller names it, an accessible label.
+
+   `multiply` is what keeps the glyphs underneath visible, and it is also why the fill has
+   to be a *paper* tint rather than the pane tint of the same meaning: multiplied over a
+   near-white page, a dark-canvas tint goes to near-black and the page ink under it falls
+   to about 1.1:1. `--rh-highlight-on-paper*` are light in both themes for that reason, and
+   design/scripts/check-contrast.mjs measures each one through the blend. */
 .rh-pdf__highlight {
   position: absolute;
   pointer-events: none;
-  border: var(--rh-border-width) solid var(--rh-accent-border);
+  border: var(--rh-border-width) solid var(--rh-highlight-on-paper-border);
   border-radius: 2px;
-  background: var(--rh-accent-subtle);
+  background: var(--rh-highlight-on-paper);
   mix-blend-mode: multiply;
 }
 
 .rh-pdf__highlight[data-kind='anchor'] {
-  border-color: var(--rh-status-accepted-border);
-  background: var(--rh-status-accepted-bg);
+  border-color: var(--rh-highlight-on-paper-anchor-border);
+  background: var(--rh-highlight-on-paper-anchor);
 }
 
 .rh-pdf__highlight[data-kind='match'] {
-  border-color: var(--rh-feedback-warning-border);
-  background: var(--rh-feedback-warning-bg);
+  border-color: var(--rh-highlight-on-paper-match-border);
+  background: var(--rh-highlight-on-paper-match);
 }
 
 .rh-pdf__fallback {
