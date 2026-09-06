@@ -37,7 +37,11 @@ from research_harness.cli.commands.local_app import (
     request_bootstrap,
 )
 
-runner = CliRunner()
+# Typer renders `--help` through Rich, which obeys FORCE_COLOR from the caller's shell and
+# would wrap every command name in escape codes; these tests read the plain words.
+runner = CliRunner(
+    env={"FORCE_COLOR": None, "CLICOLOR_FORCE": None, "NO_COLOR": "1", "TERM": "dumb"}
+)
 
 APP_TOKEN = "persisted-app-token-not-for-urls"
 NONCE = "one-time-nonce"
