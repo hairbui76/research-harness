@@ -115,6 +115,13 @@ body,
   border-top: var(--rh-border-width) dashed var(--rh-border-subtle);
 }
 
+/* The restatement and the reason sit on the stack's own gap, and a long unbroken token
+   (an id, a URL in a quote) wraps instead of pushing the pane wider. */
+.rh-web-prompt p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 /* A field that sits on one line with the button that submits it. */
 .rh-web-inline-field {
   inline-size: min(20rem, 100%);

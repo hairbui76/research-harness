@@ -165,6 +165,12 @@ const REQUIRED_SEMANTIC = [
     `--rh-feedback-${f}-bg`,
     `--rh-feedback-${f}-border`,
   ]),
+  '--rh-highlight-on-paper',
+  '--rh-highlight-on-paper-border',
+  '--rh-highlight-on-paper-anchor',
+  '--rh-highlight-on-paper-anchor-border',
+  '--rh-highlight-on-paper-match',
+  '--rh-highlight-on-paper-match-border',
 ];
 
 const REQUIRED_FOUNDATION = [

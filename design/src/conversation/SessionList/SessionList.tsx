@@ -230,6 +230,7 @@ export const SessionList = forwardRef<HTMLDivElement, SessionListProps>(function
       ) : sessions.length === 0 ? (
         <AsyncState
           kind="empty"
+          hideKind
           title={emptyMessage}
           description={
             onNewSession
