@@ -68,6 +68,8 @@
 
 .rh-error-notice__description {
   margin: 0;
+  /* Prose, on a surface that may be a whole research page wide. */
+  max-inline-size: 68ch;
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);

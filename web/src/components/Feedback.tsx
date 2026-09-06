@@ -133,6 +133,9 @@ export function Empty({
   return (
     <AsyncState
       kind="empty"
+      // Every title below names the state in the page's own words, so the kind's generic
+      // label above it would be a kicker repeating what the sentence already says.
+      hideKind
       title={children}
       {...(description === undefined ? {} : { description })}
       {...(flat ? { flat: true } : {})}

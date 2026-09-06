@@ -82,6 +82,14 @@ describe('an empty page', () => {
     expect(container.querySelector('.rh-state')).not.toHaveAttribute('data-flat');
   });
 
+  it('names the state once, in the page’s own words', () => {
+    render(<Empty>No works in the corpus yet</Empty>);
+
+    expect(screen.getByText('No works in the corpus yet')).toBeInTheDocument();
+    // The generic kind above the title would be a kicker repeating the sentence below it.
+    expect(screen.queryByText('Nothing here yet')).not.toBeInTheDocument();
+  });
+
   it('drops its own box when it sits inside a panel', () => {
     const { container } = render(<Empty flat>No decision recorded.</Empty>);
     expect(container.querySelector('.rh-state')).toHaveAttribute('data-flat');

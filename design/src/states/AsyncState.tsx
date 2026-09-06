@@ -33,6 +33,13 @@ export interface AsyncStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
    * panel does not end up holding a second, smaller panel.
    */
   flat?: boolean;
+  /**
+   * Drop the written kind above the title, for a title that already names the state in the
+   * caller's own words ("No works in the corpus yet"). The rule the label exists for still
+   * holds — the state is named in text, not by colour or an icon — it is simply named once
+   * rather than twice, and only the caller knows whether its title does that.
+   */
+  hideKind?: boolean;
   /** Force the live-region politeness rather than taking it from the kind. */
   urgent?: boolean;
 }
@@ -72,6 +79,7 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
     progress,
     compact = false,
     flat = false,
+    hideKind = false,
     urgent,
     className,
     children,
@@ -98,7 +106,7 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
         <Icon name={icon ?? meta.icon} size={compact ? 16 : 20} />
       </span>
       <div className="rh-state__body">
-        <p className="rh-state__kind">{meta.label}</p>
+        {hideKind ? null : <p className="rh-state__kind">{meta.label}</p>}
         <p className="rh-state__title">{title}</p>
         {description !== undefined ? <p className="rh-state__description">{description}</p> : null}
         {progress ? (

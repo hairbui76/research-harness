@@ -103,6 +103,16 @@ describe('AsyncState', () => {
     expect(container.firstElementChild).not.toHaveAttribute('data-flat');
   });
 
+  it('lets a title that already names the state say it once', () => {
+    const { rerender } = render(<AsyncState kind="empty" title="No works in the corpus yet" />);
+    expect(screen.getByText('Nothing here yet')).toBeInTheDocument();
+
+    rerender(<AsyncState kind="empty" title="No works in the corpus yet" hideKind />);
+    expect(screen.queryByText('Nothing here yet')).not.toBeInTheDocument();
+    // The state is still named in text rather than by the icon alone - by the title.
+    expect(screen.getByText('No works in the corpus yet')).toBeInTheDocument();
+  });
+
   it('has no axe violations for any kind', async () => {
     for (const kind of KINDS) {
       const { container, unmount } = render(
