@@ -146,6 +146,7 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
   /** What a decision does when it is chosen: confirm, open the editor, or ask for a sentence. */
   function decide(decision: ReviewDecision) {
     if (decision === 'edit') {
+      setConfirming(false);
       setEditing(true);
       return;
     }
