@@ -162,9 +162,16 @@ export function PromoteDialog({
           {/*
             Evidence is absent from the list above, and saying nothing about it would read
             as an oversight. The rule is the product's, not this screen's (spec §6).
+
+            `urgent={false}`: this is true before the dialog opens and stays true, so it is
+            a condition rather than an event. Announcing it assertively would interrupt a
+            screen-reader user with the same rule every time they open the dialog, and the
+            one notice here that is genuinely news — the daemon refusing the promotion they
+            just asked for — would then arrive in the same tone as boilerplate.
           */}
           <ErrorNotice
             kind="blocked"
+            urgent={false}
             title="Evidence cannot be promoted from prose"
             description={
               'Evidence needs an artifact and an exact, resolvable source anchor. Open the ' +
@@ -230,6 +237,8 @@ export function PromoteDialog({
             </div>
           </dl>
 
+          {/* This one *is* an event: it answers the press the researcher just made, so it
+              keeps `fatal`'s assertive announcement. */}
           {error !== null ? (
             <ErrorNotice
               kind="fatal"
@@ -238,9 +247,12 @@ export function PromoteDialog({
               safety={{ draft: 'safe', source: 'safe' }}
             />
           ) : null}
+          {/* Already on screen when the dialog opens, for the same reason as the evidence
+              rule above: it describes what this window is, not what just happened. */}
           {!canMutate && mutationBlockedReason ? (
             <ErrorNotice
               kind="blocked"
+              urgent={false}
               title="This window may not promote"
               description={mutationBlockedReason}
               safety={{ draft: 'safe', source: 'safe' }}
