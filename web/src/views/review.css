@@ -1,0 +1,51 @@
+/*
+ * What the two review screens need and no package component owns: the inbox's filter bar,
+ * the batch's restatement, and the decide-and-next footer. Semantic tokens only — the
+ * palette, the type scale and the spacing scale all come from `@research-harness/design`.
+ */
+
+/* The filter bar sits in the page header's toolbar and must not push the title off. */
+.rh-web-inbox-filters {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.rh-web-inbox-filters__search {
+  inline-size: min(18rem, 100%);
+}
+
+/*
+ * The sentence that restates what the batch is about to write. It is set apart from the
+ * preview above it because it is the thing being agreed to, not a continuation of the list.
+ */
+.rh-web-batch__confirm {
+  padding-block-start: var(--rh-space-3);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+/*
+ * Decide and move on. The outcome stays on screen beside the way forward, so a researcher
+ * reads what they just recorded before they leave the candidate that recorded it.
+ */
+.rh-web-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+  padding-block-start: var(--rh-space-3);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+.rh-web-next__outcome {
+  margin: 0;
+  color: var(--rh-text-primary);
+}
+
+.rh-web-next__moves {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+}
