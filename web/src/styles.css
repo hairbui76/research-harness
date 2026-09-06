@@ -339,3 +339,35 @@ body,
 .rh-web-token-field {
   inline-size: min(22rem, 100%);
 }
+
+/* Waiting for a read ----------------------------------------------------------------- */
+
+/*
+ * A page that is loading keeps its frame and fills its body with the shape of what is
+ * coming: rows for a table, panels for a run of cards. The bars themselves are the
+ * package's `Skeleton`; these rules only place them, and each one mirrors the geometry of
+ * the real thing so nothing jumps when the data lands.
+ */
+.rh-web-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+  min-width: 0;
+}
+
+.rh-web-skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-4);
+  padding-block: var(--rh-space-2);
+}
+
+.rh-web-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  padding: var(--rh-space-4);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-pane);
+}
