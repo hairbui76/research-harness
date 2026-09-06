@@ -145,6 +145,36 @@ describe('accepting asks twice, and the second ask says what will be written', (
     expect(confirm).toHaveTextContent(/No review action takes an acceptance back/);
   });
 
+  it('still restates a candidate that quotes nothing, without empty quotation marks', async () => {
+    const user = userEvent.setup();
+    const daemon = daemonFor();
+    const client = new HarnessClient({
+      baseUrl: 'http://daemon.test',
+      token: 'local-token',
+      fetchImpl: daemon.fetch,
+    });
+    // A numeric or absence candidate can carry no exact span; the anchor, not the prose,
+    // is what makes it evidence.
+    const quoteless = { ...CANDIDATE, evidence: { content: {} } } as unknown as CandidateView;
+    render(
+      <ThemeProvider defaultTheme="dark" storageKey={null}>
+        <ToastProvider>
+          <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <SessionProvider client={client}>
+              <ReviewActions candidate={quoteless} onReviewed={() => undefined} />
+            </SessionProvider>
+          </MemoryRouter>
+        </ToastProvider>
+      </ThemeProvider>,
+    );
+    await ready();
+
+    await user.click(screen.getByRole('button', { name: 'Accept' }));
+    const confirm = screen.getByRole('group', { name: 'Confirm the acceptance' });
+    expect(confirm).toHaveTextContent('this proposal becomes accepted Evidence');
+    expect(confirm).not.toHaveTextContent('“”');
+  });
+
   it('is inline rather than a dialog, so the source stays on screen beside it', async () => {
     const user = userEvent.setup();
     renderActions();

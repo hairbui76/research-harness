@@ -218,10 +218,7 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
             abandonAcceptance();
           }}
         >
-          <p>
-            Accept as evidence for {candidate.field} of {candidate.work}: “{quote}” becomes
-            accepted Evidence in this project, recorded with you as the reviewer.
-          </p>
+          <p>{restatement(candidate, quote)}</p>
           <p className="rh-text-secondary">
             No review action takes an acceptance back. A later change of mind is recorded as a
             Decision beside it, not a deletion.
@@ -321,6 +318,18 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
       ) : null}
     </div>
   );
+}
+
+/**
+ * The sentence the researcher is agreeing to, in the field, Work and quote it is about.
+ *
+ * A candidate with no quoted span still gets a sentence rather than a pair of empty
+ * quotation marks: the anchor, not the prose, is what makes it evidence.
+ */
+function restatement(candidate: CandidateView, quote: string): string {
+  const opening = `Accept as evidence for ${candidate.field} of ${candidate.work}: `;
+  const subject = quote === '' ? 'this proposal becomes' : `“${quote}” becomes`;
+  return `${opening}${subject} accepted Evidence in this project, recorded with you as the reviewer.`;
 }
 
 /** The exact span being proposed, short enough to stay inside one restated sentence. */
