@@ -6,6 +6,12 @@
  * pair the system declares. Text pairs must reach 4.5:1; focus rings, component
  * boundaries and large text must reach 3:1.
  *
+ * A pair may declare that one of its two colours is painted with `mix-blend-mode:
+ * multiply` over a third (`fgOver` / `bgOver`). The PDF evidence highlights are drawn that
+ * way over the reading surface, so the colour a researcher actually sees is the per-channel
+ * product, not the token — and gating the token alone is what let a dark-canvas tint
+ * multiply down to near-black over paper and take the page ink with it.
+ *
  * The check runs in `pnpm --filter @research-harness/design lint`. It fails the build, so
  * a token change that makes muted text illegible on a raised surface cannot be committed
  * and discovered later by a researcher squinting at a review queue.
@@ -139,6 +145,21 @@ function composite(fg, bg) {
   };
 }
 
+/** `mix-blend-mode: multiply`, per channel: a·b/255. Both operands are opaque here. */
+function multiply(source, backdrop) {
+  return {
+    r: (source.r * backdrop.r) / 255,
+    g: (source.g * backdrop.g) / 255,
+    b: (source.b * backdrop.b) / 255,
+    a: 1,
+  };
+}
+
+/** Straight-line distance in RGB. Used for the design invariants, not for contrast. */
+function rgbDistance(a, b) {
+  return Math.round(Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b));
+}
+
 function luminance({ r, g, b }) {
   const channel = (v) => {
     const c = v / 255;
@@ -158,8 +179,30 @@ function contrast(fg, bg) {
 
 const STATUSES = ['accepted', 'candidate', 'qualified', 'contested', 'stale', 'private'];
 const FEEDBACK = ['success', 'error', 'warning', 'info'];
+
+/**
+ * The three PDF evidence highlights, drawn over the reading surface: a SyncTeX target
+ * (the default), an accepted source anchor, and a search hit. Each is a fill multiplied
+ * over `--rh-surface-paper` with a hairline of its own.
+ */
+const HIGHLIGHTS = [
+  { kind: 'sync', fill: '--rh-highlight-on-paper', border: '--rh-highlight-on-paper-border' },
+  {
+    kind: 'anchor',
+    fill: '--rh-highlight-on-paper-anchor',
+    border: '--rh-highlight-on-paper-anchor-border',
+  },
+  {
+    kind: 'match',
+    fill: '--rh-highlight-on-paper-match',
+    border: '--rh-highlight-on-paper-match-border',
+  },
+];
+
 const TEXT_MIN = 4.5;
 const UI_MIN = 3;
+/** Both design invariants below are the same distance the statuses keep from the accent. */
+const SEPARATION_MIN = 90;
 
 function pairs() {
   const out = [];
@@ -183,6 +226,29 @@ function pairs() {
   // `paper` is near-white in both themes and carries its own ink.
   for (const ink of ['', '-secondary', '-muted']) {
     text(`--rh-text-on-paper${ink}`, '--rh-surface-paper', 'reading surface');
+  }
+
+  // A highlight is a fill multiplied over paper, so the page ink has to stay readable
+  // through the product — and the hairline that says where the highlight starts and stops
+  // is what identifies it (WCAG 1.4.11), so it is gated at 3:1 against the page. The
+  // border multiplies too: it is part of the same blended element.
+  for (const { kind, fill, border } of HIGHLIGHTS) {
+    out.push({
+      fg: '--rh-text-on-paper',
+      bg: fill,
+      bgOver: '--rh-surface-paper',
+      min: TEXT_MIN,
+      kind: 'text',
+      note: `page ink through the ${kind} highlight`,
+    });
+    out.push({
+      fg: border,
+      fgOver: '--rh-surface-paper',
+      bg: '--rh-surface-paper',
+      min: UI_MIN,
+      kind: 'non-text',
+      note: `${kind} highlight edge`,
+    });
   }
 
   text('--rh-text-inverse', '--rh-surface-inverse', 'inverse band');
@@ -223,11 +289,41 @@ function accentSeparation(tokens) {
   const rows = [];
   for (const status of STATUSES) {
     const fg = parseColour(resolve(tokens, tokens.get(`--rh-status-${status}-fg`)));
-    const distance = Math.round(
-      Math.hypot(fg.r - accent.r, fg.g - accent.g, fg.b - accent.b),
-    );
-    rows.push({ status, distance, ok: distance >= 90 });
+    rows.push({
+      status,
+      distance: rgbDistance(fg, accent),
+      ok: rgbDistance(fg, accent) >= SEPARATION_MIN,
+    });
   }
+  return rows;
+}
+
+/**
+ * The same invariant, one surface down. A researcher reading a PDF has to tell a search
+ * hit from an accepted anchor from the place SyncTeX just jumped to, so the three marks
+ * must stay apart as they are *rendered* — multiplied over paper — and the accepted anchor
+ * must not converge on the accent, which means a model did something, not that something
+ * is true.
+ */
+function highlightSeparation(tokens) {
+  const paper = parseColour(resolve(tokens, tokens.get('--rh-surface-paper')));
+  const drawn = new Map(
+    HIGHLIGHTS.map(({ kind, fill }) => [
+      kind,
+      multiply(parseColour(resolve(tokens, tokens.get(fill))), paper),
+    ]),
+  );
+  const rows = [];
+  const kinds = [...drawn.keys()];
+  for (let i = 0; i < kinds.length; i += 1) {
+    for (let j = i + 1; j < kinds.length; j += 1) {
+      const distance = rgbDistance(drawn.get(kinds[i]), drawn.get(kinds[j]));
+      rows.push({ status: `${kinds[i]}/${kinds[j]}`, distance, ok: distance >= SEPARATION_MIN });
+    }
+  }
+  const accent = parseColour(resolve(tokens, tokens.get('--rh-accent')));
+  const distance = rgbDistance(drawn.get('anchor'), accent);
+  rows.push({ status: 'anchor/accent', distance, ok: distance >= SEPARATION_MIN });
   return rows;
 }
 
@@ -242,8 +338,14 @@ function run() {
       const bgValue = tokens.get(pair.bg);
       if (fgValue === undefined) throw new Error(`${themeName}: ${pair.fg} is not defined`);
       if (bgValue === undefined) throw new Error(`${themeName}: ${pair.bg} is not defined`);
-      const bg = parseColour(resolve(tokens, bgValue));
-      const fg = parseColour(resolve(tokens, fgValue));
+      const blend = (colour, over) => {
+        if (over === undefined) return colour;
+        const backdrop = tokens.get(over);
+        if (backdrop === undefined) throw new Error(`${themeName}: ${over} is not defined`);
+        return multiply(colour, parseColour(resolve(tokens, backdrop)));
+      };
+      const bg = blend(parseColour(resolve(tokens, bgValue)), pair.bgOver);
+      const fg = blend(parseColour(resolve(tokens, fgValue)), pair.fgOver);
       const ratio = contrast(fg, bg);
       results.push({
         theme: themeName,
@@ -258,19 +360,28 @@ function run() {
     dark: accentSeparation(themes.dark),
     light: accentSeparation(themes.light),
   };
+  const highlights = {
+    dark: highlightSeparation(themes.dark),
+    light: highlightSeparation(themes.light),
+  };
 
   if (process.argv.includes('--json')) {
-    process.stdout.write(JSON.stringify({ results, separation }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ results, separation, highlights }, null, 2) + '\n');
   } else {
-    report(results, separation);
+    report(results, separation, highlights);
   }
 
   const failures = results.filter((r) => !r.pass);
-  const collisions = [...separation.dark, ...separation.light].filter((r) => !r.ok);
+  const collisions = [
+    ...separation.dark,
+    ...separation.light,
+    ...highlights.dark,
+    ...highlights.light,
+  ].filter((r) => !r.ok);
   if (failures.length > 0 || collisions.length > 0) {
     console.error(
       `\ncheck-contrast: ${failures.length} contrast failure(s), ` +
-        `${collisions.length} status/accent collision(s).`,
+        `${collisions.length} colour collision(s).`,
     );
     process.exit(1);
   }
@@ -281,15 +392,23 @@ function run() {
   );
 }
 
-function report(results, separation) {
-  const width = Math.max(...results.map((r) => `${r.fg} on ${r.bg}`.length));
+/** `a on b`, with `x paper` marking a colour that is multiplied over another. */
+function pairLabel(row) {
+  const blended = (token, over) => (over === undefined ? token : `${token} x ${short(over)}`);
+  return `${blended(row.fg, row.fgOver)} on ${blended(row.bg, row.bgOver)}`;
+}
+
+const short = (token) => token.replace('--rh-surface-', '').replace('--rh-', '');
+
+function report(results, separation, highlights) {
+  const width = Math.max(...results.map((r) => pairLabel(r).length));
   for (const theme of ['dark', 'light']) {
     console.log(`\n${theme.toUpperCase()} theme`);
     console.log(
       `  ${'pair'.padEnd(width)}  ${'ratio'.padStart(7)}  ${'min'.padStart(4)}  result`,
     );
     for (const row of results.filter((r) => r.theme === theme)) {
-      const label = `${row.fg} on ${row.bg}`.padEnd(width);
+      const label = pairLabel(row).padEnd(width);
       const ratio = `${row.ratio.toFixed(2)}:1`.padStart(7);
       const min = row.min === null ? '  --' : String(row.min).padStart(4);
       const verdict = row.min === null ? 'info' : row.pass ? 'pass' : 'FAIL';
@@ -302,12 +421,10 @@ function report(results, separation) {
       .map((r) => `${r.fg.replace('--rh-', '')} ${r.ratio.toFixed(2)}:1`)
       .join(', ');
     console.log(`  lowest: ${lowest}`);
-    console.log(
-      `  status/accent separation: ` +
-        separation[theme]
-          .map((s) => `${s.status} ${s.distance}${s.ok ? '' : ' TOO CLOSE'}`)
-          .join(', '),
-    );
+    const spread = (rows) =>
+      rows.map((s) => `${s.status} ${s.distance}${s.ok ? '' : ' TOO CLOSE'}`).join(', ');
+    console.log(`  status/accent separation: ${spread(separation[theme])}`);
+    console.log(`  highlight separation (over paper): ${spread(highlights[theme])}`);
   }
 }
 

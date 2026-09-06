@@ -56,6 +56,7 @@ is the comment at the top of `src/tokens/semantic.css`; the shape is:
 | Surfaces | `--rh-surface-{canvas,pane,raised,paper,inverse,subtle,selected,scrim}` |
 | Borders | `--rh-border-{subtle,default,strong}`, `--rh-border-on-paper` |
 | Text | `--rh-text-{primary,secondary,muted,inverse,link,on-accent}`, `--rh-text-on-paper{,-secondary,-muted}` |
+| Paper marks | `--rh-highlight-on-paper{,-anchor,-match}` and each one's `-border` |
 | AI/action accent | `--rh-accent{,-hover,-subtle,-border,-fg,-text}` |
 | Focus | `--rh-focus-ring{,-width,-offset}` |
 | Scientific status | `--rh-status-<accepted\|candidate\|qualified\|contested\|stale\|private>-<fg\|bg\|border>` |
@@ -89,6 +90,15 @@ in dark mode as well as light. It therefore carries its own ink. Use the `.rh-su
 utility (or `<Card surface="paper">`) rather than setting the background alone, or dark-mode
 text will vanish into the page.
 
+Anything drawn *on* a page follows the page, not the theme, for the same reason. The three
+PDF evidence highlights — the SyncTeX target (`--rh-highlight-on-paper`), an accepted
+anchor (`-anchor`) and a search hit (`-match`) — are paper tints of the accent, the
+accepted status and the warning tone, light in both themes, each with a full-strength
+`-border` of the same hue. They are painted with `mix-blend-mode: multiply` so the glyphs
+stay visible through them, which is exactly why a pane tint cannot stand in: multiplied
+over a near-white page, a dark-canvas tint goes to near-black and takes the page ink with
+it. `scripts/check-contrast.mjs` measures each one through the blend.
+
 ## Contrast
 
 `scripts/check-contrast.mjs` parses the token CSS, resolves every `var()` chain and
@@ -97,6 +107,12 @@ foreground on its own background, ink on the accent fill, the focus ring and con
 boundaries. Text is gated at 4.5:1 and non-text at 3:1; decorative hairlines are reported
 but not gated, and the script also checks that no scientific status has drifted close
 enough to the accent to be mistaken for it. It runs in `pnpm lint` and fails the build.
+
+A pair may say that one of its colours is painted with `mix-blend-mode: multiply` over a
+third (`fgOver` / `bgOver`), and the script composites it per channel before measuring. The
+paper highlights are gated that way: the page ink through each fill, and each edge against
+the page. The same distance the statuses keep from the accent is required between the three
+highlights as they are drawn, and between the accepted anchor and the accent itself.
 
 ```bash
 node scripts/check-contrast.mjs          # the table

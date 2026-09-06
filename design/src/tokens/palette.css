@@ -39,6 +39,15 @@
   --rh-palette-paper-ink-muted: #6b6558;
   --rh-palette-paper-line: #ded9cf;
 
+  /* Marks drawn ON the reading surface, with `mix-blend-mode: multiply` so the glyphs stay
+     visible through them. They carry the accent, accepted-status and warning hues, but as
+     paper tints rather than canvas tints: a canvas tint multiplies to near-black over a
+     near-white page and buries the ink. Light in BOTH themes, for the same reason the ink
+     above is dark in both. */
+  --rh-palette-paper-mark: #ffb694;
+  --rh-palette-paper-mark-anchor: #9fdfb0;
+  --rh-palette-paper-mark-match: #f4c32f;
+
   /* AI / action accent. Reserved for model activity, the primary send/run action,
      active reference tracking, and selected AI provenance. Never scientific truth. */
   --rh-palette-accent-700: #b83a00;

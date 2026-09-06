@@ -17,6 +17,10 @@
  *               --rh-surface-scrim     the flat wash behind an overlay
  * Borders       --rh-border-subtle | --rh-border-default | --rh-border-strong
  *               --rh-border-on-paper   hairline on the reading surface
+ * Paper marks   --rh-highlight-on-paper{,-anchor,-match} and each one's -border
+ *               A rectangle drawn over a page of a source with mix-blend-mode: multiply:
+ *               the SyncTeX target, an accepted anchor, a search hit. Light in BOTH themes
+ *               like the paper they sit on, so the page ink reads through them.
  * Text          --rh-text-primary | --rh-text-secondary | --rh-text-muted
  *               --rh-text-inverse      on --rh-surface-inverse
  *               --rh-text-link         link ink; links are underlined, never colour-only
@@ -37,6 +41,23 @@
  *               Transient application feedback. Not scientific authority.
  */
 :root {
+  /* Highlights on the reading surface.
+     These are the one group of colour tokens that lives here rather than in a theme, and
+     for the reason `paper` itself barely moves: a page of a source keeps its own ink and
+     its own marks whatever the application around it is set to. Each fill is multiplied
+     over the page, so it is stated as a paper tint of the hue it means — the accent for
+     the SyncTeX target, the accepted status for an anchor, the warning tone for a search
+     hit — and each edge is that hue at full strength, because the hairline is what says
+     where the mark begins and ends. `scripts/check-contrast.mjs` gates all six: the page
+     ink through each fill, each edge against the page, and the distance the three keep
+     from one another and from the accent. */
+  --rh-highlight-on-paper: var(--rh-palette-paper-mark);
+  --rh-highlight-on-paper-border: var(--rh-palette-accent-700);
+  --rh-highlight-on-paper-anchor: var(--rh-palette-paper-mark-anchor);
+  --rh-highlight-on-paper-anchor-border: var(--rh-palette-green-700);
+  --rh-highlight-on-paper-match: var(--rh-palette-paper-mark-match);
+  --rh-highlight-on-paper-match-border: var(--rh-palette-amber-700);
+
   /* Focus. Width and offset are theme-independent; only the colour switches. */
   --rh-focus-ring-width: 2px;
   --rh-focus-ring-offset: 2px;
