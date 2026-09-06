@@ -266,7 +266,7 @@ describe('the Local CLIs tab', () => {
     expect(within(codex).getByText('login_missing')).toBeInTheDocument();
   });
 
-  it('removes a configured entry', async () => {
+  it('asks before removing, and names the entry and what removal actually does', async () => {
     const daemon = fakeDaemon({ capabilities: answers() });
     open(daemon);
     await providersTab();
@@ -274,13 +274,58 @@ describe('the Local CLIs tab', () => {
     expect(
       within(codex).getByText('Configured as codex-sub (gpt-5.5, priority 10) — available'),
     ).toBeInTheDocument();
+
     await userEvent.click(within(codex).getByRole('button', { name: 'Remove' }));
+
+    // Nothing is written on the first press. Forgetting a project asks; taking a provider
+    // out of research.yaml did not, and the two are the same kind of act.
+    expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.remove')).toBe(
+      false,
+    );
+    const confirm = within(codex).getByRole('group', { name: 'Confirm removing codex-sub' });
+    // The consequence, read off `remove_cli_provider`: one research.yaml entry goes, and
+    // nothing else does. A researcher must not fear losing a login or a transcript here.
+    expect(confirm).toHaveTextContent('research.yaml');
+    expect(confirm).toHaveTextContent(/Codex CLI stays installed and logged in/);
+    expect(confirm).toHaveTextContent(/No session, transcript or accepted object changes/);
+  });
+
+  it('removes the entry the confirmation named, on the second press', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    await userEvent.click(within(codex).getByRole('button', { name: 'Remove' }));
+    await userEvent.click(within(codex).getByRole('button', { name: 'Remove codex-sub' }));
+
     await waitFor(() =>
       expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.remove')).toBe(true),
     );
     expect(daemon.capabilityCalls().find((call) => call.name === 'provider.cli.remove')?.request).toEqual({
       name: 'codex-sub',
     });
+  });
+
+  it('writes nothing when the removal is cancelled', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    await userEvent.click(within(codex).getByRole('button', { name: 'Remove' }));
+    await userEvent.click(
+      within(within(codex).getByRole('group', { name: 'Confirm removing codex-sub' })).getByRole(
+        'button',
+        { name: 'Cancel' },
+      ),
+    );
+
+    expect(
+      within(codex).queryByRole('group', { name: 'Confirm removing codex-sub' }),
+    ).not.toBeInTheDocument();
+    expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.remove')).toBe(
+      false,
+    );
+    expect(within(codex).getByRole('button', { name: 'Remove' })).toBeEnabled();
   });
 
   it('keeps a configured entry visible, and removable, when its runtime is gone', async () => {
@@ -304,6 +349,7 @@ describe('the Local CLIs tab', () => {
     const remove = within(codex).getByRole('button', { name: 'Remove' });
     expect(remove).toBeEnabled();
     await userEvent.click(remove);
+    await userEvent.click(within(codex).getByRole('button', { name: 'Remove codex-sub' }));
     await waitFor(() =>
       expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.remove')).toBe(true),
     );
@@ -339,5 +385,56 @@ describe('the Local CLIs tab', () => {
     }
     expect(within(codex).getByText(/agent host/)).toBeInTheDocument();
     expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.configure')).toBe(false);
+  });
+});
+
+describe('a half-typed entry survives a change of tab', () => {
+  it('keeps the draft when the provider kinds change and come back', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    const panel = await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    await userEvent.clear(within(codex).getByLabelText('Entry name'));
+    await userEvent.type(within(codex).getByLabelText('Entry name'), 'codex-half-typed');
+
+    await userEvent.click(within(panel).getByRole('tab', { name: 'API providers' }));
+    await userEvent.click(within(panel).getByRole('tab', { name: 'Local CLIs' }));
+
+    const again = screen.getByRole('article', { name: 'Codex CLI' });
+    expect(within(again).getByLabelText('Entry name')).toHaveValue('codex-half-typed');
+  });
+
+  it('keeps it across the Settings sections too, and does not rescan on the way back', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    await providersTab();
+    const codex = await screen.findByRole('article', { name: 'Codex CLI' });
+    await userEvent.clear(within(codex).getByLabelText('Priority'));
+    await userEvent.type(within(codex).getByLabelText('Priority'), '3');
+    const scansBefore = daemon.capabilityCalls().filter((call) => call.name === 'provider.cli.scan');
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Appearance' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Models & providers' }));
+
+    const again = screen.getByRole('article', { name: 'Codex CLI' });
+    expect(within(again).getByLabelText('Priority')).toHaveValue(3);
+    // The panel was never unmounted, so returning to it costs no second scan either.
+    expect(
+      daemon.capabilityCalls().filter((call) => call.name === 'provider.cli.scan'),
+    ).toHaveLength(scansBefore.length);
+  });
+
+  it('still waits for the researcher to open the providers panel before scanning', async () => {
+    const daemon = fakeDaemon({ capabilities: answers() });
+    open(daemon);
+    expect(screen.getByRole('tab', { name: 'Appearance' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    // Keeping an opened panel mounted must not turn into mounting one nobody opened: the
+    // scan spends real work on this workstation.
+    expect(daemon.capabilityCalls().some((call) => call.name === 'provider.cli.scan')).toBe(
+      false,
+    );
   });
 });
