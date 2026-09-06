@@ -42,8 +42,8 @@ export const CATEGORY_LABELS: Record<string, string> = {
 
 /** What this page is, said once, in the product's words rather than by citing a document. */
 const QUEUE_DESCRIPTION =
-  'Conflicts first, then high-risk claims, stale objects, ambiguous extractions, and ' +
-  'routine candidates — the order the daemon ranked them in.';
+  'Conflicts first, then high-risk claims, stale high-impact objects, ambiguous ' +
+  'extractions, and routine candidates — the order the daemon ranked them in.';
 
 /** How a researcher may narrow the queue on screen. None of it changes the queue. */
 export interface InboxFilters {

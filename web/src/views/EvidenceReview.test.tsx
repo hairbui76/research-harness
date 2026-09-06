@@ -125,6 +125,8 @@ describe('review authority', () => {
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Accept' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+    // Accepting writes accepted state nothing undoes, so it confirms first.
+    fireEvent.click(await screen.findByRole('button', { name: 'Accept as evidence' }));
 
     await waitFor(() =>
       expect(daemon.capabilityCalls().some((call) => call.name === 'review.accept')).toBe(true),
