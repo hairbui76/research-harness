@@ -1,0 +1,112 @@
+/*
+ * The palette and the shortcut sheet.
+ *
+ * Both sit inside the Design System's `Dialog`, so the scrim, the panel, the focus trap and
+ * the header are the package's. What is left is the list inside them: a keyed row, a group
+ * heading, and the one rule that says which option Enter would run. Semantic tokens only.
+ */
+
+.rh-web-palette__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+}
+
+.rh-web-palette__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  max-block-size: 24rem;
+  overflow-y: auto;
+}
+
+.rh-web-palette__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-palette__heading {
+  margin: 0;
+  padding-inline: var(--rh-space-2);
+  font-size: var(--rh-type-label-size);
+  line-height: var(--rh-type-label-lh);
+  letter-spacing: var(--rh-type-label-ls);
+  font-weight: var(--rh-type-label-weight);
+  color: var(--rh-text-muted);
+}
+
+.rh-web-palette__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+  padding: var(--rh-space-2);
+  border-radius: var(--rh-radius-nav);
+  cursor: default;
+  color: var(--rh-text-primary);
+}
+
+/*
+ * Which option Enter would run. Focus stays in the text box under the combobox pattern, so
+ * this is the only thing on screen that says where the researcher is — it needs to read as
+ * a selection rather than as a hover tint.
+ */
+.rh-web-palette__option[data-active] {
+  background: var(--rh-surface-selected);
+}
+
+.rh-web-palette__empty {
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
+/* A key, wherever one is printed: the palette's rows and the help sheet's. */
+.rh-web-kbd {
+  display: inline-block;
+  min-inline-size: 1.5rem;
+  padding: 0 var(--rh-space-1);
+  border: var(--rh-border-width) solid var(--rh-border-strong);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: calc(var(--rh-type-body-sm-lh) * 1.1);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rh-web-shortcuts__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-web-shortcuts__group > h3 {
+  margin: 0;
+}
+
+.rh-web-shortcuts__list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-web-shortcuts__row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: var(--rh-space-3);
+  align-items: baseline;
+}
+
+.rh-web-shortcuts__row > dt,
+.rh-web-shortcuts__row > dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.rh-web-shortcuts__label {
+  color: var(--rh-text-primary);
+}
