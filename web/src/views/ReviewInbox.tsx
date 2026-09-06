@@ -154,6 +154,7 @@ export function ReviewInboxPage() {
 
   return (
     <FullPageWorkspace
+      className="rh-web-inbox"
       title="Review inbox"
       description={QUEUE_DESCRIPTION}
       toolbar={
@@ -376,10 +377,10 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
         </div>
       }
     >
-      <p className="rh-text-secondary">
-        The daemon decides which candidates meet the batch conditions — verified supported,
-        anchor still valid, no competing candidate, a low-risk field, no disagreement with
-        accepted evidence. How sure a model was is never one of them.
+      <p className="rh-text-secondary rh-web-batch__note">
+        Only the candidates that meet every one of the daemon’s deterministic conditions, and
+        only where this project’s policy allows a batch at all. How sure a model was is never
+        one of them.
       </p>
 
       {refusal ? <ErrorBox error={refusal} /> : null}
@@ -392,7 +393,10 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
               : `${accepted.length} routine candidates meet the batch conditions.`}
           </p>
           {accepted.length > 0 ? (
-            <ul className="rh-web-list rh-web-list--tight">
+            <ul
+              className="rh-web-list rh-web-list--tight"
+              aria-label="Candidates that meet the batch conditions"
+            >
               {accepted.map((candidateId) => (
                 <li key={candidateId}>{label(candidateId)}</li>
               ))}
@@ -436,7 +440,10 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
           {skipped.length > 0 ? (
             <>
               <h3 className="rh-text-label">Left in the queue</h3>
-              <ul className="rh-web-list rh-web-list--tight">
+              <ul
+                className="rh-web-list rh-web-list--tight"
+                aria-label="Candidates the batch would leave in the queue"
+              >
                 {skipped.map(([candidateId, reason]) => (
                   <li key={candidateId}>
                     <span className="rh-web-queue__field">{label(candidateId)}</span>{' '}

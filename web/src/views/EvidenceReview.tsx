@@ -220,12 +220,12 @@ export function EvidenceReviewPage() {
                 </div>
 
                 <div className="rh-web-next">
+                  {outcome ? (
+                    <p className="rh-web-next__outcome" role="status">
+                      Candidate {outcome}.
+                    </p>
+                  ) : null}
                   <div className="rh-web-next__moves">
-                    {outcome ? (
-                      <p className="rh-web-next__outcome" role="status">
-                        Candidate {outcome}.
-                      </p>
-                    ) : null}
                     {previous ? (
                       <Link to={href(`/review/${previous.candidate_id}`)}>
                         Previous: {previous.field} · {previous.work}

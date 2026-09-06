@@ -108,7 +108,11 @@ export function CommandPalette() {
                     aria-selected={index === active}
                     data-active={index === active ? '' : undefined}
                     className="rh-web-palette__option"
-                    onMouseEnter={() => setActive(index)}
+                    // `mousemove`, not `mouseenter`: the palette is summoned by keyboard and
+                    // appears under wherever the pointer was last left, and an option that
+                    // takes the selection without the mouse having moved would let Enter run
+                    // whatever the cursor happens to be resting on.
+                    onMouseMove={() => setActive(index)}
                     // Keep the caret and the active option where they are; the click runs it.
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => run(index)}

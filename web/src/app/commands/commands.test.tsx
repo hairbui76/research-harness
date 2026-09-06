@@ -208,6 +208,24 @@ describe('when a shortcut must not fire', () => {
     expect(screen.queryByRole('dialog', { name: 'Go to, or do' })).not.toBeInTheDocument();
   });
 
+  it('still works under a closed drawer, which stays in the document while hidden', async () => {
+    const accept = vi.fn();
+    const user = userEvent.setup();
+    renderShell(
+      <Page accept={accept}>
+        {/* What `AppShell` renders below its breakpoint: a drawer that is mounted and
+            hidden. It is a dialog in the markup and nothing at all on the screen. */}
+        <div hidden>
+          <div role="dialog" aria-modal="false" aria-label="Project navigation" />
+        </div>
+      </Page>,
+    );
+
+    await user.keyboard('a');
+
+    expect(accept).toHaveBeenCalledTimes(1);
+  });
+
   it('forgets a page’s keys as soon as the page is gone', async () => {
     const accept = vi.fn();
     const user = userEvent.setup();

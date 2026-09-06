@@ -4,10 +4,14 @@
  * palette, the type scale and the spacing scale all come from `@research-harness/design`.
  */
 
-/* The filter bar sits in the page header's toolbar and must not push the title off. */
+/*
+ * The filter bar lives in the page header's toolbar slot, which is a flex item beside the
+ * heading. Claiming the whole line keeps the four controls on one row rather than letting
+ * the last one strand itself under the other three.
+ */
 .rh-web-inbox-filters {
+  flex: 1 1 100%;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .rh-web-inbox-filters__search {
@@ -29,10 +33,8 @@
  */
 .rh-web-next {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--rh-space-3);
+  flex-direction: column;
+  gap: var(--rh-space-2);
   padding-block-start: var(--rh-space-3);
   border-top: var(--rh-border-width) solid var(--rh-border-subtle);
 }
@@ -46,6 +48,26 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--rh-space-2);
+  justify-content: space-between;
+  gap: var(--rh-space-3);
   min-width: 0;
+}
+
+/*
+ * The toolbar slot is a flex item beside the heading, sized to its content, so a filter bar
+ * that has to wrap wraps inside a box narrower than the line it sits on. Giving it the whole
+ * line on this page keeps the four controls in one row and the queue's own width unchanged.
+ */
+.rh-web-inbox .rh-full-page__toolbar {
+  flex: 1 1 100%;
+}
+
+/*
+ * Prose caps its measure; rows, quotes and tables stay as wide as the page. A sentence that
+ * runs the full width of a 1440px window is not a sentence anyone reads twice.
+ */
+.rh-web-inbox .rh-full-page__description,
+.rh-web-review .rh-full-page__description,
+.rh-web-batch__note {
+  max-inline-size: 68ch;
 }

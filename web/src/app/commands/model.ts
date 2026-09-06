@@ -68,11 +68,18 @@ export function isTypingTarget(target: EventTarget | null): boolean {
  * The palette and the help sheet are summoned by the shortcut layer and marked as its own;
  * any other dialog — editing the proposed evidence, settings, a project lifecycle question —
  * is a task the researcher is inside, and a single letter must not reach past it.
+ *
+ * "On screen" is the load-bearing word. Below the shell's breakpoint the rail and the
+ * inspector are drawers that stay in the document while they are closed, marked `hidden`,
+ * so a mounted dialog is not necessarily one anybody can see — and a narrow window whose
+ * keyboard silently stopped working would be the worst possible reading of this rule.
  */
 export function foreignDialogOpen(root: Document | HTMLElement): boolean {
   const dialogs = root.querySelectorAll('[role="dialog"],[role="alertdialog"]');
   for (const dialog of Array.from(dialogs)) {
-    if (!dialog.hasAttribute('data-shell-overlay')) return true;
+    if (dialog.hasAttribute('data-shell-overlay')) continue;
+    if (dialog.closest('[hidden],[aria-hidden="true"]') !== null) continue;
+    return true;
   }
   return false;
 }
