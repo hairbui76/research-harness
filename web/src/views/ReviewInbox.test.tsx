@@ -323,6 +323,49 @@ describe('the policy batch of Product 24.4', () => {
     });
   });
 
+  it('keeps naming what it wrote after the queue it emptied comes back empty', async () => {
+    const user = userEvent.setup();
+    const base = fakeDaemon({
+      capabilities: { 'review.inbox': QUEUE, 'review.accept_batch': DRY_RUN },
+    });
+    // The second read answers empty, the way the daemon does once a batch has taken
+    // everything that qualified — which is exactly when the report must not vanish.
+    let reads = 0;
+    const draining = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith('/capabilities/review.inbox') && reads++ > 0) {
+        return new Response(
+          JSON.stringify({
+            capability: 'review.inbox',
+            ok: true,
+            result: { count: 0, counts: {}, items: [] },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      return base.fetch(input, init);
+    }) as typeof fetch;
+
+    renderInbox({ ...base, fetch: draining });
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: /Accept the routine candidates/ }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Accept 1 candidate' })).toBeEnabled(),
+    );
+    await user.click(screen.getByRole('button', { name: 'Accept 1 candidate' }));
+
+    await waitFor(() =>
+      expect(screen.getByText('1 candidate is now accepted Evidence.')).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole('list', { name: 'Candidates that meet the batch conditions' }),
+    ).toHaveTextContent('dataset · W0001');
+    expect(screen.getByText(/Nothing is waiting for review/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Accept the routine candidates/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it('offers the batch per work as well as for the whole queue, because that is all it takes', async () => {
     const user = userEvent.setup();
     const daemon = queueDaemon({ 'review.accept_batch': DRY_RUN });

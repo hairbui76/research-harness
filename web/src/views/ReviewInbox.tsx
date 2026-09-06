@@ -108,6 +108,8 @@ export function ReviewInboxPage() {
   const { href } = useProjectPaths();
   const state = useAsync(() => client.reviewInbox(), [client]);
   const [filters, setFilters] = useState<InboxFilters>(NO_FILTERS);
+  /** True once a batch has written something here, so its report survives the reload. */
+  const [written, setWritten] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const items = useMemo(() => state.data?.items ?? [], [state.data]);
@@ -167,33 +169,38 @@ export function ReviewInboxPage() {
     >
       {state.loading ? <Loading what="the review queue" /> : null}
       {state.error ? <ErrorBox error={state.error} retry={state.reload} /> : null}
-      {!state.loading && !state.error && items.length === 0 ? (
-        <Empty>
-          Nothing is waiting for review. Interrogate a work in{' '}
-          <Link to={href('/corpus')}>the corpus</Link> to stage new candidates, or ask{' '}
-          <Link to={href('/')}>the conversation</Link> what to look at next.
-        </Empty>
-      ) : null}
 
-      {items.length > 0 ? (
+      {!state.loading && !state.error ? (
         <div className="rh-web-stack" ref={listRef}>
-          <p className="rh-text-secondary" role="status">
-            {filtered
-              ? `Showing ${showing} of ${items.length} waiting.`
-              : `${items.length} waiting.`}
-          </p>
+          {items.length > 0 ? (
+            <p className="rh-text-secondary" role="status">
+              {filtered
+                ? `Showing ${showing} of ${items.length} waiting.`
+                : `${items.length} waiting.`}
+            </p>
+          ) : null}
 
-          {canMutate ? (
+          {/* The panel outlives the queue on purpose: a batch that accepted everything
+              empties the list it reported on, and the receipt for a write of accepted
+              state must not disappear with it. */}
+          {canMutate && (items.length > 0 || written) ? (
             <BatchAccept
               items={items}
               onAccepted={() => {
+                setWritten(true);
                 state.reload();
                 refresh();
               }}
             />
           ) : null}
 
-          {showing === 0 ? (
+          {items.length === 0 ? (
+            <Empty>
+              Nothing is waiting for review. Interrogate a work in{' '}
+              <Link to={href('/corpus')}>the corpus</Link> to stage new candidates, or ask{' '}
+              <Link to={href('/')}>the conversation</Link> what to look at next.
+            </Empty>
+          ) : showing === 0 ? (
             <Empty>
               No candidate matches these filters. Nothing has left the queue.{' '}
               <Button size="sm" variant="secondary" onClick={() => setFilters(NO_FILTERS)}>
@@ -316,19 +323,33 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
   const [stage, setStage] = useState<BatchStage>('idle');
   const [scope, setScope] = useState('');
   const [result, setResult] = useState<BatchAcceptResponse | null>(null);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [refusal, setRefusal] = useState<string | null>(null);
 
   const works = Array.from(new Set(items.map((item) => item.work)));
-  const label = (candidateId: string): string => {
-    const item = items.find((entry) => entry.candidate_id === candidateId);
-    return item ? `${item.field} · ${item.work}` : candidateId;
-  };
+
+  /**
+   * The daemon answers with staging ids; a researcher reads fields and works. The names are
+   * resolved against the queue at the moment of the answer and kept, because accepting
+   * drains the queue those names came from and a report that decayed into hexadecimal the
+   * instant it was true would be no report at all.
+   */
+  function nameEach(answer: BatchAcceptResponse): Record<string, string> {
+    const ids = [...answer.accepted, ...Object.keys(answer.skipped)];
+    return Object.fromEntries(
+      ids.map((candidateId) => {
+        const item = items.find((entry) => entry.candidate_id === candidateId);
+        return [candidateId, item ? `${item.field} · ${item.work}` : candidateId];
+      }),
+    );
+  }
 
   async function run(dryRun: boolean): Promise<void> {
     setStage(dryRun ? 'previewing' : 'running');
     setRefusal(null);
     try {
       const answer = await client.acceptBatch({ dryRun, ...(scope ? { work: scope } : {}) });
+      setNames(nameEach(answer));
       setResult(answer);
       setStage(dryRun ? 'preview' : 'done');
       if (!dryRun) onAccepted();
@@ -339,13 +360,18 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
     }
   }
 
+  const label = (candidateId: string): string => names[candidateId] ?? candidateId;
+
   const accepted = result?.accepted ?? [];
   const skipped = Object.entries(result?.skipped ?? {});
 
   return (
     <Panel
       title="Batch accept"
+      // Nothing left to accept: the panel stays for its report, without offering a run
+      // over an empty queue.
       action={
+        items.length === 0 ? undefined : (
         <div className="rh-web-row">
           <Select
             label="Batch scope"
@@ -375,13 +401,16 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
             Accept the routine candidates…
           </Button>
         </div>
+        )
       }
     >
-      <p className="rh-text-secondary rh-web-batch__note">
-        Only the candidates that meet every one of the daemon’s deterministic conditions, and
-        only where this project’s policy allows a batch at all. How sure a model was is never
-        one of them.
-      </p>
+      {items.length > 0 ? (
+        <p className="rh-text-secondary rh-web-batch__note">
+          Only the candidates that meet every one of the daemon’s deterministic conditions,
+          and only where this project’s policy allows a batch at all. How sure a model was is
+          never one of them.
+        </p>
+      ) : null}
 
       {refusal ? <ErrorBox error={refusal} /> : null}
 
@@ -403,7 +432,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
             </ul>
           ) : null}
 
-          {stage === 'preview' && accepted.length > 0 ? (
+          {(stage === 'preview' || stage === 'running') && accepted.length > 0 ? (
             <div className="rh-web-stack rh-web-stack--tight rh-web-batch__confirm">
               <p>
                 {accepted.length === 1
@@ -415,14 +444,20 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
                 <Button
                   size="sm"
                   variant="primary"
-                  loading={stage !== 'preview'}
+                  loading={stage === 'running'}
+                  loadingLabel="Writing the accepted Evidence"
                   onClick={() => void run(false)}
                 >
                   {accepted.length === 1
                     ? 'Accept 1 candidate'
                     : `Accept ${accepted.length} candidates`}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setStage('idle')}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={stage === 'running'}
+                  onClick={() => setStage('idle')}
+                >
                   Cancel
                 </Button>
               </div>
