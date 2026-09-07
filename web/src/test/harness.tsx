@@ -174,20 +174,25 @@ export function renderView(ui: ReactElement, options: RenderOptions) {
 /**
  * The accessibility gate every migrated view runs (DS spec §6, §12.5).
  *
- * The rules that need a layout engine or a whole document are off: jsdom computes no
- * geometry, so `color-contrast` cannot run here — the Design System verifies contrast
- * against the token values instead (`design/scripts/check-contrast.mjs`) — and page-level
- * landmark rules do not apply to a view rendered without its shell.
+ * Two rules are off, and the reason is different for each:
+ *
+ * * `color-contrast` — jsdom applies no stylesheet and paints nothing, so axe has no two
+ *   colours to compare and the rule cannot run at all here. Contrast is gated against the
+ *   token values by `design/scripts/check-contrast.mjs`, and run for real by axe on every
+ *   route, in both themes, by the browser suite (`browser-tests/axe.ts`).
+ * * `region` — a view rendered here has no shell around it, so its content sits in no
+ *   landmark and the rule reports markup that is correct in the application. It runs
+ *   route-wide in the browser suite, where the rail, the workspace and the inspector are
+ *   the landmarks the content belongs to.
+ *
+ * The five rules this list used to also hold — `bypass`, `document-title`,
+ * `html-has-lang`, `landmark-one-main`, `page-has-heading-one` — are on. They match the
+ * root `html` element only, and a context rooted at `document.body` or at a render
+ * container never includes it, so naming them suppressed nothing and hid the fact that the
+ * browser suite is the only place they can be answered. `heading-order` and the
+ * `landmark-*` rules do run here, and are on.
  */
-const DISABLED_RULES = [
-  'color-contrast',
-  'region',
-  'page-has-heading-one',
-  'landmark-one-main',
-  'html-has-lang',
-  'document-title',
-  'bypass',
-];
+const DISABLED_RULES = ['color-contrast', 'region'];
 
 /** Fails with the offending rule ids and target selectors when anything is violated. */
 export async function expectNoAxeViolations(

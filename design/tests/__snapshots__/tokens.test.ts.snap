@@ -79,7 +79,7 @@ exports[`token contract > matches the resolved dark palette 1`] = `
   "--rh-surface-subtle": "#2b2926",
   "--rh-text-inverse": "#141312",
   "--rh-text-link": "#ece8e2",
-  "--rh-text-muted": "#948d83",
+  "--rh-text-muted": "#a49d93",
   "--rh-text-on-accent": "#0e0d0c",
   "--rh-text-on-paper": "#1a1815",
   "--rh-text-primary": "#ece8e2",

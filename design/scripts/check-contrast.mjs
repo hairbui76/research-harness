@@ -215,7 +215,10 @@ function pairs() {
   // a wireframe for no accessibility gain.
   const info = (fg, bg, note) => out.push({ fg, bg, min: null, kind: 'decorative', note });
 
-  for (const surface of ['canvas', 'pane', 'raised']) {
+  // `subtle` and `selected` are surfaces too: a row a researcher hovers or has selected
+  // repaints under text that did not change, and muted ink on a selected row is where this
+  // gate found a 3.99:1 pair that axe then confirmed in a real browser.
+  for (const surface of ['canvas', 'pane', 'raised', 'subtle', 'selected']) {
     for (const ink of ['primary', 'secondary', 'muted']) {
       text(`--rh-text-${ink}`, `--rh-surface-${surface}`, 'body text');
     }

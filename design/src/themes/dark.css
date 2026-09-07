@@ -29,7 +29,15 @@
   /* Text */
   --rh-text-primary: var(--rh-palette-warm-100);
   --rh-text-secondary: var(--rh-palette-warm-300);
-  --rh-text-muted: var(--rh-palette-warm-450);
+  /* One step brighter than the ramp step below it (warm-450), because muted ink is not
+     only read on the canvas: it carries a session's id, its timestamp and its runtime
+     binding on the row that is *selected*, and a menu group's label on a raised menu.
+     warm-450 on `--rh-surface-selected` computes 3.99:1, which is a WCAG AA failure on the
+     one row a researcher is looking at. warm-400 reaches 4.89:1 there and 6.91:1 on the
+     canvas, and stays two ramp steps below `--rh-text-secondary`, so the hierarchy the
+     three inks describe is unchanged. `scripts/check-contrast.mjs` gates every ink against
+     the selected and hover tints as well as the three base surfaces. */
+  --rh-text-muted: var(--rh-palette-warm-400);
   --rh-text-inverse: var(--rh-palette-warm-975);
   --rh-text-link: var(--rh-palette-warm-100);
   --rh-text-on-accent: var(--rh-accent-fg);

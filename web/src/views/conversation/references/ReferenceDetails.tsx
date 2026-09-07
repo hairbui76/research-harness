@@ -90,7 +90,7 @@ export function ReferenceDetails({
       <Resolution entity={resolved.tokens[0] ?? entity} problems={answer?.problems ?? []} />
 
       <section className="rh-web-stack rh-web-stack--tight">
-        <h3 className="rh-text-h4">Provenance</h3>
+        <h2 className="rh-text-h4">Provenance</h2>
         {provenance.loading ? (
           <AsyncState kind="loading" compact title="Tracing this back to its source" />
         ) : provenance.error ? (
@@ -123,7 +123,7 @@ export function ReferenceDetails({
       </section>
 
       <section className="rh-web-stack rh-web-stack--tight">
-        <h3 className="rh-text-h4">In the graph</h3>
+        <h2 className="rh-text-h4">In the graph</h2>
         {neighbourhood.loading ? (
           <AsyncState kind="loading" compact title="Reading the neighbourhood" />
         ) : neighbourhood.error ? (
@@ -201,7 +201,7 @@ function Group({
     <section className="rh-web-stack rh-web-stack--tight">
       {/* The heading is the relation, in the researcher's words. The daemon's own edge
           name beside it said the same thing twice, in a form nobody reads. */}
-      <h4 className="rh-text-h4 rh-web-graph__relation">{headingFor(group)}</h4>
+      <h3 className="rh-text-h4 rh-web-graph__relation">{headingFor(group)}</h3>
       <ul className="rh-web-list rh-web-list--tight">
         {group.neighbours.map((neighbour) => (
           <li key={`${neighbour.ref.id}:${neighbour.direction}`} className="rh-web-row">

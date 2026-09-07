@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 /**
  * The cockpit speaks the researcher's language, in a real browser against the real daemon.
@@ -75,10 +75,7 @@ test('the queue and the review screen print no identifier a researcher must deco
     expect(inbox, `the review inbox shows "${identifier}"`).not.toContain(identifier);
   }
 
-  const inboxAxe = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(inboxAxe.violations).toEqual([]);
+  expect(await axeViolations(page), 'the review inbox').toEqual([]);
   await page.screenshot({ path: info.outputPath('vocabulary-inbox.png'), fullPage: true });
 
   // Open the candidate the queue named, and read the same words again.
@@ -97,10 +94,7 @@ test('the queue and the review screen print no identifier a researcher must deco
   // An open dictionary is read out as a line; braces belong in a file, not on a page.
   expect(review).not.toMatch(/[{}]/);
 
-  const reviewAxe = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(reviewAxe.violations).toEqual([]);
+  expect(await axeViolations(page), 'the evidence review screen').toEqual([]);
   await page.screenshot({ path: info.outputPath('vocabulary-review.png'), fullPage: true });
 });
 

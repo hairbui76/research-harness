@@ -13,7 +13,7 @@
  * rather than skipped.
  */
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 /** The 768px project; the rail is a drawer there and has to be opened to be used. */
 const NARROW = 'narrow-light';
@@ -202,15 +202,12 @@ test('the composer keeps saying where an unpublished message goes', async ({
   // The picker heading is the runtime's name and version; the line is the name alone.
   expect(heading.startsWith(bound![1]!)).toBeTruthy();
 
-  // Scoped to the composer: the conversation route's dark theme already fails
-  // `color-contrast` in the rail and the session list, which is wave 2H's "axe with
-  // contrast on across the web tests" and says nothing about this line. The tags are the
-  // suite's own.
-  const results = await new AxeBuilder({ page })
-    .include('.rh-composer')
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(results.violations).toEqual([]);
+  // The whole page, not just the composer. This run used to be scoped to `.rh-composer`
+  // because the conversation route's dark theme failed `color-contrast` on the session
+  // list's active row; 2H fixed that at the token, so the scope comes off. A session is
+  // open here, which is the only state where that row exists — so this is the route-wide
+  // run that keeps it fixed.
+  expect(await axeViolations(page), 'the conversation route with a bound session').toEqual([]);
   await fits('bound to a runtime');
   await page.screenshot({ path: info.outputPath('composer-bound.png'), fullPage: true });
 

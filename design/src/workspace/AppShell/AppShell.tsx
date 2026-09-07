@@ -176,7 +176,10 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
       </a>
 
       {isNarrow ? (
-        <div className="rh-app-shell__bar">
+        // A banner landmark, not a bare row: below the breakpoint this bar is the only
+        // thing on screen that is not inside `main`, the rail or the inspector, so its
+        // title and its two drawer toggles have nowhere else to belong (axe `region`).
+        <header className="rh-app-shell__bar">
           {/*
             A disclosure button, so its name stays put and `aria-expanded` carries the
             state. A label that flips between "Open" and "Close" would also collide with
@@ -201,7 +204,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
               onClick={() => onInspectorOpenChange?.(!inspectorOpen)}
             />
           ) : null}
-        </div>
+        </header>
       ) : null}
 
       <div className="rh-app-shell__body">

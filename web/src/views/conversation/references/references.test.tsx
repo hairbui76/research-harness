@@ -519,14 +519,13 @@ describe('the inspector’s graph pane', () => {
     renderCockpit({ daemon });
     await openTheClaim(user);
     await screen.findByRole('navigation', { name: 'Provenance of C0001' });
-    // `heading-order` is off for the inspector: the pane starts its headings at `h3` — task
-    // W1's rows, this pane's sections and the Design System's own `ContextReceipt` all do —
-    // while the page's `h1` is the session title, so every panel reports the same h1 → h3
-    // step. That is one decision about the whole pane, not about this panel.
-    await expectNoAxeViolations(document.body, ['heading-order']);
+    // `heading-order` is on. The pane used to start its sections at `h3` under a page whose
+    // `h1` is the session title, so every panel reported the same h1 → h3 step; the sections
+    // are `h2` now (wave 2H), which is what a pane beside the transcript is.
+    await expectNoAxeViolations(document.body);
 
     await user.click(screen.getByRole('tab', { name: /Claims/ }));
-    await expectNoAxeViolations(document.body, ['heading-order']);
+    await expectNoAxeViolations(document.body);
   });
 });
 

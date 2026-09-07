@@ -11,7 +11,7 @@
  * layout does not overflow sideways.
  */
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript((theme) => {
@@ -78,10 +78,10 @@ test('every research page keeps its frame and teaches its empty state on a new p
       `${entry.path} must offer "${entry.action}"`,
     ).toBeVisible();
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-      .analyze();
-    expect(results.violations, `${entry.path} must have no accessibility violations`).toEqual([]);
+    expect(
+      await axeViolations(page),
+      `${entry.path} must have no accessibility violations`,
+    ).toEqual([]);
 
     const fits = await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
