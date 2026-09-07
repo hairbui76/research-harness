@@ -23,6 +23,12 @@
  * scan's own egress notice first. A window that may not write keeps exactly today's
  * behaviour instead: the pick is this message's model, and the runtime rows are disabled
  * with the session's mutation-blocked sentence (plan ruling 5).
+ *
+ * The disclosure is answered once and never seen again, so the composer also keeps a
+ * standing line naming where the message in the box would go and whether it leaves the
+ * machine. It is a reading of the current selection rather than a memory of that dialog,
+ * and it is an addition to the surfaces that already state the destination — the rail's
+ * binding words and the receipt's egress class — never a replacement for them.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -50,6 +56,7 @@ import {
 } from './mappers';
 import { GraphStatusNotice, ReferenceMarks } from './references';
 import { useConversation } from './state';
+import type { RuntimeDestination } from './useModels';
 
 /**
  * Where this browser remembers that a session's egress disclosure has been read.
@@ -85,6 +92,50 @@ const ENTRY_GROUP = 'Configured entries';
 
 /** The reasoning option that sends nothing, so the runtime applies its own default. */
 const RUNTIME_DEFAULT_REASONING = '';
+
+/**
+ * Where this message goes, in one line, for as long as the composer is open.
+ *
+ * The disclosure is answered once and then never seen again, and the picker is a control:
+ * it says which model is chosen, not what choosing it means. So the composer keeps a
+ * standing statement of the destination, and this is the only place its wording is decided
+ * (Impeccable question 4).
+ *
+ * Nothing here is derived from a rule of the cockpit's own. A runtime binding is read from
+ * the daemon's scan — the runtime's name and the host it reaches are the same two fields
+ * the CLI's `egress_sentence` uses — and every other selection is read from the catalogue
+ * row the picker is showing, egress class included, so the line and the trigger can never
+ * disagree about where the next message is headed. A binding whose row the picker was
+ * never given is named and left at that: the same rule `ModelSelector.fallbackLabel`
+ * follows, because nothing about its egress is known here.
+ */
+export function destinationWords(input: {
+  /** The runtime the *selection* names, which is not always the record's binding. */
+  runtime: { runtime: string; model: string } | null;
+  /** Every scanned runtime's destination, keyed by runtime id; empty when no scan answered. */
+  destinations: Record<string, RuntimeDestination>;
+  /** The catalogue or session row the picker has selected, when the selection names one. */
+  option: ModelOption | null;
+  /** The binding words the record carries, for a binding no row was given for. */
+  binding: string | null;
+}): string | null {
+  const { runtime, destinations, option, binding } = input;
+  if (runtime !== null) {
+    const scanned = destinations[runtime.runtime] ?? null;
+    // Every CLI runtime is external egress with a vendor on the other end (binding spec
+    // §15), so the sentence survives a scan that could not be read; only the host, which is
+    // the scan's own fact, drops out of it.
+    const where =
+      scanned === null ? 'leaves this machine' : `leaves this machine for ${scanned.egressHost}`;
+    return `Sends to ${scanned?.name ?? runtime.runtime} · ${runtime.model} — ${where}`;
+  }
+  if (option !== null) {
+    const where =
+      option.egressClass === 'local' ? 'stays on this machine' : 'leaves this machine';
+    return `Sends to ${option.label} — ${where}`;
+  }
+  return binding === null ? null : `Sends to ${binding}`;
+}
 
 export function ComposerPane() {
   const { canMutate, mutationBlockedReason } = useSession();
@@ -362,6 +413,42 @@ export function ComposerPane() {
    */
   const bindingLabel = session ? (bindingWords(session.defaults) ?? '') : '';
 
+  /**
+   * Whether there is a destination to name at all.
+   *
+   * The same condition that decides whether the picker is offered: a catalogue, a scan, or
+   * a binding. A project with none of the three has told this cockpit nothing about where
+   * its messages would go, and inventing an answer there — "the project default", over a
+   * `providers:` table that does not exist — would be the one claim the composer must never
+   * make. The catalogue's own sentence already says what happened.
+   */
+  const hasSelector = models.options.length > 0 || models.groups.length > 0 || bound !== null;
+
+  /**
+   * The standing line: where the message in the box would go if it were sent now.
+   *
+   * Read from the *selection* rather than from the record, because a read-only window still
+   * has a per-message model and that is where its message would actually go. It changes
+   * when the binding changes because everything it reads changes with it, and it is never
+   * announced — the Design System renders it inside the composer's own frame as part of the
+   * text box's description.
+   */
+  const selectedOption = useMemo(
+    () =>
+      groups.flatMap((group) => group.options).find((option) => option.id === selectedModel) ??
+      null,
+    [groups, selectedModel],
+  );
+  const destination =
+    session === null || models.loading || !hasSelector
+      ? null
+      : destinationWords({
+          runtime: parseRuntimeOptionId(selectedModel),
+          destinations: models.destinations,
+          option: selectedOption,
+          binding: bindingLabel === '' ? null : bindingLabel,
+        });
+
   return (
     <div className="rh-web-composer">
       {/* References and the graph (task W3). Completion falls back to the project listings
@@ -437,7 +524,7 @@ export function ComposerPane() {
             either source. A session that is already bound keeps it whatever the catalogue
             and the scan say: the trigger has the binding words to state, and the row that
             unbinds has to stay reachable. */
-        ...(models.options.length > 0 || models.groups.length > 0 || bound !== null
+        ...(hasSelector
           ? {
               modelSelector: (
                 <span className="rh-web-composer__model">
@@ -476,6 +563,9 @@ export function ComposerPane() {
               ),
             }
           : {})}
+        {/* Where an unpublished message goes, kept on screen long after the one-time
+            disclosure was answered. Absent rather than vague when nothing is known. */
+        ...(destination !== null ? { destination } : {})}
         actions={
           <Button
             size="sm"
