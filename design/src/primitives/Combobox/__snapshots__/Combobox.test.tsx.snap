@@ -48,27 +48,54 @@ exports[`Combobox > Combobox theme x density > matches the dark / comfortable sn
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-12
-            </span>
-            <span
-              class="rh-combobox__option-description"
-            >
-              Contested
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-12
+              </span>
+              <span
+                class="rh-combobox__option-description"
+              >
+                Contested
+              </span>
             </span>
           </div>
           <div
-            aria-selected="false"
+            aria-selected="true"
             class="rh-combobox__option"
             id="rh-combobox-ID-option-c-13"
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-13
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-13
+              </span>
             </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check rh-icon rh-combobox__option-check"
+              data-icon="check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
           </div>
         </div>
         <div
@@ -89,9 +116,13 @@ exports[`Combobox > Combobox theme x density > matches the dark / comfortable sn
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-4
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-4
+              </span>
             </span>
           </div>
           <div
@@ -102,9 +133,13 @@ exports[`Combobox > Combobox theme x density > matches the dark / comfortable sn
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-9
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-9
+              </span>
             </span>
           </div>
         </div>
@@ -162,27 +197,54 @@ exports[`Combobox > Combobox theme x density > matches the dark / compact snapsh
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-12
-            </span>
-            <span
-              class="rh-combobox__option-description"
-            >
-              Contested
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-12
+              </span>
+              <span
+                class="rh-combobox__option-description"
+              >
+                Contested
+              </span>
             </span>
           </div>
           <div
-            aria-selected="false"
+            aria-selected="true"
             class="rh-combobox__option"
             id="rh-combobox-ID-option-c-13"
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-13
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-13
+              </span>
             </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check rh-icon rh-combobox__option-check"
+              data-icon="check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
           </div>
         </div>
         <div
@@ -203,9 +265,13 @@ exports[`Combobox > Combobox theme x density > matches the dark / compact snapsh
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-4
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-4
+              </span>
             </span>
           </div>
           <div
@@ -216,9 +282,13 @@ exports[`Combobox > Combobox theme x density > matches the dark / compact snapsh
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-9
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-9
+              </span>
             </span>
           </div>
         </div>
@@ -276,27 +346,54 @@ exports[`Combobox > Combobox theme x density > matches the light / comfortable s
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-12
-            </span>
-            <span
-              class="rh-combobox__option-description"
-            >
-              Contested
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-12
+              </span>
+              <span
+                class="rh-combobox__option-description"
+              >
+                Contested
+              </span>
             </span>
           </div>
           <div
-            aria-selected="false"
+            aria-selected="true"
             class="rh-combobox__option"
             id="rh-combobox-ID-option-c-13"
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-13
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-13
+              </span>
             </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check rh-icon rh-combobox__option-check"
+              data-icon="check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
           </div>
         </div>
         <div
@@ -317,9 +414,13 @@ exports[`Combobox > Combobox theme x density > matches the light / comfortable s
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-4
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-4
+              </span>
             </span>
           </div>
           <div
@@ -330,9 +431,13 @@ exports[`Combobox > Combobox theme x density > matches the light / comfortable s
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-9
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-9
+              </span>
             </span>
           </div>
         </div>
@@ -390,27 +495,54 @@ exports[`Combobox > Combobox theme x density > matches the light / compact snaps
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-12
-            </span>
-            <span
-              class="rh-combobox__option-description"
-            >
-              Contested
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-12
+              </span>
+              <span
+                class="rh-combobox__option-description"
+              >
+                Contested
+              </span>
             </span>
           </div>
           <div
-            aria-selected="false"
+            aria-selected="true"
             class="rh-combobox__option"
             id="rh-combobox-ID-option-c-13"
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Claim C-13
+              <span
+                class="rh-combobox__option-label"
+              >
+                Claim C-13
+              </span>
             </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check rh-icon rh-combobox__option-check"
+              data-icon="check"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
           </div>
         </div>
         <div
@@ -431,9 +563,13 @@ exports[`Combobox > Combobox theme x density > matches the light / compact snaps
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-4
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-4
+              </span>
             </span>
           </div>
           <div
@@ -444,9 +580,13 @@ exports[`Combobox > Combobox theme x density > matches the light / compact snaps
             role="option"
           >
             <span
-              class="rh-combobox__option-label"
+              class="rh-combobox__option-content"
             >
-              Evidence E-9
+              <span
+                class="rh-combobox__option-label"
+              >
+                Evidence E-9
+              </span>
             </span>
           </div>
         </div>

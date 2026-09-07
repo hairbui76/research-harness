@@ -98,6 +98,15 @@
 }
 
 /*
+ * How much is waiting, on the toolbar's second row under the filters that change it. It has
+ * no margin of its own: the toolbar's own gap is the space around it, and the batch control
+ * beside it keeps to the end of the same row.
+ */
+.rh-web-inbox-count {
+  margin: 0;
+}
+
+/*
  * The batch's own controls, beside the filters that narrow the queue. They keep to the end
  * of the toolbar row so the two controls a researcher reaches for constantly stay first.
  */

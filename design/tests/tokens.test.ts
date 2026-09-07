@@ -475,6 +475,61 @@ describe('border widths', () => {
     }
     expect(literals).toEqual([]);
   });
+
+  /*
+   * The sweep above reads `border` and `outline`, which is where a rule is normally drawn —
+   * and an inset `box-shadow` draws exactly the same rule without using either word. That is
+   * how a 2px accent stripe stood down the start edge of the combobox's active option: a
+   * side border by every measure except the property it was written in. The strong width is
+   * spent on the selected tab's marker and the rule beside quoted matter, so a shadow that
+   * draws a stripe is held to the hairline like anything else.
+   */
+  it('draws no thicker stripe through an inset shadow, which is a border by another name', () => {
+    const stripes: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [index, line] of css.split('\n').entries()) {
+          if (!/^\s*box-shadow\s*:/.test(line) || !/\binset\b/.test(line)) continue;
+          const above =
+            [...line.matchAll(/(\d+(?:\.\d+)?)px/g)].some((match) => Number(match[1]) > 1) ||
+            /--rh-border-width-strong/.test(line);
+          if (above) stripes.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+        }
+      }
+    }
+    expect(stripes).toEqual([]);
+  });
+});
+
+/**
+ * An icon is a registry glyph, never a character.
+ *
+ * `Icon` is the single choke point for iconography, so sizing, colour and the
+ * decorative/meaningful distinction stay in one place. A tick typed into a stylesheet
+ * escapes all three: it takes the reader's font rather than the system's 2px stroke, it
+ * cannot be sized with the rest of the set, and it is text, so it joins the accessible name
+ * of whatever it decorates. The combobox marked its chosen option with `content: ' ✓'`; the
+ * mark is `<Icon name="check">` now, and this is what keeps the next one out.
+ */
+describe('an icon is drawn, not typed', () => {
+  it('sets no glyph as generated content in any stylesheet', () => {
+    const glyphs: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [index, line] of css.split('\n').entries()) {
+          const declaration = /^\s*content\s*:\s*(.*)$/.exec(line);
+          if (declaration === null) continue;
+          // Anything outside printable ASCII in a `content` string is a drawn mark.
+          if (/[^\x20-\x7e]/.test(declaration[1]!)) {
+            glyphs.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+          }
+        }
+      }
+    }
+    expect(glyphs).toEqual([]);
+  });
 });
 
 /**
@@ -553,6 +608,36 @@ describe('the tab strip’s overflow fade', () => {
     );
     expect(ramps).not.toHaveLength(0);
     for (const step of ramps) expect(step).toBeGreaterThanOrEqual(10);
+  });
+});
+
+/**
+ * Which tab you are on is not model activity.
+ *
+ * `--rh-accent` marks model activity, the primary send/run action, active reference tracking
+ * and selected AI provenance — the package README says so, and says the accent is not an
+ * emphasis colour. Navigation is not on that list, and the tab strip is navigation: the
+ * inspector's six tabs and the manuscript's are read dozens of times a session, so the
+ * orange under the selected one was the accent's loudest appearance on a screen where the
+ * model had done nothing. The marker is the page's own ink at the strong width, which the
+ * selected tab already takes for its label, and it stays 2px — a tab marker and the rule
+ * beside quoted matter are what that width is for.
+ */
+describe('the selected tab’s marker', () => {
+  const css = read('primitives/Tabs/Tabs.css');
+
+  it('is drawn in ink at the strong width, in both orientations', () => {
+    const markers = [...css.matchAll(/border-(?:bottom|right)-color:\s*([^;]+);/g)].map(
+      (match) => match[1]!.trim(),
+    );
+    expect(markers).toHaveLength(2);
+    for (const marker of markers) expect(marker).toBe('var(--rh-text-primary)');
+    expect(css).toContain('border-bottom: var(--rh-border-width-strong) solid transparent');
+  });
+
+  it('spends no accent on navigation', () => {
+    // Declarations only: the rule above says in a comment which colour it stopped using.
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, '')).not.toContain('--rh-accent');
   });
 });
 

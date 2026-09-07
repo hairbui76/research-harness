@@ -157,6 +157,28 @@ describe('Combobox', () => {
     expect(input).toHaveValue('');
   });
 
+  /*
+   * What is chosen is marked with an icon from the registry, the way a menu marks it.
+   *
+   * It used to be `content: ' ✓'` on the label's `::after` — a text glyph standing in for an
+   * icon, which is the one thing the icon registry exists to prevent: it takes the font's
+   * shape rather than the system's 2px stroke, it cannot be sized or coloured with the rest
+   * of the iconography, and it is text, so it lands in the accessible name of the option
+   * beside a redundant `aria-selected`. The stylesheet draws no glyph now; the sweep in
+   * `tests/tokens.test.ts` is what holds every stylesheet to that.
+   */
+  it('marks the selected option with the registry’s check rather than a text glyph', () => {
+    render(<Combobox<string> label="Insert reference" items={ITEMS} defaultValue="c-13" defaultOpen />);
+    const chosen = screen.getByRole('option', { name: 'Claim C-13' });
+    expect(chosen).toHaveAttribute('aria-selected', 'true');
+    expect(chosen.querySelector('[data-icon="check"]')).not.toBeNull();
+    expect(chosen).toHaveTextContent(/^Claim C-13$/);
+
+    const other = screen.getByRole('option', { name: /Claim C-12/ });
+    expect(other).toHaveAttribute('aria-selected', 'false');
+    expect(other.querySelector('[data-icon="check"]')).toBeNull();
+  });
+
   it('closes when the pointer presses outside', async () => {
     const user = userEvent.setup();
     render(
@@ -181,7 +203,8 @@ describe('Combobox', () => {
     await expectNoAxeViolations(document.body);
   });
 
+  // One option is chosen, so the snapshot records the check the list draws on it.
   describeThemeDensitySnapshots('Combobox', () => (
-    <Combobox<string> label="Insert reference" items={ITEMS} defaultOpen />
+    <Combobox<string> label="Insert reference" items={ITEMS} defaultValue="c-13" defaultOpen />
   ));
 });

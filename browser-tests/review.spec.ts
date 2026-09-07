@@ -127,6 +127,30 @@ test('the queue can be searched, batched and reached from the keyboard', async (
 });
 
 /**
+ * Whether the notification on screen covers the box `selector` names.
+ *
+ * A toast is chrome and lands on chrome: never on what a researcher is reading, and never on
+ * what they are reaching for. Both review tests use this while a toast is up.
+ *
+ * A missing element is a fault rather than a pass: an assertion that quietly holds because
+ * the thing it protects had unmounted would have missed the defect this exists for.
+ */
+async function toastCovers(
+  page: import('@playwright/test').Page,
+  selector: string,
+): Promise<boolean> {
+  return page.evaluate((css) => {
+    const notice = document.querySelector('.rh-toast');
+    if (notice === null) throw new Error('no toast is on screen');
+    const other = document.querySelector(css);
+    if (other === null) throw new Error(`nothing on the page matches ${css}`);
+    const a = notice.getBoundingClientRect();
+    const b = other.getBoundingClientRect();
+    return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  }, selector);
+}
+
+/**
  * A deep review is refused from the queue, and the keyboard is handed on.
  *
  * Tier 2 is the queue's deepest filing, and the tier is what withholds Accept from the row:
@@ -163,6 +187,27 @@ test('a deep review is refused from the queue, and the focus lands on the next r
     .fill('the cell is the baseline, not this model');
   await page.screenshot({ path: info.outputPath('review-row-reject.png'), fullPage: true });
   await form.getByRole('button', { name: 'Reject', exact: true }).click();
+
+  /*
+   * The notice about the decision does not cover what the decision changed.
+   *
+   * The queue's count is the sentence a researcher reads to see the refusal took — and at
+   * 768px, where the toast takes the width of the screen, it landed exactly there: the strip
+   * that said "Candidate rejected." sat on top of "2 waiting.". The count belongs to the
+   * toolbar that filters it, so it is in the page header now, which is the region the
+   * viewport already measures and clears. Asserted at both widths, while the toast is up.
+   */
+  const count = page.locator('.rh-web-inbox-count');
+  await expect(count).toHaveText('2 waiting.');
+  const notice = page.getByRole('region', { name: 'Notifications' }).locator('.rh-toast').first();
+  await expect(notice).toBeVisible();
+  expect(await toastCovers(page, '.rh-full-page__header'), 'the toast covers the page header').toBe(
+    false,
+  );
+  expect(
+    await toastCovers(page, '.rh-web-inbox-count'),
+    'the toast covers the queue’s count',
+  ).toBe(false);
 
   await expect(page.getByText('2 waiting.')).toBeVisible();
   await expect(page.getByRole('link', { name: /Metric result · W0001/ })).toHaveCount(0);
@@ -215,20 +260,11 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
    */
   const toast = page.getByRole('region', { name: 'Notifications' }).locator('.rh-toast').first();
   await expect(toast).toBeVisible();
-  const overlaps = async (selector: string): Promise<boolean> =>
-    page.evaluate((css) => {
-      const notice = document.querySelector('.rh-toast');
-      const other = document.querySelector(css);
-      if (notice === null || other === null) return false;
-      const a = notice.getBoundingClientRect();
-      const b = other.getBoundingClientRect();
-      return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-    }, selector);
-  expect(await overlaps('.rh-full-page__header'), 'the toast covers the page header').toBe(
+  expect(await toastCovers(page, '.rh-full-page__header'), 'the toast covers the page header').toBe(
     false,
   );
   expect(
-    await overlaps('.rh-review-decision-bar'),
+    await toastCovers(page, '.rh-review-decision-bar'),
     'the toast covers the decision controls',
   ).toBe(false);
 

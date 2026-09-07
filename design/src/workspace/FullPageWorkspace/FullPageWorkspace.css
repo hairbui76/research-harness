@@ -10,7 +10,7 @@
  * The page is a query container, because the page is what has to fit.
  *
  * A research page is a pane, not a window: the rail takes 16rem of it, the conversation's
- * inspector takes another 22rem when it is open, and a `PaneGroup` divider can take more.
+ * inspector takes another 26rem when it is open, and a `PaneGroup` divider can take more.
  * A viewport query cannot see any of that — at 1440px it says "wide" to a page that has
  * 520px to draw in — so the queries below ask this element's own inline size instead. The
  * shell keeps its viewport query (`AppShell`'s `breakpoint`), because the shell really is

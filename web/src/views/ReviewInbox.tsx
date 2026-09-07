@@ -287,6 +287,19 @@ export function ReviewInboxPage() {
         items.length > 0 ? (
           <>
             <InboxFilterBar items={items} filters={filters} onChange={setFilters} />
+            {/* How much is waiting, and what the filters left of it — beside the controls
+                that change the number rather than under them.
+
+                It sat at the top of the queue, which is where a toast lands: at 768px the
+                notice about a decision covered the count the decision had just changed. The
+                header is the one region the toast viewport measures and clears
+                (`--rh-page-header-bottom`), and the header is sticky, so the count now
+                survives a scroll down a long queue as well. */}
+            <p className="rh-web-inbox-count rh-text-secondary" role="status">
+              {filtered
+                ? `Showing ${showing} of ${items.length} waiting.`
+                : `${items.length} waiting.`}
+            </p>
             {/* The one control that acts on the queue rather than on a candidate in it,
                 beside the two that narrow it. It is offered only to a window that may
                 accept, and the policy gate is still the daemon's. */}
@@ -302,14 +315,6 @@ export function ReviewInboxPage() {
 
       {!state.loading && !state.error ? (
         <div className="rh-web-stack" ref={listRef}>
-          {items.length > 0 ? (
-            <p className="rh-text-secondary" role="status">
-              {filtered
-                ? `Showing ${showing} of ${items.length} waiting.`
-                : `${items.length} waiting.`}
-            </p>
-          ) : null}
-
           {/* What the batch would write, and afterwards what it wrote. It exists only once
               a preview has been asked for, so the page still opens on the group the daemon
               put first — and it appears where the control that opened it is, because a
