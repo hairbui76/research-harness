@@ -8,47 +8,55 @@
           "detail": "tier 2: an interpretive judgement needs deep review; numeric evidence: F1 carries unit, dataset, and condition",
           "id": "cand_44c1f007fc0db0b2",
           "label": "metric_result · W0001",
-          "priority": 1
+          "priority": 1,
+          "route": "/review/cand_44c1f007fc0db0b2"
         },
         {
           "detail": "the verifier reported partially_supported",
           "id": "cand_b09aa84fc5dee7c0",
           "label": "method_summary · W0001",
-          "priority": 3
+          "priority": 3,
+          "route": "/review/cand_b09aa84fc5dee7c0"
         },
         {
           "detail": "verified supported, tier 1, anchor valid",
           "id": "cand_4590b9b1f474d343",
           "label": "dataset · W0001",
-          "priority": 4
+          "priority": 4,
+          "route": "/review/cand_4590b9b1f474d343"
         }
       ],
       "kind": "review_items",
       "label": "3 review items",
-      "route": "/review"
+      "route": "/review",
+      "surface": "decide"
     },
     {
       "count": 0,
       "items": [],
       "kind": "conflicts",
       "label": "0 conflicts",
-      "route": "/conflicts"
+      "route": "/conflicts",
+      "surface": "decide"
     },
     {
       "count": 0,
       "items": [],
       "kind": "stale",
       "label": "0 stale objects",
-      "route": "/stale"
+      "route": "/stale",
+      "surface": "stale"
     },
     {
       "count": 0,
       "items": [],
       "kind": "unsupported_manuscript_claims",
       "label": "0 unsupported manuscript claims",
-      "route": "/manuscript"
+      "route": "/manuscript",
+      "surface": "decide"
     }
   ],
+  "attention_summary": "3 review items need a researcher.",
   "claim_health": [],
   "conflicts": [],
   "counts": {
@@ -66,5 +74,23 @@
   "principal": "human",
   "project": "gate-p11",
   "review_policy": "strict",
-  "workspace": "/tmp/research-harness-web-fixtures-wuc165wy/cockpit"
+  "since_last_session": {
+    "basis": "recent_window",
+    "entries": [
+      {
+        "at": "2026-09-07T04:42:18.554422+00:00",
+        "detail": "W0001",
+        "id": "work.ingested:2026-09-07T04:42:18.554422+00:00:W0001",
+        "kind": "work",
+        "label": "registered W0001 from synthetic_research_paper.pdf",
+        "route": "/corpus/W0001",
+        "when": "7 September, 11:42"
+      }
+    ],
+    "more": "",
+    "since": "2026-08-31T04:42:22.238926+00:00",
+    "summary": "1 change in the last seven days.",
+    "total": 1
+  },
+  "workspace": "/tmp/research-harness-web-fixtures-k12208d0/cockpit"
 }

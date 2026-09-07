@@ -61,6 +61,7 @@ __all__ = [
     "CapabilityDescriptor",
     "CapabilityRequest",
     "CapabilityResponse",
+    "ChangeEntry",
     "ClaimSummary",
     "ConflictPosition",
     "ConflictView",
@@ -74,6 +75,7 @@ __all__ = [
     "OverviewReport",
     "PlannedCapability",
     "QuestionSummary",
+    "RecentChanges",
     "RunStatus",
     "TaxonomySummary",
     "WorkSummary",
@@ -284,6 +286,14 @@ class AttentionItem(BaseModel):
     label: str
     detail: str = ""
     priority: int = 0
+    route: str = ""
+    """Where this one item lives, when the cockpit has a screen for it.
+
+    A waiting review item is reachable on its own (`/review/<candidate>`); a stale Work,
+    Claim, or Evidence object has a page of its own. Anything the cockpit can only show
+    inside its list leaves this empty, and the group's own `route` carries the reader
+    there instead. The path is the daemon's, exactly as `AttentionGroup.route` is.
+    """
 
 
 class AttentionGroup(BaseModel):
@@ -296,6 +306,15 @@ class AttentionGroup(BaseModel):
     count: int
     route: str
     items: tuple[AttentionItem, ...] = ()
+    surface: str = "decide"
+    """Which kind of attention this group asks for: `decide` or `stale`.
+
+    A candidate in the queue, an open conflict, and a manuscript sentence with no support
+    are all waiting for a researcher to decide something. A stale object is not: it is
+    accepted state that has gone out of date and has to be repaired, and nothing is
+    silently re-anchored (ADR-008). The distinction is scientific, so the daemon draws it
+    and the Overview reads it rather than deciding from `kind` which is which.
+    """
 
 
 class CountEntry(BaseModel):
@@ -322,6 +341,67 @@ class OverviewCounts(BaseModel):
     manuscript_anchors: int = 0
 
 
+class ChangeEntry(BaseModel):
+    """One thing that changed while the researcher was away, as the daemon recorded it."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    kind: str
+    """Which research surface moved: `work`, `evidence`, `claim`, `decision`, `conflict`."""
+
+    label: str
+    """The sentence the daemon wrote when it happened. A client renders it; it never
+    composes one of its own out of ids and enum values."""
+
+    detail: str = ""
+    at: str
+    """When it happened, ISO-8601 in UTC — the machine-readable half of `when`."""
+
+    when: str
+    """The same instant in the words a person reads, in the machine's own time zone."""
+
+    route: str = ""
+    """Where the changed object lives, when the cockpit has a screen for it."""
+
+
+class RecentChanges(BaseModel):
+    """`OverviewReport.since_last_session`: what changed while the researcher was away.
+
+    **Where the window opens.** The daemon reads this project's conversation sessions,
+    keeps the ones that recorded a message, and orders them by that message, newest first.
+    With two or more, the window opens at the end of the session *before* the most recent
+    one, so what a researcher sees on returning is the work of their last sitting and
+    everything after it — which is the question "what changed since I last worked" actually
+    asks. With fewer than two sessions there is nothing to bound a window with, so the
+    window is the last seven days. `basis` names which rule applied (`previous_session`,
+    `recent_window`, or `no_history` for a project that has recorded no research yet) and
+    `summary` says it in words, so nothing on screen has to guess.
+
+    **What counts as a change.** Works added, evidence accepted, claims promoted or
+    reclassified, and decisions taken, read from the Git-visible semantic event log
+    (Product 19.3); conflicts opened or resolved, read from the conflict store. Newest
+    first, capped, with `more` saying in words what the cap left out. Every judgement here
+    is the daemon's: a client displays this list and never rebuilds it (Product 5 P10).
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    basis: str = "no_history"
+    since: str = ""
+    """Start of the window, ISO-8601 in UTC. Empty only when nothing bounds one."""
+
+    summary: str = ""
+    """One line: which window this is, and how much happened inside it."""
+
+    more: str = ""
+    """What the cap left out, in words. Empty when nothing was left out."""
+
+    entries: tuple[ChangeEntry, ...] = ()
+    total: int = 0
+    """Everything in the window, including what the cap left out of `entries`."""
+
+
 class OverviewReport(BaseModel):
     """`GET /overview`: next actions first, then claim health and open questions.
 
@@ -342,7 +422,15 @@ class OverviewReport(BaseModel):
     """Id the next `decision.accept` will write; an override is a Decision first (Product 38)."""
 
     counts: OverviewCounts = Field(default_factory=OverviewCounts)
+    attention_summary: str = ""
+    """One line naming what needs a researcher, composed from the groups below.
+
+    The Overview's own description reads this. It is written here because deciding what
+    counts as waiting — and in which words — is the same judgement that built `attention`.
+    """
+
     attention: tuple[AttentionGroup, ...] = ()
+    since_last_session: RecentChanges = Field(default_factory=RecentChanges)
     claim_health: tuple[CountEntry, ...] = ()
     open_questions: tuple[AttentionItem, ...] = ()
     conflicts: tuple[ConflictView, ...] = ()
