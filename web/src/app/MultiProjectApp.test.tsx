@@ -176,7 +176,7 @@ describe('the multi-project application', () => {
       await user.click(screen.getByRole('button', { name: /Switch project/ }));
       await user.click(await screen.findByRole('menuitem', { name: 'All projects' }));
       await screen.findByRole('heading', { name: 'Your research projects' });
-      await user.click(within(rowFor('Reef survey')).getByRole('button', { name: 'Locate' }));
+      await user.click(within(rowFor('Reef survey')).getByRole('button', { name: 'Locate folder' }));
 
       await waitFor(() =>
         expect(daemon.callsTo('POST', '/api/projects/prj_reef/locate')[0]?.body).toEqual({
@@ -190,7 +190,10 @@ describe('the multi-project application', () => {
       expect(within(rowFor('Reef survey')).getByText('/research/reef-survey')).toBeInTheDocument();
 
       // -- forget: a row leaves the list, and nothing leaves the disk -------------------
-      await user.click(within(rowFor('Latency study')).getByRole('button', { name: 'Forget' }));
+      await user.click(
+        within(rowFor('Latency study')).getByRole('button', { name: 'Project actions' }),
+      );
+      await user.click(await screen.findByRole('menuitem', { name: 'Forget project' }));
       const confirm = await screen.findByRole('alertdialog', { name: 'Forget project' });
       expect(within(confirm).getByText(/files remain on disk/)).toBeInTheDocument();
       expect(daemon.callsTo('DELETE', '/api/projects/prj_left')).toHaveLength(0);
