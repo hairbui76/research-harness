@@ -236,3 +236,99 @@ test('a narrow pane gets the narrow layout at a wide viewport', async ({ page, r
 
   await page.screenshot({ path: info.outputPath('narrow-pane.png'), fullPage: false });
 });
+
+/**
+ * The other two query containers, at a window that is not narrow.
+ *
+ * `rh-page` is the one the test above measures; the cockpit declares two more, and neither
+ * of them answers the window either. `rh-centre` is the conversation's middle column, which
+ * the rail and an open inspector leave at about 415px inside a 1024px window, and
+ * `rh-inspector` is the pane itself, which is 22rem beside a page and 85vw as a drawer.
+ * Whether a container query fires is a decision the browser makes about one element's own
+ * width, so each half below reads the rule's visible effect at 1024 and then changes only
+ * that element's width.
+ *
+ * The effect is measured rather than the `display` property: a flex item's `display` is
+ * blockified, so `inline-flex` and `flex` both compute to `flex` on the model cluster and
+ * reading it would assert nothing. What the rule actually does is give the cluster the
+ * composer's whole width, and that is what is measured.
+ *
+ * The conversation is seeded with a turn because the composer only offers its model cluster
+ * once a session has something to send, and that cluster is what the `rh-centre` rule moves.
+ */
+test('the conversation panes answer their own width, not the window’s', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  const bootstrap = await request.get('/__test__/bootstrap');
+  expect(bootstrap.ok()).toBeTruthy();
+  const { nonce } = await bootstrap.json();
+  const seeded = await request.post('/__test__/session-with-turn', { timeout: 60_000 });
+  expect(seeded.ok()).toBeTruthy();
+  const conversation = await seeded.json();
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
+  await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+  await page.goto(conversation.conversation_url);
+  await expect(page.getByRole('main', { name: 'Research workspace' })).toBeVisible();
+
+  // -- rh-centre: below 30rem the model cluster takes the composer's width ---
+  await expect(page.locator('.rh-web-composer__model')).toBeVisible();
+  const centre = () =>
+    page.evaluate(() => ({
+      pane: document.querySelector('.rh-conversation-workspace__centre')?.clientWidth ?? 0,
+      cluster:
+        document.querySelector('.rh-web-composer__model')?.getBoundingClientRect().width ?? 0,
+      toolbar: document.querySelector('.rh-composer__toolbar')?.getBoundingClientRect().width ?? 0,
+      window: window.innerWidth,
+    }));
+
+  const packed = await centre();
+  expect(packed.window, 'the window is not narrow').toBe(1024);
+  expect(packed.pane, 'the rail and the inspector leave the centre inside 30rem').toBeLessThan(
+    480,
+  );
+  expect(
+    Math.abs(packed.cluster - packed.toolbar),
+    'a narrow centre gives the model cluster the composer’s whole width',
+  ).toBeLessThan(1);
+
+  // -- rh-inspector: below 20rem the panel gives its padding back -----------
+  const toggle = page.getByRole('button', { name: /^(Show|Hide) the research inspector$/ });
+  if ((await toggle.innerText()).startsWith('Show')) await toggle.click();
+  await expect(page.getByRole('region', { name: 'Research inspector' })).toBeVisible();
+  const panel = page.locator('.rh-research-inspector__panel').first();
+  const padding = () => panel.evaluate((node) => getComputedStyle(node).paddingTop);
+  const roomy = await padding();
+
+  // The inspector is the container, so narrowing it is narrowing the query's own subject.
+  await page.addStyleTag({ content: '.rh-research-inspector { max-inline-size: 300px; }' });
+  await expect.poll(padding, { timeout: 10_000 }).not.toBe(roomy);
+  expect(
+    Number.parseFloat(await padding()),
+    'a narrow inspector gives the panel’s padding back to its content',
+  ).toBeLessThan(Number.parseFloat(roomy));
+
+  // And the centre lets go of its rule when the pane grows, at the same 1024 window.
+  await page.addStyleTag({ content: '.rh-app-shell__main { min-inline-size: 700px; }' });
+  await expect
+    .poll(async () => {
+      const grown = await centre();
+      return grown.pane > 480 && grown.toolbar - grown.cluster > 100;
+    }, { timeout: 10_000 })
+    .toBe(true);
+
+  const grown = await centre();
+  console.log(
+    `[resilience/${info.project.name}] centre ${packed.pane}px then ${grown.pane}px inside the ` +
+      'same 1024px window: the composer took the narrow rule and then let it go',
+  );
+
+  await page.screenshot({ path: info.outputPath('narrow-conversation.png'), fullPage: false });
+  expect(errors).toEqual([]);
+});
