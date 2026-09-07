@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
 import { describeThemeDensitySnapshots } from '../../../tests/variants';
 import { ManuscriptWorkspace } from './ManuscriptWorkspace';
@@ -45,6 +45,12 @@ function Example(props: { narrow?: boolean; onColumnSizesChange?: (s: PaneSizes)
 }
 
 describe('ManuscriptWorkspace', () => {
+  // One test supplies `ResizeObserver` and a layout engine jsdom does not have; the stubs
+  // must not outlive it, or every later test would be measuring that one's element.
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('lays files, source and PDF out as three panes on a wide screen', () => {
     render(<Example narrow={false} />);
     expect(screen.getByRole('navigation', { name: 'Files' })).toBeInTheDocument();
@@ -104,6 +110,89 @@ describe('ManuscriptWorkspace', () => {
 
     const sizes = onColumnSizesChange.mock.calls.at(-1)?.[0] as PaneSizes;
     expect(Object.keys(sizes).sort()).toEqual(['editor', 'files', 'preview']);
+  });
+
+  it('gives the audit inspector the whole document area below the breakpoint', async () => {
+    const user = userEvent.setup();
+    render(<Example narrow />);
+
+    // Three views of one area, not three panes dividing a width none of them can hold.
+    const views = screen.getByRole('tablist', { name: 'Manuscript view' });
+    expect(within(views).getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Source',
+      'PDF',
+      'Build and audit',
+    ]);
+    // While the source is showing, the inspector is not a second region under it.
+    expect(screen.queryByRole('region', { name: 'Build and audit' })).not.toBeInTheDocument();
+
+    await user.click(within(views).getByRole('tab', { name: 'Build and audit' }));
+    expect(screen.getByRole('region', { name: 'Build and audit' })).toHaveTextContent(
+      'Compiler diagnostics and audit',
+    );
+  });
+
+  it('lets a host name the narrow tab when the inspector carries a strip of its own', () => {
+    render(
+      <ManuscriptWorkspace
+        narrow
+        view="inspector"
+        inspectorTabLabel="Inspector"
+        fileTree={<nav aria-label="Files">main.tex</nav>}
+        editor={<Editor />}
+        preview={<Preview />}
+        inspector={<p>Compiler diagnostics and audit</p>}
+      />,
+    );
+    const views = screen.getByRole('tablist', { name: 'Manuscript view' });
+    expect(within(views).getByRole('tab', { name: 'Inspector' })).toBeInTheDocument();
+    // The panel is still the panel: only the word on the tab changed.
+    expect(screen.getByRole('region', { name: 'Build and audit' })).toBeInTheDocument();
+  });
+
+  it('keeps one inspector control in the bar at both widths', async () => {
+    const user = userEvent.setup();
+    render(<Example narrow />);
+
+    const toggle = screen.getByRole('button', { name: 'Expand the build and audit panel' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(toggle);
+    expect(screen.getByRole('region', { name: 'Build and audit' })).toBeInTheDocument();
+    const open = screen.getByRole('button', { name: 'Collapse the build and audit panel' });
+    expect(open).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(open);
+    expect(screen.queryByRole('region', { name: 'Build and audit' })).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Source' })).toBeInTheDocument();
+  });
+
+  it('reads its own width rather than the window’s', () => {
+    // jsdom has no layout engine and no `ResizeObserver`, so both are supplied. The point
+    // is the ruler: a 1024px window that spends 16rem on the project rail hands this
+    // workspace about 768px, and a media query on the window would call that wide.
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const matchMedia = vi.fn();
+    vi.stubGlobal('matchMedia', matchMedia);
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ width: 768 } as DOMRect);
+
+    const narrow = render(<Example />);
+    expect(screen.getByRole('tablist', { name: 'Manuscript view' })).toBeInTheDocument();
+    expect(matchMedia).not.toHaveBeenCalled();
+    narrow.unmount();
+
+    // …and an element nobody has laid out yet reports zero, which is not a small screen.
+    rect.mockReturnValue({ width: 0 } as DOMRect);
+    render(<Example />);
+    expect(screen.queryByRole('tablist', { name: 'Manuscript view' })).not.toBeInTheDocument();
   });
 
   it('can place the inspector at the end instead of the bottom', () => {
