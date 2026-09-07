@@ -76,6 +76,7 @@ WEB_RESPONSE_TYPES = {
     "QuestionGroup": "question.list",
     "CorpusAttentionGroup": "work.list",
     "CorpusAttentionItem": "work.list",
+    "CorpusQuestion": "work.list",
     "QuestionList": "question.list",
     "DecisionList": "decision.list",
     "AnchorList": "anchor.list",

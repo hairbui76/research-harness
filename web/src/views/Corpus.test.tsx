@@ -80,6 +80,7 @@ describe('the corpus list', () => {
   });
 
   it('reads the artifact’s bytes from wherever the client points, with no view logic', async () => {
+    const user = userEvent.setup();
     renderView(
       <ProjectPathProvider projectId="prj_abc">
         <CorpusPage />
@@ -88,6 +89,10 @@ describe('the corpus list', () => {
     );
 
     await waitFor(() => expect(screen.getByText(WORK.title)).toBeInTheDocument());
+    // The files of one work are one press away, inside the row. The count moved into the
+    // row's own control when the works became columns; the files themselves are the table
+    // they always were.
+    await user.click(screen.getByRole('button', { name: '1 file' }));
     // The test client is the legacy one, so the byte link is the legacy one: the view has
     // added nothing to it, which is exactly the property under test.
     expect(screen.getByRole('link', { name: 'open the file' })).toHaveAttribute(
@@ -272,6 +277,180 @@ describe('what needs a researcher among the sources', () => {
   });
 });
 
+/**
+ * A corpus that can be asked things, and a daemon that answers the asking.
+ *
+ * Shaped as `work.list` answers it: the questions and their counts are over the whole
+ * corpus, the works are only the ones the question named, and the summary sentence is the
+ * daemon's. The fake answers each question with a different list, which is the property the
+ * tests below are about — the page asks rather than filters.
+ */
+const CORPUS_QUESTIONS = [
+  {
+    kind: 'unparsed',
+    label: 'No readable text',
+    count: 4,
+    summary: '4 of 5 works have no readable text yet.',
+  },
+  {
+    kind: 'unread',
+    label: 'Nothing accepted',
+    count: 1,
+    summary: '1 of 5 works has nothing accepted from it yet.',
+  },
+];
+
+function askableDaemon(): FakeDaemon {
+  const all = manyWorks(5);
+  const byQuestion: Record<string, WorkSummary[]> = {
+    '': all,
+    unparsed: all.slice(0, 4),
+    unread: all.slice(4),
+  };
+  const calls: { method: string; path: string; body: unknown }[] = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input), 'http://daemon.test');
+    const body = init?.body ? (JSON.parse(String(init.body)) as { question?: string }) : null;
+    calls.push({ method: init?.method ?? 'GET', path: url.pathname, body });
+    if (url.pathname !== '/capabilities/work.list') {
+      return new Response('not found', { status: 404 });
+    }
+    const question = body?.question ?? '';
+    const works = byQuestion[question] ?? [];
+    return new Response(
+      JSON.stringify({
+        capability: 'work.list',
+        ok: true,
+        result: {
+          count: works.length,
+          total: all.length,
+          question,
+          works,
+          attention: NEEDS_A_RESEARCHER,
+          questions: CORPUS_QUESTIONS,
+        },
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+  return {
+    fetch: fetchImpl as unknown as typeof fetch,
+    calls: calls as never,
+    capabilityCalls: () =>
+      calls
+        .filter((call) => call.method === 'POST' && call.path.startsWith('/capabilities/'))
+        .map((call) => ({ name: call.path.slice('/capabilities/'.length), request: call.body })),
+  } as FakeDaemon;
+}
+
+/** The controls that ask the corpus something. The rail has buttons too, so this is named. */
+function questionBar(): HTMLElement {
+  return screen.getByRole('group', { name: 'Ask the corpus a question' });
+}
+
+/**
+ * The questions a researcher brings, as the controls that ask them.
+ *
+ * "Which of these thousand works has nothing accepted from it?" is a judgement over
+ * scientific state, so the line it draws and the words for it are the daemon's and the
+ * narrowing is a request (PRODUCT §5 P10). What is asserted here is that the page asks,
+ * renders what comes back, and never works the answer out for itself.
+ */
+describe('the questions a corpus can be asked', () => {
+  it('offers what the daemon says this corpus answers, and how many answer each', async () => {
+    const { container } = renderView(<CorpusPage />, {
+      daemon: askableDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('5 works.'));
+    const bar = questionBar();
+    expect(within(bar).getByRole('button', { name: 'Every work (5)' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(within(bar).getByRole('button', { name: 'No readable text (4)' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+    expect(within(bar).getByRole('button', { name: 'Nothing accepted (1)' })).toBeInTheDocument();
+    // Every count on this page is inside the thing it counts, controls included.
+    expect(bareNumbers(container), 'no number stands on its own').toEqual([]);
+    await expectNoAxeViolations(container);
+  });
+
+  it('asks the daemon the question instead of filtering the list itself', async () => {
+    const user = userEvent.setup();
+    const daemon = askableDaemon();
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('5 works.'));
+    await user.click(screen.getByRole('button', { name: 'No readable text (4)' }));
+
+    await waitFor(() =>
+      expect(corpusCount()).toHaveTextContent('4 of 5 works have no readable text yet.'),
+    );
+    // The narrowing went to the daemon, and the works on screen are the ones it answered
+    // with — not the ones the page would have chosen from the list it already had.
+    expect(daemon.capabilityCalls()).toContainEqual({
+      name: 'work.list',
+      request: { question: 'unparsed' },
+    });
+    const list = screen.getByRole('list', { name: 'Works in the corpus' });
+    expect(within(list).getAllByRole('listitem').length).toBe(4);
+    expect(screen.queryByText('Synthetic corpus study 0005')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'No readable text (4)' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps the lead, the counts and the way back while the works are narrowed', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: askableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('5 works.'));
+    await user.click(screen.getByRole('button', { name: 'Nothing accepted (1)' }));
+    await waitFor(() =>
+      expect(corpusCount()).toHaveTextContent('1 of 5 works has nothing accepted from it yet.'),
+    );
+
+    // The lead is about the corpus, so it does not change when the list under it is
+    // narrowed; neither do the counts on the controls, which are over the whole corpus.
+    expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'No readable text (4)' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Every work (5)' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+
+    // Pressing the chosen question again is the way back, and so is "Every work".
+    await user.click(screen.getByRole('button', { name: 'Nothing accepted (1)' }));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('5 works.'));
+  });
+
+  it('finds inside a question, and says what it is finding inside', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: askableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('5 works.'));
+    await user.click(screen.getByRole('button', { name: 'No readable text (4)' }));
+    await waitFor(() =>
+      expect(corpusCount()).toHaveTextContent('4 of 5 works have no readable text yet.'),
+    );
+
+    // The find is the one question that is about the text on screen rather than about the
+    // science, so it stays in the browser — and it says which set it is narrowing.
+    await user.type(screen.getByRole('searchbox'), 'study 0002');
+    await waitFor(() =>
+      expect(corpusCount()).toHaveTextContent(
+        '4 of 5 works have no readable text yet. Showing 1 of them.',
+      ),
+    );
+    expect(screen.getByText('Synthetic corpus study 0002')).toBeInTheDocument();
+  });
+});
+
 describe('one accepted piece of evidence', () => {
   it('links its Work inside the project', async () => {
     renderView(
@@ -409,9 +588,11 @@ describe('the corpus before, without, and after its read', () => {
   });
 
   it('states a file size in the units the rest of the product uses', async () => {
+    const user = userEvent.setup();
     renderView(<CorpusPage />, { daemon: corpusDaemon(), route: '/corpus', path: '/corpus' });
 
     await waitFor(() => expect(screen.getByText(WORK.title)).toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: '1 file' }));
     // `formatFileSize` is the package's own wording, so a file reads the same here as it
     // does in the composer's attachment tray. A raw byte count is not a size a reader has.
     expect(screen.queryByText(`${ARTIFACT.size_bytes} bytes`)).not.toBeInTheDocument();
@@ -462,7 +643,18 @@ function manyWorks(count: number): WorkSummary[] {
       ...WORK,
       id,
       title: `Synthetic corpus study ${String(index + 1).padStart(4, '0')}`,
-      artifacts: WORK.artifacts.map((artifact) => ({ ...artifact, id: `A${id.slice(1)}-1` })),
+      // The four facts the corpus is asked about, as the daemon answers them: none of
+      // these files has a stored parse, nothing has been accepted, three claims cite it,
+      // and it came in on a day the assertions can name.
+      readable: false,
+      evidence: 0,
+      claims: 3,
+      added: '4 September 2026',
+      added_at: '2026-09-04T09:00:00+00:00',
+      artifacts: [
+        ...WORK.artifacts.map((artifact) => ({ ...artifact, id: `A${id.slice(1)}-1` })),
+        ...WORK.artifacts.map((artifact) => ({ ...artifact, id: `A${id.slice(1)}-2` })),
+      ],
     } as WorkSummary;
   });
 }
@@ -622,20 +814,57 @@ describe('a corpus of a thousand works', () => {
     );
   });
 
-  it('draws each mounted work exactly as it drew it before', async () => {
+  it('answers the corpus’s questions in the row, without opening anything', async () => {
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
     await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     const first = within(screen.getByRole('list', { name: 'Works in the corpus' }))
       .getAllByRole('listitem')[0]!;
-    // The card, its fields and its nested file table are the ones the page always drew; the
-    // window changed when they mount, not what they are.
-    expect(within(first).getByRole('heading', { name: 'Synthetic corpus study 0001' })).toBeInTheDocument();
+
+    // The row is what a researcher reads: what this work is, and every fact the questions
+    // on this page are about. The card of ID / AUTHORS / YEAR / VENUE this replaced said
+    // none of them without being read one at a time.
+    expect(within(first).getByRole('link', { name: 'Synthetic corpus study 0001' })).toHaveAttribute(
+      'href',
+      '/corpus/W0001',
+    );
     expect(within(first).getByRole('link', { name: 'W0001' })).toBeInTheDocument();
+    expect(within(first).getByText(/A\. Researcher, B\. Collaborator/)).toBeInTheDocument();
+    for (const [label, value] of [
+      ['Readable text', 'no'],
+      ['Accepted evidence', '0'],
+      ['Claims citing it', '3'],
+      ['Came into the corpus', '4 September 2026'],
+    ] as const) {
+      const named = within(first).getByText(label);
+      expect(named.parentElement, `${label} answers with ${value}`).toHaveTextContent(
+        `${label}${value}`,
+      );
+    }
+  });
+
+  it('opens one work’s files inside the row, without unmounting the list', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
+    const list = screen.getByRole('list', { name: 'Works in the corpus' });
+    const first = within(list).getAllByRole('listitem')[0]!;
+    const mounted = within(list).getAllByRole('listitem').length;
+
+    const files = within(first).getByRole('button', { name: '2 files' });
+    expect(files).toHaveAttribute('aria-expanded', 'false');
+    await user.click(files);
+
+    // The file table is the one the page always drew, in the row rather than on a second
+    // screen: a corpus a researcher had to leave to see whether a PDF was parsed would cost
+    // them their place in a thousand works.
+    expect(files).toHaveAttribute('aria-expanded', 'true');
     expect(within(first).getByRole('table')).toBeInTheDocument();
     expect(within(first).getByRole('columnheader', { name: 'Parsed' })).toBeInTheDocument();
     expect(first.querySelector('[data-density="compact"]')).not.toBeNull();
     expect(first.querySelector('.rh-web-table')).not.toBeNull();
+    expect(within(list).getAllByRole('listitem').length).toBe(mounted);
   });
 
   it('has no automatically detectable accessibility violation', async () => {

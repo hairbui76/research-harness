@@ -21,6 +21,8 @@
   "taxonomies": [],
   "works": [
     {
+      "added": "8 September 2026",
+      "added_at": "2026-09-07T17:48:12.992479+00:00",
       "artifacts": [
         {
           "id": "A0001-1",
@@ -37,8 +39,10 @@
         "B. Collaborator",
         "C. Advisor"
       ],
+      "claims": 1,
       "evidence": 1,
       "id": "W0001",
+      "readable": true,
       "screening": "discovered",
       "title": "Deep Representations for Encrypted Network Traffic",
       "venue": null,

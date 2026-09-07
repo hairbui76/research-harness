@@ -9,7 +9,9 @@ server-side, and `GET /index` composes the same summaries the capabilities retur
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import get_args
 
 import pytest
 
@@ -28,7 +30,12 @@ from research_harness.capabilities.handlers import (
     create_question,
 )
 from research_harness.capabilities.permissions import Permission, Principal
-from research_harness.capabilities.reads import workspace_index
+from research_harness.capabilities.reads import (
+    CORPUS_MONTHS,
+    CORPUS_QUESTIONS,
+    CorpusQuestionKind,
+    workspace_index,
+)
 from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
 from research_harness.domain.base import Provenance
 from research_harness.domain.claim import (
@@ -216,6 +223,122 @@ def test_work_list_carries_the_artifacts_and_counts_the_corpus_view_shows(
     assert work.id == str(registered.work)
     assert [item.id for item in work.artifacts] == [str(registered.artifact)]
     assert work.evidence == 1
+
+
+# -- the questions a researcher brings to the corpus -------------------------
+
+
+def _works(context: CapabilityContext, request: dict[str, object] | None = None) -> object:
+    registry = build_default_registry()
+    return registry.invoke("work.list", context, request or {}, principal=Principal.human())
+
+
+def test_the_question_vocabulary_is_the_one_the_request_accepts() -> None:
+    """One list of questions, not two: the words and the closed type cannot drift."""
+    assert [kind for kind, *_ in CORPUS_QUESTIONS] == list(get_args(CorpusQuestionKind))
+
+
+def test_a_work_carries_what_the_corpus_is_asked_about_it(
+    populated: CapabilityContext, registered: Registered
+) -> None:
+    """Readable, cited and arrived are the daemon's answers, not a client's inference."""
+    work = _works(populated).works[0]  # type: ignore[attr-defined]
+
+    assert work.id == str(registered.work)
+    # Nothing has parsed the registered artifact, so no span in it can be anchored yet.
+    assert work.readable is False
+    assert work.evidence == 1
+    # Two claims exist in this workspace and neither of them rests on that evidence.
+    assert work.claims == 0
+    assert work.added_at.startswith(str(datetime.now(UTC).year))
+    # The same instant in words, as a day rather than a clock time: two sources are read
+    # against each other, and a column of minutes would compare when someone was at a desk.
+    assert work.added.endswith(str(datetime.now().astimezone().year))
+    assert CORPUS_MONTHS[datetime.now().astimezone().month - 1] in work.added
+
+
+def test_the_corpus_offers_only_the_questions_something_answers(
+    populated: CapabilityContext,
+) -> None:
+    """A control that narrows a list to nothing is a dead end, not a filter."""
+    answer = _works(populated)
+    asked = {question.kind: question for question in answer.questions}  # type: ignore[attr-defined]
+
+    # The one work has a file, no parse of it, one accepted evidence and no claim on it.
+    assert set(asked) == {"unparsed", "uncited", "recent"}
+    assert asked["unparsed"].count == 1
+    assert asked["unparsed"].label == "No readable text"
+    assert asked["unparsed"].summary == "1 of 1 works has no readable text yet."
+    # "Nothing accepted" is not offered: this work's first missing thing is its parse, and
+    # counting the same absence twice would give two controls that lead to the same row.
+    assert "unread" not in asked
+    assert "no_file" not in asked
+
+
+def test_a_question_narrows_the_works_and_leaves_the_corpus_whole(
+    populated: CapabilityContext,
+) -> None:
+    """The lead and the counts describe the corpus; only the rows are narrowed."""
+    whole = _works(populated)
+    narrowed = _works(populated, {"question": "unparsed"})
+    empty = _works(populated, {"question": "screening"})
+
+    assert narrowed.count == 1  # type: ignore[attr-defined]
+    assert narrowed.total == whole.total == 1  # type: ignore[attr-defined]
+    assert narrowed.question == "unparsed"  # type: ignore[attr-defined]
+    assert narrowed.attention == whole.attention  # type: ignore[attr-defined]
+    assert narrowed.questions == whole.questions  # type: ignore[attr-defined]
+
+    # A question no work answers is an empty list of works, never an empty corpus.
+    assert empty.count == 0  # type: ignore[attr-defined]
+    assert empty.works == ()  # type: ignore[attr-defined]
+    assert empty.total == 1  # type: ignore[attr-defined]
+
+
+def test_an_unknown_question_is_refused_rather_than_answered_with_nothing(
+    populated: CapabilityContext,
+) -> None:
+    """A typo must not read as "no works match": the vocabulary is closed."""
+    registry = build_default_registry()
+    with pytest.raises(Exception) as refusal:
+        registry.invoke(
+            "work.list", populated, {"question": "unreadable"}, principal=Principal.human()
+        )
+    assert "unreadable" in str(refusal.value) or "question" in str(refusal.value)
+
+
+def test_a_claim_that_rests_on_a_work_takes_it_out_of_the_uncited_question(
+    populated: CapabilityContext,
+) -> None:
+    """`claims` is the inverted edge: a Claim records its evidence, evidence records none."""
+    evidence = _works(populated).works[0]  # type: ignore[attr-defined]
+    assert evidence.claims == 0
+
+    registry = build_default_registry()
+    accepted = registry.invoke(
+        "evidence.list", populated, {}, principal=Principal.human()
+    ).evidence[0]  # type: ignore[attr-defined]
+    registry.invoke(
+        "claim.relate",
+        populated,
+        {
+            "claim_id": "C0001",
+            "relation": {"evidence": accepted.id, "relation": "supports"},
+        },
+        principal=Principal.human(),
+    )
+
+    after = _works(populated)
+    assert after.works[0].claims == 1  # type: ignore[attr-defined]
+    assert "uncited" not in {question.kind for question in after.questions}  # type: ignore[attr-defined]
+
+
+def test_the_index_and_work_list_still_return_identical_work_summaries(
+    populated: CapabilityContext,
+) -> None:
+    """The optimisation `work.list` uses may never change the answer it gives."""
+    listed = _works(populated)
+    assert listed.works == workspace_index(populated.repo).works  # type: ignore[attr-defined]
 
 
 def test_anchor_list_is_empty_rather_than_an_error_without_a_manuscript(
