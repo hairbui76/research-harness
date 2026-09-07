@@ -33,6 +33,11 @@ from research_harness.capabilities.context import open_context
 from research_harness.capabilities.dto import InitProjectRequest
 from research_harness.capabilities.handlers import init_project
 from research_harness.capabilities.permissions import Principal
+from research_harness.capabilities.reads import (
+    ArtifactSummary,
+    WorkSummary,
+    corpus_attention,
+)
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.domain.base import Provenance
 from research_harness.domain.conversation import Message, MessageRole, TextBlock
@@ -64,6 +69,8 @@ ARTIFACT = "A0001-1"
 WEB_RESPONSE_TYPES = {
     "ClaimList": "claim.list",
     "WorkList": "work.list",
+    "CorpusAttentionGroup": "work.list",
+    "CorpusAttentionItem": "work.list",
     "QuestionList": "question.list",
     "DecisionList": "decision.list",
     "AnchorList": "anchor.list",
@@ -622,6 +629,133 @@ def test_every_list_read_the_cockpit_issues_is_accepted_as_the_client_shapes_it(
     assert refused["error"]["code"] == "invalid_request", (
         "`claim.list` refuses a field the cockpit did not learn from the schema"
     )
+
+
+# -- what in the corpus needs a researcher -----------------------------------
+
+
+def _work(work_id: str, **overrides: Any) -> WorkSummary:
+    """One `work.list` row, as the daemon composes it, with one thing changed."""
+    fields: dict[str, Any] = {
+        "id": work_id,
+        "title": f"study {work_id}",
+        "screening": "included",
+        "evidence": 1,
+        "artifacts": (
+            ArtifactSummary(
+                id=f"A{work_id[1:]}-1",
+                version=f"V{work_id[1:]}-1",
+                kind="pdf",
+                mime_type="application/pdf",
+                original_filename=f"{work_id}.pdf",
+                size_bytes=1024,
+                parsed=True,
+            ),
+        ),
+    }
+    fields.update(overrides)
+    return WorkSummary(**fields)
+
+
+def test_work_list_names_the_sources_that_need_a_researcher(reader: TestClient) -> None:
+    """The Corpus page opens with this, so `work.list` has to answer it (Product 5 P10).
+
+    The fixture workspace holds one Work, ingested and parsed, with nothing accepted from
+    it yet - so the one thing it asks for is a reader, and the daemon says so in the
+    sentence the page prints.
+    """
+    result = _call(reader, "work.list", {})
+
+    assert [group["kind"] for group in result["attention"]] == ["unread"], (
+        "a parsed Work nothing has been accepted from is the corpus's own open work"
+    )
+    group = result["attention"][0]
+    assert group["label"] == "1 work has nothing accepted from it yet"
+    assert group["count"] == 1
+    assert group["more"] == "", "nothing was left out, so nothing says it was"
+    assert [item["id"] for item in group["items"]] == [WORK]
+    assert group["items"][0]["route"] == f"/corpus/{WORK}", (
+        "the daemon says where one Work lives, exactly as `GET /overview` does"
+    )
+
+
+def test_an_unparsed_source_is_named_before_one_nothing_was_accepted_from(
+    tmp_path: Path, registry: CapabilityRegistry
+) -> None:
+    """A file with no stored parse cannot have a span anchored in it at all (Product 16).
+
+    Asking a researcher to read from it would be asking for the wrong thing, so the group
+    it belongs in is the earlier one, and the sentence names the file rather than the work.
+    """
+    root = init_project(InitProjectRequest(root=tmp_path / "unparsed", name="unparsed")).root
+    registry.invoke(
+        "corpus.ingest",
+        open_context(root, HUMAN_ACTOR),
+        {"path": str(FIXTURE)},
+        principal=Principal.human(),
+    )
+    token = ensure_token(root)
+    with TestClient(create_app(root, registry=registry)) as client:
+        client.headers["Authorization"] = f"Bearer {token}"
+        result = _call(client, "work.list", {})
+
+    assert [group["kind"] for group in result["attention"]] == ["unparsed"]
+    assert result["attention"][0]["label"] == "1 work has no readable text yet"
+    assert result["attention"][0]["items"][0]["detail"] == "its one file has no stored parse"
+
+
+def test_a_source_is_named_by_the_first_thing_missing_from_it() -> None:
+    """Screening, then a file, then a parse, then a reading: the order it is acquired in.
+
+    Two of these states no capability can reach - nothing screens a Work or unregisters its
+    file - so the judgement is exercised where it lives, over the rows `work.list` builds.
+    """
+    unparsed = _work("W0003").artifacts[0].model_copy(update={"parsed": False})
+    groups = corpus_attention(
+        (
+            _work("W0001", screening="screened", artifacts=(), evidence=0),
+            _work("W0002", artifacts=(), evidence=0),
+            _work("W0003", artifacts=(unparsed,), evidence=0),
+            _work("W0004", evidence=0),
+            _work("W0005"),
+            _work("W0006", screening="excluded", artifacts=(), evidence=0),
+        )
+    )
+
+    assert [(group.kind, group.count) for group in groups] == [
+        ("screening", 1),
+        ("no_file", 1),
+        ("unparsed", 1),
+        ("unread", 1),
+    ], "a Work already read from, and one screened out, ask for nothing"
+    assert groups[0].items[0].id == "W0001"
+    assert groups[2].items[0].detail == "its one file has no stored parse"
+
+
+def test_the_state_every_work_is_ingested_in_is_not_an_open_decision() -> None:
+    """`discovered` is the field's default and nothing in the cockpit moves it.
+
+    Counting it would put every source a project ever ingested into one group with no next
+    step in it, which is the opposite of naming what needs a researcher.
+    """
+    groups = corpus_attention((_work("W0001", screening="discovered"),))
+
+    assert groups == (), "a Work that has been read from asks for nothing, however it is screened"
+
+
+def test_a_group_larger_than_the_page_shows_says_what_it_left_out() -> None:
+    """The cap is the page's, and the sentence that admits it is the daemon's."""
+    groups = corpus_attention(tuple(_work(f"W{index:04d}", evidence=0) for index in range(1, 7)))
+
+    assert groups[0].count == 6
+    assert groups[0].label == "6 works have nothing accepted from them yet"
+    assert len(groups[0].items) == 3
+    assert groups[0].more == "3 more are in the list below."
+
+
+def test_a_corpus_every_source_of_which_can_be_read_names_nothing() -> None:
+    """Four lines of zero are not an answer; the page's own empty state is."""
+    assert corpus_attention((_work("W0001"), _work("W0002"))) == ()
 
 
 def test_claim_list_filters_server_side_rather_than_handing_back_everything(
