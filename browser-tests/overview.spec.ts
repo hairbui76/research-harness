@@ -87,6 +87,31 @@ test('the overview leads with what is waiting, and states what the project holds
   await expect(page.getByText(/changes in the last seven days\./)).toBeVisible();
   await expect(page.getByRole('link', { name: '1 claim is' })).toBeVisible();
 
+  // Rule 9 of the page's own pattern: a line that names a group, then the items in it
+  // indented one space unit under it — the one cue that they belong to that line. Both
+  // groups take the same indent, because they are one shape read twice.
+  const indents = await page.evaluate(() => {
+    const left = (selector: string): number | null => {
+      const node = document.querySelector(selector);
+      return node instanceof HTMLElement ? node.getBoundingClientRect().left : null;
+    };
+    return {
+      waitingLine: left('.rh-web-attention > li > p'),
+      waitingItem: left('.rh-web-attention__items > li'),
+      staleLine: left('.rh-web-overview__group > p'),
+      staleItem: left('.rh-web-overview__stale > li'),
+    };
+  });
+  expect(Object.values(indents).every((value) => value !== null), 'both groups drew').toBe(true);
+  expect(
+    indents.staleItem!,
+    'a stale object is indented under the line that names its group',
+  ).toBeGreaterThan(indents.staleLine!);
+  expect(
+    indents.staleItem! - indents.staleLine!,
+    'both groups indent their items by the same unit',
+  ).toBeCloseTo(indents.waitingItem! - indents.waitingLine!, 1);
+
   // A waiting item leads to the item, not only to the list it is in.
   const item = page.getByRole('link', { name: /metric result · W0001/ });
   await expect(item).toHaveAttribute('href', new RegExp(`^${project.overview_url.replace('/overview', '/review/')}`));

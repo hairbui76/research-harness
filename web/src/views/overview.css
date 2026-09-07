@@ -32,6 +32,20 @@
 }
 
 /*
+ * The stale objects, indented under the line that names their group by the same unit.
+ *
+ * Two classes for the same reason `.rh-web-attention__items` needs them: `.rh-web-list`
+ * zeroes the margin at equal specificity from `styles.css`, which the bundle emits after
+ * every view stylesheet, so a single class would lose the cascade by position and the one
+ * cue that these objects belong to the line above them would silently not happen. The
+ * claim-health and open-question lists take no indent: they sit directly under their
+ * panel's heading with no naming line of their own to be indented under.
+ */
+.rh-web-list.rh-web-overview__stale {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/*
  * A group and the items under it, spaced the way an attention group spaces them: the line
  * that names the group and the first item beneath it belong to each other, and reading them
  * as one block is what makes the two panels feel like one page.
