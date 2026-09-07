@@ -701,9 +701,16 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
     anchors = tuple(repo.iter_anchors())
     unsupported = _unsupported_anchors(anchors, claims)
     names = _ObjectNames(repo)
+    staged = _staged_candidates(inbox)
     attention = (
         _group("review_items", "review item", "/review", inbox.count, _review_items(inbox)),
-        _group("conflicts", "conflict", "/conflicts", len(conflicts), _conflict_items(conflicts)),
+        _group(
+            "conflicts",
+            "conflict",
+            "/conflicts",
+            len(conflicts),
+            _conflict_items(conflicts, names, staged),
+        ),
         _group("stale", "stale object", "/stale", stale.count, _stale_items(stale, names), "stale"),
         _group(
             "unsupported_manuscript_claims",
@@ -751,11 +758,15 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
         ),
         conflicts=conflicts,
         conflict_summary=_conflict_summary(conflicts),
-        conflict_groups=_conflict_groups(conflicts),
+        conflict_groups=_conflict_groups(conflicts, names, staged),
     )
 
 
-def _conflict_groups(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionGroup, ...]:
+def _conflict_groups(
+    conflicts: tuple[ConflictView, ...],
+    names: _ObjectNames,
+    staged: Mapping[str, tuple[str, str]],
+) -> tuple[AttentionGroup, ...]:
     """The open disagreements, grouped by what kind of disagreement each one is.
 
     Product 25 lists six kinds and treats them as different questions: an extractor against
@@ -779,7 +790,7 @@ def _conflict_groups(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionGrou
             items=tuple(
                 AttentionItem(
                     id=conflict.conflict_id,
-                    label=conflict.subject,
+                    label=_conflict_subject(conflict, names, staged),
                     detail=conflict.summary,
                     priority=conflict.tier,
                     route=_conflict_route(conflict.subject),
@@ -789,6 +800,49 @@ def _conflict_groups(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionGrou
         )
         for kind, members in grouped.items()
     )
+
+
+def _conflict_subject(
+    conflict: ConflictView, names: _ObjectNames, staged: Mapping[str, tuple[str, str]]
+) -> str:
+    """What one disagreement is about, in the words the rest of the cockpit uses for it.
+
+    A conflict is recorded against an id, and an id is not a name. An object that already
+    exists carries its own title, so both the Conflicts page and the Overview call the
+    disputed Claim what the Claims page calls it. A staged candidate is named the way the
+    review queue names it — the field it answers, and the work the span was read from —
+    because that is where the disagreement is decided and what it is called there.
+
+    A subject that is neither, and a candidate the queue no longer holds, keep the text the
+    record holds: inventing a name for a subject nothing in the workspace answers to would
+    be worse than showing what was written down.
+    """
+    named = names.title(conflict.subject)
+    if named:
+        return named
+    candidate = staged.get(conflict.subject)
+    if candidate is not None:
+        return _candidate_name(*candidate)
+    if conflict.differing_fields:
+        return conflict.differing_fields[0]
+    return conflict.subject
+
+
+def _staged_candidates(inbox: ReviewInbox) -> Mapping[str, tuple[str, str]]:
+    """The field and work of every candidate still in the queue, by candidate id."""
+    return {
+        str(item.get("candidate_id", "")): (str(item.get("field", "")), str(item.get("work", "")))
+        for item in inbox.items
+    }
+
+
+def _candidate_name(field: str, work: str) -> str:
+    """What one staged candidate is called wherever it is named: `<field> · <work>`.
+
+    The review queue, the review screen, the command palette and now a conflict over that
+    candidate all say the same thing, so one candidate never has two names.
+    """
+    return f"{field or '?'} · {work or '?'}"
 
 
 def _conflict_route(subject: str) -> str:
@@ -995,7 +1049,7 @@ def _review_items(inbox: ReviewInbox) -> tuple[AttentionItem, ...]:
     return tuple(
         AttentionItem(
             id=str(item.get("candidate_id", "")),
-            label=f"{item.get('field', '?')} · {item.get('work', '?')}",
+            label=_candidate_name(str(item.get("field", "")), str(item.get("work", ""))),
             detail="; ".join(str(reason) for reason in item.get("reasons", ())),
             priority=int(item.get("priority", 0)),
             route=f"/review/{item.get('candidate_id', '')}",
@@ -1004,11 +1058,21 @@ def _review_items(inbox: ReviewInbox) -> tuple[AttentionItem, ...]:
     )
 
 
-def _conflict_items(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionItem, ...]:
+def _conflict_items(
+    conflicts: tuple[ConflictView, ...],
+    names: _ObjectNames,
+    staged: Mapping[str, tuple[str, str]],
+) -> tuple[AttentionItem, ...]:
+    """The open disagreements as the Overview lists them: the kind, then what it is about.
+
+    The subject is composed by the same function the Conflicts page's own groups use, so
+    one disagreement carries one name on both pages. The kind stays in front of it here
+    because this list is not grouped by kind and the Conflicts page's is.
+    """
     return tuple(
         AttentionItem(
             id=conflict.conflict_id,
-            label=f"{conflict.kind} · {conflict.subject}",
+            label=f"{conflict.kind} · {_conflict_subject(conflict, names, staged)}",
             detail=conflict.summary,
         )
         for conflict in conflicts

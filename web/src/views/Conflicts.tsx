@@ -130,14 +130,16 @@ function ConflictGroup({
  * The subject is the link, exactly as a waiting item on the Overview is, and only when the
  * daemon gave the record a route. A subject with no screen of its own stays text: this page
  * is where it is on record, and a link back to this page would be a link to nowhere.
+ *
+ * What the link says is the daemon's name for the subject — the Claim's own statement, or
+ * the field and work a staged candidate is called by everywhere else in the cockpit — and
+ * never the id the conflict was recorded against. The id is in the route.
  */
 function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: ConflictView }) {
   return (
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
-        <Subject route={item.route}>
-          <code>{item.label}</code>
-        </Subject>
+        <Subject route={item.route}>{humaniseResearchTokens(item.label)}</Subject>
         <StatusBadge status={String(conflict.tier)} vocabulary="reviewTier" describe />
       </p>
       <p>{humaniseResearchTokens(item.detail)}</p>

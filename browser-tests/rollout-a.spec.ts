@@ -120,14 +120,18 @@ test('the three rolled-out pages lead with what needs a researcher', async ({
   );
   await expect(page.getByText('Candidate against accepted state')).toBeVisible();
   await expect(page.getByText('Provider against provider')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'C0001' })).toHaveAttribute(
-    'href',
-    `${project.workspace_url}/claims/C0001`,
-  );
-  await expect(page.getByRole('link', { name: /^cand_/ })).toHaveAttribute(
+  // The subject is named by what it is: the Claim's own statement, and the words the
+  // review queue calls the staged candidate by. The id lives in the route and nowhere else.
+  await expect(
+    page.getByRole('link', {
+      name: 'Byte-level tokenization improves recall on encrypted traffic',
+    }),
+  ).toHaveAttribute('href', `${project.workspace_url}/claims/C0001`);
+  await expect(page.getByRole('link', { name: 'metric result · W0001' })).toHaveAttribute(
     'href',
     new RegExp(`^${project.workspace_url}/review/cand_`),
   );
+  await expect(page.getByText(/cand_[0-9a-f]{16}/)).toHaveCount(0);
   await auditPage(page, 'the conflicts');
   await page.screenshot({ path: info.outputPath('conflicts.png'), fullPage: true });
 

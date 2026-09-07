@@ -579,6 +579,53 @@ def test_an_open_conflict_leads_to_where_that_disagreement_is_decided(
     assert routes["table-1"] == ""
 
 
+def test_a_conflict_over_a_staged_candidate_is_named_the_way_the_queue_names_it(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """A `cand_<16 hex>` id is where the record lives, never what the disagreement is about.
+
+    The candidate is called `<field> · <work>` in the review inbox, on the review screen
+    and in the palette, so a conflict over it is called that too — and the Overview's own
+    list of conflicts composes the subject with the same function, so one disagreement
+    never carries two names (Product 5 P10).
+    """
+    candidate = _staged_candidate(corpus, registry, "metric_result")
+    _open_a_conflict(corpus, candidate, resolve=False)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+    disputed = overview.conflict_groups[0].items[0]
+    listed = next(group for group in overview.attention if group.kind == "conflicts").items[0]
+
+    assert disputed.label == "metric_result · W0001"
+    assert disputed.route == f"/review/{candidate}", "the id is in the route, not in the label"
+    assert listed.label == "candidate_vs_accepted · metric_result · W0001"
+
+
+def test_a_conflict_over_a_claim_is_named_by_the_claim_it_is_about(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """The Claims page calls C0001 by its statement, so the Conflicts page does too."""
+    _create_claim(corpus, registry)
+    _open_a_conflict(corpus, "C0001", resolve=False)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+    disputed = overview.conflict_groups[0].items[0]
+
+    assert disputed.label == "Byte-level tokenization improves recall on short encrypted flows."
+    assert disputed.route == "/claims/C0001"
+
+
+def test_a_subject_this_workspace_cannot_name_keeps_the_text_the_record_holds(
+    reader: TestClient, corpus: Path
+) -> None:
+    """Inventing a name for a subject nothing answers to would be worse than the record."""
+    _open_a_conflict(corpus, "table-1", resolve=False)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+
+    assert overview.conflict_groups[0].items[0].label == "table-1"
+
+
 def test_a_project_with_nothing_in_dispute_says_so_in_its_own_sentence(
     bare_reader: TestClient,
 ) -> None:
@@ -1140,6 +1187,21 @@ def _stage_candidates(root: Path) -> None:
     from tests.e2e.test_web_gate import stage_candidates
 
     stage_candidates(root)
+
+
+def _staged_candidate(root: Path, registry: CapabilityRegistry, field: str) -> str:
+    """The id of one staged candidate, so a conflict can be opened against it."""
+    _stage_candidates(root)
+    inbox = registry.invoke(
+        "review.inbox", open_context(root, HUMAN_ACTOR), {}, principal=Principal.human()
+    )
+    return str(
+        next(
+            item["candidate_id"]
+            for item in inbox.items  # type: ignore[union-attr]
+            if item["field"] == field
+        )
+    )
 
 
 def _accept_a_candidate(root: Path, registry: CapabilityRegistry) -> None:

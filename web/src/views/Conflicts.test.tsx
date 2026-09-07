@@ -42,7 +42,14 @@ function refusingDaemon(): FakeDaemon {
  * fixture that omitted it would let the page go back to deciding for itself.
  */
 function overviewWith(
-  conflicts: { conflict_id: string; kind: string; subject: string; summary: string; tier: number }[],
+  conflicts: {
+    conflict_id: string;
+    kind: string;
+    subject: string;
+    summary: string;
+    tier: number;
+    name?: string;
+  }[],
 ): FakeDaemon {
   const kinds = [...new Set(conflicts.map((conflict) => conflict.kind))];
   const conflict_groups = kinds.map((kind) => {
@@ -54,8 +61,9 @@ function overviewWith(
       route: '/conflicts',
       surface: 'conflict',
       items: members.map((conflict) => ({
+        // The daemon composes the subject's name; the id is in the route and nowhere else.
         id: conflict.conflict_id,
-        label: conflict.subject,
+        label: conflict.name ?? conflict.subject,
         detail: conflict.summary,
         priority: conflict.tier,
         route: conflict.subject.startsWith('cand_') ? `/review/${conflict.subject}` : '',
@@ -84,6 +92,8 @@ const CONFLICT = {
   conflict_id: 'conf_0f2a1c33d4e5b607',
   kind: 'provider_disagreement',
   subject: 'cand_44c1f007fc0db0b2',
+  // What the review queue calls that candidate, composed by the daemon (`app.py`).
+  name: 'metric_result · W0001',
   summary: 'two providers read metric_result differently',
   tier: 2,
   status: 'open',
@@ -167,6 +177,7 @@ describe('the conflicts page', () => {
       conflict_id: 'conf_11111111',
       kind: 'candidate_vs_accepted',
       subject: 'table-1',
+      name: 'table-1',
       summary: 'the staged reading of table-1 differs from the accepted one',
     };
     renderView(
@@ -181,7 +192,7 @@ describe('the conflicts page', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'cand_44c1f007fc0db0b2' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'metric result · W0001' })).toHaveAttribute(
         'href',
         '/projects/prj_abc/review/cand_44c1f007fc0db0b2',
       ),
@@ -196,6 +207,21 @@ describe('the conflicts page', () => {
    * its evidence pointing both ways. An open conflict is a question nobody has answered, so
    * the kind of disagreement is a word and the only badge is the queue's own tier.
    */
+  /**
+   * A `cand_<16 hex>` id is where the record lives, not what the disagreement is about.
+   * The daemon composes the subject's name and this page renders it; the id survives in
+   * the route, which is where a researcher needs it.
+   */
+  it('calls a disputed candidate what the review queue calls it, never by its id', async () => {
+    const { container } = renderView(<ConflictsPage />, { daemon: overviewWith([CONFLICT]) });
+
+    await waitFor(() =>
+      expect(screen.getByText('Provider against provider')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('link', { name: 'metric result · W0001' })).toBeInTheDocument();
+    expect(container.textContent).not.toContain('cand_44c1f007fc0db0b2');
+  });
+
   it('never dresses a queue state in a scientific status colour', async () => {
     const { container } = renderView(<ConflictsPage />, { daemon: overviewWith([CONFLICT]) });
 
