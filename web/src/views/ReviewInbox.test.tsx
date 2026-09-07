@@ -323,14 +323,34 @@ describe('the policy batch of Product 24.4', () => {
     mutations: [],
   };
 
-  it('sits below the queue, so the highest-priority group is what opens the page', async () => {
+  it('puts its control in the toolbar and still opens the page on the first group', async () => {
+    /*
+     * Wave one moved this panel below the queue so that a conflict, not a batch, was what
+     * opened the page. That property is kept and asserted here — but the control itself is
+     * no longer *in* the queue at all: it acts on the whole queue, so it sits in the
+     * toolbar beside the filters, and nothing about the batch is on the page until a
+     * preview has been asked for.
+     */
+    const user = userEvent.setup();
     renderInbox(queueDaemon({ 'review.accept_batch': DRY_RUN }));
 
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
-    const panels = screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent);
+    const trigger = screen.getByRole('button', { name: /Accept the routine candidates/ });
+    expect(trigger.closest('.rh-full-page__toolbar')).not.toBeNull();
+    expect(screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent)).not.toContain(
+      'Batch accept',
+    );
 
-    expect(panels).toContain('Batch accept');
-    expect(panels.indexOf('Batch accept')).toBeGreaterThan(
+    await user.click(trigger);
+    await waitFor(() =>
+      expect(
+        screen.getByText(/1 routine candidate meets the batch conditions/),
+      ).toBeInTheDocument(),
+    );
+    // The restatement appears where the control that opened it is: above the queue, so it
+    // can be read without hunting, and only once it has been asked for.
+    const panels = screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent);
+    expect(panels.indexOf('Batch accept')).toBeLessThan(
       panels.indexOf('High-risk scientific claims (1)'),
     );
   });
@@ -430,6 +450,91 @@ describe('the policy batch of Product 24.4', () => {
     expect(
       screen.queryByRole('button', { name: /Accept the routine candidates/ }),
     ).not.toBeInTheDocument();
+  });
+
+  it('decides a routine candidate on its own row, and still asks twice before it writes', async () => {
+    const user = userEvent.setup();
+    const daemon = queueDaemon({
+      'review.accept': {
+        candidate_id: 'cand_4590b9b1f474d343',
+        action: 'accept',
+        status: 'reviewed',
+        evidence: 'E0007',
+        mutation: null,
+      },
+    });
+    renderInbox(daemon);
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    const row = screen.getByRole('group', { name: 'Decide Dataset · W0001' });
+
+    // The three decisions the daemon's routine filing leaves to the researcher, and no more.
+    expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Accept',
+      'Defer',
+      'Reject',
+    ]);
+    // Only the routine row carries them: a high-risk claim is read before it is decided.
+    expect(screen.queryByRole('group', { name: /Decide Metric result/ })).not.toBeInTheDocument();
+
+    await user.click(within(row).getByRole('button', { name: 'Accept' }));
+    // The first press writes nothing: it restates what the second one would write.
+    expect(daemon.capabilityCalls().filter((call) => call.name === 'review.accept')).toEqual([]);
+    expect(
+      screen.getByText(/Accept as evidence for Dataset of W0001: “All experiments use CICIDS2017”/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/No review action takes an acceptance back/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Accept as evidence' }));
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().filter((call) => call.name === 'review.accept')).toEqual([
+        { name: 'review.accept', request: { candidate_id: 'cand_4590b9b1f474d343' } },
+      ]),
+    );
+    // Nothing fakes an undo, here or anywhere else the cockpit accepts.
+    expect(screen.queryByRole('button', { name: /Undo/i })).not.toBeInTheDocument();
+  });
+
+  it('asks a routine deferral for the sentence the daemon records with it', async () => {
+    const user = userEvent.setup();
+    const daemon = queueDaemon({
+      'review.defer': {
+        candidate_id: 'cand_4590b9b1f474d343',
+        action: 'defer',
+        status: 'deferred',
+        evidence: null,
+        mutation: null,
+      },
+    });
+    renderInbox(daemon);
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    const row = screen.getByRole('group', { name: 'Decide Dataset · W0001' });
+    await user.click(within(row).getByRole('button', { name: 'Defer' }));
+
+    const form = screen.getByRole('form', { name: 'Defer Dataset · W0001' });
+    await user.type(within(form).getByLabelText('Why this is being put aside'), 'waiting for the appendix');
+    await user.click(within(form).getByRole('button', { name: 'Defer', exact: true }));
+
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().filter((call) => call.name === 'review.defer')).toEqual([
+        {
+          name: 'review.defer',
+          request: { candidate_id: 'cand_4590b9b1f474d343', note: 'waiting for the appendix' },
+        },
+      ]),
+    );
+  });
+
+  it('offers no row decision at all to a window that may not accept', async () => {
+    const asHost = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
+    renderInbox(
+      fakeDaemon({ gets: { '/overview': asHost }, capabilities: { 'review.inbox': QUEUE } }),
+      null,
+    );
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    expect(screen.queryByRole('group', { name: /^Decide / })).not.toBeInTheDocument();
   });
 
   it('offers the batch per work as well as for the whole queue, because that is all it takes', async () => {

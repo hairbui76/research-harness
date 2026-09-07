@@ -19,6 +19,17 @@
  * here is: preview with `dry_run`, restate what the write would do, then write, then render
  * what came back — accepted, skipped with the daemon's reason for each, or the refusal in
  * the daemon's own sentence.
+ *
+ * Its *control* sits in the toolbar beside the filters, because it acts on the queue rather
+ * than on anything in it, and a control that had to be reached by scrolling past every card
+ * was a control that arrived after the work it was meant to save. Nothing else moved: the
+ * page still opens on the group the daemon ranked first, the restatement only exists once a
+ * preview has been asked for, and the report outlives the queue it emptied.
+ *
+ * A routine row carries its own three decisions (`QueueDecision`), for the same reason and
+ * with the same ceremony: the daemon has already filed it as verified, supported, tier 0 or
+ * 1 and validly anchored, so what is left is the researcher's decision — and accepting one
+ * still restates what it writes and asks for a second press.
  */
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -41,6 +52,7 @@ import {
   candidateName,
   fieldLabel,
 } from '../components/Feedback';
+import { QueueDecision, decidableInQueue } from '../components/QueueDecision';
 import { useRegisterCommands } from '../app/commands';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
@@ -110,11 +122,14 @@ export function ReviewInboxPage() {
   const { href } = useProjectPaths();
   const state = useAsync(() => client.reviewInbox(), [client]);
   const [filters, setFilters] = useState<InboxFilters>(NO_FILTERS);
-  /** True once a batch has written something here, so its report survives the reload. */
-  const [written, setWritten] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const items = useMemo(() => state.data?.items ?? [], [state.data]);
+  const reread = () => {
+    state.reload();
+    refresh();
+  };
+  const batch = useBatchAccept(items, reread);
   const groups = useMemo(() => inboxGroups(items, filters), [items, filters]);
   const showing = groups.reduce((total, [, group]) => total + group.length, 0);
   const filtered = filters.text !== '' || filters.category !== '' || filters.verdict !== '';
@@ -163,7 +178,13 @@ export function ReviewInboxPage() {
       description={QUEUE_DESCRIPTION}
       toolbar={
         items.length > 0 ? (
-          <InboxFilterBar items={items} filters={filters} onChange={setFilters} />
+          <>
+            <InboxFilterBar items={items} filters={filters} onChange={setFilters} />
+            {/* The one control that acts on the queue rather than on a candidate in it,
+                beside the two that narrow it. It is offered only to a window that may
+                accept, and the policy gate is still the daemon's. */}
+            {canMutate ? <BatchAcceptControls batch={batch} items={items} /> : null}
+          </>
         ) : (
           <></>
         )
@@ -180,6 +201,16 @@ export function ReviewInboxPage() {
                 ? `Showing ${showing} of ${items.length} waiting.`
                 : `${items.length} waiting.`}
             </p>
+          ) : null}
+
+          {/* What the batch would write, and afterwards what it wrote. It exists only once
+              a preview has been asked for, so the page still opens on the group the daemon
+              put first — and it appears where the control that opened it is, because a
+              restatement nobody can see is not a restatement. It outlives the queue on
+              purpose: a batch that accepted everything empties the list it reported on, and
+              the receipt for a write of accepted state must not disappear with it. */}
+          {canMutate && (batch.result !== null || batch.refusal !== null) ? (
+            <BatchAcceptReport batch={batch} />
           ) : null}
 
           {items.length === 0 ? (
@@ -212,28 +243,13 @@ export function ReviewInboxPage() {
               >
                 <ul className="rh-web-list rh-web-list--rules">
                   {group.map((item) => (
-                    <ReviewRow key={item.candidate_id} item={item} />
+                    <ReviewRow key={item.candidate_id} item={item} onDecided={reread} />
                   ))}
                 </ul>
               </Panel>
             ))
           )}
 
-          {/* Last, because it acts on the routine tier: a conflict is what the queue puts
-              first, and this panel and its caveat used to push that group down the page.
-              It outlives the queue on purpose — a batch that accepted everything empties
-              the list it reported on, and the receipt for a write of accepted state must
-              not disappear with it. */}
-          {canMutate && (items.length > 0 || written) ? (
-            <BatchAccept
-              items={items}
-              onAccepted={() => {
-                setWritten(true);
-                state.reload();
-                refresh();
-              }}
-            />
-          ) : null}
         </div>
       ) : null}
     </FullPageWorkspace>
@@ -307,11 +323,6 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
 
 type BatchStage = 'idle' | 'previewing' | 'preview' | 'running' | 'done';
 
-interface BatchAcceptProps {
-  items: ReviewItem[];
-  onAccepted: () => void;
-}
-
 /**
  * The Product 24.4 batch, with the ceremony a write of accepted state has to carry.
  *
@@ -319,8 +330,25 @@ interface BatchAcceptProps {
  * which is the only honest preview, since the conditions are re-checked at the moment of
  * the call. Between them sits the restatement — how many candidates become accepted
  * Evidence, and whose verification that will be recorded as.
+ *
+ * The state lives in the page rather than in either half of the presentation, because the
+ * control sits in the toolbar and the restatement it opens sits over the queue, and they
+ * are one act: pressing the button in one place has to be answered in the other.
  */
-function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
+interface Batch {
+  stage: BatchStage;
+  scope: string;
+  works: string[];
+  setScope: (work: string) => void;
+  result: BatchAcceptResponse | null;
+  refusal: string | null;
+  /** What a candidate the daemon named is called, resolved when the answer arrived. */
+  label: (candidateId: string) => string;
+  run: (dryRun: boolean) => void;
+  cancel: () => void;
+}
+
+function useBatchAccept(items: ReviewItem[], onAccepted: () => void): Batch {
   const { client } = useSession();
   const [stage, setStage] = useState<BatchStage>('idle');
   const [scope, setScope] = useState('');
@@ -346,7 +374,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
     );
   }
 
-  async function run(dryRun: boolean): Promise<void> {
+  async function call(dryRun: boolean): Promise<void> {
     setStage(dryRun ? 'previewing' : 'running');
     setRefusal(null);
     try {
@@ -362,57 +390,68 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
     }
   }
 
-  const label = (candidateId: string): string => names[candidateId] ?? candidateId;
+  return {
+    stage,
+    scope,
+    works,
+    setScope: (work: string) => {
+      setScope(work);
+      setStage('idle');
+      setResult(null);
+    },
+    result,
+    refusal,
+    label: (candidateId: string) => names[candidateId] ?? candidateId,
+    run: (dryRun: boolean) => void call(dryRun),
+    cancel: () => setStage('idle'),
+  };
+}
 
+/** The batch's scope and its first press, in the toolbar beside the filters. */
+function BatchAcceptControls({ batch, items }: { batch: Batch; items: ReviewItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="rh-web-row rh-web-inbox-batch">
+      <Select
+        label="Batch scope"
+        hideLabel
+        size="sm"
+        value={batch.scope}
+        onChange={(event) => batch.setScope(event.target.value)}
+      >
+        <option value="">The whole queue</option>
+        {batch.works.map((work) => (
+          <option key={work} value={work}>
+            {work}
+          </option>
+        ))}
+      </Select>
+      <Button
+        size="sm"
+        variant="secondary"
+        loading={batch.stage === 'previewing'}
+        loadingLabel="Asking the daemon what it would accept"
+        onClick={() => batch.run(true)}
+      >
+        Accept the routine candidates…
+      </Button>
+    </div>
+  );
+}
+
+/** What the batch would write, what it wrote, and what it left behind. */
+function BatchAcceptReport({ batch }: { batch: Batch }) {
+  const { result, stage, refusal, label } = batch;
   const accepted = result?.accepted ?? [];
   const skipped = Object.entries(result?.skipped ?? {});
 
   return (
-    <Panel
-      title="Batch accept"
-      // Nothing left to accept: the panel stays for its report, without offering a run
-      // over an empty queue.
-      action={
-        items.length === 0 ? undefined : (
-        <div className="rh-web-row">
-          <Select
-            label="Batch scope"
-            hideLabel
-            size="sm"
-            value={scope}
-            onChange={(event) => {
-              setScope(event.target.value);
-              setStage('idle');
-              setResult(null);
-            }}
-          >
-            <option value="">The whole queue</option>
-            {works.map((work) => (
-              <option key={work} value={work}>
-                {work}
-              </option>
-            ))}
-          </Select>
-          <Button
-            size="sm"
-            variant="secondary"
-            loading={stage === 'previewing'}
-            loadingLabel="Asking the daemon what it would accept"
-            onClick={() => void run(true)}
-          >
-            Accept the routine candidates…
-          </Button>
-        </div>
-        )
-      }
-    >
-      {items.length > 0 ? (
-        <p className="rh-text-secondary rh-web-batch__note">
-          Only the candidates that meet every one of the daemon’s deterministic conditions,
-          and only where this project’s policy allows a batch at all. How sure a model was is
-          never one of them.
-        </p>
-      ) : null}
+    <Panel title="Batch accept">
+      <p className="rh-text-secondary rh-web-batch__note">
+        Only the candidates that meet every one of the daemon’s deterministic conditions, and
+        only where this project’s policy allows a batch at all. How sure a model was is never
+        one of them.
+      </p>
 
       {refusal ? <ErrorBox error={refusal} /> : null}
 
@@ -448,7 +487,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
                   variant="primary"
                   loading={stage === 'running'}
                   loadingLabel="Writing the accepted Evidence"
-                  onClick={() => void run(false)}
+                  onClick={() => batch.run(false)}
                 >
                   {accepted.length === 1
                     ? 'Accept 1 candidate'
@@ -458,7 +497,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
                   size="sm"
                   variant="ghost"
                   disabled={stage === 'running'}
-                  onClick={() => setStage('idle')}
+                  onClick={batch.cancel}
                 >
                   Cancel
                 </Button>
@@ -484,9 +523,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
                 {skipped.map(([candidateId, reason]) => (
                   <li key={candidateId}>
                     <span className="rh-web-queue__field">{label(candidateId)}</span>{' '}
-                    <span className="rh-text-secondary">
-                      — {humaniseResearchTokens(reason)}
-                    </span>
+                    <span className="rh-text-secondary">— {humaniseResearchTokens(reason)}</span>
                   </li>
                 ))}
               </ul>
@@ -498,7 +535,14 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
   );
 }
 
-export function ReviewRow({ item }: { item: ReviewItem }) {
+export function ReviewRow({
+  item,
+  onDecided = () => {},
+}: {
+  item: ReviewItem;
+  /** Re-read the queue after a decision on this row. */
+  onDecided?: () => void;
+}) {
   const { href } = useProjectPaths();
   return (
     <li className="rh-web-stack rh-web-stack--tight">
@@ -526,6 +570,9 @@ export function ReviewRow({ item }: { item: ReviewItem }) {
       {/* The queue's own sentences, with the identifiers inside them read out in the same
           words the badges above use. The sentence stays the daemon's. */}
       <p className="rh-text-secondary">{humaniseResearchTokens(item.reasons.join('; '))}</p>
+      {/* A candidate the daemon filed as routine can be decided where it is read. Everything
+          else keeps the screen that shows the source beside the decision. */}
+      {decidableInQueue(item) ? <QueueDecision item={item} onDecided={onDecided} /> : null}
     </li>
   );
 }

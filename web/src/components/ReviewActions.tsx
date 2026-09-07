@@ -64,7 +64,7 @@ export interface ReviewActionsProps {
 }
 
 /** The five decisions that ask for a sentence before they are recorded. */
-type Prompt = Exclude<ReviewDecision, 'edit'>;
+export type Prompt = Exclude<ReviewDecision, 'edit'>;
 
 /** The longest a quote is restated at before the sentence stops being one. */
 const QUOTE_LIMIT = 140;
@@ -331,20 +331,31 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
  *
  * A candidate with no quoted span still gets a sentence rather than a pair of empty
  * quotation marks: the anchor, not the prose, is what makes it evidence.
+ *
+ * It is exported because the queue now offers the same acceptance on a routine row, and the
+ * two presses have to be agreeing to the same thing: one wording, wherever it is read.
  */
-function restatement(candidate: CandidateView, quote: string): string {
-  const opening = `Accept as evidence for ${candidate.field} of ${candidate.work}: `;
+export function restatementFor(field: string, work: string, quote: string): string {
+  const opening = `Accept as evidence for ${field} of ${work}: `;
   const subject = quote === '' ? 'this proposal becomes' : `“${quote}” becomes`;
   return `${opening}${subject} accepted Evidence in this project, recorded with you as the reviewer.`;
 }
 
-/** The exact span being proposed, short enough to stay inside one restated sentence. */
+function restatement(candidate: CandidateView, quote: string): string {
+  return restatementFor(candidate.field, candidate.work, quote);
+}
+
+/** The exact span, short enough to stay inside one restated sentence. */
+export function shortQuote(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= QUOTE_LIMIT) return trimmed;
+  return `${trimmed.slice(0, QUOTE_LIMIT).trimEnd()}…`;
+}
+
 function quoteOf(candidate: CandidateView): string {
   const evidence = (candidate.evidence ?? {}) as JsonObject;
   const content = (evidence.content ?? {}) as JsonObject;
-  const text = String(content.exact_text ?? '').trim();
-  if (text.length <= QUOTE_LIMIT) return text;
-  return `${text.slice(0, QUOTE_LIMIT).trimEnd()}…`;
+  return shortQuote(String(content.exact_text ?? ''));
 }
 
 /** The `EvidenceId` a `ReviewOutcome` allocated, when the action created one. */
@@ -354,7 +365,7 @@ function evidenceIdOf(result: unknown): string | null {
   return typeof evidence === 'string' && evidence.length > 0 ? evidence : null;
 }
 
-const PROMPT_LABELS: Record<Prompt, string> = {
+export const PROMPT_LABELS: Record<Prompt, string> = {
   accept: 'Why this side of the conflict is the one to accept',
   qualify: 'Qualification recorded with the acceptance',
   reject: 'Why this candidate is refused',
@@ -362,7 +373,7 @@ const PROMPT_LABELS: Record<Prompt, string> = {
   request_more_evidence: 'What further evidence is needed',
 };
 
-const PROMPT_SUBMIT: Record<Prompt, string> = {
+export const PROMPT_SUBMIT: Record<Prompt, string> = {
   accept: 'Accept and close the conflict',
   qualify: 'Accept with qualification',
   reject: 'Reject',
@@ -377,7 +388,7 @@ const PROMPT_SUBMIT: Record<Prompt, string> = {
  * Work's rejections file and nothing is accepted, a deferral is a note to the researcher's
  * future self, and a request for more evidence is recorded as a low-authority note.
  */
-const WROTE: Record<ReviewDecision, string> = {
+export const WROTE: Record<ReviewDecision, string> = {
   accept: 'It is accepted Evidence in this project now.',
   qualify: 'It is accepted Evidence, carrying the qualification you wrote.',
   edit: 'Your corrected wording is what was accepted, against the same source anchor.',
@@ -393,7 +404,7 @@ const WROTE: Record<ReviewDecision, string> = {
  * the other three end with "nothing is accepted". Only the first three may wear the success
  * tone.
  */
-const ACCEPTS: Record<ReviewDecision, boolean> = {
+export const ACCEPTS: Record<ReviewDecision, boolean> = {
   accept: true,
   qualify: true,
   edit: true,

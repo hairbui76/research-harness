@@ -266,7 +266,10 @@ body,
   padding: var(--rh-space-1) var(--rh-space-3) var(--rh-space-4) 0;
 }
 
+/* The decision panel is pinned to the foot of this scroller and carries its own bottom
+   padding, so the pane keeps none of its own underneath it. */
 .rh-web-review-pane--end {
+  padding-block-end: 0;
   padding-inline: var(--rh-space-3) 0;
 }
 

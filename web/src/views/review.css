@@ -71,3 +71,45 @@
 .rh-web-batch__note {
   max-inline-size: 68ch;
 }
+
+/*
+ * The decision, pinned to the foot of the pane it is taken in.
+ *
+ * Reading order and reach are not the same thing. The proposal, the number, the verifier's
+ * verdict and the conflict all belong above the decision, because they are what the
+ * decision is made out of — but on a 1024px-tall window that order put the six actions
+ * below the fold, so the one act this screen exists for was the one thing a researcher had
+ * to go looking for. It stays where it reads and arrives where it is needed: the panel
+ * sticks to the bottom edge of its own scroller, on the canvas it sits on and under a
+ * hairline of its own, so the source stays beside the decision at every height. The outcome
+ * line, the way forward and the auto-advance switch are inside it, because they are the
+ * same moment.
+ *
+ * Below 1100px the panes stack and the workspace is the scroller; the panel sticks to the
+ * bottom of the window for exactly as long as the proposal it belongs to is on screen.
+ */
+.rh-web-decide {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: var(--rh-z-sticky);
+  padding-block: var(--rh-space-2);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-canvas);
+}
+
+/*
+ * The batch's own controls, beside the filters that narrow the queue. They keep to the end
+ * of the toolbar row so the two controls a researcher reaches for constantly stay first.
+ */
+.rh-web-inbox-batch {
+  margin-inline-start: auto;
+}
+
+/*
+ * The three decisions a routine row offers, and whatever they ask before they are recorded.
+ * Indented under the row's own text so the card reads as one candidate rather than as a
+ * list item with a toolbar under it.
+ */
+.rh-web-queue-decision {
+  padding-block-start: var(--rh-space-1);
+}

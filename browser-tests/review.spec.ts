@@ -49,8 +49,29 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   expect(fits, 'The review inbox must not overflow horizontally').toBeTruthy();
   await page.screenshot({ path: info.outputPath('review-inbox.png'), fullPage: true });
 
+  // The batch acts on the queue, so its control sits in the toolbar beside the filters
+  // rather than after every card, and nothing about it is on the page until it is pressed.
+  const batch = page.getByRole('button', { name: /Accept the routine candidates/ });
+  await expect(batch).toBeVisible();
+  expect(
+    await batch.evaluate((node) => node.closest('.rh-full-page__toolbar') !== null),
+    'the batch control belongs in the toolbar',
+  ).toBe(true);
+
+  // A candidate the daemon filed as routine can be decided on its own row. Accepting still
+  // restates what it writes and waits for a second press.
+  const routine = page.getByRole('group', { name: 'Decide Dataset · W0001' });
+  await expect(routine).toBeVisible();
+  await routine.getByRole('button', { name: 'Accept' }).click();
+  await expect(
+    page.getByText(/Accept as evidence for Dataset of W0001/),
+  ).toBeVisible();
+  await expect(page.getByText(/No review action takes an acceptance back/)).toBeVisible();
+  await page.screenshot({ path: info.outputPath('review-row-decision.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Cancel' }).click();
+
   // The batch previews before it writes, and says what it would leave behind.
-  await page.getByRole('button', { name: /Accept the routine candidates/ }).click();
+  await batch.click();
   await expect(page.getByText('1 routine candidate meets the batch conditions.')).toBeVisible();
   const meets = page.getByRole('list', { name: 'Candidates that meet the batch conditions' });
   await expect(meets.getByRole('listitem')).toHaveText(['Dataset · W0001']);
@@ -167,4 +188,59 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
   await expect(help).toBeVisible();
   await expect(help).toContainText('Request more evidence');
   await page.screenshot({ path: info.outputPath('shortcut-help.png'), fullPage: true });
+});
+
+/**
+ * The act this screen exists for is on screen at the height it is worked at.
+ *
+ * Proposal, number, verification and conflict all belong above the decision — they are what
+ * the decision is made out of — and that order used to put the six actions below the fold on
+ * a 1024px window. The panel is pinned to the foot of its own scroller now, so the source
+ * stays beside the decision instead of being replaced by it.
+ */
+test('the decision is in reach without scrolling for it', async ({ page, request }, info) => {
+  await seedQueue(page, request);
+  await page.getByRole('link', { name: /Metric result · W0001/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Metric result · W0001', level: 1 }),
+  ).toBeVisible();
+
+  const pinned = await page.evaluate(() => {
+    const panel = document.querySelector('.rh-web-decide');
+    return panel === null ? null : getComputedStyle(panel).position;
+  });
+  expect(pinned, 'the decision panel must be pinned, not merely last').toBe('sticky');
+
+  const box = async (): Promise<{ top: number; bottom: number; height: number; view: number }> =>
+    page.evaluate(() => {
+      const bar = document.querySelector('.rh-review-decision-bar');
+      const rect = (bar as HTMLElement).getBoundingClientRect();
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height,
+        view: window.innerHeight,
+      };
+    });
+
+  const viewport = page.viewportSize();
+  if ((viewport?.width ?? 0) > 1100) {
+    // Source beside decision: the pane scrolls, the decision does not leave it.
+    const rect = await box();
+    expect(
+      rect.height > 0 && rect.top >= 0 && rect.bottom <= rect.view,
+      `the decision controls were at ${rect.top}-${rect.bottom} in a ${rect.view}px window`,
+    ).toBe(true);
+  } else {
+    // Stacked, and the workspace is the one scroller: the panel pins to the bottom of the
+    // window for as long as the proposal it belongs to is on screen.
+    await page.getByRole('heading', { name: 'Verification' }).scrollIntoViewIfNeeded();
+    const rect = await box();
+    expect(
+      rect.height > 0 && rect.bottom <= rect.view + 1,
+      `the decision controls were at ${rect.top}-${rect.bottom} in a ${rect.view}px window`,
+    ).toBe(true);
+  }
+
+  await page.screenshot({ path: info.outputPath('review-decision-in-reach.png') });
 });

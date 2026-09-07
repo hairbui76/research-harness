@@ -232,48 +232,61 @@ export function EvidenceReviewPage() {
             <div className="rh-web-review-pane rh-web-review-pane--end rh-web-stack">
               <Proposal candidate={candidate} item={item} />
 
-              <Panel title="Decide">
-                <div ref={decideRef}>
-                  <ReviewActions
-                    candidate={candidate}
-                    hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
-                    onReviewed={(what) => {
-                      setOutcome(what);
-                      if (autoAdvance) openCandidate(next);
-                    }}
-                  />
-                </div>
+              {/*
+                  The decision stays on screen while the source does.
 
-                <div className="rh-web-next">
-                  {outcome ? (
-                    <p className="rh-web-next__outcome" role="status">
-                      Candidate {outcome}.
-                    </p>
-                  ) : null}
-                  <div className="rh-web-next__moves">
-                    {previous ? (
-                      <Link to={href(`/review/${previous.candidate_id}`)}>
-                        Previous: {candidateName(previous.field, previous.work)}
-                      </Link>
-                    ) : null}
-                    {next ? (
-                      <Link to={href(`/review/${next.candidate_id}`)}>
-                        Next: {candidateName(next.field, next.work)}
-                      </Link>
-                    ) : (
-                      <span className="rh-text-secondary">Last in the queue.</span>
-                    )}
+                  Everything above this — the proposal, the number, the verification, the
+                  conflict — is what a researcher reads *before* deciding, and on a 1024px
+                  window it used to push the six actions past the bottom of the pane, so the
+                  one act this screen exists for was the one thing you had to scroll to
+                  find. The panel is pinned to the foot of the pane instead: its own surface
+                  and hairline over whatever it covers, the outcome and the way forward
+                  inside it, and the source still beside it.
+              */}
+              <div className="rh-web-decide">
+                <Panel title="Decide">
+                  <div ref={decideRef}>
+                    <ReviewActions
+                      candidate={candidate}
+                      hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
+                      onReviewed={(what) => {
+                        setOutcome(what);
+                        if (autoAdvance) openCandidate(next);
+                      }}
+                    />
                   </div>
-                  <Switch
-                    label="Open the next candidate after a decision"
-                    checked={autoAdvance}
-                    onCheckedChange={(on) => {
-                      setAutoAdvance(on);
-                      writeAutoAdvance(on);
-                    }}
-                  />
-                </div>
-              </Panel>
+
+                  <div className="rh-web-next">
+                    {outcome ? (
+                      <p className="rh-web-next__outcome" role="status">
+                        Candidate {outcome}.
+                      </p>
+                    ) : null}
+                    <div className="rh-web-next__moves">
+                      {previous ? (
+                        <Link to={href(`/review/${previous.candidate_id}`)}>
+                          Previous: {candidateName(previous.field, previous.work)}
+                        </Link>
+                      ) : null}
+                      {next ? (
+                        <Link to={href(`/review/${next.candidate_id}`)}>
+                          Next: {candidateName(next.field, next.work)}
+                        </Link>
+                      ) : (
+                        <span className="rh-text-secondary">Last in the queue.</span>
+                      )}
+                    </div>
+                    <Switch
+                      label="Open the next candidate after a decision"
+                      checked={autoAdvance}
+                      onCheckedChange={(on) => {
+                        setAutoAdvance(on);
+                        writeAutoAdvance(on);
+                      }}
+                    />
+                  </div>
+                </Panel>
+              </div>
             </div>
           </Pane>
         </PaneGroup>
