@@ -190,6 +190,62 @@ test('every inspector tab is reachable from the keyboard at both widths', async 
   expect(errors).toEqual([]);
 });
 
+/**
+ * The one surface sixty screenshots did not hold: a transcript row.
+ *
+ * 2G's answer to "eight controls per message" was one toolbar with a *More actions*
+ * overflow behind it, and nothing in the suite could photograph one, because every route to
+ * an assistant turn runs through `session.send` and a model provider. `/__test__/session-
+ * with-turn` seeds one through the daemon's own offline selector, so the row here is the
+ * row the code writes rather than a fixture written to look like it.
+ */
+test('a transcript row carries one toolbar, with the rest behind More actions', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  const bootstrap = await request.get('/__test__/bootstrap');
+  expect(bootstrap.ok()).toBeTruthy();
+  const { nonce } = await bootstrap.json();
+  const seeded = await request.post('/__test__/session-with-turn', { timeout: 60_000 });
+  expect(seeded.ok()).toBeTruthy();
+  const conversation = await seeded.json();
+
+  await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
+  await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+  await page.goto(conversation.conversation_url);
+  await expect(page.getByRole('main', { name: 'Research workspace' })).toBeVisible();
+
+  const answer = page.locator('.rh-message[data-role="assistant"]').first();
+  await expect(answer).toBeVisible();
+
+  // One row of controls, not eight loose buttons: what stays visible is the short list,
+  // and everything else is one press away.
+  const toolbar = answer.getByRole('group', { name: /^Actions for / });
+  await expect(toolbar).toBeVisible();
+  const visible = await toolbar.getByRole('button').allInnerTexts();
+  expect(
+    visible.length,
+    `a message row shows ${visible.length} controls: ${visible.join(', ')}`,
+  ).toBeLessThanOrEqual(4);
+
+  await toolbar.getByRole('button', { name: 'More actions' }).click();
+  await expect(page.getByRole('menu', { name: /^More actions for / })).toBeVisible();
+  await page.screenshot({ path: info.outputPath('message-overflow.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+    .include('.rh-message')
+    .analyze();
+  expect(results.violations).toEqual([]);
+
+  expect(errors).toEqual([]);
+});
+
 test('the rail and Project Home offer the same project actions in the same words', async ({
   page,
   request,

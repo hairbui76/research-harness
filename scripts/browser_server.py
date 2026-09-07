@@ -47,6 +47,47 @@ def stage_review_queue(root: Path) -> None:
     stage_candidates(root)
 
 
+def stage_conversation(root: Path) -> str:
+    """Give a fresh workspace one session with a real user turn and a real answer.
+
+    A transcript row is a design surface — the reference chips, the toolbar and its
+    *More actions* overflow — and the browser suite could not photograph one, because every
+    route to a message runs through `session.send` and a model provider. It does not have
+    to run through a *hosted* one: `ScriptedProviders` is the offline selector the CLI's own
+    `--script` mode uses, a real adapter running the real contract, so the message, its
+    context pack and the streamed answer are all written by the same code path a hosted send
+    takes. Nothing leaves the machine and nothing here reaches production code.
+    """
+    from research_harness.capabilities.context import CapabilityContext
+    from research_harness.conversation.send import ScriptedProviders
+    from research_harness.conversation.service import ConversationService
+    from research_harness.providers.models.scripted import ScriptedProvider
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    repo = WorkspaceRepository.open(root)
+    service = ConversationService(
+        CapabilityContext(repo=repo),
+        providers=ScriptedProviders(
+            ScriptedProvider(
+                [
+                    {
+                        "text": (
+                            "The pretrained encoder improves F1 by 2.57 points over the "
+                            "strongest baseline, and the gain is concentrated in the two "
+                            "rarest attack families."
+                        )
+                    }
+                ]
+            ),
+            chunk_words=4,
+        ),
+    )
+    session = service.create("Latency study")
+    started = service.send(session.id, "What did we learn about the held-out split?")
+    service.wait(started.run_id, 60)
+    return str(session.id)
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -88,6 +129,26 @@ def main() -> None:
                 "project_id": view.project_id,
                 "name": name,
                 "review_url": f"/projects/{view.project_id}/review",
+            }
+
+        @app.post("/__test__/session-with-turn")
+        def session_with_turn() -> dict[str, str]:
+            """A registered project holding one session with a question and an answer.
+
+            The transcript's own row — its reference chips, its toolbar and the overflow
+            behind *More actions* — cannot be photographed without one, and no capability
+            reachable from the browser can write an assistant turn without a model provider.
+            Each call builds its own project, so the two viewport runs never share a session.
+            """
+            manager: ProjectManager = backend.state.manager
+            name = f"Transcript {next(seeded)}"
+            view = manager.create(directory, name, ReviewPolicy.STRICT)
+            session = stage_conversation(Path(view.path))
+            return {
+                "project_id": view.project_id,
+                "name": name,
+                "session_id": session,
+                "conversation_url": f"/projects/{view.project_id}/?session={session}",
             }
 
         app.mount("/", backend)
