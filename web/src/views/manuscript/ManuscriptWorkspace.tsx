@@ -35,7 +35,7 @@ import {
   ManuscriptWorkspace as WorkspaceFrame,
   useToast,
 } from '@research-harness/design';
-import type { EditorFrameState, PaneSizes } from '@research-harness/design';
+import type { EditorFrameState, ManuscriptView, PaneSizes } from '@research-harness/design';
 import type { CursorPosition, LatexEditorHandle } from '../../editor';
 import { ErrorBox, Loading } from '../../components/Feedback';
 import { useProjectPaths } from '../../app/projectPaths';
@@ -126,6 +126,18 @@ export function ManuscriptPage() {
   const [rowSizes, setRowSizes] = usePersisted<PaneSizes>(ROW_KEY, {});
   const [inspectorOpen, setInspectorOpen] = usePersisted<boolean>(INSPECTOR_KEY, true);
 
+  /*
+   * Which view the narrow layout is showing.
+   *
+   * A workspace too narrow for three columns gives the source, the PDF and the inspector
+   * turns over the same area, and the route holds that choice because the route is where
+   * the acts that imply one happen: opening a file, following a diagnostic to its line,
+   * and jumping from the cursor to the page it set. Each of those has always put its
+   * answer in front of the researcher, and it still has to when the answer is behind a
+   * tab. The wide layout ignores it: nothing there takes turns.
+   */
+  const [view, setView] = useState<ManuscriptView>('editor');
+
   const active = files.active;
   const entryFile = files.tree?.entry_file ?? 'main.tex';
 
@@ -151,6 +163,8 @@ export function ManuscriptPage() {
   const openAt = useCallback(
     async (file: string, line: number, column?: number): Promise<void> => {
       pending.current = { file, line, ...(column === undefined ? {} : { column }) };
+      // A line is being pointed at, so the source is what has to be on screen.
+      setView('editor');
       await openFile(file);
       flushPending();
     },
@@ -246,6 +260,8 @@ export function ManuscriptPage() {
   const jumpToPdf = useCallback((): void => {
     if (!active) return;
     setSyncLabel(`${active.path}:${cursor.line}`);
+    // The jump's whole point is the page it lands on, so the preview comes forward with it.
+    setView('preview');
     void synctex.forward(active.path, cursor.line);
   }, [active, cursor.line, synctex]);
 
@@ -346,6 +362,12 @@ export function ManuscriptPage() {
   return (
     <>
       <WorkspaceFrame
+        view={view}
+        onViewChange={setView}
+        // `AuditPane` carries a strip of its own, so the tab that opens it is named for the
+        // panel's role: two strips saying "Build and audit" one under the other would read
+        // as a rendering fault rather than as a hierarchy.
+        inspectorTabLabel="Inspector"
         columnSizes={columnSizes}
         onColumnSizesChange={setColumnSizes}
         rowSizes={rowSizes}
@@ -383,7 +405,10 @@ export function ManuscriptPage() {
             nodes={nodes}
             defaultExpanded={expanded}
             {...(files.activePath ? { selectedPath: files.activePath } : {})}
-            onSelect={(path) => void files.open(path)}
+            onSelect={(path) => {
+              setView('editor');
+              void files.open(path);
+            }}
             emptyDescription={`No files under ${files.tree.root}.`}
           />
         }
