@@ -9,7 +9,7 @@ import { SourceAnchor } from '../SourceAnchor';
 import type { EvidenceModel, SourceAnchorModel } from '../models';
 
 export interface EvidenceCardProps
-  extends Omit<CardProps, 'header' | 'footer' | 'children' | 'onSelect'> {
+  extends Omit<CardProps, 'header' | 'footer' | 'children' | 'onSelect' | 'title'> {
   evidence: EvidenceModel;
   /**
    * What this evidence is called on the page that is showing it.
