@@ -31,8 +31,13 @@ import {
   humaniseResearchTokens,
   humaniseTerm,
   researchLabel,
+  researchMeaning,
 } from '@research-harness/design';
-import type { EvidenceModel, ReviewDecision } from '@research-harness/design';
+import type {
+  EvidenceFactMeanings,
+  EvidenceModel,
+  ReviewDecision,
+} from '@research-harness/design';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { CandidateView, JsonObject, ReviewItem } from '../api/dto';
 import {
@@ -337,12 +342,13 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
       <EvidenceCard
         title={candidateName(candidate.field, candidate.work)}
         evidence={proposedEvidence(candidate, evidence, content, source)}
+        meanings={proposedMeanings(candidate, evidence)}
       />
 
       <Panel title="Proposal">
         <Fields>
           <Field label="Anchor">
-            <StatusBadge status={candidate.anchor_status} vocabulary="anchorStatus" /> block{' '}
+            <StatusBadge status={candidate.anchor_status} vocabulary="anchorStatus" describe /> block{' '}
             <code>{String(source.block ?? '?')}</code> · page {String(source.page ?? '?')}
           </Field>
           {item ? (
@@ -361,9 +367,12 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
       {content.negative_state ? (
         <Panel title="Absence">
           <Fields>
-            <Field label="State">
-              {researchLabel('negativeState', String(content.negative_state))}
-            </Field>
+            <Field
+              label="State"
+              vocabulary="negativeState"
+              value={String(content.negative_state)}
+              describe
+            />
           </Fields>
           <p className="rh-text-secondary">
             Absence is a state, not a finding: only an audited decision turns “not reported”
@@ -469,6 +478,30 @@ function proposedEvidence(
       ...(typeof source.block === 'string' ? { block: source.block } : {}),
     },
   };
+}
+
+/**
+ * What the product states about each word the card prints as a fact.
+ *
+ * The card is handed the researcher's word rather than the daemon's value, so the meaning
+ * has to travel with it. `researchMeaning` answers with the value's own sentence where the
+ * product writes one — `Source observed`, `Metric result` — and with what the product says
+ * about the vocabulary itself where it defines the axis but not its members, which is the
+ * case for every evidence type and for `Direct` and `Indirect` (PRODUCT §9.2, §9.3). A
+ * word it answers nothing for is left plain: `Work` is an identifier, and a vocabulary the
+ * product never defines is not given a definition here.
+ */
+function proposedMeanings(candidate: CandidateView, evidence: JsonObject): EvidenceFactMeanings {
+  const meanings: EvidenceFactMeanings = {};
+  const type = researchMeaning('evidenceType', String(evidence.evidence_type ?? ''));
+  const strength = researchMeaning('evidenceStrength', String(evidence.strength ?? ''));
+  const origin = researchMeaning('evidenceOrigin', String(evidence.origin ?? ''));
+  const field = researchMeaning('candidateField', candidate.field);
+  if (type !== undefined) meanings.type = type;
+  if (strength !== undefined) meanings.strength = strength;
+  if (origin !== undefined) meanings.origin = origin;
+  if (field !== undefined) meanings.field = field;
+  return meanings;
 }
 
 function NumericPanel({ numeric }: { numeric: JsonObject }) {

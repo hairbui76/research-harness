@@ -43,6 +43,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button,
+  DescribedTerm,
   FullPageWorkspace,
   Input,
   REVIEW_DECISION_META,
@@ -50,6 +51,7 @@ import {
   SourceAnchor,
   humaniseResearchTokens,
   researchLabel,
+  researchMeaning,
 } from '@research-harness/design';
 import type { BatchAcceptResponse, ReviewItem } from '../api/dto';
 import {
@@ -658,10 +660,12 @@ export function ReviewRow({
         </Link>
         {/* Why it is waiting and what the verifier said are the two states this row is
             about, so both carry the sentence that says what they mean. The tier is a
-            property of the question rather than of this answer, so it stays plain text. */}
+            property of the question rather than of this answer, so it stays plain text —
+            but "Tier 2 — deep review" is no more self-explaining than the two badges are,
+            so it carries its sentence in the same shape and by the same gesture. */}
         <StatusBadge status={item.category} vocabulary="reviewCategory" describe />
         <StatusBadge status={item.verdict ?? 'unverified'} vocabulary="verdict" describe />
-        <span className="rh-text-secondary">{researchLabel('reviewTier', String(item.tier))}</span>
+        <TierName tier={item.tier} />
       </p>
       <SourceAnchor
         variant="inline"
@@ -679,5 +683,25 @@ export function ReviewRow({
           filed as routine can be accepted there, and the rest say where that happens. */}
       <QueueDecision item={item} onDecided={onDecided} />
     </li>
+  );
+}
+
+/**
+ * How much reading this question needs, in the product's words and with its meaning.
+ *
+ * Secondary ink and no badge: the tier belongs to the question the candidate answers, and
+ * a third badge on the row would put it beside the two states this row actually reports.
+ * The meaning is reachable all the same, because `Tier 2 — deep review` is exactly the
+ * kind of phrase that means nothing on a first visit.
+ */
+function TierName({ tier }: { tier: number }) {
+  const value = String(tier);
+  const meaning = researchMeaning('reviewTier', value);
+  const name = researchLabel('reviewTier', value);
+  if (meaning === undefined) return <span className="rh-text-secondary">{name}</span>;
+  return (
+    <DescribedTerm className="rh-text-secondary" description={meaning}>
+      {name}
+    </DescribedTerm>
   );
 }

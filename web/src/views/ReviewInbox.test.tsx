@@ -200,6 +200,32 @@ describe('the review inbox view', () => {
     );
   });
 
+  /**
+   * The tier stays plain text — it is a property of the question, not a state of this
+   * answer, and a third badge on the row would say otherwise — but "Tier 2 — deep review"
+   * was a phrase a first-timer met with nothing to explain it (critique 2026-09-07,
+   * heuristic 10, Jordan). It carries its sentence the way the two badges beside it do.
+   */
+  it('says what the tier means, without turning the tier into a badge', async () => {
+    const user = userEvent.setup();
+    const { container } = renderView(<ReviewRow item={QUEUE.items[0]!} />, {
+      daemon: queueDaemon(),
+      route: '/review',
+      path: '/review',
+    });
+
+    const tier = screen.getByText('Tier 2 — deep review');
+    expect(tier.closest('.rh-badge')).toBeNull();
+    expect(tier).toHaveAttribute('tabindex', '0');
+    expect(tier).not.toHaveAttribute('title');
+    expect(container.querySelector(`#${tier.getAttribute('aria-describedby')}`)).toHaveTextContent(
+      /Interpretation/,
+    );
+
+    await user.click(tier);
+    expect(container.querySelector('.rh-described-term__hint')).toHaveTextContent(/Interpretation/);
+  });
+
   it('finds a candidate by the word the row shows as well as by the daemon’s field name', () => {
     const metric = QUEUE.items.find((item) => item.field === 'metric_result')!;
 
