@@ -88,6 +88,15 @@ test('the composer keeps saying where an unpublished message goes', async ({
       return node === null ? true : node.scrollWidth <= node.clientWidth;
     });
     expect(composer, `${where}: the composer must not overflow horizontally`).toBeTruthy();
+    // A trigger that names a model and says nothing about egress is the one regression the
+    // removal of the EXTERNAL/LOCAL tag must not cause. Once the scan has settled, the two
+    // stand or fall together: no picker, or a picker with the line beside it.
+    if ((await picker.count()) > 0) {
+      await expect(
+        destination,
+        `${where}: a rendered model trigger states no destination`,
+      ).toHaveCount(1);
+    }
     if (!narrow) return;
     const whole = await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,

@@ -358,6 +358,19 @@ describe('the composer after the disclosure', () => {
     await expectNoAxeViolations(document.body);
   });
 
+  it('offers no model trigger where there is no message to send', async () => {
+    // The capture that found this: a workspace with no session open, a picker reading
+    // "Project default", and no line under it. A trigger that names a model while the
+    // composer says nothing about egress is the one regression the removal of the
+    // EXTERNAL/LOCAL tag must not cause, so the two stand or fall together.
+    const empty = { count: 0, sessions: [] };
+    renderConversation({ daemon: fakeDaemon({ capabilities: answers({ 'session.list': empty }) }), session: '' });
+    await screen.findByText('No session open');
+
+    expect(screen.queryByRole('button', { name: /^Model:/ })).toBeNull();
+    expect(document.querySelector('.rh-composer__destination')).toBeNull();
+  });
+
   it('keeps the index state beside the destination and one notice above the box', async () => {
     // The stack the finish review measured: the graph's framed notice, the catalogue's
     // sentence, and four more siblings above an empty message box. The index state is a

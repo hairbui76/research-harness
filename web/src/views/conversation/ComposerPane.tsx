@@ -421,8 +421,16 @@ export function ComposerPane() {
    * its messages would go, and inventing an answer there — "the project default", over a
    * `providers:` table that does not exist — would be the one claim the composer must never
    * make. The catalogue's own sentence already says what happened.
+   *
+   * And no session is the same case. With nothing open there is no message, so there is no
+   * destination to state and nothing for a binding to bind — but the trigger was rendered
+   * anyway, reading "Project default" over a composer that could not be typed in and a line
+   * that had gone silent. A control that says a model and nothing about egress is precisely
+   * the regression that removing the EXTERNAL/LOCAL tag must not cause, so the trigger and
+   * the line stand or fall together.
    */
-  const hasSelector = models.options.length > 0 || models.groups.length > 0 || bound !== null;
+  const hasSelector =
+    session !== null && (models.options.length > 0 || models.groups.length > 0 || bound !== null);
 
   /**
    * The standing line: where the message in the box would go if it were sent now.

@@ -199,6 +199,14 @@ test('the rail and Project Home offer the same project actions in the same words
   page.on('pageerror', (error) => errors.push(error.message));
 
   await openWorkspace(page, request, info, 'Vocabulary study');
+
+  // A workspace with no session open. The composer has nothing to send, so it offers no
+  // model trigger either: one that names a model over a silent destination line is what
+  // the capture of this screen caught, and it is the one regression removing the
+  // EXTERNAL/LOCAL tag from the trigger must not cause.
+  await expect(page.getByRole('button', { name: /^Model:/ })).toHaveCount(0);
+  await expect(page.locator('.rh-composer__destination')).toHaveCount(0);
+
   await openRail(page);
   const fromRail = await projectActionLabels(
     page,
