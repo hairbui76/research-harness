@@ -126,7 +126,7 @@ check reported. Neither of the last two runs without the researcher's yes.
   fixed, and the toast still covered the page header) and passed after two repairs. Wave 1
   was pushed at 11:56 and wave 2 at 14:34; both pushes had to go over HTTPS because this
   network drops most TCP connects to GitHub.
-- 2026-09-07 (wave 3, in progress): the Overview proof page (3J) is built — the page opens
+- 2026-09-07 (wave 3): the Overview proof page (3J) is built — the page opens
   with the daemon's sentence about what needs a researcher, then what is waiting, what went
   stale, what changed since the last session (a new server-composed section with a stated
   window rule), claim health as sentences, open questions, and the project's size last;
@@ -139,3 +139,13 @@ check reported. Neither of the last two runs without the researcher's yes.
   `docs/plans/2026-09-07-rail-grouping-proposal.md` and waits for the researcher's answer.
   The rollout (3K) runs as two agents: Claims, Questions and Conflicts; Taxonomy, Stale and
   Synthesis. Corpus follows once the windowing has merged. All of it integrates on `wave-3`.
+- 2026-09-07 (wave 3, integrated): the three rollout agents finished after the account's
+  session limit killed them once mid-gate; their branches merged on `wave-3` with the
+  Overview, both halves of 2H and the rail proposal, and the full gate passed on the merge.
+  The finish review ruled *fix* with eight findings — daemon identifiers still standing as
+  labels on the stale objects, the conflicts and a question's claims; the Overview's stale
+  list flush with its heading; a status badge repeating its group's name; one absence said
+  twice with no next step; a heading in two cases; a cap sentence that leads nowhere — and
+  one fix batch landed all of them with the reviewer's test rulings. The manuscript route at
+  768px (tight, scrolling internally) is logged for wave 4; the rail grouping (3L) waits for
+  the researcher's answer.
