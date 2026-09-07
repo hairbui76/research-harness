@@ -603,6 +603,75 @@ def stage_synthesis_grid(root: Path) -> None:
     rebuild_workspace(WorkspaceRepository.open(root))
 
 
+MAIN_TEX = r"""\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{Pretrained encoders for rare intrusion families}
+\author{A Researcher}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+The held-out split is the only evidence in this paper that the encoder generalises beyond
+the families it was pretrained on, so the introduction states the split before it states
+the gain, and every later number is read against it.
+
+\input{sections/results}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
+"""
+
+RESULTS_TEX = r"""\section{Results}
+The pretrained encoder improves F1 by 2.57 points over the strongest baseline, and the
+gain is concentrated in the two rarest attack families~\cite{holdout2026}.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lrr}
+\hline
+Family & Baseline & Pretrained \\
+\hline
+Reconnaissance & 0.81 & 0.83 \\
+Exfiltration & 0.42 & 0.61 \\
+\hline
+\end{tabular}
+\caption{F1 on the held-out split.}
+\end{table}
+"""
+
+REFERENCES_BIB = """@article{holdout2026,
+  title = {A held-out split for rare intrusion families},
+  author = {Researcher, A.},
+  journal = {Journal of Synthetic Evidence},
+  year = {2026}
+}
+"""
+
+
+def stage_manuscript(root: Path) -> None:
+    """Give a fresh workspace a manuscript with source in it.
+
+    The manuscript route's layout question is about a *loaded* workspace: a file tree with
+    names in it, a buffer holding LaTeX lines longer than any narrow pane, and an inspector
+    reporting on a build. A project whose `manuscript/` directory is empty answers none of
+    it, and the fit sweep photographed exactly that. The files are written through
+    `ManuscriptFiles.create` - the service `manuscript.write` uses - so the tree the cockpit
+    lists is the tree the daemon walks, and nothing here reaches production code.
+    """
+    from research_harness.manuscript.files import ManuscriptFiles
+
+    files = ManuscriptFiles(root)
+    files.root.mkdir(parents=True, exist_ok=True)
+    (files.root / "sections").mkdir(parents=True, exist_ok=True)
+    files.create("main.tex", MAIN_TEX)
+    files.create("sections/results.tex", RESULTS_TEX)
+    files.create("references.bib", REFERENCES_BIB)
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -790,6 +859,22 @@ def main() -> None:
                 "project_id": view.project_id,
                 "name": name,
                 "workspace_url": f"/projects/{view.project_id}",
+            }
+
+        @app.post("/__test__/manuscript-project")
+        def manuscript_project() -> dict[str, str]:
+            """A registered project whose manuscript already has source files in it.
+
+            Each call builds its own project, so the two viewport runs never share a tree.
+            """
+            manager: ProjectManager = backend.state.manager
+            name = f"Manuscript study {next(seeded)}"
+            view = manager.create(directory, name, ReviewPolicy.STRICT)
+            stage_manuscript(Path(view.path))
+            return {
+                "project_id": view.project_id,
+                "name": name,
+                "manuscript_url": f"/projects/{view.project_id}/manuscript",
             }
 
         app.mount("/", backend)

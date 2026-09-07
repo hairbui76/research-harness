@@ -134,3 +134,20 @@ button.rh-audit-finding__button:hover .rh-audit-finding__kind {
   background: var(--rh-surface-subtle);
   color: var(--rh-text-primary);
 }
+
+/*
+ * In a narrow panel the message takes a line of its own.
+ *
+ * The kind and the file position are short and fixed; the message is the long part, and
+ * a row that keeps all three on one line pays for the fixed pair by shrinking the message
+ * to a column a few characters wide. Vertical room is the cheaper currency here.
+ */
+@container rh-diagnostics (max-width: 34rem) {
+  .rh-audit-finding__button {
+    flex-wrap: wrap;
+  }
+
+  .rh-audit-finding__message {
+    flex-basis: 100%;
+  }
+}
