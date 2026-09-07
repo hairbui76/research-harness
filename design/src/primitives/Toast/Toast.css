@@ -39,26 +39,27 @@
   background: var(--rh-surface-raised);
   color: var(--rh-text-primary);
   border: 1px solid var(--rh-border-default);
-  border-left: 3px solid var(--rh-border-strong);
   border-radius: var(--rh-radius-card);
   font-family: var(--rh-font-sans);
   pointer-events: auto;
 }
 
+/* The tone tints the whole hairline rather than a thick rule down one edge; the tone is
+   also spelled out in the toast, so colour is never the only signal. */
 .rh-toast[data-tone='info'] {
-  border-left-color: var(--rh-feedback-info-border);
+  border-color: var(--rh-feedback-info-border);
 }
 
 .rh-toast[data-tone='success'] {
-  border-left-color: var(--rh-feedback-success-border);
+  border-color: var(--rh-feedback-success-border);
 }
 
 .rh-toast[data-tone='warning'] {
-  border-left-color: var(--rh-feedback-warning-border);
+  border-color: var(--rh-feedback-warning-border);
 }
 
 .rh-toast[data-tone='error'] {
-  border-left-color: var(--rh-feedback-error-border);
+  border-color: var(--rh-feedback-error-border);
 }
 
 .rh-toast__icon {

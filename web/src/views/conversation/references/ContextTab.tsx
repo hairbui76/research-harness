@@ -67,6 +67,7 @@ export function GraphContextPanel({ enabled = true }: GraphContextPanelProps) {
       <AsyncState
         kind="empty"
         compact
+        hideKind
         title="Nothing selected"
         description="Open a reference or inspect a message to see what the graph joins it to."
       />

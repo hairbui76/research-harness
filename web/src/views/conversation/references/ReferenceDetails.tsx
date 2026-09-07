@@ -94,6 +94,7 @@ export function ReferenceDetails({
           <AsyncState
             kind="empty"
             compact
+            hideKind
             title="No path to a source artifact"
             description="Nothing accepted joins this object to an artifact the project holds."
           />
@@ -126,6 +127,7 @@ export function ReferenceDetails({
           <AsyncState
             kind="empty"
             compact
+            hideKind
             title="Nothing is linked to this yet"
             description="The graph holds no relation into or out of this object."
           />

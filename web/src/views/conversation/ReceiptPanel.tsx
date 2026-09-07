@@ -61,6 +61,7 @@ export function ReceiptPanel() {
       <AsyncState
         kind="empty"
         compact
+        hideKind
         title="No receipt open"
         description="Open Context used on an answer, or preview the context this draft would send."
       />

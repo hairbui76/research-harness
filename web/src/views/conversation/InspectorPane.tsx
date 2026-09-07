@@ -160,6 +160,7 @@ function SelectedAttachment() {
       <AsyncState
         kind="empty"
         compact
+        hideKind
         title={`${selection.ref.id} is not in the open session`}
         description="Open the session it belongs to to preview or save it."
       />
@@ -213,6 +214,7 @@ function UsedIn({
         <AsyncState
           kind="empty"
           compact
+          hideKind
           title="Not referenced in the loaded transcript"
           description="Earlier pages of a long session may still reference it."
         />

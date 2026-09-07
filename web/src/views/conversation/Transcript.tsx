@@ -101,6 +101,7 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
     return (
       <AsyncState
         kind="empty"
+        hideKind
         title="No session open"
         description="Start a session in the rail to ask a question against this project."
       />
