@@ -670,6 +670,16 @@
             "title": "At",
             "type": "string"
           },
+          "by": {
+            "default": "",
+            "enum": [
+              "researcher",
+              "daemon",
+              ""
+            ],
+            "title": "By",
+            "type": "string"
+          },
           "detail": {
             "default": "",
             "title": "Detail",

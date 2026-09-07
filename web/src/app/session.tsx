@@ -7,7 +7,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { HarnessClient } from '../api/client';
+import { HarnessClient, daemonReachability } from '../api/client';
 import type { OverviewReport } from '../api/dto';
 import { readToken, storeToken } from '../api/session';
 
@@ -19,6 +19,14 @@ export interface Session {
   error: string | null;
   loading: boolean;
   refresh: () => void;
+  /**
+   * When the report on screen was read, ISO-8601, or null before the first answer.
+   *
+   * It is the transport's own stamp for the round trip that answered — the one the outage
+   * notice reports as "last read at" — so the cockpit keeps one clock and a page saying how
+   * old its content is cannot drift from the shell saying the same thing.
+   */
+  readAt: string | null;
   /** True when the daemon accepted our token; an agent host may read and stage only. */
   canMutate: boolean;
   /** Why the mutation controls are disabled, in one sentence a researcher can act on. */
@@ -41,6 +49,7 @@ export function SessionProvider({
 }) {
   const [token, setTokenState] = useState<string | null>(() => (injected ? null : readToken()));
   const [overview, setOverview] = useState<OverviewReport | null>(null);
+  const [readAt, setReadAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
@@ -66,6 +75,7 @@ export function SessionProvider({
         if (!live) return;
         setOverview(report);
         setError(null);
+        setReadAt(daemonReachability.lastAnsweredAt());
       })
       .catch((cause: unknown) => {
         if (!live) return;
@@ -87,6 +97,7 @@ export function SessionProvider({
     error,
     loading,
     refresh,
+    readAt,
     canMutate,
     mutationBlockedReason: canMutate ? null : AGENT_HOST_EXPLANATION,
   };

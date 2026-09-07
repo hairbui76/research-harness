@@ -718,6 +718,12 @@ export interface components {
             /** At */
             at: string;
             /**
+             * By
+             * @default
+             * @enum {string}
+             */
+            by: "researcher" | "daemon" | "";
+            /**
              * Detail
              * @default
              */

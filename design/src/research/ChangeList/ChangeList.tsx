@@ -32,10 +32,31 @@ export const CHANGE_KIND_META: Record<ChangeKind, ChangeKindMeta> = {
   conflict: { label: 'Conflict', icon: 'git-compare' },
 };
 
+/** Who the host's record says made a change. A change it attributes to nobody has none. */
+export type ChangeBy = 'researcher' | 'daemon';
+
+/**
+ * The word each actor leads their own sentence with.
+ *
+ * It is prose, not a label: the host's sentences are verb-initial ("accepted evidence
+ * E0001…"), so the subject in front of one makes the row a sentence a person reads. Who
+ * acted is never told by a colour or a chip — a returning researcher scanning for what she
+ * decided has to be able to read it, in greyscale and out loud.
+ */
+export const CHANGE_BY_META: Record<ChangeBy, string> = {
+  researcher: 'You',
+  daemon: 'The daemon',
+};
+
 export interface ChangeListEntry {
   id: string;
   /** One of `CHANGE_KINDS`, or any other word the host records; unknown kinds still render. */
   kind: string;
+  /**
+   * Who the host's record says did it. Absent when the record attributes it to nobody, and
+   * the sentence then stands on its own rather than naming a subject the host never gave.
+   */
+  by?: ChangeBy | undefined;
   /** The sentence the host wrote for this change. Never assembled here. */
   label: string;
   /** The instant, machine-readable: the `datetime` of the rendered `<time>`. */
@@ -66,6 +87,11 @@ export interface ChangeListProps extends Omit<HTMLAttributes<HTMLElement>, 'chil
  * daemon's, because deciding what counts as a change is a research judgement and this
  * package holds none (Product 5 P10).
  *
+ * The one word this package puts in front of the host's sentence is the subject of it —
+ * "You", "The daemon" — for a change the host attributed to one of them. It is what lets a
+ * researcher back after a week tell her own decisions from what ran while she was away, and
+ * it is words rather than a tint, because that difference is the point of reading the list.
+ *
  * It is an ordered list, so assistive technology reads "3 of 8" and a reader knows where
  * they are in a run of similar rows.
  */
@@ -86,12 +112,22 @@ export const ChangeList = forwardRef<HTMLOListElement, ChangeListProps>(function
           onOpen(entry);
         };
         return (
-          <li key={entry.id} className="rh-change-list__entry" data-kind={entry.kind}>
+          <li
+            key={entry.id}
+            className="rh-change-list__entry"
+            data-kind={entry.kind}
+            {...(entry.by ? { 'data-by': entry.by } : {})}
+          >
             <span className="rh-change-list__kind">
               <Icon name={meta.icon} size={14} />
               <span>{meta.label}</span>
             </span>
             <p className="rh-change-list__what">
+              {entry.by ? (
+                <>
+                  <span className="rh-change-list__by">{CHANGE_BY_META[entry.by]}</span>{' '}
+                </>
+              ) : null}
               {entry.href === undefined ? (
                 entry.label
               ) : (

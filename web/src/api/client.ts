@@ -193,6 +193,15 @@ class DaemonReachability {
   /** The current outage, or null while the daemon is answering. Stable between changes. */
   readonly get = (): DaemonOutage | null => this.outage;
 
+  /**
+   * When a round trip was last answered, or null before the first one.
+   *
+   * The same instant `DaemonOutage.lastReadAt` reports, offered while the daemon *is*
+   * answering: a page that says how old its content is asks the transport that stamped it
+   * rather than reading a clock of its own, so the two can never disagree.
+   */
+  readonly lastAnsweredAt = (): string | null => this.answeredAt;
+
   readonly subscribe = (listener: OutageListener): (() => void) => {
     this.listeners.add(listener);
     return () => {

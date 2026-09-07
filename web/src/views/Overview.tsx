@@ -18,6 +18,7 @@
  * The frame is mounted before the read resolves, so the project's name, the description and
  * the toolbar are on screen while the report is arriving and after a refusal.
  */
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -34,7 +35,15 @@ import type {
   OverviewCounts,
   OverviewReport,
 } from '../api/dto';
-import { AttentionName, Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
+import {
+  AttentionName,
+  Empty,
+  ErrorBox,
+  Loading,
+  Panel,
+  StatusBadge,
+  clockTime,
+} from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import './overview.css';
@@ -55,7 +64,21 @@ function counted(count: number, singular: string, plural = `${singular}s`): stri
 }
 
 export function OverviewPage() {
-  const { overview, error, loading, refresh } = useSession();
+  const { overview, error, loading, refresh, readAt } = useSession();
+  /*
+   * Whether the read-at line is a live region yet.
+   *
+   * A page that announced every read would talk over the work: the automatic first read is
+   * quiet text. Pressing "Look again" is a question — is this still current? — so the press
+   * arms the region *before* the answer lands, which is the only ordering a polite live
+   * region is actually announced in, and it stays armed because every later read is one the
+   * researcher asked for too.
+   */
+  const [announceRead, setAnnounceRead] = useState(false);
+  const lookAgain = (): void => {
+    setAnnounceRead(true);
+    refresh();
+  };
   // `attention[].route` and `since_last_session[].route` are the daemon's own workspace
   // paths (`/review`, `/claims/C0001`). They stay that way in the DTO and are pointed at
   // this project only as they are rendered.
@@ -76,9 +99,12 @@ export function OverviewPage() {
         'What needs a researcher next, and what changed since you last worked.'
       }
       toolbar={
-        <Button size="sm" variant="secondary" iconStart="refresh-cw" onClick={refresh}>
-          Look again
-        </Button>
+        <>
+          <LastRead at={readAt} announce={announceRead} />
+          <Button size="sm" variant="secondary" iconStart="refresh-cw" onClick={lookAgain}>
+            Look again
+          </Button>
+        </>
       }
     >
       {loading ? (
@@ -89,7 +115,7 @@ export function OverviewPage() {
         <Empty
           description="Nothing answered on this connection. The daemon may have stopped, or this window may be pointed at a workspace that is no longer open."
           action={
-            <Button size="sm" variant="secondary" iconStart="refresh-cw" onClick={refresh}>
+            <Button size="sm" variant="secondary" iconStart="refresh-cw" onClick={lookAgain}>
               Look again
             </Button>
           }
@@ -162,6 +188,9 @@ export function OverviewPage() {
                       label: humaniseResearchTokens(entry.label),
                       at: entry.at,
                       when: entry.when,
+                      // Who the daemon says did it, when it says. An entry the record
+                      // attributes to nobody carries nothing rather than a guess.
+                      ...(entry.by ? { by: entry.by } : {}),
                       ...(entry.route ? { href: href(entry.route) } : {}),
                     }),
                   )}
@@ -234,6 +263,27 @@ export function OverviewPage() {
         </div>
       )}
     </FullPageWorkspace>
+  );
+}
+
+/**
+ * When what is on screen was read, next to the button that reads again.
+ *
+ * The critique's finding was that "Look again" never says when it last looked, which leaves
+ * a returning researcher unable to tell a project with nothing happening from a page that
+ * stopped listening. The instant is the transport's own stamp for the round trip that
+ * answered — one clock for the whole window — and it is the time of day, not a date,
+ * because it answers "how old is this?" over a sitting rather than over a week.
+ *
+ * Nothing is shown before the first answer: a page that has read nothing has no time to
+ * report, and inventing one would be the opposite of the point.
+ */
+function LastRead({ at, announce }: { at: string | null; announce: boolean }) {
+  if (at === null) return null;
+  return (
+    <span className="rh-web-overview__read" {...(announce ? { role: 'status' } : {})}>
+      Read at {clockTime(at)}
+    </span>
   );
 }
 

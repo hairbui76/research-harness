@@ -10,12 +10,20 @@ export {
 export type { CommandDestination, CommandsApi, CommandsProviderProps } from './CommandsProvider';
 export { CommandPalette } from './CommandPalette';
 export { ShortcutHelp } from './ShortcutHelp';
+export { ShortcutKeys } from './ShortcutKeys';
 export {
+  CHORD_HEADING,
+  CHORD_LEAD,
+  CHORD_TIMEOUT,
+  DESTINATION_CHORDS,
+  DO_SECTION,
+  GO_SECTION,
   foreignDialogOpen,
   groupCommands,
   isTypingTarget,
   matchCommands,
   modifierLabel,
+  sectionCommands,
   shortcutLabel,
 } from './model';
-export type { Command } from './model';
+export type { Command, CommandSection } from './model';

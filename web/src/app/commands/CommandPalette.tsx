@@ -9,14 +9,32 @@
  *
  * The palette runs the page's own handler. It cannot do anything a control on the screen
  * behind it could not.
+ *
+ * It reads in two sections — where a researcher can go, and what this screen can do — with
+ * the rail's own headings inside the first. The critique found a power user opening it and
+ * seeing a list of destinations with nothing saying that actions were on it at all; the
+ * second section is on screen before anything is typed, and on a page that registers no
+ * actions it still holds the shell's own.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogBody, DialogHeader, Input, useId } from '@research-harness/design';
 import { useCommands } from './CommandsProvider';
-import { groupCommands, matchCommands, shortcutLabel } from './model';
+import { DO_SECTION, GO_SECTION, matchCommands, sectionCommands } from './model';
+import type { CommandSection } from './model';
+import { ShortcutKeys } from './ShortcutKeys';
+
+/** How many commands a section holds, in the words its own name is read with. */
+function counted(section: CommandSection | undefined, singular: string): string {
+  const count = section === undefined ? 0 : section.loose.length + section.groups.reduce(
+    (total, [, items]) => total + items.length,
+    0,
+  );
+  if (count === 0) return `no ${singular}s`;
+  return `${count} ${count === 1 ? singular : `${singular}s`}`;
+}
 
 export function CommandPalette() {
-  const { commands, paletteOpen, setPaletteOpen } = useCommands();
+  const { commands, paletteOpen, setPaletteOpen, singleKeys } = useCommands();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const baseId = useId(undefined, 'rh-web-palette');
@@ -24,7 +42,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const matches = useMemo(() => matchCommands(commands, query), [commands, query]);
-  const groups = useMemo(() => groupCommands(matches), [matches]);
+  const sections = useMemo(() => sectionCommands(matches), [matches]);
 
   // A palette opened again starts from the top with an empty query: it is a way in, not a
   // place that remembers what was asked last time.
@@ -39,6 +57,31 @@ export function CommandPalette() {
 
   const optionId = (command: { id: string }): string =>
     `${baseId}-${command.id.replace(/[^A-Za-z0-9_-]/g, '-')}`;
+
+  const option = (command: (typeof matches)[number]) => {
+    const index = matches.indexOf(command);
+    return (
+      <div
+        key={command.id}
+        id={optionId(command)}
+        role="option"
+        aria-selected={index === active}
+        data-active={index === active ? '' : undefined}
+        className="rh-web-palette__option"
+        // `mousemove`, not `mouseenter`: the palette is summoned by keyboard and appears
+        // under wherever the pointer was last left, and an option that takes the selection
+        // without the mouse having moved would let Enter run whatever the cursor happens to
+        // be resting on.
+        onMouseMove={() => setActive(index)}
+        // Keep the caret and the active option where they are; the click runs it.
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => run(index)}
+      >
+        <span>{command.label}</span>
+        <ShortcutKeys command={command} singleKeys={singleKeys} />
+      </div>
+    );
+  };
 
   const run = (index: number): void => {
     const command = matches[index];
@@ -94,36 +137,36 @@ export function CommandPalette() {
           }}
         />
 
+        {/*
+          One line saying what is in the list, before any of it is scrolled to. Eleven
+          destinations fill the list on their own, so the actions section is below the fold
+          on a tall rail — and the whole point of the section is that a power user learns
+          this screen has actions without typing anything (critique H7, Alex).
+        */}
+        {matches.length > 0 ? (
+          <p className="rh-web-palette__summary">
+            {counted(sections.find((section) => section.name === GO_SECTION), 'screen')} to go
+            to, and {counted(sections.find((section) => section.name === DO_SECTION), 'action')}{' '}
+            on this screen.
+          </p>
+        ) : null}
+
         <div id={listId} role="listbox" aria-label="Screens and actions" className="rh-web-palette__list">
-          {groups.map(([group, items]) => (
-            <div key={group} role="group" aria-label={group} className="rh-web-palette__group">
-              <p className="rh-web-palette__heading">{group}</p>
-              {items.map((command) => {
-                const index = matches.indexOf(command);
-                return (
-                  <div
-                    key={command.id}
-                    id={optionId(command)}
-                    role="option"
-                    aria-selected={index === active}
-                    data-active={index === active ? '' : undefined}
-                    className="rh-web-palette__option"
-                    // `mousemove`, not `mouseenter`: the palette is summoned by keyboard and
-                    // appears under wherever the pointer was last left, and an option that
-                    // takes the selection without the mouse having moved would let Enter run
-                    // whatever the cursor happens to be resting on.
-                    onMouseMove={() => setActive(index)}
-                    // Keep the caret and the active option where they are; the click runs it.
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => run(index)}
-                  >
-                    <span>{command.label}</span>
-                    {command.shortcut ? (
-                      <kbd className="rh-web-kbd">{shortcutLabel(command.shortcut)}</kbd>
-                    ) : null}
-                  </div>
-                );
-              })}
+          {sections.map((section) => (
+            <div
+              key={section.name}
+              role="group"
+              aria-label={section.name}
+              className="rh-web-palette__section"
+            >
+              <p className="rh-web-palette__section-heading">{section.name}</p>
+              {section.loose.map(option)}
+              {section.groups.map(([group, items]) => (
+                <div key={group} role="group" aria-label={group} className="rh-web-palette__group">
+                  <p className="rh-web-palette__heading">{group}</p>
+                  {items.map(option)}
+                </div>
+              ))}
             </div>
           ))}
         </div>

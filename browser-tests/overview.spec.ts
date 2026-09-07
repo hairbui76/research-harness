@@ -121,6 +121,41 @@ test('the overview leads with what is waiting, and states what the project holds
   await expect(page.getByText(/changes in the last seven days\./)).toBeVisible();
   await expect(page.getByRole('link', { name: '1 claim is' })).toBeVisible();
 
+  // Whose change each one was, in words inside the sentence: the researcher accepted the
+  // Decision, and the disagreement the store attributes to nobody says nothing about who
+  // opened it rather than guessing (wave 5J).
+  const decided = page
+    .locator('.rh-change-list__entry')
+    .filter({ hasText: 'accepted methodology decision D0001' });
+  await expect(decided).toHaveAttribute('data-by', 'researcher');
+  await expect(decided.locator('.rh-change-list__what')).toHaveText(
+    /^You accepted methodology decision D0001/,
+  );
+  const opened = page.locator('.rh-change-list__entry').filter({ hasText: 'opened a conflict' });
+  await expect(opened).toHaveCount(1);
+  expect(
+    await opened.evaluate((node) => node.hasAttribute('data-by')),
+    'a conflict opening the record attributes to nobody stays unattributed',
+  ).toBe(false);
+
+  // "Look again" says when it last looked, and only announces a read the researcher asked
+  // for: an automatic one is quiet text (critique H1).
+  const read = page.locator('.rh-web-overview__read');
+  await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  expect(
+    await read.evaluate((node) => node.getAttribute('role')),
+    'an automatic read announces nothing',
+  ).toBeNull();
+  await page.locator('.rh-full-page__header').screenshot({
+    path: info.outputPath('overview-read-at.png'),
+  });
+  await page.getByRole('button', { name: 'Look again' }).click();
+  await expect(read).toHaveAttribute('role', 'status');
+  await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  // The read the press asked for lands and the page comes back; everything measured below
+  // is measured on the page as it stands after it, not on the skeleton in between.
+  await expect(page.getByRole('heading', { name: 'Waiting for a decision' })).toBeVisible();
+
   // Rule 9 of the page's own pattern: a line that names a group, then the items in it
   // indented one space unit under it — the one cue that they belong to that line. Both
   // groups take the same indent, because they are one shape read twice.

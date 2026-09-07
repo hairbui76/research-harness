@@ -20,10 +20,52 @@
   overflow-y: auto;
 }
 
+/*
+ * One half of the palette: everywhere you can go, or everything this screen can do. The
+ * section is the outer run and the rail's own headings sit inside it, so the two levels
+ * differ by the space around them rather than by a second type size.
+ */
+.rh-web-palette__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-palette__section + .rh-web-palette__section {
+  margin-block-start: var(--rh-space-3);
+  padding-block-start: var(--rh-space-3);
+  border-block-start: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
 .rh-web-palette__group {
   display: flex;
   flex-direction: column;
   gap: var(--rh-space-1);
+}
+
+/* A group inside a section is a subdivision of it, and is indented to say so. */
+.rh-web-palette__section > .rh-web-palette__group {
+  margin-block-start: var(--rh-space-2);
+}
+
+/*
+ * The section's name, in the same label role as a group heading and one ink step darker:
+ * it is the thing a researcher reads to find out that this palette holds actions at all.
+ */
+.rh-web-palette__section-heading {
+  /* Sticky, so a list long enough to scroll always says which half is being read. */
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: var(--rh-surface-raised);
+  margin: 0;
+  padding-block: var(--rh-space-1);
+  padding-inline: var(--rh-space-2);
+  font-size: var(--rh-type-label-size);
+  line-height: var(--rh-type-label-lh);
+  letter-spacing: var(--rh-type-label-ls);
+  font-weight: var(--rh-type-label-weight);
+  color: var(--rh-text-secondary);
 }
 
 .rh-web-palette__heading {
@@ -56,6 +98,12 @@
   background: var(--rh-surface-selected);
 }
 
+/* What the list holds, said before it is scrolled: the sections are longer than the pane. */
+.rh-web-palette__summary {
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
 .rh-web-palette__empty {
   margin: 0;
   color: var(--rh-text-secondary);
@@ -75,6 +123,37 @@
   line-height: calc(var(--rh-type-body-sm-lh) * 1.1);
   text-align: center;
   white-space: nowrap;
+}
+
+/* Both halves of a chord, read as two presses: `g` then the letter, with air between. */
+.rh-web-kbd-chord {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+}
+
+/*
+ * The chord is open and waiting for its letter.
+ *
+ * Bottom-right: a state rather than a control — nothing in it is clickable and it goes away
+ * on its own — so it stays out of the reading column, off the rail (whose footer says who
+ * this window is) and away from the toasts, which sit at the top. It is only ever on screen
+ * for the moment between two keystrokes.
+ */
+.rh-web-chord {
+  position: fixed;
+  inset-block-end: var(--rh-space-4);
+  inset-inline-end: var(--rh-space-4);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  padding: var(--rh-space-2) var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-secondary);
 }
 
 .rh-web-shortcuts__group {

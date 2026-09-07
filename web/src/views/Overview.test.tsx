@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { OverviewPage } from './Overview';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
@@ -172,7 +173,58 @@ describe('the overview', () => {
     const rendered = Array.from(container.querySelectorAll('.rh-change-list__what')).map(
       (node) => node.textContent,
     );
-    expect(rendered).toEqual(changes.entries.map((entry) => entry.label));
+    // Each row now leads with the subject the daemon attributed the change to (wave 5J).
+    // The daemon's own sentence still follows it word for word, in the order it was given.
+    const subject: Record<string, string> = { researcher: 'You ', daemon: 'The daemon ', '': '' };
+    expect(rendered).toEqual(
+      changes.entries.map((entry) => `${subject[entry.by] ?? ''}${entry.label}`),
+    );
+  });
+
+  it('says who recorded each change, in the words the daemon attributed it to', async () => {
+    /*
+     * The returning researcher's question is which of these she decided and which the
+     * daemon did while she was away. The answer is the daemon's `by`, rendered as the
+     * subject of its own sentence; the page adds no attribution of its own and drops none.
+     */
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    const entries = FIXTURES.overview.since_last_session!.entries;
+    expect(entries.every((entry) => entry.by === 'researcher')).toBe(true);
+    const rows = Array.from(container.querySelectorAll('.rh-change-list__entry'));
+    expect(rows.map((row) => row.getAttribute('data-by'))).toEqual(entries.map(() => 'researcher'));
+    expect(container.querySelector('.rh-change-list__what')).toHaveTextContent(
+      `You ${entries[0]!.label}`,
+    );
+  });
+
+  it('leaves a change the daemon attributed to nobody unattributed', async () => {
+    const unattributed = {
+      ...FIXTURES.overview.since_last_session!,
+      entries: [
+        {
+          ...FIXTURES.overview.since_last_session!.entries[0]!,
+          by: '',
+          label: 'opened a conflict: two readings of Table 1 disagree',
+        },
+      ],
+    };
+    const { container } = renderView(<OverviewPage />, {
+      daemon: fakeDaemon({
+        gets: { '/overview': overviewWith({ since_last_session: unattributed }) },
+      }),
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    expect(container.querySelector('.rh-change-list__entry')).not.toHaveAttribute('data-by');
+    expect(container.querySelector('.rh-change-list__what')).toHaveTextContent(
+      'opened a conflict: two readings of Table 1 disagree',
+    );
   });
 
   it('says which window it looked at, and offers a next action, when nothing changed', async () => {
@@ -315,6 +367,49 @@ describe('the overview inside a project', () => {
       FIXTURES.overview.attention
         .filter((group) => group.surface === 'decide')
         .map((group) => group.route),
+    );
+  });
+});
+
+/**
+ * "Look again" says when it last looked (critique H1: it never did).
+ *
+ * The time is the read's own: the transport stamps every answered round trip, and the
+ * session hands that instant on, so the page reports when its content arrived rather than
+ * running a clock of its own. It is quiet text until a researcher presses the button — a
+ * page that announced every automatic read would talk over the work — and from that press
+ * on it is a polite live region, because the answer to "is this current?" is the one thing
+ * a manual refresh is asking for.
+ */
+describe('when the overview last read', () => {
+  it('states the time of the read beside “Look again”', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText(FIXTURES.overview.project)).toBeInTheDocument());
+    const read = await screen.findByText(/^Read at \d{1,2}:\d{2}/);
+    expect(read.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
+    expect(container.querySelector('.rh-web-overview__read')).toBe(read);
+  });
+
+  it('says nothing about a read that has not happened', () => {
+    renderView(<OverviewPage />, { daemon: pendingDaemon() });
+
+    expect(screen.queryByText(/^Read at /)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Look again' })).toBeInTheDocument();
+  });
+
+  it('stays quiet until the researcher asks again, and is polite when it answers', async () => {
+    const user = userEvent.setup();
+    renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    const read = await screen.findByText(/^Read at /);
+    expect(read, 'an automatic read announces nothing').not.toHaveAttribute('role');
+
+    await user.click(screen.getByRole('button', { name: 'Look again' }));
+
+    // `status` is the polite one: it waits for a pause instead of interrupting.
+    await waitFor(() =>
+      expect(screen.getByText(/^Read at /)).toHaveAttribute('role', 'status'),
     );
   });
 });

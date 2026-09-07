@@ -32,7 +32,7 @@ from collections import Counter
 from collections.abc import Callable, Container, Iterable, Mapping, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -80,6 +80,7 @@ from research_harness.domain.research import (
     Taxonomy,
     TaxonomyTerm,
 )
+from research_harness.domain.transitions import is_human_actor
 from research_harness.domain.work import Artifact, Work
 from research_harness.evidence.conflicts import ConflictRecord, ConflictStore
 from research_harness.local_app.runtime import LEGACY_PROJECT_ID, WorkspaceRuntime
@@ -1213,10 +1214,22 @@ def _event_changes(
                     at=event.occurred_at.isoformat(),
                     when=_human_moment(event.occurred_at),
                     route=_object_route(subject),
+                    by=_recorded_by(event.actor),
                 ),
             )
         )
     return found
+
+
+def _recorded_by(actor: str) -> Literal["researcher", "daemon"]:
+    """Who the log's actor is, in the two words the Overview reports.
+
+    The vocabulary is Product 7.3's: `human` and `human:<name>` are the researcher at this
+    workstation, and every other actor — a model, a workflow, `system` — is the daemon
+    acting on her behalf. Nothing else is consulted, so a change is attributed to whoever
+    the record says wrote it.
+    """
+    return "researcher" if is_human_actor(actor) else "daemon"
 
 
 def _conflict_changes(
@@ -1233,7 +1246,16 @@ def _conflict_changes(
             found.append(
                 (
                     record.created_at,
-                    _conflict_change(record, record.created_at, "opened", record.summary),
+                    _conflict_change(
+                        record,
+                        record.created_at,
+                        "opened",
+                        record.summary,
+                        # The store keeps no actor for an opening. A conflict that names the
+                        # run it came out of was opened by that run, which is the daemon; one
+                        # that names nothing is left unattributed rather than guessed at.
+                        by="daemon" if record.run_id else "",
+                    ),
                 )
             )
         resolution = record.resolution
@@ -1246,6 +1268,9 @@ def _conflict_changes(
                         resolution.resolved_at,
                         "resolved",
                         f"{record.summary} — resolved as {resolution.choice}: {resolution.reason}",
+                        # A resolution records the researcher who answered it, and the model
+                        # refuses any other actor: this reads that field, it does not assume it.
+                        by=_recorded_by(resolution.actor),
                     ),
                 )
             )
@@ -1253,16 +1278,28 @@ def _conflict_changes(
 
 
 def _conflict_change(
-    record: ConflictRecord, moment: datetime, verb: str, summary: str
+    record: ConflictRecord,
+    moment: datetime,
+    verb: str,
+    summary: str,
+    *,
+    by: Literal["researcher", "daemon", ""],
 ) -> ChangeEntry:
+    """One conflict change, worded so that whoever did it can lead the sentence.
+
+    The label begins with the verb — "opened a conflict…", "resolved a conflict…" — because
+    a client puts the actor in front of it ("you resolved a conflict…"). It also stops the
+    row repeating the word the kind already prints beside it.
+    """
     return ChangeEntry(
         id=f"{record.conflict_id}:{verb}",
         kind="conflict",
-        label=f"Conflict {verb}: {summary}",
+        label=f"{verb} a conflict: {summary}",
         detail=record.subject,
         at=moment.isoformat(),
         when=_human_moment(moment),
         route="/conflicts",
+        by=by,
     )
 
 
