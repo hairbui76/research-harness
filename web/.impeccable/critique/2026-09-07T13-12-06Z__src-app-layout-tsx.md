@@ -10,6 +10,7 @@ target_fingerprint: "sha256:2fb3f0342f6bd9401ce0dd1355303008fca576d9ca3ea670c462
 target_path: /mnt/virtual/repo/research-harness/.claude/worktrees/wave-3/web/src/app/Layout.tsx
 timestamp: 2026-09-07T13-12-06Z
 slug: src-app-layout-tsx
+closed: true
 ---
 Method: dual-agent (A: design-review subagent · B: detector-and-browser subagent, isolated; A finished before B's findings entered synthesis)
 

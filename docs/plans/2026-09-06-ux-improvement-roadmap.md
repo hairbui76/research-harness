@@ -149,3 +149,22 @@ check reported. Neither of the last two runs without the researcher's yes.
   one fix batch landed all of them with the reviewer's test rulings. The manuscript route at
   768px (tight, scrolling internally) is logged for wave 4; the rail grouping (3L) waits for
   the researcher's answer.
+- 2026-09-07 (wave 4): the critique was re-run on the pushed wave-three tree as two isolated
+  assessments and scored 25/40 against the 20/40 of 2026-09-06 (snapshot
+  `web/.impeccable/critique/2026-09-07T13-12-06Z__src-app-layout-tsx.md`): the writing and
+  the evidence-review screen are the product's own; the frame was not yet — the decision
+  below the fold, an unlabelled Promote, a rail with dead space and eleven flat
+  destinations, notices that announce their kind, an inspector strip that clips, and two
+  type defects the browser detector measured. A polish pass took every item that needs no
+  decision from the researcher: the decision panel is pinned to the foot of the review
+  pane, batch accept moved into the queue's toolbar and a routine row gained Accept, Defer
+  and Reject with the same two-press restatement; Promote is a labelled button and Inspect
+  joined the overflow; the empty session list stopped opening a void; a notice's kind
+  became its icon's name and an outage now states itself once, with the age of what is on
+  screen; the inspector's tabs wrap in a 26rem pane; the small badge and the transcript's
+  prose meet the reading floor and the reading measure; screening states gained icons and
+  meanings, the inspector one empty card, and the Overview one badge vocabulary. Skipped
+  and said so: the anchor highlight that bleeds past a cited cell is the parse's own block
+  box, not a CSS cause, and the composer's egress line already takes secondary ink.
+  Open for the researcher: the rail grouping (3L), `impeccable document` for DESIGN.md, and
+  `impeccable init` for the PRODUCT.md schema; the manuscript route at 768px is logged.
