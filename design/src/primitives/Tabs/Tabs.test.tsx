@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -10,11 +10,13 @@ function Example({
   orientation,
   activation,
   keepMounted,
+  overflow,
   onValueChange,
 }: {
   orientation?: 'horizontal' | 'vertical';
   activation?: 'automatic' | 'manual';
   keepMounted?: boolean;
+  overflow?: 'scroll' | 'wrap';
   onValueChange?: (value: string) => void;
 }) {
   return (
@@ -25,7 +27,7 @@ function Example({
       keepMounted={keepMounted}
       onValueChange={onValueChange}
     >
-      <Tabs.List aria-label="Inspector">
+      <Tabs.List aria-label="Inspector" overflow={overflow}>
         <Tabs.Tab value="sources">Sources</Tabs.Tab>
         <Tabs.Tab value="claims" disabled>
           Claims
@@ -134,6 +136,92 @@ describe('Tabs', () => {
     const hidden = screen.getByText('Context receipt');
     expect(hidden).toBeInTheDocument();
     expect(hidden).toHaveAttribute('hidden');
+  });
+
+  /*
+   * jsdom lays nothing out, so a strip narrower than its tabs has to be stated rather than
+   * produced. The component reads exactly these three numbers, so defining them and firing
+   * the scroll the browser would fire drives the same code path a 352px pane does.
+   */
+  function narrowStrip(
+    list: HTMLElement,
+    { scrollWidth = 734, clientWidth = 320, scrollLeft = 0 } = {},
+  ): void {
+    Object.defineProperty(list, 'scrollWidth', { configurable: true, value: scrollWidth });
+    Object.defineProperty(list, 'clientWidth', { configurable: true, value: clientWidth });
+    Object.defineProperty(list, 'scrollLeft', { configurable: true, writable: true, value: scrollLeft });
+    fireEvent.scroll(list);
+  }
+
+  it('offers a way to reach the tabs a narrow strip cannot show', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Example />);
+    const list = screen.getByRole('tablist');
+    list.scrollBy = vi.fn();
+
+    // Nothing overflows yet, so the strip carries no controls at all.
+    expect(container.querySelector('.rh-tabs__scroll')).toBeNull();
+
+    narrowStrip(list);
+    const forward = container.querySelector('.rh-tabs__scroll--end');
+    expect(forward).not.toBeNull();
+    // Nothing is scrolled past yet, so only the trailing edge is offered.
+    expect(container.querySelector('.rh-tabs__scroll--start')).toBeNull();
+    expect(container.querySelector('.rh-tabs__strip')).toHaveAttribute('data-overflow', 'end');
+
+    await user.click(forward as HTMLElement);
+    expect(list.scrollBy).toHaveBeenCalledWith(
+      expect.objectContaining({ left: expect.any(Number) }),
+    );
+    expect((list.scrollBy as ReturnType<typeof vi.fn>).mock.calls[0]?.[0].left).toBeGreaterThan(0);
+
+    narrowStrip(list, { scrollLeft: 200 });
+    expect(container.querySelector('.rh-tabs__scroll--start')).not.toBeNull();
+    expect(container.querySelector('.rh-tabs__strip')).toHaveAttribute('data-overflow', 'both');
+  });
+
+  it('keeps the strip controls out of the tab order and out of the tablist', () => {
+    const { container } = render(<Example />);
+    const list = screen.getByRole('tablist');
+    narrowStrip(list);
+
+    const control = container.querySelector('.rh-tabs__scroll--end') as HTMLElement;
+    // Arrow keys already reach every tab, so the pointer affordance is not a second
+    // announcement of the same thing — and it must never sit inside the tablist.
+    expect(control).toHaveAttribute('aria-hidden', 'true');
+    expect(control).toHaveAttribute('tabindex', '-1');
+    expect(list.contains(control)).toBe(false);
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
+  });
+
+  it('scrolls the tab the arrow keys reach into view', async () => {
+    const user = userEvent.setup();
+    render(<Example />);
+    const list = screen.getByRole('tablist');
+    narrowStrip(list);
+    const target = screen.getByRole('tab', { name: 'Context' });
+    target.scrollIntoView = vi.fn();
+
+    await user.tab();
+    await user.keyboard('{ArrowRight}');
+
+    expect(target).toHaveFocus();
+    expect(target.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('spends vertical room instead of scrolling when the host asks it to', () => {
+    const { container } = render(<Example overflow="wrap" />);
+    const list = screen.getByRole('tablist');
+    narrowStrip(list);
+
+    expect(list).toHaveAttribute('data-overflow', 'wrap');
+    expect(container.querySelector('.rh-tabs__scroll')).toBeNull();
+  });
+
+  it('has no axe violations while the strip is scrolled', async () => {
+    const { container } = render(<Example />);
+    narrowStrip(screen.getByRole('tablist'), { scrollLeft: 120 });
+    await expectNoAxeViolations(container);
   });
 
   it('has no axe violations', async () => {

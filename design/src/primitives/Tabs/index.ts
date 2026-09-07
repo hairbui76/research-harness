@@ -6,4 +6,5 @@ export type {
   TabPanelProps,
   TabsActivation,
   TabsOrientation,
+  TabsOverflow,
 } from './Tabs';

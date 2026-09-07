@@ -9,20 +9,84 @@
   flex-direction: row;
 }
 
+/*
+ * The strip: the tab row plus the two controls that admit there is more of it.
+ *
+ * The rule under the tabs belongs here rather than on the scrolling row, so it runs the
+ * full width of the pane instead of scrolling away with the tabs.
+ */
+.rh-tabs__strip {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex: none;
+  min-width: 0;
+  border-bottom: 1px solid var(--rh-border-subtle);
+}
+
+.rh-tabs[data-orientation='vertical'] > .rh-tabs__strip {
+  border-bottom: 0;
+  border-right: 1px solid var(--rh-border-subtle);
+}
+
 .rh-tabs__list {
   display: flex;
   align-items: stretch;
   gap: var(--rh-space-1);
-  border-bottom: 1px solid var(--rh-border-subtle);
   min-width: 0;
+  flex: 1 1 auto;
   overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
-.rh-tabs[data-orientation='vertical'] > .rh-tabs__list {
-  flex-direction: column;
-  border-bottom: 0;
-  border-right: 1px solid var(--rh-border-subtle);
+.rh-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Vertical room instead of a scroller, for a host that has some. */
+.rh-tabs__list[data-overflow='wrap'] {
+  flex-wrap: wrap;
   overflow-x: visible;
+}
+
+.rh-tabs[data-orientation='vertical'] .rh-tabs__list {
+  flex-direction: column;
+  overflow-x: visible;
+}
+
+/*
+ * Which way the rest of the tabs are.
+ *
+ * The fade is the passive half of the answer and the control is the active one; both are
+ * driven by the same measurement, so a strip that fits carries neither.
+ */
+.rh-tabs__scroll {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: var(--rh-density-row);
+  padding: 0;
+  border: 0;
+  background: var(--rh-surface-pane);
+  color: var(--rh-text-secondary);
+  cursor: pointer;
+}
+
+.rh-tabs__scroll:hover {
+  color: var(--rh-text-primary);
+  background: var(--rh-surface-subtle);
+}
+
+.rh-tabs__strip[data-overflow='end'] .rh-tabs__list,
+.rh-tabs__strip[data-overflow='both'] .rh-tabs__list {
+  mask-image: linear-gradient(to right, black calc(100% - var(--rh-space-6)), transparent);
+}
+
+.rh-tabs__strip[data-overflow='start'] .rh-tabs__list {
+  mask-image: linear-gradient(to left, black calc(100% - var(--rh-space-6)), transparent);
 }
 
 .rh-tabs__tab {
@@ -93,5 +157,9 @@
 @media (prefers-reduced-motion: reduce) {
   .rh-tabs__tab {
     transition: none;
+  }
+
+  .rh-tabs__list {
+    scroll-behavior: auto;
   }
 }

@@ -150,273 +150,279 @@ exports[`ResearchInspector theme x density > matches the dark / comfortable snap
       data-orientation="horizontal"
     >
       <div
-        aria-label="Research inspector"
-        aria-orientation="horizontal"
-        class="rh-tabs__list"
-        role="tablist"
+        class="rh-tabs__strip"
+        data-overflow="none"
       >
-        <button
-          aria-controls="rh-tabs-ID-panel-context"
-          aria-selected="true"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="selected"
-          data-value="context"
-          id="rh-tabs-ID-tab-context"
-          role="tab"
-          tabindex="0"
-          type="button"
+        <div
+          aria-label="Research inspector"
+          aria-orientation="horizontal"
+          class="rh-tabs__list"
+          data-overflow="scroll"
+          role="tablist"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-list rh-icon"
-            data-icon="list"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            aria-controls="rh-tabs-ID-panel-context"
+            aria-selected="true"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="selected"
+            data-value="context"
+            id="rh-tabs-ID-tab-context"
+            role="tab"
+            tabindex="0"
+            type="button"
           >
-            <path
-              d="M3 5h.01"
-            />
-            <path
-              d="M3 12h.01"
-            />
-            <path
-              d="M3 19h.01"
-            />
-            <path
-              d="M8 5h13"
-            />
-            <path
-              d="M8 12h13"
-            />
-            <path
-              d="M8 19h13"
-            />
-          </svg>
-          <span>
-            Context
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-evidence"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="evidence"
-          id="rh-tabs-ID-tab-evidence"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-quote rh-icon"
-            data-icon="quote"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-            <path
-              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-          </svg>
-          <span>
-            Evidence
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-claims"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="claims"
-          id="rh-tabs-ID-tab-claims"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-bookmark rh-icon"
-            data-icon="bookmark"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-            />
-          </svg>
-          <span>
-            Claims
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-review"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="review"
-          id="rh-tabs-ID-tab-review"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-inbox rh-icon"
-            data-icon="inbox"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <polyline
-              points="22 12 16 12 14 15 10 15 8 12 2 12"
-            />
-            <path
-              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-            />
-          </svg>
-          <span>
-            Review inbox
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            4
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-list rh-icon"
+              data-icon="list"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Review inbox items
+              <path
+                d="M3 5h.01"
+              />
+              <path
+                d="M3 12h.01"
+              />
+              <path
+                d="M3 19h.01"
+              />
+              <path
+                d="M8 5h13"
+              />
+              <path
+                d="M8 12h13"
+              />
+              <path
+                d="M8 19h13"
+              />
+            </svg>
+            <span>
+              Context
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-conflicts"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="conflicts"
-          id="rh-tabs-ID-tab-conflicts"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-triangle-alert rh-icon"
-            data-icon="alert-triangle"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-evidence"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="evidence"
+            id="rh-tabs-ID-tab-evidence"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <path
-              d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
-            />
-            <path
-              d="M12 9v4"
-            />
-            <path
-              d="M12 17h.01"
-            />
-          </svg>
-          <span>
-            Conflicts
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            1
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-quote rh-icon"
+              data-icon="quote"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Conflicts items
+              <path
+                d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+              <path
+                d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+            </svg>
+            <span>
+              Evidence
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-stale"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="stale"
-          id="rh-tabs-ID-tab-stale"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-clock rh-icon"
-            data-icon="clock"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-claims"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="claims"
+            id="rh-tabs-ID-tab-claims"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <path
-              d="M12 6v6l4 2"
-            />
-          </svg>
-          <span>
-            Stale
-          </span>
-        </button>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-bookmark rh-icon"
+              data-icon="bookmark"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+              />
+            </svg>
+            <span>
+              Claims
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-review"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="review"
+            id="rh-tabs-ID-tab-review"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-inbox rh-icon"
+              data-icon="inbox"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <polyline
+                points="22 12 16 12 14 15 10 15 8 12 2 12"
+              />
+              <path
+                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+              />
+            </svg>
+            <span>
+              Review inbox
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              4
+              <span
+                class="rh-visually-hidden"
+              >
+                 Review inbox items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-conflicts"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="conflicts"
+            id="rh-tabs-ID-tab-conflicts"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span>
+              Conflicts
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              1
+              <span
+                class="rh-visually-hidden"
+              >
+                 Conflicts items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-stale"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="stale"
+            id="rh-tabs-ID-tab-stale"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock rh-icon"
+              data-icon="clock"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 6v6l4 2"
+              />
+            </svg>
+            <span>
+              Stale
+            </span>
+          </button>
+        </div>
       </div>
       <div
         aria-labelledby="rh-tabs-ID-tab-context"
@@ -585,273 +591,279 @@ exports[`ResearchInspector theme x density > matches the dark / compact snapshot
       data-orientation="horizontal"
     >
       <div
-        aria-label="Research inspector"
-        aria-orientation="horizontal"
-        class="rh-tabs__list"
-        role="tablist"
+        class="rh-tabs__strip"
+        data-overflow="none"
       >
-        <button
-          aria-controls="rh-tabs-ID-panel-context"
-          aria-selected="true"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="selected"
-          data-value="context"
-          id="rh-tabs-ID-tab-context"
-          role="tab"
-          tabindex="0"
-          type="button"
+        <div
+          aria-label="Research inspector"
+          aria-orientation="horizontal"
+          class="rh-tabs__list"
+          data-overflow="scroll"
+          role="tablist"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-list rh-icon"
-            data-icon="list"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            aria-controls="rh-tabs-ID-panel-context"
+            aria-selected="true"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="selected"
+            data-value="context"
+            id="rh-tabs-ID-tab-context"
+            role="tab"
+            tabindex="0"
+            type="button"
           >
-            <path
-              d="M3 5h.01"
-            />
-            <path
-              d="M3 12h.01"
-            />
-            <path
-              d="M3 19h.01"
-            />
-            <path
-              d="M8 5h13"
-            />
-            <path
-              d="M8 12h13"
-            />
-            <path
-              d="M8 19h13"
-            />
-          </svg>
-          <span>
-            Context
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-evidence"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="evidence"
-          id="rh-tabs-ID-tab-evidence"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-quote rh-icon"
-            data-icon="quote"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-            <path
-              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-          </svg>
-          <span>
-            Evidence
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-claims"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="claims"
-          id="rh-tabs-ID-tab-claims"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-bookmark rh-icon"
-            data-icon="bookmark"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-            />
-          </svg>
-          <span>
-            Claims
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-review"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="review"
-          id="rh-tabs-ID-tab-review"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-inbox rh-icon"
-            data-icon="inbox"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <polyline
-              points="22 12 16 12 14 15 10 15 8 12 2 12"
-            />
-            <path
-              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-            />
-          </svg>
-          <span>
-            Review inbox
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            4
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-list rh-icon"
+              data-icon="list"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Review inbox items
+              <path
+                d="M3 5h.01"
+              />
+              <path
+                d="M3 12h.01"
+              />
+              <path
+                d="M3 19h.01"
+              />
+              <path
+                d="M8 5h13"
+              />
+              <path
+                d="M8 12h13"
+              />
+              <path
+                d="M8 19h13"
+              />
+            </svg>
+            <span>
+              Context
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-conflicts"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="conflicts"
-          id="rh-tabs-ID-tab-conflicts"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-triangle-alert rh-icon"
-            data-icon="alert-triangle"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-evidence"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="evidence"
+            id="rh-tabs-ID-tab-evidence"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <path
-              d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
-            />
-            <path
-              d="M12 9v4"
-            />
-            <path
-              d="M12 17h.01"
-            />
-          </svg>
-          <span>
-            Conflicts
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            1
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-quote rh-icon"
+              data-icon="quote"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Conflicts items
+              <path
+                d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+              <path
+                d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+            </svg>
+            <span>
+              Evidence
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-stale"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="stale"
-          id="rh-tabs-ID-tab-stale"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-clock rh-icon"
-            data-icon="clock"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-claims"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="claims"
+            id="rh-tabs-ID-tab-claims"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <path
-              d="M12 6v6l4 2"
-            />
-          </svg>
-          <span>
-            Stale
-          </span>
-        </button>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-bookmark rh-icon"
+              data-icon="bookmark"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+              />
+            </svg>
+            <span>
+              Claims
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-review"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="review"
+            id="rh-tabs-ID-tab-review"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-inbox rh-icon"
+              data-icon="inbox"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <polyline
+                points="22 12 16 12 14 15 10 15 8 12 2 12"
+              />
+              <path
+                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+              />
+            </svg>
+            <span>
+              Review inbox
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              4
+              <span
+                class="rh-visually-hidden"
+              >
+                 Review inbox items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-conflicts"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="conflicts"
+            id="rh-tabs-ID-tab-conflicts"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span>
+              Conflicts
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              1
+              <span
+                class="rh-visually-hidden"
+              >
+                 Conflicts items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-stale"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="stale"
+            id="rh-tabs-ID-tab-stale"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock rh-icon"
+              data-icon="clock"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 6v6l4 2"
+              />
+            </svg>
+            <span>
+              Stale
+            </span>
+          </button>
+        </div>
       </div>
       <div
         aria-labelledby="rh-tabs-ID-tab-context"
@@ -1020,273 +1032,279 @@ exports[`ResearchInspector theme x density > matches the light / comfortable sna
       data-orientation="horizontal"
     >
       <div
-        aria-label="Research inspector"
-        aria-orientation="horizontal"
-        class="rh-tabs__list"
-        role="tablist"
+        class="rh-tabs__strip"
+        data-overflow="none"
       >
-        <button
-          aria-controls="rh-tabs-ID-panel-context"
-          aria-selected="true"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="selected"
-          data-value="context"
-          id="rh-tabs-ID-tab-context"
-          role="tab"
-          tabindex="0"
-          type="button"
+        <div
+          aria-label="Research inspector"
+          aria-orientation="horizontal"
+          class="rh-tabs__list"
+          data-overflow="scroll"
+          role="tablist"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-list rh-icon"
-            data-icon="list"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            aria-controls="rh-tabs-ID-panel-context"
+            aria-selected="true"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="selected"
+            data-value="context"
+            id="rh-tabs-ID-tab-context"
+            role="tab"
+            tabindex="0"
+            type="button"
           >
-            <path
-              d="M3 5h.01"
-            />
-            <path
-              d="M3 12h.01"
-            />
-            <path
-              d="M3 19h.01"
-            />
-            <path
-              d="M8 5h13"
-            />
-            <path
-              d="M8 12h13"
-            />
-            <path
-              d="M8 19h13"
-            />
-          </svg>
-          <span>
-            Context
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-evidence"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="evidence"
-          id="rh-tabs-ID-tab-evidence"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-quote rh-icon"
-            data-icon="quote"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-            <path
-              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-          </svg>
-          <span>
-            Evidence
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-claims"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="claims"
-          id="rh-tabs-ID-tab-claims"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-bookmark rh-icon"
-            data-icon="bookmark"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-            />
-          </svg>
-          <span>
-            Claims
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-review"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="review"
-          id="rh-tabs-ID-tab-review"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-inbox rh-icon"
-            data-icon="inbox"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <polyline
-              points="22 12 16 12 14 15 10 15 8 12 2 12"
-            />
-            <path
-              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-            />
-          </svg>
-          <span>
-            Review inbox
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            4
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-list rh-icon"
+              data-icon="list"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Review inbox items
+              <path
+                d="M3 5h.01"
+              />
+              <path
+                d="M3 12h.01"
+              />
+              <path
+                d="M3 19h.01"
+              />
+              <path
+                d="M8 5h13"
+              />
+              <path
+                d="M8 12h13"
+              />
+              <path
+                d="M8 19h13"
+              />
+            </svg>
+            <span>
+              Context
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-conflicts"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="conflicts"
-          id="rh-tabs-ID-tab-conflicts"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-triangle-alert rh-icon"
-            data-icon="alert-triangle"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-evidence"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="evidence"
+            id="rh-tabs-ID-tab-evidence"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <path
-              d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
-            />
-            <path
-              d="M12 9v4"
-            />
-            <path
-              d="M12 17h.01"
-            />
-          </svg>
-          <span>
-            Conflicts
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            1
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-quote rh-icon"
+              data-icon="quote"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Conflicts items
+              <path
+                d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+              <path
+                d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+            </svg>
+            <span>
+              Evidence
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-stale"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="stale"
-          id="rh-tabs-ID-tab-stale"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-clock rh-icon"
-            data-icon="clock"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-claims"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="claims"
+            id="rh-tabs-ID-tab-claims"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <path
-              d="M12 6v6l4 2"
-            />
-          </svg>
-          <span>
-            Stale
-          </span>
-        </button>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-bookmark rh-icon"
+              data-icon="bookmark"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+              />
+            </svg>
+            <span>
+              Claims
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-review"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="review"
+            id="rh-tabs-ID-tab-review"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-inbox rh-icon"
+              data-icon="inbox"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <polyline
+                points="22 12 16 12 14 15 10 15 8 12 2 12"
+              />
+              <path
+                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+              />
+            </svg>
+            <span>
+              Review inbox
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              4
+              <span
+                class="rh-visually-hidden"
+              >
+                 Review inbox items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-conflicts"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="conflicts"
+            id="rh-tabs-ID-tab-conflicts"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span>
+              Conflicts
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              1
+              <span
+                class="rh-visually-hidden"
+              >
+                 Conflicts items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-stale"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="stale"
+            id="rh-tabs-ID-tab-stale"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock rh-icon"
+              data-icon="clock"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 6v6l4 2"
+              />
+            </svg>
+            <span>
+              Stale
+            </span>
+          </button>
+        </div>
       </div>
       <div
         aria-labelledby="rh-tabs-ID-tab-context"
@@ -1455,273 +1473,279 @@ exports[`ResearchInspector theme x density > matches the light / compact snapsho
       data-orientation="horizontal"
     >
       <div
-        aria-label="Research inspector"
-        aria-orientation="horizontal"
-        class="rh-tabs__list"
-        role="tablist"
+        class="rh-tabs__strip"
+        data-overflow="none"
       >
-        <button
-          aria-controls="rh-tabs-ID-panel-context"
-          aria-selected="true"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="selected"
-          data-value="context"
-          id="rh-tabs-ID-tab-context"
-          role="tab"
-          tabindex="0"
-          type="button"
+        <div
+          aria-label="Research inspector"
+          aria-orientation="horizontal"
+          class="rh-tabs__list"
+          data-overflow="scroll"
+          role="tablist"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-list rh-icon"
-            data-icon="list"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            aria-controls="rh-tabs-ID-panel-context"
+            aria-selected="true"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="selected"
+            data-value="context"
+            id="rh-tabs-ID-tab-context"
+            role="tab"
+            tabindex="0"
+            type="button"
           >
-            <path
-              d="M3 5h.01"
-            />
-            <path
-              d="M3 12h.01"
-            />
-            <path
-              d="M3 19h.01"
-            />
-            <path
-              d="M8 5h13"
-            />
-            <path
-              d="M8 12h13"
-            />
-            <path
-              d="M8 19h13"
-            />
-          </svg>
-          <span>
-            Context
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-evidence"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="evidence"
-          id="rh-tabs-ID-tab-evidence"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-quote rh-icon"
-            data-icon="quote"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-            <path
-              d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-            />
-          </svg>
-          <span>
-            Evidence
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-claims"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="claims"
-          id="rh-tabs-ID-tab-claims"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-bookmark rh-icon"
-            data-icon="bookmark"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-            />
-          </svg>
-          <span>
-            Claims
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-review"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="review"
-          id="rh-tabs-ID-tab-review"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-inbox rh-icon"
-            data-icon="inbox"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <polyline
-              points="22 12 16 12 14 15 10 15 8 12 2 12"
-            />
-            <path
-              d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-            />
-          </svg>
-          <span>
-            Review inbox
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            4
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-list rh-icon"
+              data-icon="list"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Review inbox items
+              <path
+                d="M3 5h.01"
+              />
+              <path
+                d="M3 12h.01"
+              />
+              <path
+                d="M3 19h.01"
+              />
+              <path
+                d="M8 5h13"
+              />
+              <path
+                d="M8 12h13"
+              />
+              <path
+                d="M8 19h13"
+              />
+            </svg>
+            <span>
+              Context
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-conflicts"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="conflicts"
-          id="rh-tabs-ID-tab-conflicts"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-triangle-alert rh-icon"
-            data-icon="alert-triangle"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-evidence"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="evidence"
+            id="rh-tabs-ID-tab-evidence"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <path
-              d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
-            />
-            <path
-              d="M12 9v4"
-            />
-            <path
-              d="M12 17h.01"
-            />
-          </svg>
-          <span>
-            Conflicts
-          </span>
-          <span
-            class="rh-research-inspector__tab-count"
-          >
-            1
-            <span
-              class="rh-visually-hidden"
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-quote rh-icon"
+              data-icon="quote"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
             >
-               Conflicts items
+              <path
+                d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+              <path
+                d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+              />
+            </svg>
+            <span>
+              Evidence
             </span>
-          </span>
-        </button>
-        <button
-          aria-controls="rh-tabs-ID-panel-stale"
-          aria-selected="false"
-          class="rh-tabs__tab rh-research-inspector__tab"
-          data-rh-roving-item=""
-          data-state="idle"
-          data-value="stale"
-          id="rh-tabs-ID-tab-stale"
-          role="tab"
-          tabindex="-1"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-clock rh-icon"
-            data-icon="clock"
-            fill="none"
-            focusable="false"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-claims"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="claims"
+            id="rh-tabs-ID-tab-claims"
+            role="tab"
+            tabindex="-1"
+            type="button"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <path
-              d="M12 6v6l4 2"
-            />
-          </svg>
-          <span>
-            Stale
-          </span>
-        </button>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-bookmark rh-icon"
+              data-icon="bookmark"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+              />
+            </svg>
+            <span>
+              Claims
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-review"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="review"
+            id="rh-tabs-ID-tab-review"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-inbox rh-icon"
+              data-icon="inbox"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <polyline
+                points="22 12 16 12 14 15 10 15 8 12 2 12"
+              />
+              <path
+                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+              />
+            </svg>
+            <span>
+              Review inbox
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              4
+              <span
+                class="rh-visually-hidden"
+              >
+                 Review inbox items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-conflicts"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="conflicts"
+            id="rh-tabs-ID-tab-conflicts"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert rh-icon"
+              data-icon="alert-triangle"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <span>
+              Conflicts
+            </span>
+            <span
+              class="rh-research-inspector__tab-count"
+            >
+              1
+              <span
+                class="rh-visually-hidden"
+              >
+                 Conflicts items
+              </span>
+            </span>
+          </button>
+          <button
+            aria-controls="rh-tabs-ID-panel-stale"
+            aria-selected="false"
+            class="rh-tabs__tab rh-research-inspector__tab"
+            data-rh-roving-item=""
+            data-state="idle"
+            data-value="stale"
+            id="rh-tabs-ID-tab-stale"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-clock rh-icon"
+              data-icon="clock"
+              fill="none"
+              focusable="false"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <path
+                d="M12 6v6l4 2"
+              />
+            </svg>
+            <span>
+              Stale
+            </span>
+          </button>
+        </div>
       </div>
       <div
         aria-labelledby="rh-tabs-ID-tab-context"
