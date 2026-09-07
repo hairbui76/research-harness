@@ -830,11 +830,12 @@ function RelateForm({
     >
       <h3 className="rh-text-h4">Relate evidence</h3>
       <div className="rh-web-stack rh-web-stack--tight">
-        <label className="rh-text-label" htmlFor="relate-evidence">
+        <label className="rh-field__label" id="relate-evidence-label" htmlFor="relate-evidence">
           Accepted evidence
         </label>
         <Combobox
           id="relate-evidence"
+          aria-labelledby="relate-evidence-label"
           label="Accepted evidence"
           placeholder="Search by id, field, work or quoted text"
           items={options}

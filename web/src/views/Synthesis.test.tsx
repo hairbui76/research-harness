@@ -340,6 +340,25 @@ describe('the synthesis page', () => {
     ).toBeInTheDocument();
   });
 
+  it('labels the field picker in the control role, and once', async () => {
+    // DESIGN.md's Inputs section: "Labels are `ui`". The 11px uppercase mono role names a
+    // group, a column or a `<dt>`; set above a control it is the kicker the craft floor
+    // forbids. The visible label is also the combobox's accessible name, so the control
+    // carries one name rather than a visible label the box then overrides with its own.
+    renderSynthesis();
+
+    const picker = await screen.findByRole('combobox', {
+      name: 'Read a field down its column',
+    });
+    const label = document.querySelector<HTMLLabelElement>(`label[for="${picker.id}"]`);
+    expect(label).not.toBeNull();
+    expect(label).toHaveTextContent('Read a field down its column');
+    expect(label).not.toHaveClass('rh-text-label');
+    expect(label).toHaveClass('rh-field__label');
+    expect(picker).not.toHaveAttribute('aria-label');
+    expect(picker).toHaveAttribute('aria-labelledby', label!.id);
+  });
+
   it('offers the matrix’s own fields to read down, and never asks for one to be typed', async () => {
     const user = userEvent.setup();
     const { container } = renderSynthesis();

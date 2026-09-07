@@ -225,11 +225,12 @@ function FieldPicker({
 
   return (
     <div className="rh-web-stack rh-web-stack--tight rh-web-synthesis__picker">
-      <label className="rh-text-label" htmlFor={id}>
+      <label className="rh-field__label" id={`${id}-label`} htmlFor={id}>
         Read a field down its column
       </label>
       <Combobox
         id={id}
+        aria-labelledby={`${id}-label`}
         label="Read a field down its column"
         placeholder="Every field this matrix declares"
         items={items}

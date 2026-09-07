@@ -41,7 +41,14 @@ export interface ComboboxProps<T = unknown>
    * that belongs in the application, and it reports typing through `onQueryChange`.
    */
   items: ReadonlyArray<ComboboxItem<T>>;
-  /** Accessible name for the text box and the list. */
+  /**
+   * Accessible name for the text box and the list.
+   *
+   * A host that draws its own visible label points at it with `aria-labelledby` instead;
+   * the text box then takes its name from that element and carries no `aria-label`, so the
+   * name a screen reader hears is the words on the page rather than a second string. The
+   * listbox is a different element and keeps this one.
+   */
   label: string;
   /** Controlled selected item id, or null. */
   value?: string | null;
@@ -107,6 +114,7 @@ function ComboboxInner<T>(
     onKeyDown,
     onFocus,
     id,
+    'aria-labelledby': labelledBy,
     ...rest
   }: ComboboxProps<T>,
   ref: ForwardedRef<HTMLInputElement>,
@@ -248,7 +256,9 @@ function ComboboxInner<T>(
         type="text"
         role="combobox"
         className="rh-combobox__input"
-        aria-label={label}
+        {...(labelledBy === undefined
+          ? { 'aria-label': label }
+          : { 'aria-labelledby': labelledBy })}
         aria-expanded={isOpen}
         aria-controls={listboxId}
         aria-autocomplete="list"

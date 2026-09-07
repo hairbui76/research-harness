@@ -195,6 +195,26 @@ describe('Combobox', () => {
     );
   });
 
+  it('takes its name from the host’s own label when one is pointed at', async () => {
+    // A control above which the host draws a visible label should be named by that label,
+    // not by a second string only assistive technology hears. `aria-labelledby` wins over
+    // `aria-label` in the accessible-name computation, so leaving both on the box would
+    // publish a name nothing on screen accounts for; the box drops its own instead.
+    render(
+      <>
+        <label id="picker-label" htmlFor="picker">
+          Read a field down its column
+        </label>
+        <Combobox<string> id="picker" aria-labelledby="picker-label" label="Fallback" items={ITEMS} />
+      </>,
+    );
+    const box = screen.getByRole('combobox', { name: 'Read a field down its column' });
+    expect(box).not.toHaveAttribute('aria-label');
+    // The list still carries a name of its own: it is a separate element and the host's
+    // label points at the text box.
+    expect(box).toHaveAttribute('aria-labelledby', 'picker-label');
+  });
+
   it('has no axe violations while open', async () => {
     const user = userEvent.setup();
     render(<Example />);
