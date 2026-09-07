@@ -202,23 +202,50 @@ export const ManuscriptWorkspace = forwardRef<HTMLDivElement, ManuscriptWorkspac
     const currentTab = isNarrow && currentView === INSPECTOR && !hasInspector ? EDITOR : currentView;
     const showingInspector = isNarrow ? currentTab === INSPECTOR : open;
 
-    // One control for the inspector at both widths, saying the same thing: it is the only
-    // place the words "build and audit" are pinned in the bar before the panel is opened.
+    /**
+     * Show the inspector, at whichever width this is.
+     *
+     * Below the breakpoint the two states are one. `open` says whether a pane is expanded
+     * under the document; `currentView` says which of the three views the document area is
+     * showing. They were independent, so the bar could offer to collapse an inspector the
+     * tab strip had not selected, or to expand one it had — two controls disagreeing about
+     * one thing on screen. Choosing the inspector now sets both, from the tab strip and
+     * from the bar alike, so widening the window keeps the choice the narrow layout made
+     * rather than reverting to whatever `open` was left at.
+     */
+    const showInspector = (next: boolean): void => {
+      if (isNarrow) setView(next ? INSPECTOR : EDITOR);
+      setOpen(next);
+    };
+
+    /*
+     * One control for the inspector at both widths — the only place the words "build and
+     * audit" are pinned in the bar before the panel is opened — reporting its state in
+     * whichever of the two ways is true of this width.
+     *
+     * Wide, it is a disclosure: a pane under the document expands and collapses, and the
+     * name says which of those the press will do. Narrow, nothing collapses; the three
+     * views take turns over one area and this selects one of them. That is a toggle, so
+     * the name stays put and `aria-pressed` carries the state — a name that read "collapse
+     * the panel" while the Inspector tab was selected described a disclosure that is not
+     * what the press does.
+     */
     const toggle = !hasInspector ? null : (
       <IconButton
         className="rh-manuscript-workspace__inspector-toggle"
         icon={inspectorPlacement === 'bottom' ? 'panel-bottom' : 'panel-right'}
         size="sm"
         label={
-          showingInspector
-            ? `Collapse the ${inspectorLabel.toLowerCase()} panel`
-            : `Expand the ${inspectorLabel.toLowerCase()} panel`
+          isNarrow
+            ? `Show the ${inspectorLabel.toLowerCase()} panel`
+            : showingInspector
+              ? `Collapse the ${inspectorLabel.toLowerCase()} panel`
+              : `Expand the ${inspectorLabel.toLowerCase()} panel`
         }
-        aria-expanded={showingInspector}
-        onClick={() => {
-          if (isNarrow) setView(showingInspector ? EDITOR : INSPECTOR);
-          else setOpen(!open);
-        }}
+        {...(isNarrow
+          ? { 'aria-pressed': showingInspector }
+          : { 'aria-expanded': showingInspector })}
+        onClick={() => showInspector(!showingInspector)}
       />
     );
 
@@ -229,7 +256,13 @@ export const ManuscriptWorkspace = forwardRef<HTMLDivElement, ManuscriptWorkspac
       <Tabs
         className="rh-manuscript-workspace__tabs"
         value={currentTab}
-        onValueChange={(next) => setView(next as ManuscriptView)}
+        onValueChange={(next) => {
+          const view = next as ManuscriptView;
+          setView(view);
+          // The bar's control reads the inspector's state, so the tab strip writes it:
+          // one thing on screen, one state, whichever of the two the researcher used.
+          if (hasInspector) setOpen(view === INSPECTOR);
+        }}
         activation="manual"
         keepMounted
       >

@@ -172,10 +172,14 @@ for (const screen of SCREENS) {
     // bar's own control, whose name is the panel's, and the tab that opens it. Choosing it
     // has to put the audit's own lists in the viewport, not the top of a 300px strip whose
     // headings are below the bottom edge.
+    const barControl = page.getByRole('button', { name: 'Show the build and audit panel' });
     await expect(
-      page.getByRole('button', { name: 'Expand the build and audit panel' }),
+      barControl,
       `the bar's inspector control must be in view at ${screen.label}`,
     ).toBeInViewport();
+    // Below the breakpoint the control selects a view rather than expanding a pane, so it
+    // is a toggle and says whether the inspector is the view on show.
+    await expect(barControl).toHaveAttribute('aria-pressed', 'false');
     const auditTab = page.getByRole('tab', { name: 'Inspector', exact: true });
     await expect(
       auditTab,
@@ -183,6 +187,12 @@ for (const screen of SCREENS) {
     ).toBeInViewport();
     await auditTab.click();
     await expect(page.getByRole('region', { name: 'Build and audit' })).toBeVisible();
+    // The tab and the bar are two ways to one view, so the bar reports what the tab did:
+    // it can never offer to hide an inspector that is already the view on show.
+    await expect(
+      barControl,
+      `the bar control must read the inspector's own state at ${screen.label}`,
+    ).toHaveAttribute('aria-pressed', 'true');
     const diagnostics = page.getByRole('heading', { name: /^Compiler diagnostics/ }).first();
     await expect(
       diagnostics,

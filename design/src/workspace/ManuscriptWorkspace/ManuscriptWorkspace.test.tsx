@@ -154,17 +154,50 @@ describe('ManuscriptWorkspace', () => {
     const user = userEvent.setup();
     render(<Example narrow />);
 
-    const toggle = screen.getByRole('button', { name: 'Expand the build and audit panel' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    // Below the breakpoint the control selects a view; it discloses nothing, because the
+    // three views take turns over one area. So it is a toggle: one name that does not
+    // change under the reader, and `aria-pressed` for whether the inspector is the view on
+    // show. `aria-expanded` said "collapse" while the Inspector tab was selected, which is
+    // two controls disagreeing about one state.
+    const toggle = screen.getByRole('button', { name: 'Show the build and audit panel' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(toggle).not.toHaveAttribute('aria-expanded');
 
     await user.click(toggle);
     expect(screen.getByRole('region', { name: 'Build and audit' })).toBeInTheDocument();
-    const open = screen.getByRole('button', { name: 'Collapse the build and audit panel' });
-    expect(open).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
 
-    await user.click(open);
+    await user.click(toggle);
     expect(screen.queryByRole('region', { name: 'Build and audit' })).not.toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Source' })).toBeInTheDocument();
+  });
+
+  it('binds the bar control to the inspector view below the breakpoint', async () => {
+    const user = userEvent.setup();
+    const onInspectorOpenChange = vi.fn();
+    render(
+      <ManuscriptWorkspace
+        narrow
+        fileTree={<div>tree</div>}
+        editor={<textarea aria-label="Source" defaultValue="" />}
+        preview={<div>pdf</div>}
+        inspector={<div>audit</div>}
+        onInspectorOpenChange={onInspectorOpenChange}
+      />,
+    );
+
+    // The tab strip and the bar control are two ways to the same view, so choosing the tab
+    // has to leave the bar saying what the tab says. They were independent states: the bar
+    // could offer to hide an inspector that was already the view on show.
+    await user.click(screen.getByRole('tab', { name: 'Build and audit' }));
+    const toggle = screen.getByRole('button', { name: 'Show the build and audit panel' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    // And the pane state follows it, so widening the window does not undo the choice.
+    expect(onInspectorOpenChange).toHaveBeenLastCalledWith(true);
+
+    await user.click(screen.getByRole('tab', { name: 'Source' }));
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(onInspectorOpenChange).toHaveBeenLastCalledWith(false);
   });
 
   it('reads its own width rather than the window’s', () => {
