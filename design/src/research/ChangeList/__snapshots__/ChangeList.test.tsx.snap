@@ -1,0 +1,469 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ChangeList theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <ol
+    aria-label="What changed"
+    class="rh-change-list"
+  >
+    <li
+      class="rh-change-list__entry"
+      data-kind="decision"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-gavel rh-icon"
+          data-icon="gavel"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"
+          />
+          <path
+            d="m16 16 6-6"
+          />
+          <path
+            d="m21.5 10.5-8-8"
+          />
+          <path
+            d="m8 8 6-6"
+          />
+          <path
+            d="m8.5 7.5 8 8"
+          />
+        </svg>
+        <span>
+          Decision
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        <a
+          class="rh-change-list__link"
+          href="/claims/C0001"
+        >
+          accepted D0002: count only held-out splits
+        </a>
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T14:03:00+00:00"
+      >
+        6 September, 14:03
+      </time>
+    </li>
+    <li
+      class="rh-change-list__entry"
+      data-kind="evidence"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span>
+          Evidence
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        accepted evidence E0001 anchored in A0001-1
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T11:20:00+00:00"
+      >
+        6 September, 11:20
+      </time>
+    </li>
+  </ol>
+</div>
+`;
+
+exports[`ChangeList theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <ol
+    aria-label="What changed"
+    class="rh-change-list"
+  >
+    <li
+      class="rh-change-list__entry"
+      data-kind="decision"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-gavel rh-icon"
+          data-icon="gavel"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"
+          />
+          <path
+            d="m16 16 6-6"
+          />
+          <path
+            d="m21.5 10.5-8-8"
+          />
+          <path
+            d="m8 8 6-6"
+          />
+          <path
+            d="m8.5 7.5 8 8"
+          />
+        </svg>
+        <span>
+          Decision
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        <a
+          class="rh-change-list__link"
+          href="/claims/C0001"
+        >
+          accepted D0002: count only held-out splits
+        </a>
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T14:03:00+00:00"
+      >
+        6 September, 14:03
+      </time>
+    </li>
+    <li
+      class="rh-change-list__entry"
+      data-kind="evidence"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span>
+          Evidence
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        accepted evidence E0001 anchored in A0001-1
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T11:20:00+00:00"
+      >
+        6 September, 11:20
+      </time>
+    </li>
+  </ol>
+</div>
+`;
+
+exports[`ChangeList theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <ol
+    aria-label="What changed"
+    class="rh-change-list"
+  >
+    <li
+      class="rh-change-list__entry"
+      data-kind="decision"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-gavel rh-icon"
+          data-icon="gavel"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"
+          />
+          <path
+            d="m16 16 6-6"
+          />
+          <path
+            d="m21.5 10.5-8-8"
+          />
+          <path
+            d="m8 8 6-6"
+          />
+          <path
+            d="m8.5 7.5 8 8"
+          />
+        </svg>
+        <span>
+          Decision
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        <a
+          class="rh-change-list__link"
+          href="/claims/C0001"
+        >
+          accepted D0002: count only held-out splits
+        </a>
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T14:03:00+00:00"
+      >
+        6 September, 14:03
+      </time>
+    </li>
+    <li
+      class="rh-change-list__entry"
+      data-kind="evidence"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span>
+          Evidence
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        accepted evidence E0001 anchored in A0001-1
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T11:20:00+00:00"
+      >
+        6 September, 11:20
+      </time>
+    </li>
+  </ol>
+</div>
+`;
+
+exports[`ChangeList theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <ol
+    aria-label="What changed"
+    class="rh-change-list"
+  >
+    <li
+      class="rh-change-list__entry"
+      data-kind="decision"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-gavel rh-icon"
+          data-icon="gavel"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"
+          />
+          <path
+            d="m16 16 6-6"
+          />
+          <path
+            d="m21.5 10.5-8-8"
+          />
+          <path
+            d="m8 8 6-6"
+          />
+          <path
+            d="m8.5 7.5 8 8"
+          />
+        </svg>
+        <span>
+          Decision
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        <a
+          class="rh-change-list__link"
+          href="/claims/C0001"
+        >
+          accepted D0002: count only held-out splits
+        </a>
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T14:03:00+00:00"
+      >
+        6 September, 14:03
+      </time>
+    </li>
+    <li
+      class="rh-change-list__entry"
+      data-kind="evidence"
+    >
+      <span
+        class="rh-change-list__kind"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-quote rh-icon"
+          data-icon="quote"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+          <path
+            d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
+          />
+        </svg>
+        <span>
+          Evidence
+        </span>
+      </span>
+      <p
+        class="rh-change-list__what"
+      >
+        accepted evidence E0001 anchored in A0001-1
+      </p>
+      <time
+        class="rh-change-list__when"
+        datetime="2026-09-06T11:20:00+00:00"
+      >
+        6 September, 11:20
+      </time>
+    </li>
+  </ol>
+</div>
+`;
