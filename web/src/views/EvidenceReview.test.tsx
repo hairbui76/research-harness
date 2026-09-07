@@ -15,6 +15,7 @@ import type { ReviewItem } from '../api/dto';
 import { AUTO_ADVANCE_KEY, EvidenceReviewPage, ProposedChanges, neighbours } from './EvidenceReview';
 import { CommandsProvider } from '../app/commands';
 import { ProjectPathProvider } from '../app/projectPaths';
+import { candidateName, fieldLabel } from '../components/Feedback';
 import { splitAround } from '../components/SourcePane';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 
@@ -78,7 +79,7 @@ describe('source beside decision', () => {
     await waitFor(() => expect(screen.getByText('Source text')).toBeInTheDocument());
     expect(screen.getAllByText(ITEM.source_context.exact_text).length).toBeGreaterThan(0);
     expect(screen.getByText('Anchor')).toBeInTheDocument();
-    expect(screen.getAllByText(ITEM.field).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(fieldLabel(ITEM.field)).length).toBeGreaterThan(0);
   });
 
   it('offers the original file when the page cannot be rendered here', async () => {
@@ -105,8 +106,37 @@ describe('source beside decision', () => {
     const { container } = renderReview();
 
     await waitFor(() => expect(screen.getByText('Verification')).toBeInTheDocument());
-    expect(screen.getByText('supported')).toBeInTheDocument();
+    expect(screen.getByText('Supported')).toBeInTheDocument();
     expect(container.textContent?.toLowerCase()).not.toContain('confidence');
+  });
+
+  it('names the screen by the question it answers, in words', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Verification')).toBeInTheDocument());
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Metric result · W0001');
+    const text = container.textContent ?? '';
+    for (const token of ['metric_result', 'experimental_result', 'source_observed', 'high_risk']) {
+      expect(text).not.toContain(token);
+    }
+  });
+
+  it('puts the verdict’s meaning within reach rather than in a title', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Verification')).toBeInTheDocument());
+    const verdict = screen.getByText('Supported').closest('.rh-badge')!;
+    expect(verdict).not.toHaveAttribute('title');
+    expect(
+      container.querySelector(`#${verdict.getAttribute('aria-describedby')}`),
+    ).toHaveTextContent(/independent reader/);
+  });
+
+  it('reads an open dictionary out as a line, never as JSON', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Number')).toBeInTheDocument());
+    expect(container.textContent).not.toMatch(/[{}]/);
   });
 
   it('shows a number with the provenance Product 12 requires of one', async () => {
@@ -335,6 +365,7 @@ describe('the diff Product 25 asks for', () => {
     );
 
     expect(screen.getByText('a/model-x')).toBeInTheDocument();
+    expect(screen.getByText('Verdict')).toBeInTheDocument();
     expect(screen.getByText('supported')).toBeInTheDocument();
     expect(screen.getByText('contradicted')).toBeInTheDocument();
   });
@@ -457,7 +488,9 @@ describe('decide and next', () => {
 
     await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
     expect(
-      screen.getByRole('link', { name: `Next: ${SECOND.field} · ${SECOND.work}` }),
+      screen.getByRole('link', {
+        name: `Next: ${candidateName(SECOND.field, SECOND.work)}`,
+      }),
     ).toHaveAttribute('href', `/review/${SECOND.candidate_id}`);
     expect(screen.queryByRole('link', { name: /^Previous:/ })).not.toBeInTheDocument();
   });
@@ -490,7 +523,9 @@ describe('decide and next', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
 
     await waitFor(() => expect(decidePanel()).toHaveTextContent('Candidate deferred.'));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      candidateName(ITEM.field, ITEM.work),
+    );
   });
 
   it('opens the next one when it was, and remembers the choice for next time', async () => {
@@ -508,7 +543,9 @@ describe('decide and next', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
 
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(SECOND.field),
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        candidateName(SECOND.field, SECOND.work),
+      ),
     );
   });
 
@@ -545,7 +582,9 @@ describe('the review keyboard', () => {
     await user.keyboard('needs a decision about anchors');
 
     expect(note).toHaveValue('needs a decision about anchors');
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      candidateName(ITEM.field, ITEM.work),
+    );
   });
 
   it('moves to the next candidate on n and back on p', async () => {
@@ -556,12 +595,16 @@ describe('the review keyboard', () => {
     await user.keyboard('n');
 
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(SECOND.field),
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        candidateName(SECOND.field, SECOND.work),
+      ),
     );
 
     await user.keyboard('p');
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ITEM.field),
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+        candidateName(ITEM.field, ITEM.work),
+      ),
     );
   });
 

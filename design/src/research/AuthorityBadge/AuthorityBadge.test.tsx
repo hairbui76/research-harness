@@ -33,13 +33,51 @@ describe('AuthorityBadge', () => {
     expect(container.querySelector('.rh-authority-badge')).not.toHaveAttribute('tabindex');
   });
 
-  it('describes the state on focus, not only on hover', async () => {
+  it('names the badge by its own sentence, so the meaning is read out with it', () => {
+    const { container } = render(<AuthorityBadge authority="contested" describe />);
+
+    const badge = container.querySelector('.rh-authority-badge');
+    const describedBy = badge?.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(
+      STATUS_META.contested.description,
+    );
+    expect(badge).not.toHaveAttribute('title');
+  });
+
+  it('prints the sentence under the badge while it has focus', async () => {
     const user = userEvent.setup();
-    render(<AuthorityBadge authority="contested" describe reason="Two accepted claims disagree." />);
+    const { container } = render(
+      <AuthorityBadge authority="contested" describe reason="Two accepted claims disagree." />,
+    );
+
+    const hint = (): Element | null => container.querySelector('.rh-authority-badge__hint');
+    expect(hint()).toBeNull();
+
     await user.tab();
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent(STATUS_META.contested.description);
-    expect(tooltip).toHaveTextContent('Two accepted claims disagree.');
+    expect(hint()).toHaveTextContent(STATUS_META.contested.description);
+    expect(hint()).toHaveTextContent('Two accepted claims disagree.');
+    // The visible half and the described half are the same sentence, so only one of them
+    // may reach a screen reader.
+    expect(hint()).toHaveAttribute('aria-hidden', 'true');
+
+    await user.tab();
+    expect(hint()).toBeNull();
+  });
+
+  it('does not move the page under a pointer that is only passing over it', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<AuthorityBadge authority="contested" describe />);
+
+    await user.hover(container.querySelector('.rh-authority-badge')!);
+    // A badge sits beside the links of its own row. A sentence that opened on hover would
+    // push those links out from under the pointer aiming at them.
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+  });
+
+  it('reaches for no tooltip: the meaning is on the page or nowhere', () => {
+    render(<AuthorityBadge authority="qualified" describe />);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('forwards a ref', () => {

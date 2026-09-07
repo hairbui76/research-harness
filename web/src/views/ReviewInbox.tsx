@@ -22,9 +22,25 @@
  */
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, FullPageWorkspace, Input, Select, SourceAnchor } from '@research-harness/design';
+import {
+  Button,
+  FullPageWorkspace,
+  Input,
+  Select,
+  SourceAnchor,
+  humaniseResearchTokens,
+  researchLabel,
+} from '@research-harness/design';
 import type { BatchAcceptResponse, ReviewItem } from '../api/dto';
-import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
+import {
+  Empty,
+  ErrorBox,
+  Loading,
+  Panel,
+  StatusBadge,
+  candidateName,
+  fieldLabel,
+} from '../components/Feedback';
 import { useRegisterCommands } from '../app/commands';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
@@ -34,13 +50,9 @@ import './review.css';
 /** The queue order itself; an item's category is the server's own word for why it is here. */
 export const CATEGORY_ORDER = ['conflict', 'high_risk', 'stale', 'ambiguous', 'routine'] as const;
 
-export const CATEGORY_LABELS: Record<string, string> = {
-  conflict: 'Conflicts',
-  high_risk: 'High-risk scientific claims',
-  stale: 'Stale high-impact objects',
-  ambiguous: 'Ambiguous extractions',
-  routine: 'Routine verified candidates',
-};
+/** The product's own name for one category. The vocabulary owns the words. */
+export const categoryLabel = (category: string): string =>
+  researchLabel('reviewCategory', category);
 
 /** What this page is, said once, in the product's words rather than by citing a document. */
 const QUEUE_DESCRIPTION =
@@ -73,7 +85,16 @@ export function matchesFilters(item: ReviewItem, filters: InboxFilters): boolean
   if (filters.verdict && (item.verdict ?? 'unverified') !== filters.verdict) return false;
   const terms = filters.text.toLowerCase().split(/\s+/).filter(Boolean);
   if (terms.length === 0) return true;
-  const haystack = [item.field, item.work, item.exact_text, ...item.reasons]
+  // Both the word on screen and the daemon's own identifier match, so typing what the row
+  // says finds it and so does typing what a `--field` flag would take.
+  const haystack = [
+    item.field,
+    fieldLabel(item.field),
+    item.work,
+    item.exact_text,
+    ...item.reasons,
+    ...item.reasons.map(humaniseResearchTokens),
+  ]
     .join(' ')
     .toLowerCase();
   return terms.every((term) => haystack.includes(term));
@@ -187,7 +208,7 @@ export function ReviewInboxPage() {
             groups.map(([category, group]) => (
               <Panel
                 key={category}
-                title={`${CATEGORY_LABELS[category] ?? category} (${group.length})`}
+                title={`${categoryLabel(category)} (${group.length})`}
               >
                 <ul className="rh-web-list rh-web-list--rules">
                   {group.map((item) => (
@@ -262,7 +283,7 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
         <option value="">Every category</option>
         {categories.map((category) => (
           <option key={category} value={category}>
-            {CATEGORY_LABELS[category] ?? category}
+            {categoryLabel(category)}
           </option>
         ))}
       </Select>
@@ -276,7 +297,7 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
         <option value="">Every verdict</option>
         {verdicts.map((verdict) => (
           <option key={verdict} value={verdict}>
-            {verdict.replace(/_/g, ' ')}
+            {researchLabel('verdict', verdict)}
           </option>
         ))}
       </Select>
@@ -320,7 +341,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
     return Object.fromEntries(
       ids.map((candidateId) => {
         const item = items.find((entry) => entry.candidate_id === candidateId);
-        return [candidateId, item ? `${item.field} · ${item.work}` : candidateId];
+        return [candidateId, item ? candidateName(item.field, item.work) : candidateId];
       }),
     );
   }
@@ -463,7 +484,9 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
                 {skipped.map(([candidateId, reason]) => (
                   <li key={candidateId}>
                     <span className="rh-web-queue__field">{label(candidateId)}</span>{' '}
-                    <span className="rh-text-secondary">— {reason}</span>
+                    <span className="rh-text-secondary">
+                      — {humaniseResearchTokens(reason)}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -481,14 +504,15 @@ export function ReviewRow({ item }: { item: ReviewItem }) {
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
         <Link to={href(`/review/${item.candidate_id}`)} data-review-row="">
-          <span className="rh-web-queue__field">{item.field}</span>
+          <span className="rh-web-queue__field">{fieldLabel(item.field)}</span>
           <span className="rh-text-secondary"> · {item.work}</span>
         </Link>
-        <StatusBadge status={item.category}>{item.category.replace('_', ' ')}</StatusBadge>
-        <StatusBadge status={item.verdict ?? 'unverified'}>
-          {item.verdict ?? 'unverified'}
-        </StatusBadge>
-        <span className="rh-text-secondary">tier {item.tier}</span>
+        {/* Why it is waiting and what the verifier said are the two states this row is
+            about, so both carry the sentence that says what they mean. The tier is a
+            property of the question rather than of this answer, so it stays plain text. */}
+        <StatusBadge status={item.category} vocabulary="reviewCategory" describe />
+        <StatusBadge status={item.verdict ?? 'unverified'} vocabulary="verdict" describe />
+        <span className="rh-text-secondary">{researchLabel('reviewTier', String(item.tier))}</span>
       </p>
       <SourceAnchor
         variant="inline"
@@ -499,7 +523,9 @@ export function ReviewRow({ item }: { item: ReviewItem }) {
         }}
       />
       <blockquote className="rh-web-quote">{item.exact_text}</blockquote>
-      <p className="rh-text-secondary">{item.reasons.join('; ')}</p>
+      {/* The queue's own sentences, with the identifiers inside them read out in the same
+          words the badges above use. The sentence stays the daemon's. */}
+      <p className="rh-text-secondary">{humaniseResearchTokens(item.reasons.join('; '))}</p>
     </li>
   );
 }

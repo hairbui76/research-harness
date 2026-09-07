@@ -26,7 +26,7 @@ export const specimens: Array<{ name: string; render: () => ReactNode }> = [
     ),
   },
   {
-    name: 'With its own wording, and a tooltip on focus',
+    name: 'With its own wording, and its meaning on focus or hover',
     render: () => (
       <AuthorityBadge
         authority="qualified"

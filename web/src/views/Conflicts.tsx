@@ -17,9 +17,21 @@
  * survive loading, a refusal and a project with nothing in dispute.
  */
 import { Link } from 'react-router-dom';
-import { Badge, FullPageWorkspace } from '@research-harness/design';
-import { DataTable, Empty, ErrorBox, Loading, Panel } from '../components/Feedback';
-import { ProposedChanges } from './EvidenceReview';
+import {
+  Badge,
+  FullPageWorkspace,
+  humaniseResearchTokens,
+  researchLabel,
+} from '@research-harness/design';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Loading,
+  Panel,
+  fieldLabel,
+} from '../components/Feedback';
+import { ProposedChanges, readable } from './EvidenceReview';
 import type { JsonObject } from '../api/dto';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
@@ -59,14 +71,16 @@ export function ConflictsPage() {
               title={conflict.subject}
               action={
                 <Badge status="contested" size="sm">
-                  {conflict.kind.replace(/_/g, ' ')}
+                  {researchLabel('conflictKind', conflict.kind)}
                 </Badge>
               }
             >
-              <p>{conflict.summary}</p>
+              <p>{humaniseResearchTokens(conflict.summary)}</p>
               <p className="rh-text-secondary">
-                Disagrees on: {conflict.differing_fields.join(', ') || 'unrecorded'} · tier{' '}
-                {conflict.tier}
+                {conflict.differing_fields.length > 0
+                  ? `Disagrees on: ${conflict.differing_fields.map(fieldLabel).join(', ')}`
+                  : 'The fields it disagrees on were not recorded'}{' '}
+                · {researchLabel('reviewTier', String(conflict.tier))}
               </p>
               <DataTable
                 label={`Positions in ${conflict.conflict_id}`}
@@ -81,9 +95,7 @@ export function ConflictsPage() {
                 {conflict.positions.map((position) => (
                   <tr key={position.label}>
                     <th scope="row">{position.label}</th>
-                    <td>
-                      <code>{JSON.stringify(position.decision)}</code>
-                    </td>
+                    <td>{readable(position.decision)}</td>
                     <td>{position.rationale ?? '—'}</td>
                   </tr>
                 ))}

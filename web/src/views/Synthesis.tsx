@@ -10,7 +10,7 @@
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, FullPageWorkspace, Input } from '@research-harness/design';
+import { Button, FullPageWorkspace, Input, humaniseTerm } from '@research-harness/design';
 import type { JsonObject } from '../api/dto';
 import {
   DataTable,
@@ -21,7 +21,9 @@ import {
   Loading,
   Panel,
   StatusBadge,
+  fieldLabel,
 } from '../components/Feedback';
+import { readable } from './EvidenceReview';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
@@ -70,7 +72,9 @@ export function SynthesisPage() {
                 </Field>
                 <Field label="Taxonomy">{matrix.taxonomy ?? '—'}</Field>
                 <Field label="Rows">{matrix.works} works</Field>
-                <Field label="Fields">{matrix.fields.join(', ') || '—'}</Field>
+                <Field label="Fields">
+                  {matrix.fields.map(fieldLabel).join(', ') || '— none recorded'}
+                </Field>
                 <Field label="Cells">{matrix.cells}</Field>
               </Fields>
             </Panel>
@@ -131,7 +135,7 @@ export function ComparisonTable({ rows, field }: { rows: JsonObject[]; field?: s
           <tr>
             {columns.map((column) => (
               <th scope="col" key={column}>
-                {column}
+                {humaniseTerm(column)}
               </th>
             ))}
           </tr>
@@ -140,7 +144,7 @@ export function ComparisonTable({ rows, field }: { rows: JsonObject[]; field?: s
         {rows.map((row, index) => (
           <tr key={index}>
             {columns.map((column) => (
-              <td key={column}>{format(row[column])}</td>
+              <td key={column}>{readable(row[column])}</td>
             ))}
           </tr>
         ))}
@@ -150,11 +154,4 @@ export function ComparisonTable({ rows, field }: { rows: JsonObject[]; field?: s
       </p>
     </>
   );
-}
-
-function format(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
-  if (Array.isArray(value)) return value.length ? value.join(', ') : '—';
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
 }

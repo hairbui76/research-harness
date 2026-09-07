@@ -85,6 +85,20 @@ describe('the stale list', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('reads the daemon’s vocabulary out of its own reason sentence', async () => {
+    const mark = { ...MARK, reason: "the anchor is stale: origin 'author_interpreted'" };
+    const { container } = renderView(<StalePage />, {
+      daemon: fakeDaemon({ capabilities: { 'state.stale': { count: 1, marks: [mark] } } }),
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.getByText("the anchor is stale: origin 'author interpreted'"),
+      ).toBeInTheDocument(),
+    );
+    expect(container.textContent).not.toContain('author_interpreted');
+  });
+
   it('reports the count the daemon gave once the marks arrive', async () => {
     renderView(<StalePage />, {
       daemon: fakeDaemon({ capabilities: { 'state.stale': { count: 1, marks: [MARK] } } }),

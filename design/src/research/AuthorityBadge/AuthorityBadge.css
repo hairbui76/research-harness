@@ -1,5 +1,26 @@
-/* The badge itself is the primitive; this only adds the focus affordance the tooltip
-   variant needs, so a describable badge shows where the keyboard is. */
+/* A describable badge is focusable, so it says where the keyboard is — and the cursor
+   says the press is worth making. */
 .rh-authority-badge[tabindex] {
   cursor: help;
+}
+
+/*
+ * The badge and the sentence that explains it.
+ *
+ * The sentence sits under the badge, in flow, so it can never be clipped by a scrolling
+ * table or a narrow pane the way an overlay would be. It appears on focus rather than on
+ * hover, so a pointer crossing a row never moves the links in that row.
+ */
+.rh-authority-badge__described {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+}
+
+.rh-authority-badge__hint {
+  max-inline-size: 52ch;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
 }
