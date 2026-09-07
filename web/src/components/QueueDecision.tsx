@@ -1,32 +1,49 @@
 /**
- * The three decisions a routine candidate can be given from the queue itself.
+ * The decisions a queue row carries, at every tier, and the one it does not.
  *
  * The review screen is where a proposal is *read* — the page it came off, the number's
- * provenance, the verifier's rationale, the competing readings. A tier 0 or 1 candidate the
- * daemon has already filed as routine has none of that to argue about: it is verified,
- * supported, its anchor is valid, and the researcher's part is the decision. So the row
- * offers the decision, and the screen stays one click away for everything else.
+ * provenance, the verifier's rationale, the competing readings. What a researcher does with
+ * that reading splits in two, and the split is Product 26's: **acceptance** writes authority
+ * into the project, and the source belongs beside that decision; **refusing** a proposal and
+ * **putting one aside** write no evidence, and the page it was read off would not change
+ * either one. So the row offers those two at every tier, and the screen keeps the acceptance
+ * of anything the daemon has not already filed as routine.
  *
- * Three rules hold it to the same standard as the full bar:
+ * What a row therefore shows:
  *
- * - **Accepting still asks twice.** The first press restates what is about to be written,
- *   in the field, the Work and the quoted span it will be written about — the same sentence
- *   the review screen uses, from the same function — and the second press writes it. The
- *   confirmation is inline on the card, because the row it is about is what should still be
- *   readable while the decision is made.
+ * - **Accept**, only where `acceptableInQueue` holds — the daemon's own routine filing:
+ *   verified, supported, tier 0 or 1, anchor valid. It still asks twice. The first press
+ *   restates what is about to be written, in the field, the Work and the quoted span it will
+ *   be written about — the same sentence the review screen uses, from the same function —
+ *   and the second press writes it. The confirmation is inline on the card, because the row
+ *   it is about is what should still be readable while the decision is made.
+ * - **Defer** and **Reject**, on every row, taking the researcher's sentence exactly as the
+ *   review screen does, because that is what the daemon records with them. The field is a
+ *   compact one on the row itself: a dialog would cover the queue the decision is about.
+ * - **Open to decide**, on every row: the screen where the source sits, where Accept lives
+ *   for a deeper review, and where Qualify, Edit and Request more evidence live for all of
+ *   them. A row that withholds Accept says so in a sentence rather than leaving its absence
+ *   to be read as a defect.
+ *
+ * Three rules hold all of it to the same standard as the full bar:
+ *
  * - **Nothing fakes an undo.** No `review.*` capability reopens an acceptance, so the row
  *   says so before the write and offers nothing afterwards but the evidence it created.
  * - **The queue's order is the daemon's.** Deciding removes a candidate from the queue by
  *   re-reading it; nothing here re-ranks, re-sorts or promotes a row.
- *
- * Rejecting and deferring take the researcher's sentence, exactly as they do on the review
- * screen, because that is what the daemon records with them.
+ * - **A conflict is closed, never stepped past.** When the daemon reported an open conflict
+ *   record about this candidate, Defer and Reject go through `review.resolve_conflict` —
+ *   the same routing `ReviewActions` uses, for the same reason: a rejection that left the
+ *   record open would leave the disagreement on the Conflicts screen forever.
  */
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, REVIEW_DECISION_META, Textarea, useToast } from '@research-harness/design';
 import type { ReviewItem } from '../api/dto';
+import { useProjectPaths } from '../app/projectPaths';
 import { useSession } from '../app/session';
 import {
+  CLOSES_THE_CONFLICT,
   PROMPT_LABELS,
   PROMPT_SUBMIT,
   WROTE,
@@ -35,29 +52,34 @@ import {
 } from './ReviewActions';
 import { ErrorBox, candidateName, fieldLabel } from './Feedback';
 
-/** The three decisions a routine row offers, in the order they are read. */
-const ROW_DECISIONS = ['accept', 'defer', 'reject'] as const;
-type RowDecision = (typeof ROW_DECISIONS)[number];
+/** The two decisions every row offers, in the order they are read. */
+const SENTENCE_DECISIONS = ['defer', 'reject'] as const;
+type RowDecision = 'accept' | (typeof SENTENCE_DECISIONS)[number];
 
 /**
- * Whether this row may be decided where it sits.
+ * Whether this row may be *accepted* where it sits.
  *
  * The daemon's own filing, and nothing computed here: the routine category *is* "verified
  * supported, Tier 0 or 1, and the anchor is valid". A conflict, a high-risk claim, a stale
- * anchor or an ambiguous extraction is read before it is decided, and keeps the full screen.
+ * anchor or an ambiguous extraction is a deep review, and an acceptance it writes is taken
+ * beside the source (Product 26) rather than off a queue row.
  */
-export function decidableInQueue(item: ReviewItem): boolean {
+export function acceptableInQueue(item: ReviewItem): boolean {
   return item.category === 'routine' && item.tier <= 1;
 }
 
 export interface QueueDecisionProps {
   item: ReviewItem;
-  /** Re-read the queue. A decided candidate leaves it; nothing is removed here. */
-  onDecided: () => void;
+  /**
+   * Re-read the queue. A decided candidate leaves it; nothing is removed here. The id is
+   * passed back so the page can put the focus where the queue's own order says next.
+   */
+  onDecided: (candidateId: string) => void;
 }
 
 export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
   const { client, canMutate, refresh } = useSession();
+  const { href } = useProjectPaths();
   const { toast } = useToast();
   const [open, setOpen] = useState<RowDecision | null>(null);
   const [text, setText] = useState('');
@@ -76,30 +98,47 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
 
   const name = candidateName(item.field, item.work);
   const quote = shortQuote(item.exact_text);
+  const acceptable = acceptableInQueue(item);
+  const decisions: RowDecision[] = acceptable
+    ? ['accept', ...SENTENCE_DECISIONS]
+    : [...SENTENCE_DECISIONS];
+  // The daemon's judgement, read off the queue item and never recomputed here.
+  const hasOpenConflict = item.conflicts.length > 0;
+  /** What the decision leaves behind, in the researcher's terms — the conflict included. */
+  const wrote = (decision: 'defer' | 'reject'): string =>
+    hasOpenConflict ? CLOSES_THE_CONFLICT[decision] : WROTE[decision];
 
   function abandon(): void {
+    const opened = open;
     setOpen(null);
     setText('');
     setError(null);
-    root.current?.querySelector<HTMLButtonElement>('[data-decision="accept"]')?.focus();
+    root.current
+      ?.querySelector<HTMLButtonElement>(`[data-decision="${opened ?? decisions[0]}"]`)
+      ?.focus();
   }
 
-  async function run(decision: RowDecision, what: string, action: () => Promise<unknown>) {
+  async function run(
+    decision: RowDecision,
+    what: string,
+    wrote: string,
+    action: () => Promise<unknown>,
+  ) {
     setBusy(decision);
     setError(null);
     try {
       await action();
       setOpen(null);
       setText('');
-      // A write of accepted state is announced the way the review screen announces it: the
-      // tone belongs to the decisions that accept something, and nothing offers an undo.
+      // A write is announced the way the review screen announces it: politely, once, the
+      // tone belonging to the decisions that accept something, and nothing offers an undo.
       toast({
         tone: decision === 'accept' ? 'success' : 'info',
         title: `${name} ${what}.`,
-        description: WROTE[decision],
+        description: wrote,
       });
       refresh();
-      onDecided();
+      onDecided(item.candidate_id);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -110,7 +149,7 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
   return (
     <div className="rh-web-queue-decision rh-web-stack rh-web-stack--tight" ref={root}>
       <div className="rh-web-row" role="group" aria-label={`Decide ${name}`}>
-        {ROW_DECISIONS.map((decision) => {
+        {decisions.map((decision) => {
           const meta = REVIEW_DECISION_META[decision];
           return (
             <Button
@@ -130,7 +169,16 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
             </Button>
           );
         })}
+        {/* The screen where the source is: the acceptance of a deeper review is taken
+            there, and so are the three decisions no row offers at any tier. */}
+        <Link to={href(`/review/${item.candidate_id}`)}>Open to decide</Link>
       </div>
+
+      {acceptable ? null : (
+        <p className="rh-text-secondary">
+          Accepting it happens beside the source, on its own screen.
+        </p>
+      )}
 
       {open === 'accept' ? (
         <div
@@ -156,7 +204,9 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
               loading={busy === 'accept'}
               loadingLabel="Recording the acceptance"
               onClick={() =>
-                void run('accept', 'accepted', () => client.acceptCandidate(item.candidate_id))
+                void run('accept', 'accepted', WROTE.accept, () =>
+                  client.acceptCandidate(item.candidate_id),
+                )
               }
             >
               Accept as evidence
@@ -177,9 +227,17 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
             const note = text.trim();
             if (!note || open === null) return;
             if (open === 'defer') {
-              void run('defer', 'deferred', () => client.deferCandidate(item.candidate_id, note));
+              void run('defer', 'deferred', wrote('defer'), () =>
+                hasOpenConflict
+                  ? client.resolveCandidate(item.candidate_id, 'defer', note)
+                  : client.deferCandidate(item.candidate_id, note),
+              );
             } else {
-              void run('reject', 'rejected', () => client.rejectCandidate(item.candidate_id, note));
+              void run('reject', 'rejected', wrote('reject'), () =>
+                hasOpenConflict
+                  ? client.resolveCandidate(item.candidate_id, 'reject', note)
+                  : client.rejectCandidate(item.candidate_id, note),
+              );
             }
           }}
         >
@@ -189,7 +247,7 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
             value={text}
             onChange={(event) => setText(event.target.value)}
           />
-          <p className="rh-text-secondary">{WROTE[open]}</p>
+          <p className="rh-text-secondary">{wrote(open)}</p>
           <div className="rh-web-row">
             <Button
               type="submit"

@@ -106,10 +106,19 @@
 }
 
 /*
- * The three decisions a routine row offers, and whatever they ask before they are recorded.
- * Indented under the row's own text so the card reads as one candidate rather than as a
- * list item with a toolbar under it.
+ * The decisions a row offers, and whatever they ask before they are recorded. Indented under
+ * the row's own text so the card reads as one candidate rather than as a list item with a
+ * toolbar under it.
  */
 .rh-web-queue-decision {
   padding-block-start: var(--rh-space-1);
+}
+
+/*
+ * The line that says where an acceptance is taken when the row does not offer one. It
+ * belongs to the controls above it, so it sits on the stack's own gap rather than adding a
+ * paragraph's default margin between the two.
+ */
+.rh-web-queue-decision > p {
+  margin: 0;
 }

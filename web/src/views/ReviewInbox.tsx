@@ -26,17 +26,26 @@
  * page still opens on the group the daemon ranked first, the restatement only exists once a
  * preview has been asked for, and the report outlives the queue it emptied.
  *
- * A routine row carries its own three decisions (`QueueDecision`), for the same reason and
- * with the same ceremony: the daemon has already filed it as verified, supported, tier 0 or
- * 1 and validly anchored, so what is left is the researcher's decision — and accepting one
- * still restates what it writes and asks for a second press.
+ * Every row carries its own decisions (`QueueDecision`), and the tier decides which. Refusing
+ * a proposal and putting one aside write no evidence, and the page a span was read off would
+ * settle neither, so they are offered wherever the row is; an acceptance writes authority and
+ * Product 26 puts the source beside that, so Accept stays on the row only where the daemon
+ * has already filed the candidate as routine — verified, supported, tier 0 or 1, validly
+ * anchored — and every other row says where its acceptance is taken instead. The ceremony is
+ * the review screen's throughout: the restatement before an acceptance, the daemon's sentence
+ * before a rejection or a deferral, and nothing that fakes an undo.
+ *
+ * A decision that empties a row hands the keyboard on rather than dropping it at the top of
+ * the document: the focus lands on the next candidate in the queue's own order, which is the
+ * rule decide-and-next already follows on the review screen.
  */
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Button,
   FullPageWorkspace,
   Input,
+  REVIEW_DECISION_META,
   Select,
   SourceAnchor,
   humaniseResearchTokens,
@@ -52,12 +61,45 @@ import {
   candidateName,
   fieldLabel,
 } from '../components/Feedback';
-import { QueueDecision, decidableInQueue } from '../components/QueueDecision';
+import { QueueDecision } from '../components/QueueDecision';
 import { useRegisterCommands } from '../app/commands';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 import './review.css';
+
+/**
+ * Which key presses which row decision.
+ *
+ * The same three letters the review screen binds, and for the same reason: a key presses the
+ * row's own button rather than calling a capability of its own, so it can never record
+ * something the control on screen would not have. A row that offers no Accept has no button
+ * for `a` to press, and the key does nothing rather than inventing a second path.
+ */
+const ROW_DECISION_KEYS = { accept: 'a', defer: 'd', reject: 'r' } as const;
+
+/**
+ * What each key does to the row in focus, for the help sheet and the palette.
+ *
+ * `REVIEW_DECISION_META` owns the labels and the general descriptions; these say the part
+ * that is true *here* — which row it lands on, and what the row will ask for first.
+ */
+const ROW_DECISION_HINTS: { decision: keyof typeof ROW_DECISION_KEYS; hint: string }[] = [
+  {
+    decision: 'accept',
+    hint:
+      'Restate what accepting the row in focus writes, where the daemon filed it as ' +
+      'routine. A deeper review is accepted beside its source.',
+  },
+  {
+    decision: 'defer',
+    hint: 'Put the row in focus aside, with the note it stays in the queue with.',
+  },
+  {
+    decision: 'reject',
+    hint: 'Refuse the row in focus, with the reason it is recorded with.',
+  },
+];
 
 /** The queue order itself; an item's category is the server's own word for why it is here. */
 export const CATEGORY_ORDER = ['conflict', 'high_risk', 'stale', 'ambiguous', 'routine'] as const;
@@ -134,6 +176,45 @@ export function ReviewInboxPage() {
   const showing = groups.reduce((total, [, group]) => total + group.length, 0);
   const filtered = filters.text !== '' || filters.category !== '' || filters.verdict !== '';
 
+  /** The rows as they are drawn: the daemon's order, minus whatever the filters hide. */
+  const onScreen = useMemo(
+    () => groups.flatMap(([, group]) => group.map((item) => item.candidate_id)),
+    [groups],
+  );
+
+  /**
+   * Where the keyboard goes when the row it was on is decided.
+   *
+   * A decision re-reads the queue, and a candidate that left it takes its controls — and
+   * whatever had the focus — out of the document with it. Dropping the researcher at the top
+   * of the page after every decision is the cost of getting through a queue by keyboard, so
+   * the focus is handed on the way decide-and-next hands it on the review screen: to the next
+   * candidate in the queue's own order, and to the one before it when there is no next. The
+   * target is chosen before the re-read, from the order that was on screen at the time.
+   */
+  const landing = useRef<string | null>(null);
+  const decided = (candidateId: string): void => {
+    const index = onScreen.indexOf(candidateId);
+    landing.current = onScreen[index + 1] ?? onScreen[index - 1] ?? null;
+    reread();
+  };
+
+  useEffect(() => {
+    const target = landing.current;
+    if (target === null) return;
+    landing.current = null;
+    const list = listRef.current;
+    if (list === null) return;
+    // A deferred candidate stays in the queue and a rejected one does not, so the row that
+    // was chosen may itself have moved; the first row is the honest fallback, and an emptied
+    // queue has none, which is what the empty state is for.
+    const next =
+      list.querySelector<HTMLAnchorElement>(
+        `a[data-review-row="${CSS.escape(target)}"]`,
+      ) ?? list.querySelector<HTMLAnchorElement>('a[data-review-row]');
+    next?.focus();
+  }, [items]);
+
   /**
    * Move the focus ring, not a selection of our own. The row's link is what Enter opens, so
    * putting real focus on it is what makes `j` and Enter agree with the mouse and with a
@@ -147,6 +228,22 @@ export function ReviewInboxPage() {
     const current = rows.findIndex((row) => row === document.activeElement);
     const next = current < 0 ? (delta > 0 ? 0 : rows.length - 1) : current + delta;
     rows[Math.min(Math.max(next, 0), rows.length - 1)]?.focus();
+  };
+
+  /**
+   * Press the focused row's own decision button.
+   *
+   * "The row in focus" is wherever the caret is inside the list: the row's link after `j`,
+   * or a control inside the decision it opened. Nothing is pressed when the focus is outside
+   * the queue, and nothing is pressed on a row that does not offer that decision.
+   */
+  const pressRowDecision = (decision: keyof typeof ROW_DECISION_KEYS): void => {
+    const focused = document.activeElement;
+    if (!(focused instanceof HTMLElement)) return;
+    const row = focused.closest('li');
+    if (row === null || listRef.current?.contains(row) !== true) return;
+    const button = row.querySelector<HTMLButtonElement>(`button[data-decision="${decision}"]`);
+    if (button && !button.disabled) button.click();
   };
 
   useRegisterCommands(
@@ -167,6 +264,14 @@ export function ReviewInboxPage() {
         hint: 'Move back up the queue.',
         run: () => moveRow(-1),
       },
+      ...ROW_DECISION_HINTS.map((entry) => ({
+        id: `inbox:${entry.decision}`,
+        label: REVIEW_DECISION_META[entry.decision].label,
+        group: 'The row in focus',
+        shortcut: ROW_DECISION_KEYS[entry.decision],
+        hint: entry.hint,
+        run: () => pressRowDecision(entry.decision),
+      })),
     ],
     [],
   );
@@ -243,7 +348,7 @@ export function ReviewInboxPage() {
               >
                 <ul className="rh-web-list rh-web-list--rules">
                   {group.map((item) => (
-                    <ReviewRow key={item.candidate_id} item={item} onDecided={reread} />
+                    <ReviewRow key={item.candidate_id} item={item} onDecided={decided} />
                   ))}
                 </ul>
               </Panel>
@@ -540,14 +645,14 @@ export function ReviewRow({
   onDecided = () => {},
 }: {
   item: ReviewItem;
-  /** Re-read the queue after a decision on this row. */
-  onDecided?: () => void;
+  /** Re-read the queue after a decision on this row, and say which row it was. */
+  onDecided?: (candidateId: string) => void;
 }) {
   const { href } = useProjectPaths();
   return (
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
-        <Link to={href(`/review/${item.candidate_id}`)} data-review-row="">
+        <Link to={href(`/review/${item.candidate_id}`)} data-review-row={item.candidate_id}>
           <span className="rh-web-queue__field">{fieldLabel(item.field)}</span>
           <span className="rh-text-secondary"> · {item.work}</span>
         </Link>
@@ -570,9 +675,9 @@ export function ReviewRow({
       {/* The queue's own sentences, with the identifiers inside them read out in the same
           words the badges above use. The sentence stays the daemon's. */}
       <p className="rh-text-secondary">{humaniseResearchTokens(item.reasons.join('; '))}</p>
-      {/* A candidate the daemon filed as routine can be decided where it is read. Everything
-          else keeps the screen that shows the source beside the decision. */}
-      {decidableInQueue(item) ? <QueueDecision item={item} onDecided={onDecided} /> : null}
+      {/* Every candidate can be refused or put aside where it is read; only one the daemon
+          filed as routine can be accepted there, and the rest say where that happens. */}
+      <QueueDecision item={item} onDecided={onDecided} />
     </li>
   );
 }

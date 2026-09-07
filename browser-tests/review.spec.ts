@@ -107,6 +107,53 @@ test('the queue can be searched, batched and reached from the keyboard', async (
 });
 
 /**
+ * A deep review is refused from the queue, and the keyboard is handed on.
+ *
+ * Tier 2 is the queue's deepest filing, and the tier is what withholds Accept from the row:
+ * an acceptance writes authority into the project, and Product 26 puts the source beside
+ * that decision. Refusing one writes no evidence, so it happens where the row is — with the
+ * sentence the daemon records the refusal with, typed on the row itself. The candidate then
+ * leaves the queue, taking the control that had the focus with it, and the focus lands on
+ * the next candidate in the queue's own order rather than at the top of the document.
+ */
+test('a deep review is refused from the queue, and the focus lands on the next row', async ({ page, request }, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await seedQueue(page, request);
+
+  const row = page.getByRole('group', { name: 'Decide Metric result · W0001' });
+  await expect(row).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Defer' })).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+  // The way to the screen where its acceptance is taken: the same candidate the row names.
+  const candidate = await page.getByRole('link', { name: /Metric result · W0001/ }).getAttribute('href');
+  await expect(row.getByRole('link', { name: 'Open to decide' })).toHaveAttribute(
+    'href',
+    String(candidate),
+  );
+  await page.screenshot({ path: info.outputPath('review-row-deep.png'), fullPage: true });
+
+  // The sentence is asked for on the row, in a field rather than in a dialog over the queue.
+  await row.getByRole('button', { name: 'Reject' }).click();
+  const form = page.getByRole('form', { name: 'Reject Metric result · W0001' });
+  await expect(form).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await form
+    .getByLabel('Why this candidate is refused')
+    .fill('the cell is the baseline, not this model');
+  await page.screenshot({ path: info.outputPath('review-row-reject.png'), fullPage: true });
+  await form.getByRole('button', { name: 'Reject', exact: true }).click();
+
+  await expect(page.getByText('2 waiting.')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Metric result · W0001/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Method summary · W0001/ })).toBeFocused();
+  expect(await axeViolations(page), 'the queue with every row decidable').toEqual([]);
+  await page.screenshot({ path: info.outputPath('review-row-rejected.png'), fullPage: true });
+
+  expect(errors).toEqual([]);
+});
+
+/**
  * Put every scroller back where a researcher starts reading.
  *
  * Below 1100px the two review panes stack, and the page workspace — not the document — is

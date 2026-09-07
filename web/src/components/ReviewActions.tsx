@@ -413,8 +413,14 @@ export const ACCEPTS: Record<ReviewDecision, boolean> = {
   request_more_evidence: false,
 };
 
-/** The same three decisions when a conflict record is open, which they also close. */
-const CLOSES_THE_CONFLICT: Record<'accept' | 'reject' | 'defer', string> = {
+/**
+ * The same three decisions when a conflict record is open, which they also close.
+ *
+ * Exported because a queue row offers two of them now, and a row that promised a plain
+ * rejection while the daemon closed a conflict record would be describing a different act
+ * from the one it performed.
+ */
+export const CLOSES_THE_CONFLICT: Record<'accept' | 'reject' | 'defer', string> = {
   accept: 'It becomes accepted Evidence and the conflict record closes with your reason.',
   reject: 'The conflict record closes with your reason; nothing is accepted.',
   defer: 'It stays in the queue and the conflict record closes with your reason.',

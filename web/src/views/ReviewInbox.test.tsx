@@ -299,6 +299,42 @@ describe('the keyboard', () => {
     expect(rows[0]).toHaveFocus();
   });
 
+  it('presses the row in focus with the keys the review screen binds', async () => {
+    const user = userEvent.setup();
+    renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
+
+    // `j` puts the focus on the first row, and `r` asks *that* row for the sentence a
+    // rejection is recorded with — the key presses the row's own button, as `r` on the
+    // review screen presses the bar's.
+    await user.keyboard('j');
+    await user.keyboard('r');
+    expect(
+      screen.getByRole('form', { name: 'Reject Metric result · W0001' }),
+    ).toBeInTheDocument();
+
+    // A deep review has no Accept on its row, and the key invents none: three rows down,
+    // on the candidate the daemon filed as routine, the same key restates what it writes.
+    await user.keyboard('jj');
+    await user.keyboard('a');
+    expect(
+      screen.getByText(/Accept as evidence for Dataset of W0001/),
+    ).toBeInTheDocument();
+  });
+
+  it('teaches the row keys rather than leaving them to be guessed', async () => {
+    const user = userEvent.setup();
+    renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
+    await user.keyboard('?');
+
+    const help = screen.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    expect(within(help).getByText('The row in focus')).toBeInTheDocument();
+    expect(within(help).getByText('Reject')).toBeInTheDocument();
+  });
+
   it('does not move a row while the researcher is typing in the filter', async () => {
     const user = userEvent.setup();
     renderInbox(queueDaemon());
@@ -475,8 +511,10 @@ describe('the policy batch of Product 24.4', () => {
       'Defer',
       'Reject',
     ]);
-    // Only the routine row carries them: a high-risk claim is read before it is decided.
-    expect(screen.queryByRole('group', { name: /Decide Metric result/ })).not.toBeInTheDocument();
+    // Every row is decidable now; only a routine one may be *accepted* where it sits. The
+    // deep-review row keeps its own group, and Accept is the one thing missing from it.
+    const deep = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
+    expect(within(deep).queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
 
     await user.click(within(row).getByRole('button', { name: 'Accept' }));
     // The first press writes nothing: it restates what the second one would write.
@@ -536,6 +574,7 @@ describe('the policy batch of Product 24.4', () => {
 
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
     expect(screen.queryByRole('group', { name: /^Decide / })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open to decide' })).not.toBeInTheDocument();
   });
 
   it('offers the batch per work as well as for the whole queue, because that is all it takes', async () => {
@@ -589,6 +628,180 @@ describe('the policy batch of Product 24.4', () => {
     expect(
       screen.queryByRole('button', { name: /Accept the routine candidates/ }),
     ).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Deciding a row at every tier.
+ *
+ * The daemon's routine filing is what lets a candidate be *accepted* where it sits:
+ * verified, supported, tier 0 or 1, anchor valid. A deeper one is read before it is
+ * accepted, because the acceptance is what writes authority and Product 26 puts the source
+ * beside that decision. Refusing a proposal and putting one aside write no evidence and
+ * change no state the source would settle, so every row offers those two, in the same
+ * words and against the same capabilities the review screen uses — and says where Accept is.
+ */
+describe('deciding a row, at every tier', () => {
+  /** metric_result: high risk, tier 2 — a deep review, and first in the queue. */
+  const DEEP = QUEUE.items[0]!;
+  const REJECTED = {
+    candidate_id: DEEP.candidate_id,
+    action: 'reject',
+    status: 'rejected',
+    evidence: null,
+    mutation: null,
+  };
+
+  it('offers a deep review what the source does not settle, and never Accept', async () => {
+    renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    const row = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
+
+    expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Defer',
+      'Reject',
+    ]);
+    // Where the acceptance is taken instead, said on the row rather than left to be found.
+    expect(within(row).getByRole('link', { name: 'Open to decide' })).toHaveAttribute(
+      'href',
+      `/review/${DEEP.candidate_id}`,
+    );
+    // Both rows the daemon did not file as routine say why Accept is not on them.
+    expect(screen.getAllByText(/Accepting it happens beside the source/)).toHaveLength(2);
+  });
+
+  it('takes the sentence a rejection needs on the row itself, in a field and never a dialog', async () => {
+    const user = userEvent.setup();
+    const daemon = queueDaemon({ 'review.reject': REJECTED });
+    renderInbox(daemon);
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    const row = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
+    await user.click(within(row).getByRole('button', { name: 'Reject' }));
+
+    // The first press writes nothing. It asks for what the daemon records the refusal with.
+    expect(daemon.capabilityCalls().filter((call) => call.name === 'review.reject')).toEqual([]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const form = screen.getByRole('form', { name: 'Reject Metric result · W0001' });
+    expect(within(form).getByRole('button', { name: 'Reject' })).toBeDisabled();
+
+    await user.type(
+      within(form).getByLabelText('Why this candidate is refused'),
+      'the number is the baseline, not the model',
+    );
+    await user.click(within(form).getByRole('button', { name: 'Reject' }));
+
+    await waitFor(() =>
+      expect(daemon.capabilityCalls().filter((call) => call.name === 'review.reject')).toEqual([
+        {
+          name: 'review.reject',
+          request: {
+            candidate_id: DEEP.candidate_id,
+            reason: 'the number is the baseline, not the model',
+          },
+        },
+      ]),
+    );
+    // Nothing fakes an undo on a row either, whatever the tier.
+    expect(screen.queryByRole('button', { name: /Undo/i })).not.toBeInTheDocument();
+  });
+
+  it('lands the focus on the next row in the daemon’s order once one leaves the queue', async () => {
+    const user = userEvent.setup();
+    // The queue the daemon answers with changes when the candidate leaves it, so the
+    // capability table is the mutable one a real afternoon has.
+    const capabilities: Record<string, unknown> = {
+      'review.inbox': QUEUE,
+      'review.reject': REJECTED,
+    };
+    renderInbox(fakeDaemon({ capabilities }));
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    capabilities['review.inbox'] = { ...QUEUE, count: 2, items: QUEUE.items.slice(1) };
+
+    const row = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
+    await user.click(within(row).getByRole('button', { name: 'Reject' }));
+    const form = screen.getByRole('form', { name: 'Reject Metric result · W0001' });
+    await user.type(within(form).getByLabelText('Why this candidate is refused'), 'the baseline');
+    await user.click(within(form).getByRole('button', { name: 'Reject' }));
+
+    await waitFor(() => expect(screen.getByText(/2 waiting/)).toBeInTheDocument());
+    // The rule decide-and-next uses: the next candidate in the queue's own order, not the
+    // top of the document a removed row would otherwise drop the keyboard on.
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: /Method summary · W0001/ })).toHaveFocus(),
+    );
+  });
+
+  it('closes an open conflict record rather than rejecting past it', async () => {
+    const user = userEvent.setup();
+    const conflicted: ReviewItem = {
+      ...DEEP,
+      category: 'conflict',
+      conflicts: [
+        {
+          conflict_id: 'CF0001',
+          created_at: '2026-09-01T00:00:00Z',
+          differing_fields: ['value'],
+          kind: 'value_conflict',
+          positions: [],
+          proposed_changes: [],
+          status: 'open',
+          subject: 'W0001 metric_result',
+          summary: 'Two readings of the same cell',
+          tier: 2,
+        },
+      ],
+    };
+    const daemon = fakeDaemon({
+      capabilities: {
+        'review.inbox': { ...QUEUE, count: 1, items: [conflicted] },
+        'review.resolve_conflict': {
+          candidate_id: conflicted.candidate_id,
+          choice: 'reject',
+          mutation: null,
+        },
+      },
+    });
+    renderInbox(daemon);
+
+    await waitFor(() => expect(screen.getByText(/1 waiting/)).toBeInTheDocument());
+    const row = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
+    await user.click(within(row).getByRole('button', { name: 'Reject' }));
+
+    const form = screen.getByRole('form', { name: 'Reject Metric result · W0001' });
+    expect(within(form).getByText(/conflict record closes with your reason/)).toBeInTheDocument();
+    await user.type(
+      within(form).getByLabelText('Why this candidate is refused'),
+      'the other cell is the model’s',
+    );
+    await user.click(within(form).getByRole('button', { name: 'Reject' }));
+
+    // The same routing the review screen uses: a rejection that left the record open would
+    // leave the disagreement on the Conflicts screen forever.
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().filter((call) => call.name === 'review.resolve_conflict'),
+      ).toEqual([
+        {
+          name: 'review.resolve_conflict',
+          request: {
+            candidate_id: conflicted.candidate_id,
+            choice: 'reject',
+            reason: 'the other cell is the model’s',
+          },
+        },
+      ]),
+    );
+    expect(daemon.capabilityCalls().filter((call) => call.name === 'review.reject')).toEqual([]);
+  });
+
+  it('has no automatically detectable accessibility violation with every row decidable', async () => {
+    const { container } = renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 });
 
