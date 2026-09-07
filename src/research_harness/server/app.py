@@ -28,7 +28,8 @@ import logging
 import os
 import secrets
 import threading
-from collections.abc import Callable, Container, Mapping, Sequence
+from collections import Counter
+from collections.abc import Callable, Container, Iterable, Mapping, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any
@@ -58,6 +59,7 @@ from research_harness.domain.enums import (
     StaleState,
 )
 from research_harness.domain.errors import ResearchHarnessError
+from research_harness.domain.evidence import Evidence, NumericValue
 from research_harness.domain.ids import (
     ArtifactId,
     ClaimId,
@@ -72,7 +74,12 @@ from research_harness.domain.ids import (
     parse_id,
 )
 from research_harness.domain.manuscript import ManuscriptAnchor
-from research_harness.domain.research import Decision, Taxonomy, TaxonomyTerm
+from research_harness.domain.research import (
+    Decision,
+    SynthesisMatrix,
+    Taxonomy,
+    TaxonomyTerm,
+)
 from research_harness.domain.work import Artifact, Work
 from research_harness.evidence.conflicts import ConflictRecord, ConflictStore
 from research_harness.local_app.runtime import LEGACY_PROJECT_ID, WorkspaceRuntime
@@ -96,6 +103,10 @@ from research_harness.protocol.dto import (
     CountEntry,
     ErrorBody,
     HealthReport,
+    MatrixCellView,
+    MatrixColumnView,
+    MatrixEvidenceView,
+    MatrixRowView,
     MatrixView,
     ObjectView,
     OverviewCounts,
@@ -1617,12 +1628,15 @@ def _synthesis_report(root: Path) -> SynthesisReport:
     record, and none of them is about a work.
     """
     repo = _open_repo(root)
+    names = _ObjectNames(repo)
     corpus = tuple(str(work.id) for work in repo.list_works())
+    matrices = repo.list_matrices()
+    spans = _cited_evidence(repo, matrices)
     views: list[MatrixView] = []
     groups: list[ResearchGroup] = []
     missing_total = 0
     uncovered_total = 0
-    for matrix in repo.list_matrices():
+    for matrix in matrices:
         rows = tuple(str(work) for work in matrix.works)
         read = {(str(cell.work), cell.field) for cell in matrix.cells if cell.labels}
         declared = len(rows) * len(matrix.fields)
@@ -1643,6 +1657,9 @@ def _synthesis_report(root: Path) -> SynthesisReport:
                 recorded=recorded,
                 shape=_matrix_shape(len(rows), len(matrix.fields)),
                 coverage=_matrix_coverage(recorded, declared),
+                labels_from=_matrix_vocabulary(matrix.taxonomy),
+                columns=_matrix_columns(matrix),
+                rows=_matrix_rows(matrix, spans, names.title),
             )
         )
         items = _matrix_gaps(str(matrix.id), rows, matrix.fields, read, uncovered)
@@ -1710,6 +1727,234 @@ def _matrix_gaps(
             )
         )
     return tuple(items)
+
+
+def _cited_evidence(
+    repo: WorkspaceRepository, matrices: Sequence[SynthesisMatrix]
+) -> Mapping[str, Evidence]:
+    """Every accepted Evidence object some matrix cell cites, by id.
+
+    A grid that opens a cell has to quote the span the reading was taken from, and the
+    span lives in the evidence file rather than in the matrix. The index is read once for
+    the whole page, and a project whose cells cite nothing never opens an evidence file at
+    all — the same rule `_ObjectNames` follows for the marks it names.
+    """
+    cited = {
+        str(evidence) for matrix in matrices for cell in matrix.cells for evidence in cell.evidence
+    }
+    if not cited:
+        return {}
+    found: dict[str, Evidence] = {}
+    for work in repo.list_works():
+        for evidence in repo.iter_evidence(work.id):
+            key = str(evidence.id)
+            if key in cited:
+                found[key] = evidence
+    return found
+
+
+def _matrix_vocabulary(taxonomy: str | None) -> str:
+    """Which vocabulary a matrix's labels come from: an approved one, or the matrix's own.
+
+    A taxonomy is a project decision rather than a universal fact (Product 32), so a grid
+    whose labels rest on one names it, and a grid whose labels rest on none says that too
+    instead of leaving a reader to assume there is an approved vocabulary behind them.
+    """
+    if not taxonomy:
+        return "Its labels are this matrix's own; no taxonomy stands behind them."
+    return f"Its labels come from the {taxonomy} taxonomy."
+
+
+def _matrix_columns(matrix: SynthesisMatrix) -> tuple[MatrixColumnView, ...]:
+    """One column per declared field, in the matrix's own order, read down its works.
+
+    Reading one property across every work is the question a matrix exists to answer, so
+    how a column reads is composed here: which labels were recorded under it, for how many
+    works, and whether the works read for it recorded the same label. All of that is a
+    count of the record. None of it prefers a reading, resolves a disagreement, or says
+    anything about a work nobody has read.
+    """
+    works = tuple(str(work) for work in matrix.works)
+    recorded = {(str(cell.work), cell.field): cell.labels for cell in matrix.cells if cell.labels}
+    columns: list[MatrixColumnView] = []
+    for field in matrix.fields:
+        counts: Counter[str] = Counter()
+        read = 0
+        for work in works:
+            labels = recorded.get((work, field))
+            if not labels:
+                continue
+            read += 1
+            counts.update(labels)
+        columns.append(
+            MatrixColumnView(
+                field=field,
+                recorded=read,
+                coverage=_column_coverage(read, len(works)),
+                reading=_column_reading(read, len(works), counts),
+            )
+        )
+    return tuple(columns)
+
+
+def _column_coverage(recorded: int, works: int) -> str:
+    """How much of one column is recorded, said about the record and not about the works."""
+    if not works:
+        return "This matrix declares no works to read for it"
+    if not recorded:
+        return "No work in this matrix has been read for it yet"
+    if recorded == works:
+        return f"All {_counted(works, 'work')} read for it"
+    return f"{recorded} of {_counted(works, 'work')} read for it"
+
+
+def _column_reading(recorded: int, works: int, counts: Counter[str]) -> str:
+    """How one column reads across the works: the labels on record, and how many carry each.
+
+    The order is the frequent label first and then alphabetical, which is the order
+    `ComparisonTable.label_counts` already puts them in: one ordering of one fact, decided
+    once. A column whose works do not all record the same label says so, because two
+    different readings on record is the thing a researcher opened the matrix to find — and
+    it is stated as a difference in the record, never as a disagreement resolved here.
+    """
+    coverage = _column_coverage(recorded, works)
+    if not recorded:
+        return f"{coverage}, so there is nothing to read across it yet."
+    listed = ", ".join(
+        f"{label} ({_counted(count, 'work')})"
+        for label, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    )
+    sentence = f"{coverage}. Recorded: {listed}."
+    if len(counts) > 1:
+        sentence += " The works read for it do not all record the same label."
+    return sentence
+
+
+def _matrix_rows(
+    matrix: SynthesisMatrix,
+    spans: Mapping[str, Evidence],
+    title: Callable[[str], str],
+) -> tuple[MatrixRowView, ...]:
+    """One row per declared work, in the matrix's own order, with a cell per declared field.
+
+    Every declared field gets a cell, including the ones nobody has read: the grid's shape
+    is what the matrix declares, and a row that quietly dropped its unread columns would
+    show a reader a smaller matrix than the project actually built.
+    """
+    cells = {(str(cell.work), cell.field): cell for cell in matrix.cells}
+    rows: list[MatrixRowView] = []
+    for work in (str(work) for work in matrix.works):
+        drawn: list[MatrixCellView] = []
+        recorded = 0
+        for field in matrix.fields:
+            cell = cells.get((work, field))
+            labels = cell.labels if cell else ()
+            evidence = _cell_evidence(cell.evidence if cell else (), spans, title)
+            if labels:
+                recorded += 1
+            drawn.append(
+                MatrixCellView(
+                    work=work,
+                    field=field,
+                    recorded=bool(labels),
+                    reading=", ".join(labels),
+                    measurement=next(
+                        (span.measurement for span in evidence if span.measurement), ""
+                    ),
+                    detail=_cell_detail(bool(labels), evidence),
+                    evidence=evidence,
+                )
+            )
+        rows.append(
+            MatrixRowView(
+                work=work,
+                title=title(work),
+                route=_object_route(work),
+                summary=_row_summary(recorded, len(matrix.fields)),
+                cells=tuple(drawn),
+            )
+        )
+    return tuple(rows)
+
+
+def _row_summary(recorded: int, fields: int) -> str:
+    """How much of one work's row is recorded, in the same words the matrix's own uses."""
+    if not fields:
+        return "This matrix declares no fields to read it for"
+    if not recorded:
+        return f"None of its {_counted(fields, 'reading')} recorded yet"
+    if recorded == fields:
+        return f"All {_counted(fields, 'reading')} recorded"
+    return f"{recorded} of {_counted(fields, 'reading')} recorded"
+
+
+def _cell_evidence(
+    cited: Iterable[EvidenceId],
+    spans: Mapping[str, Evidence],
+    title: Callable[[str], str],
+) -> tuple[MatrixEvidenceView, ...]:
+    """The accepted spans one cell rests on, quoted exactly as they were recorded.
+
+    A span is never shortened here. A trimmed quotation is a different quotation, and a
+    matrix cell whose evidence a reader cannot check word for word is a reading on trust.
+    """
+    found: list[MatrixEvidenceView] = []
+    for evidence in cited:
+        key = str(evidence)
+        held = spans.get(key)
+        found.append(
+            MatrixEvidenceView(
+                id=key,
+                title=title(key) if held is not None else "",
+                route=_object_route(key),
+                quote=held.content.exact_text if held is not None else "",
+                measurement=(
+                    _measured(held.content.numeric)
+                    if held is not None and held.content.numeric is not None
+                    else ""
+                ),
+                found=held is not None,
+            )
+        )
+    return tuple(found)
+
+
+def _cell_detail(recorded: bool, evidence: Sequence[MatrixEvidenceView]) -> str:
+    """What one cell is, in words: what its reading rests on, or what a blank one means.
+
+    The blank is the sentence this whole page exists to keep honest. An empty cell means
+    the reading has not been taken; it is never the work read as lacking the property, and
+    nothing anywhere infers novelty or absence from one (Product 7.1, 11, 33).
+    """
+    if not recorded:
+        return (
+            "No reading has been recorded here yet. A blank cell is a gap in the record, "
+            "never a reading of the work."
+        )
+    missing = [span for span in evidence if not span.found]
+    if not evidence:
+        return "No accepted evidence is recorded behind this reading."
+    stated = f"Read from {_counted(len(evidence), 'accepted evidence span')}."
+    if missing:
+        stated += (
+            " One of them is no longer in this workspace."
+            if len(missing) == 1
+            else f" {len(missing)} of them are no longer in this workspace."
+        )
+    return stated
+
+
+def _measured(numeric: NumericValue) -> str:
+    """A measured reading with the metric and the unit it was recorded under (Product 12).
+
+    A number without them is not the number that was read: the writer must never silently
+    change metric, unit, dataset or condition, and a grid that printed `94.32` alone would
+    be the first surface to do it.
+    """
+    parts = [numeric.metric, numeric.raw]
+    if numeric.unit:
+        parts.append(numeric.unit)
+    return " ".join(parts)
 
 
 def _matrix_shape(works: int, fields: int) -> str:
