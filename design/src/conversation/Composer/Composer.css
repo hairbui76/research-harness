@@ -73,3 +73,18 @@
   margin: var(--rh-space-1) 0 0;
   padding-inline-start: var(--rh-space-5);
 }
+
+/*
+ * Where an unpublished message goes.
+ *
+ * The keyboard hint's own colour and size, on a line of its own: a standing statement that
+ * the eye can pass over and come back to, never an alarm. It wraps rather than truncating,
+ * because half a destination is worse than none, and it carries no colour of its own —
+ * "leaves this machine" is a sentence, not a hue.
+ */
+.rh-composer__destination {
+  margin: 0;
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}

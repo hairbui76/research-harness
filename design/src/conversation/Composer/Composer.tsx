@@ -105,6 +105,16 @@ export interface ComposerProps
   attachAccept?: string;
   /** Overrides the keyboard hint under the box. */
   hint?: ReactNode;
+  /**
+   * Where an unpublished message would go, stated for as long as the composer is open.
+   *
+   * A standing fact, not an announcement: it keeps its own line beside the keyboard hint,
+   * it is part of the text box's own description, and it is never a live region — a
+   * researcher forty messages into a session should be able to look, not be told again on
+   * every render. Every word is the host's; nothing here derives or decorates a
+   * destination, because where research content goes is not a presentation decision.
+   */
+  destination?: ReactNode;
   sendLabel?: string;
 }
 
@@ -141,6 +151,7 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
     onAttach,
     attachAccept,
     hint,
+    destination,
     sendLabel = 'Send',
     className,
     ...rest
@@ -324,7 +335,11 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
           placeholder={placeholder}
           disabled={disabled}
           value={value.text}
-          aria-describedby={`${baseId}-hint`}
+          aria-describedby={
+            destination === undefined
+              ? `${baseId}-hint`
+              : `${baseId}-hint ${baseId}-destination`
+          }
           onChange={handleTextChange}
           onKeyDown={handleTextKeyDown}
         />
@@ -425,6 +440,12 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
           </>
         )}
       </p>
+
+      {destination === undefined ? null : (
+        <p className="rh-composer__destination" id={`${baseId}-destination`}>
+          {destination}
+        </p>
+      )}
     </div>
   );
 });

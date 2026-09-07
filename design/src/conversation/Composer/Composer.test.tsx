@@ -181,6 +181,27 @@ describe('Composer', () => {
     expect(onAttach).toHaveBeenCalledWith([file]);
   });
 
+  it('states where the message goes, as part of the text box’s own description', () => {
+    render(<Example destination="Sends to Codex CLI · gpt-5.5 — leaves this machine" />);
+    const line = screen.getByText('Sends to Codex CLI · gpt-5.5 — leaves this machine');
+    expect(line).toBeInTheDocument();
+    // Described, not announced: a researcher forty messages in should be able to look it
+    // up, and never be interrupted by it.
+    expect(line).not.toHaveAttribute('aria-live');
+    const textarea = screen.getByRole('textbox', { name: 'Message' });
+    const described = (textarea.getAttribute('aria-describedby') ?? '').split(' ');
+    expect(described).toContain(line.id);
+    // The keyboard contract keeps its own line rather than being replaced by this one.
+    expect(screen.getByText(/Enter sends · Shift\+Enter starts a new line/)).toBeInTheDocument();
+  });
+
+  it('says nothing about a destination when the host states none', () => {
+    render(<Example />);
+    const textarea = screen.getByRole('textbox', { name: 'Message' });
+    expect(textarea.getAttribute('aria-describedby')?.split(' ')).toHaveLength(1);
+    expect(document.querySelector('.rh-composer__destination')).toBeNull();
+  });
+
   it('renders the attachment tray and model selector slots', () => {
     render(
       <Example
