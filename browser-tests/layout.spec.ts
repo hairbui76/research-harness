@@ -173,6 +173,30 @@ test('every inspector tab is reachable from the keyboard at both widths', async 
       if (index < 5) await page.keyboard.press('ArrowRight');
     }
 
+    /*
+     * Reachable is not the same as legible. Six tabs measuring about 734px used to live in a
+     * 22rem strip, so at 1920 the last visible label read "ew inbox" and two tabs were
+     * behind a chevron at every width. The strip spends vertical room instead: nothing
+     * scrolls sideways, and every tab draws its whole label inside it.
+     */
+    const clipped = await inspector.evaluate((node) => {
+      const list = node.querySelector('.rh-tabs__list') as HTMLElement;
+      const out: string[] = [];
+      if (list.scrollWidth > list.clientWidth + 1) {
+        out.push(`the strip scrolls by ${list.scrollWidth - list.clientWidth}px`);
+      }
+      const box = list.getBoundingClientRect();
+      for (const tab of Array.from(node.querySelectorAll('[role="tab"]')) as HTMLElement[]) {
+        const rect = tab.getBoundingClientRect();
+        if (rect.left < box.left - 1 || rect.right > box.right + 1) {
+          out.push(`${tab.textContent?.trim()} is cut off`);
+        }
+        if (tab.scrollWidth > tab.clientWidth + 1) out.push(`${tab.textContent?.trim()} is clipped`);
+      }
+      return out;
+    });
+    expect(clipped, `the inspector strip at ${width}px`).toEqual([]);
+
     expect(await axeViolations(page), `axe at ${width}px`).toEqual([]);
 
     const fits = await page.evaluate(

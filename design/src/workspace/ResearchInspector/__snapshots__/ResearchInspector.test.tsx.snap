@@ -157,7 +157,7 @@ exports[`ResearchInspector theme x density > matches the dark / comfortable snap
           aria-label="Research inspector"
           aria-orientation="horizontal"
           class="rh-tabs__list"
-          data-overflow="scroll"
+          data-overflow="wrap"
           role="tablist"
         >
           <button
@@ -598,7 +598,7 @@ exports[`ResearchInspector theme x density > matches the dark / compact snapshot
           aria-label="Research inspector"
           aria-orientation="horizontal"
           class="rh-tabs__list"
-          data-overflow="scroll"
+          data-overflow="wrap"
           role="tablist"
         >
           <button
@@ -1039,7 +1039,7 @@ exports[`ResearchInspector theme x density > matches the light / comfortable sna
           aria-label="Research inspector"
           aria-orientation="horizontal"
           class="rh-tabs__list"
-          data-overflow="scroll"
+          data-overflow="wrap"
           role="tablist"
         >
           <button
@@ -1480,7 +1480,7 @@ exports[`ResearchInspector theme x density > matches the light / compact snapsho
           aria-label="Research inspector"
           aria-orientation="horizontal"
           class="rh-tabs__list"
-          data-overflow="scroll"
+          data-overflow="wrap"
           role="tablist"
         >
           <button

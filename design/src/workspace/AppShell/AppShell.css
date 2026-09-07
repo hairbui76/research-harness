@@ -86,9 +86,18 @@
   flex-direction: column;
 }
 
+/*
+ * The inspector, wide enough for the strip that names its six tabs.
+ *
+ * At 22rem the strip could not draw them at any window width — at 1920 the last label read
+ * "ew inbox" — so half of what the pane holds was behind a chevron on a screen with room to
+ * spare. The tabs wrap now rather than scroll (`ResearchInspector`), and the pane is wide
+ * enough that they wrap to two rows instead of six. `max-inline-size` still keeps it a pane
+ * beside the conversation rather than a second column of it.
+ */
 .rh-app-shell__inspector {
   flex: none;
-  inline-size: 22rem;
+  inline-size: 26rem;
   max-inline-size: 40%;
   min-height: 0;
   overflow: hidden;

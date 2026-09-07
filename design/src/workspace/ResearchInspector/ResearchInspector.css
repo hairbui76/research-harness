@@ -1,5 +1,5 @@
 /*
- * The inspector is a query container: 22rem beside a page, 85vw as a drawer, and whatever a
+ * The inspector is a query container: 26rem beside a page, 85vw as a drawer, and whatever a
  * host gives it in between. Nothing about how it lays out follows from the window's width,
  * so nothing here asks the window. Overlays portal to `document.body`, so containment here
  * traps no menu or tooltip.

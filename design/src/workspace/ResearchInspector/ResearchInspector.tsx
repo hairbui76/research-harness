@@ -122,7 +122,17 @@ export const ResearchInspector = forwardRef<HTMLElement, ResearchInspectorProps>
           onValueChange={(next) => setTab(next as InspectorTab)}
           activation="manual"
         >
-          <Tabs.List aria-label={label}>
+          {/*
+            Six tabs, all six on the strip.
+
+            A scrolling strip is the right answer where one more tab is out of sight; it is
+            the wrong one where half of them are, which is what a 22rem pane did to a row
+            measuring about 734px — Conflicts and Stale, the two that say something is
+            wrong, lived behind a chevron at every window width. The pane is wider now
+            (`AppShell.css`) and the row spends the vertical space it has instead: two rows
+            of tabs, every label readable, nothing to discover by scrolling.
+          */}
+          <Tabs.List aria-label={label} overflow="wrap">
             {INSPECTOR_TABS.map((name) => {
               const meta = INSPECTOR_TAB_META[name];
               const count = counts?.[name];

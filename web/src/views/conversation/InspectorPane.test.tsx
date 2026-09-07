@@ -129,12 +129,13 @@ describe('the inspector with nothing followed', () => {
 });
 
 /*
- * Six tabs measuring about 734px live in a pane that is about 352px wide, so two of them —
- * Conflicts and Stale, the two that say something is wrong — used to be off the end of the
- * strip with nothing on screen admitting they existed. The strip is a scroller now, and the
- * contract this file can check without a browser is the one that matters most: every tab is
- * in the document, in the daemon's order, and the arrow keys walk all six of them.
- * `browser-tests/layout.spec.ts` checks that each one is actually scrolled into view.
+ * Six tabs measuring about 734px used to live in a pane about 352px wide, so two of them —
+ * Conflicts and Stale, the two that say something is wrong — were off the end of the strip
+ * at every window width, with a clipped label where the third one should have been. The
+ * strip wraps now and the pane is 26rem, so all six are drawn. The contract this file can
+ * check without a browser is the one that matters most: every tab is in the document, in
+ * the daemon's order, and the arrow keys walk all six of them.
+ * `browser-tests/layout.spec.ts` measures that none of them is cut off or clipped.
  */
 describe('the inspector’s tab strip', () => {
   const LABELS = ['Context', 'Evidence', 'Claims', 'Review inbox', 'Conflicts', 'Stale'];
@@ -153,9 +154,11 @@ describe('the inspector’s tab strip', () => {
       expect(tabs[index]).toHaveFocus();
     }
 
-    // The strip is one row that scrolls, not a row that clips.
+    // The strip spends the vertical room it has rather than hiding half its tabs behind a
+    // chevron: a scroller was the right answer for one tab out of sight and the wrong one
+    // for three. `browser-tests/layout.spec.ts` measures that none of them is clipped.
     const list = screen.getByRole('tablist');
     expect(list.parentElement).toHaveClass('rh-tabs__strip');
-    expect(list).toHaveAttribute('data-overflow', 'scroll');
+    expect(list).toHaveAttribute('data-overflow', 'wrap');
   });
 });
