@@ -273,6 +273,41 @@ test('the rail and Project Home offer the same project actions in the same words
   ]);
   await page.screenshot({ path: info.outputPath('rail-actions.png'), fullPage: true });
 
+  /*
+   * A project with no sessions opens no void.
+   *
+   * The empty session list used to be the rail's growing element, so about a third of the
+   * rail's height sat empty between it and the navigation. The list takes its content
+   * height, the destinations follow it, and the free space goes under them to the footer.
+   */
+  const rail = await page.evaluate(() => {
+    const gap = (a: Element | null, b: Element | null): number =>
+      a === null || b === null
+        ? Number.NaN
+        : b.getBoundingClientRect().top - a.getBoundingClientRect().bottom;
+    const sessions = document.querySelector('.rh-project-rail__sessions');
+    const nav = document.querySelector('.rh-project-rail__nav');
+    const foot = document.querySelector('.rh-project-rail__foot');
+    return {
+      beforeNav: gap(sessions, nav),
+      navAboveFoot:
+        nav !== null && foot !== null
+          ? nav.getBoundingClientRect().bottom <= foot.getBoundingClientRect().top
+          : false,
+      footAtTheBottom:
+        foot !== null && document.querySelector('.rh-project-rail') !== null
+          ? Math.abs(
+              foot.getBoundingClientRect().bottom -
+                (document.querySelector('.rh-project-rail') as HTMLElement).getBoundingClientRect()
+                  .bottom,
+            )
+          : Number.NaN,
+    };
+  });
+  expect(rail.beforeNav, `${rail.beforeNav}px of empty rail above the navigation`).toBeLessThan(24);
+  expect(rail.navAboveFoot, 'the destinations sit above the provider footer').toBe(true);
+  expect(rail.footAtTheBottom, 'the footer stays at the rail’s bottom edge').toBeLessThan(24);
+
   // Project Home is reached the way a researcher reaches it. A fresh load of `/` would
   // reopen the last project instead (spec §4.2), which is the point of that rule.
   await page.getByRole('button', { name: /^Project: .* Switch project$/ }).click();

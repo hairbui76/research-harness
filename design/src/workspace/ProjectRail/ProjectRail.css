@@ -117,8 +117,18 @@ button.rh-project-rail__project[data-state='open'] {
   flex: none;
 }
 
+/*
+ * The session list takes the room it needs, and no more.
+ *
+ * It used to be the rail's growing element, so a project with no sessions opened about
+ * 350px of nothing between the empty list and the navigation under it — the rail read as
+ * broken before a single destination had been considered. The list is content-height now
+ * and shrinks (scrolling inside itself) when a long history runs out of room, which is the
+ * only case that ever needed the height. The free space goes to the foot instead, so the
+ * provider's standing stays at the bottom edge where a footer belongs.
+ */
 .rh-project-rail__sessions {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
 }
 
@@ -184,6 +194,7 @@ button.rh-project-rail__project[data-state='open'] {
   flex-direction: column;
   gap: var(--rh-space-2);
   flex: none;
+  margin-block-start: auto;
   border-top: var(--rh-border-width) solid var(--rh-border-subtle);
   padding-top: var(--rh-space-2);
 }
