@@ -115,6 +115,23 @@ export interface ComposerProps
    * destination, because where research content goes is not a presentation decision.
    */
   destination?: ReactNode;
+  /**
+   * A capability note that belongs beside the destination, not above the box.
+   *
+   * Which index is answering reference completion, and what to do about it, is a standing
+   * fact about what the composer can do — not a failure of anything the researcher just
+   * did. It shares the destination's row, so the one notice slot above the box stays for
+   * the thing that actually stopped a send.
+   */
+  note?: ReactNode;
+  /**
+   * What the paperclip accepts, given to the paperclip.
+   *
+   * A permanent strip inside the box explaining the drop target was the loudest thing on
+   * an empty conversation, so this is the button's own description instead; the host shows
+   * the visible version while a file is actually over the box.
+   */
+  attachHint?: ReactNode;
   sendLabel?: string;
 }
 
@@ -152,6 +169,8 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
     attachAccept,
     hint,
     destination,
+    note,
+    attachHint,
     sendLabel = 'Send',
     className,
     ...rest
@@ -389,8 +408,16 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
               label="Attach files"
               size="sm"
               disabled={disabled}
+              {...(attachHint === undefined
+                ? {}
+                : { 'aria-describedby': `${baseId}-attach-hint` })}
               onClick={() => fileInputRef.current?.click()}
             />
+            {attachHint === undefined ? null : (
+              <span className="rh-visually-hidden" id={`${baseId}-attach-hint`}>
+                {attachHint}
+              </span>
+            )}
           </>
         ) : null}
         {modelSelector}
@@ -441,10 +468,15 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
         )}
       </p>
 
-      {destination === undefined ? null : (
-        <p className="rh-composer__destination" id={`${baseId}-destination`}>
-          {destination}
-        </p>
+      {destination === undefined && note === undefined ? null : (
+        <div className="rh-composer__footer">
+          {destination === undefined ? null : (
+            <p className="rh-composer__destination" id={`${baseId}-destination`}>
+              {destination}
+            </p>
+          )}
+          {note === undefined ? null : <div className="rh-composer__note">{note}</div>}
+        </div>
       )}
     </div>
   );

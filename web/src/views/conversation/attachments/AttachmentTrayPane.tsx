@@ -14,9 +14,11 @@
 import type { ReactNode } from 'react';
 import { AttachmentTray, ErrorNotice } from '@research-harness/design';
 import type { EntityRefModel } from '@research-harness/design';
-import { AttachmentIntake } from './AttachmentIntake';
+import { ATTACHMENT_HINT, AttachmentIntake } from './AttachmentIntake';
 import { SaveOutcome, saveSlicesFor } from './SaveToCorpusFlow';
 import type { AttachmentWorkspace } from './useAttachments';
+
+export { ATTACHMENT_HINT };
 
 export interface AttachmentTrayPaneProps {
   attachments: AttachmentWorkspace;

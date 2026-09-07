@@ -46,7 +46,7 @@ import type {
   ModelOptionGroup,
 } from '@research-harness/design';
 import { useSession } from '../../app/session';
-import { AttachmentTrayPane } from './attachments/AttachmentTrayPane';
+import { ATTACHMENT_HINT, AttachmentTrayPane } from './attachments/AttachmentTrayPane';
 import {
   PROJECT_DEFAULT_OPTION,
   bindingOptionId,
@@ -54,7 +54,7 @@ import {
   parseRuntimeOptionId,
   toProjectDefaultOption,
 } from './mappers';
-import { GraphStatusNotice, ReferenceMarks } from './references';
+import { GraphStatusNote, ReferenceMarks } from './references';
 import { useConversation } from './state';
 import type { RuntimeDestination } from './useModels';
 
@@ -449,22 +449,47 @@ export function ComposerPane() {
           binding: bindingLabel === '' ? null : bindingLabel,
         });
 
+  /**
+   * The one notice slot above the box, filled by whichever thing is loudest.
+   *
+   * Five strips used to stack here — the graph's, the draft's flagged references, the
+   * catalogue's sentence, a refused binding and a failed send — with the design system's
+   * own blocked notice inside the box under them. Six framed strips above an empty message
+   * box is H8's named issue, and the at-rest one was the tallest. So: the `Composer`'s
+   * `blockedReasons` notice wins, because it is the only one that has actually stopped the
+   * send; then a refused binding, then a retryable send; then the catalogue's own sentence
+   * about why it has nothing to offer. The graph state left the stack entirely — it is a
+   * capability note, and it rides beside the destination line now.
+   *
+   * `ReferenceMarks` is not in the priority: it is not a notice about the composer but a
+   * list of the draft's own tokens, and it appears only when the resolver objected to one.
+   */
+  const notice =
+    blockedReasons.length > 0 ? null : refusal !== null ? (
+      // A binding the daemon would not store, in its own words, where the pick was made.
+      // Nothing durable changed, so the selector is still on the stored binding.
+      <ErrorNotice
+        kind="blocked"
+        title="That model was not bound to this session"
+        description={refusal}
+        safety={{ draft: 'safe', note: 'Your message is exactly where you left it.' }}
+        onDismiss={() => setRefusal(null)}
+      />
+    ) : send.error !== null && send.retryable ? (
+      <ErrorNotice
+        kind="retryable"
+        title="The message did not get through"
+        description={send.error}
+        safety={{ draft: 'safe', note: 'Your message is exactly where you left it.' }}
+        actions={[{ label: 'Try again', onClick: onSend, iconStart: 'refresh-cw' }]}
+        onDismiss={send.dismissError}
+      />
+    ) : models.unavailable ? (
+      <p className="rh-web-composer__note rh-text-secondary">{models.unavailable}</p>
+    ) : null;
+
   return (
     <div className="rh-web-composer">
-      {/* References and the graph (task W3). Completion falls back to the project listings
-          when `graph.status` says the index is absent, rebuilding or unreadable, and this
-          is the one place that says so — once, beside the composer, in the Design System's
-          own wording (graph spec §8). An index that is absent or unreadable also carries
-          the rebuild its wording asks for; a window that may not write is offered `Check
-          again` alone, because `state.rebuild` is admin and human-only. */}
-      <GraphStatusNotice
-        degradation={graph.degradation}
-        answering={graph.answering}
-        onRecheck={graph.recheck}
-        rebuilding={graph.rebuilding}
-        rebuildError={graph.rebuildError}
-        {...(canMutate ? { onRebuild: graph.rebuild } : {})}
-      />
       {/* References and the graph (task W3). Every token in the draft is resolved against
           canonical state; the ones that did not come back clean are marked here, with the
           resolver's own sentence, before the message is sent (conversation spec §7). They
@@ -474,30 +499,7 @@ export function ComposerPane() {
         flagged={draftReferences.flagged}
         onOpen={openRef}
       />
-      {models.unavailable ? (
-        <p className="rh-web-composer__note rh-text-secondary">{models.unavailable}</p>
-      ) : null}
-      {/* A binding the daemon would not store, in its own words, where the pick was made.
-          Nothing durable changed, so the selector is still on the stored binding. */}
-      {refusal !== null ? (
-        <ErrorNotice
-          kind="blocked"
-          title="That model was not bound to this session"
-          description={refusal}
-          safety={{ draft: 'safe', note: 'Your message is exactly where you left it.' }}
-          onDismiss={() => setRefusal(null)}
-        />
-      ) : null}
-      {send.error !== null && send.retryable ? (
-        <ErrorNotice
-          kind="retryable"
-          title="The message did not get through"
-          description={send.error}
-          safety={{ draft: 'safe', note: 'Your message is exactly where you left it.' }}
-          actions={[{ label: 'Try again', onClick: onSend, iconStart: 'refresh-cw' }]}
-          onDismiss={send.dismissError}
-        />
-      ) : null}
+      {notice}
       <Composer
         value={draft.value}
         onChange={onChange}
@@ -566,6 +568,31 @@ export function ComposerPane() {
         {/* Where an unpublished message goes, kept on screen long after the one-time
             disclosure was answered. Absent rather than vague when nothing is known. */
         ...(destination !== null ? { destination } : {})}
+        {/* References and the graph (task W3). Completion falls back to the project
+            listings when `graph.status` says the index is absent, rebuilding or
+            unreadable, and this is the one place that says so — once, beside the line that
+            says where the message goes (graph spec §8). An index that is absent or
+            unreadable still carries the rebuild its own wording asks for; a window that may
+            not write is offered `Check again` alone, because `state.rebuild` is admin and
+            human-only. */
+        ...(graph.degradation === null
+          ? {}
+          : {
+              note: (
+                <GraphStatusNote
+                  degradation={graph.degradation}
+                  answering={graph.answering}
+                  onRecheck={graph.recheck}
+                  rebuilding={graph.rebuilding}
+                  rebuildError={graph.rebuildError}
+                  {...(canMutate ? { onRebuild: graph.rebuild } : {})}
+                />
+              ),
+            })}
+        {/* What the paperclip accepts, on the paperclip. The strip that used to say it sat
+            permanently inside the box; the host shows it now only while a file is over the
+            composer. */
+        ...(attachments.files.canAttach ? { attachHint: ATTACHMENT_HINT } : {})}
         actions={
           <Button
             size="sm"

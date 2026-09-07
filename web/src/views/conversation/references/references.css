@@ -42,16 +42,37 @@
 }
 
 /*
- * A refused rebuild, in the daemon's own words, inside the notice that offered it.
+ * Which index is answering `@` completion, beside the line that says where a message goes.
  *
- * The same treatment `__problems` gives the resolver's sentences: the daemon's text, at the
- * notice's own secondary weight, with no framing of ours around it.
+ * A capability note, at the destination line's own size and one step quieter than it: what
+ * the picker can offer right now matters less than where the message is headed. It wraps
+ * rather than truncating, and the action sits on the same row as the sentence.
  */
-.rh-web-graph__rebuild-refusal {
-  margin: 0;
-  color: var(--rh-text-secondary);
+.rh-web-graph-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1) var(--rh-space-2);
+  min-width: 0;
+  color: var(--rh-text-muted);
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
+}
+
+.rh-web-graph-note__line {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/*
+ * A refused rebuild, in the daemon's own words, beside the note that offered it.
+ *
+ * The same treatment `__problems` gives the resolver's sentences: the daemon's text, at the
+ * note's own secondary weight, with no framing of ours around it.
+ */
+.rh-web-graph-note__refusal {
+  flex: 1 1 100%;
+  color: var(--rh-text-secondary);
 }
 
 /*

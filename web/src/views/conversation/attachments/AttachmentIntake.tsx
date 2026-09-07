@@ -14,11 +14,26 @@
  *
  * A window the daemon resolved as an agent host may not write, so the intake is closed and
  * says why in the daemon's own sentence rather than quietly ignoring a drop (PRODUCT §29).
+ * That refusal is standing and stays on screen; the invitation is not, and appears only
+ * while a file is over the target.
  */
 import { useCallback, useState } from 'react';
 import type { DragEvent, ReactNode } from 'react';
 import { Icon } from '@research-harness/design';
 import type { AttachmentsApi } from './useAttachments';
+
+/**
+ * What the intake accepts and what it does with a file, in one sentence.
+ *
+ * It used to be a permanent strip inside the composer, above the box, on every empty
+ * conversation. It is the paperclip's own description now — the composer hands it to the
+ * button through `attachHint` — and the visible copy appears only while a file is actually
+ * over the drop target, which is the one moment it is telling the researcher something
+ * they did not already know.
+ */
+export const ATTACHMENT_HINT =
+  'Drop images, PDFs and other files here, or use Attach files. They stay in this session ' +
+  'until you save one to the corpus.';
 
 export interface AttachmentIntakeProps {
   files: AttachmentsApi;
@@ -59,10 +74,9 @@ export function AttachmentIntake({ files, children }: AttachmentIntakeProps) {
           <Icon name="lock" size={14} />{' '}
           {`Files cannot be attached from this window. ${files.blockedReason}`}
         </p>
-      ) : files.canAttach && files.models.length === 0 ? (
+      ) : files.canAttach && over ? (
         <p className="rh-web-attachments__hint rh-text-secondary">
-          <Icon name="paperclip" size={14} /> Drop images, PDFs and other files here, or use
-          Attach files. They stay in this session until you save one to the corpus.
+          <Icon name="paperclip" size={14} /> {ATTACHMENT_HINT}
         </p>
       ) : null}
       {children}

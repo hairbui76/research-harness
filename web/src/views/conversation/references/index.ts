@@ -12,7 +12,7 @@
  * | `useNeighbourhood.ts` / `useProvenance.ts` | one-hop traversal, and the path to the exact source anchor |
  * | `mappers.ts` | `graph.*` responses → Design System view models, deciding nothing |
  * | `ContextTab.tsx` / `ReferenceDetails.tsx` | the inspector's graph pane |
- * | `GraphStatusNotice.tsx` / `ReferenceMarks.tsx` / `DeepLinkNotice.tsx` | the three things the researcher has to be told |
+ * | `GraphStatusNote.tsx` / `ReferenceMarks.tsx` / `DeepLinkNotice.tsx` | the three things the researcher has to be told |
  * | `ArtifactSourceRoute.tsx` | `/source/:artifactId`, where an artifact deep link lands |
  */
 import './references.css';
@@ -20,7 +20,7 @@ import './references.css';
 export { ArtifactSourcePage } from './ArtifactSourceRoute';
 export { GraphContextPanel } from './ContextTab';
 export { DeepLinkNotice } from './DeepLinkNotice';
-export { GraphStatusNotice } from './GraphStatusNotice';
+export { GraphStatusNote } from './GraphStatusNote';
 export { ReferenceMarks } from './ReferenceMarks';
 export { ReferenceDetails } from './ReferenceDetails';
 export { followable, routeForResolvedLink, useDeepLinks, MANUSCRIPT_PATH, SOURCE_PATH } from './deepLinks';

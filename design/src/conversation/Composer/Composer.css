@@ -90,3 +90,27 @@
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
 }
+
+/*
+ * The destination and whatever capability note stands beside it, on one row.
+ *
+ * They wrap onto separate lines rather than truncating: the destination keeps a line of
+ * its own whenever both are present and the box is narrow, because half a destination is
+ * worse than none.
+ */
+.rh-composer__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rh-space-1) var(--rh-space-4);
+  min-width: 0;
+}
+
+.rh-composer__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1) var(--rh-space-2);
+  min-width: 0;
+}

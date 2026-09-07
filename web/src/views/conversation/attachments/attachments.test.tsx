@@ -263,6 +263,32 @@ beforeEach(() => {
 
 /* -- §9.1 attach and preview, with no corpus mutation --------------------- */
 
+describe('the intake’s own invitation', () => {
+  it('rides on the paperclip at rest and appears only while a file is over the box', async () => {
+    const daemon = withAttachments(fakeDaemon({ capabilities: answers() }), { uploads: {} });
+    renderConversation({ daemon });
+    await workspaceReady();
+
+    // At rest it is the button's description, not a strip inside the box: a permanent
+    // explanation of the drop target was the loudest thing on an empty conversation.
+    const paperclip = screen.getByRole('button', { name: 'Attach files' });
+    const describedBy = paperclip.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy!)).toHaveTextContent(
+      /Drop images, PDFs and other files here/,
+    );
+    expect(document.querySelector('.rh-web-attachments__hint')).toBeNull();
+
+    // While a file is actually over the target, the invitation is worth its own line.
+    fireEvent.dragOver(intake(), { dataTransfer: { files: [IMAGE()], types: ['Files'] } });
+    await waitFor(() =>
+      expect(document.querySelector('.rh-web-attachments__hint')).not.toBeNull(),
+    );
+    fireEvent.dragLeave(intake());
+    await waitFor(() => expect(document.querySelector('.rh-web-attachments__hint')).toBeNull());
+  });
+});
+
 describe('attaching an image and a PDF', () => {
   it('previews both and calls no corpus capability', async () => {
     const daemon = withAttachments(

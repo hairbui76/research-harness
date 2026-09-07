@@ -628,10 +628,15 @@ describe('when the graph is not answering', () => {
     renderCockpit({ daemon });
     await transcriptReady();
 
-    const notice = await screen.findByText('Rebuilding the research index');
-    expect(notice).toBeInTheDocument();
-    expect(screen.getAllByText('Rebuilding the research index')).toHaveLength(1);
-    expect(screen.getByText(/Completing from state.index/)).toBeInTheDocument();
+    // The demoted line: one sentence beside the destination, not a framed notice above the
+    // box. It still names the state the daemon reported and what is answering instead — and
+    // the capability that is answering is on the element rather than in the sentence,
+    // because `state.index` is not a word a researcher reads (2E).
+    const line = await screen.findByText(/Rebuilding the research index/);
+    expect(screen.getAllByText(/Rebuilding the research index/)).toHaveLength(1);
+    expect(line).toHaveTextContent('completing from the project listings');
+    expect(line.closest('.rh-web-graph-note')).toHaveAttribute('data-answering', 'state.index');
+    expect(line.closest('.rh-composer')).not.toBeNull();
 
     // Completion still works, from the listings, and the graph is not asked.
     await user.type(screen.getByRole('textbox', { name: 'Message' }), '@');
@@ -648,7 +653,9 @@ describe('when the graph is not answering', () => {
     renderCockpit({ daemon });
     await transcriptReady();
 
-    expect(await screen.findByText('The research index is not answering')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/The research index is not answering/),
+    ).toBeInTheDocument();
   });
 
   it('says a rebuild is in progress only while one actually is', async () => {
@@ -659,10 +666,14 @@ describe('when the graph is not answering', () => {
     renderCockpit({ daemon });
     await transcriptReady();
 
-    const notice = (await screen.findByText('Rebuilding the research index')).closest('.rh-state')!;
-    expect(notice).toHaveAttribute('data-kind', 'loading');
-    expect(notice).toHaveAttribute('aria-busy', 'true');
-    expect(within(notice as HTMLElement).getByRole('progressbar')).toBeInTheDocument();
+    const note = (await screen.findByText(/Rebuilding the research index/)).closest(
+      '.rh-web-graph-note',
+    )!;
+    // The bar and the frame went with the demotion; what a rebuild in flight still owes the
+    // reader is that it *is* in flight, and the note says so in words and to the live region.
+    expect(note).toHaveAttribute('data-degradation', 'rebuilding');
+    expect(note).toHaveAttribute('aria-busy', 'true');
+    expect(within(note as HTMLElement).queryByRole('progressbar')).toBeNull();
   });
 
   it('does not dress an index that was never built as one being built', async () => {
@@ -673,15 +684,16 @@ describe('when the graph is not answering', () => {
     renderCockpit({ daemon });
     await transcriptReady();
 
-    const notice = (
-      await screen.findByText('The research index has not been built yet')
-    ).closest('.rh-state')!;
+    const note = (await screen.findByText(/The research index is not built yet/)).closest(
+      '.rh-web-graph-note',
+    )!;
     // The Windows report: a spinner, LOADING and an "Index rebuild" bar, with nothing running.
-    expect(notice).toHaveAttribute('data-kind', 'partial');
-    expect(notice).not.toHaveAttribute('aria-busy');
-    expect(within(notice as HTMLElement).queryByRole('progressbar')).toBeNull();
-    expect(notice).not.toHaveTextContent('Loading');
-    expect(notice).toHaveTextContent(/Completing from state.index/);
+    expect(note).toHaveAttribute('data-degradation', 'absent');
+    expect(note).not.toHaveAttribute('aria-busy');
+    expect(within(note as HTMLElement).queryByRole('progressbar')).toBeNull();
+    expect(note).not.toHaveTextContent('Loading');
+    expect(note).not.toHaveTextContent('Rebuilding');
+    expect(note).toHaveTextContent('completing from the project listings');
   });
 
   it('runs the rebuild its own wording asks for, and the notice goes when the index is there', async () => {
@@ -690,14 +702,14 @@ describe('when the graph is not answering', () => {
     const user = userEvent.setup();
     renderCockpit({ daemon });
     await transcriptReady();
-    await screen.findByText('The research index has not been built yet');
+    await screen.findByText(/The research index is not built yet/);
 
     // The rebuild the daemon is about to run is the one that makes the index answer.
     capabilities['graph.status'] = statusAvailable;
     await user.click(screen.getByRole('button', { name: 'Rebuild the index' }));
 
     await waitFor(() =>
-      expect(screen.queryByText('The research index has not been built yet')).toBeNull(),
+      expect(screen.queryByText(/The research index is not built yet/)).toBeNull(),
     );
     const names = daemon.capabilityCalls().map((call) => call.name);
     const rebuiltAt = names.indexOf('state.rebuild');
@@ -718,11 +730,15 @@ describe('when the graph is not answering', () => {
     renderCockpit({ daemon });
     await transcriptReady();
 
-    const notice = (
-      await screen.findByText('The research index has not been built yet')
-    ).closest('.rh-state')!;
-    expect(within(notice as HTMLElement).getByRole('button', { name: 'Check again' })).toBeInTheDocument();
-    expect(within(notice as HTMLElement).queryByRole('button', { name: 'Rebuild the index' })).toBeNull();
+    const note = (await screen.findByText(/The research index is not built yet/)).closest(
+      '.rh-web-graph-note',
+    )!;
+    expect(
+      within(note as HTMLElement).getByRole('button', { name: 'Check again' }),
+    ).toBeInTheDocument();
+    expect(
+      within(note as HTMLElement).queryByRole('button', { name: 'Rebuild the index' }),
+    ).toBeNull();
   });
 
   it('renders the daemon’s own sentence when a rebuild is refused, and keeps the notice', async () => {
@@ -740,13 +756,13 @@ describe('when the graph is not answering', () => {
     const user = userEvent.setup();
     renderCockpit({ daemon });
     await transcriptReady();
-    await screen.findByText('The research index has not been built yet');
+    await screen.findByText(/The research index is not built yet/);
 
     await user.click(screen.getByRole('button', { name: 'Rebuild the index' }));
 
     expect(await screen.findByText(REFUSAL)).toBeInTheDocument();
-    // Nothing was built, so the notice is still the truth about the index.
-    expect(screen.getByText('The research index has not been built yet')).toBeInTheDocument();
+    // Nothing was built, so the note is still the truth about the index.
+    expect(screen.getByText(/The research index is not built yet/)).toBeInTheDocument();
   });
 
   it('has no accessibility violations with the rebuild offered', async () => {

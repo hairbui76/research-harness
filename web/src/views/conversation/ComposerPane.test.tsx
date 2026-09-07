@@ -358,6 +358,34 @@ describe('the composer after the disclosure', () => {
     await expectNoAxeViolations(document.body);
   });
 
+  it('keeps the index state beside the destination and one notice above the box', async () => {
+    // The stack the finish review measured: the graph's framed notice, the catalogue's
+    // sentence, and four more siblings above an empty message box. The index state is a
+    // capability note and rides beside the destination line now; the slot above the box
+    // holds one thing, and here that is the catalogue's own sentence.
+    const capabilities = answers();
+    delete capabilities['provider.list'];
+    capabilities['provider.cli.scan'] = {
+      capability: 'provider.cli.scan',
+      ok: false,
+      error: { code: 'unavailable', message: 'the runtime scan could not be read' },
+    };
+    renderConversation({ daemon: fakeDaemon({ capabilities }), session: LOCAL });
+    await transcriptReady();
+    await screen.findByText(/model catalogue is unavailable/);
+
+    const pane = document.querySelector('.rh-web-composer')!;
+    const box = pane.querySelector('.rh-composer')!;
+    const above = [
+      ...pane.querySelectorAll('.rh-error-notice, .rh-state, .rh-web-composer__note'),
+    ].filter((node) => !box.contains(node));
+    expect(above).toHaveLength(1);
+    expect(above[0]).toHaveTextContent(/model catalogue is unavailable/);
+    // No `graph.status` in this fixture, so completion is falling back — and says so from
+    // inside the box, on the footer row the destination line owns.
+    expect(box.querySelector('.rh-composer__footer .rh-web-graph-note')).not.toBeNull();
+  });
+
   it('is not the only place the destination is stated', async () => {
     const daemon = fakeDaemon({ capabilities: answers() });
     const user = userEvent.setup();
