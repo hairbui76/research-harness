@@ -55,7 +55,7 @@ is the comment at the top of `src/tokens/semantic.css`; the shape is:
 | --- | --- |
 | Surfaces | `--rh-surface-{canvas,pane,raised,paper,inverse,subtle,selected,scrim}` |
 | Borders | `--rh-border-{subtle,default,strong}`, `--rh-border-on-paper`, `--rh-border-width{,-strong}` |
-| Text | `--rh-text-{primary,secondary,muted,inverse,link,on-accent}`, `--rh-text-on-paper{,-secondary,-muted}` |
+| Text | `--rh-text-{primary,secondary,muted,inverse,link}`, `--rh-text-on-paper{,-secondary,-muted}` |
 | Paper marks | `--rh-highlight-on-paper{,-anchor,-match}` and each one's `-border` |
 | AI/action accent | `--rh-accent{,-hover,-subtle,-border,-fg,-text}` |
 | Focus | `--rh-focus-ring{,-width,-offset}` |
@@ -63,10 +63,10 @@ is the comment at the top of `src/tokens/semantic.css`; the shape is:
 | Feedback | `--rh-feedback-<success\|error\|warning\|info>-<fg\|bg\|border>` |
 | Type | `--rh-font-{sans,serif,mono}`, `--rh-type-<role>-{size,lh,ls,weight}`, `--rh-type-reading-min-size` |
 | Space / radius | `--rh-space-{1,2,3,4,5,6,8,10,12,16}`, `--rh-radius-{control,nav,card,pill}` |
-| Motion | `--rh-duration-{fast,base,slow}`, `--rh-ease-standard`, `--rh-scale-{hover,press}` |
+| Motion | `--rh-duration-{fast,base}`, `--rh-ease-standard`, `--rh-scale-{hover,press}` |
 | Density | `--rh-density-{row,gap,pad,font-scale}`, `--rh-control-{target-min,height-sm,height-md}` |
 
-Three rules make the contract hold:
+Four rules make the contract hold:
 
 **Raw colour lives in two places.** `src/tokens/palette.css` and `src/themes/*.css`.
 Anywhere else — a component, the Web client — is a fork of the theme that will look right
@@ -80,6 +80,29 @@ stroke: #65b5ff; /* raw-colour-ok: chart series 2, fixed across themes */
 **The accent is not decoration.** `--rh-accent` marks model activity, the primary send/run
 action, active reference tracking and selected AI provenance. It is not an emphasis colour,
 not a hover colour, and it never says anything about whether a claim is true.
+
+**Every token has a reader.** `scripts/token-usage.mjs` lists every `--rh-*` declared under
+`src/tokens` and `src/themes` and every `var()` that reads one across `design/src` and
+`web/src`; `tests/tokens.test.ts` fails on a token nothing reads. Tests, snapshots and
+specimens are deliberately not consumers — a token whose only reader is the test asserting
+it exists is exactly what the census is for. Two names are allow-listed in `HOST_TOKENS`,
+each because it completes a set this file publishes as an interface: `--rh-density-gap`
+(the four density values) and `--rh-z-base` (the floor of the stacking scale). Everything
+else must be read by something to stay.
+
+```bash
+node scripts/token-usage.mjs           # the census
+node scripts/token-usage.mjs --json    # the same, for tooling
+```
+
+Six tokens were removed by the first run of it. `--rh-space-0` (zero is not a spacing
+decision), `--rh-duration-slow` (a third speed nobody chose), `--rh-text-on-accent` (an
+alias of `--rh-accent-fg`, and two names for one ink is how a theme comes to disagree with
+itself), and the three warm ramp steps `250`, `350` and `400` that no theme picked up. The
+`display` type role stays: it is the published step above a page title, `base.css` ships
+`.rh-text-display` for it, and it is the step a host reaches for when it needs one above
+`h1`. The cockpit itself sets no `display` type any more — every page title is an `h1` —
+so nothing in `web/src` reads it, and that is correct rather than dead.
 
 **Status is never colour alone.** Every one of the six scientific states renders an icon
 and a label as well as its palette (`STATUS_META` in `src/primitives/Badge/status.ts`), so

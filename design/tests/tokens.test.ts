@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { HOST_TOKENS, tokenCensus } from '../scripts/token-usage.mjs';
 
 /**
  * The token contract.
@@ -145,9 +146,9 @@ const REQUIRED_SEMANTIC = [
     (n) => `--rh-surface-${n}`,
   ),
   ...['subtle', 'default', 'strong'].map((n) => `--rh-border-${n}`),
-  ...['primary', 'secondary', 'muted', 'inverse', 'link', 'on-accent'].map(
-    (n) => `--rh-text-${n}`,
-  ),
+  // `on-accent` is gone: it was an alias of `--rh-accent-fg` that nothing ever read, and
+  // two names for one ink is how a theme comes to disagree with itself (token-usage.mjs).
+  ...['primary', 'secondary', 'muted', 'inverse', 'link'].map((n) => `--rh-text-${n}`),
   '--rh-accent',
   '--rh-accent-hover',
   '--rh-accent-subtle',
@@ -185,9 +186,10 @@ const REQUIRED_FOUNDATION = [
   ]),
   ...[1, 2, 3, 4, 5, 6, 8, 10, 12, 16].map((n) => `--rh-space-${n}`),
   ...['control', 'nav', 'card', 'pill'].map((n) => `--rh-radius-${n}`),
+  // Two durations. `--rh-duration-slow` was declared, reset under reduced motion, and read
+  // by nothing; a third speed nobody chose is not part of the contract (token-usage.mjs).
   '--rh-duration-fast',
   '--rh-duration-base',
-  '--rh-duration-slow',
   '--rh-ease-standard',
   '--rh-scale-hover',
   '--rh-scale-press',
@@ -438,3 +440,43 @@ function cssFilesUnder(root: string): string[] {
   }
   return out;
 }
+
+
+/**
+ * The census.
+ *
+ * A token is a promise that a name means something, and a token nothing reads is not a
+ * promise — it survives palette changes because nothing breaks when it drifts, and it sits
+ * in autocomplete beside the name that is real. `scripts/token-usage.mjs` reads every
+ * `--rh-*` declared under `src/tokens` and `src/themes` and every `var()` under
+ * `design/src` and `web/src`; tests, snapshots and specimens are not consumers, because a
+ * token whose only reader is the test asserting it exists is exactly the case being looked
+ * for.
+ *
+ * `HOST_TOKENS` is the allow-list, and its bar is not "we might want it one day": each
+ * entry must name a set the README publishes as an interface, where a host reads the name
+ * and shipping only part of the set would be wrong.
+ */
+describe('the token census', () => {
+  it('declares no token that nothing reads', () => {
+    const { unexplained } = tokenCensus();
+    expect(unexplained.map((token) => `${token.name} (${token.file}:${token.line})`)).toEqual([]);
+  });
+
+  it('gives every host-facing exception a written reason', () => {
+    const { dead } = tokenCensus();
+    for (const token of dead) {
+      const reason = HOST_TOKENS[token.name];
+      expect(reason, `${token.name} has no consumer and no reason`).toBeTruthy();
+      expect((reason ?? '').length, `${token.name}'s reason is not a sentence`).toBeGreaterThan(40);
+    }
+  });
+
+  it('allows nothing it does not have to', () => {
+    const { dead } = tokenCensus();
+    const names = new Set(dead.map((token) => token.name));
+    for (const token of Object.keys(HOST_TOKENS)) {
+      expect(names.has(token), `${token} is read after all; drop it from HOST_TOKENS`).toBe(true);
+    }
+  });
+});

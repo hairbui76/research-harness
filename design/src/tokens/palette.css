@@ -8,7 +8,9 @@
  * off-black #111111, oat #dedbd6, sand #d3cec6) and extended into a full dark ramp.
  */
 :root {
-  /* Warm neutral ramp, darkest to lightest. */
+  /* Warm neutral ramp, darkest to lightest. Every step here is picked up by a theme:
+     `scripts/token-usage.mjs` fails on a step nothing reads, so the ramp says what the
+     system actually uses rather than how wide a ramp could be. */
   --rh-palette-warm-1000: #0e0d0c;
   --rh-palette-warm-975: #141312;
   --rh-palette-warm-950: #1b1a18;
@@ -20,10 +22,7 @@
   --rh-palette-warm-600: #635e56;
   --rh-palette-warm-500: #7d776e;
   --rh-palette-warm-450: #948d83;
-  --rh-palette-warm-400: #a49d93;
-  --rh-palette-warm-350: #b5aea4;
   --rh-palette-warm-300: #c9c2b8;
-  --rh-palette-warm-250: #d3cec6;
   --rh-palette-warm-200: #dedbd6;
   --rh-palette-warm-150: #e7e3dc;
   --rh-palette-warm-100: #ece8e2;

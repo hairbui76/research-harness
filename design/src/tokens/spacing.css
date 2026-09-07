@@ -1,9 +1,11 @@
 /*
  * Spacing on a 4px base. The number in the token name is the multiplier, so
  * --rh-space-3 is 3 x 4px = 12px. Nothing in the package uses a bare pixel gap.
+ *
+ * The scale starts at 1. There is no --rh-space-0, because zero is not a spacing
+ * decision: `gap: 0` says what it means, and a token for it only ever hid that.
  */
 :root {
-  --rh-space-0: 0;
   --rh-space-1: 4px;
   --rh-space-2: 8px;
   --rh-space-3: 12px;
