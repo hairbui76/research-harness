@@ -1,5 +1,5 @@
 /*
- * Layout for the corpus list, and nothing else.
+ * Layout for the corpus page: what needs a researcher, then the works themselves.
  *
  * The corpus is the one research page whose length nothing bounds: `work.list` answers the
  * whole corpus in a single read, and a project of a thousand works used to mount a thousand
@@ -8,8 +8,13 @@
  * page frame does not already give it: a height to window against.
  *
  * `FullPageWorkspace` is the scroller for a research page, and it stays the scroller here.
- * The list takes the height the body has left and scrolls inside it, so the page does not
- * also scroll: one scroller, in the same place a researcher already found it.
+ * The lead takes the height it needs, the list takes what is left and scrolls inside it, so
+ * the page does not also scroll: one scroller, in the same place a researcher already
+ * found it.
+ *
+ * There is deliberately no rule here that makes a count large. Every number on this page is
+ * inside a sentence — the daemon's, or the live one beside the list — and a stylesheet that
+ * could draw a stat tile is an invitation to draw one again.
  *
  * Colour, spacing and type are the Design System's; `check-tokens.mjs` scans `web/src` and
  * fails the lint on a literal.
@@ -18,9 +23,61 @@
 .rh-web-corpus {
   display: flex;
   flex-direction: column;
-  gap: var(--rh-space-3);
+  /* Generous between the lead and the works, so the heading below has more room above it
+     than under it and the two parts of the page read as two things. */
+  gap: var(--rh-space-6);
   min-block-size: 0;
   block-size: 100%;
+}
+
+/*
+ * The works, under their own heading: the instrument the lead points into.
+ *
+ * It is the part that flexes, so the lead above it is never compressed and the list below
+ * it always has a height to window against.
+ */
+.rh-web-corpus__works {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+/*
+ * One group in the lead, and the works named under it.
+ *
+ * The same shape the Overview's attention groups keep: the line that names the group and
+ * the first work beneath it belong to each other, and the works are indented by one space
+ * unit so the group reads as one block rather than as five separate lines.
+ */
+.rh-web-corpus__attention > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-corpus__group {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/*
+ * The works a group names, indented under it by one space unit — the shape every attention
+ * group on the Overview keeps. The two-class selector is deliberate: `.rh-web-list` zeroes
+ * the margin of every list in the cockpit and would otherwise win on source order.
+ */
+.rh-web-corpus__attention .rh-web-corpus__group-items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* What the group's cap left out, in the daemon's words: quiet, and in line with the works
+   it did show. */
+.rh-web-corpus__more {
+  margin: 0;
+  margin-inline-start: var(--rh-space-4);
+  color: var(--rh-text-secondary);
 }
 
 .rh-web-corpus__list {

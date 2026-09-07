@@ -10,9 +10,9 @@ This module is the shared answer. Every function here is a pure read over canoni
 the summaries are exactly what the navigation lists, and `GET /index` is composed from the
 same functions the capabilities call - so the route and the capability cannot drift.
 
-Nothing here derives a judgement about an object. A summary counts what a canonical file
-already records; deciding what needs attention across the workspace is `GET /overview`'s
-job, and deciding what a Claim may say is `claim.audit`'s.
+Nothing here derives a judgement about what a Claim may say - that is `claim.audit`'s job -
+and deciding what needs attention across the workspace is `GET /overview`'s. A summary
+counts what a canonical file already records.
 
 Two lists also carry the grouping they are read in - `ClaimList.groups` and
 `QuestionList.groups`. That is not a new judgement: the line between a claim whose evidence
@@ -20,10 +20,17 @@ carries it and one whose evidence does not is `allowed_strength` against
 `requested_strength`, both of which the claim file already records, and the line between an
 open question and an answered one is its own status. Composing it once, here, is what stops
 each host drawing it again in its own words (Product 5 P10).
+
+The one judgement made here is the corpus's own: which sources cannot yet be read from, and
+why. It lives beside `work.list` because it is answered from the same read and the cockpit
+must never re-derive it from `screening` and `parsed` in React (Product 5 P10) - the same
+reason `GET /overview` composes the attention surfaces of Product 26 rather than shipping
+React the raw lists.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -58,6 +65,8 @@ __all__ = [
     "ClaimGroup",
     "ClaimList",
     "ClaimSummary",
+    "CorpusAttentionGroup",
+    "CorpusAttentionItem",
     "DecisionList",
     "DecisionSummary",
     "EvidenceList",
@@ -85,6 +94,7 @@ __all__ = [
     "WorkspaceIndexRequest",
     "claim_concern",
     "claim_groups",
+    "corpus_attention",
     "list_anchors",
     "list_claims",
     "list_decisions",
@@ -136,6 +146,36 @@ class WorkSummary(_Summary):
     versions: int = 0
     evidence: int = 0
     artifacts: tuple[ArtifactSummary, ...] = ()
+
+
+class CorpusAttentionItem(_Summary):
+    """One Work that needs a researcher, and what is specific to it."""
+
+    id: str
+    label: str
+    """The Work's own title, or its id when it has no title yet."""
+
+    detail: str = ""
+    """What is true of this Work and not of the rest of its group; empty when there is
+    nothing to add, because three copies of the group's own sentence teach nothing."""
+
+    route: str = ""
+    """Where the cockpit shows this one Work. Empty means the cockpit has no screen for it
+    and the item is text, never a link back to the list it is already in."""
+
+
+class CorpusAttentionGroup(_Summary):
+    """One reason a source is not yet something this project can read from."""
+
+    kind: str
+    label: str
+    """The whole line, as a sentence: "4 works have no readable text yet". The count is
+    inside it because a corpus reads its own size everywhere else on the page."""
+
+    count: int
+    items: tuple[CorpusAttentionItem, ...] = ()
+    more: str = ""
+    """What the item cap left out, in words; empty when nothing was left out."""
 
 
 class ClaimSummary(_Summary):
@@ -331,10 +371,17 @@ class WorkspaceIndex(_Summary):
 
 
 class WorkList(_Summary):
-    """`work.list`: the corpus, summarised."""
+    """`work.list`: the corpus, summarised, and what in it needs a researcher."""
 
     count: int = 0
     works: tuple[WorkSummary, ...] = ()
+    attention: tuple[CorpusAttentionGroup, ...] = ()
+    """The sources that cannot yet be read from, in the order a researcher meets them.
+
+    Only the groups with something in them are here: a corpus every source of which is
+    readable answers with none, and the page says so in one sentence rather than in four
+    lines of zero.
+    """
 
 
 class ClaimGroup(_Summary):
@@ -499,13 +546,14 @@ class WorkspaceIndexRequest(CapabilityRequest):
 
 
 def list_works(ctx: CapabilityContext, request: ListWorksRequest) -> WorkList:
-    """`work.list`: the corpus with its files, versions, and evidence counts."""
+    """`work.list`: the corpus with its files, its evidence counts, and what needs a reader."""
     works = [
         work
         for work in ctx.repo.list_works()
         if request.screening is None or work.screening.value == request.screening
     ]
-    return WorkList(count=len(works), works=tuple(work_summary(ctx.repo, work) for work in works))
+    summaries = tuple(work_summary(ctx.repo, work) for work in works)
+    return WorkList(count=len(summaries), works=summaries, attention=corpus_attention(summaries))
 
 
 def list_claims(ctx: CapabilityContext, request: ListClaimsRequest) -> ClaimList:
@@ -648,6 +696,137 @@ def read_index(ctx: CapabilityContext, request: WorkspaceIndexRequest) -> Worksp
 
 
 # -- the shared builders -----------------------------------------------------
+
+
+#: How many works one corpus attention group names before it defers to the list itself.
+#: Three, because a group's job is to make the trouble concrete and reachable, and every one
+#: of the works it counts is already in the list underneath it.
+CORPUS_ATTENTION_ITEMS = 3
+
+#: Why a source is not yet something this project can read from, in the order a researcher
+#: meets them: a screening decision left half-taken keeps a Work out of the corpus proper
+#: (Product 14), a file has to be behind it, a stored parse has to exist before any span in
+#: it can be anchored (Product 16), and only then can anything be accepted from it.
+#:
+#: Each entry is the whole line the page reads - for one work, and for several. The count
+#: lives inside the sentence because a bare number at heading size is the shape the Overview
+#: was rebuilt to leave behind, and this page follows it.
+CORPUS_ATTENTION: tuple[tuple[str, str, str], ...] = (
+    (
+        "screening",
+        "1 work was screened and never included or excluded",
+        "{count} works were screened and never included or excluded",
+    ),
+    (
+        "no_file",
+        "1 work has no file to read from",
+        "{count} works have no file to read from",
+    ),
+    (
+        "unparsed",
+        "1 work has no readable text yet",
+        "{count} works have no readable text yet",
+    ),
+    (
+        "unread",
+        "1 work has nothing accepted from it yet",
+        "{count} works have nothing accepted from them yet",
+    ),
+)
+
+
+def corpus_attention(works: Sequence[WorkSummary]) -> tuple[CorpusAttentionGroup, ...]:
+    """Which sources need a researcher, and why, in the order the corpus acquires them.
+
+    This is the judgement the Corpus page opens with, and it is made here so no client
+    makes it: a cockpit that read `screening` and `parsed` and decided for itself which
+    works were in trouble would be a second, disagreeing copy of Product 14 and 16 living
+    in React (Product 5 P10).
+
+    Only the groups with something in them come back. A corpus every source of which can be
+    read from answers with none, and the page says that in one sentence rather than in four
+    lines of zero.
+    """
+    members: dict[str, list[WorkSummary]] = {kind: [] for kind, _, _ in CORPUS_ATTENTION}
+    for work in works:
+        kind = _corpus_group(work)
+        if kind:
+            members[kind].append(work)
+    return tuple(
+        _corpus_group_view(kind, singular, plural, members[kind])
+        for kind, singular, plural in CORPUS_ATTENTION
+        if members[kind]
+    )
+
+
+def _corpus_group(work: WorkSummary) -> str:
+    """Which group one Work belongs to, or "" when it needs nothing.
+
+    The first missing thing wins: a half-finished screening decision is a decision whatever
+    else is true of the Work, and asking for a parse of a file that was never attached would
+    ask for the wrong thing.
+
+    Two screening states ask for nothing. `excluded` is a decision already taken (Product
+    14). `discovered` is the state every Work is *ingested* in - it is the field's default
+    and nothing in the cockpit moves it - so counting it as an open decision would put the
+    whole corpus in a group with no next step in it, forever. `screened` is the one that is
+    genuinely unfinished: something judged this Work and left it neither in nor out.
+    """
+    if work.screening == "screened":
+        return "screening"
+    if work.screening == "excluded":
+        return ""
+    if not work.artifacts:
+        return "no_file"
+    if not any(artifact.parsed for artifact in work.artifacts):
+        return "unparsed"
+    if work.evidence == 0:
+        return "unread"
+    return ""
+
+
+def _corpus_detail(kind: str, work: WorkSummary) -> str:
+    """What is true of this Work and not of every other Work in its group.
+
+    Empty where there is nothing to add: three copies of the group's own sentence teach a
+    reader nothing the line above them did not already say.
+    """
+    if kind == "unparsed" and len(work.artifacts) > 1:
+        # Only the plural is news. "Its one file has no stored parse" under a line that
+        # already said "4 works have no readable text yet" is the same sentence three times.
+        return f"none of its {len(work.artifacts)} files has a stored parse"
+    return ""
+
+
+def _corpus_group_view(
+    kind: str, singular: str, plural: str, works: Sequence[WorkSummary]
+) -> CorpusAttentionGroup:
+    """One group: its sentence, the first few works in it, and what the cap left out."""
+    shown = tuple(works[:CORPUS_ATTENTION_ITEMS])
+    rest = len(works) - len(shown)
+    if rest == 0:
+        more = ""
+    elif rest == 1:
+        more = "1 more is in the list below."
+    else:
+        more = f"{rest} more are in the list below."
+    return CorpusAttentionGroup(
+        kind=kind,
+        label=singular if len(works) == 1 else plural.format(count=len(works)),
+        count=len(works),
+        items=tuple(
+            CorpusAttentionItem(
+                id=work.id,
+                label=work.title or work.id,
+                detail=_corpus_detail(kind, work),
+                # The cockpit's own path for one Work, as `GET /overview` writes it for a
+                # stale object: the daemon says where an item lives, never the client.
+                route=f"/corpus/{work.id}",
+            )
+            for work in shown
+        ),
+        more=more,
+    )
 
 
 def work_summary(repo: WorkspaceRepository, work: Work) -> WorkSummary:

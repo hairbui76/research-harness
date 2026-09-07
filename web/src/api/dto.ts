@@ -327,9 +327,40 @@ export interface ClaimList {
   summary: string;
 }
 
+/**
+ * One Work the corpus needs a researcher for, and what is specific to it.
+ *
+ * `route` is the daemon's own cockpit path for that Work, exactly as an overview attention
+ * item carries one; an item with no route is text rather than a link back into the list it
+ * is already in.
+ */
+export interface CorpusAttentionItem {
+  id: string;
+  label: string;
+  detail: string;
+  route: string;
+}
+
+/**
+ * One reason a source is not yet something this project can read from.
+ *
+ * `label` is the whole line — "4 works have no readable text yet" — because the judgement
+ * behind the grouping and the words for it are one decision, and it is the daemon's
+ * (Product 5 P10). A client renders this; it never re-derives a group from `screening` and
+ * `parsed`.
+ */
+export interface CorpusAttentionGroup {
+  kind: string;
+  label: string;
+  count: number;
+  items: CorpusAttentionItem[];
+  more: string;
+}
+
 export interface WorkList {
   count: number;
   works: WorkSummary[];
+  attention: CorpusAttentionGroup[];
 }
 
 /**
