@@ -184,3 +184,21 @@ check reported. Neither of the last two runs without the researcher's yes.
   Taxonomy now precedes Synthesis, because a group is a run of consecutive entries and
   Taxonomy belongs to the record while Synthesis is an output; the two assertions that
   encoded the old order say why they changed.
+- 2026-09-08 (wave 5): the researcher answered every open item with "continue everything",
+  so eleven agents ran from the pushed wave-four tree. Built: the rail grouping as proposed
+  (option A — Waiting, The record, Outputs — with Taxonomy moved before Synthesis so each
+  name covers a contiguous run); DESIGN.md with its sidecar, extracted from the shipped
+  system, and the PRODUCT.md schema block with its inferred facts labelled; Defer and Reject
+  on every queue row at every tier with Accept kept where the source sits beside the
+  decision; the Corpus as rows across the columns the researcher's questions ask, with those
+  questions as server-composed filters; the Synthesis matrix as a real grid with a field
+  picker and cells that open onto their evidence; the manuscript route answering its own
+  width, with the audit joining the editor and preview as a view below the breakpoint; the
+  review screen's vocabulary defining itself to the keyboard; the collapsed bar naming the
+  current page and Project Home saying what a project is; palette chords with visible
+  hints and an actions group, the Overview's read-at time, and change entries attributed to
+  the researcher or the daemon from the record; and the craft-floor defects the DESIGN.md
+  extraction found (the combobox's accent stripe and text glyph, the tabs' accent marker,
+  the toast over the inbox count). Two integration fixes followed: the PDF highlight's 2px
+  radius became `--rh-radius-mark` once the detector could read the recorded scale, and the
+  corpus filters' pressed ring took the hairline under the new inset-shadow sweep.
