@@ -276,6 +276,21 @@ export interface ReviewOutcome {
 }
 
 /**
+ * `review.accept_batch`: what the policy batch accepted, and why it left the rest alone.
+ *
+ * Which candidates meet the Product 24.4 conditions is the daemon's judgement, checked per
+ * candidate at the moment of the call; `skipped` carries its own sentence for each one it
+ * refused, and the cockpit renders both lists rather than counting or explaining anything
+ * itself. A `dry_run` answers the same shape with no mutation behind it.
+ */
+export interface BatchAcceptResponse {
+  dry_run: boolean;
+  accepted: string[];
+  skipped: Record<string, string>;
+  mutations: MutationResponse[];
+}
+
+/**
  * The one-list reads of `capabilities/reads.py`.
  *
  * `state.index` answers all of them at once and is what the navigation uses; a view that

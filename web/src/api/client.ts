@@ -21,6 +21,7 @@ import type {
   AttachmentRemoved,
   AttachmentSendCheck,
   AttachmentView,
+  BatchAcceptResponse,
   BuildView,
   CandidateView,
   CapabilityCatalog,
@@ -345,6 +346,23 @@ export class HarnessClient {
   /** Ask for more evidence: staging forgets, and the note the handler writes does not. */
   requestMoreEvidence(candidateId: string, note: string): Promise<ReviewOutcome> {
     return this.call<ReviewOutcome>('review.request_more', { candidate_id: candidateId, note });
+  }
+
+  /**
+   * The Product 24.4 policy batch: accept every candidate that meets the conditions.
+   *
+   * The cockpit names no candidate. Which ones qualify — verifier supported, anchor still
+   * valid, no competing candidate, low-risk field, no conflict with accepted state — is
+   * decided by the daemon per candidate at the moment of the call, and a workspace under
+   * the default strict policy refuses the whole request. So there is nothing to select
+   * here: the request narrows to one `work` or takes the whole queue, and `dryRun` asks
+   * what would happen without anything happening.
+   */
+  acceptBatch(options: { work?: string | null; dryRun: boolean }): Promise<BatchAcceptResponse> {
+    return this.call<BatchAcceptResponse>('review.accept_batch', {
+      dry_run: options.dryRun,
+      ...(options.work ? { work: options.work } : {}),
+    });
   }
 
   /**

@@ -42,6 +42,9 @@ import type {
   RailItem,
 } from "@research-harness/design";
 import type { ProjectView } from "../api/projects";
+// The shortcut layer wraps the shell so a page's commands and the rail's destinations meet
+// in one palette; it renders the palette and the help sheet itself.
+import { CommandsProvider } from "./commands";
 import { useOptionalHost } from "./host";
 import type { Host } from "./host";
 import { projectHref, useProjectPaths } from "./projectPaths";
@@ -164,7 +167,7 @@ function Shell() {
   };
 
   return (
-    <>
+    <CommandsProvider destinations={items}>
       <AppShell
         mainLabel="Research workspace"
         railOpen={railOpen}
@@ -209,7 +212,7 @@ function Shell() {
         onOpenChange={setNewSessionOpen}
         onCreate={(visibility) => void conversation.sessions.create(undefined, visibility)}
       />
-    </>
+    </CommandsProvider>
   );
 }
 
