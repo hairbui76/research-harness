@@ -55,10 +55,20 @@
   cursor: pointer;
 }
 
-/* The active option is marked with a border as well as a fill, so it is not colour-only. */
+/*
+ * Which option Enter would take. Focus stays in the text box under the combobox pattern, so
+ * the row itself has to say where the keyboard is — it takes the `selected` fill a menu item
+ * takes under the pointer and the command palette's active row takes under the keyboard,
+ * which is a step in lightness rather than a hue and survives greyscale.
+ *
+ * It used to carry a 2px accent stripe down its start edge as well. That spent the model's
+ * orange on a keyboard highlight, where the accent means model activity, send/run, reference
+ * tracking and AI provenance and nothing else, and it drew a coloured side rule twice the
+ * hairline on a row — which is the strong width, reserved for the selected tab's marker and
+ * the rule beside quoted matter.
+ */
 .rh-combobox__option[data-active] {
   background: var(--rh-surface-selected);
-  box-shadow: inset 2px 0 0 0 var(--rh-accent);
 }
 
 .rh-combobox__option[aria-selected='true'] .rh-combobox__option-label::after {

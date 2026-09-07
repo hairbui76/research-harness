@@ -475,6 +475,31 @@ describe('border widths', () => {
     }
     expect(literals).toEqual([]);
   });
+
+  /*
+   * The sweep above reads `border` and `outline`, which is where a rule is normally drawn —
+   * and an inset `box-shadow` draws exactly the same rule without using either word. That is
+   * how a 2px accent stripe stood down the start edge of the combobox's active option: a
+   * side border by every measure except the property it was written in. The strong width is
+   * spent on the selected tab's marker and the rule beside quoted matter, so a shadow that
+   * draws a stripe is held to the hairline like anything else.
+   */
+  it('draws no thicker stripe through an inset shadow, which is a border by another name', () => {
+    const stripes: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [index, line] of css.split('\n').entries()) {
+          if (!/^\s*box-shadow\s*:/.test(line) || !/\binset\b/.test(line)) continue;
+          const above =
+            [...line.matchAll(/(\d+(?:\.\d+)?)px/g)].some((match) => Number(match[1]) > 1) ||
+            /--rh-border-width-strong/.test(line);
+          if (above) stripes.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+        }
+      }
+    }
+    expect(stripes).toEqual([]);
+  });
 });
 
 /**
