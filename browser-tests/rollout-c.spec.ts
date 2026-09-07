@@ -4,9 +4,11 @@
  * The Overview's pattern says a research page opens with what needs a researcher and reads
  * the size of the project after it. The corpus is where that is hardest to hold: it is the
  * one screen whose length nothing bounds, its list is windowed, and the list itself is
- * genuinely comparative — files, versions, sizes and whether each one is parsed, read by
- * running an eye down shared columns. So the lead names the work and the table stays the
- * instrument, and what is asserted below is that both are true at once.
+ * genuinely comparative — whether a source can be read from, what has been accepted from
+ * it, what cites it, when it came in — read by running an eye down shared columns. So the
+ * lead names the work, the rows answer the questions a researcher brings, and the questions
+ * themselves are the controls that narrow the list. What is asserted below is that all of
+ * it is true at once, and that the narrowing is the daemon's rather than the browser's.
  *
  * `/__test__/corpus-readiness` builds the state through the daemon's own services: a paper
  * ingested and parsed with nothing accepted from it, four more sources whose one file has
@@ -126,9 +128,44 @@ test('the corpus names the sources that need a researcher before it says how muc
   ).toBeLessThan(countBox.y);
   expect(await bareNumbers(page), 'no number stands on its own').toEqual([]);
 
-  // The works stay the instrument: the find narrows them and the live count follows it.
+  // The works stay the instrument, and the row is where the questions are answered: the
+  // columns that used to be a stack of labels per card are one strip over a thousand rows.
   const works = page.getByRole('region', { name: 'Every work in the corpus' });
-  await expect(works.getByRole('columnheader', { name: 'Parsed' }).first()).toBeVisible();
+  await expect(page.locator('.rh-web-corpus__head .rh-web-corpus__column')).toHaveText([
+    'Work',
+    'Screening',
+    'Readable',
+    'Accepted',
+    'Cited by',
+    'Came in',
+  ]);
+
+  // One row, read across. Nothing here is opened: the four facts a corpus is asked about
+  // are on the row, and each cell carries its own name for a screen reader that only ever
+  // has a window of the list to read.
+  const first = page.locator('.rh-web-corpus__row').first();
+  const cell = (index: number) => first.locator('.rh-web-corpus__cell').nth(index);
+  await expect(cell(0).getByRole('link').first()).toBeVisible();
+  for (const [index, name] of [
+    [1, 'Screening state'],
+    [2, 'Readable text'],
+    [3, 'Accepted evidence'],
+    [4, 'Claims citing it'],
+    [5, 'Came into the corpus'],
+  ] as const) {
+    await expect(cell(index), `the row names its ${name}`).toContainText(name);
+  }
+  await expect(cell(2), 'the paper the lead named has been parsed').toContainText('yes');
+  await expect(cell(3), 'and nothing has been accepted from it').toContainText('0');
+
+  // Its files are one press away, inside the row: reaching them never unmounts the list.
+  const files = first.getByRole('button', { name: /file/ });
+  await expect(files).toHaveAttribute('aria-expanded', 'false');
+  await files.click();
+  await expect(first.getByRole('columnheader', { name: 'Parsed' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Works in the corpus' })).toBeVisible();
+  await files.click();
+
   // The work the lead named is reachable through the find without scrolling to it. Its own
   // id is the query, because a title or a year can be a substring of another work's id and
   // the find matches over both.
@@ -140,6 +177,82 @@ test('the corpus names the sources that need a researcher before it says how muc
 
   await auditPage(page, 'the corpus');
   await page.screenshot({ path: info.outputPath('corpus-needs-a-researcher.png'), fullPage: false });
+  expect(errors).toEqual([]);
+});
+
+/**
+ * The questions a researcher brings, against a real corpus.
+ *
+ * `work.list` composes them — which works cannot be read from yet, which have nothing
+ * accepted, which came in lately — counts each over the whole corpus, and answers with the
+ * works that answer the question. So what is asserted here is that pressing one narrows the
+ * list to exactly what the daemon counted, that the lead and the counts stay whole while it
+ * is narrowed, and that the browser's own find still works inside it.
+ */
+test('the questions the corpus can be asked are the controls that narrow it', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(300_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await signIn(page, request);
+  const corpus = await corpusOf(request, true);
+  await page.goto(corpus.corpus_url);
+  await expect(page.getByRole('heading', { level: 1, name: 'Corpus' })).toBeVisible();
+
+  const bar = page.getByRole('group', { name: 'Ask the corpus a question' });
+  const every = bar.getByRole('button', { name: 'Every work (5)' });
+  const unparsed = bar.getByRole('button', { name: 'No readable text (4)' });
+  const unread = bar.getByRole('button', { name: 'Nothing accepted (1)' });
+  await expect(every).toHaveAttribute('aria-pressed', 'true');
+  await expect(unparsed).toBeVisible();
+  await expect(unread).toBeVisible();
+
+  const rows = page.locator('.rh-web-corpus__row');
+  await expect(rows).toHaveCount(5);
+
+  // The four the daemon counted, and only those. Every one of them says "no" under
+  // Readable text, which is the question, answered on the row.
+  await unparsed.click();
+  await expect(
+    page.getByRole('status').filter({ hasText: '4 of 5 works have no readable text yet.' }),
+  ).toBeVisible();
+  await expect(rows).toHaveCount(4);
+  for (let index = 0; index < 4; index += 1) {
+    await expect(rows.nth(index).locator('.rh-web-corpus__cell').nth(2)).toContainText('no');
+  }
+  await expect(unparsed).toHaveAttribute('aria-pressed', 'true');
+  await expect(every).toHaveAttribute('aria-pressed', 'false');
+
+  // The lead is about the corpus, so it does not move; neither do the counts on the
+  // controls, which are over the whole of it.
+  await expect(
+    page.locator('.rh-web-corpus__attention').getByText('1 work has nothing accepted from it yet'),
+  ).toBeVisible();
+  await expect(unread).toBeVisible();
+  expect(await bareNumbers(page), 'no number stands on its own').toEqual([]);
+
+  // The find is the one question about the text on screen rather than about the science, so
+  // it stays in the browser — and it says which set it is narrowing.
+  const inside = await rows.first().getByRole('link', { name: /^W\d{4}$/ }).innerText();
+  await findAWork(page).fill(inside);
+  await expect(
+    page
+      .getByRole('status')
+      .filter({ hasText: '4 of 5 works have no readable text yet. Showing 1 of them.' }),
+  ).toBeVisible();
+  await expect(rows).toHaveCount(1);
+  await findAWork(page).fill('');
+
+  await auditPage(page, 'the corpus narrowed to one question');
+  await page.screenshot({ path: info.outputPath('corpus-one-question.png'), fullPage: false });
+
+  // A question narrows and nothing else: pressing the chosen one again is the way back.
+  await unparsed.click();
+  await expect(page.getByRole('status').filter({ hasText: '5 works.' })).toBeVisible();
+  await expect(rows).toHaveCount(5);
   expect(errors).toEqual([]);
 });
 

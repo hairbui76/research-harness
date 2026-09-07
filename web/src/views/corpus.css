@@ -43,7 +43,7 @@
    * strip that names them and every row under it. The work takes what is left; the five
    * facts take what their own words need and no more.
    */
-  --rh-web-corpus-columns: minmax(12rem, 1fr) 7rem 5.5rem 4.5rem 4.75rem 7.5rem;
+  --rh-web-corpus-columns: minmax(14rem, 1fr) 6.75rem 5rem 4.5rem 4.75rem 7.5rem;
 }
 
 /*
@@ -108,11 +108,16 @@
   gap: var(--rh-space-2);
 }
 
-/* The chosen question, in the surface the cockpit already uses for a chosen thing. */
+/*
+ * The chosen question, in the surface the cockpit already uses for a chosen thing.
+ *
+ * The others keep the ordinary control's own border: a filter that looks like a line of
+ * text is one a researcher has to discover by hovering over the page.
+ */
 .rh-web-corpus__questions .rh-button[aria-pressed='true'] {
   background: var(--rh-surface-selected);
   color: var(--rh-text-primary);
-  box-shadow: inset 0 0 0 var(--rh-border-width) var(--rh-border-strong);
+  box-shadow: inset 0 0 0 var(--rh-border-width-strong) var(--rh-border-strong);
 }
 
 /*
@@ -125,7 +130,9 @@
 .rh-web-corpus__head {
   display: grid;
   grid-template-columns: var(--rh-web-corpus-columns);
-  gap: var(--rh-space-3);
+  /* Wide enough that a right-aligned count and the date beside it are two columns rather
+     than one run of digits. */
+  gap: var(--rh-space-4);
   align-items: end;
   padding: var(--rh-space-1) var(--rh-space-2);
   border-block-end: var(--rh-border-width) solid var(--rh-border-default);
@@ -171,7 +178,7 @@
 .rh-web-corpus__cells {
   display: grid;
   grid-template-columns: var(--rh-web-corpus-columns);
-  gap: var(--rh-space-3);
+  gap: var(--rh-space-4);
   align-items: start;
 }
 
@@ -200,18 +207,24 @@
 }
 
 .rh-web-corpus__byline {
-  margin: 0;
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
   max-inline-size: var(--rh-measure-prose);
 }
 
-.rh-web-corpus__row-actions {
+/*
+ * The line under a title: the id, what the work is, and the way into its files.
+ *
+ * One line rather than three, because a row is read against the rows above and below it
+ * and a three-line row is a card with the borders taken off. It wraps rather than
+ * truncating: a byline cut short is a claim about the paper, and this one would be false.
+ */
+.rh-web-corpus__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--rh-space-3);
+  gap: var(--rh-space-1) var(--rh-space-3);
 }
 
 /*
@@ -281,7 +294,7 @@
  * dropped — a fact that only fits on a wide screen is a fact a researcher on a narrow one
  * would have to open a second page to read.
  */
-@container rh-page (width < 46rem) {
+@container rh-page (width < 52rem) {
   .rh-web-corpus__head {
     display: none;
   }
@@ -310,7 +323,9 @@
     color: var(--rh-text-secondary);
   }
 
+  /* A label and its value are a pair once they are on the same line as four other
+     pairs; without the colon "Claims citing it 0" reads as a sentence that stopped. */
   .rh-web-corpus__label::after {
-    content: ' ';
+    content: ': ';
   }
 }

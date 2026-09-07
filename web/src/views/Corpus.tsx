@@ -106,7 +106,7 @@ import './corpus.css';
  * researcher opens its files. The measurement is the real answer; this is only what the
  * window places rows by until it has one.
  */
-const WORK_ROW_HEIGHT = 96;
+const WORK_ROW_HEIGHT = 68;
 
 /**
  * The columns a corpus is read across.
@@ -124,7 +124,7 @@ const WORK_ROW_HEIGHT = 96;
 const COLUMNS = [
   { key: 'work', head: 'Work', label: 'Work' },
   { key: 'screening', head: 'Screening', label: 'Screening state' },
-  { key: 'readable', head: 'Readable text', label: 'Readable text' },
+  { key: 'readable', head: 'Readable', label: 'Readable text' },
   { key: 'evidence', head: 'Accepted', label: 'Accepted evidence' },
   { key: 'claims', head: 'Cited by', label: 'Claims citing it' },
   { key: 'added', head: 'Came in', label: 'Came into the corpus' },
@@ -391,7 +391,7 @@ function Questions({
     >
       <Button
         size="sm"
-        variant="ghost"
+        variant="secondary"
         aria-pressed={chosen === ''}
         onClick={() => onChoose('')}
       >
@@ -401,7 +401,7 @@ function Questions({
         <Button
           key={question.kind}
           size="sm"
-          variant="ghost"
+          variant="secondary"
           aria-pressed={chosen === question.kind}
           onClick={() => onChoose(chosen === question.kind ? '' : question.kind)}
         >
@@ -514,9 +514,12 @@ function WorkRow({
           <Link className="rh-web-corpus__title" to={to}>
             {work.title}
           </Link>
-          <p className="rh-web-corpus__byline">{byline(work)}</p>
-          <div className="rh-web-corpus__row-actions">
+          {/* One line under the title: the reference a researcher writes down, what the
+              work is, and the way into its files. Three stacked lines on every row of a
+              thousand-row list is a card again. */}
+          <div className="rh-web-corpus__meta">
             <ObjectRef id={work.id} kind="work" to={to} />
+            <span className="rh-web-corpus__byline">{byline(work)}</span>
             {work.artifacts.length === 0 ? (
               <span className="rh-text-secondary">No file yet</span>
             ) : (
