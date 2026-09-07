@@ -28,7 +28,7 @@ import logging
 import os
 import secrets
 import threading
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Container, Mapping, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any
@@ -51,6 +51,7 @@ from research_harness.domain.base import utc_now
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
     ClaimStatus,
+    DecisionStatus,
     ManuscriptAnchorStatus,
     QuestionStatus,
     ResearchEventType,
@@ -71,6 +72,7 @@ from research_harness.domain.ids import (
     parse_id,
 )
 from research_harness.domain.manuscript import ManuscriptAnchor
+from research_harness.domain.research import Decision, Taxonomy, TaxonomyTerm
 from research_harness.domain.work import Artifact, Work
 from research_harness.evidence.conflicts import ConflictRecord, ConflictStore
 from research_harness.local_app.runtime import LEGACY_PROJECT_ID, WorkspaceRuntime
@@ -88,11 +90,18 @@ from research_harness.protocol.dto import (
     CountEntry,
     ErrorBody,
     HealthReport,
+    MatrixView,
     ObjectView,
     OverviewCounts,
     OverviewReport,
     RecentChanges,
+    ResearchGroup,
     RunStatus,
+    StaleOverview,
+    SynthesisReport,
+    TaxonomyReport,
+    TaxonomyTermView,
+    TaxonomyView,
     WorkspaceIndex,
     WorkSummary,
     error_body,
@@ -315,6 +324,28 @@ def create_workspace_app(
         """What needs attention now, composed server-side (Product 26, principle P10)."""
         caller.authorize("overview", Permission.READ, human_only=False)
         return _overview(catalog, root, caller)
+
+    @app.get("/stale", response_model=StaleOverview)
+    def stale(caller: Caller) -> StaleOverview:
+        """What went out of date and why, grouped by scientific impact (Product 37).
+
+        Staleness is decay this daemon declares. A client never computes one, and the
+        reasons here are the same ones the Overview's own stale group carries.
+        """
+        caller.authorize("stale", Permission.READ, human_only=False)
+        return _stale_overview(catalog, root, caller)
+
+    @app.get("/taxonomy", response_model=TaxonomyReport)
+    def taxonomy(caller: Caller) -> TaxonomyReport:
+        """The classification, and the terms no accepted Decision stands behind (Product 32)."""
+        caller.authorize("taxonomy", Permission.READ, human_only=False)
+        return _taxonomy_report(root)
+
+    @app.get("/synthesis", response_model=SynthesisReport)
+    def synthesis(caller: Caller) -> SynthesisReport:
+        """The matrices, and the readings nobody has recorded for them (Product 7.1)."""
+        caller.authorize("synthesis", Permission.READ, human_only=False)
+        return _synthesis_report(root)
 
     register_manuscript_routes(app, root)
     register_attachment_routes(app, root)
@@ -1022,6 +1053,430 @@ def _read_result[T: BaseModel](
     if not isinstance(result, model_type):  # pragma: no cover - the registry guarantees it
         raise TypeError(f"{name} returned {type(result).__name__}, not {model_type.__name__}")
     return result
+
+
+# -- the research pages the Overview's pattern reaches ------------------------
+#
+# Three pages that used to be a table in a card now read the way the Overview reads: what
+# needs a researcher first, stated in sentences, then the instrument the page exists for.
+# Every line those pages group by is drawn here, because deciding which group an object
+# belongs in is the same scientific judgement that decides whether it needs attention at
+# all (Product 5 P10). A client renders these answers and composes none of them.
+
+#: Product 37's tiers of scientific impact, highest first: the priority `state.stale`
+#: records, a stable key, what the tier is called on screen, the noun one of its objects is,
+#: where the cockpit shows those objects, and what going stale in that tier costs.
+STALE_TIERS: tuple[tuple[int, str, str, str, str, str], ...] = (
+    (
+        5,
+        "manuscript",
+        "Manuscript sentences",
+        "manuscript sentence",
+        "/manuscript",
+        "A sentence in the manuscript is attached to a Claim whose support has moved, so "
+        "what is written no longer rests on what the accepted state says. Nothing is "
+        "rewritten for you; this is the tier to repair first.",
+    ),
+    (
+        4,
+        "claims",
+        "Accepted claims",
+        "claim",
+        "/claims",
+        "A Claim was audited against evidence that has since changed, so the strength it is "
+        "allowed to state was settled on a reading that no longer stands.",
+    ),
+    (
+        3,
+        "synthesis",
+        "Synthesis matrices",
+        "matrix",
+        "/synthesis",
+        "A matrix cell was read from evidence that has since changed, so the row it sits in "
+        "no longer reads the corpus as the corpus now stands.",
+    ),
+    (
+        2,
+        "taxonomy",
+        "Classifications",
+        "classification",
+        "/taxonomy",
+        "A work was classified under a term whose Decision has since been revised. The "
+        "classification is never rewritten silently; a researcher decides what it becomes.",
+    ),
+    (
+        1,
+        "index",
+        "Index entries",
+        "index entry",
+        "",
+        "A projection entry is behind the canonical files it is derived from. Rebuilding "
+        "the projection settles it, and no canonical object is affected.",
+    ),
+)
+
+#: How many works with no row of their own one synthesis gap group names before it stops
+#: listing them. The group's own sentence still states the whole number.
+UNCOVERED_ITEMS = 5
+
+
+def _counted(count: int, noun: str, plural: str | None = None) -> str:
+    """`1 claim` / `4 claims` — a count only ever read inside the thing it counts."""
+    return f"{count} {noun if count == 1 else (plural or f'{noun}s')}"
+
+
+def _has(count: int) -> str:
+    """`has` or `have`, so a sentence built around a count still parses."""
+    return "has" if count == 1 else "have"
+
+
+# -- what went stale, and why ------------------------------------------------
+
+
+def _stale_overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> StaleOverview:
+    """`state.stale`, grouped into the scientific-impact tiers of Product 37.
+
+    The items are built by :func:`_stale_items`, which is the Overview's own "Gone stale"
+    group. That is deliberate: two surfaces reporting the same decay in two different sets
+    of words would be two accounts of one fact, and a researcher would have to decide which
+    to believe. There is one account, and both pages read it.
+    """
+    ctx = open_context(root, caller.actor)
+    report = _read_result(registry, "state.stale", {"limit": STALE_LIMIT}, ctx, caller, StaleReport)
+    items = _stale_items(report)
+    groups: list[ResearchGroup] = []
+    for priority, key, title, noun, route, detail in STALE_TIERS:
+        tier = tuple(item for item in items if item.priority == priority)
+        if not tier:
+            continue
+        groups.append(
+            ResearchGroup(
+                key=key,
+                title=title,
+                summary=f"{_counted(len(tier), noun)} {_has(len(tier))} gone stale",
+                detail=detail,
+                count=len(tier),
+                route=route,
+                items=tier,
+            )
+        )
+    left_out = report.count - len(items)
+    return StaleOverview(
+        summary=_stale_summary(report.count),
+        count=report.count,
+        reported=len(items),
+        more=(
+            ""
+            if left_out <= 0
+            else f"{_counted(left_out, 'further stale mark')} {_has(left_out)} been recorded "
+            "beyond the ones listed here."
+        ),
+        groups=tuple(groups),
+    )
+
+
+def _stale_summary(count: int) -> str:
+    """The Stale page's own line: decay the daemon declared, never a client's guess."""
+    if not count:
+        return "Nothing in this project has gone out of date."
+    subject = "it rests" if count == 1 else "they rest"
+    return f"{_counted(count, 'object')} went stale because something {subject} on changed."
+
+
+# -- the classification, and the terms nothing stands behind -----------------
+
+
+def _taxonomy_report(root: Path) -> TaxonomyReport:
+    """Every taxonomy of this project, and which of its terms need a researcher.
+
+    A taxonomy is a researcher-approved project decision rather than a universal domain
+    fact (Product 32). A term with no Decision, or one whose Decision has been superseded,
+    is therefore classifying works on an authority the project has not granted — which is
+    the work this page opens with, before the classification itself.
+    """
+    repo = _open_repo(root)
+    decisions = {str(decision.id): decision for decision in repo.list_decisions()}
+    views: list[TaxonomyView] = []
+    waiting: list[AttentionItem] = []
+    total = 0
+    for taxonomy in repo.list_taxonomies():
+        terms: list[TaxonomyTermView] = []
+        approved = 0
+        for term, depth in _ordered_terms(taxonomy):
+            standing, status, reason = _term_standing(term, decisions)
+            approved += 1 if standing else 0
+            terms.append(
+                TaxonomyTermView(
+                    term=str(term.term),
+                    parent=str(term.parent or ""),
+                    definition=term.definition or "",
+                    decision=str(term.decision or ""),
+                    decision_status=status,
+                    approved=standing,
+                    depth=depth,
+                )
+            )
+            if not standing:
+                waiting.append(
+                    AttentionItem(
+                        id=f"{taxonomy.name}:{term.term}",
+                        label=f"{term.term} · {taxonomy.name}",
+                        detail=reason,
+                    )
+                )
+        total += len(terms)
+        views.append(
+            TaxonomyView(
+                name=taxonomy.name,
+                summary=_taxonomy_summary(len(terms), approved),
+                count=len(terms),
+                approved=approved,
+                terms=tuple(terms),
+            )
+        )
+    group = ResearchGroup(
+        key="needs_decision",
+        title="Waiting for a Decision",
+        summary=f"{_counted(len(waiting), 'term')} {_has(len(waiting))} no accepted Decision "
+        f"behind {'it' if len(waiting) == 1 else 'them'}",
+        detail=(
+            "A term becomes this project's classification when a Decision approves it, and a "
+            "Decision that has been superseded no longer carries the term it approved. Until "
+            "a researcher records one, anything classified by the term rests on nothing the "
+            "project has agreed."
+        ),
+        count=len(waiting),
+        items=tuple(waiting),
+    )
+    return TaxonomyReport(
+        summary=_taxonomy_page_summary(total, len(waiting)),
+        count=total,
+        needs_decision=group,
+        taxonomies=tuple(views),
+    )
+
+
+def _taxonomy_summary(count: int, approved: int) -> str:
+    """One taxonomy's own line: how much it classifies, and how much of it is agreed."""
+    if not count:
+        return "No term has been recorded in this taxonomy yet"
+    if approved == count:
+        return f"{_counted(count, 'term')}, every one approved by an accepted Decision"
+    return f"{_counted(count, 'term')}, {count - approved} of them without an accepted Decision"
+
+
+def _taxonomy_page_summary(total: int, waiting: int) -> str:
+    """The Taxonomy page's own line: the work first, the size of the classification after."""
+    if not total:
+        return "This project has agreed no classification yet."
+    if not waiting:
+        return (
+            f"Every one of this project's {_counted(total, 'term')} is approved by an "
+            "accepted Decision."
+        )
+    subject = "it" if waiting == 1 else "them"
+    return (
+        f"{_counted(waiting, 'term')} {_has(waiting)} no accepted Decision behind {subject}, "
+        f"out of {_counted(total, 'term')} in this project."
+    )
+
+
+def _ordered_terms(taxonomy: Taxonomy) -> tuple[tuple[TaxonomyTerm, int], ...]:
+    """The terms in the order the classification reads: each root, then what hangs under it.
+
+    A taxonomy is a tree, and walking it is the daemon's job so that no client has to
+    reconstruct the shape from a `parent` column. A term the walk cannot reach — which the
+    model's own validator makes impossible for a missing parent, and leaves possible only
+    for a cycle — is still reported, at the root, rather than dropped off the page.
+    """
+    children: dict[str, list[TaxonomyTerm]] = {}
+    for term in taxonomy.terms:
+        children.setdefault(str(term.parent or ""), []).append(term)
+    ordered: list[tuple[TaxonomyTerm, int]] = []
+    seen: set[str] = set()
+
+    def walk(parent: str, depth: int) -> None:
+        for term in sorted(children.get(parent, ()), key=lambda item: str(item.term)):
+            if str(term.term) in seen:
+                continue
+            seen.add(str(term.term))
+            ordered.append((term, depth))
+            walk(str(term.term), depth + 1)
+
+    walk("", 0)
+    ordered.extend((term, 0) for term in taxonomy.terms if str(term.term) not in seen)
+    return tuple(ordered)
+
+
+def _term_standing(term: TaxonomyTerm, decisions: Mapping[str, Decision]) -> tuple[bool, str, str]:
+    """Whether an accepted Decision stands behind ``term``, its status, and why not."""
+    if term.decision is None:
+        return False, "", "no Decision approves it yet"
+    named = str(term.decision)
+    decision = decisions.get(named)
+    if decision is None:
+        return False, "", f"{named} is named as its approval but is not recorded here"
+    status = decision.status.value
+    if status == DecisionStatus.ACCEPTED.value:
+        return True, status, ""
+    if status == DecisionStatus.SUPERSEDED.value:
+        return False, status, f"{named} approved it and has since been superseded"
+    return False, status, f"{named} proposes it and has not been accepted"
+
+
+# -- the matrices, and what they cannot say yet ------------------------------
+
+
+def _synthesis_report(root: Path) -> SynthesisReport:
+    """Every matrix of this project, and the readings nobody has recorded for it.
+
+    A matrix reads one property across works and proposes nothing. A cell with no labels
+    means "not recorded", never "the work lacks the property", and novelty is never
+    inferred from a gap (Product 7.1, 33) — so every sentence composed here is about the
+    record, and none of them is about a work.
+    """
+    repo = _open_repo(root)
+    corpus = tuple(str(work.id) for work in repo.list_works())
+    views: list[MatrixView] = []
+    groups: list[ResearchGroup] = []
+    missing_total = 0
+    uncovered_total = 0
+    for matrix in repo.list_matrices():
+        rows = tuple(str(work) for work in matrix.works)
+        read = {(str(cell.work), cell.field) for cell in matrix.cells if cell.labels}
+        declared = len(rows) * len(matrix.fields)
+        recorded = sum(1 for row in rows for field in matrix.fields if (row, field) in read)
+        missing = declared - recorded
+        missing_total += missing
+        uncovered = tuple(work for work in corpus if work not in rows)
+        uncovered_total += len(uncovered)
+        views.append(
+            MatrixView(
+                id=str(matrix.id),
+                name=matrix.name,
+                taxonomy=matrix.taxonomy or "",
+                stale=matrix.stale.value,
+                works=len(rows),
+                fields=matrix.fields,
+                cells=len(matrix.cells),
+                recorded=recorded,
+                shape=_matrix_shape(len(rows), len(matrix.fields)),
+                coverage=_matrix_coverage(recorded, declared),
+            )
+        )
+        items = _matrix_gaps(str(matrix.id), rows, matrix.fields, read, uncovered)
+        if items:
+            groups.append(
+                ResearchGroup(
+                    key=str(matrix.id),
+                    title=matrix.name,
+                    summary=_matrix_gap_summary(missing, len(uncovered)),
+                    detail=(
+                        "A matrix reads one property across works, from accepted evidence. A "
+                        "reading nobody has recorded is a gap in the record: it never means "
+                        "the work lacks the property, and nothing is proposed for it here."
+                    ),
+                    count=missing + len(uncovered),
+                    items=items,
+                )
+            )
+    return SynthesisReport(
+        summary=_synthesis_summary(len(views), missing_total, uncovered_total),
+        count=len(views),
+        missing=missing_total,
+        gaps=tuple(groups),
+        matrices=tuple(views),
+    )
+
+
+def _matrix_gaps(
+    matrix_id: str,
+    rows: Sequence[str],
+    fields: Sequence[str],
+    read: Container[tuple[str, str]],
+    uncovered: Sequence[str],
+) -> tuple[AttentionItem, ...]:
+    """One item per column that is missing a reading, then the works with no row at all.
+
+    A field is named once, with how much of the column is unread, rather than once per
+    empty cell: a column nobody has read is one gap in the record, not five.
+    """
+    items: list[AttentionItem] = []
+    for field in fields:
+        unread = [row for row in rows if (row, field) not in read]
+        if not unread:
+            continue
+        items.append(
+            AttentionItem(
+                id=f"{matrix_id}:{field}",
+                label=field,
+                detail=(
+                    "no work in this matrix has been read for it yet"
+                    if len(unread) == len(rows)
+                    else f"{len(unread)} of its {_counted(len(rows), 'work')} "
+                    f"{_has(len(unread))} not been read for it"
+                ),
+                priority=len(unread),
+            )
+        )
+    for work in uncovered[:UNCOVERED_ITEMS]:
+        items.append(
+            AttentionItem(
+                id=f"{matrix_id}:{work}",
+                label=work,
+                detail="this matrix has no row for it",
+                route=_object_route(work),
+            )
+        )
+    return tuple(items)
+
+
+def _matrix_shape(works: int, fields: int) -> str:
+    """What one matrix lines up, in words: never two numbers with a cross between them."""
+    if not works or not fields:
+        return "This matrix declares no works or no fields to read them for"
+    return f"{_counted(works, 'work')} read for {_counted(fields, 'field')}"
+
+
+def _matrix_coverage(recorded: int, declared: int) -> str:
+    """How much of a matrix has been recorded, said about the record and not the works."""
+    if not declared:
+        return "Nothing to read yet"
+    if recorded == declared:
+        return f"All {_counted(declared, 'reading')} recorded"
+    return f"{recorded} of {_counted(declared, 'reading')} recorded"
+
+
+def _matrix_gap_summary(missing: int, uncovered: int) -> str:
+    """One matrix's own gap line: what is unrecorded, and what has no row at all."""
+    phrases = []
+    if missing:
+        phrases.append(
+            f"{_counted(missing, 'reading')} this matrix declares {_has(missing)} not been recorded"
+        )
+    if uncovered:
+        phrases.append(
+            f"{_counted(uncovered, 'work')} in the corpus {_has(uncovered)} no row in it"
+        )
+    return _join_phrases(phrases)
+
+
+def _synthesis_summary(matrices: int, missing: int, uncovered: int) -> str:
+    """The Synthesis page's own line: what the matrices cannot say yet, before their size."""
+    if not matrices:
+        return "No matrix has been built yet, so nothing reads a property across this corpus."
+    recorded = "Every reading these matrices declare has been recorded"
+    if not missing and not uncovered:
+        return f"{recorded}."
+    if not missing:
+        return (
+            f"{recorded}, and {_counted(uncovered, 'work')} in the corpus "
+            f"{_has(uncovered)} no row in any of them."
+        )
+    return (
+        f"{_counted(missing, 'reading')} these matrices declare {_has(missing)} not been "
+        "recorded yet."
+    )
 
 
 # -- the built bundle --------------------------------------------------------

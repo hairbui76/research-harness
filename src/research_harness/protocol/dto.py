@@ -434,3 +434,164 @@ class OverviewReport(BaseModel):
     claim_health: tuple[CountEntry, ...] = ()
     open_questions: tuple[AttentionItem, ...] = ()
     conflicts: tuple[ConflictView, ...] = ()
+
+
+# -- the research pages that follow the Overview's pattern -------------------
+
+
+class ResearchGroup(BaseModel):
+    """One group of items a research page reads: what it is, its size, and where it leads.
+
+    The Overview settled this shape: a line naming the group and stating its size in words,
+    a sentence teaching what the objects in it are, and the items themselves indented under
+    it. Which group an object belongs in is a scientific judgement, so the daemon draws
+    every line and a client renders what it was handed (Product 5 P10).
+
+    There is deliberately no count on this model that a client could print on its own:
+    `summary` is the whole sentence a reader sees, and `count` exists so a client can tell
+    an empty group from a full one, not so it can compose a number into words of its own.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    key: str = ""
+    """Stable identifier for the group. Never rendered."""
+
+    title: str = ""
+    """What this group is, in the words a researcher reads."""
+
+    summary: str = ""
+    """The group's own line: its size stated inside a sentence, never a bare number."""
+
+    detail: str = ""
+    """What these objects are and where they come from — what an empty group teaches."""
+
+    count: int = 0
+    route: str = ""
+    """The cockpit path this group's own page lives at, when it has one. Empty otherwise."""
+
+    items: tuple[AttentionItem, ...] = ()
+
+
+class StaleOverview(BaseModel):
+    """`GET /stale`: what went out of date and why, grouped by scientific impact.
+
+    Staleness is decay the daemon declares, never a client's guess: an object is here
+    because something it rests on changed, and nothing is ever silently re-anchored
+    (Product 37, ADR-008). The groups are the priority tiers Product 37 names, highest
+    scientific impact first, and each item carries the daemon's own reason for it — the
+    same `AttentionItem` the Overview's "Gone stale" group is built from, so the two
+    surfaces cannot drift into two different accounts of the same decay.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    summary: str = ""
+    """One line: how much went stale, and why anything is here at all."""
+
+    count: int = 0
+    """Every mark recorded, including the ones beyond what this report carries."""
+
+    reported: int = 0
+    """How many marks the groups below hold."""
+
+    more: str = ""
+    """What the cap left out, in words. Empty when nothing was left out."""
+
+    groups: tuple[ResearchGroup, ...] = ()
+
+
+class TaxonomyTermView(BaseModel):
+    """One approved term, its place in the tree, and the Decision standing behind it."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    term: str
+    parent: str = ""
+    definition: str = ""
+    decision: str = ""
+    decision_status: str = ""
+    """`accepted`, `proposed`, `superseded`, or empty when no Decision is named."""
+
+    approved: bool = False
+    """True only when an accepted Decision stands behind this term (Product 32)."""
+
+    depth: int = 0
+    """How deep in the classification this term sits. The daemon walks the tree, not a client."""
+
+
+class TaxonomyView(BaseModel):
+    """One project taxonomy, its terms already ordered as the tree they form."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    name: str
+    summary: str = ""
+    """The taxonomy's own line: how many terms it holds and how many are approved."""
+
+    count: int = 0
+    approved: int = 0
+    terms: tuple[TaxonomyTermView, ...] = ()
+
+
+class TaxonomyReport(BaseModel):
+    """`GET /taxonomy`: what needs a researcher first, then the classification itself.
+
+    A taxonomy is a researcher-approved project decision rather than a universal domain
+    fact (Product 32), so the question this page opens with is which terms no accepted
+    Decision stands behind — a term with none, or one whose Decision has been superseded,
+    classifies works on an authority the project never granted.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    summary: str = ""
+    count: int = 0
+    """Every term in every taxonomy of this project."""
+
+    needs_decision: ResearchGroup = Field(default_factory=ResearchGroup)
+    taxonomies: tuple[TaxonomyView, ...] = ()
+
+
+class MatrixView(BaseModel):
+    """One synthesis matrix as its page states it: what it reads, and how much it has read."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    name: str
+    taxonomy: str = ""
+    stale: str = "fresh"
+    works: int = 0
+    fields: tuple[str, ...] = ()
+    cells: int = 0
+    recorded: int = 0
+    """Cells that carry at least one label. A cell with none has not been read yet."""
+
+    shape: str = ""
+    """What the matrix lines up, in words: the works it reads and the fields it reads them for."""
+
+    coverage: str = ""
+    """How much of the matrix has been recorded, in words. Never a claim about the works."""
+
+
+class SynthesisReport(BaseModel):
+    """`GET /synthesis`: what the matrices cannot say yet, then the matrices themselves.
+
+    A matrix reads one property across works and proposes nothing. An empty cell means
+    "not recorded", never "the work lacks the property", and novelty is never inferred from
+    a missing cell (Product 7.1, 33). So the gaps below are stated as gaps in the record:
+    each one names a reading nobody has taken, and none of them says anything about a work.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    summary: str = ""
+    count: int = 0
+    """How many matrices this project holds."""
+
+    missing: int = 0
+    """Readings the matrices declare and nobody has recorded yet."""
+
+    gaps: tuple[ResearchGroup, ...] = ()
+    matrices: tuple[MatrixView, ...] = ()
