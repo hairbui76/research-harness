@@ -57,6 +57,8 @@ describe('the project rail', () => {
     const items = Array.from(rail.querySelectorAll('.rh-project-rail__nav-item')).map((node) =>
       node.querySelector('.rh-project-rail__nav-label')?.textContent,
     );
+    // Taxonomy and Synthesis swapped on 2026-09-08 (roadmap 3L, option A): Taxonomy is part
+    // of the record and Synthesis is an output, and a group is a run of consecutive items.
     expect(items).toEqual([
       'Conversation',
       'Overview',
@@ -66,8 +68,8 @@ describe('the project rail', () => {
       'Corpus',
       'Claims',
       'Questions',
-      'Synthesis',
       'Taxonomy',
+      'Synthesis',
       'Manuscript',
     ]);
 
@@ -77,6 +79,29 @@ describe('the project rail', () => {
       String(review?.count),
     );
     expect(screen.getByRole('link', { name: /Conflicts/ }).textContent).not.toMatch(/\d/);
+  });
+
+  it('draws the three groups the roadmap named, over the pages they hold', async () => {
+    renderShell();
+
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    for (const [name, labels] of [
+      ['Waiting', ['Review inbox', 'Conflicts', 'Stale']],
+      ['The record', ['Corpus', 'Claims', 'Questions', 'Taxonomy']],
+      ['Outputs', ['Synthesis', 'Manuscript']],
+    ] as const) {
+      const group = screen.getByRole('list', { name });
+      expect(screen.getByText(name)).toBeInTheDocument();
+      expect(
+        Array.from(group.querySelectorAll('.rh-project-rail__nav-label')).map(
+          (node) => node.textContent,
+        ),
+      ).toEqual([...labels]);
+    }
+
+    // A heading is text; the rail's tab stops are still its links and its own controls.
+    expect(screen.queryByRole('link', { name: 'The record' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'The record' })).not.toBeInTheDocument();
   });
 
   it('carries the conversation session history, on every route', async () => {

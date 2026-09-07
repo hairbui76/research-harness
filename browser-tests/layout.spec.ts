@@ -274,6 +274,90 @@ test('a transcript row carries one toolbar, with the rest behind More actions', 
   expect(errors).toEqual([]);
 });
 
+test('the rail names its three groups without adding a tab stop', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await openWorkspace(page, request, info, 'Grouping study');
+  await openRail(page);
+
+  // Roadmap 3L, option A: three visible headings over eight of the eleven destinations, and
+  // the two ways in above them with no heading at all.
+  for (const [name, labels] of [
+    ['Waiting', ['Review inbox', 'Conflicts', 'Stale']],
+    ['The record', ['Corpus', 'Claims', 'Questions', 'Taxonomy']],
+    ['Outputs', ['Synthesis', 'Manuscript']],
+  ] as const) {
+    const group = page.getByRole('list', { name });
+    await expect(group, `the rail must name the ${name} group`).toBeVisible();
+    await expect(group.locator('.rh-project-rail__nav-label')).toHaveText([...labels]);
+  }
+
+  /*
+   * What only a browser can say about the headings.
+   *
+   * Each is a paragraph that names its list, so a screen reader announces the word on
+   * entering the run and Tab never lands on it — the drawer path of `app.spec.ts` reaches
+   * the project switcher first, and would not if a heading were focusable. And the craft
+   * floor bans the uppercase micro-label: the word renders in the case it was written in,
+   * in the muted ink the palette's "Go to" heading uses.
+   */
+  const headings = await page.evaluate(() => {
+    const rail = document.querySelector('.rh-project-rail') as HTMLElement;
+    const muted = getComputedStyle(document.documentElement)
+      .getPropertyValue('--rh-text-muted')
+      .trim();
+    const probe = document.createElement('span');
+    probe.style.color = `var(--rh-text-muted)`;
+    rail.appendChild(probe);
+    const mutedRGB = getComputedStyle(probe).color;
+    probe.remove();
+    return {
+      words: [...rail.querySelectorAll('.rh-project-rail__nav-heading')].map((node) => ({
+        text: (node.textContent ?? '').trim(),
+        tag: node.tagName,
+        names: node.id !== '' && document.querySelector(`[aria-labelledby="${node.id}"]`) !== null,
+        // Only a control the rail itself owns counts: below the shell's breakpoint the rail
+        // is inside a drawer parked at `tabindex="-1"`, which is not a tab stop.
+        focusable: (() => {
+          const owner = node.closest('a[href], button, [tabindex]:not([tabindex="-1"])');
+          return owner !== null && rail.contains(owner);
+        })(),
+        transform: getComputedStyle(node).textTransform,
+        muted: getComputedStyle(node).color === mutedRGB,
+        size: Number.parseFloat(getComputedStyle(node).fontSize),
+      })),
+      mutedDeclared: muted !== '',
+      // Every tab stop inside the rail, as its accessible text.
+      stops: [...rail.querySelectorAll('a[href], button, [tabindex]:not([tabindex="-1"])')].map(
+        (node) => (node.textContent ?? '').trim(),
+      ),
+    };
+  });
+
+  expect(headings.words.map((word) => word.text)).toEqual(['Waiting', 'The record', 'Outputs']);
+  for (const word of headings.words) {
+    expect(word.tag, `${word.text} must be text, not a control`).toBe('P');
+    expect(word.names, `${word.text} must name its own list`).toBe(true);
+    expect(word.focusable, `${word.text} must not sit inside a control`).toBe(false);
+    expect(word.transform, `${word.text} must not be an uppercase micro-label`).toBe('none');
+    expect(word.muted, `${word.text} must take the muted ink`).toBe(true);
+    expect(word.size, `${word.text} must be at label size`).toBeLessThan(14);
+  }
+  expect(headings.mutedDeclared).toBe(true);
+  for (const name of ['Waiting', 'The record', 'Outputs']) {
+    expect(headings.stops, `${name} must add no tab stop`).not.toContain(name);
+  }
+
+  await page.screenshot({ path: info.outputPath('rail-groups.png'), fullPage: true });
+  expect(await axeViolations(page), 'the workspace with a grouped rail').toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test('the rail and Project Home offer the same project actions in the same words', async ({
   page,
   request,

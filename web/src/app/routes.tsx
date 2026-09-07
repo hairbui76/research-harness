@@ -46,27 +46,56 @@ export interface NavigationEntry {
   label: string;
   to: string;
   icon: IconName;
+  /**
+   * The rail heading this entry is listed under (roadmap 3L, option A).
+   *
+   * The rail and the palette both draw a group as a run of consecutive entries naming it,
+   * so this table's order *is* the grouping; an entry without one stands on its own.
+   */
+  group?: string;
   /** `NavLink`-style exact matching, for the route that is a prefix of every other. */
   end?: boolean;
   /** Extra paths this entry is the active one for. */
   alsoMatches?: readonly string[];
 }
 
-/** The research navigation of PRODUCT §26, in the order the rail lists it. */
+/**
+ * The research navigation of PRODUCT §26, in the order the rail lists it.
+ *
+ * Eleven destinations under three headings — the flow of a session, from what is waiting
+ * through what the project holds to what it produces (roadmap 3L, option A of
+ * `docs/plans/2026-09-07-rail-grouping-proposal.md`). Conversation and Overview carry no
+ * group: they are the ways in, not a category. Every label, route, icon, count and `end`
+ * flag is the one that shipped; only Taxonomy and Synthesis changed places, because a group
+ * is a run of consecutive entries and Taxonomy is part of the record while Synthesis is an
+ * output.
+ */
 export const NAVIGATION: NavigationEntry[] = [
   // The conversation is `/` and matches only `/`: the session travels in the query, so
   // `/?session=CS0001` is the same screen and `location.pathname` is still exactly `/`.
   { id: 'conversation', label: 'Conversation', to: '/', icon: 'messages-square', end: true },
   { id: 'overview', label: 'Overview', to: OVERVIEW_PATH, icon: 'microscope', end: true },
-  { id: 'review', label: 'Review inbox', to: '/review', icon: 'inbox' },
-  { id: 'conflicts', label: 'Conflicts', to: '/conflicts', icon: 'alert-triangle' },
-  { id: 'stale', label: 'Stale', to: '/stale', icon: 'clock' },
-  { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library' },
-  { id: 'claims', label: 'Claims', to: '/claims', icon: 'scale' },
-  { id: 'questions', label: 'Questions', to: '/questions', icon: 'circle-help' },
-  { id: 'synthesis', label: 'Synthesis', to: '/synthesis', icon: 'layers' },
-  { id: 'taxonomy', label: 'Taxonomy', to: '/taxonomy', icon: 'git-branch' },
-  { id: 'manuscript', label: 'Manuscript', to: '/manuscript', icon: 'file-code' },
+  { id: 'review', label: 'Review inbox', to: '/review', icon: 'inbox', group: 'Waiting' },
+  {
+    id: 'conflicts',
+    label: 'Conflicts',
+    to: '/conflicts',
+    icon: 'alert-triangle',
+    group: 'Waiting',
+  },
+  { id: 'stale', label: 'Stale', to: '/stale', icon: 'clock', group: 'Waiting' },
+  { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library', group: 'The record' },
+  { id: 'claims', label: 'Claims', to: '/claims', icon: 'scale', group: 'The record' },
+  {
+    id: 'questions',
+    label: 'Questions',
+    to: '/questions',
+    icon: 'circle-help',
+    group: 'The record',
+  },
+  { id: 'taxonomy', label: 'Taxonomy', to: '/taxonomy', icon: 'git-branch', group: 'The record' },
+  { id: 'synthesis', label: 'Synthesis', to: '/synthesis', icon: 'layers', group: 'Outputs' },
+  { id: 'manuscript', label: 'Manuscript', to: '/manuscript', icon: 'file-code', group: 'Outputs' },
 ];
 
 /**

@@ -8,7 +8,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Dialog, DialogBody, DialogHeader, ThemeProvider } from '@research-harness/design';
@@ -20,10 +20,11 @@ beforeEach(() => {
   window.localStorage.clear();
 });
 
+/** The rail's own list, headings and all: the palette files a destination where the rail does. */
 const DESTINATIONS = [
   { id: 'overview', label: 'Overview', to: '/overview' },
-  { id: 'review', label: 'Review inbox', to: '/review' },
-  { id: 'corpus', label: 'Corpus', to: '/corpus' },
+  { id: 'review', label: 'Review inbox', to: '/review', group: 'Waiting' },
+  { id: 'corpus', label: 'Corpus', to: '/corpus', group: 'The record' },
 ];
 
 function Page({ accept, children }: { accept: () => void; children?: ReactNode }) {
@@ -93,6 +94,31 @@ describe('the command palette', () => {
     expect(screen.getByRole('dialog', { name: 'Go to, or do' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Review inbox/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Accept/ })).toBeInTheDocument();
+  });
+
+  it('files a destination under the rail’s own heading', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    // Roadmap 3L: the rail groups its destinations, and the palette must not call the same
+    // page something else. An ungrouped way in is still filed under "Go to".
+    expect(
+      screen
+        .getAllByRole('group')
+        .map((group) => group.getAttribute('aria-label')),
+    ).toEqual(['Go to', 'Waiting', 'The record', 'Review', 'Anywhere']);
+    expect(
+      within(screen.getByRole('group', { name: 'Waiting' })).getByRole('option', {
+        name: /Review inbox/,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('group', { name: 'Go to' })).getByRole('option', {
+        name: /Overview/,
+      }),
+    ).toBeInTheDocument();
   });
 
   it('narrows as the researcher types and runs the match Enter lands on', async () => {
