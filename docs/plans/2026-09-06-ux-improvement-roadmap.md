@@ -110,3 +110,29 @@ check reported. Neither of the last two runs without the researcher's yes.
   caller's shell not forcing colour. Wave 2 started with 2F and 2I; 2E and 2G follow now;
   2H (axe rules, narrow tests, container queries, virtualisation, offline, dead tokens) runs
   after those merge because it touches every test file.
+- 2026-09-07 (wave 2): the four wave-two branches were integrated on `wave-2` by a
+  successor session after the first one hit its session limit with the reports still
+  queued. The gate passed on the merge; the finish review ruled *fix* with eight findings
+  (a raw candidate id as the evidence card's heading; kicker lead-ins left in the state
+  components and toasts; the composer's notice stack; section headings set as 11px chips;
+  a tab fade that read as a clip; the inspector saying "nothing selected" twice; a toast
+  over the page header at 768px; the destination line silent while the picker loaded) and
+  four rulings (promote the sentences a researcher reads before acting to body size; the
+  menu, combobox and `<dt>` label chips are labels, not kickers, and stay; the 2px
+  quotation rule stays; the model trigger's EXTERNAL/LOCAL tag goes, since the composer
+  states egress in a sentence). One fix batch of twelve commits landed all of it, plus a
+  browser capture of a transcript row with its overflow. Wave 1 was pushed at 11:56; the
+  push had to go over HTTPS because this network drops most TCP connects to GitHub.
+- 2026-09-07 (wave 3, in progress): the Overview proof page (3J) is built — the page opens
+  with the daemon's sentence about what needs a researcher, then what is waiting, what went
+  stale, what changed since the last session (a new server-composed section with a stated
+  window rule), claim health as sentences, open questions, and the project's size last;
+  `ChangeList` joins the design package; its ten-rule pattern note drives the rollout.
+  2H landed in two halves: coverage (route-wide axe with landmark and heading rules, the
+  dark muted ink lifted one ramp step and gated by the contrast script, a fit sweep of every
+  destination at 1024 and 768) and resilience (the corpus windowed with its own find, one
+  polite daemon-offline state, container queries on the three panes, a token census that
+  fails on any unread token). The rail grouping proposal (3L) is written at
+  `docs/plans/2026-09-07-rail-grouping-proposal.md` and waits for the researcher's answer.
+  The rollout (3K) runs as two agents: Claims, Questions and Conflicts; Taxonomy, Stale and
+  Synthesis. Corpus follows once the windowing has merged. All of it integrates on `wave-3`.
