@@ -136,6 +136,7 @@ function ConflictGroup({
  * never the id the conflict was recorded against. The id is in the route.
  */
 function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: ConflictView }) {
+  const { href } = useProjectPaths();
   return (
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
@@ -143,16 +144,19 @@ function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: Confli
         <StatusBadge status={String(conflict.tier)} vocabulary="reviewTier" describe />
       </p>
       <p>{humaniseResearchTokens(item.detail)}</p>
-      <p className="rh-text-secondary">
-        {conflict.differing_fields.length > 0
-          ? `Disagrees on: ${conflict.differing_fields.map(fieldLabel).join(', ')}`
-          : 'The fields it disagrees on were not recorded'}
-      </p>
+      {/*
+        What the record holds about the disagreement, said once. A record with neither the
+        fields nor the positions used to say the absence twice — "the fields it disagrees
+        on were not recorded", then "the record kept no side-by-side answers" — which is
+        one absence stated as two, and neither of them offered a way forward.
+      */}
+      <p className="rh-text-secondary">{disagreement(conflict)}</p>
       {/*
         The sides, compared. A table earns its place here and nowhere else on this page: N
         answers read against the same three columns is the reading a table exists for. A
-        record that kept no positions gets the sentence instead — a header row with nothing
-        under it is a table pretending to hold a comparison nobody made.
+        record that kept no positions has nothing to compare, so where the table would have
+        been it offers the one act this page cannot perform: a disagreement is answered
+        where the staged candidate is decided, and that is the review queue.
       */}
       {conflict.positions.length > 0 ? (
         <DataTable
@@ -174,13 +178,28 @@ function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: Confli
           ))}
         </DataTable>
       ) : (
-        <p className="rh-text-secondary">
-          The record kept no side-by-side answers; what disagreed is in the sentence above.
+        <p className="rh-web-row">
+          <Link to={href('/review')}>Decide it in the review inbox</Link>
         </p>
       )}
       <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
     </li>
   );
+}
+
+/**
+ * What the record says the two sides differ on, in one sentence.
+ *
+ * Three cases, one line each: the fields it names; that it named none, where the positions
+ * below still show what was said; and — where it holds neither — that it holds neither.
+ */
+function disagreement(conflict: ConflictView): string {
+  if (conflict.differing_fields.length > 0) {
+    return `Disagrees on: ${conflict.differing_fields.map(fieldLabel).join(', ')}`;
+  }
+  return conflict.positions.length > 0
+    ? 'The fields it disagrees on were not recorded'
+    : 'The record kept neither the fields the two sides differ on nor their answers side by side';
 }
 
 /** The subject of a disagreement, pointed at wherever the daemon said it is decided. */

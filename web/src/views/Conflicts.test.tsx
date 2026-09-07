@@ -49,6 +49,8 @@ function overviewWith(
     summary: string;
     tier: number;
     name?: string;
+    differing_fields?: string[];
+    positions?: unknown[];
   }[],
 ): FakeDaemon {
   const kinds = [...new Set(conflicts.map((conflict) => conflict.kind))];
@@ -207,6 +209,56 @@ describe('the conflicts page', () => {
    * its evidence pointing both ways. An open conflict is a question nobody has answered, so
    * the kind of disagreement is a word and the only badge is the queue's own tier.
    */
+  /**
+   * One absence, said once, with the one act this page cannot perform offered under it.
+   * The record used to state the missing fields and the missing positions as two separate
+   * sentences, and then stop — which taught the reader nothing and offered nowhere to go.
+   */
+  it('states one absence once, and offers where the disagreement is decided', async () => {
+    const bare = {
+      ...CONFLICT,
+      conflict_id: 'conf_22222222',
+      kind: 'candidate_vs_accepted',
+      subject: 'C0001',
+      name: 'TrafficLM reaches an F1 of 94.32 on CICIDS2017',
+      summary: 'the staged F1 differs from the accepted reading of Table 1',
+      differing_fields: [],
+      positions: [],
+    };
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ConflictsPage />
+      </ProjectPathProvider>,
+      {
+        daemon: overviewWith([bare]),
+        route: '/projects/prj_abc/conflicts',
+        path: '/projects/prj_abc/conflicts',
+      },
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          'The record kept neither the fields the two sides differ on nor their answers side by side',
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByText(/The fields it disagrees on were not recorded/)).toBeNull();
+    expect(screen.queryByText(/kept no side-by-side answers/)).toBeNull();
+    expect(screen.getByRole('link', { name: 'Decide it in the review inbox' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/review',
+    );
+  });
+
+  it('names the fields, and keeps the table, when the record kept both', async () => {
+    renderView(<ConflictsPage />, { daemon: overviewWith([CONFLICT]) });
+
+    await waitFor(() => expect(screen.getByText(/Disagrees on: Metric result/)).toBeInTheDocument());
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Decide it in the review inbox' })).toBeNull();
+  });
+
   /**
    * A `cand_<16 hex>` id is where the record lives, not what the disagreement is about.
    * The daemon composes the subject's name and this page renders it; the id survives in
