@@ -139,11 +139,6 @@ body,
   overflow-wrap: anywhere;
 }
 
-/* A field that sits on one line with the button that submits it. */
-.rh-web-inline-field {
-  inline-size: min(20rem, 100%);
-}
-
 .rh-web-json {
   min-block-size: 18rem;
   font-family: var(--rh-font-mono);

@@ -1,0 +1,56 @@
+/*
+ * What the Taxonomy page needs and no package component owns. Semantic tokens only.
+ *
+ * The indentation below is the whole reason the `Parent` column is gone: a hierarchy read
+ * by matching an id in one cell against a term in another is a hierarchy the reader has to
+ * reconstruct, and a hierarchy drawn as one is a hierarchy they can see.
+ */
+
+/* The terms waiting for a Decision, read as one block. */
+.rh-web-taxonomy__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-taxonomy__group > p {
+  margin: 0;
+}
+
+/* What a Decision does for a term, and what one taxonomy holds: the page's quieter voice. */
+.rh-web-taxonomy__detail {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/* The terms, indented under the line that names them by one space unit. */
+.rh-web-taxonomy__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* A term is the project's own word, so it is set apart from the sentence around it. */
+.rh-web-taxonomy__term-name {
+  font-family: var(--rh-font-mono);
+}
+
+/*
+ * One step of the tree per level. The steps are discrete rather than computed so that the
+ * scale stays the spacing scale, and they stop at four because a classification deeper than
+ * that is telling the reader something the indentation cannot.
+ */
+.rh-web-taxonomy__term[data-depth='1'] {
+  padding-inline-start: var(--rh-space-4);
+}
+
+.rh-web-taxonomy__term[data-depth='2'] {
+  padding-inline-start: var(--rh-space-6);
+}
+
+.rh-web-taxonomy__term[data-depth='3'] {
+  padding-inline-start: var(--rh-space-8);
+}
+
+.rh-web-taxonomy__term[data-depth='4'] {
+  padding-inline-start: var(--rh-space-10);
+}
