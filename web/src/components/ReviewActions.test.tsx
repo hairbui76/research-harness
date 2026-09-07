@@ -305,6 +305,33 @@ describe('what the toast says was written', () => {
     expect(screen.getByTestId('where')).toHaveTextContent('/projects/prj_abc/evidence/E0042');
   });
 
+  it('keeps the success tone for the decisions that write accepted state', async () => {
+    const user = userEvent.setup();
+    renderActions();
+    await ready();
+    await user.click(screen.getByRole('button', { name: 'Accept' }));
+    await user.click(screen.getByRole('button', { name: 'Accept as evidence' }));
+
+    const toast = await toastSaying('Accepted as E0042');
+    expect(toast).toHaveAttribute('data-tone', 'success');
+    expect(toast).toHaveTextContent('Success:');
+  });
+
+  it('does not congratulate a decision that accepted nothing', async () => {
+    const user = userEvent.setup();
+    const { daemon } = renderActions();
+    await ready();
+
+    await user.click(screen.getByRole('button', { name: 'Defer' }));
+    await user.type(screen.getByLabelText('Why this is being put aside'), 'waiting for the appendix');
+    await user.click(screen.getAllByRole('button', { name: 'Defer' })[1]!);
+
+    await waitFor(() => expect(names(daemon)).toContain('review.defer'));
+    const toast = await toastSaying('Candidate deferred.');
+    expect(toast).toHaveAttribute('data-tone', 'info');
+    expect(toast).not.toHaveTextContent('Success:');
+  });
+
   it('says what a rejection wrote, and links to nothing, because it created nothing', async () => {
     const user = userEvent.setup();
     const { daemon } = renderActions();
@@ -316,6 +343,7 @@ describe('what the toast says was written', () => {
 
     await waitFor(() => expect(names(daemon)).toContain('review.reject'));
     const toast = await toastSaying('Candidate rejected.');
+    expect(toast).toHaveAttribute('data-tone', 'info');
     expect(toast).toHaveTextContent('nothing is accepted');
     expect(within(toast).queryByRole('button', { name: /^Open / })).toBeNull();
   });

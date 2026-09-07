@@ -44,6 +44,18 @@ describe('Toast', () => {
     expect(status).toHaveTextContent('Information:');
   });
 
+  it('places the viewport at the top, clear of the controls a task ends on', async () => {
+    const user = userEvent.setup();
+    render(withProvider(<Trigger title="Candidate deferred" duration={null} />));
+    await user.click(screen.getByRole('button', { name: 'Notify' }));
+    // Bottom-right is where an app puts what it wants read next: a decision's outcome, the
+    // way on, the switch beside it. A notification lands above the work instead.
+    expect(screen.getByRole('region', { name: 'Notifications' })).toHaveAttribute(
+      'data-placement',
+      'top-right',
+    );
+  });
+
   it('uses role=alert for the error tone', async () => {
     const user = userEvent.setup();
     render(withProvider(<Trigger title="Provider unavailable" tone="error" duration={null} />));

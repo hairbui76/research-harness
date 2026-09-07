@@ -7,7 +7,7 @@ exports[`Toast > Toast theme x density > matches the dark / comfortable snapshot
   <div
     aria-label="Notifications"
     class="rh-toast-viewport"
-    data-placement="bottom-right"
+    data-placement="top-right"
     role="region"
   >
     <div
@@ -196,7 +196,7 @@ exports[`Toast > Toast theme x density > matches the dark / compact snapshot 1`]
   <div
     aria-label="Notifications"
     class="rh-toast-viewport"
-    data-placement="bottom-right"
+    data-placement="top-right"
     role="region"
   >
     <div
@@ -385,7 +385,7 @@ exports[`Toast > Toast theme x density > matches the light / comfortable snapsho
   <div
     aria-label="Notifications"
     class="rh-toast-viewport"
-    data-placement="bottom-right"
+    data-placement="top-right"
     role="region"
   >
     <div
@@ -574,7 +574,7 @@ exports[`Toast > Toast theme x density > matches the light / compact snapshot 1`
   <div
     aria-label="Notifications"
     class="rh-toast-viewport"
-    data-placement="bottom-right"
+    data-placement="top-right"
     role="region"
   >
     <div

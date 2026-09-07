@@ -9,8 +9,10 @@
   pointer-events: none;
 }
 
+/* Below the app shell's own bar, so a notification never covers the title bar's controls
+   — and, on a wide window where there is no bar, it still clears the top edge. */
 .rh-toast-viewport[data-placement^='top'] {
-  top: 0;
+  top: var(--rh-app-shell-bar-height, 0px);
 }
 
 .rh-toast-viewport[data-placement^='bottom'] {

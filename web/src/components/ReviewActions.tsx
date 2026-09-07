@@ -112,7 +112,7 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
       setText('');
       refresh();
       onReviewed(what);
-      announce(what, wrote, result);
+      announce(decision, what, wrote, result);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -127,16 +127,22 @@ export function ReviewActions({ candidate, hasOpenConflict, onReviewed }: Review
    * offers the page it is on. Nothing offers an undo, because the daemon has none: adding
    * one would be a button that either lies or writes a second decision the researcher did
    * not ask for.
+   *
+   * The tone follows the same rule the sentence does. Success belongs to the three
+   * decisions that write accepted Evidence; a rejection, a deferral and a request for more
+   * evidence accepted nothing, and their own toasts say so, so a congratulatory tone would
+   * contradict the words beside it.
    */
-  function announce(what: string, wrote: string, result: unknown) {
+  function announce(decision: ReviewDecision, what: string, wrote: string, result: unknown) {
+    const tone = ACCEPTS[decision] ? 'success' : 'info';
     const evidenceId = evidenceIdOf(result);
     if (evidenceId === null) {
-      toast({ tone: 'success', title: `Candidate ${what}.`, description: wrote });
+      toast({ tone, title: `Candidate ${what}.`, description: wrote });
       return;
     }
     const route = href(`/evidence/${encodeURIComponent(evidenceId)}`);
     toast({
-      tone: 'success',
+      tone,
       title: `Accepted as ${evidenceId}`,
       description: `${candidate.field} of ${candidate.work}. ${wrote}`,
       action: { label: `Open ${evidenceId}`, onClick: () => navigate(route) },
@@ -378,6 +384,22 @@ const WROTE: Record<ReviewDecision, string> = {
   reject: 'The reason is recorded with the Work; nothing is accepted.',
   defer: 'It stays in the review queue with your note; nothing is accepted.',
   request_more_evidence: 'Your question is recorded as a note; nothing is accepted.',
+};
+
+/**
+ * Which decisions write accepted state.
+ *
+ * Read off `WROTE` above: accept, qualify and edit each leave accepted Evidence behind, and
+ * the other three end with "nothing is accepted". Only the first three may wear the success
+ * tone.
+ */
+const ACCEPTS: Record<ReviewDecision, boolean> = {
+  accept: true,
+  qualify: true,
+  edit: true,
+  reject: false,
+  defer: false,
+  request_more_evidence: false,
 };
 
 /** The same three decisions when a conflict record is open, which they also close. */

@@ -77,6 +77,11 @@ export interface ToastProviderProps {
   limit?: number;
   /** Default auto-dismiss in ms, or `null` for sticky toasts. Default 6000. */
   duration?: number | null;
+  /**
+   * Where the viewport sits. The default is the top right, because the bottom right of a
+   * task pane is where an application puts what it wants read *next* — an outcome, the way
+   * on, the switch beside it — and a notification that lands on those hides them.
+   */
   placement?: ToastPlacement;
   /** Accessible name of the notification region. */
   label?: string;
@@ -87,7 +92,7 @@ export function ToastProvider({
   children,
   limit = 3,
   duration = 6000,
-  placement = 'bottom-right',
+  placement = 'top-right',
   label = 'Notifications',
   container,
 }: ToastProviderProps): ReactElement {

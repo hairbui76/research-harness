@@ -29,11 +29,24 @@
   transform: translateY(0);
 }
 
+/*
+ * The narrow-layout bar's own height, published on the root so a fixed overlay can sit
+ * under it. The toast viewport is the reason: it is portalled outside the shell, so it
+ * cannot read a value scoped to it, and a notification drawn over the title bar would
+ * cover the control that opened the drawer beneath it.
+ */
+:root {
+  --rh-app-shell-bar-height: calc(
+    var(--rh-control-height-sm) + var(--rh-space-2) * 2 + var(--rh-border-width)
+  );
+}
+
 .rh-app-shell__bar {
   display: flex;
   align-items: center;
   gap: var(--rh-space-2);
   flex: none;
+  min-block-size: var(--rh-app-shell-bar-height);
   padding: var(--rh-space-2) var(--rh-space-3);
   border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
   background: var(--rh-surface-pane);
