@@ -9,6 +9,12 @@
  *   --rh-density-gap         the gap between items inside a row
  *   --rh-density-pad         the inline padding of a row or cell
  *   --rh-density-font-scale  multiplier applied to type-role sizes in dense surfaces
+ *
+ * Density compresses geometry. It is not a second type scale: whatever it multiplies must
+ * still land at or above `--rh-type-reading-min-size` for anything a researcher reads, and
+ * at or above `--rh-control-target-min` for anything they have to hit with a pointer. A
+ * queue is a queue because its rows are close together, not because its words are smaller
+ * than the words on the page it sits in.
  */
 :root,
 [data-density='comfortable'] {
@@ -22,10 +28,12 @@
   --rh-density-row: 28px;
   --rh-density-gap: var(--rh-space-1);
   --rh-density-pad: var(--rh-space-2);
+  /* 13px body-sm x 0.929 = 12.08px: the dense reading size stays over the floor. */
   --rh-density-font-scale: 0.929;
 
-  /* Controls shrink with the rows they sit in, so a compact table's buttons still fit. */
-  --rh-control-height-sm: 22px;
+  /* Controls shrink with the rows they sit in, down to the pointer target and no further:
+     a compact table's icon button is still a 24px target (WCAG 2.2 SC 2.5.8). */
+  --rh-control-height-sm: var(--rh-control-target-min);
   --rh-control-height-md: 28px;
   --rh-control-padding-md: var(--rh-space-2);
 }

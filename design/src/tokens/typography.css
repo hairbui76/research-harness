@@ -8,8 +8,23 @@
  * URL anywhere in this package: the runtime must render with zero network requests. When
  * licensed faces are self-hosted, swap the first entry of each stack and nothing else.
  *
- * The scale is tuned for a dense research application, not a landing page. `display` is
- * 28px, not the 80px of the source marketing bundle; body is 14px/1.5 and UI text is 13px.
+ * The scale is tuned for a dense research application, not a landing page.
+ *
+ *   26 / 22 / 19 / 16 / 14 px   display, h1, h2, h3, h4
+ *
+ * One ramp, one family, one step of about 1.16 between neighbours — inside the 1.125-1.2
+ * a product interface wants, because a research page carries far more type roles than a
+ * marketing page does and exaggerated contrast between them reads as noise rather than as
+ * hierarchy. The ramp bottoms out *at* body size: `h4` is 14px like body and separates
+ * itself by weight (600 against 400), because a heading set smaller than the paragraph it
+ * introduces inverts the thing a heading is for.
+ *
+ * Reading text is 14px (`body`) and 13px (`body-sm`, for dense surfaces). Nothing a
+ * researcher reads is allowed below `--rh-type-reading-min-size`, at any density — see
+ * tokens/density.css, which scales dense surfaces but never through that floor. The two
+ * roles below it are not reading text: `label` is a mono, uppercase, wide-tracked metadata
+ * chip, and `mono` is for ids, code and compiler output.
+ *
  * Each role exposes -size, -lh, -ls and -weight.
  */
 :root {
@@ -20,28 +35,37 @@
   --rh-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', 'Courier New', monospace;
 
-  /* Page/section title. The largest type the application ever uses. */
-  --rh-type-display-size: 28px;
+  /*
+   * The floor for anything a researcher reads: quotes, reasons, descriptions, table
+   * cells, a state's own sentence. Density may compress rows, gaps and padding; it may
+   * never take reading text under this. Below it live only the metadata roles.
+   */
+  --rh-type-reading-min-size: 12px;
+
+  /* The step above the page title. The largest type the application ever uses. */
+  --rh-type-display-size: 26px;
   --rh-type-display-lh: 1.15;
   --rh-type-display-ls: -0.5px;
   --rh-type-display-weight: 600;
 
+  /* The page title. Every `<h1>` in the cockpit is this size, on every workspace. */
   --rh-type-h1-size: 22px;
   --rh-type-h1-lh: 1.2;
   --rh-type-h1-ls: -0.35px;
   --rh-type-h1-weight: 600;
 
-  --rh-type-h2-size: 18px;
+  --rh-type-h2-size: 19px;
   --rh-type-h2-lh: 1.25;
   --rh-type-h2-ls: -0.2px;
   --rh-type-h2-weight: 600;
 
-  --rh-type-h3-size: 15px;
+  --rh-type-h3-size: 16px;
   --rh-type-h3-lh: 1.3;
   --rh-type-h3-ls: -0.1px;
   --rh-type-h3-weight: 600;
 
-  --rh-type-h4-size: 13px;
+  /* The smallest heading. Body size; the weight is what makes it a heading. */
+  --rh-type-h4-size: 14px;
   --rh-type-h4-lh: 1.35;
   --rh-type-h4-ls: normal;
   --rh-type-h4-weight: 600;
@@ -64,7 +88,8 @@
   --rh-type-body-ls: normal;
   --rh-type-body-weight: 400;
 
-  --rh-type-body-sm-size: 12px;
+  /* Reading text on a dense surface: a state's description, a queue row, a table cell. */
+  --rh-type-body-sm-size: 13px;
   --rh-type-body-sm-lh: 1.45;
   --rh-type-body-sm-ls: normal;
   --rh-type-body-sm-weight: 400;

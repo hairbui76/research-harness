@@ -27,12 +27,20 @@
   flex: 1 1 auto;
 }
 
+/*
+ * The page's name, at the cockpit's one `<h1>` size.
+ *
+ * It used to be set in the `display` role, which made a research page's title 28px while
+ * the manuscript workspace's title was 13px and the conversation's 15px — three sizes for
+ * one thing. `h1` is that thing: the same size here, on Project Home and on the manuscript
+ * toolbar, so the eye and the screen reader agree about what names a screen.
+ */
 .rh-full-page__title {
   margin: 0;
-  font-size: var(--rh-type-display-size);
-  line-height: var(--rh-type-display-lh);
-  letter-spacing: var(--rh-type-display-ls);
-  font-weight: var(--rh-type-display-weight);
+  font-size: var(--rh-type-h1-size);
+  line-height: var(--rh-type-h1-lh);
+  letter-spacing: var(--rh-type-h1-ls);
+  font-weight: var(--rh-type-h1-weight);
 }
 
 .rh-full-page__description {

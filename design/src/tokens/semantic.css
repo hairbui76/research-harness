@@ -62,10 +62,20 @@
   --rh-focus-ring-width: 2px;
   --rh-focus-ring-offset: 2px;
 
-  /* Hairline width. Depth in this system is a border plus a surface change, not a shadow. */
+  /* Hairline width. Depth in this system is a border plus a surface change, not a shadow.
+     Two widths ship and no more: the hairline every separator, card and control edge is
+     drawn with, and one emphatic width for the two things that are an *indicator* rather
+     than an edge — the selected tab's marker and the rule beside quoted matter. A coloured
+     stripe down the side of a card, a row or a notice is not one of them; those take the
+     hairline, so weight never stands in for meaning the words and the icon already carry. */
   --rh-border-width: 1px;
+  --rh-border-width-strong: 2px;
 
-  /* Control geometry, shared by every interactive primitive. */
+  /* Control geometry, shared by every interactive primitive.
+     `--rh-control-target-min` is the floor a pointer target may not fall through (WCAG 2.2
+     SC 2.5.8, Target Size (Minimum)). Density may take a control down to it; the glyph
+     inside may be smaller, the box may not. */
+  --rh-control-target-min: 24px;
   --rh-control-height-sm: 26px;
   --rh-control-height-md: 32px;
   --rh-control-padding-sm: var(--rh-space-2);
