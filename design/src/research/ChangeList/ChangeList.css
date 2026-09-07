@@ -26,7 +26,15 @@
   border-block-start: var(--rh-border-width) solid var(--rh-border-subtle);
 }
 
-/* The kind is a word first and a glyph second, so it survives greyscale and a projector. */
+/*
+ * The kind is a word first and a glyph second, so it survives greyscale and a projector.
+ *
+ * It is not set as a kicker. It used to be — 11px, wide-tracked, uppercase — which is the
+ * one label shape the craft floor bans outright, and `design/tests/tokens.test.ts` now
+ * holds that mechanically. What separates the kind from the label beside it is the muted
+ * ink, the fixed column and the monospace that lines the column up, none of which change
+ * the word's case, tracking or size.
+ */
 .rh-change-list__kind {
   display: inline-flex;
   align-items: center;
@@ -35,9 +43,6 @@
   inline-size: 7.5rem;
   color: var(--rh-text-muted);
   font-family: var(--rh-font-mono);
-  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
 }
 
 .rh-change-list__what {
