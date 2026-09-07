@@ -27,7 +27,7 @@
   font-weight: var(--rh-type-h4-weight);
 }
 
-.rh-web-attention__items {
+.rh-web-list.rh-web-attention__items {
   margin-inline-start: var(--rh-space-4);
 }
 
