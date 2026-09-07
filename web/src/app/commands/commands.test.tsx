@@ -104,11 +104,14 @@ describe('the command palette', () => {
 
     // Roadmap 3L: the rail groups its destinations, and the palette must not call the same
     // page something else. An ungrouped way in is still filed under "Go to".
+    // The palette has two sections — where you can go, and what you can do here — and the
+    // rail's own headings sit inside the first (wave 5J added the sections; before them the
+    // list ran destinations into actions with nothing saying which was which).
     expect(
       screen
         .getAllByRole('group')
         .map((group) => group.getAttribute('aria-label')),
-    ).toEqual(['Go to', 'Waiting', 'The record', 'Review', 'Anywhere']);
+    ).toEqual(['Go to', 'Waiting', 'The record', 'Actions', 'Review', 'Anywhere']);
     expect(
       within(screen.getByRole('group', { name: 'Waiting' })).getByRole('option', {
         name: /Review inbox/,
@@ -163,6 +166,154 @@ describe('the command palette', () => {
 
     await user.keyboard('{Control>}k{/Control}');
     await expectNoAxeViolations(document.body);
+  });
+});
+
+/**
+ * `g` then a letter, the way every keyboard-first product does it.
+ *
+ * A destination is not an action, so it does not take a single letter: those belong to the
+ * screen in front of the researcher, where `a` accepts a candidate. The chord is a lead key
+ * that binds nothing on its own, and the letter after it is consumed by the chord whether
+ * or not it names a destination — so `g` followed by a stray `a` goes nowhere rather than
+ * accepting something.
+ */
+describe('the chords that go somewhere', () => {
+  it('takes the researcher to a screen on “g” then its letter', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('g');
+    await user.keyboard('r');
+
+    expect(await screen.findByRole('heading', { name: 'Review inbox' })).toBeInTheDocument();
+  });
+
+  it('consumes the letter after “g”, so a stray one decides nothing', async () => {
+    const accept = vi.fn();
+    const user = userEvent.setup();
+    renderShell(<Page accept={accept} />);
+
+    await user.keyboard('g');
+    await user.keyboard('a');
+
+    expect(accept, 'the second key belongs to the chord, not to the page').not.toHaveBeenCalled();
+    expect(screen.getByText('the page')).toBeInTheDocument();
+  });
+
+  it('runs the page’s own keys again once the chord is over', async () => {
+    const accept = vi.fn();
+    const user = userEvent.setup();
+    renderShell(<Page accept={accept} />);
+
+    await user.keyboard('g');
+    await user.keyboard('{Escape}');
+    await user.keyboard('a');
+
+    expect(accept).toHaveBeenCalledTimes(1);
+  });
+
+  it('says a chord is waiting rather than swallowing a key in silence', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('g');
+    const waiting = screen.getByRole('status');
+    expect(waiting).toHaveTextContent(/Go to/);
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('prints the chord beside the destination in the palette', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    const destination = screen.getByRole('option', { name: /Review inbox/ });
+    expect(
+      Array.from(destination.querySelectorAll('kbd')).map((key) => key.textContent),
+    ).toEqual(['g', 'r']);
+    expect(
+      Array.from(
+        screen.getByRole('option', { name: /Accept/ }).querySelectorAll('kbd'),
+      ).map((key) => key.textContent),
+      'a page action keeps its own single key',
+    ).toEqual(['a']);
+  });
+
+  it('lists every chord in the help sheet, under its own heading', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('?');
+
+    const going = screen.getByRole('heading', { name: 'Go to a screen' }).parentElement!;
+    expect(going).toHaveTextContent('Review inbox');
+    expect(going).toHaveTextContent('Corpus');
+    // Two keys printed per row, in the order they are pressed. The section's own note
+    // names the lead key once more, above the list, which is why the list is read here.
+    expect(
+      Array.from(going.querySelector('dl')!.querySelectorAll('kbd')).map((key) => key.textContent),
+    ).toEqual(['g', 'o', 'g', 'r', 'g', 'c']);
+  });
+
+  it('goes off with the single keys, and stops being printed', async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(SINGLE_KEY_SHORTCUTS, 'false');
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('g');
+    await user.keyboard('r');
+    expect(screen.queryByRole('heading', { name: 'Review inbox' })).toBeNull();
+
+    await user.keyboard('{Control>}k{/Control}');
+    expect(
+      screen.getByRole('dialog', { name: 'Go to, or do' }).querySelectorAll('kbd'),
+      'a key that would not fire is not printed as if it would',
+    ).toHaveLength(0);
+  });
+});
+
+/**
+ * The palette says which half of it is which.
+ *
+ * Alex opens it and sees a list of screens; nothing tells him this page has actions at all
+ * (critique H7). The two sections are the answer, and the actions one is on screen before
+ * anything is typed — on a page that registers none, it still holds the shell's own.
+ */
+describe('the palette’s two sections', () => {
+  it('shows what this screen can do, in a group named for what they are', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    const actions = screen.getByRole('group', { name: 'Actions' });
+    expect(within(actions).getByRole('option', { name: /Accept/ })).toBeInTheDocument();
+    expect(within(actions).getByRole('option', { name: /Keyboard shortcuts/ })).toBeInTheDocument();
+    expect(within(actions).queryByRole('option', { name: /Corpus/ })).toBeNull();
+  });
+
+  it('offers the actions group on a screen that registers none of its own', async () => {
+    const user = userEvent.setup();
+    render(
+      <ThemeProvider defaultTheme="dark" storageKey={null}>
+        <MemoryRouter
+          initialEntries={['/']}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <CommandsProvider destinations={DESTINATIONS}>
+            <p>a screen with no actions of its own</p>
+          </CommandsProvider>
+        </MemoryRouter>
+      </ThemeProvider>,
+    );
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    expect(screen.getByRole('group', { name: 'Actions' })).toBeInTheDocument();
   });
 });
 

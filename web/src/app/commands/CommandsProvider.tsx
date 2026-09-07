@@ -8,7 +8,8 @@
  * * a registry — a page registers the actions it already renders as controls, and they gain
  *   a keystroke, a palette entry and a line in the help sheet without being re-implemented;
  * * one document-level key listener, which refuses to fire while a researcher is typing or
- *   while a dialog it did not open is on screen;
+ *   while a dialog it did not open is on screen, and which reads the `g`-then-letter chords
+ *   that go to a screen as well as the single keys that act on the one in front of you;
  * * the two surfaces the keys summon: the palette on Ctrl/⌘+K and the help sheet on `?`.
  *
  * Every page shortcut is a single character with no modifier held, which WCAG 2.2 (2.1.4)
@@ -39,7 +40,14 @@ import {
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Command } from './model';
-import { foreignDialogOpen, isTypingTarget } from './model';
+import {
+  CHORD_LEAD,
+  CHORD_TIMEOUT,
+  DESTINATION_CHORDS,
+  GO_SECTION,
+  foreignDialogOpen,
+  isTypingTarget,
+} from './model';
 import { CommandPalette } from './CommandPalette';
 import { ShortcutHelp } from './ShortcutHelp';
 import './commands.css';
@@ -155,7 +163,13 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
         label: destination.label,
         // The rail's own heading, and "Go to" for a destination that carries none — the two
         // surfaces must not call the same page by two different names (roadmap 3L).
-        group: destination.group ?? 'Go to',
+        group: destination.group ?? GO_SECTION,
+        section: GO_SECTION,
+        // `g` then a letter. A destination this table does not name keeps its place in the
+        // palette and simply has no chord printed beside it.
+        ...(DESTINATION_CHORDS[destination.id]
+          ? { chord: DESTINATION_CHORDS[destination.id] }
+          : {}),
         run: () => navigate(destination.to),
       }));
     // The help sheet as a command, so `?` is a convenience rather than the only way in:
@@ -176,7 +190,35 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
   const state = useRef({ commands, paletteOpen, helpOpen, singleKeys });
   state.current = { commands, paletteOpen, helpOpen, singleKeys };
 
+  /*
+   * Whether `g` has been pressed and the chord is waiting for its letter.
+   *
+   * The ref is what the listener reads, because two keys can arrive inside one React commit
+   * and a chord decided from stale state would go to the wrong screen; the state is what
+   * the hint on screen is drawn from. A chord that is never finished expires, so a lead key
+   * pressed by accident cannot sit there and swallow a decision a minute later.
+   */
+  const chordRef = useRef(false);
+  const [chordArmed, setChordArmed] = useState(false);
+  const chordTimer = useRef<number | null>(null);
+
   useEffect(() => {
+    function forgetChord(): void {
+      chordRef.current = false;
+      setChordArmed(false);
+      if (chordTimer.current !== null) {
+        window.clearTimeout(chordTimer.current);
+        chordTimer.current = null;
+      }
+    }
+
+    function armChord(): void {
+      chordRef.current = true;
+      setChordArmed(true);
+      if (chordTimer.current !== null) window.clearTimeout(chordTimer.current);
+      chordTimer.current = window.setTimeout(forgetChord, CHORD_TIMEOUT);
+    }
+
     function onKeyDown(event: KeyboardEvent): void {
       if (event.defaultPrevented || event.repeat) return;
       const {
@@ -190,19 +232,37 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
 
       if ((event.metaKey || event.ctrlKey) && !event.altKey && event.key.toLowerCase() === 'k') {
         event.preventDefault();
+        forgetChord();
         setHelpOpen(false);
         setPaletteOpen(!palette);
         return;
       }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      // Everything past here is a bare character (WCAG 2.2 2.1.4), including `?`.
-      if (!single) return;
-      if (isTypingTarget(event.target)) return;
-      if (shellOverlay) return;
+      // Everything past here is a bare character (WCAG 2.2 2.1.4), including `?` and both
+      // halves of a chord — so the switch that turns the single keys off turns off the
+      // chords with them, and an armed one is dropped rather than left waiting.
+      if (!single || isTypingTarget(event.target) || shellOverlay) {
+        forgetChord();
+        return;
+      }
+
+      // The letter after `g` belongs to the chord whether or not it names a destination:
+      // `g` then a stray `a` goes nowhere, rather than accepting a candidate.
+      if (chordRef.current) {
+        event.preventDefault();
+        forgetChord();
+        current.find((entry) => entry.chord === event.key)?.run();
+        return;
+      }
 
       if (event.key === '?') {
         event.preventDefault();
         setHelpOpen(true);
+        return;
+      }
+      if (event.key === CHORD_LEAD && current.some((entry) => entry.chord !== undefined)) {
+        event.preventDefault();
+        armChord();
         return;
       }
       const command = current.find((entry) => entry.shortcut === event.key);
@@ -212,7 +272,10 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
     }
 
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      if (chordTimer.current !== null) window.clearTimeout(chordTimer.current);
+    };
   }, []);
 
   const api = useMemo<CommandsApi>(
@@ -234,7 +297,25 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
       {children}
       <CommandPalette />
       <ShortcutHelp />
+      {chordArmed ? <ChordWaiting /> : null}
     </CommandsContext.Provider>
+  );
+}
+
+/**
+ * The chord is waiting for its letter, said out loud rather than left to be guessed.
+ *
+ * A mode nothing on screen mentions is the worst kind: the next key would go somewhere
+ * unexpected and nothing would explain why. It is a `status` because it is a state the
+ * researcher put the cockpit in and can read at their own pace, it names the way out, and
+ * it disappears on its own — the chord expires — so nothing has to be dismissed.
+ */
+function ChordWaiting() {
+  return (
+    <p className="rh-web-chord" role="status">
+      <kbd className="rh-web-kbd">{CHORD_LEAD}</kbd>
+      <span>Go to a screen: press its letter, or Esc to stop.</span>
+    </p>
   );
 }
 

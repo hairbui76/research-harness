@@ -2,9 +2,9 @@
  * What the keyboard can do here, on `?` or from the palette.
  *
  * The critique found no help affordance anywhere in the cockpit. This is the smallest
- * honest one: it lists the keys that are actually bound right now — the shell's two, then
- * whatever the open page registered — so it cannot promise a shortcut the page does not
- * offer, and a screen with no shortcuts of its own says so.
+ * honest one: it lists the keys that are actually bound right now — the shell's two, the
+ * chords that go to a screen, then whatever the open page registered — so it cannot promise
+ * a shortcut the page does not offer, and a screen with no shortcuts of its own says so.
  *
  * "Actually bound" includes the switch at the top. Every page shortcut is a single
  * character pressed with no modifier, and a researcher who dictates or uses a switch device
@@ -13,7 +13,8 @@
  */
 import { Dialog, DialogBody, DialogHeader, Switch } from '@research-harness/design';
 import { SHELL_SHORTCUTS, useCommands } from './CommandsProvider';
-import { groupCommands, shortcutLabel } from './model';
+import { CHORD_HEADING, groupCommands, shortcutLabel } from './model';
+import { ShortcutKeys } from './ShortcutKeys';
 
 export function ShortcutHelp() {
   const { commands, helpOpen, setHelpOpen, singleKeys, setSingleKeys } = useCommands();
@@ -21,6 +22,9 @@ export function ShortcutHelp() {
 
   const bound = commands.filter((command) => command.shortcut !== undefined);
   const groups = singleKeys ? groupCommands(bound) : [];
+  // The chords, under one heading of their own: they all do the same kind of thing, and
+  // the rail's three groups are a shape for browsing rather than for learning eleven keys.
+  const going = singleKeys ? commands.filter((command) => command.chord !== undefined) : [];
   // Only the chord survives the switch being off, so only the chord is listed.
   const anywhere = SHELL_SHORTCUTS.filter(
     (entry) => singleKeys || entry.shortcut.startsWith('Mod+'),
@@ -69,6 +73,30 @@ export function ShortcutHelp() {
             </dl>
           </section>
 
+          {going.length > 0 ? (
+            <section className="rh-web-shortcuts__group">
+              <h3 className="rh-text-h4">{CHORD_HEADING}</h3>
+              <p className="rh-text-secondary rh-web-shortcuts__note">
+                Two keys: <kbd className="rh-web-kbd">g</kbd>, then the letter. The letter is
+                only read while the chord is open, so it never collides with the single key
+                the screen in front of you binds.
+              </p>
+              <dl className="rh-web-shortcuts__list">
+                {going.map((command) => (
+                  <div key={command.id} className="rh-web-shortcuts__row">
+                    <dt>
+                      <ShortcutKeys command={command} singleKeys={singleKeys} />
+                    </dt>
+                    <dd>
+                      <span className="rh-web-shortcuts__label">{command.label}</span>{' '}
+                      <span className="rh-text-secondary">{command.group}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
           {groups.map(([group, items]) => (
             <section key={group} className="rh-web-shortcuts__group">
               <h3 className="rh-text-h4">{group}</h3>
@@ -76,7 +104,7 @@ export function ShortcutHelp() {
                 {items.map((command) => (
                   <div key={command.id} className="rh-web-shortcuts__row">
                     <dt>
-                      <kbd className="rh-web-kbd">{shortcutLabel(command.shortcut ?? '')}</kbd>
+                      <ShortcutKeys command={command} singleKeys={singleKeys} />
                     </dt>
                     <dd>
                       <span className="rh-web-shortcuts__label">{command.label}</span>
