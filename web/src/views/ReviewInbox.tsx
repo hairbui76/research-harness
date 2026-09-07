@@ -162,17 +162,26 @@ export function ReviewInboxPage() {
           ) : null}
 
           {items.length === 0 ? (
-            <Empty>
-              Nothing is waiting for review. Interrogate a work in{' '}
-              <Link to={href('/corpus')}>the corpus</Link> to stage new candidates, or ask{' '}
-              <Link to={href('/')}>the conversation</Link> what to look at next.
+            <Empty
+              description={
+                'This queue holds the proposals a run staged and nobody has decided yet. ' +
+                'Candidates come from interrogating a work, and none of them is accepted ' +
+                'state until it is decided here.'
+              }
+              action={<Link to={href('/corpus')}>Open the corpus to interrogate a work</Link>}
+            >
+              Nothing is waiting for review
             </Empty>
           ) : showing === 0 ? (
-            <Empty>
-              No candidate matches these filters. Nothing has left the queue.{' '}
-              <Button size="sm" variant="secondary" onClick={() => setFilters(NO_FILTERS)}>
-                Clear the filters
-              </Button>
+            <Empty
+              description="Nothing has left the queue. The filters only hide, and the daemon’s order is unchanged underneath them."
+              action={
+                <Button size="sm" variant="secondary" onClick={() => setFilters(NO_FILTERS)}>
+                  Clear the filters
+                </Button>
+              }
+            >
+              No candidate matches these filters
             </Empty>
           ) : (
             groups.map(([category, group]) => (

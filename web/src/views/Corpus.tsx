@@ -48,8 +48,8 @@ export function CorpusPage() {
       title="Corpus"
       description={
         settled
-          ? `${works.length} works. A file with no stored parse cannot have an anchor replayed against it.`
-          : 'A file with no stored parse cannot have an anchor replayed against it.'
+          ? `${works.length} works. The sources this project reads from, and the files kept for each.`
+          : 'The sources this project reads from, and the files kept for each.'
       }
     >
       {state.loading ? (

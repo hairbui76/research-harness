@@ -176,9 +176,14 @@ describe('the review inbox view', () => {
     renderInbox(daemon);
 
     await waitFor(() =>
-      expect(screen.getByText(/Nothing is waiting for review/)).toBeInTheDocument(),
+      expect(screen.getByText('Nothing is waiting for review')).toBeInTheDocument(),
     );
-    expect(screen.getByRole('link', { name: 'the corpus' })).toHaveAttribute('href', '/corpus');
+    // The shared contract every other research page uses: the fact as the title, what the
+    // page is for as the description, one real next step as the action.
+    expect(screen.getByText(/none of them is accepted state until it is decided here/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the corpus to interrogate a work' }),
+    ).toHaveAttribute('href', '/corpus');
   });
 
   it('has no automatically detectable accessibility violation', async () => {
@@ -210,8 +215,9 @@ describe('narrowing the queue on screen', () => {
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
     await user.type(screen.getByRole('textbox', { name: /Filter/ }), 'no such span');
 
-    expect(screen.getByText(/No candidate matches/)).toBeInTheDocument();
-    expect(screen.queryByText(/Nothing is waiting for review/)).not.toBeInTheDocument();
+    expect(screen.getByText('No candidate matches these filters')).toBeInTheDocument();
+    expect(screen.getByText(/Nothing has left the queue/)).toBeInTheDocument();
+    expect(screen.queryByText('Nothing is waiting for review')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Clear the filters' }));
     await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
@@ -375,7 +381,7 @@ describe('the policy batch of Product 24.4', () => {
     expect(
       screen.getByRole('list', { name: 'Candidates that meet the batch conditions' }),
     ).toHaveTextContent('dataset · W0001');
-    expect(screen.getByText(/Nothing is waiting for review/)).toBeInTheDocument();
+    expect(screen.getByText('Nothing is waiting for review')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Accept the routine candidates/ }),
     ).not.toBeInTheDocument();

@@ -215,6 +215,16 @@ describe('the corpus before, without, and after its read', () => {
     expect(container.textContent).not.toMatch(/\d+ works\./);
   });
 
+  it('describes the page rather than the mechanism behind one of its columns', async () => {
+    renderView(<CorpusPage />, { daemon: corpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByText(/works\./)).toBeInTheDocument());
+    expect(
+      screen.getByText('1 works. The sources this project reads from, and the files kept for each.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/anchor replayed/)).not.toBeInTheDocument();
+  });
+
   it('keeps its heading when the read is refused, and offers the retry', async () => {
     renderView(<CorpusPage />, { daemon: refusingDaemon('work.list') });
 
