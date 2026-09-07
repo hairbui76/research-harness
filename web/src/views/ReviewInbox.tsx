@@ -6,9 +6,11 @@
  * The order and the grouping are the server's: `review.inbox` returns items already sorted
  * and already labelled with a category and the reasons behind it. This view groups by that
  * label and never reorders, because deciding what a researcher should look at first is a
- * scientific judgement, not a presentation one (Product 5 P8). Searching and filtering only
- * *hide*; a sort is offered but applies inside one group and only when it was explicitly
- * chosen, so the queue's own ranking survives every control on this page.
+ * scientific judgement, not a presentation one (Product 5 P8). Every control on this page
+ * therefore only *hides*: searching and filtering take items out of the list, and nothing
+ * moves one. The daemon already ranks inside a category — deeper review first, then the
+ * older candidate — and a control that re-ranked that would be the cockpit deciding what
+ * to look at first.
  *
  * Batch acceptance is the daemon's, end to end. `review.accept_batch` takes a work or the
  * whole queue and nothing finer — there is no per-item selection to offer, because the
@@ -53,11 +55,9 @@ export interface InboxFilters {
   category: string;
   /** One of the verifier's verdicts, or '' for every verdict. */
   verdict: string;
-  /** Queue order unless a sort was explicitly chosen; a sort never crosses a group. */
-  sort: 'queue' | 'tier' | 'work';
 }
 
-export const NO_FILTERS: InboxFilters = { text: '', category: '', verdict: '', sort: 'queue' };
+export const NO_FILTERS: InboxFilters = { text: '', category: '', verdict: '' };
 
 /** Group the items the server already ordered, keeping its order inside each group. */
 export function groupByCategory(items: ReviewItem[]): [string, ReviewItem[]][] {
@@ -79,28 +79,9 @@ export function matchesFilters(item: ReviewItem, filters: InboxFilters): boolean
   return terms.every((term) => haystack.includes(term));
 }
 
-/**
- * The groups to draw: the server's order, minus whatever the filters hide.
- *
- * A sort is applied inside a group and never across one, and it is stable, so items the
- * sort cannot separate stay in the order the daemon ranked them.
- */
+/** The groups to draw: the server's order, minus whatever the filters hide. */
 export function inboxGroups(items: ReviewItem[], filters: InboxFilters): [string, ReviewItem[]][] {
-  const kept = items.filter((item) => matchesFilters(item, filters));
-  return groupByCategory(kept).map(([category, group]) => [category, sortGroup(group, filters)]);
-}
-
-function sortGroup(group: ReviewItem[], filters: InboxFilters): ReviewItem[] {
-  if (filters.sort === 'queue') return group;
-  const ranked = group.map((item, index) => ({ item, index }));
-  ranked.sort((left, right) => {
-    const compared =
-      filters.sort === 'tier'
-        ? left.item.tier - right.item.tier
-        : left.item.work.localeCompare(right.item.work);
-    return compared !== 0 ? compared : left.index - right.index;
-  });
-  return ranked.map((entry) => entry.item);
+  return groupByCategory(items.filter((item) => matchesFilters(item, filters)));
 }
 
 export function ReviewInboxPage() {
@@ -238,7 +219,9 @@ interface FilterBarProps {
  *
  * Every option is a word the daemon used: the categories it labelled the queue with, and
  * the verdicts its verifier actually returned for the items on screen. Nothing here offers
- * a category the queue does not contain, because an empty result is not a filter.
+ * a category the queue does not contain, because an empty result is not a filter, and
+ * nothing here re-orders: hiding is the only thing a presentation control may do to a
+ * scientific ranking.
  */
 function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
   const categories = CATEGORY_ORDER.filter((category) =>
@@ -285,19 +268,6 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
             {verdict.replace(/_/g, ' ')}
           </option>
         ))}
-      </Select>
-      <Select
-        label="Order inside each group"
-        hideLabel
-        size="sm"
-        value={filters.sort}
-        onChange={(event) =>
-          onChange({ ...filters, sort: event.target.value as InboxFilters['sort'] })
-        }
-      >
-        <option value="queue">Queue order</option>
-        <option value="tier">By tier</option>
-        <option value="work">By work</option>
       </Select>
     </div>
   );

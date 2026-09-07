@@ -5,8 +5,8 @@
  * The fixture is a real `review.inbox` response. What is asserted is that the view keeps
  * Product 24.2's order, shows the reason each item is waiting, and reports no confidence
  * number anywhere — the queue is about attention, not about how sure a model was (§43) —
- * and, now, that searching, filtering and sorting can hide and re-order *within* a group
- * but never move a group or invent a rank of their own (Product 5 P8).
+ * and that searching and filtering only ever *hide*, because the ranking they would
+ * otherwise disturb is the daemon's scientific judgement (Product 5 P8).
  *
  * The batch is the daemon's judgement end to end: the cockpit names no candidate, previews
  * with `dry_run`, restates what the write will do, and renders the answer — including a
@@ -30,7 +30,7 @@ import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test
 import type { FakeDaemon } from '../test/harness';
 
 const QUEUE = FIXTURES.reviewInbox as unknown as { items: ReviewItem[]; count: number };
-const NO_FILTERS = { text: '', category: '', verdict: '', sort: 'queue' as const };
+const NO_FILTERS = { text: '', category: '', verdict: '' };
 
 /** The inbox inside the shortcut layer, which is where the shell mounts it. */
 function withShell(ui: ReactElement): ReactElement {
@@ -67,7 +67,7 @@ describe('grouping', () => {
   });
 });
 
-describe('search, filter and sort', () => {
+describe('search and filter', () => {
   it('searches the field, the work, the quoted span and the reasons', () => {
     const metric = QUEUE.items.find((item) => item.field === 'metric_result')!;
 
@@ -93,23 +93,26 @@ describe('search, filter and sort', () => {
     expect(groups.map(([category]) => category)).toEqual(['high_risk', 'routine']);
   });
 
-  it('sorts only inside a group, and only when a sort was asked for', () => {
+  it('leaves a filtered group in the order the daemon ranked it', () => {
     const items: ReviewItem[] = [
       { ...QUEUE.items[0]!, candidate_id: 'c1', category: 'routine', tier: 2, work: 'W0009' },
       { ...QUEUE.items[0]!, candidate_id: 'c2', category: 'conflict', tier: 1, work: 'W0001' },
       { ...QUEUE.items[0]!, candidate_id: 'c3', category: 'routine', tier: 1, work: 'W0002' },
     ];
 
-    const queue = inboxGroups(items, NO_FILTERS);
-    expect(queue.map(([category]) => category)).toEqual(['conflict', 'routine']);
-    expect(queue[1]![1].map((item) => item.candidate_id)).toEqual(['c1', 'c3']);
+    const groups = inboxGroups(items, NO_FILTERS);
+    expect(groups.map(([category]) => category)).toEqual(['conflict', 'routine']);
+    // Neither the tier nor the work moves c3 in front of c1: the daemon sent them this way.
+    expect(groups[1]![1].map((item) => item.candidate_id)).toEqual(['c1', 'c3']);
+  });
 
-    const byTier = inboxGroups(items, { ...NO_FILTERS, sort: 'tier' });
-    expect(byTier.map(([category]) => category)).toEqual(['conflict', 'routine']);
-    expect(byTier[1]![1].map((item) => item.candidate_id)).toEqual(['c3', 'c1']);
+  it('offers no control that could re-order a group', async () => {
+    renderInbox(queueDaemon());
 
-    const byWork = inboxGroups(items, { ...NO_FILTERS, sort: 'work' });
-    expect(byWork[1]![1].map((item) => item.candidate_id)).toEqual(['c3', 'c1']);
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    expect(screen.queryByRole('combobox', { name: /Order inside each group/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'By tier' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'By work' })).not.toBeInTheDocument();
   });
 });
 
