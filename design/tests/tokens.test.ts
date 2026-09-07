@@ -426,6 +426,39 @@ describe('border widths', () => {
   });
 });
 
+/**
+ * The kicker ban, held mechanically.
+ *
+ * Every state component names its kind in words, which is right: colour is never the only
+ * signal. What the craft floor refuses is naming it *as a label above the heading* — an
+ * 11px uppercase wide-tracked word set before the sentence it belongs to. The lead-in that
+ * replaced it is the first words of the title, so it carries no case, tracking or size of
+ * its own; if one comes back, this fails.
+ */
+describe('the states name their kind without a kicker', () => {
+  const LEAD_INS = ['__kind', '__tone-label'];
+  const KICKER_PROPERTIES = ['text-transform', 'letter-spacing', 'font-size'];
+
+  it('leaves the lead-in in the title’s own case, tracking and size', () => {
+    const offenders: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const rule of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+          const selector = rule[1]!.trim();
+          if (!LEAD_INS.some((suffix) => selector.includes(suffix))) continue;
+          for (const property of KICKER_PROPERTIES) {
+            if (new RegExp(`(?:^|[;\\s])${property}\\s*:`).test(rule[2]!)) {
+              offenders.push(`${relative(src, file)}: ${selector} sets ${property}`);
+            }
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
 function cssFilesUnder(root: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {

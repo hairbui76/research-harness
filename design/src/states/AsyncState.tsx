@@ -34,10 +34,14 @@ export interface AsyncStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
    */
   flat?: boolean;
   /**
-   * Drop the written kind above the title, for a title that already names the state in the
-   * caller's own words ("No works in the corpus yet"). The rule the label exists for still
-   * holds — the state is named in text, not by colour or an icon — it is simply named once
-   * rather than twice, and only the caller knows whether its title does that.
+   * Drop the written kind leading the title, for a title that already names the state in
+   * the caller's own words ("No works in the corpus yet"). The rule the label exists for
+   * still holds — the state is named in text, not by colour or an icon — it is simply
+   * named once rather than twice, and only the caller knows whether its title does that.
+   *
+   * Left unset, two cases answer for themselves: a title that literally begins with the
+   * kind's own label, and every `loading` state, which the loader, `aria-busy` and a
+   * present-participle title already say three times over. Pass `false` to override either.
    */
   hideKind?: boolean;
   /** Force the live-region politeness rather than taking it from the kind. */
@@ -63,8 +67,11 @@ export function SafetyStatement({ safety }: { safety: SafetyNote }): ReactElemen
 /**
  * The one presentation for loading, empty, partial, stale, blocked, retryable and fatal
  * states. It owns no recovery logic: the caller passes a typed state, optional actions and
- * whatever content already succeeded, and this renders them consistently - always with a
- * written kind label beside the icon, never with colour as the only signal.
+ * whatever content already succeeded, and this renders them consistently - always with the
+ * kind written out, never with colour as the only signal.
+ *
+ * The kind leads the title's own sentence rather than sitting above it: a label set apart
+ * before a heading is a kicker, and the craft floor bans it outright.
  */
 export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function AsyncState(
   {
@@ -79,7 +86,7 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
     progress,
     compact = false,
     flat = false,
-    hideKind = false,
+    hideKind,
     urgent,
     className,
     children,
@@ -89,6 +96,9 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
 ) {
   const meta = ASYNC_STATE_META[kind];
   const assertive = urgent ?? meta.urgent;
+  const repeatsKind =
+    typeof title === 'string' && title.trim().toLowerCase().startsWith(meta.label.toLowerCase());
+  const kindHidden = hideKind ?? (kind === 'loading' || repeatsKind);
 
   return (
     <div
@@ -106,8 +116,14 @@ export const AsyncState = forwardRef<HTMLDivElement, AsyncStateProps>(function A
         <Icon name={icon ?? meta.icon} size={compact ? 16 : 20} />
       </span>
       <div className="rh-state__body">
-        {hideKind ? null : <p className="rh-state__kind">{meta.label}</p>}
-        <p className="rh-state__title">{title}</p>
+        <p className="rh-state__title">
+          {kindHidden ? null : (
+            <>
+              <span className="rh-state__kind">{`${meta.label}:`}</span>{' '}
+            </>
+          )}
+          {title}
+        </p>
         {description !== undefined ? <p className="rh-state__description">{description}</p> : null}
         {progress ? (
           <Progress

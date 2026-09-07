@@ -18,12 +18,22 @@ const KINDS: AsyncStateKind[] = [
 ];
 
 describe('AsyncState', () => {
-  it('names every kind in text as well as with an icon', () => {
+  it('names every kind in text as well as with an icon, leading the title with it', () => {
     for (const kind of KINDS) {
-      const { unmount } = render(<AsyncState kind={kind} title={`${kind} title`} />);
+      // A title that does not restate the kind, so the lead-in is the only thing saying it.
+      const { container, unmount } = render(<AsyncState kind={kind} title="What happened" />);
       const meta = ASYNC_STATE_META[kind];
-      // The written label is what carries the state; the icon only reinforces it.
-      expect(screen.getByText(meta.label)).toBeInTheDocument();
+      // The written label is what carries the state; the icon only reinforces it. It leads
+      // the title's own sentence rather than standing above it as a label of its own: a
+      // kicker is a kicker at any size, and the craft floor bans it outright.
+      const lead = container.querySelector('.rh-state__kind');
+      if (kind === 'loading') {
+        // `loading` says it with the loader, `aria-busy` and a present-participle title.
+        expect(lead).toBeNull();
+      } else {
+        expect(lead).toHaveTextContent(`${meta.label}:`);
+        expect(lead?.closest('.rh-state__title')).not.toBeNull();
+      }
       expect(document.querySelector(`[data-icon="${meta.icon}"]`)).toBeInTheDocument();
       expect(document.querySelector(`[data-icon="${meta.icon}"]`)).toHaveAttribute(
         'aria-hidden',
@@ -31,6 +41,16 @@ describe('AsyncState', () => {
       );
       unmount();
     }
+  });
+
+  it('says the kind once when the title already begins with it', () => {
+    const { container, rerender } = render(<AsyncState kind="partial" title="Partial reply" />);
+    expect(container.querySelector('.rh-state__kind')).toBeNull();
+    expect(screen.getByText('Partial reply')).toBeInTheDocument();
+
+    // An explicit `hideKind={false}` still wins: only the caller knows its own wording.
+    rerender(<AsyncState kind="partial" title="Partial reply" hideKind={false} />);
+    expect(container.querySelector('.rh-state__kind')).toHaveTextContent('Partial:');
   });
 
   it('announces politely by default and assertively when blocked or fatal', () => {
@@ -105,10 +125,10 @@ describe('AsyncState', () => {
 
   it('lets a title that already names the state say it once', () => {
     const { rerender } = render(<AsyncState kind="empty" title="No works in the corpus yet" />);
-    expect(screen.getByText('Nothing here yet')).toBeInTheDocument();
+    expect(screen.getByText('Nothing here yet:')).toBeInTheDocument();
 
     rerender(<AsyncState kind="empty" title="No works in the corpus yet" hideKind />);
-    expect(screen.queryByText('Nothing here yet')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nothing here yet:')).not.toBeInTheDocument();
     // The state is still named in text rather than by the icon alone - by the title.
     expect(screen.getByText('No works in the corpus yet')).toBeInTheDocument();
   });

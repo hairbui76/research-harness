@@ -51,14 +51,16 @@
   gap: var(--rh-space-2) var(--rh-space-3);
 }
 
-/* The state is named in words; colour and icon only reinforce it. */
+/*
+ * The state is named in words; colour and icon only reinforce it.
+ *
+ * The words lead the title — "Blocked: connected as unknown" — rather than standing above
+ * it as a label of their own. A separate 11px uppercase wide-tracked line before a heading
+ * is a kicker at any size, and `LOADING` above `Loading sessions` also said the same word
+ * twice; `hideKind` drops it wherever the title has already said it.
+ */
 .rh-state__kind {
-  margin: 0;
-  color: var(--rh-text-muted);
-  font-size: var(--rh-type-label-size);
-  line-height: var(--rh-type-label-lh);
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
+  color: inherit;
 }
 
 /*

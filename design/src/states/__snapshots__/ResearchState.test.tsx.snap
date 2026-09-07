@@ -60,13 +60,14 @@ exports[`ResearchState > ResearchState theme x density > matches the dark / comf
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Partial
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Partial:
+        </span>
+         
         The response was interrupted
       </p>
       <p
@@ -206,13 +207,14 @@ exports[`ResearchState > ResearchState theme x density > matches the dark / comp
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Partial
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Partial:
+        </span>
+         
         The response was interrupted
       </p>
       <p
@@ -352,13 +354,14 @@ exports[`ResearchState > ResearchState theme x density > matches the light / com
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Partial
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Partial:
+        </span>
+         
         The response was interrupted
       </p>
       <p
@@ -498,13 +501,14 @@ exports[`ResearchState > ResearchState theme x density > matches the light / com
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Partial
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Partial:
+        </span>
+         
         The response was interrupted
       </p>
       <p

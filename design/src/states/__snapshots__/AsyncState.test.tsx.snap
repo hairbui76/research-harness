@@ -47,13 +47,14 @@ exports[`AsyncState > AsyncState theme x density > matches the dark / comfortabl
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Try again
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Try again:
+        </span>
+         
         The model provider did not respond
       </p>
       <p
@@ -166,13 +167,14 @@ exports[`AsyncState > AsyncState theme x density > matches the dark / compact sn
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Try again
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Try again:
+        </span>
+         
         The model provider did not respond
       </p>
       <p
@@ -285,13 +287,14 @@ exports[`AsyncState > AsyncState theme x density > matches the light / comfortab
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Try again
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Try again:
+        </span>
+         
         The model provider did not respond
       </p>
       <p
@@ -404,13 +407,14 @@ exports[`AsyncState > AsyncState theme x density > matches the light / compact s
       class="rh-state__body"
     >
       <p
-        class="rh-state__kind"
-      >
-        Try again
-      </p>
-      <p
         class="rh-state__title"
       >
+        <span
+          class="rh-state__kind"
+        >
+          Try again:
+        </span>
+         
         The model provider did not respond
       </p>
       <p

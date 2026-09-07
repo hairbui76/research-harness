@@ -104,12 +104,13 @@
   color: var(--rh-text-primary);
 }
 
-/* The tone is always written out, never carried by the border colour alone. */
+/*
+ * The tone is always written out, never carried by the border colour alone — as the first
+ * words of the title, in the title's own type. An 11px uppercase word set before the
+ * sentence is a kicker, whatever it says.
+ */
 .rh-toast__tone-label {
-  font-size: var(--rh-type-label-size);
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
-  color: var(--rh-text-muted);
+  color: inherit;
 }
 
 .rh-toast__description {

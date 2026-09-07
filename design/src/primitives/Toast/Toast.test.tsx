@@ -40,8 +40,11 @@ describe('Toast', () => {
     const status = screen.getByRole('status');
     expect(status).toHaveTextContent('Saved to corpus');
     expect(status).toHaveAttribute('aria-atomic', 'true');
-    // The tone is spelled out, so it never depends on the border colour alone.
+    // The tone is spelled out, so it never depends on the border colour alone — as the
+    // first words of the title, not as a label set above it.
     expect(status).toHaveTextContent('Information:');
+    const lead = status.querySelector('.rh-toast__tone-label');
+    expect(lead?.closest('.rh-toast__title')).not.toBeNull();
   });
 
   it('places the viewport at the top, clear of the controls a task ends on', async () => {

@@ -6,11 +6,17 @@ import { describeThemeDensitySnapshots } from '../../tests/variants';
 import { ErrorNotice } from './ErrorNotice';
 
 describe('ErrorNotice', () => {
-  it('writes the kind out beside the title', () => {
-    render(<ErrorNotice kind="blocked" title="Privacy rule blocked this request" />);
+  it('leads the title with the kind, in the title’s own type', () => {
+    const { container } = render(
+      <ErrorNotice kind="blocked" title="Privacy rule blocked this request" />,
+    );
     const notice = screen.getByRole('alert');
     expect(notice).toHaveTextContent('Blocked:');
     expect(notice).toHaveTextContent('Privacy rule blocked this request');
+    // Not a label standing above the heading: the kind is the first words of the title's
+    // own sentence, and carries no size, tracking or case of its own.
+    const lead = container.querySelector('.rh-error-notice__kind');
+    expect(lead?.closest('.rh-error-notice__title')).not.toBeNull();
   });
 
   it('is polite for partial and stale, assertive for blocked and fatal', () => {
