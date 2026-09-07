@@ -164,11 +164,19 @@ body,
  * A research table. It scrolls inside the package's `ScrollArea`, which becomes a named,
  * keyboard-reachable region once it actually overflows (WCAG 2.2), and sits inside a
  * `data-density="compact"` wrapper so its rows read as a queue rather than as prose.
+ *
+ * The queue is made of the row height, the gap and the padding — not of the cell text. A
+ * cell is the value a researcher reads off the screen and then acts on, so the size is
+ * floored: dense enough to scan, never under `--rh-type-reading-min-size`, whatever
+ * density the page around it is set to.
  */
 .rh-web-table {
   border-collapse: collapse;
   width: 100%;
-  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
+  font-size: max(
+    var(--rh-type-reading-min-size),
+    calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale))
+  );
   line-height: var(--rh-type-body-sm-lh);
 }
 
@@ -199,7 +207,7 @@ body,
 .rh-web-quote {
   margin: 0;
   padding-inline-start: var(--rh-space-3);
-  border-inline-start: 2px solid var(--rh-border-strong);
+  border-inline-start: var(--rh-border-width-strong) solid var(--rh-border-strong);
   font-family: var(--rh-font-serif);
   color: var(--rh-text-primary);
   overflow-wrap: anywhere;

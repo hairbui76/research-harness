@@ -74,7 +74,7 @@
 
 .rh-md blockquote {
   padding: var(--rh-space-1) var(--rh-space-3);
-  border-left: 2px solid var(--rh-border-strong);
+  border-left: var(--rh-border-width-strong) solid var(--rh-border-strong);
   color: var(--rh-text-secondary);
 }
 

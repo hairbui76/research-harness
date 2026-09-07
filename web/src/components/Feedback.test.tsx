@@ -6,10 +6,13 @@
  * failure that keeps its retry, and an empty state that says what the page is for and
  * offers one real next step.
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { Empty, ErrorBox, Loading } from './Feedback';
+import { DataTable, Empty, ErrorBox, Loading } from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
 
 describe('waiting for a read', () => {
@@ -110,5 +113,50 @@ describe('a read that failed', () => {
   it('offers no retry when there is nothing to retry', () => {
     render(<ErrorBox error="the daemon refused" />);
     expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+  });
+});
+
+describe('a research table', () => {
+  /**
+   * The wrapper is the queue: close rows, small gaps, tight cell padding. It is not a
+   * second type scale — the critique measured these cells at 11.15px, under the size
+   * anything meant to be read may be. `--rh-type-body-sm-size` is 13px now and
+   * `.rh-web-table` clamps its computed size at `--rh-type-reading-min-size`, so the
+   * density can stay exactly where it was.
+   */
+  it('keeps its compact rows', () => {
+    const { container } = render(
+      <DataTable label="Works" head={<tr><th>Title</th></tr>}>
+        <tr>
+          <td>A traffic classifier study</td>
+        </tr>
+      </DataTable>,
+    );
+
+    const table = container.querySelector('.rh-web-table');
+    expect(table).toBeInTheDocument();
+    expect(table?.closest('[data-density="compact"]')).not.toBeNull();
+  });
+
+  it('names the region a keyboard can reach when the table overflows', () => {
+    const { container } = render(
+      <DataTable label="Works" head={<tr><th>Title</th></tr>}>
+        <tr>
+          <td>A traffic classifier study</td>
+        </tr>
+      </DataTable>,
+    );
+
+    expect(screen.getByText('A traffic classifier study')).toBeInTheDocument();
+    expect(container.querySelector('.rh-scroll-area')).toBeInTheDocument();
+  });
+
+  it('floors the cell size at the reading floor, at any density', () => {
+    const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'styles.css'), 'utf8');
+    const rule = /\.rh-web-table \{([^}]*)\}/.exec(css)?.[1] ?? '';
+
+    expect(rule).toMatch(/font-size:\s*max\(/);
+    expect(rule).toContain('--rh-type-reading-min-size');
+    expect(rule).toContain('--rh-density-font-scale');
   });
 });
