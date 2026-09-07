@@ -36,6 +36,7 @@ const REPORT = {
         {
           id: 'C0001',
           label: 'C0001',
+          title: 'Byte-level tokenization improves recall on short encrypted flows.',
           detail: "the anchor is stale: origin 'author_interpreted'",
           priority: 4,
           route: '/claims/C0001',
@@ -50,7 +51,14 @@ const REPORT = {
       count: 1,
       route: '',
       items: [
-        { id: 'taxonomy:shape', label: 'taxonomy:shape', detail: 'upstream D0001 changed', priority: 1, route: '' },
+        {
+          id: 'TX:traffic-shape',
+          label: 'TX:traffic-shape',
+          title: 'traffic-shape',
+          detail: 'upstream Decision “count only held-out splits” changed',
+          priority: 1,
+          route: '',
+        },
       ],
     },
   ],
@@ -157,6 +165,22 @@ describe('the stale page', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('names a stale object by what it is, and keeps its id beside the name', async () => {
+    const { container } = renderView(<StalePage />, { daemon: staleDaemon(REPORT) });
+
+    await waitFor(() => expect(screen.getByText('Accepted claims')).toBeInTheDocument());
+    // The daemon's title is the name; the node id stays, in mono, as the thing a
+    // researcher repairing the object types.
+    expect(
+      screen.getByText('Byte-level tokenization improves recall on short encrypted flows.', {
+        exact: false,
+      }),
+    ).toBeInTheDocument();
+    expect(container.querySelector('code.rh-web-object-id')).toHaveTextContent('C0001');
+    expect(screen.getByText('traffic-shape', { exact: true })).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   it('links an object to itself, and reads the daemon’s vocabulary out of its reason', async () => {
     renderView(
       <ProjectPathProvider projectId="prj_abc">
@@ -168,14 +192,18 @@ describe('the stale page', () => {
     await waitFor(() =>
       expect(screen.getByText("— the anchor is stale: origin 'author interpreted'")).toBeInTheDocument(),
     );
-    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute(
-      'href',
-      '/projects/prj_abc/claims/C0001',
-    );
+    // The name is the link, and the id rides inside it: the whole name opens the object.
+    expect(
+      screen.getByRole('link', {
+        name: 'Byte-level tokenization improves recall on short encrypted flows. C0001',
+      }),
+    ).toHaveAttribute('href', '/projects/prj_abc/claims/C0001');
     // An object the daemon gave no route to is text, not a second link to its own group.
-    const entry = screen.getByText('taxonomy:shape');
+    const entry = screen.getByText('TX:traffic-shape');
     expect(entry.closest('a')).toBeNull();
-    expect(within(entry.closest('li')!).getByText(/upstream D0001 changed/)).toBeInTheDocument();
+    expect(
+      within(entry.closest('li')!).getByText(/upstream Decision “count only held-out splits” changed/),
+    ).toBeInTheDocument();
   });
 
   it('says in the daemon’s words what a cap left out', async () => {

@@ -46,6 +46,7 @@ import {
   ScrollArea,
   Skeleton,
   AUTHORITY_LABELS,
+  humaniseResearchTokens,
   humaniseTerm,
   researchDescription,
   researchLabel,
@@ -433,4 +434,25 @@ export function fieldLabel(field: string): string {
  */
 export function candidateName(field: string, work: string): string {
   return `${fieldLabel(field)} · ${work}`;
+}
+
+/**
+ * What one attention item is called: the daemon's title, then the id it is held under.
+ *
+ * A stale object arrives labelled with the node id the dependency graph knows it by —
+ * `C0001`, `S0001#W0001#tokenization`, `TX:traffic-shape` — and an id is not a name. The
+ * daemon composes the name (`AttentionItem.title`) and this renders it, keeping the id
+ * beside it in mono because that is what a researcher repairing the object works with.
+ *
+ * It lives here rather than in either view because the Overview's "Gone stale" group and
+ * the Stale page show the same items: one component is what keeps the two surfaces
+ * character-identical, which is the property the browser suite asserts.
+ */
+export function AttentionName({ item }: { item: { label: string; title?: string } }) {
+  if (!item.title) return <code>{item.label}</code>;
+  return (
+    <>
+      {humaniseResearchTokens(item.title)} <code className="rh-web-object-id">{item.label}</code>
+    </>
+  );
 }

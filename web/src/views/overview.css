@@ -42,11 +42,6 @@
   gap: var(--rh-space-1);
 }
 
-/* A stale object is named by its id, so the ids line up down the column. */
-.rh-web-overview__stale code {
-  font-family: var(--rh-font-mono);
-}
-
 /* The window a change list covers, and what the cap left out: quiet, and above/below it. */
 .rh-web-overview__window {
   margin: 0;

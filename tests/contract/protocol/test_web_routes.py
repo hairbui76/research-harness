@@ -41,15 +41,17 @@ from research_harness.capabilities.reads import (
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.domain.base import Provenance
 from research_harness.domain.conversation import Message, MessageRole, TextBlock
-from research_harness.domain.ids import ClaimId
+from research_harness.domain.ids import ClaimId, WorkId
 from research_harness.domain.transitions import HUMAN_ACTOR
 from research_harness.evidence.conflicts import ConflictKind, ConflictRecord, ConflictStore
+from research_harness.projection.rows import manuscript_anchor_key
 from research_harness.protocol.dto import ArtifactBlocks, OverviewReport, WorkspaceIndex
 from research_harness.server.app import (
     CHANGE_ITEMS,
     DEV_ENV,
     DEV_ORIGINS,
     WEB_DIST_ENV,
+    _ObjectNames,
     create_app,
     dev_mode,
     ensure_token,
@@ -366,6 +368,60 @@ def test_an_overview_of_a_workspace_with_a_claim_reports_its_status(
 
     assert overview.counts.claims == 1
     assert [(entry.key, entry.count) for entry in overview.claim_health] == [("unverified", 1)]
+
+
+def test_every_kind_of_object_a_page_names_has_one_title_composed_here(
+    corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """Naming an object is a judgement about the workspace, so the daemon makes it once.
+
+    The Stale page, the Overview's "Gone stale" group and the Conflicts page all show
+    objects the daemon reports by id. Which field of a record is its name — a Work's
+    title, a Claim's statement, a Decision's title or, when it has none, the rationale it
+    was taken for, the field and work an Evidence object was accepted under — is decided
+    here, and every one of those surfaces reads the same answer (Product 5 P10).
+    """
+    _accept_a_candidate(corpus, registry)
+    _create_claim(corpus, registry)
+    _create_question(corpus, registry)
+    _accept_a_decision(corpus, registry)
+    _attach_a_sentence(corpus)
+    repo = WorkspaceRepository.open(corpus)
+    names = _ObjectNames(repo)
+    evidence = next(str(record.id) for record in repo.iter_evidence(WorkId(WORK)))
+    anchor = next(
+        manuscript_anchor_key(record.file, record.sentence_fingerprint)
+        for record in repo.iter_anchors()
+    )
+
+    assert names.title(WORK) == "Deep Representations for Encrypted Network Traffic"
+    assert names.title("C0001") == (
+        "Byte-level tokenization improves recall on short encrypted flows."
+    )
+    assert names.title("RQ0001") == "Which tokenizations survive short encrypted flows?"
+    assert names.title("D0001") == "count only held-out splits"
+    assert names.title(evidence) == ("dataset · Deep Representations for Encrypted Network Traffic")
+    assert names.title(anchor) == "Existing systems disagree about byte-level tokenization."
+    assert names.title("W0404") == "", "an id nothing in this workspace answers to names nothing"
+
+
+def test_a_stale_object_the_overview_reports_carries_its_name_and_keeps_its_id(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """The Overview's "Gone stale" group is the Stale page's items, titles included."""
+    _accept_a_candidate(corpus, registry)
+    _create_claim(corpus, registry)
+    _make_the_claim_stale(corpus, registry)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+    stale = next(group for group in overview.attention if group.surface == "stale")
+
+    assert [item.label for item in stale.items] == ["C0001"]
+    assert stale.items[0].title == (
+        "Byte-level tokenization improves recall on short encrypted flows."
+    )
+    assert "E0001" not in stale.items[0].detail, "the evidence that moved is named, not coded"
+    assert stale.items[0].detail.startswith("upstream evidence “dataset · ")
 
 
 # -- what changed since the researcher last worked ----------------------------
@@ -1119,6 +1175,55 @@ def _accept_a_decision(root: Path, registry: CapabilityRegistry) -> None:
         },
         principal=Principal.human(),
     )
+
+
+def _attach_a_sentence(root: Path) -> None:
+    """One manuscript anchor on record, appended the way the workspace stores them.
+
+    The daemon names an anchor by the sentence it holds, and nothing else in this file
+    writes one; going through the manuscript workspace to get a single line into
+    `manuscript/anchors.jsonl` would test the editor rather than the naming.
+    """
+    from research_harness.domain.manuscript import ManuscriptAnchor
+    from research_harness.workspace.serialization import dump_jsonl_line
+
+    layout = WorkspaceRepository.open(root).layout
+    layout.anchors_file.parent.mkdir(parents=True, exist_ok=True)
+    anchor = ManuscriptAnchor(
+        file="main.tex",
+        line_start=17,
+        line_end=17,
+        sentence="Existing systems disagree about byte-level tokenization.",
+        sentence_fingerprint=f"sha256:{'b' * 64}",
+        claim=ClaimId("C0001"),
+        provenance=Provenance.human(HUMAN_ACTOR),
+    )
+    with layout.anchors_file.open("a", encoding="utf-8") as stream:
+        stream.write(dump_jsonl_line(anchor))
+
+
+def _make_the_claim_stale(root: Path, registry: CapabilityRegistry) -> None:
+    """Real decay under the Claim: the evidence it rests on is declared changed.
+
+    Nothing asks for a stale mark. The Claim is related to the accepted Evidence, the
+    projection is rebuilt, and the daemon's own invalidation hook runs over that Evidence
+    — which is what a mutation touching it would have done (Product 37, ADR-008).
+    """
+    from research_harness.capabilities.invalidation import DependencyInvalidation
+    from research_harness.projection.rebuild import rebuild_workspace
+
+    repo = WorkspaceRepository.open(root)
+    evidence = [str(record.id) for record in repo.iter_evidence(WorkId(WORK))]
+    for identifier in evidence:
+        registry.invoke(
+            "claim.relate",
+            open_context(root, HUMAN_ACTOR),
+            {"claim_id": "C0001", "relation": {"evidence": identifier, "relation": "supports"}},
+            principal=Principal.human(),
+        )
+    repo = WorkspaceRepository.open(root)
+    rebuild_workspace(repo)
+    DependencyInvalidation().invalidate(repo, evidence)
 
 
 def _open_a_conflict(root: Path, subject: str, *, resolve: bool) -> None:

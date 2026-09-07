@@ -355,6 +355,11 @@
             "default": "",
             "title": "Route",
             "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
           }
         },
         "required": [

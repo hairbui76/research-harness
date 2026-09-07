@@ -119,6 +119,7 @@ describe('the overview', () => {
                       {
                         id: 'C0001',
                         label: 'C0001',
+                        title: 'TrafficLM reaches an F1 of 94.32 on CICIDS2017',
                         detail: 'anchor no longer replays against the stored parse',
                         priority: 4,
                         route: '/claims/C0001',
@@ -133,7 +134,11 @@ describe('the overview', () => {
     });
 
     await waitFor(() => expect(screen.getByText('Gone stale')).toBeInTheDocument());
-    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute('href', '/claims/C0001');
+    // The daemon's title names the object; the node id rides along in mono, exactly as it
+    // does on the Stale page, because both surfaces render one item.
+    expect(
+      screen.getByRole('link', { name: 'TrafficLM reaches an F1 of 94.32 on CICIDS2017 C0001' }),
+    ).toHaveAttribute('href', '/claims/C0001');
     expect(
       screen.getByText(/anchor no longer replays against the stored parse/),
     ).toBeInTheDocument();

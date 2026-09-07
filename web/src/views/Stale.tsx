@@ -21,7 +21,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { FullPageWorkspace, humaniseResearchTokens } from '@research-harness/design';
 import type { AttentionItem, ResearchGroup } from '../api/dto';
-import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
+import { AttentionName, Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
@@ -94,7 +94,7 @@ function StaleGroup({ group }: { group: ResearchGroup }) {
         {group.items.map((item) => (
           <li key={`${group.key}:${item.id}`}>
             <StaleItem item={item}>
-              <code>{item.label}</code>
+              <AttentionName item={item} />
             </StaleItem>{' '}
             <span className="rh-text-secondary">— {humaniseResearchTokens(item.detail)}</span>
           </li>

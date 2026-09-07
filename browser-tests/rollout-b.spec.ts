@@ -102,6 +102,13 @@ test('the three rolled-out pages lead with the work the daemon composed', async 
     .first()
     .innerText()).replace(/\s+/g, ' ').trim();
   expect(onOverview, 'the Overview reports the decay with a reason').toContain('—');
+  // The matrix is named by what it was called, not by the node id the graph holds it
+  // under, and the Decision that moved is named the same way in the reason.
+  expect(onOverview, 'a stale object is named').toContain('Traffic shape');
+  expect(onOverview, 'the id stays beside the name').toContain('S0001');
+  expect(onOverview, 'the upstream Decision is named, not coded').toContain(
+    'upstream Decision “separate padded flows from unpadded ones” changed',
+  );
 
   await page.goto(`${project.workspace_url}/stale`);
   await expect(page.getByRole('heading', { level: 1, name: 'Stale objects' })).toBeVisible();

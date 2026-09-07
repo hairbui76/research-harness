@@ -126,6 +126,20 @@ body,
   padding-block-start: var(--rh-space-3);
 }
 
+/*
+ * The id an object is held under, beside the name it is read by (`AttentionName`).
+ *
+ * Mono because it is a machine identity a researcher copies and types, and quieter than
+ * the name because the name is what the line is about — the same relation the reference
+ * chip draws between its id and its label.
+ */
+.rh-web-object-id {
+  font-family: var(--rh-font-mono);
+  font-size: var(--rh-type-mono-size);
+  color: var(--rh-text-secondary);
+  overflow-wrap: anywhere;
+}
+
 /* A form that asks for the sentence a decision is recorded with. */
 .rh-web-prompt {
   padding-block-start: var(--rh-space-3);

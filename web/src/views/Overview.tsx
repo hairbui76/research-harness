@@ -35,7 +35,7 @@ import type {
   OverviewCounts,
   OverviewReport,
 } from '../api/dto';
-import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
+import { AttentionName, Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import './overview.css';
@@ -130,7 +130,7 @@ export function OverviewPage() {
                   {stale.items.map((item) => (
                     <li key={item.id}>
                       <ItemLink item={item} fallback={stale.route}>
-                        <code>{item.label}</code>
+                        <AttentionName item={item} />
                       </ItemLink>{' '}
                       <span className="rh-text-secondary">
                         — {humaniseResearchTokens(item.detail)}

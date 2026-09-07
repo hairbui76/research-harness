@@ -284,6 +284,17 @@ class AttentionItem(BaseModel):
 
     id: str
     label: str
+    title: str = ""
+    """The name a person reads for this object, when the label is a daemon identifier.
+
+    A stale object is reported by the id the dependency graph knows it under — `C0001`,
+    `S0001#W0001#tokenization`, `TX:traffic-shape` — and none of those is a name. The
+    object's own name is composed here, once, so the Overview's "Gone stale" group and the
+    Stale page read one title rather than each humanising an id its own way (Product 5
+    P10). Empty when the label is already the name, which is what every other surface's
+    items carry.
+    """
+
     detail: str = ""
     priority: int = 0
     route: str = ""

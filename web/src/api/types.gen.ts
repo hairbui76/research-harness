@@ -577,6 +577,11 @@ export interface components {
              * @default
              */
             route: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
         };
         /**
          * BlockView

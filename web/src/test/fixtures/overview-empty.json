@@ -9,21 +9,24 @@
           "id": "cand_44c1f007fc0db0b2",
           "label": "metric_result · W0001",
           "priority": 1,
-          "route": "/review/cand_44c1f007fc0db0b2"
+          "route": "/review/cand_44c1f007fc0db0b2",
+          "title": ""
         },
         {
           "detail": "the verifier reported partially_supported",
           "id": "cand_b09aa84fc5dee7c0",
           "label": "method_summary · W0001",
           "priority": 3,
-          "route": "/review/cand_b09aa84fc5dee7c0"
+          "route": "/review/cand_b09aa84fc5dee7c0",
+          "title": ""
         },
         {
           "detail": "verified supported, tier 1, anchor valid",
           "id": "cand_4590b9b1f474d343",
           "label": "dataset · W0001",
           "priority": 4,
-          "route": "/review/cand_4590b9b1f474d343"
+          "route": "/review/cand_4590b9b1f474d343",
+          "title": ""
         }
       ],
       "kind": "review_items",

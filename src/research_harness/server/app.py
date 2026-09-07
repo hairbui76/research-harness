@@ -76,6 +76,12 @@ from research_harness.domain.research import Decision, Taxonomy, TaxonomyTerm
 from research_harness.domain.work import Artifact, Work
 from research_harness.evidence.conflicts import ConflictRecord, ConflictStore
 from research_harness.local_app.runtime import LEGACY_PROJECT_ID, WorkspaceRuntime
+from research_harness.projection.rows import (
+    MANUSCRIPT_ANCHOR_PREFIX,
+    NODE_SEPARATOR,
+    TAXONOMY_PREFIX,
+    manuscript_anchor_key,
+)
 from research_harness.protocol.dto import (
     ArtifactBlocks,
     AttentionGroup,
@@ -633,6 +639,19 @@ OBJECT_ROUTES: Mapping[type[ResearchId], str] = {
     ArtifactId: "/source",
 }
 
+#: What each kind of object is called in a sentence, capitalised the way the product
+#: capitalises its terms: a Claim and a Decision are named things a researcher recorded,
+#: while a work's evidence is the reading it holds.
+OBJECT_KINDS: Mapping[type[ResearchId], str] = {
+    WorkId: "work",
+    EvidenceId: "evidence",
+    ClaimId: "Claim",
+    QuestionId: "question",
+    DecisionId: "Decision",
+    SynthesisId: "matrix",
+    ArtifactId: "file",
+}
+
 #: Month names, so a change reads identically on every machine. `strftime('%B')` follows the
 #: process locale, and a research log whose wording depends on `LC_TIME` is one two
 #: researchers cannot compare.
@@ -681,10 +700,11 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
     questions = repo.list_questions()
     anchors = tuple(repo.iter_anchors())
     unsupported = _unsupported_anchors(anchors, claims)
+    names = _ObjectNames(repo)
     attention = (
         _group("review_items", "review item", "/review", inbox.count, _review_items(inbox)),
         _group("conflicts", "conflict", "/conflicts", len(conflicts), _conflict_items(conflicts)),
-        _group("stale", "stale object", "/stale", stale.count, _stale_items(stale), "stale"),
+        _group("stale", "stale object", "/stale", stale.count, _stale_items(stale, names), "stale"),
         _group(
             "unsupported_manuscript_claims",
             "unsupported manuscript claim",
@@ -843,6 +863,133 @@ def _object_route(object_id: str) -> str:
     return f"{base}/{parsed}" if base else ""
 
 
+class _ObjectNames:
+    """What one research object is called, in the words a person reads.
+
+    An id is how the daemon holds an object, not what it is. Naming one is a judgement
+    about the workspace — which field of the record is its name, and what a composite node
+    like a matrix cell is called at all — so it is made here, once, and every surface that
+    shows the object reads the same title (Product 5 P10). Two pages humanising the same
+    id in two different ways would be two names for one thing.
+
+    Every index is read on first use and kept for the life of one request. A project with
+    nothing stale and nothing in dispute never opens its evidence files at all, and one
+    that does reads each list once however many marks point into it.
+    """
+
+    __slots__ = ("_evidence", "_named", "_repo", "_works")
+
+    def __init__(self, repo: WorkspaceRepository) -> None:
+        self._repo = repo
+        self._named: dict[str, str] | None = None
+        self._works: dict[str, str] | None = None
+        self._evidence: dict[str, str] | None = None
+
+    def title(self, object_id: str) -> str:
+        """The object's own name, or "" when this workspace cannot name it.
+
+        An id nothing in the workspace answers to — a node left behind by an object that
+        has since been deleted — names nothing, and the surface falls back to the id.
+        """
+        text = str(object_id)
+        if text.startswith(TAXONOMY_PREFIX):
+            return text[len(TAXONOMY_PREFIX) :]
+        if text.startswith(MANUSCRIPT_ANCHOR_PREFIX):
+            return self._anchor(text)
+        if NODE_SEPARATOR in text:
+            _, _, rest = text.partition(NODE_SEPARATOR)
+            work, _, field = rest.partition(NODE_SEPARATOR)
+            return f"{field} · {self._work(work)}" if field else ""
+        try:
+            parsed = parse_id(text)
+        except ResearchHarnessError:
+            return ""
+        if isinstance(parsed, EvidenceId):
+            return self._evidence_titles().get(text, "")
+        return self._names().get(text, "")
+
+    def kind(self, object_id: str) -> str:
+        """The word for what kind of object this is, as the product capitalises it."""
+        text = str(object_id)
+        if text.startswith(TAXONOMY_PREFIX):
+            return "taxonomy"
+        if text.startswith(MANUSCRIPT_ANCHOR_PREFIX):
+            return "manuscript sentence"
+        if NODE_SEPARATOR in text:
+            return "classification"
+        try:
+            parsed = parse_id(text)
+        except ResearchHarnessError:
+            return ""
+        return OBJECT_KINDS.get(type(parsed), "")
+
+    def reason(self, reason: str, source_change: str) -> str:
+        """One stale reason with the object that moved named rather than coded.
+
+        `state.stale` records the change as the id it happened to — "upstream D0001
+        changed" — because the projection has nothing but ids. Here the workspace is open,
+        so the id becomes the object's own name and the sentence stops asking a researcher
+        to remember which Decision D0001 was. A reason that names nothing resolvable is
+        left exactly as the daemon recorded it.
+        """
+        named = self.title(source_change)
+        kind = self.kind(source_change)
+        if not named or not source_change or source_change not in reason:
+            return reason
+        return reason.replace(source_change, f"{kind} “{named}”" if kind else f"“{named}”")
+
+    def _work(self, work: str) -> str:
+        """One Work's title, falling back to its id when the corpus has no such Work."""
+        return self._work_titles().get(work, work)
+
+    def _anchor(self, node: str) -> str:
+        """The manuscript sentence one anchor holds, found by the node id it is keyed by."""
+        for anchor in self._repo.iter_anchors():
+            if manuscript_anchor_key(anchor.file, anchor.sentence_fingerprint) == node:
+                return anchor.sentence
+        return ""
+
+    def _work_titles(self) -> dict[str, str]:
+        if self._works is None:
+            self._works = {str(work.id): work.title for work in self._repo.list_works()}
+        return self._works
+
+    def _names(self) -> dict[str, str]:
+        """Every object whose name is a field of its own file, by id."""
+        if self._named is None:
+            named = dict(self._work_titles())
+            named.update({str(claim.id): claim.statement for claim in self._repo.list_claims()})
+            named.update(
+                {str(question.id): question.question for question in self._repo.list_questions()}
+            )
+            named.update(
+                # A Decision may carry no title, and then its rationale is what a researcher
+                # recorded it as: it is the sentence the decision was taken for.
+                {
+                    str(decision.id): decision.title or decision.rationale
+                    for decision in self._repo.list_decisions()
+                }
+            )
+            named.update({str(matrix.id): matrix.name for matrix in self._repo.list_matrices()})
+            self._named = named
+        return self._named
+
+    def _evidence_titles(self) -> dict[str, str]:
+        """Accepted evidence, named the way the review queue names the candidate it came from.
+
+        `field · work` is what a researcher decided this evidence under (`candidateName` in
+        the cockpit), so the accepted object keeps the name the candidate had.
+        """
+        if self._evidence is None:
+            found: dict[str, str] = {}
+            for work in self._repo.list_works():
+                for evidence in self._repo.iter_evidence(work.id):
+                    field = evidence.content.field or "evidence"
+                    found[str(evidence.id)] = f"{field} · {work.title}"
+            self._evidence = found
+        return self._evidence
+
+
 def _review_items(inbox: ReviewInbox) -> tuple[AttentionItem, ...]:
     """The queue's own order, already Product 24.2: conflict, high-risk, stale, ..."""
     return tuple(
@@ -868,13 +1015,20 @@ def _conflict_items(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionItem,
     )
 
 
-def _stale_items(stale: StaleReport) -> tuple[AttentionItem, ...]:
-    """Stale marks in the order `state.stale` reports them: highest impact first."""
+def _stale_items(stale: StaleReport, names: _ObjectNames) -> tuple[AttentionItem, ...]:
+    """Stale marks in the order `state.stale` reports them: highest impact first.
+
+    The projection knows each object by its node id and nothing else, so the name and the
+    reason are composed here against the open workspace: the object's own title, and the
+    upstream object that moved named rather than coded. The id stays in `label`, because a
+    researcher repairing a stale object works with it.
+    """
     return tuple(
         AttentionItem(
             id=mark.object_id,
             label=mark.object_id,
-            detail=mark.reason,
+            title=names.title(mark.object_id),
+            detail=names.reason(mark.reason, mark.source_change),
             priority=mark.priority,
             route=_object_route(mark.object_id),
         )
@@ -1202,7 +1356,7 @@ def _stale_overview(registry: CapabilityRegistry, root: Path, caller: Principal)
     """
     ctx = open_context(root, caller.actor)
     report = _read_result(registry, "state.stale", {"limit": STALE_LIMIT}, ctx, caller, StaleReport)
-    items = _stale_items(report)
+    items = _stale_items(report, _ObjectNames(_open_repo(root)))
     groups: list[ResearchGroup] = []
     for priority, key, title, noun, route, detail in STALE_TIERS:
         tier = tuple(item for item in items if item.priority == priority)

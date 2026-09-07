@@ -35,11 +35,6 @@
   margin-inline-start: var(--rh-space-4);
 }
 
-/* A stale object is named by its id, so the ids line up down the column. */
-.rh-web-stale__items code {
-  font-family: var(--rh-font-mono);
-}
-
 /* What the cap left out, in the daemon's words: the page's last, quietest line. */
 .rh-web-stale__more {
   margin: 0;

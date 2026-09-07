@@ -194,6 +194,41 @@ def test_the_stale_page_and_the_overview_report_one_decay_in_one_set_of_words(
     assert stale.count == group.count
 
 
+def test_a_stale_object_is_named_by_what_it_is_and_not_by_its_node_id(
+    reader: TestClient,
+) -> None:
+    """A node id is how the graph holds an object, never what a researcher calls it.
+
+    The dependency graph reports a matrix as `S0001`, one cell of it as
+    `S0001#W0001#tokenization` and a classification scheme as `TX:traffic-shape`. Each of
+    those is a code to decode, so the daemon composes the object's own name beside it and
+    both surfaces that show stale objects read that one title (Product 5 P10).
+    """
+    report = StaleOverview.model_validate(reader.get("/stale").json())
+    titles = {item.label: item.title for group in report.groups for item in group.items}
+
+    assert titles["S0001"] == "Traffic shape", "a matrix is called what it was named"
+    assert titles["TX:traffic-shape"] == TAXONOMY, "a scheme is called by its own name"
+    assert titles["S0001#W0001#tokenization"] == (
+        "tokenization · Deep Representations for Encrypted Network Traffic"
+    ), "a cell is the field it reads, of the work it reads it for"
+    # The id stays on the item: repairing a stale object is work done with the id.
+    assert all(item.label == item.id for group in report.groups for item in group.items), (
+        "the node id is still carried, as the label the page sets in mono"
+    )
+
+
+def test_the_reason_names_the_object_that_moved_rather_than_reporting_its_id(
+    reader: TestClient,
+) -> None:
+    """`state.stale` records "upstream D0001 changed"; a researcher reads the Decision."""
+    report = StaleOverview.model_validate(reader.get("/stale").json())
+    reasons = {item.detail for group in report.groups for item in group.items}
+
+    assert reasons == {"upstream Decision “separate padded flows from unpadded ones” changed"}
+    assert str(APPROVAL) not in " ".join(reasons), "no page should have to decode D0001"
+
+
 def test_the_stale_page_states_its_size_inside_a_sentence(reader: TestClient) -> None:
     report = StaleOverview.model_validate(reader.get("/stale").json())
 
