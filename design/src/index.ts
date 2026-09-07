@@ -280,6 +280,7 @@ export type {
 // research semantics and conversation (DS2a)
 export {
   AuthorityBadge,
+  DescribedTerm,
   EntityRef,
   SourceAnchor,
   EvidenceCard,
@@ -321,6 +322,7 @@ export {
   OVERTURN_RISK_META,
   QUESTION_STATUS_META,
   RESEARCH_VOCABULARIES,
+  RESEARCH_VOCABULARY_DESCRIPTIONS,
   REVIEW_CATEGORY_META,
   REVIEW_TIER_META,
   SCREENING_STATE_META,
@@ -330,17 +332,21 @@ export {
   humaniseTerm,
   researchDescription,
   researchLabel,
+  researchMeaning,
+  researchVocabularyDescription,
   termDescription,
   termLabel,
 } from './research';
 export type {
   AuthorityBadgeProps,
+  DescribedTermProps,
   EntityRefProps,
   EntityRefElement,
   EntityRefSize,
   SourceAnchorProps,
   SourceAnchorVariant,
   EvidenceCardProps,
+  EvidenceFactMeanings,
   ClaimCardProps,
   ChangeKind,
   ChangeKindMeta,

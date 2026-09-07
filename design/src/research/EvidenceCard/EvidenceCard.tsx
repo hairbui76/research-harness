@@ -5,8 +5,25 @@ import type { CardProps } from '../../primitives/Card';
 import { Icon } from '../../primitives/Icon';
 import { cx } from '../../utils/cx';
 import { AuthorityBadge } from '../AuthorityBadge';
+import { DescribedTerm } from '../DescribedTerm';
 import { SourceAnchor } from '../SourceAnchor';
 import type { EvidenceModel, SourceAnchorModel } from '../models';
+
+/**
+ * The one line the product states about each metadata fact, keyed by the fact.
+ *
+ * The card is handed words, not identifiers — the host has already spelled `direct` as
+ * `Direct` — so it cannot look a meaning up, and it is given one per fact instead. A fact
+ * with no sentence here stays plain text: `Work` is an identifier and means nothing beyond
+ * itself, and a vocabulary the product never defines gets no invented definition.
+ */
+export interface EvidenceFactMeanings {
+  work?: string;
+  type?: string;
+  strength?: string;
+  origin?: string;
+  field?: string;
+}
 
 export interface EvidenceCardProps
   extends Omit<CardProps, 'header' | 'footer' | 'children' | 'onSelect' | 'title'> {
@@ -25,6 +42,16 @@ export interface EvidenceCardProps
   onOpen?: (evidence: EvidenceModel) => void;
   /** Open the source at the exact anchor. */
   onOpenAnchor?: (anchor: SourceAnchorModel) => void;
+  /**
+   * Put the meaning of the metadata facts on the page.
+   *
+   * Each sentence given makes its fact reachable — the value takes a tab stop, is
+   * `aria-describedby` the sentence and prints it underneath on focus, exactly as the
+   * authority badge in the header does. Pass it where a reader has to know what `Direct`
+   * or `Source observed` is in order to judge the evidence; leave it off and the facts
+   * render as before.
+   */
+  meanings?: EvidenceFactMeanings;
   /** Actions belonging to this card — usually a `ReviewDecisionBar`. */
   actions?: ReactNode;
   /** Drop the quote and the metadata grid, for a dense list. */
@@ -36,14 +63,22 @@ export interface EvidenceCardProps
 interface FactProps {
   label: string;
   value: ReactNode;
+  /** What the product states about this value, when it states anything. */
+  description?: string;
 }
 
-function Fact({ label, value }: FactProps): ReactElement | null {
+function Fact({ label, value, description }: FactProps): ReactElement | null {
   if (value === undefined || value === null || value === '') return null;
   return (
     <div className="rh-evidence-card__fact">
       <dt className="rh-text-label">{label}</dt>
-      <dd className="rh-evidence-card__fact-value">{value}</dd>
+      <dd className="rh-evidence-card__fact-value">
+        {description === undefined ? (
+          value
+        ) : (
+          <DescribedTerm description={description}>{value}</DescribedTerm>
+        )}
+      </dd>
     </div>
   );
 }
@@ -66,6 +101,7 @@ export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function 
     title,
     onOpen,
     onOpenAnchor,
+    meanings,
     actions,
     compact = false,
     selected = false,
@@ -146,13 +182,18 @@ export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function 
       ) : null}
       {compact ? null : (
         <dl className="rh-evidence-card__facts">
-          <Fact label="Work" value={evidence.workId} />
-          <Fact label="Type" value={evidence.evidenceType} />
-          <Fact label="Strength" value={evidence.strength} />
-          <Fact label="Origin" value={evidence.origin} />
-          <Fact label="Field" value={evidence.field} />
+          <Fact label="Work" value={evidence.workId} {...describedBy(meanings?.work)} />
+          <Fact label="Type" value={evidence.evidenceType} {...describedBy(meanings?.type)} />
+          <Fact label="Strength" value={evidence.strength} {...describedBy(meanings?.strength)} />
+          <Fact label="Origin" value={evidence.origin} {...describedBy(meanings?.origin)} />
+          <Fact label="Field" value={evidence.field} {...describedBy(meanings?.field)} />
         </dl>
       )}
     </Card>
   );
 });
+
+/** The description prop for a fact, present only when the host stated a meaning for it. */
+function describedBy(description: string | undefined): { description?: string } {
+  return description === undefined ? {} : { description };
+}

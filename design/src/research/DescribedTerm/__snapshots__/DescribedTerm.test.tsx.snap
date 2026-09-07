@@ -1,0 +1,101 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DescribedTerm theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <span
+    class="rh-described-term"
+  >
+    <span
+      aria-describedby="rh-described-term-r5"
+      class="rh-described-term__word"
+      tabindex="0"
+    >
+      Direct
+    </span>
+    <span
+      class="rh-visually-hidden"
+      id="rh-described-term-r5"
+    >
+      How directly the source supports the evidence.
+    </span>
+  </span>
+</div>
+`;
+
+exports[`DescribedTerm theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <span
+    class="rh-described-term"
+  >
+    <span
+      aria-describedby="rh-described-term-r6"
+      class="rh-described-term__word"
+      tabindex="0"
+    >
+      Direct
+    </span>
+    <span
+      class="rh-visually-hidden"
+      id="rh-described-term-r6"
+    >
+      How directly the source supports the evidence.
+    </span>
+  </span>
+</div>
+`;
+
+exports[`DescribedTerm theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <span
+    class="rh-described-term"
+  >
+    <span
+      aria-describedby="rh-described-term-r7"
+      class="rh-described-term__word"
+      tabindex="0"
+    >
+      Direct
+    </span>
+    <span
+      class="rh-visually-hidden"
+      id="rh-described-term-r7"
+    >
+      How directly the source supports the evidence.
+    </span>
+  </span>
+</div>
+`;
+
+exports[`DescribedTerm theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <span
+    class="rh-described-term"
+  >
+    <span
+      aria-describedby="rh-described-term-r8"
+      class="rh-described-term__word"
+      tabindex="0"
+    >
+      Direct
+    </span>
+    <span
+      class="rh-visually-hidden"
+      id="rh-described-term-r8"
+    >
+      How directly the source supports the evidence.
+    </span>
+  </span>
+</div>
+`;

@@ -1,0 +1,24 @@
+/*
+ * A word with its meaning under it — the same shape `AuthorityBadge` draws, for a term
+ * that is not a badge. The sentence sits in flow under the word, so a scrolling pane
+ * cannot clip it the way it would clip an overlay, and it opens on focus rather than on
+ * hover so that a pointer crossing a row never moves what is under it.
+ */
+.rh-described-term {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+}
+
+/* Focusable, so it says where the keyboard is — and the cursor says the press is there. */
+.rh-described-term__word {
+  cursor: help;
+}
+
+.rh-described-term__hint {
+  max-inline-size: 52ch;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
