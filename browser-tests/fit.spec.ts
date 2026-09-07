@@ -178,6 +178,7 @@ for (const screen of SCREENS) {
     // The viewport is set before the project is created, so the session is opened through
     // whichever layout this screen actually has.
     await page.setViewportSize(screen);
+    const projectName = `Fit study ${label} ${info.project.name}`;
     const { workspace, conversation } = await openWorkspace(
       page,
       request,
@@ -212,6 +213,32 @@ for (const screen of SCREENS) {
       expect(await axeViolations(page), `${destination.name} at ${label}`).toEqual([]);
 
       if (screen.width === 768) {
+        /*
+         * And it says it once.
+         *
+         * The bar names the project because the rail that otherwise does is a drawer at
+         * this width. The workspace header under it named the project again, and its path
+         * under that, so three lines and about 110px went by before the destination's own
+         * `h1` — the same name twice above one heading. Below the breakpoint the header
+         * keeps the path alone, which is the half the bar does not carry and the thing
+         * that tells two projects of the same name apart.
+         */
+        const named = await page.evaluate((projectName) => {
+          const heading = document.querySelector('h1');
+          const top = heading?.getBoundingClientRect().top ?? Number.POSITIVE_INFINITY;
+          return [...document.querySelectorAll('*')]
+            .filter((node) => (node.textContent ?? '').trim() === projectName)
+            // The leaf that carries the words, not every ancestor that contains them.
+            .filter((node) => ![...node.children].some((child) => (child.textContent ?? '').trim() === projectName))
+            .filter((node) => node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+            .filter((node) => node.getBoundingClientRect().top < top)
+            .map((node) => `${node.tagName.toLowerCase()}.${[...node.classList].join('.')}`);
+        }, projectName);
+        expect(
+          named,
+          `the project is named ${named.length} times above ${destination.name}'s h1 at ${label}`,
+        ).toHaveLength(1);
+
         // The rail is a drawer at this width, so the bar is the only thing on screen that
         // can say where you are. It says both halves: the project, and this destination.
         const bar = page.locator('header.rh-app-shell__bar');

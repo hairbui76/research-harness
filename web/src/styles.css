@@ -372,6 +372,17 @@ body,
   overflow-wrap: anywhere;
 }
 
+/*
+ * Below the shell's breakpoint the bar above this one already carries the project's name,
+ * because the rail that normally does is a drawer by then. Saying it again here put the
+ * same words twice within about 110px, above a heading that then said the destination the
+ * bar had also just said. So the line keeps the path alone: it is the half the bar does
+ * not carry, and it is what tells two projects of the same name apart.
+ */
+.rh-app-shell[data-narrow] .rh-web-project-bar__name {
+  display: none;
+}
+
 .rh-web-token-form {
   display: flex;
   flex-wrap: wrap;
