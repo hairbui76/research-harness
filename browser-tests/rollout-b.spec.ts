@@ -147,10 +147,16 @@ test('the three rolled-out pages lead with the work the daemon composed', async 
   ).toBeVisible();
   await expect(page.getByText('— no work in this matrix has been read for it yet')).toBeVisible();
   await expect(page.getByText(/never means the work lacks the property/)).toBeVisible();
-  // The matrix itself stays a table, reached through the compare form it has always had.
-  await page.getByLabel('Field').fill('tokenization');
-  await page.getByRole('button', { name: 'Compare' }).click();
+  // The matrix itself is drawn: its one work down the rows, its two fields across the
+  // columns, the recorded reading in one cell and the words "Not recorded" in the other.
+  // It used to be reachable only by typing a field name into a compare form, which is the
+  // recall this page's rebuild removed; `synthesis.spec.ts` asserts the picker that
+  // replaced it against a matrix with something in every state of a cell.
   await expect(page.getByRole('columnheader', { name: 'Work' })).toBeVisible();
+  const grid = await page.getByRole('columnheader').allInnerTexts();
+  expect(grid.map((text) => text.trim())).toEqual(['Work', 'Tokenization', 'Dataset']);
+  await expect(page.getByText('padded', { exact: true })).toBeVisible();
+  await expect(page.getByText('Not recorded', { exact: true })).toHaveCount(1);
   await leadsWithTheWork(
     page,
     'the synthesis page',
