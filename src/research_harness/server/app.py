@@ -856,10 +856,7 @@ def _has_history(repo: WorkspaceRepository) -> bool:
 def _change_summary(basis: str, since: datetime, count: int) -> str:
     """The window and its size in one sentence, so no client has to infer either."""
     if basis == "no_history":
-        return (
-            "No research activity has been recorded in this project yet. It fills as works "
-            "are added, evidence is accepted and decisions are taken."
-        )
+        return "No research activity has been recorded in this project yet."
     window = (
         f"since your previous session ended on {_human_moment(since)}"
         if basis == "previous_session"

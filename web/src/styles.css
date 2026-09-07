@@ -126,46 +126,6 @@ body,
   padding-block-start: var(--rh-space-3);
 }
 
-/* The Overview's attention groups: what needs a researcher, in the daemon's own order. */
-.rh-web-attention > li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rh-space-1);
-}
-
-.rh-web-attention > li > p {
-  margin: 0;
-}
-
-.rh-web-attention > li[data-work] .rh-web-attention__item {
-  font-weight: var(--rh-type-h4-weight);
-}
-
-.rh-web-attention__items {
-  margin-inline-start: var(--rh-space-4);
-}
-
-/* Claim health: a count and the word it counts, never a percentage. */
-.rh-web-tally {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--rh-space-6);
-}
-
-.rh-web-tally > li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--rh-space-2);
-}
-
-.rh-web-tally__count {
-  font-size: var(--rh-type-h2-size);
-  font-weight: var(--rh-type-h2-weight);
-}
-
 /* A form that asks for the sentence a decision is recorded with. */
 .rh-web-prompt {
   padding-block-start: var(--rh-space-3);

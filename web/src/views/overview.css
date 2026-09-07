@@ -1,0 +1,62 @@
+/*
+ * What the Overview needs and no package component owns. Semantic tokens only — the
+ * palette, the type scale and the spacing scale all come from `@research-harness/design`.
+ *
+ * There is deliberately no rule here that makes a number large. The page states counts
+ * inside sentences that lead somewhere, and a tile row is the shape PRODUCT §26's brief
+ * rules out; a stylesheet that could draw one is an invitation to draw one again.
+ */
+
+/* One attention surface: its own line, then the first few items under it. */
+.rh-web-attention > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-attention > li > p {
+  margin: 0;
+}
+
+/*
+ * The groups that have something in them read heavier than the ones that are clear. Weight
+ * is the whole signal: the badge beside the group already says "waiting" or "clear" in
+ * words, so nothing here depends on noticing a colour.
+ */
+.rh-web-attention > li[data-work] .rh-web-attention__item {
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-web-attention__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* A stale object is named by its id, so the ids line up down the column. */
+.rh-web-overview__stale code {
+  font-family: var(--rh-font-mono);
+}
+
+/* The window a change list covers, and what the cap left out: quiet, and above/below it. */
+.rh-web-overview__window {
+  margin: 0;
+  color: var(--rh-text-secondary);
+}
+
+/*
+ * Claim health, and the open questions: one line each, the status badge completing the
+ * sentence rather than repeating it. Baseline alignment keeps the badge sitting on the
+ * line of text it belongs to instead of floating above it.
+ */
+.rh-web-overview__health > li,
+.rh-web-overview__questions > li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--rh-space-1) var(--rh-space-2);
+}
+
+/* What the project holds: the page's colophon, in the footer's own quieter voice. */
+.rh-web-overview__holdings {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+}

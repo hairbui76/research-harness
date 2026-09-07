@@ -1,12 +1,14 @@
 /**
- * Task 11.2: the Overview leads with next actions, and reports no vanity metric.
+ * The Overview leads with the research state that matters today.
  *
- * The order of the attention groups and the wording of their labels come from the daemon,
- * so the assertion is that the page renders them in the order it received — not that it
- * knows the order itself.
+ * Wave 3 replaced the stat-tile row the critique named. What the page asserts now is the
+ * order of the reading: what is waiting for a decision, then what has gone stale, then
+ * what changed since the researcher last worked, and only then — in the page's footer —
+ * what the project holds. Every judgement in all four comes from the daemon, so these
+ * assertions are that the page renders what it received, never that it worked anything out.
  */
 import { describe, expect, it } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { OverviewPage } from './Overview';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
@@ -32,38 +34,161 @@ function refusingDaemon(): FakeDaemon {
   };
 }
 
+/** The exported overview with one report replaced, so a group can be given something to show. */
+function overviewWith(patch: Record<string, unknown>) {
+  return { ...FIXTURES.overview, ...patch };
+}
+
 describe('the overview', () => {
-  it('states the project and its size the way Product 26 asks', async () => {
+  it('leads with the daemon’s own sentence about what needs a researcher', async () => {
     renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() => expect(screen.getByText(FIXTURES.overview.project)).toBeInTheDocument());
-    expect(screen.getByText(/works ·/)).toBeInTheDocument();
+    expect(screen.getByText(FIXTURES.overview.attention_summary)).toBeInTheDocument();
   });
 
-  it('renders the attention groups in the order the daemon reported them', async () => {
+  it('states what the project holds last, in the page’s footer', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
-    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
-    const rendered = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map(
-      (node) => node.textContent,
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
     );
-    expect(rendered).toEqual(FIXTURES.overview.attention.map((group) => group.label));
+    const footer = container.querySelector('.rh-full-page__footer');
+    expect(footer).toHaveTextContent(/This project holds/);
+    // The size of the project is a count in a sentence that leads somewhere, never a tile.
+    expect(within(footer as HTMLElement).getByRole('link', { name: '1 work' })).toBeInTheDocument();
+    expect(container.querySelector('.rh-web-tally')).toBeNull();
+  });
+
+  it('renders the waiting groups in the order the daemon reported them', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
+    );
+    const rendered = Array.from(
+      container.querySelectorAll('.rh-web-attention > li > p > a'),
+    ).map((node) => node.textContent);
+    expect(rendered).toEqual(
+      FIXTURES.overview.attention
+        .filter((group) => group.surface === 'decide')
+        .map((group) => group.label),
+    );
   });
 
   it('leads with the group that has work in it', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
-    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
+    );
     // "Has work" is an attribute rather than a class since the migration to the Design
     // System: the group's own state, styled from `[data-work]`, and read here the same way.
     expect(container.querySelector('.rh-web-attention > li')?.hasAttribute('data-work')).toBe(true);
   });
 
-  it('shows claim health as counts and nothing that looks like model confidence', async () => {
+  it('sends a waiting item to the item itself when the daemon named a route for it', async () => {
+    renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
+    );
+    const item = FIXTURES.overview.attention[0]?.items[0];
+    expect(item?.route).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: new RegExp(item!.label.replace('_', ' ')) }),
+    ).toHaveAttribute('href', item!.route);
+  });
+
+  it('gives what has gone stale its own group, with the daemon’s reason', async () => {
+    renderView(<OverviewPage />, {
+      daemon: fakeDaemon({
+        gets: {
+          '/overview': overviewWith({
+            attention: FIXTURES.overview.attention.map((group) =>
+              group.kind === 'stale'
+                ? {
+                    ...group,
+                    count: 1,
+                    label: '1 stale object',
+                    items: [
+                      {
+                        id: 'C0001',
+                        label: 'C0001',
+                        detail: 'anchor no longer replays against the stored parse',
+                        priority: 4,
+                        route: '/claims/C0001',
+                      },
+                    ],
+                  }
+                : group,
+            ),
+          }),
+        },
+      }),
+    });
+
+    await waitFor(() => expect(screen.getByText('Gone stale')).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute('href', '/claims/C0001');
+    expect(
+      screen.getByText(/anchor no longer replays against the stored parse/),
+    ).toBeInTheDocument();
+  });
+
+  it('lists what changed since the last session, newest first, with the window it used', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    const changes = FIXTURES.overview.since_last_session!;
+    expect(screen.getByText(changes.summary)).toBeInTheDocument();
+    const rendered = Array.from(container.querySelectorAll('.rh-change-list__what')).map(
+      (node) => node.textContent,
+    );
+    expect(rendered).toEqual(changes.entries.map((entry) => entry.label));
+  });
+
+  it('says which window it looked at, and offers a next action, when nothing changed', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <OverviewPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({
+          gets: {
+            '/overview': overviewWith({
+              since_last_session: {
+                basis: 'recent_window',
+                since: '2026-08-31T00:00:00+00:00',
+                summary: 'Nothing has changed in the last seven days.',
+                more: '',
+                entries: [],
+                total: 0,
+              },
+            }),
+          },
+        }),
+        route: '/projects/prj_abc/overview',
+        path: '/projects/prj_abc/overview',
+      },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('Nothing has changed in the last seven days.')).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to start the next piece of work' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+  });
+
+  it('states claim health as sentences that lead to the claims, not as a row of numbers', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() => expect(screen.getByText('Claim health')).toBeInTheDocument());
-    expect(screen.getByText('supported')).toBeInTheDocument();
+    // The word for the status comes from the shared vocabulary, never from the daemon's key.
+    expect(screen.getByRole('link', { name: '1 claim is' })).toBeInTheDocument();
+    expect(screen.getByText('Supported')).toBeInTheDocument();
     expect(container.textContent?.toLowerCase()).not.toContain('confidence');
     expect(container.textContent).not.toMatch(/\d+(\.\d+)?%/);
   });
@@ -71,7 +196,9 @@ describe('the overview', () => {
   it('has no automatically detectable accessibility violation', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
-    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
+    );
     await expectNoAxeViolations(container);
   });
 });
@@ -81,7 +208,7 @@ describe('the overview', () => {
  *
  * `attention[].route` is the daemon's own workspace path and stays that way in the DTO;
  * what changes is only where the link on screen points, which is what keeps a click on
- * "Evidence waiting for review" inside the project the researcher is reading.
+ * "3 review items" inside the project the researcher is reading.
  */
 describe('the overview inside a project', () => {
   const renderInProject = () =>
@@ -96,26 +223,42 @@ describe('the overview inside a project', () => {
       },
     );
 
-  it('points every attention group at the active project', async () => {
+  it('points every waiting group at the active project', async () => {
     const { container } = renderInProject();
 
-    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
-    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map((node) =>
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
+    );
+    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li > p > a')).map(
+      (node) => node.getAttribute('href'),
+    );
+    expect(hrefs).toEqual(
+      FIXTURES.overview.attention
+        .filter((group) => group.surface === 'decide')
+        .map((group) => `/projects/prj_abc${group.route}`),
+    );
+  });
+
+  it('points a change at the object it changed, inside the project', async () => {
+    const { container } = renderInProject();
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    const linked = FIXTURES.overview.since_last_session!.entries.find((entry) => entry.route);
+    expect(linked).toBeDefined();
+    const hrefs = Array.from(container.querySelectorAll('.rh-change-list__link')).map((node) =>
       node.getAttribute('href'),
     );
-    expect(hrefs.length).toBe(FIXTURES.overview.attention.length);
-    expect(hrefs).toEqual(
-      FIXTURES.overview.attention.map((group) => `/projects/prj_abc${group.route}`),
-    );
+    expect(hrefs).toContain(`/projects/prj_abc${linked!.route}`);
   });
 
   it('points an open question at the project’s own questions screen', async () => {
     // The exported fixture has no open question; the link is what is under test, so one is
     // added to the daemon's own report rather than invented in the view.
-    const overview = {
-      ...FIXTURES.overview,
+    const overview = overviewWith({
       open_questions: [{ id: 'RQ0001', label: 'Does it hold out of distribution?', detail: 'open' }],
-    };
+    });
     renderView(
       <ProjectPathProvider projectId="prj_abc">
         <OverviewPage />
@@ -136,11 +279,17 @@ describe('the overview inside a project', () => {
   it('leaves the legacy host’s links exactly where they were', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
-    await waitFor(() => expect(screen.getByText('Attention')).toBeInTheDocument());
-    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li a')).map((node) =>
-      node.getAttribute('href'),
+    await waitFor(() =>
+      expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
     );
-    expect(hrefs).toEqual(FIXTURES.overview.attention.map((group) => group.route));
+    const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li > p > a')).map(
+      (node) => node.getAttribute('href'),
+    );
+    expect(hrefs).toEqual(
+      FIXTURES.overview.attention
+        .filter((group) => group.surface === 'decide')
+        .map((group) => group.route),
+    );
   });
 });
 
@@ -149,30 +298,51 @@ describe('the overview inside a project', () => {
  *
  * The page used to return each of them *instead of* itself, which left the h1 — the
  * project's own name — off the screen exactly when a researcher needed to know which
- * project had failed to load. The frame is the assertion here.
+ * project had failed to load. The frame is the assertion here, and the toolbar with it:
+ * "look again" is the one thing a researcher can do in every one of these states.
  */
 describe('the overview before, without, and after its read', () => {
-  it('keeps a heading and marks the body busy while the read is in flight', () => {
+  it('keeps a heading, a toolbar and a skeleton while the read is in flight', () => {
     const { container } = renderView(<OverviewPage />, { daemon: pendingDaemon() });
 
     expect(screen.getByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Look again' })).toBeInTheDocument();
     expect(container.querySelector('.rh-full-page__content')).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('status')).toHaveTextContent('Reading the project overview…');
     expect(container.querySelector('.rh-skeleton')).toBeInTheDocument();
-    // The description cannot quote counts it does not have, so it says what it does know.
-    expect(container.textContent).not.toMatch(/\d+ works ·/);
+    // The description cannot quote what it does not have, so it says what it does know.
+    expect(container.textContent).not.toMatch(/need a researcher/);
   });
 
-  it('keeps the heading when the daemon refuses, and offers the retry', async () => {
+  it('keeps the heading and the toolbar when the daemon refuses, and offers the retry', async () => {
     renderView(<OverviewPage />, { daemon: refusingDaemon() });
 
     await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
     expect(screen.getByRole('heading', { level: 1, name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Look again' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 
-  it('teaches what claims and questions are when there are none, and where they come from', async () => {
-    const bare = { ...FIXTURES.overview, claim_health: [], open_questions: [] };
+  it('teaches what every group is when a project is new, and where each one comes from', async () => {
+    const bare = overviewWith({
+      attention_summary: 'Nothing needs a researcher right now.',
+      attention: FIXTURES.overview.attention.map((group) => ({
+        ...group,
+        count: 0,
+        label: `0 ${group.kind}`,
+        items: [],
+      })),
+      claim_health: [],
+      open_questions: [],
+      since_last_session: {
+        basis: 'no_history',
+        since: '2026-08-31T00:00:00+00:00',
+        summary: 'No research activity has been recorded in this project yet.',
+        more: '',
+        entries: [],
+        total: 0,
+      },
+    });
     const { container } = renderView(
       <ProjectPathProvider projectId="prj_abc">
         <OverviewPage />
@@ -184,15 +354,21 @@ describe('the overview before, without, and after its read', () => {
       },
     );
 
-    await waitFor(() => expect(screen.getByText('No claims registered yet')).toBeInTheDocument());
-    expect(screen.getByText(/A claim states what this project asserts/)).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'Open the conversation to promote a claim' }),
-    ).toHaveAttribute('href', '/projects/prj_abc/');
+    await waitFor(() =>
+      expect(screen.getByText('Nothing is waiting for a decision')).toBeInTheDocument(),
+    );
+    for (const action of [
+      'Open the review inbox',
+      'Open the corpus this project rests on',
+      'Open the conversation to start the next piece of work',
+      'Open the conversation to promote a claim',
+      'Open the conversation to promote a question',
+    ]) {
+      expect(screen.getByRole('link', { name: action })).toBeInTheDocument();
+    }
+    expect(screen.getByText('Nothing is stale')).toBeInTheDocument();
+    expect(screen.getByText('No claims registered yet')).toBeInTheDocument();
     expect(screen.getByText('No open questions')).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'Open the conversation to promote a question' }),
-    ).toHaveAttribute('href', '/projects/prj_abc/');
     await expectNoAxeViolations(container);
   });
 });
