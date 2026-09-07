@@ -73,3 +73,20 @@
   margin: var(--rh-space-1) 0 0;
   padding-inline-start: var(--rh-space-5);
 }
+
+/*
+ * Where an unpublished message goes.
+ *
+ * A line of its own under the keyboard hint, at the same size and one step less quiet:
+ * where your work is headed outranks a shortcut you learned on the first day, and that is
+ * the whole difference between them. It carries no colour of its own — "leaves this
+ * machine" is a sentence, not a hue — and it wraps rather than truncating, because half a
+ * destination is worse than none and a host is one long word.
+ */
+.rh-composer__destination {
+  margin: 0;
+  overflow-wrap: break-word;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}

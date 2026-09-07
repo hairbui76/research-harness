@@ -1,0 +1,234 @@
+/**
+ * Where an unpublished message goes, in a real browser, against the real daemon.
+ *
+ * The egress disclosure is a dialog a researcher answers once per session. This test is
+ * about everything after that: a project is created, a session is opened through the real
+ * UI, and the composer is asked — at both widths the suite runs — to keep saying where the
+ * next message would go and whether it leaves the machine.
+ *
+ * The runtimes are whatever is actually installed on this workstation, so nothing here
+ * hard-codes Codex or Claude Code. What the daemon's scan offers is read out of the picker
+ * and asserted against the line; a workstation with no routable runtime and a project with
+ * no `providers:` table is a real state too, and it is asserted as the honest silence it is
+ * rather than skipped.
+ */
+import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+/** The 768px project; the rail is a drawer there and has to be opened to be used. */
+const NARROW = 'narrow-light';
+
+/** `Sends to <runtime> · <model> — leaves this machine for <host>`. */
+const EXTERNAL_RUNTIME = /^Sends to (.+) · (.+) — leaves this machine for (\S+)$/;
+
+test.beforeEach(async ({ page }, info) => {
+  await page.addInitScript((theme) => {
+    localStorage.setItem('research-harness:design:appearance', JSON.stringify({ theme }));
+  }, info.project.name.endsWith('light') ? 'light' : 'dark');
+});
+
+test('the composer keeps saying where an unpublished message goes', async ({
+  page,
+  request,
+}, info) => {
+  // Creating a project, scanning the workstation's CLI runtimes and two axe passes is more
+  // than one default timeout.
+  test.setTimeout(180_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  const bootstrap = await request.get('/__test__/bootstrap');
+  expect(bootstrap.ok()).toBeTruthy();
+  const { nonce, parent } = await bootstrap.json();
+  await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
+  await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
+  await page
+    .getByLabel('Project name', { exact: true })
+    .fill(`Composer study ${info.project.name}`);
+  await page.getByRole('button', { name: 'Choose parent folder' }).click();
+  await page.getByLabel('Parent folder path').fill(parent);
+  const created = page.waitForResponse(
+    (r) => r.url().endsWith('/api/projects/create') && r.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Create project', exact: true }).click();
+  expect((await created).ok()).toBeTruthy();
+  await page.waitForURL(/\/projects\/[^/?#]+/);
+
+  // A session, opened the way a researcher opens one. The default visibility is `project`,
+  // which is the kind of session a CLI runtime may be bound to at all.
+  const narrow = info.project.name === NARROW;
+  if (narrow) await page.getByRole('button', { name: 'Project navigation', exact: true }).click();
+  await page.getByRole('button', { name: 'New session', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'New session' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Visibility' })).toHaveValue('project');
+  await dialog.getByRole('button', { name: 'Create session', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  if (narrow) {
+    const close = page.getByRole('button', { name: 'Close project navigation' });
+    if (await close.isVisible()) await close.click();
+  }
+  await expect(page.getByRole('textbox', { name: 'Message' })).toBeVisible();
+
+  const destination = page.locator('.rh-composer__destination');
+  const picker = page.getByRole('button', { name: /^Model:/ });
+
+  /**
+   * The composer never scrolls sideways, and at 768px neither does the page.
+   *
+   * The page-wide check is asserted at the narrow width only: at 1440px the conversation
+   * route already overflows on the inspector's six tabs, which is the critique's own P2 and
+   * is being fixed elsewhere. Failing here for that would say nothing about this line.
+   */
+  const fits = async (where: string): Promise<void> => {
+    const composer = await page.evaluate(() => {
+      const node = document.querySelector('.rh-composer');
+      return node === null ? true : node.scrollWidth <= node.clientWidth;
+    });
+    expect(composer, `${where}: the composer must not overflow horizontally`).toBeTruthy();
+    if (!narrow) return;
+    const whole = await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    );
+    expect(whole, `${where}: the page must not overflow horizontally at 768px`).toBeTruthy();
+  };
+
+  // The picker arrives with the daemon's scan of this workstation's CLI runtimes, which is
+  // a real process launch per runtime; a scan that never produces one is the no-runtime
+  // state, and it is asserted rather than skipped.
+  const offers = await picker
+    .waitFor({ state: 'visible', timeout: 60_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!offers) {
+    // No `providers:` table and no routable runtime: this cockpit has been told nothing
+    // about where a message would go, and it says nothing rather than guessing.
+    await expect(destination).toHaveCount(0);
+    await fits('with no destination to state');
+    await page.screenshot({ path: info.outputPath('composer-no-runtime.png'), fullPage: true });
+    expect(errors).toEqual([]);
+    return;
+  }
+
+  // A project created a moment ago has no configured entries, so the unbound state is the
+  // picker's own project-default row, stated in the picker's own words.
+  await expect(destination).toHaveText('Sends to Project default — leaves this machine');
+  // Described, not announced: the line is part of the message box, never a live region.
+  const described = await page
+    .getByRole('textbox', { name: 'Message' })
+    .getAttribute('aria-describedby');
+  const lineId = await destination.getAttribute('id');
+  expect((described ?? '').split(' ')).toContain(lineId);
+  await expect(destination).not.toHaveAttribute('aria-live', /.*/);
+  await fits('with no binding');
+  await page.screenshot({ path: info.outputPath('composer-unbound.png'), fullPage: true });
+
+  /** Every runtime model the daemon's scan says this workstation can actually route to. */
+  const routable = async (): Promise<{ id: string; runtime: string; model: string }[]> => {
+    const menu = page.getByRole('menu', { name: 'Model' });
+    const ids = await menu
+      .locator('[role="menuitem"][data-model^="runtime:"]:not([aria-disabled="true"])')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-model') ?? ''));
+    return ids.flatMap((id) => {
+      const rest = id.slice('runtime:'.length);
+      const at = rest.indexOf(':');
+      return at <= 0 ? [] : [{ id, runtime: rest.slice(0, at), model: rest.slice(at + 1) }];
+    });
+  };
+
+  await picker.click();
+  await expect(page.getByRole('menu', { name: 'Model' })).toBeVisible();
+  const offered = await routable();
+  if (offered.length === 0) {
+    // A workstation with no runtime installed, logged in and provably bounded. The picker
+    // is there for the entries; the line still states the project default and nothing more.
+    await page.keyboard.press('Escape');
+    await expect(destination).toHaveText('Sends to Project default — leaves this machine');
+    await page.screenshot({ path: info.outputPath('composer-no-runtime.png'), fullPage: true });
+    expect(errors).toEqual([]);
+    return;
+  }
+
+  /** Bind the session to one runtime model, answering the disclosure the first time only. */
+  const bind = async (
+    target: { id: string; runtime: string; model: string },
+    first: boolean,
+  ): Promise<string> => {
+    // What the line says now, so the assertion after the pick waits for the record to come
+    // back rather than reading the sentence that is still on screen.
+    const before = (await destination.textContent()) ?? '';
+    const menu = page.getByRole('menu', { name: 'Model' });
+    const item = menu.locator(`[role="menuitem"][data-model="${target.id}"]`);
+    // The runtime's own heading in the picker, to check the line names the same runtime.
+    // `textContent`, not `innerText`: the heading is rendered uppercase by the menu's own
+    // stylesheet, and the runtime's name is the one the scan gave.
+    const heading = await item
+      .locator('xpath=ancestor::*[@role="group"][1]')
+      .locator('.rh-menu__group-label')
+      .textContent();
+    await item.click();
+    const disclosure = page.getByRole('alertdialog');
+    if (first) {
+      await expect(disclosure).toBeVisible();
+      await disclosure.getByRole('button', { name: 'Use this runtime' }).click();
+    } else {
+      // Asked once per session — which is precisely why the line has to stay.
+      await expect(disclosure).toHaveCount(0);
+    }
+    await expect(destination).not.toHaveText(before);
+    return heading ?? '';
+  };
+
+  const first = offered[0]!;
+  const heading = await bind(first, true);
+
+  // The bound runtime, its model and the host the scan says it reaches, all in the line.
+  await expect(destination).toHaveText(EXTERNAL_RUNTIME);
+  const bound = EXTERNAL_RUNTIME.exec((await destination.textContent()) ?? '');
+  expect(bound, 'the destination line must name a runtime, a model and a host').not.toBeNull();
+  expect(bound![2]).toBe(first.model);
+  // The picker heading is the runtime's name and version; the line is the name alone.
+  expect(heading.startsWith(bound![1]!)).toBeTruthy();
+
+  // Scoped to the composer: the conversation route's dark theme already fails
+  // `color-contrast` in the rail and the session list, which is wave 2H's "axe with
+  // contrast on across the web tests" and says nothing about this line. The tags are the
+  // suite's own.
+  const results = await new AxeBuilder({ page })
+    .include('.rh-composer')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+    .analyze();
+  expect(results.violations).toEqual([]);
+  await fits('bound to a runtime');
+  await page.screenshot({ path: info.outputPath('composer-bound.png'), fullPage: true });
+
+  // A second runtime, when this workstation has one, changes the line and nothing else.
+  const other = offered.find((entry) => entry.runtime !== first.runtime);
+  let current = first;
+  if (other !== undefined) {
+    current = other;
+    await picker.click();
+    await expect(page.getByRole('menu', { name: 'Model' })).toBeVisible();
+    const otherHeading = await bind(other, false);
+    await expect(destination).toHaveText(EXTERNAL_RUNTIME);
+    const rebound = EXTERNAL_RUNTIME.exec((await destination.textContent()) ?? '');
+    expect(rebound).not.toBeNull();
+    expect(rebound![2]).toBe(other.model);
+    expect(rebound![1]).not.toBe(bound![1]);
+    expect(otherHeading.startsWith(rebound![1]!)).toBeTruthy();
+    await fits('bound to a second runtime');
+    await page.screenshot({ path: info.outputPath('composer-rebound.png'), fullPage: true });
+  }
+
+  // The line is an addition to the surfaces that already state the destination, not a
+  // replacement: the rail keeps the record's binding in the format every surface uses.
+  if (narrow) await page.getByRole('button', { name: 'Project navigation', exact: true }).click();
+  await expect(page.locator('.rh-session-list__binding').first()).toHaveText(
+    `session:${current.runtime}/${current.model}`,
+  );
+
+  expect(errors).toEqual([]);
+});
