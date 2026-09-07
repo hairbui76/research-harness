@@ -118,6 +118,33 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
   await page.getByLabel('Why this is being put aside').fill('waiting for the appendix');
   await page.getByRole('button', { name: 'Defer', exact: true }).nth(1).click();
   await expect(page.getByText('Candidate deferred.').first()).toBeVisible();
+
+  /*
+   * A notification lands on chrome, never on what is being read or reached for.
+   *
+   * Wave one moved the viewport off the decision controls; at 768px the corner it moved to
+   * is the page's own header, and the capture showed the toast over "Nothing here is
+   * accepted state." Both are asserted here, at both widths, while the toast is up.
+   */
+  const toast = page.getByRole('region', { name: 'Notifications' }).locator('.rh-toast').first();
+  await expect(toast).toBeVisible();
+  const overlaps = async (selector: string): Promise<boolean> =>
+    page.evaluate((css) => {
+      const notice = document.querySelector('.rh-toast');
+      const other = document.querySelector(css);
+      if (notice === null || other === null) return false;
+      const a = notice.getBoundingClientRect();
+      const b = other.getBoundingClientRect();
+      return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+    }, selector);
+  expect(await overlaps('.rh-full-page__header'), 'the toast covers the page header').toBe(
+    false,
+  );
+  expect(
+    await overlaps('.rh-review-decision-bar'),
+    'the toast covers the decision controls',
+  ).toBe(false);
+
   await toTop(page);
   await page.screenshot({ path: info.outputPath('review-decided.png'), fullPage: true });
 

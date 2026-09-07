@@ -36,6 +36,30 @@
   transform: translateX(-50%);
 }
 
+/*
+ * At a narrow width the top corner is not empty chrome.
+ *
+ * On a desktop window the page's header runs the full width and the top right is canvas, so
+ * a notification there covers nothing. At 768px the same corner is the page's own
+ * breadcrumb, its `h1` and the sentence under it — and a toast landing on "Nothing here is
+ * accepted state." hides a sentence the researcher is reading rather than one they have
+ * already read. So the viewport clears the page header as well as the shell's bar, and
+ * spans the width instead of hanging in a corner of it.
+ *
+ * It stays at the top: the bottom of a narrow review screen is wherever the decision
+ * controls happen to have been scrolled to, and covering those is the defect wave one
+ * moved the viewport away from.
+ */
+@media (max-width: 768px) {
+  .rh-toast-viewport {
+    width: 100%;
+  }
+
+  .rh-toast-viewport[data-placement^='top'] {
+    top: calc(var(--rh-app-shell-bar-height, 0px) + var(--rh-page-header-height, 0px));
+  }
+}
+
 .rh-toast {
   display: flex;
   align-items: flex-start;

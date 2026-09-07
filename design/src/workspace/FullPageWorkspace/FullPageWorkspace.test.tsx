@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
 import { describeThemeDensitySnapshots } from '../../../tests/variants';
 import { FullPageWorkspace } from './FullPageWorkspace';
 
 describe('FullPageWorkspace', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    document.documentElement.style.removeProperty('--rh-page-header-height');
+  });
+
   it('makes the title the page heading and names the region with it', () => {
     const { container } = render(
       <FullPageWorkspace title="Corpus" description="Every artifact in this project">
@@ -65,6 +70,34 @@ describe('FullPageWorkspace', () => {
       </FullPageWorkspace>,
     );
     expect(container.querySelector('.rh-full-page__content')).not.toHaveAttribute('aria-busy');
+  });
+
+  it('publishes its header height, so a fixed overlay can sit under it', () => {
+    // jsdom has no `ResizeObserver` and no layout engine, so both are supplied: the height
+    // is whatever the observed element reports, and the point of the test is that the frame
+    // publishes it on the root and takes it back down again. The toast viewport is the
+    // reason — it is portalled outside this frame and cannot read a value scoped to it.
+    const observed: Element[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe(node: Element) {
+          observed.push(node);
+        }
+        disconnect() {}
+      },
+    );
+    const root = document.documentElement;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      height: 96,
+    } as DOMRect);
+
+    const { container, unmount } = render(<FullPageWorkspace title="Corpus">rows</FullPageWorkspace>);
+    expect(root.style.getPropertyValue('--rh-page-header-height')).toBe('96px');
+    expect(observed).toEqual([container.querySelector('.rh-full-page__header')]);
+
+    unmount();
+    expect(root.style.getPropertyValue('--rh-page-header-height')).toBe('');
   });
 
   it('has no axe violations', async () => {

@@ -1,7 +1,20 @@
-import { forwardRef } from 'react';
+import { forwardRef, useLayoutEffect, useRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cx } from '../../utils/cx';
 import { useId } from '../../hooks/useId';
+
+/**
+ * The sticky header's own height, published on the root so a fixed overlay can sit under it.
+ *
+ * The same problem `--rh-app-shell-bar-height` solves, one level in: the toast viewport is
+ * portalled outside this frame, so it cannot read a value scoped to it, and at a narrow
+ * width the top of the window is not empty chrome — it is the page's `h1` and the sentence
+ * under it. Unlike the shell's bar this height is not a sum of tokens (a title wraps, a
+ * toolbar wraps under it), so it is measured. Where there is no layout engine and no
+ * `ResizeObserver` — jsdom, SSR — nothing is published and the overlay falls back to
+ * clearing the shell's bar alone.
+ */
+const PAGE_HEADER_HEIGHT = '--rh-page-header-height';
 
 export interface FullPageWorkspaceProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   /** The page's `h1`. Rich content is allowed, so this is not the DOM `title` attribute. */
@@ -58,6 +71,26 @@ export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>
   ) {
     const baseId = useId(id, 'rh-fullpage');
     const titleId = `${baseId}-title`;
+    const headerRef = useRef<HTMLElement | null>(null);
+
+    useLayoutEffect(() => {
+      const node = headerRef.current;
+      const root = node?.ownerDocument.documentElement;
+      if (!node || !root) return;
+      const publish = (): void => {
+        root.style.setProperty(PAGE_HEADER_HEIGHT, `${node.getBoundingClientRect().height}px`);
+      };
+      publish();
+      if (typeof ResizeObserver === 'undefined') {
+        return () => root.style.removeProperty(PAGE_HEADER_HEIGHT);
+      }
+      const observer = new ResizeObserver(publish);
+      observer.observe(node);
+      return () => {
+        observer.disconnect();
+        root.style.removeProperty(PAGE_HEADER_HEIGHT);
+      };
+    }, []);
 
     return (
       <section
@@ -68,7 +101,7 @@ export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>
         data-side={sidePanel === undefined ? undefined : sidePanelPosition}
         {...rest}
       >
-        <header className="rh-full-page__header">
+        <header className="rh-full-page__header" ref={headerRef}>
           <div className="rh-full-page__heading">
             <h1 className="rh-full-page__title" id={titleId}>
               {title}

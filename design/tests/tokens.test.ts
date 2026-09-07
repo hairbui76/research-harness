@@ -505,6 +505,31 @@ describe('the tab strip’s overflow fade', () => {
   });
 });
 
+/**
+ * A notification lands on chrome, never on what is being read or reached for.
+ *
+ * Wave one moved the viewport off the review screen's decision controls and under the app
+ * shell's bar. At 768px that is not enough: the top corner is the page's own header there,
+ * and a toast over the `h1` and the sentence under it covers something the researcher has
+ * not read yet. The narrow rule clears the measured page header as well, and stays at the
+ * top — the bottom of a narrow review screen is wherever the decision controls happen to
+ * have been scrolled to.
+ */
+describe('the toast viewport at a narrow width', () => {
+  const css = read('primitives/Toast/Toast.css');
+
+  it('clears the shell bar and the page header, and spans the width', () => {
+    const narrow = /@media \(max-width: 768px\)\s*\{([\s\S]*?)\n\}/.exec(css);
+    expect(narrow, 'Toast.css declares no narrow-width rule').not.toBeNull();
+    const rules = narrow![1]!;
+    expect(rules).toContain('--rh-app-shell-bar-height');
+    expect(rules).toContain('--rh-page-header-height');
+    expect(rules).toContain('width: 100%');
+    // Still the top: bottom is where a narrow review screen's decision controls can be.
+    expect(rules).not.toContain("[data-placement^='bottom']");
+  });
+});
+
 function filesUnder(root: string, ends: (name: string) => boolean): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
