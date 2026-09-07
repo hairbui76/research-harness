@@ -24,9 +24,25 @@
   max-inline-size: var(--rh-measure-prose);
 }
 
-/* The terms, indented under the line that names them by one space unit. */
-.rh-web-taxonomy__items {
+/*
+ * The terms, indented under the line that names them by one space unit. Two classes,
+ * because `.rh-web-list` zeroes the margin at the same specificity and is emitted after
+ * this file, so a single class would lose the cascade by position.
+ */
+.rh-web-list.rh-web-taxonomy__items {
   margin-inline-start: var(--rh-space-4);
+}
+
+/*
+ * The Decision behind a term, and — when it is not an accepted one — what it actually is.
+ * Baseline alignment, so the id sits on the row's own line instead of being centred in a
+ * box the badge made taller than the text beside it.
+ */
+.rh-web-taxonomy__decision {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rh-space-2);
 }
 
 /* A term is the project's own word, so it is set apart from the sentence around it. */

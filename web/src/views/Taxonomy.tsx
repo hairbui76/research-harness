@@ -141,7 +141,7 @@ function Classification({ taxonomy }: { taxonomy: TaxonomyView }) {
             <td>{term.definition || '—'}</td>
             <td>
               {term.decision ? (
-                <span className="rh-web-row">
+                <span className="rh-web-taxonomy__decision">
                   <code>{term.decision}</code>
                   {term.approved ? null : (
                     <StatusBadge status={term.decision_status || 'proposed'} vocabulary="decisionStatus" />
