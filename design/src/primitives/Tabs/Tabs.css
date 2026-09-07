@@ -80,13 +80,20 @@
   background: var(--rh-surface-subtle);
 }
 
+/*
+ * The edge a tab is cut off at, dissolved rather than clipped.
+ *
+ * Over one space the ramp is about one character wide, so "Review inbox" ended as "nbox"
+ * against a hard edge beside the chevron and read as a rendering fault rather than as more
+ * to scroll to. Over two the label visibly fades out, which is the whole signal.
+ */
 .rh-tabs__strip[data-overflow='end'] .rh-tabs__list,
 .rh-tabs__strip[data-overflow='both'] .rh-tabs__list {
-  mask-image: linear-gradient(to right, black calc(100% - var(--rh-space-6)), transparent);
+  mask-image: linear-gradient(to right, black calc(100% - var(--rh-space-12)), transparent);
 }
 
 .rh-tabs__strip[data-overflow='start'] .rh-tabs__list {
-  mask-image: linear-gradient(to left, black calc(100% - var(--rh-space-6)), transparent);
+  mask-image: linear-gradient(to left, black calc(100% - var(--rh-space-12)), transparent);
 }
 
 .rh-tabs__tab {

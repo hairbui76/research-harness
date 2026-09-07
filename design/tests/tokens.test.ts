@@ -485,6 +485,26 @@ describe('headings are not label chips', () => {
   });
 });
 
+/**
+ * A tab strip that admits it is narrower than its tabs has to look like one.
+ *
+ * The overflow fade is a mask, so jsdom neither applies it nor resolves the `var()` inside
+ * it; the ramp is read off the source the way every other geometry assertion here is. Over
+ * one space it is about one character wide, which is not a fade — "Review inbox" ended as
+ * "nbox" against a hard edge beside the chevron and read as a rendering fault rather than
+ * as more to scroll to.
+ */
+describe('the tab strip’s overflow fade', () => {
+  it('dissolves the label it clips over about two spaces', () => {
+    const css = read('primitives/Tabs/Tabs.css');
+    const ramps = [...css.matchAll(/mask-image:[^;]*var\(--rh-space-(\d+)\)/g)].map((match) =>
+      Number(match[1]),
+    );
+    expect(ramps).not.toHaveLength(0);
+    for (const step of ramps) expect(step).toBeGreaterThanOrEqual(10);
+  });
+});
+
 function filesUnder(root: string, ends: (name: string) => boolean): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
