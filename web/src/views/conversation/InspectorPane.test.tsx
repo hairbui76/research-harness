@@ -111,6 +111,23 @@ describe('the inspector’s conflicts tab', () => {
   });
 });
 
+describe('the inspector with nothing followed', () => {
+  it('says “nothing selected” once, in the tab that can do something about it', async () => {
+    renderInspector(fakeDaemon());
+    await waitFor(() => expect(screen.getAllByRole('tab')).toHaveLength(6));
+
+    // The pane used to say it twice: a line above the strip, and the Context tab's own
+    // empty card under it. The card is the one that teaches, so the line is gone.
+    expect(screen.getAllByText('Nothing selected')).toHaveLength(1);
+    expect(
+      screen.queryByText('Nothing selected. Choose a message, reference or attachment.'),
+    ).toBeNull();
+    expect(
+      screen.getByText('Open a reference or inspect a message to see what the graph joins it to.'),
+    ).toBeInTheDocument();
+  });
+});
+
 /*
  * Six tabs measuring about 734px live in a pane that is about 352px wide, so two of them —
  * Conflicts and Stale, the two that say something is wrong — used to be off the end of the

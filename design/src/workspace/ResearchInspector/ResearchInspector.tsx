@@ -38,6 +38,10 @@ export interface ResearchInspectorProps extends Omit<HTMLAttributes<HTMLElement>
  * never a guess, and `onNavigate` is the other half of the two-way link: a reference in
  * the transcript opens its object here, and the object opens the message it came from.
  * Panels are slots; the inspector owns no research content of its own.
+ *
+ * With nothing followed there is nothing to state, so the header is not there. The open
+ * tab's own empty state says it once — and, unlike a line above the strip, says what to do
+ * about it.
  */
 export const ResearchInspector = forwardRef<HTMLElement, ResearchInspectorProps>(
   function ResearchInspector(
@@ -72,8 +76,8 @@ export const ResearchInspector = forwardRef<HTMLElement, ResearchInspectorProps>
         data-tab={currentTab}
         {...rest}
       >
-        <header className="rh-research-inspector__header">
-          {selection && selectionMeta ? (
+        {selection && selectionMeta ? (
+          <header className="rh-research-inspector__header">
             <>
               <p className="rh-research-inspector__following">
                 <Icon name={selectionMeta.icon} size={14} />
@@ -109,13 +113,8 @@ export const ResearchInspector = forwardRef<HTMLElement, ResearchInspectorProps>
                 ) : null}
               </div>
             </>
-          ) : (
-            <p className="rh-research-inspector__following" data-empty="">
-              <Icon name="circle-dashed" size={14} />
-              <span>Nothing selected. Choose a message, reference or attachment.</span>
-            </p>
-          )}
-        </header>
+          </header>
+        ) : null}
 
         <Tabs
           className="rh-research-inspector__tabs"

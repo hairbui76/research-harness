@@ -26,10 +26,6 @@
   font-size: var(--rh-type-body-sm-size);
 }
 
-.rh-research-inspector__following[data-empty] {
-  color: var(--rh-text-muted);
-}
-
 .rh-research-inspector__following-kind {
   font-family: var(--rh-font-mono);
   font-size: var(--rh-type-label-size);

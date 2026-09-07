@@ -41,10 +41,14 @@ describe('ResearchInspector', () => {
     expect(screen.getByText('Cited in M0042')).toBeInTheDocument();
   });
 
-  it('says so when nothing is selected', () => {
-    render(<ResearchInspector panels={panels} />);
+  it('leaves “nothing selected” to the open tab rather than saying it twice', () => {
+    const { container } = render(<ResearchInspector />);
+    // The header states what is followed. With nothing followed it has nothing to state,
+    // and the tab's own empty state already says it — and says what to do about it.
+    expect(container.querySelector('.rh-research-inspector__header')).toBeNull();
+    expect(screen.getByText('No context for this selection')).toBeInTheDocument();
     expect(
-      screen.getByText('Nothing selected. Choose a message, reference or attachment.'),
+      screen.getByText('Selecting a message, reference or attachment fills this tab.'),
     ).toBeInTheDocument();
   });
 
