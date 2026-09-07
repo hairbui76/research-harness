@@ -47,16 +47,20 @@ describe('the overview', () => {
     expect(screen.getByText(FIXTURES.overview.attention_summary)).toBeInTheDocument();
   });
 
-  it('states what the project holds last, in the page’s footer', async () => {
+  it('states what the project holds last, after every group that is work', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() =>
       expect(screen.getByText('Waiting for a decision')).toBeInTheDocument(),
     );
-    const footer = container.querySelector('.rh-full-page__footer');
-    expect(footer).toHaveTextContent(/This project holds/);
+    const stack = container.querySelector('.rh-web-stack');
+    const holdings = container.querySelector('.rh-web-overview__holdings');
+    expect(holdings).toHaveTextContent(/This project holds/);
+    expect(stack?.lastElementChild, 'the colophon is the last thing on the page').toBe(holdings);
     // The size of the project is a count in a sentence that leads somewhere, never a tile.
-    expect(within(footer as HTMLElement).getByRole('link', { name: '1 work' })).toBeInTheDocument();
+    expect(
+      within(holdings as HTMLElement).getByRole('link', { name: '1 work' }),
+    ).toBeInTheDocument();
     expect(container.querySelector('.rh-web-tally')).toBeNull();
   });
 

@@ -81,7 +81,6 @@ export function OverviewPage() {
           Look again
         </Button>
       }
-      footer={overview ? <Holdings overview={overview} /> : undefined}
     >
       {loading ? (
         <Loading what="the project overview" shape="cards" />
@@ -123,7 +122,10 @@ export function OverviewPage() {
             action={<StatusBadge status="stale" vocabulary="staleState" describe />}
           >
             {stale && stale.count > 0 ? (
-              <>
+              <div className="rh-web-overview__group">
+                <p className="rh-web-row">
+                  <Link to={href(stale.route)}>{stale.label}</Link>
+                </p>
                 <ul className="rh-web-list rh-web-list--tight rh-web-overview__stale">
                   {stale.items.map((item) => (
                     <li key={item.id}>
@@ -136,10 +138,7 @@ export function OverviewPage() {
                     </li>
                   ))}
                 </ul>
-                <p className="rh-web-row">
-                  <Link to={href(stale.route)}>{`All ${stale.label}`}</Link>
-                </p>
-              </>
+              </div>
             ) : (
               <Empty
                 flat
@@ -231,6 +230,8 @@ export function OverviewPage() {
               </Empty>
             )}
           </Panel>
+
+          <Holdings overview={overview} />
         </div>
       )}
     </FullPageWorkspace>
@@ -307,6 +308,10 @@ function ItemLink({
  * PRODUCT §26 states the size of the project on this page and the brief forbids vanity
  * metrics; both hold when the counts are a sentence that leads to the pages that hold
  * them, and neither does when they are a row of large numbers above the work.
+ *
+ * It is the last thing in the page's own column rather than a footer bar, because a bar
+ * pinned to the bottom of every screen would put the size of the project permanently in
+ * front of the work — which is the placement the brief rules out, only smaller.
  */
 function Holdings({ overview }: { overview: OverviewReport }) {
   const { href } = useProjectPaths();

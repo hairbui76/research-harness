@@ -31,6 +31,17 @@
   margin-inline-start: var(--rh-space-4);
 }
 
+/*
+ * A group and the items under it, spaced the way an attention group spaces them: the line
+ * that names the group and the first item beneath it belong to each other, and reading them
+ * as one block is what makes the two panels feel like one page.
+ */
+.rh-web-overview__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
 /* A stale object is named by its id, so the ids line up down the column. */
 .rh-web-overview__stale code {
   font-family: var(--rh-font-mono);
