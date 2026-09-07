@@ -4,9 +4,12 @@
  * Everything a researcher can do to a message is in its action row rather than on hover
  * (the Design System's `Message` owns that decision): copy, retry, open the `Context used`
  * receipt, promote. The row is one group with one visible act — promotion, which is how a
- * chat answer becomes something reviewable — and an overflow for the rest, because this
- * page adds Inspect, a corpus save per attachment and attempt navigation to the same row,
- * and eight controls beside one paragraph is a scatter rather than a toolbar. Nothing is
+ * chat answer becomes something reviewable, and which now says so in words — and an
+ * overflow for the rest, because this page adds Inspect, a corpus save per attachment and
+ * attempt navigation to the same row, and eight controls beside one paragraph is a scatter
+ * rather than a toolbar. Inspect goes into that overflow rather than beside promotion: it
+ * moves the inspector, which is a smaller act than turning an answer into a Claim
+ * candidate, and it was reading as the more important of the two. Nothing is
  * hidden until hover and nothing left the keyboard; a turn that failed keeps its retry in
  * the open. Attempts are navigable inside their turn, so a retried question is one row
  * with its history rather than three rows that look like three questions.
@@ -192,16 +195,11 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
         {...(retryable ? { onRetry: retryable } : {})}
         onOpenReceipt={(packId) => showReceipt({ kind: 'recorded', packId })}
         onPromote={(target: PromotionTarget) => onPromote(message, target)}
+        menuActions={[
+          { key: 'inspect', icon: 'crosshair', label: 'Inspect', run: () => selectMessage(message.id) },
+        ]}
         actions={
           <>
-            <Button
-              size="sm"
-              variant="ghost"
-              iconStart="crosshair"
-              onClick={() => selectMessage(message.id)}
-            >
-              Inspect
-            </Button>
             {carried.map((attachment) => (
               <SaveToCorpusFlow
                 key={attachment.id}

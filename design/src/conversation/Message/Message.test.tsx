@@ -81,7 +81,7 @@ describe('Message', () => {
     render(
       <Message message={SAMPLE_ASSISTANT_MESSAGE} renderMarkdown={plain} onPromote={onPromote} />,
     );
-    await user.click(screen.getByRole('button', { name: 'Promote this message' }));
+    await user.click(screen.getByRole('button', { name: 'Promote…' }));
     const items = screen.getAllByRole('menuitem');
     expect(items).toHaveLength(4);
     await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
@@ -98,7 +98,7 @@ describe('Message', () => {
         promotionTargets={['note']}
       />,
     );
-    await user.click(screen.getByRole('button', { name: 'Promote this message' }));
+    await user.click(screen.getByRole('button', { name: 'Promote…' }));
     expect(screen.getAllByRole('menuitem')).toHaveLength(1);
     expect(screen.getByRole('menuitem', { name: PROMOTION_TARGET_META.note.label })).toBeInTheDocument();
   });
@@ -137,10 +137,12 @@ describe('Message', () => {
     );
 
     const row = screen.getByRole('group', { name: 'Actions for M0042' });
-    expect(within(row).getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
-      'Promote this message',
-      'More actions',
+    // The act that leads somewhere carries its name; the overflow is the only icon left.
+    expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Promote…',
+      '',
     ]);
+    expect(within(row).getByRole('button', { name: 'More actions' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'More actions' }));
     expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([

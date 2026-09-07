@@ -429,11 +429,21 @@ describe('the action row of a turn', () => {
     await transcriptReady();
 
     const row = screen.getByRole('group', { name: 'Actions for M0042' });
+    // Promotion is the act that leads somewhere and it says so; Inspect moves this pane and
+    // joins copy, "ask again" and the receipt in the one overflow.
     expect(
       within(row)
         .getAllByRole('button')
         .map((button) => button.getAttribute('aria-label') ?? button.textContent),
-    ).toEqual(['Inspect', 'Promote this message', 'More actions']);
+    ).toEqual(['Promote…', 'More actions']);
+
+    await userEvent.setup().click(within(row).getByRole('button', { name: 'More actions' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Inspect',
+      'Copy message',
+      'Ask again',
+      'Context used (CP0007)',
+    ]);
   });
 });
 
@@ -445,7 +455,8 @@ describe('the action row of a turn', () => {
  * still in the tab order, never behind a hover.
  */
 async function openReceipt(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  await user.click(screen.getByRole('button', { name: 'More actions' }));
+  // The assistant's turn is the one with a receipt; the question's row has an overflow too.
+  await user.click(screen.getAllByRole('button', { name: 'More actions' })[1] as HTMLElement);
   await user.click(await screen.findByRole('menuitem', { name: 'Context used (CP0007)' }));
 }
 
@@ -531,7 +542,7 @@ describe('promotion', () => {
     renderConversation({ daemon });
     await transcriptReady();
     // The second Promote button is the assistant's answer; the first is the question.
-    const buttons = screen.getAllByRole('button', { name: 'Promote this message' });
+    const buttons = screen.getAllByRole('button', { name: 'Promote…' });
     await user.click(buttons[1] as HTMLElement);
     await user.click(await screen.findByRole('menuitem', { name: 'Claim candidate' }));
     return { user, dialog: await screen.findByRole('dialog', { name: /Promote this message/ }) };
@@ -985,7 +996,7 @@ describe('an agent host', () => {
     renderConversation({ daemon, token: null });
     await transcriptReady();
 
-    const buttons = screen.getAllByRole('button', { name: 'Promote this message' });
+    const buttons = screen.getAllByRole('button', { name: 'Promote…' });
     await user.click(buttons[1] as HTMLElement);
     await user.click(await screen.findByRole('menuitem', { name: 'Research note' }));
     const dialog = await screen.findByRole('dialog', { name: /Promote this message/ });

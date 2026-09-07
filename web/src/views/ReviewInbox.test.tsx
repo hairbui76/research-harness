@@ -514,7 +514,7 @@ describe('the policy batch of Product 24.4', () => {
 
     const form = screen.getByRole('form', { name: 'Defer Dataset · W0001' });
     await user.type(within(form).getByLabelText('Why this is being put aside'), 'waiting for the appendix');
-    await user.click(within(form).getByRole('button', { name: 'Defer', exact: true }));
+    await user.click(within(form).getByRole('button', { name: 'Defer' }));
 
     await waitFor(() =>
       expect(daemon.capabilityCalls().filter((call) => call.name === 'review.defer')).toEqual([

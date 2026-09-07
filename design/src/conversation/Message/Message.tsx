@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import { Badge } from '../../primitives/Badge';
+import { Button } from '../../primitives/Button';
 import { Icon } from '../../primitives/Icon';
 import { IconButton } from '../../primitives/IconButton';
 import { Menu } from '../../primitives/Menu';
@@ -21,6 +22,22 @@ export type MessageElement = 'article' | 'li' | 'div';
 /** Where copy, retry and the context receipt live in the action row. */
 export type MessageSecondaryActions = 'inline' | 'menu';
 
+/**
+ * A control the host adds to the same place the message's own secondary acts go.
+ *
+ * A host that folds the row (`secondaryActions="menu"`) has one overflow, and a control it
+ * contributes belongs *in* it rather than beside it: a transcript that adds Inspect, a
+ * corpus save per attachment and attempt navigation to the row is exactly how eight
+ * controls end up beside one paragraph. The shape is the same as the built-in acts, so
+ * neither arrangement can offer a different set.
+ */
+export interface MessageMenuAction {
+  key: string;
+  icon: IconName;
+  label: string;
+  run: () => void;
+}
+
 export interface MessageProps
   extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'onCopy' | 'title'> {
   message: MessageModel;
@@ -39,6 +56,11 @@ export interface MessageProps
   promotionTargets?: readonly PromotionTarget[];
   /** Extra controls in the action row, before the standard ones. */
   actions?: ReactNode;
+  /**
+   * Host controls that belong beside copy, retry and the receipt: in the overflow when the
+   * row is folded, and on the row when it is not.
+   */
+  menuActions?: readonly MessageMenuAction[];
   /**
    * `inline` (the default) puts copy, retry and the context receipt on the row beside
    * promotion. `menu` folds them into one overflow, leaving promotion as the row's visible
@@ -81,6 +103,7 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
     onPromote,
     promotionTargets = PROMOTION_TARGETS,
     actions,
+    menuActions,
     secondaryActions = 'inline',
     renderPage,
     altFor,
@@ -109,7 +132,7 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
      the overflow, so neither arrangement can quietly offer a different set. Retry is the
      exception — a turn that failed or was cut short keeps it on the row, because recovery
      from an error is never something a researcher should have to open a menu to find. */
-  const secondary: { key: string; icon: IconName; label: string; run: () => void }[] = [];
+  const secondary: MessageMenuAction[] = [...(menuActions ?? [])];
   if (onCopy) secondary.push({ key: 'copy', icon: 'copy', label: 'Copy message', run: onCopy });
   if (onRetry && !retryable) {
     secondary.push({ key: 'retry', icon: 'rotate-ccw', label: 'Ask again', run: onRetry });
@@ -126,11 +149,21 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
   // One control is not a crowd: an overflow holding a single item hides it for nothing.
   const folded = secondaryActions === 'menu' && secondary.length > 1;
 
+  /*
+   * The act that turns a conversation into scientific state, with its name on it.
+   *
+   * It was a 16px arrow between a labelled control and an overflow — the least legible thing
+   * in the transcript, and the one thing on the row that leads somewhere. A label is what a
+   * researcher recognises rather than recalls; the ellipsis says the same thing the arrow
+   * was trying to, that a choice of destination follows.
+   */
   const promotion =
     onPromote && promotionTargets.length > 0 ? (
       <Menu>
         <Menu.Trigger asChild>
-          <IconButton icon="arrow-up-right" label="Promote this message" size="sm" />
+          <Button size="sm" variant="secondary" iconStart="arrow-up-right">
+            Promote…
+          </Button>
         </Menu.Trigger>
         <Menu.Content aria-label="Promote this message">
           {promotionTargets.map((target) => {

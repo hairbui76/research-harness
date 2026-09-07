@@ -228,8 +228,13 @@ test('a transcript row carries one toolbar, with the rest behind More actions', 
     `a message row shows ${visible.length} controls: ${visible.join(', ')}`,
   ).toBeLessThanOrEqual(4);
 
+  // The act that turns an answer into scientific state is the one with a name on it.
+  await expect(toolbar.getByRole('button', { name: 'Promote…' })).toBeVisible();
+
   await toolbar.getByRole('button', { name: 'More actions' }).click();
-  await expect(page.getByRole('menu', { name: /^More actions for / })).toBeVisible();
+  const overflow = page.getByRole('menu', { name: /^More actions for / });
+  await expect(overflow).toBeVisible();
+  await expect(overflow.getByRole('menuitem', { name: 'Inspect' })).toBeVisible();
   await page.screenshot({ path: info.outputPath('message-overflow.png'), fullPage: true });
   await page.keyboard.press('Escape');
 

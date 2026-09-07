@@ -524,7 +524,8 @@ describe('sending with a compatible model', () => {
 
     // The receipt sits in the turn's overflow beside copy and "ask again"; promotion is
     // the act this row keeps visible.
-    await user.click(await screen.findByRole('button', { name: 'More actions' }));
+    await screen.findAllByRole('button', { name: 'More actions' });
+    await user.click(screen.getAllByRole('button', { name: 'More actions' })[1] as HTMLElement);
     await user.click(await screen.findByRole('menuitem', { name: /Context used/ }));
 
     expect(
