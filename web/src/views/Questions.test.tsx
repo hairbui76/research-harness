@@ -21,16 +21,24 @@ const QUESTION = {
   question: 'Does the encoding survive re-encryption?',
   status: 'open',
   claims: [],
+  bearing: [],
   remaining_uncertainty: null,
   stale: 'fresh',
   opened: '2026-03-12',
+};
+
+const CLAIM = {
+  id: 'C0001',
+  title: 'Byte-level tokenization improves recall on short encrypted flows.',
 };
 
 const OLDER = {
   id: 'RQ0002',
   question: 'Which metrics are comparable across captures?',
   status: 'blocked',
-  claims: ['C0001'],
+  claims: [CLAIM.id],
+  // The daemon carries the statement beside the id: the Claims page's own name for C0001.
+  bearing: [CLAIM],
   remaining_uncertainty: 'the two captures use different samplers',
   stale: 'fresh',
   opened: '2026-01-04',
@@ -232,7 +240,8 @@ describe('the questions page', () => {
     expect(
       screen.getByText(/the two captures use different samplers/),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute(
+    // The claim is named by what it asserts; the id stays inside the reference chip.
+    expect(screen.getByRole('link', { name: `C0001 ${CLAIM.title}` })).toHaveAttribute(
       'href',
       '/projects/prj_abc/claims/C0001',
     );

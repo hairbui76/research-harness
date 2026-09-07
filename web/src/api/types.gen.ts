@@ -737,6 +737,21 @@ export interface components {
             when: string;
         };
         /**
+         * ClaimRef
+         * @description One Claim as another object refers to it: its id, and the statement it makes.
+         *
+         *     A question carries the claims that bear on it as ids, and an id is not something a
+         *     researcher reads. The statement is the Claim's own name — it is what the Claims page
+         *     shows — so it is carried here rather than re-fetched by whichever surface needs it
+         *     (Product 5 P10).
+         */
+        ClaimRef: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+        };
+        /**
          * ClaimSummary
          * @description One Claim as the Claim explorer lists it: what it asks, and what it may say.
          */
@@ -1122,6 +1137,11 @@ export interface components {
          * @description One ResearchQuestion and what currently bears on it.
          */
         QuestionSummary: {
+            /**
+             * Bearing
+             * @default []
+             */
+            bearing: components["schemas"]["ClaimRef"][];
             /**
              * Claims
              * @default []

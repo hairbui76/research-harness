@@ -171,11 +171,23 @@ function QuestionRow({ question, group }: { question: QuestionSummary; group: Qu
           : 'No remaining uncertainty has been recorded.'}
       </p>
       <p className="rh-web-row">
-        {question.claims.length > 0 ? (
+        {question.bearing.length > 0 ? (
           <>
             <span className="rh-text-secondary">Bearing on it:</span>
-            {question.claims.map((claim) => (
-              <ObjectRef key={claim} id={claim} kind="claim" to={href(`/claims/${claim}`)} />
+            {/*
+              The claim is named by what it asserts, which is what the Claims page calls
+              it; the id rides along inside the reference chip, where it has always been.
+              `bearing` is the daemon's — a page that looked a statement up itself would be
+              a second account of what C0001 says.
+            */}
+            {question.bearing.map((claim) => (
+              <ObjectRef
+                key={claim.id}
+                id={claim.id}
+                kind="claim"
+                label={claim.title}
+                to={href(`/claims/${claim.id}`)}
+              />
             ))}
           </>
         ) : (

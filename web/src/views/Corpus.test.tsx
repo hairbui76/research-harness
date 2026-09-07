@@ -52,6 +52,8 @@ const QUESTION = {
   question: 'Does the encoding survive re-encryption?',
   status: 'open',
   claims: ['C0001'],
+  // `bearing` is `claims` with the statement the Claims page names each of them by.
+  bearing: [{ id: 'C0001', title: 'Byte-level tokenization improves recall.' }],
   remaining_uncertainty: null,
   stale: 'fresh',
   opened: '2026-03-12',
@@ -356,10 +358,9 @@ describe('the questions screen', () => {
     );
 
     await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
-    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute(
-      'href',
-      '/projects/prj_abc/claims/C0001',
-    );
+    expect(
+      screen.getByRole('link', { name: 'C0001 Byte-level tokenization improves recall.' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/claims/C0001');
   });
 
   it('keeps the bare path when there is no project', async () => {
@@ -370,10 +371,9 @@ describe('the questions screen', () => {
     });
 
     await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
-    expect(screen.getByRole('link', { name: 'C0001' })).toHaveAttribute(
-      'href',
-      '/claims/C0001',
-    );
+    expect(
+      screen.getByRole('link', { name: 'C0001 Byte-level tokenization improves recall.' }),
+    ).toHaveAttribute('href', '/claims/C0001');
   });
 });
 

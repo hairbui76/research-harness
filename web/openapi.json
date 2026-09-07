@@ -707,6 +707,26 @@
         "title": "ChangeEntry",
         "type": "object"
       },
+      "ClaimRef": {
+        "additionalProperties": false,
+        "description": "One Claim as another object refers to it: its id, and the statement it makes.\n\nA question carries the claims that bear on it as ids, and an id is not something a\nresearcher reads. The statement is the Claim's own name — it is what the Claims page\nshows — so it is carried here rather than re-fetched by whichever surface needs it\n(Product 5 P10).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "ClaimRef",
+        "type": "object"
+      },
       "ClaimSummary": {
         "additionalProperties": false,
         "description": "One Claim as the Claim explorer lists it: what it asks, and what it may say.",
@@ -1389,6 +1409,14 @@
         "additionalProperties": false,
         "description": "One ResearchQuestion and what currently bears on it.",
         "properties": {
+          "bearing": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ClaimRef"
+            },
+            "title": "Bearing",
+            "type": "array"
+          },
           "claims": {
             "default": [],
             "items": {

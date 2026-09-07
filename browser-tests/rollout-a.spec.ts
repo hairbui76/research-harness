@@ -106,6 +106,12 @@ test('the three rolled-out pages lead with what needs a researcher', async ({
   await expect(page.getByText(/no capture in the corpus re-encrypts a flow/)).toBeVisible();
   // The group's line already says every row under it is open, so no row repeats it.
   await expect(page.getByText('Open', { exact: true })).toHaveCount(0);
+  // The claims that bear on a question are named by what they assert, not only by id.
+  await expect(
+    page.getByRole('link', {
+      name: 'C0001 Byte-level tokenization improves recall on encrypted traffic',
+    }),
+  ).toHaveAttribute('href', `${project.workspace_url}/claims/C0001`);
   const open = (await page.getByRole('heading', { name: 'Still open' }).boundingBox())!;
   const answered = (await page.getByRole('heading', { name: 'Answered' }).boundingBox())!;
   expect(open.y, 'what is still open is read before what has been answered').toBeLessThan(

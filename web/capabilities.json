@@ -20759,6 +20759,26 @@
       },
       "response_schema": {
         "$defs": {
+          "ClaimRef": {
+            "additionalProperties": false,
+            "description": "One Claim as another object refers to it: its id, and the statement it makes.\n\nA question carries the claims that bear on it as ids, and an id is not something a\nresearcher reads. The statement is the Claim's own name — it is what the Claims page\nshows — so it is carried here rather than re-fetched by whichever surface needs it\n(Product 5 P10).",
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "title": "ClaimRef",
+            "type": "object"
+          },
           "QuestionGroup": {
             "additionalProperties": false,
             "description": "One line the Questions page groups by: what this group is waiting on.",
@@ -20784,6 +20804,11 @@
                 "title": "Questions",
                 "type": "array"
               },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
               "surface": {
                 "default": "waiting",
                 "title": "Surface",
@@ -20801,6 +20826,14 @@
             "additionalProperties": false,
             "description": "One ResearchQuestion and what currently bears on it.",
             "properties": {
+              "bearing": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ClaimRef"
+                },
+                "title": "Bearing",
+                "type": "array"
+              },
               "claims": {
                 "default": [],
                 "items": {
@@ -31177,6 +31210,26 @@
             "title": "ArtifactSummary",
             "type": "object"
           },
+          "ClaimRef": {
+            "additionalProperties": false,
+            "description": "One Claim as another object refers to it: its id, and the statement it makes.\n\nA question carries the claims that bear on it as ids, and an id is not something a\nresearcher reads. The statement is the Claim's own name — it is what the Claims page\nshows — so it is carried here rather than re-fetched by whichever surface needs it\n(Product 5 P10).",
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "title": "ClaimRef",
+            "type": "object"
+          },
           "ClaimSummary": {
             "additionalProperties": false,
             "description": "One Claim as the Claim explorer lists it: what it asks, and what it may say.",
@@ -31386,6 +31439,14 @@
             "additionalProperties": false,
             "description": "One ResearchQuestion and what currently bears on it.",
             "properties": {
+              "bearing": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ClaimRef"
+                },
+                "title": "Bearing",
+                "type": "array"
+              },
               "claims": {
                 "default": [],
                 "items": {
@@ -33710,6 +33771,74 @@
             "title": "ArtifactSummary",
             "type": "object"
           },
+          "CorpusAttentionGroup": {
+            "additionalProperties": false,
+            "description": "One reason a source is not yet something this project can read from.",
+            "properties": {
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "items": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/CorpusAttentionItem"
+                },
+                "title": "Items",
+                "type": "array"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "more": {
+                "default": "",
+                "title": "More",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "label",
+              "count"
+            ],
+            "title": "CorpusAttentionGroup",
+            "type": "object"
+          },
+          "CorpusAttentionItem": {
+            "additionalProperties": false,
+            "description": "One Work that needs a researcher, and what is specific to it.",
+            "properties": {
+              "detail": {
+                "default": "",
+                "title": "Detail",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "route": {
+                "default": "",
+                "title": "Route",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "title": "CorpusAttentionItem",
+            "type": "object"
+          },
           "WorkSummary": {
             "additionalProperties": false,
             "description": "One Work as the Corpus list shows it.",
@@ -33787,8 +33916,16 @@
           }
         },
         "additionalProperties": false,
-        "description": "`work.list`: the corpus, summarised.",
+        "description": "`work.list`: the corpus, summarised, and what in it needs a researcher.",
         "properties": {
+          "attention": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/CorpusAttentionGroup"
+            },
+            "title": "Attention",
+            "type": "array"
+          },
           "count": {
             "default": 0,
             "title": "Count",

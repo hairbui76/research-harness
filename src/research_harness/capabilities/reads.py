@@ -30,7 +30,7 @@ React the raw lists.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -64,6 +64,7 @@ __all__ = [
     "CandidateView",
     "ClaimGroup",
     "ClaimList",
+    "ClaimRef",
     "ClaimSummary",
     "CorpusAttentionGroup",
     "CorpusAttentionItem",
@@ -94,6 +95,7 @@ __all__ = [
     "WorkspaceIndexRequest",
     "claim_concern",
     "claim_groups",
+    "claim_titles",
     "corpus_attention",
     "list_anchors",
     "list_claims",
@@ -194,6 +196,19 @@ class ClaimSummary(_Summary):
     contradicting: int = 0
 
 
+class ClaimRef(_Summary):
+    """One Claim as another object refers to it: its id, and the statement it makes.
+
+    A question carries the claims that bear on it as ids, and an id is not something a
+    researcher reads. The statement is the Claim's own name — it is what the Claims page
+    shows — so it is carried here rather than re-fetched by whichever surface needs it
+    (Product 5 P10).
+    """
+
+    id: str
+    title: str
+
+
 class QuestionSummary(_Summary):
     """One ResearchQuestion and what currently bears on it."""
 
@@ -201,6 +216,14 @@ class QuestionSummary(_Summary):
     question: str
     status: str
     claims: tuple[str, ...] = ()
+    bearing: tuple[ClaimRef, ...] = ()
+    """The same claims as `claims`, each with the statement a person reads it by.
+
+    `claims` stays a tuple of ids, because every reader written against it still wants
+    ids. This is the additive sibling a page renders: "Bearing on it: C0001" tells a
+    researcher nothing, and the Claims page already calls C0001 by its statement.
+    """
+
     remaining_uncertainty: str | None = None
     stale: str
     opened: str = ""
@@ -592,7 +615,8 @@ def list_questions(ctx: CapabilityContext, request: ListQuestionsRequest) -> Que
         for question in ctx.repo.list_questions()
         if request.status is None or question.status is request.status
     ]
-    summaries = tuple(question_summary(question) for question in questions)
+    titles = claim_titles(ctx.repo)
+    summaries = tuple(question_summary(question, titles) for question in questions)
     groups = question_groups(summaries)
     return QuestionList(
         count=len(questions),
@@ -1014,17 +1038,30 @@ def _joined(phrases: tuple[str, ...]) -> str:
     return f"{', '.join(phrases[:-1])} and {phrases[-1]}"
 
 
-def question_summary(question: Any) -> QuestionSummary:
-    """One ResearchQuestion as every list of questions shows it."""
+def question_summary(question: Any, titles: Mapping[str, str] | None = None) -> QuestionSummary:
+    """One ResearchQuestion as every list of questions shows it.
+
+    `titles` maps a Claim id to its statement. Without it the claims are still reported as
+    ids and `bearing` names each of them by its id, which is what a caller that has not
+    opened the claims can honestly say.
+    """
+    known = titles or {}
+    claims = tuple(str(claim) for claim in question.claims)
     return QuestionSummary(
         id=str(question.id),
         question=question.question,
         status=question.status.value,
-        claims=tuple(str(claim) for claim in question.claims),
+        claims=claims,
+        bearing=tuple(ClaimRef(id=claim, title=known.get(claim, claim)) for claim in claims),
         remaining_uncertainty=question.remaining_uncertainty,
         stale=question.stale.value,
         opened=question.created_at.date().isoformat(),
     )
+
+
+def claim_titles(repo: Any) -> dict[str, str]:
+    """Every Claim's own statement, by id: what another object calls it when it names one."""
+    return {str(claim.id): claim.statement for claim in repo.list_claims()}
 
 
 def decision_summary(decision: Any) -> DecisionSummary:
@@ -1156,7 +1193,9 @@ def workspace_index(repo: WorkspaceRepository) -> WorkspaceIndex:
     return WorkspaceIndex(
         works=tuple(work_summary(repo, work) for work in repo.list_works()),
         claims=tuple(claim_summary(claim) for claim in repo.list_claims()),
-        questions=tuple(question_summary(question) for question in repo.list_questions()),
+        questions=tuple(
+            question_summary(question, claim_titles(repo)) for question in repo.list_questions()
+        ),
         decisions=tuple(decision_summary(decision) for decision in repo.list_decisions()),
         matrices=tuple(
             MatrixSummary(

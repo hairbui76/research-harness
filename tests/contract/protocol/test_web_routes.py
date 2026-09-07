@@ -1016,6 +1016,34 @@ def test_question_list_says_when_every_question_it_holds_has_been_answered(
     )
 
 
+def test_a_question_carries_the_claims_that_bear_on_it_by_what_they_assert(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """ "Bearing on it: C0001" is a code; the Claims page calls C0001 by its statement.
+
+    The statement is the Claim's own name, so the daemon carries it beside the id rather
+    than leaving each page to look it up and risk two accounts of what C0001 says.
+    """
+    _create_claim(corpus, registry)
+    _create_question(corpus, registry)
+    registry.invoke(
+        "question.update",
+        open_context(corpus, HUMAN_ACTOR),
+        {"question_id": "RQ0001", "claims": ["C0001"]},
+        principal=Principal.human(),
+    )
+
+    question = _call(reader, "question.list", {})["questions"][0]
+
+    assert question["claims"] == ["C0001"], "the ids stay, for every reader written on them"
+    assert question["bearing"] == [
+        {
+            "id": "C0001",
+            "title": "Byte-level tokenization improves recall on short encrypted flows.",
+        }
+    ]
+
+
 def test_a_question_says_when_it_was_registered_so_the_oldest_is_visible(
     reader: TestClient, corpus: Path, registry: CapabilityRegistry
 ) -> None:
