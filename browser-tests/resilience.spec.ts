@@ -9,7 +9,7 @@
  * can only be seen by making a pane narrow at a viewport that is not.
  */
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 /** How many works the corpus is seeded with. Far past the few hundred a real project has. */
 const WORKS = 1000;
@@ -119,10 +119,7 @@ test('a thousand works render inside a budget, and only a window of them is in t
   await expect(page.getByRole('status').filter({ hasText: `Showing 1 of ${WORKS} works.` })).toBeVisible();
   await findAWork(page).fill('');
 
-  const axe = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(axe.violations).toEqual([]);
+  expect(await axeViolations(page)).toEqual([]);
 
   await page.screenshot({ path: info.outputPath('corpus-thousand-works.png'), fullPage: false });
   expect(errors).toEqual([]);
@@ -175,10 +172,7 @@ test('a daemon that stops answering becomes one polite notice, and comes back', 
 
   await page.screenshot({ path: info.outputPath('daemon-offline.png'), fullPage: false });
 
-  const axe = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(axe.violations).toEqual([]);
+  expect(await axeViolations(page)).toEqual([]);
 
   // Give the daemon back and ask once. The notice clears with no reload.
   await page.unroute(workspaceApi);

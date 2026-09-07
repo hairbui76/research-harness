@@ -231,11 +231,7 @@ test('a transcript row carries one toolbar, with the rest behind More actions', 
   await page.screenshot({ path: info.outputPath('message-overflow.png'), fullPage: true });
   await page.keyboard.press('Escape');
 
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .include('.rh-message')
-    .analyze();
-  expect(results.violations).toEqual([]);
+  expect(await axeViolations(page), 'a transcript row and its overflow').toEqual([]);
 
   expect(errors).toEqual([]);
 });

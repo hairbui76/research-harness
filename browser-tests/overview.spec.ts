@@ -12,7 +12,7 @@
  * next action. That is the pattern the rest of the research pages follow.
  */
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript((theme) => {
@@ -33,10 +33,7 @@ async function bareNumbers(page: import('@playwright/test').Page): Promise<strin
 }
 
 async function auditPage(page: import('@playwright/test').Page, name: string): Promise<void> {
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(results.violations, `${name} must have no accessibility violations`).toEqual([]);
+  expect(await axeViolations(page), `${name} must have no accessibility violations`).toEqual([]);
   const fits = await page.evaluate(
     () => document.documentElement.scrollWidth <= window.innerWidth,
   );
