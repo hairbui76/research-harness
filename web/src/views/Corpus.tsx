@@ -8,15 +8,35 @@
  * (`work.list`'s `attention`); a cockpit that re-derived it from `screening` and `parsed`
  * would be a second, disagreeing copy of Product 14 and 16 living in React (P10).
  *
- * The works themselves stay the instrument they are. A researcher reads this list by
- * running an eye down shared columns — files, versions, sizes, whether each file is parsed
- * — and that is what a table is for; the lead names the work, the table compares the rows.
+ * ## The works answer questions, they do not display records
+ *
+ * A corpus is not read record by record. It is asked things — which of these thousand works
+ * has nothing accepted from it, which cannot be read from yet, which does no claim rest on,
+ * which came in while I was away, which one was that fact in — and the page is built around
+ * those five and nothing else. So each work is a row read across shared columns that answer
+ * them (what it is; whether it has readable text; what has been accepted from it; how many
+ * claims cite it; when it came in), and the questions themselves are the controls that
+ * narrow the list.
+ *
+ * The narrowing is a request, not a `filter()`. "Nothing accepted from it" and "cannot be
+ * read from yet" are judgements over canonical state, and the same P10 that keeps the lead
+ * on the daemon keeps these there: `work.list` takes a `question`, answers with the works
+ * that answer it, and composes the sentence the narrowed list is read under. What stays in
+ * the browser is the find, because "which one was that fact in" is a question about the
+ * text on screen rather than about the science.
+ *
+ * The row used to be a card of ID / AUTHORS / YEAR / VENUE / ACCEPTED EVIDENCE — the shape
+ * a CRM gives a contact, and the shape the second design critique named. Every one of those
+ * fields is still on the page; what changed is that they are columns a thousand rows share
+ * rather than a stack of labels each row repeats, so a corpus can be scanned instead of
+ * read one card at a time.
  *
  * The corpus list is windowed. `work.list` answers the whole corpus in one read — the
  * daemon imposes no page size, and PRODUCT §5 P10 forbids the cockpit inventing one — so a
  * project of a thousand works used to mount a thousand cards, each with its own nested file
  * table, before the first one could be read. `VirtualList` keeps only what is near the
- * viewport in the DOM; each card renders exactly as it always did once it is mounted.
+ * viewport in the DOM. The files of one work stay one press away, inside the row, so
+ * reaching them never unmounts the list a researcher is standing in.
  *
  * Windowing costs the browser's own find-in-page, and pretending otherwise would be the
  * dishonest part: Ctrl/Cmd+F can only search the works the DOM currently holds. So the page
@@ -25,8 +45,9 @@
  * — taking a key away from the researcher to hide a trade-off is worse than the trade-off.
  *
  * A file with no stored parse cannot have an anchor replayed against it, which is why
- * "parsed" is on the list rather than buried: it is the difference between a source you can
- * open at a span and one you cannot (PRODUCT §16, §42 D).
+ * "readable text" is a column rather than something buried in a nested table: it is the
+ * difference between a source you can open at a span and one you cannot (PRODUCT §16, §42
+ * D).
  *
  * Not here, and deliberately: the `work.update_metadata` proposals a discovery run turns up
  * (`discovery/search_runs.py::MetadataEnrichment`). Nothing in the capability surface reads
@@ -55,6 +76,7 @@ import type { EvidenceModel } from '@research-harness/design';
 import type {
   CorpusAttentionGroup,
   CorpusAttentionItem,
+  CorpusQuestion,
   EvidenceSummary,
   WorkList,
   WorkSummary,
@@ -77,8 +99,41 @@ import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 import './corpus.css';
 
-/** About how tall one work's card is before it has been measured, in CSS pixels. */
-const WORK_CARD_HEIGHT = 320;
+/**
+ * About how tall one work's row is before it has been measured, in CSS pixels.
+ *
+ * Two lines of work identity plus a line of controls, which is what the row is before a
+ * researcher opens its files. The measurement is the real answer; this is only what the
+ * window places rows by until it has one.
+ */
+const WORK_ROW_HEIGHT = 96;
+
+/**
+ * The columns a corpus is read across.
+ *
+ * `head` is what the strip above the list says; `label` is what one cell says on its own,
+ * to a screen reader and — once the pane is too narrow for columns — to everyone. They
+ * differ because a column header is read once with five others beside it and a cell label
+ * is read alone: "Accepted" under a heading row is unambiguous, "Accepted 3" in a stack of
+ * facts is not.
+ *
+ * The set is the questions of the page's opening comment, in the order a researcher asks
+ * them: what is this, where does it stand, can I read it, what has it given, does anything
+ * rest on it, when did it arrive.
+ */
+const COLUMNS = [
+  { key: 'work', head: 'Work', label: 'Work' },
+  { key: 'screening', head: 'Screening', label: 'Screening state' },
+  { key: 'readable', head: 'Readable text', label: 'Readable text' },
+  { key: 'evidence', head: 'Accepted', label: 'Accepted evidence' },
+  { key: 'claims', head: 'Cited by', label: 'Claims citing it' },
+  { key: 'added', head: 'Came in', label: 'Came into the corpus' },
+] as const;
+
+/** `1 file` / `2 files` — a count is only ever read inside the thing it counts. */
+function counted(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
 
 /**
  * Whether one work answers what was typed into the page's find field.
@@ -100,10 +155,18 @@ export function matchesWork(work: WorkSummary, query: string): boolean {
 export function CorpusPage() {
   const { client } = useSession();
   const { href } = useProjectPaths();
-  // `work.list`: the corpus, and the daemon's own reading of which of these sources cannot
-  // be read from yet. This view needs nothing else on the navigation.
-  const state = useAsync(() => client.works(), [client]);
+  // Which question the corpus is being asked, or "" for the whole of it. It goes to the
+  // daemon rather than into a `filter()`: which works have nothing accepted from them is a
+  // judgement about scientific state, and P10 leaves those where they are made.
+  const [question, setQuestion] = useState('');
+  // `work.list`: the corpus, the daemon's own reading of which of these sources cannot be
+  // read from yet, and what this corpus can be asked. This view needs nothing else.
+  const state = useAsync(() => client.works(null, question || null), [client, question]);
   const [query, setQuery] = useState('');
+  // The works whose files are open, by id, held by the page rather than by the row: a row
+  // scrolled out of the window is unmounted, and a researcher who scrolls back should find
+  // what they opened still open.
+  const [opened, setOpened] = useState<readonly string[]>([]);
   const outage = useDaemonOutage();
   // The works are a region of their own, named by their own heading, so a screen-reader
   // user can jump past the lead straight into the list — and so the live count below is
@@ -123,6 +186,14 @@ export function CorpusPage() {
   const answer = state.data ?? kept.current;
   const works = answer?.works ?? [];
   const attention = answer?.attention ?? [];
+  const questions = answer?.questions ?? [];
+  // How many works the corpus holds, whatever this answer was narrowed to. An older daemon
+  // answers without it, and then the answer is the whole corpus by definition.
+  const total = answer?.total ?? works.length;
+  // The question these rows actually answer, taken from the answer that produced them
+  // rather than from the request: while a new one is in flight the sentence beside the list
+  // has to describe what is on the screen.
+  const asked = questions.find((item) => item.kind === (answer?.question ?? '')) ?? null;
   const stale = outage !== null && works.length > 0;
 
   // The daemon came back: ask again, so the page catches up without a reload.
@@ -142,13 +213,18 @@ export function CorpusPage() {
     [query, works],
   );
   const failed = state.error !== null && !stale;
+  // The skeleton is for a page that has nothing yet. Once a corpus is on screen, asking it
+  // another question keeps it there and marks the region busy: replacing a thousand rows
+  // with a placeholder for the seconds a re-read takes loses the reader's place to say
+  // nothing they did not already know.
+  const arriving = state.loading && answer === null;
   return (
     <FullPageWorkspace
       busy={state.loading}
       title="Corpus"
       description="The sources this project reads from, and the files kept for each."
       toolbar={
-        works.length > 0 ? (
+        works.length > 0 || question !== '' ? (
           <Input
             label="Find a work by title, author, venue, year or id"
             hideLabel
@@ -165,11 +241,11 @@ export function CorpusPage() {
         )
       }
     >
-      {state.loading ? (
+      {arriving ? (
         <Loading what="the corpus" shape="cards" />
       ) : failed ? (
         <ErrorBox error={state.error as string} retry={state.reload} />
-      ) : works.length === 0 ? (
+      ) : total === 0 ? (
         <Empty
           description="The corpus is the set of sources this project reads from: each work, the files kept for it, and whether a file has a stored parse. A file enters it by being attached to a conversation and saved to the corpus."
           action={<Link to={href('/')}>Open the conversation to attach a source</Link>}
@@ -202,14 +278,35 @@ export function CorpusPage() {
             <h2 className="rh-text-h3" id={worksHeading}>
               Every work in the corpus
             </h2>
+            <Questions
+              questions={questions}
+              chosen={question}
+              total={total}
+              onChoose={setQuestion}
+            />
             <p className="rh-text-secondary" role="status">
               {stale
                 ? `The last corpus the daemon sent: ${works.length} works. It has not answered since.`
-                : query
-                  ? `Showing ${shown.length} of ${works.length} works.`
-                  : `${works.length} works.`}
+                : asked
+                  ? query
+                    ? `${asked.summary} Showing ${shown.length} of them.`
+                    : asked.summary
+                  : query
+                    ? `Showing ${shown.length} of ${total} works.`
+                    : `${total} works.`}
             </p>
-            {shown.length === 0 ? (
+            {works.length === 0 ? (
+              <Empty
+                description="Every work the daemon counted under this question is still in the corpus; this list is only the ones it named. The corpus itself is unchanged underneath it."
+                action={
+                  <Button size="sm" variant="secondary" onClick={() => setQuestion('')}>
+                    Show every work
+                  </Button>
+                }
+              >
+                No work answers this question
+              </Empty>
+            ) : shown.length === 0 ? (
               <Empty
                 description="The find only hides. Every work the daemon listed is still in the corpus underneath it."
                 action={
@@ -221,19 +318,97 @@ export function CorpusPage() {
                 No work matches this find
               </Empty>
             ) : (
-              <VirtualList
-                className="rh-web-corpus__list"
-                label="Works in the corpus"
-                items={shown}
-                itemKey={(work) => work.id}
-                estimatedItemHeight={WORK_CARD_HEIGHT}
-                renderItem={(work) => <WorkCard work={work} client={client} href={href} />}
-              />
+              <>
+                {/* The column names, once, above the window. They are the visible half of
+                    the labels each cell carries for a screen reader, which is why they are
+                    hidden from one: read together they would say every column name twice. */}
+                <div className="rh-web-corpus__head" aria-hidden="true">
+                  {COLUMNS.map((column) => (
+                    <span key={column.key} className="rh-web-corpus__column">
+                      {column.head}
+                    </span>
+                  ))}
+                </div>
+                <VirtualList
+                  className="rh-web-corpus__list"
+                  label="Works in the corpus"
+                  items={shown}
+                  itemKey={(work) => work.id}
+                  estimatedItemHeight={WORK_ROW_HEIGHT}
+                  renderItem={(work) => (
+                    <WorkRow
+                      work={work}
+                      client={client}
+                      href={href}
+                      open={opened.includes(work.id)}
+                      onToggle={() =>
+                        setOpened((current) =>
+                          current.includes(work.id)
+                            ? current.filter((id) => id !== work.id)
+                            : [...current, work.id],
+                        )
+                      }
+                    />
+                  )}
+                />
+              </>
             )}
           </section>
         </div>
       )}
     </FullPageWorkspace>
+  );
+}
+
+/**
+ * What this corpus can be asked, as the controls that ask it.
+ *
+ * Every one of them is the daemon's: the question, the words on it, and how many works
+ * answer it. The cockpit contributes one control the daemon has no opinion about — the way
+ * back to the whole corpus — and the press that sends the next `work.list`.
+ *
+ * They are toggles rather than a select because there are rarely more than three and a
+ * researcher should be able to see what a corpus can be asked without opening anything;
+ * a corpus in good order offers none of them, and the row disappears.
+ */
+function Questions({
+  questions,
+  chosen,
+  total,
+  onChoose,
+}: {
+  questions: CorpusQuestion[];
+  chosen: string;
+  total: number;
+  onChoose: (kind: string) => void;
+}) {
+  if (questions.length === 0) return null;
+  return (
+    <div
+      className="rh-web-corpus__questions"
+      role="group"
+      aria-label="Ask the corpus a question"
+    >
+      <Button
+        size="sm"
+        variant="ghost"
+        aria-pressed={chosen === ''}
+        onClick={() => onChoose('')}
+      >
+        {`Every work (${total})`}
+      </Button>
+      {questions.map((question) => (
+        <Button
+          key={question.kind}
+          size="sm"
+          variant="ghost"
+          aria-pressed={chosen === question.kind}
+          onClick={() => onChoose(chosen === question.kind ? '' : question.kind)}
+        >
+          {`${question.label} (${question.count})`}
+        </Button>
+      ))}
+    </div>
   );
 }
 
@@ -292,73 +467,136 @@ function WorkLink({
   return <Link to={href(item.route)}>{item.label}</Link>;
 }
 
+/** What a work is, in one line under its title: who wrote it, when, and where. */
+function byline(work: WorkSummary): string {
+  const parts = [
+    work.authors.join(', '),
+    work.year === null || work.year === undefined ? '' : String(work.year),
+    work.venue ?? '',
+  ].filter((part) => part !== '');
+  // An empty line would read as "no authors", which is a claim about the paper. This is a
+  // claim about the record, which is the true one.
+  return parts.length === 0 ? 'No authors, year or venue recorded' : parts.join(' · ');
+}
+
+/** One cell's own name, for a screen reader and for a pane too narrow to hold columns. */
+function CellLabel({ children }: { children: string }) {
+  return <span className="rh-web-corpus__label">{children}</span>;
+}
+
 /**
- * One work in the corpus list: identity, then the files kept for it.
+ * One work in the corpus list, read across the columns the page is asked about.
  *
- * Lifted out of the list body unchanged, because the list now mounts it rather than the
- * page: what a researcher sees when a card is on screen is exactly what they saw before,
- * down to the compact density the file table sits in.
+ * The title opens the work; the id beside it is the reference a researcher works with and
+ * opens the same page. The files are one press away and open *inside* the row, because the
+ * list is windowed: sending a reader to another screen to see whether a PDF was parsed
+ * would unmount the thousand works they were reading and lose their place in them.
  */
-function WorkCard({
+function WorkRow({
   work,
   client,
   href,
+  open,
+  onToggle,
 }: {
   work: WorkSummary;
   client: HarnessClient;
   href: (path: string) => string;
+  open: boolean;
+  onToggle: () => void;
 }) {
+  const files = useId(undefined, 'rh-web-corpus-files');
+  const to = href(`/corpus/${work.id}`);
   return (
-    <Panel
-      title={work.title}
-      action={<StatusBadge status={work.screening} vocabulary="screeningState" />}
-    >
-      <Fields>
-        <Field label="Id">
-          <ObjectRef id={work.id} kind="work" to={href(`/corpus/${work.id}`)} />
-        </Field>
-        <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
-        <Field label="Year">{work.year ?? '—'}</Field>
-        <Field label="Venue">{work.venue ?? '—'}</Field>
-        <Field label="Accepted evidence">{work.evidence}</Field>
-      </Fields>
-      <DataTable
-        label={`Files of ${work.id}`}
-        head={
-          <tr>
-            <th scope="col">Artifact</th>
-            <th scope="col">Version</th>
-            <th scope="col">Type</th>
-            <th scope="col">Size</th>
-            <th scope="col">Parsed</th>
-            <th scope="col">Source</th>
-          </tr>
-        }
-      >
-        {work.artifacts.map((artifact) => (
-          <tr key={artifact.id}>
-            <th scope="row">
-              <code>{artifact.id}</code>
-            </th>
-            <td>{artifact.version}</td>
-            <td>{artifact.mime_type}</td>
-            {/* The package's own file-size wording, so a file reads the same here
-                as it does in the composer's attachment tray. */}
-            <td>{formatFileSize(artifact.size_bytes)}</td>
-            <td>
-              <StatusBadge status={artifact.parsed ? 'valid' : 'unverified'}>
-                {artifact.parsed ? 'yes' : 'no parse stored'}
-              </StatusBadge>
-            </td>
-            <td>
-              <a href={client.artifactBytesUrl(artifact.id)} target="_blank" rel="noreferrer">
-                open the file
-              </a>
-            </td>
-          </tr>
-        ))}
-      </DataTable>
-    </Panel>
+    <div className="rh-web-corpus__row">
+      <div className="rh-web-corpus__cells">
+        <div className="rh-web-corpus__cell rh-web-corpus__cell--work">
+          <Link className="rh-web-corpus__title" to={to}>
+            {work.title}
+          </Link>
+          <p className="rh-web-corpus__byline">{byline(work)}</p>
+          <div className="rh-web-corpus__row-actions">
+            <ObjectRef id={work.id} kind="work" to={to} />
+            {work.artifacts.length === 0 ? (
+              <span className="rh-text-secondary">No file yet</span>
+            ) : (
+              <button
+                type="button"
+                className="rh-web-corpus__files"
+                aria-expanded={open}
+                aria-controls={files}
+                onClick={onToggle}
+              >
+                <Icon name={open ? 'chevron-down' : 'chevron-right'} size={14} />
+                {counted(work.artifacts.length, 'file')}
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="rh-web-corpus__cell">
+          <CellLabel>Screening state</CellLabel>
+          <StatusBadge status={work.screening} vocabulary="screeningState" />
+        </div>
+        <div className="rh-web-corpus__cell">
+          <CellLabel>Readable text</CellLabel>
+          {/* The daemon's own answer over every file of this work: a span can only be
+              anchored in a file that has been parsed (PRODUCT §16). */}
+          {work.readable ? 'yes' : 'no'}
+        </div>
+        <div className="rh-web-corpus__cell rh-web-corpus__cell--count">
+          <CellLabel>Accepted evidence</CellLabel>
+          {work.evidence}
+        </div>
+        <div className="rh-web-corpus__cell rh-web-corpus__cell--count">
+          <CellLabel>Claims citing it</CellLabel>
+          {work.claims}
+        </div>
+        <div className="rh-web-corpus__cell">
+          <CellLabel>Came into the corpus</CellLabel>
+          {work.added_at ? <time dateTime={work.added_at}>{work.added}</time> : '—'}
+        </div>
+      </div>
+      {open ? (
+        <div className="rh-web-corpus__files-open" id={files}>
+          <DataTable
+            label={`Files of ${work.id}`}
+            head={
+              <tr>
+                <th scope="col">Artifact</th>
+                <th scope="col">Version</th>
+                <th scope="col">Type</th>
+                <th scope="col">Size</th>
+                <th scope="col">Parsed</th>
+                <th scope="col">Source</th>
+              </tr>
+            }
+          >
+            {work.artifacts.map((artifact) => (
+              <tr key={artifact.id}>
+                <th scope="row">
+                  <code>{artifact.id}</code>
+                </th>
+                <td>{artifact.version}</td>
+                <td>{artifact.mime_type}</td>
+                {/* The package's own file-size wording, so a file reads the same here
+                    as it does in the composer's attachment tray. */}
+                <td>{formatFileSize(artifact.size_bytes)}</td>
+                <td>
+                  <StatusBadge status={artifact.parsed ? 'valid' : 'unverified'}>
+                    {artifact.parsed ? 'yes' : 'no parse stored'}
+                  </StatusBadge>
+                </td>
+                <td>
+                  <a href={client.artifactBytesUrl(artifact.id)} target="_blank" rel="noreferrer">
+                    open the file
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </DataTable>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

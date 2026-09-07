@@ -357,10 +357,39 @@ export interface CorpusAttentionGroup {
   more: string;
 }
 
+/**
+ * One question a researcher brings to the corpus, as a filter over the works.
+ *
+ * A corpus is asked things — which of these thousand works has nothing accepted from it,
+ * which cannot be read from yet, which no claim rests on, which came in lately — and both
+ * the line each question draws and the words for it are the daemon's (Product 5 P10).
+ * `label` goes on the control, `summary` is read beside the narrowed list, and `count` is
+ * over the whole corpus, so a control says the same number whether or not it is chosen.
+ */
+export interface CorpusQuestion {
+  kind: string;
+  label: string;
+  count: number;
+  summary: string;
+}
+
+/**
+ * The corpus as one answer: the works, the lead, and what this corpus can be asked.
+ *
+ * `count` is what this answer carries and `total` is what the corpus holds, which are the
+ * same number until a question narrows the rows. `attention` and `questions` are always
+ * over the whole corpus: a lead that changed with the filter under it would be describing
+ * the filter. `question` is the narrowing echoed back, so a sentence about the rows on
+ * screen is composed from the answer that produced them rather than from a request still
+ * in flight.
+ */
 export interface WorkList {
   count: number;
+  total: number;
+  question: string;
   works: WorkSummary[];
   attention: CorpusAttentionGroup[];
+  questions: CorpusQuestion[];
 }
 
 /**

@@ -454,15 +454,19 @@ export class HarnessClient {
   }
 
   /**
-   * The corpus, optionally narrowed to one screening state.
+   * The corpus, optionally narrowed to one screening state or to one question.
    *
    * The whole answer, not only its rows: `work.list` also says which of those sources
-   * cannot yet be read from and why, and that judgement is the daemon's (Product 5 P10).
-   * Handing back `works` alone would leave the Corpus page to re-derive it from `screening`
-   * and `parsed`, which is the one thing a client must not do.
+   * cannot yet be read from and why, which questions this corpus can be asked and how many
+   * works answer each, and every one of those judgements is the daemon's (Product 5 P10).
+   * Handing back `works` alone would leave the Corpus page to re-derive them from
+   * `screening`, `parsed` and its own arithmetic, which is the one thing a client must not
+   * do — so the narrowing is a request rather than a `filter()`.
    */
-  async works(screening?: string | null): Promise<WorkList> {
-    const request: Record<string, Json> = screening ? { screening } : {};
+  async works(screening?: string | null, question?: string | null): Promise<WorkList> {
+    const request: Record<string, Json> = {};
+    if (screening) request.screening = screening;
+    if (question) request.question = question;
     return await this.call<WorkList>('work.list', request);
   }
 

@@ -1,5 +1,6 @@
 /*
- * Layout for the corpus page: what needs a researcher, then the works themselves.
+ * Layout for the corpus page: what needs a researcher, the questions it can be asked, and
+ * the works themselves.
  *
  * The corpus is the one research page whose length nothing bounds: `work.list` answers the
  * whole corpus in a single read, and a project of a thousand works used to mount a thousand
@@ -12,9 +13,17 @@
  * the page does not also scroll: one scroller, in the same place a researcher already
  * found it.
  *
+ * The works are read across columns, and a windowed list cannot use a table to align them:
+ * only a window of rows exists at any moment, and each one is its own element. So the track
+ * sizes live in one custom property that the heading strip and every row share, which is
+ * what makes a column a column here. Below the width those tracks need, the row stops
+ * pretending to be a table and becomes what it is on a phone — a title, and the same facts
+ * as labelled pairs — by revealing the label each cell already carries for a screen reader.
+ * The query is on the page container, not the window: this pane is narrow at 1440 too.
+ *
  * There is deliberately no rule here that makes a count large. Every number on this page is
- * inside a sentence — the daemon's, or the live one beside the list — and a stylesheet that
- * could draw a stat tile is an invitation to draw one again.
+ * inside a sentence, a control, or a cell under the column that names it, and a stylesheet
+ * that could draw a stat tile is an invitation to draw one again.
  *
  * Colour, spacing and type are the Design System's; `check-tokens.mjs` scans `web/src` and
  * fails the lint on a literal.
@@ -28,6 +37,13 @@
   gap: var(--rh-space-6);
   min-block-size: 0;
   block-size: 100%;
+
+  /*
+   * The corpus's columns, in one place because two things have to agree about them: the
+   * strip that names them and every row under it. The work takes what is left; the five
+   * facts take what their own words need and no more.
+   */
+  --rh-web-corpus-columns: minmax(12rem, 1fr) 7rem 5.5rem 4.5rem 4.75rem 7.5rem;
 }
 
 /*
@@ -80,6 +96,53 @@
   color: var(--rh-text-secondary);
 }
 
+/*
+ * The questions this corpus can be asked, as the controls that ask them.
+ *
+ * They wrap rather than scroll: there are rarely more than three, and a control a
+ * researcher has to scroll a strip to find is one they will not know exists.
+ */
+.rh-web-corpus__questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2);
+}
+
+/* The chosen question, in the surface the cockpit already uses for a chosen thing. */
+.rh-web-corpus__questions .rh-button[aria-pressed='true'] {
+  background: var(--rh-surface-selected);
+  color: var(--rh-text-primary);
+  box-shadow: inset 0 0 0 var(--rh-border-width) var(--rh-border-strong);
+}
+
+/*
+ * The column names, once, above the window.
+ *
+ * Label type, on the page's own surface rather than on a band of its own: the rule under it
+ * is what separates it from the first row, and a filled header bar would be a second
+ * surface on a page that already has one.
+ */
+.rh-web-corpus__head {
+  display: grid;
+  grid-template-columns: var(--rh-web-corpus-columns);
+  gap: var(--rh-space-3);
+  align-items: end;
+  padding: var(--rh-space-1) var(--rh-space-2);
+  border-block-end: var(--rh-border-width) solid var(--rh-border-default);
+  font-size: var(--rh-type-label-size);
+  line-height: var(--rh-type-label-lh);
+  font-weight: var(--rh-type-label-weight);
+  letter-spacing: var(--rh-type-label-ls);
+  color: var(--rh-text-secondary);
+}
+
+/* The three columns that hold a count or a state read against their own kind, so the
+   heading sits over the value rather than beside it. */
+.rh-web-corpus__head .rh-web-corpus__column:nth-child(4),
+.rh-web-corpus__head .rh-web-corpus__column:nth-child(5) {
+  text-align: end;
+}
+
 .rh-web-corpus__list {
   flex: 1 1 auto;
   min-block-size: 0;
@@ -90,15 +153,164 @@
 /*
  * One work, inside the window.
  *
- * The card is the same card the page has always drawn. What the window adds is the gap
- * between two of them, which cannot be a margin: the item's measured height is what the
- * list places the next one by, and a collapsing margin is not in it.
+ * Rows are contiguous and separated by a rule rather than by a gap: a corpus is read by
+ * running an eye down a column, and space between rows breaks the column into a stack of
+ * cards again. The rule is 1px on the shared border token — the same one the heading strip
+ * takes — and nothing here is a coloured edge.
  */
-.rh-web-corpus__list .rh-virtual-list__item {
-  padding-block-end: var(--rh-space-3);
+.rh-web-corpus__row {
+  padding: var(--rh-space-2);
+  border-block-end: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+}
+
+.rh-web-corpus__row:hover {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-web-corpus__cells {
+  display: grid;
+  grid-template-columns: var(--rh-web-corpus-columns);
+  gap: var(--rh-space-3);
+  align-items: start;
+}
+
+.rh-web-corpus__cell {
+  min-inline-size: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+  overflow-wrap: anywhere;
+}
+
+/* A count is read against the counts above and below it, so the digits line up and the
+   figures are the tabular ones rather than whatever the face defaults to. */
+.rh-web-corpus__cell--count {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.rh-web-corpus__cell--work {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-corpus__title {
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-web-corpus__byline {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+.rh-web-corpus__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-3);
+}
+
+/*
+ * The files of one work, opened inside the row.
+ *
+ * A quiet control rather than a button: it is one of a thousand on this page, and the row
+ * it sits in is already the thing a researcher is looking at.
+ */
+.rh-web-corpus__files {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  min-block-size: var(--rh-control-target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--rh-text-secondary);
+  font: inherit;
+  font-size: var(--rh-type-body-sm-size);
+  cursor: pointer;
+  border-radius: var(--rh-radius-control);
+}
+
+.rh-web-corpus__files:hover {
+  color: var(--rh-text-primary);
+}
+
+.rh-web-corpus__files:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+.rh-web-corpus__files-open {
+  margin-block-start: var(--rh-space-2);
+}
+
+/*
+ * Each cell's own name.
+ *
+ * Hidden the way the package hides a label, but under this page's own class so the columns
+ * can give it back when they collapse. Reading it out is the point: only a window of the
+ * list exists, so a screen reader is told what a cell is by the cell rather than by a
+ * heading row it may never reach.
+ */
+.rh-web-corpus__label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* The find field sits in the page toolbar and takes a readable share of it. */
 .rh-web-corpus__find {
   inline-size: min(22rem, 100%);
+}
+
+/*
+ * A pane too narrow for six columns.
+ *
+ * The row stops pretending to be a table: the work takes the width, the five facts become
+ * labelled pairs that wrap, and the strip that named the columns goes with them. Nothing is
+ * dropped — a fact that only fits on a wide screen is a fact a researcher on a narrow one
+ * would have to open a second page to read.
+ */
+@container rh-page (width < 46rem) {
+  .rh-web-corpus__head {
+    display: none;
+  }
+
+  .rh-web-corpus__cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rh-space-1) var(--rh-space-4);
+  }
+
+  .rh-web-corpus__cell--work {
+    flex: 1 0 100%;
+  }
+
+  .rh-web-corpus__cell--count {
+    text-align: start;
+  }
+
+  .rh-web-corpus__label {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    color: var(--rh-text-secondary);
+  }
+
+  .rh-web-corpus__label::after {
+    content: ' ';
+  }
 }
