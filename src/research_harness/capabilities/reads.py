@@ -10,9 +10,16 @@ This module is the shared answer. Every function here is a pure read over canoni
 the summaries are exactly what the navigation lists, and `GET /index` is composed from the
 same functions the capabilities call - so the route and the capability cannot drift.
 
-Nothing here derives a judgement. A summary counts what a canonical file already records;
-deciding what needs attention is `GET /overview`'s job, and deciding what a Claim may say is
-`claim.audit`'s.
+Nothing here derives a judgement about an object. A summary counts what a canonical file
+already records; deciding what needs attention across the workspace is `GET /overview`'s
+job, and deciding what a Claim may say is `claim.audit`'s.
+
+Two lists also carry the grouping they are read in - `ClaimList.groups` and
+`QuestionList.groups`. That is not a new judgement: the line between a claim whose evidence
+carries it and one whose evidence does not is `allowed_strength` against
+`requested_strength`, both of which the claim file already records, and the line between an
+open question and an answered one is its own status. Composing it once, here, is what stops
+each host drawing it again in its own words (Product 5 P10).
 """
 
 from __future__ import annotations
@@ -27,6 +34,7 @@ from research_harness.capabilities.permissions import Permission
 from research_harness.capabilities.registry import CapabilitySpec
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
+    ClaimScope,
     ClaimStatus,
     ClaimType,
     EvidenceStatus,
@@ -47,6 +55,7 @@ __all__ = [
     "AnchorSummary",
     "ArtifactSummary",
     "CandidateView",
+    "ClaimGroup",
     "ClaimList",
     "ClaimSummary",
     "DecisionList",
@@ -61,6 +70,7 @@ __all__ = [
     "ListSearchRunsRequest",
     "ListWorksRequest",
     "MatrixSummary",
+    "QuestionGroup",
     "QuestionList",
     "QuestionSummary",
     "ReadCandidateRequest",
@@ -73,6 +83,8 @@ __all__ = [
     "WorkSummary",
     "WorkspaceIndex",
     "WorkspaceIndexRequest",
+    "claim_concern",
+    "claim_groups",
     "list_anchors",
     "list_claims",
     "list_decisions",
@@ -80,6 +92,8 @@ __all__ = [
     "list_questions",
     "list_search_runs",
     "list_works",
+    "question_groups",
+    "question_summary",
     "read_candidate",
     "read_search_run",
     "read_specs",
@@ -149,6 +163,13 @@ class QuestionSummary(_Summary):
     claims: tuple[str, ...] = ()
     remaining_uncertainty: str | None = None
     stale: str
+    opened: str = ""
+    """The day this question was registered, as `YYYY-MM-DD`.
+
+    A question stays open until a researcher resolves it (Product 31), so how long it has
+    been open is the fact that separates two open questions. The order of `QuestionGroup`
+    already carries it; this is what lets a row say it in words.
+    """
 
 
 class DecisionSummary(_Summary):
@@ -316,11 +337,51 @@ class WorkList(_Summary):
     works: tuple[WorkSummary, ...] = ()
 
 
+class ClaimGroup(_Summary):
+    """One line the Claims page groups by: the concern, in words, and whose it is."""
+
+    kind: str
+    label: str
+    """`2 claims ask for more than their evidence allows` - the count inside the sentence."""
+
+    count: int = 0
+    claims: tuple[str, ...] = ()
+    """The claims in this group, in the order the page reads them."""
+
+
 class ClaimList(_Summary):
     """`claim.list`: the claims a filter selected, summarised."""
 
     count: int = 0
     claims: tuple[ClaimSummary, ...] = ()
+    groups: tuple[ClaimGroup, ...] = ()
+    """The claims whose evidence cannot carry them, grouped by what is wrong with each.
+
+    Only claims with something wrong appear here; a claim standing where its evidence puts
+    it belongs to no group. The groups are ordered by Product 42 G's own priority: asking
+    for more than the evidence allows first, then contested, unsupported, and stale.
+    """
+
+    summary: str = ""
+    """One line naming the work on this list, for the Claims page's own description."""
+
+
+class QuestionGroup(_Summary):
+    """One line the Questions page groups by: what this group is waiting on."""
+
+    kind: str
+    label: str
+    count: int = 0
+    surface: str = "waiting"
+    """Whether this group is still work (`waiting`) or is finished (`settled`).
+
+    A blocked question and an open one are both work; an answered one is the record of work
+    already done. The distinction is the researcher's, so the daemon draws it rather than
+    a page deciding from `kind` which of its two panels a group belongs in.
+    """
+
+    questions: tuple[str, ...] = ()
+    """The questions in this group, oldest first: the longest unanswered is read first."""
 
 
 class QuestionList(_Summary):
@@ -328,6 +389,9 @@ class QuestionList(_Summary):
 
     count: int = 0
     questions: tuple[QuestionSummary, ...] = ()
+    groups: tuple[QuestionGroup, ...] = ()
+    summary: str = ""
+    """One line naming what is still open, for the Questions page's own description."""
 
 
 class DecisionList(_Summary):
@@ -453,7 +517,14 @@ def list_claims(ctx: CapabilityContext, request: ListClaimsRequest) -> ClaimList
         and (request.stale is None or claim.stale is request.stale)
         and (request.type is None or claim.type is request.type)
     ]
-    return ClaimList(count=len(claims), claims=tuple(claim_summary(claim) for claim in claims))
+    summaries = tuple(claim_summary(claim) for claim in claims)
+    groups = claim_groups(summaries)
+    return ClaimList(
+        count=len(claims),
+        claims=summaries,
+        groups=groups,
+        summary=_claim_summary_line(summaries, groups),
+    )
 
 
 def list_questions(ctx: CapabilityContext, request: ListQuestionsRequest) -> QuestionList:
@@ -463,19 +534,13 @@ def list_questions(ctx: CapabilityContext, request: ListQuestionsRequest) -> Que
         for question in ctx.repo.list_questions()
         if request.status is None or question.status is request.status
     ]
+    summaries = tuple(question_summary(question) for question in questions)
+    groups = question_groups(summaries)
     return QuestionList(
         count=len(questions),
-        questions=tuple(
-            QuestionSummary(
-                id=str(question.id),
-                question=question.question,
-                status=question.status.value,
-                claims=tuple(str(claim) for claim in question.claims),
-                remaining_uncertainty=question.remaining_uncertainty,
-                stale=question.stale.value,
-            )
-            for question in questions
-        ),
+        questions=summaries,
+        groups=groups,
+        summary=_question_summary_line(summaries, groups),
     )
 
 
@@ -628,6 +693,143 @@ def claim_summary(claim: Claim) -> ClaimSummary:
     )
 
 
+#: What can be wrong with a claim, in Product 42 G's own order of seriousness, with the
+#: verb each concern reads with in the singular and in the plural. A claim belongs to the
+#: first of these that describes it, so one claim is never counted twice.
+CLAIM_CONCERNS: tuple[tuple[str, str, str], ...] = (
+    (
+        "overreaching",
+        "asks for more than its evidence allows",
+        "ask for more than their evidence allows",
+    ),
+    ("contested", "is contested", "are contested"),
+    ("unsupported", "is unsupported", "are unsupported"),
+    ("stale", "has gone stale", "have gone stale"),
+)
+
+#: The three states a question can be read in, and the sentence each group reads with. The
+#: first two are still work; the third is the record of work already finished.
+QUESTION_CONCERNS: tuple[tuple[str, str, str, str], ...] = (
+    ("unanswered", "waiting", "is still open", "are still open"),
+    ("blocked", "waiting", "is blocked", "are blocked"),
+    ("answered", "settled", "has been answered", "have been answered"),
+)
+
+#: Which group a question's own status puts it in.
+QUESTION_SURFACES: dict[QuestionStatus, str] = {
+    QuestionStatus.OPEN: "unanswered",
+    QuestionStatus.PARTIALLY_ANSWERED: "unanswered",
+    QuestionStatus.BLOCKED: "blocked",
+    QuestionStatus.ANSWERED: "answered",
+}
+
+
+def claim_concern(claim: ClaimSummary) -> str | None:
+    """What is wrong with one claim, or `None` when its evidence carries it.
+
+    The first line is the one this product exists to hold: a claim may not say more than
+    the audit allows (Product 10.2, 42 G), so a requested strength above the allowed one is
+    the concern that outranks the rest. Nothing here is computed about the claim - every
+    comparison is between two fields the claim file already records.
+    """
+    if ClaimScope(claim.allowed_strength) < ClaimScope(claim.requested_strength):
+        return "overreaching"
+    if claim.status == ClaimStatus.CONTESTED:
+        return "contested"
+    if claim.status == ClaimStatus.UNSUPPORTED:
+        return "unsupported"
+    if claim.stale == StaleState.STALE:
+        return "stale"
+    return None
+
+
+def claim_groups(claims: tuple[ClaimSummary, ...]) -> tuple[ClaimGroup, ...]:
+    """The claims whose evidence cannot carry them, grouped and ordered for reading."""
+    found: dict[str, list[str]] = {}
+    for claim in claims:
+        concern = claim_concern(claim)
+        if concern is not None:
+            found.setdefault(concern, []).append(claim.id)
+    return tuple(
+        ClaimGroup(
+            kind=kind,
+            label=_counted("claim", len(found[kind]), singular, plural),
+            count=len(found[kind]),
+            claims=tuple(found[kind]),
+        )
+        for kind, singular, plural in CLAIM_CONCERNS
+        if kind in found
+    )
+
+
+def question_groups(questions: tuple[QuestionSummary, ...]) -> tuple[QuestionGroup, ...]:
+    """Every question, grouped by what it is waiting on, longest unanswered first."""
+    found: dict[str, list[QuestionSummary]] = {}
+    for question in questions:
+        kind = QUESTION_SURFACES[QuestionStatus(question.status)]
+        found.setdefault(kind, []).append(question)
+    return tuple(
+        QuestionGroup(
+            kind=kind,
+            label=_counted("question", len(found[kind]), singular, plural),
+            count=len(found[kind]),
+            surface=surface,
+            questions=tuple(
+                entry.id
+                for entry in sorted(found[kind], key=lambda entry: (entry.opened, entry.id))
+            ),
+        )
+        for kind, surface, singular, plural in QUESTION_CONCERNS
+        if kind in found
+    )
+
+
+def _claim_summary_line(claims: tuple[ClaimSummary, ...], groups: tuple[ClaimGroup, ...]) -> str:
+    """The Claims page's first sentence: the work first, and the size of the list never."""
+    if not claims:
+        return "This project has registered no claims yet."
+    if not groups:
+        return "Every registered claim stands where its evidence puts it."
+    return f"{_joined(tuple(group.label for group in groups))}."
+
+
+def _question_summary_line(
+    questions: tuple[QuestionSummary, ...], groups: tuple[QuestionGroup, ...]
+) -> str:
+    """The Questions page's first sentence, naming what is still open (Product 31)."""
+    if not questions:
+        return "This project has registered no questions yet."
+    waiting = tuple(group.label for group in groups if group.surface == "waiting")
+    if not waiting:
+        return "Every question this project registered has been answered."
+    return f"{_joined(waiting)}."
+
+
+def _counted(noun: str, count: int, singular: str, plural: str) -> str:
+    """`1 claim is contested` / `3 claims are contested`: the count inside its sentence."""
+    return f"{count} {noun} {singular}" if count == 1 else f"{count} {noun}s {plural}"
+
+
+def _joined(phrases: tuple[str, ...]) -> str:
+    """`a`, `a and b`, `a, b and c` - several phrases read as one sentence."""
+    if len(phrases) <= 1:
+        return "".join(phrases)
+    return f"{', '.join(phrases[:-1])} and {phrases[-1]}"
+
+
+def question_summary(question: Any) -> QuestionSummary:
+    """One ResearchQuestion as every list of questions shows it."""
+    return QuestionSummary(
+        id=str(question.id),
+        question=question.question,
+        status=question.status.value,
+        claims=tuple(str(claim) for claim in question.claims),
+        remaining_uncertainty=question.remaining_uncertainty,
+        stale=question.stale.value,
+        opened=question.created_at.date().isoformat(),
+    )
+
+
 def decision_summary(decision: Any) -> DecisionSummary:
     """One Decision as every list of decisions shows it."""
     return DecisionSummary(
@@ -757,17 +959,7 @@ def workspace_index(repo: WorkspaceRepository) -> WorkspaceIndex:
     return WorkspaceIndex(
         works=tuple(work_summary(repo, work) for work in repo.list_works()),
         claims=tuple(claim_summary(claim) for claim in repo.list_claims()),
-        questions=tuple(
-            QuestionSummary(
-                id=str(question.id),
-                question=question.question,
-                status=question.status.value,
-                claims=tuple(str(claim) for claim in question.claims),
-                remaining_uncertainty=question.remaining_uncertainty,
-                stale=question.stale.value,
-            )
-            for question in repo.list_questions()
-        ),
+        questions=tuple(question_summary(question) for question in repo.list_questions()),
         decisions=tuple(decision_summary(decision) for decision in repo.list_decisions()),
         matrices=tuple(
             MatrixSummary(

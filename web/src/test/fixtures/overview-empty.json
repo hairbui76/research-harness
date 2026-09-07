@@ -58,6 +58,8 @@
   ],
   "attention_summary": "3 review items need a researcher.",
   "claim_health": [],
+  "conflict_groups": [],
+  "conflict_summary": "Nothing in this project is in dispute.",
   "conflicts": [],
   "counts": {
     "accepted_evidence": 0,

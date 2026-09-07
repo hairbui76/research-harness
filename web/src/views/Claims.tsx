@@ -1,9 +1,16 @@
 /**
  * The Claim explorer (ROADMAP Task 11.4).
  *
- * The list shows what each claim asks for and what the audit allows — the two numbers that
- * matter, side by side, because the failure this product is built against is a claim that
- * quietly says more than its evidence supports (PRODUCT §10.2, §42 G).
+ * The list opens with the claims whose evidence cannot carry them, because the failure this
+ * product is built against is a claim that quietly says more than its evidence supports
+ * (PRODUCT §10.2, §42 G) — and a table sorted by id says nothing about which of its rows is
+ * that claim. Which ones they are, and in what order, is `claim.list`'s own grouping; this
+ * page renders it and never rebuilds it (principle P10).
+ *
+ * The table stays underneath, because comparing what several claims ask for against what
+ * their evidence allows is exactly the reading a table is for: five shared columns, one row
+ * per claim, the eye running down two of them. What the page holds is said there, in the
+ * sentence above the table, after the work.
  *
  * The detail page adds the evidence behind it (each relation drawn as the Claim → Evidence
  * → Work chain it is, and each link opening the span it was accepted from), the coverage
@@ -31,6 +38,7 @@ import {
 import type { ClaimModel, ComboboxItem } from '@research-harness/design';
 import type {
   AnchorSummary,
+  ClaimGroup,
   ClaimSummary,
   ClaimSupport,
   DecisionSummary,
@@ -54,6 +62,7 @@ import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
+import './claims.css';
 
 /** The claim statuses an audit may record, in the order the product lists them. */
 const CLAIM_STATUSES = [
@@ -95,18 +104,26 @@ export function ClaimsPage() {
   const { client } = useSession();
   const { href } = useProjectPaths();
   // `claim.list` rather than the whole index: this view needs one list, and the capability
-  // is the surface every host shares (it returns the same `ClaimSummary` objects).
-  const state = useAsync(() => client.claims(), [client]);
+  // is the surface every host shares (it returns the same `ClaimSummary` objects, plus the
+  // grouping and the sentence the daemon composed around them).
+  const state = useAsync(() => client.claimList(), [client]);
 
-  const claims = state.data ?? [];
+  const list = state.data;
+  const claims = list?.claims ?? [];
+  // `?? []` because a daemon build older than this grouping still answers `claim.list`,
+  // and a cockpit that crashed on a field it did not get would be worse than one that
+  // shows the table and says nothing about concerns it was never told about.
+  const groups = list?.groups ?? [];
   const settled = !state.loading && !state.error;
   return (
     <FullPageWorkspace
       busy={state.loading}
       title="Claims"
       description={
-        settled
-          ? `${claims.length} registered. What each claim asks for, beside what its evidence allows.`
+        // The daemon's own sentence about what needs work here. Until it arrives, the part
+        // of it that is true without the data.
+        settled && list?.summary
+          ? list.summary
           : 'What each claim asks for, beside what its evidence allows.'
       }
     >
@@ -122,44 +139,114 @@ export function ClaimsPage() {
           No claims registered yet
         </Empty>
       ) : (
-        <DataTable
-          label="Registered claims"
-          head={
-            <tr>
-              <th scope="col">Claim</th>
-              <th scope="col">Status</th>
-              <th scope="col">Requested</th>
-              <th scope="col">Allowed</th>
-              <th scope="col">Evidence</th>
-            </tr>
-          }
-        >
-          {claims.map((claim: ClaimSummary) => (
-            <tr key={claim.id}>
-              <th scope="row">
-                <ObjectRef
-                  id={claim.id}
-                  kind="claim"
-                  to={href(`/claims/${claim.id}`)}
-                  authority={authorityOf(claim.status, claim.stale === 'stale')}
-                />
-                <div className="rh-text-secondary">{claim.statement}</div>
-              </th>
-              <td>
-                <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
-                {claim.stale === 'stale' ? <StatusBadge status="stale" describe /> : null}
-              </td>
-              <td>{researchLabel('claimScope', claim.requested_strength)}</td>
-              <td>{researchLabel('claimScope', claim.allowed_strength)}</td>
-              <td className="rh-text-secondary">
-                {claim.supporting} supporting · {claim.qualifying} qualifying ·{' '}
-                {claim.contradicting} contradicting
-              </td>
-            </tr>
-          ))}
-        </DataTable>
+        <div className="rh-web-stack">
+          <Panel title="Claims their evidence cannot carry">
+            {groups.length > 0 ? (
+              <ul className="rh-web-list rh-web-claims">
+                {groups.map((group) => (
+                  <ConcernGroup key={group.kind} group={group} claims={claims} />
+                ))}
+              </ul>
+            ) : (
+              <Empty
+                flat
+                description="A claim lands here when it asks for a rung of the scope ladder its evidence does not reach, when the evidence points both ways, when nothing carries it, or when something it rests on has changed. An audit is what moves a claim off this list, and new evidence is what makes an audit worth running."
+                action={<Link to={href('/review')}>Open the review inbox</Link>}
+              >
+                Every registered claim stands where its evidence puts it
+              </Empty>
+            )}
+          </Panel>
+
+          <Panel title="Every claim">
+            <p className="rh-text-secondary rh-web-claims__holdings">
+              This project has registered {counted(claims.length, 'claim')}: what each asks
+              for, beside what its evidence allows.
+            </p>
+            <DataTable
+              label="Registered claims"
+              head={
+                <tr>
+                  <th scope="col">Claim</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Requested</th>
+                  <th scope="col">Allowed</th>
+                  <th scope="col">Evidence</th>
+                </tr>
+              }
+            >
+              {claims.map((claim: ClaimSummary) => (
+                <tr key={claim.id}>
+                  <th scope="row">
+                    <ObjectRef
+                      id={claim.id}
+                      kind="claim"
+                      to={href(`/claims/${claim.id}`)}
+                      authority={authorityOf(claim.status, claim.stale === 'stale')}
+                    />
+                    <div className="rh-text-secondary">{claim.statement}</div>
+                  </th>
+                  <td>
+                    <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
+                    {claim.stale === 'stale' ? <StatusBadge status="stale" describe /> : null}
+                  </td>
+                  <td>{researchLabel('claimScope', claim.requested_strength)}</td>
+                  <td>{researchLabel('claimScope', claim.allowed_strength)}</td>
+                  <td className="rh-text-secondary">
+                    {claim.supporting} supporting · {claim.qualifying} qualifying ·{' '}
+                    {claim.contradicting} contradicting
+                  </td>
+                </tr>
+              ))}
+            </DataTable>
+          </Panel>
+        </div>
       )}
     </FullPageWorkspace>
+  );
+}
+
+/** `1 claim` / `4 claims` — a count is only ever read inside the thing it counts. */
+function counted(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+/**
+ * One concern the daemon grouped claims under, and the claims in it.
+ *
+ * The line naming the group is the daemon's own sentence, count and all; the claims under
+ * it link to themselves, because a claim is the one object on this page that has a screen.
+ * A claim whose id the list does not carry is skipped rather than drawn as a blank row: the
+ * group and the rows come from the same read, so that can only mean a filtered read.
+ */
+function ConcernGroup({ group, claims }: { group: ClaimGroup; claims: ClaimSummary[] }) {
+  const { href } = useProjectPaths();
+  const byId = new Map(claims.map((claim) => [claim.id, claim]));
+  return (
+    <li>
+      <p className="rh-web-claims__concern">{group.label}</p>
+      <ul className="rh-web-list rh-web-list--tight rh-web-claims__items">
+        {group.claims.map((id) => {
+          const claim = byId.get(id);
+          if (claim === undefined) return null;
+          return (
+            <li key={`${group.kind}:${id}`}>
+              <p className="rh-web-row">
+                <Link to={href(`/claims/${id}`)}>{claim.statement}</Link>
+                <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
+                {claim.stale === 'stale' ? (
+                  <StatusBadge status="stale" vocabulary="staleState" describe />
+                ) : null}
+              </p>
+              <p className="rh-text-secondary">
+                Asks for {researchLabel('claimScope', claim.requested_strength)}; its evidence
+                allows {researchLabel('claimScope', claim.allowed_strength)}.
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </li>
   );
 }
 

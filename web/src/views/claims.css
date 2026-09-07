@@ -1,0 +1,53 @@
+/*
+ * What the Claims list needs and no package component owns. Semantic tokens only — the
+ * palette, the type scale and the spacing scale all come from `@research-harness/design`.
+ *
+ * There is no rule here that makes a count large. The concern lines state their counts
+ * inside sentences, and a claim's strength is read from two words rather than from a
+ * number, because a claim never carries one (PRODUCT §43).
+ */
+
+/* One concern: the line that names it, then the claims under it. */
+.rh-web-claims > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+/*
+ * The daemon's sentence about the group reads as the group's own line, so it takes the
+ * weight a heading in this column would. It is not a heading: the panel above it already
+ * is one, and a second level here would push the claims to h4 for no gain in outline.
+ */
+.rh-web-claims__concern {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+/*
+ * Indentation is written as `.rh-web-list.<name>` on purpose. `.rh-web-list` in the shared
+ * sheet sets `margin: 0`, the bundler emits that sheet after every view stylesheet, and
+ * `margin: 0` and `margin-inline-start` resolve to the same used value — so at equal
+ * specificity the shared rule wins and the indent silently disappears. Two classes settle
+ * it in the cascade rather than with `!important`.
+ */
+.rh-web-list.rh-web-claims__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+.rh-web-claims__items > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-claims__items p {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/* What the project holds, said above the table it is the size of. */
+.rh-web-claims__holdings {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+}

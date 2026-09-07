@@ -408,11 +408,22 @@ export class HarnessClient {
 
   /** The claims a filter selects. One list, so the Claims view does not read the rest. */
   async claims(filters: ClaimFilters = {}): Promise<ClaimSummary[]> {
+    return (await this.claimList(filters)).claims;
+  }
+
+  /**
+   * The same read, with the grouping and the sentence the daemon composed around it.
+   *
+   * The Claims page needs those; a picker needs only the rows, so `claims()` above stays
+   * the shorter call. Neither re-derives anything: which claims cannot be carried by their
+   * evidence is the daemon's judgement, and this hands it over whole (principle P10).
+   */
+  async claimList(filters: ClaimFilters = {}): Promise<ClaimList> {
     const request: Record<string, Json> = {};
     if (filters.status) request.status = filters.status;
     if (filters.stale) request.stale = filters.stale;
     if (filters.type) request.type = filters.type;
-    return (await this.call<ClaimList>('claim.list', request)).claims;
+    return await this.call<ClaimList>('claim.list', request);
   }
 
   /** The corpus, optionally narrowed to one screening state. */
@@ -423,8 +434,13 @@ export class HarnessClient {
 
   /** The research questions, optionally narrowed to one status. */
   async questions(status?: string | null): Promise<QuestionSummary[]> {
+    return (await this.questionList(status)).questions;
+  }
+
+  /** The research questions with the grouping and the sentence the daemon composed. */
+  async questionList(status?: string | null): Promise<QuestionList> {
     const request: Record<string, Json> = status ? { status } : {};
-    return (await this.call<QuestionList>('question.list', request)).questions;
+    return await this.call<QuestionList>('question.list', request);
   }
 
   /** The recorded researcher decisions, optionally for one Claim. */

@@ -3,34 +3,55 @@
  *
  * A question is research state, not a to-do list entry: it carries the claims that answer
  * it and the uncertainty that remains, and it stays open until a researcher resolves it.
+ * So the page opens with what is still open, longest-unanswered first, and the questions
+ * that have been answered are read after them as the record they are.
+ *
+ * The grouping and that order are `question.list`'s: which statuses still count as work,
+ * and which question has waited longest, are the daemon's judgement and this page renders
+ * them (principle P10). A question has no screen of its own, so a row links to nothing but
+ * the claims that bear on it — which do.
+ *
+ * There is no table here. A table earns its place when the reader compares rows across
+ * shared columns; these rows share no comparable columns at all — one question's remaining
+ * uncertainty is a sentence, its claims are a set, and neither is read against the next
+ * question's. Each row carries one fact and one next step, which is a list of sentences.
  *
  * The frame is mounted before the read resolves, so the heading and this page's shape
  * survive loading, a refusal and an empty project.
  */
 import { Link } from 'react-router-dom';
 import { FullPageWorkspace } from '@research-harness/design';
-import { Empty, ErrorBox, Field, Fields, Loading, Panel, StatusBadge } from '../components/Feedback';
+import type { QuestionGroup, QuestionSummary } from '../api/dto';
+import { Empty, ErrorBox, Loading, Panel, StatusBadge } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
+import './questions.css';
 
 export function QuestionsPage() {
   const { client } = useSession();
   const { href } = useProjectPaths();
-  // `question.list`: one list, through the capability every host shares.
-  const state = useAsync(() => client.questions(), [client]);
+  // `question.list`: one list, through the capability every host shares, with the grouping
+  // and the sentence the daemon composed around it.
+  const state = useAsync(() => client.questionList(), [client]);
 
-  const questions = state.data ?? [];
+  const list = state.data;
+  const questions = list?.questions ?? [];
+  // `?? []` because a daemon build older than this grouping still answers `question.list`.
+  const groups = list?.groups ?? [];
+  const waiting = groups.filter((group) => group.surface === 'waiting');
+  const answered = groups.filter((group) => group.surface === 'settled');
   const settled = !state.loading && !state.error;
   return (
     <FullPageWorkspace
       busy={state.loading}
       title="Questions"
       description={
-        // The count is only true once it has arrived; the sentence beside it always is.
-        settled
-          ? `${questions.length} registered. A question stays open until a researcher resolves it.`
+        // The daemon's own sentence about what is still open. Until it arrives, the part of
+        // it that is true without the data.
+        settled && list?.summary
+          ? list.summary
           : 'A question stays open until a researcher resolves it.'
       }
     >
@@ -47,40 +68,129 @@ export function QuestionsPage() {
         </Empty>
       ) : (
         <div className="rh-web-stack">
-          {questions.map((question) => (
-            <Panel
-              key={question.id}
-              title={question.question}
-              action={<StatusBadge status={question.status} vocabulary="questionStatus" />}
-            >
-              <Fields>
-                <Field label="Id">
-                  <code>{question.id}</code>
-                </Field>
-                <Field label="Claims">
-                  {question.claims.length ? (
-                    <span className="rh-web-row">
-                      {question.claims.map((claim) => (
-                        <ObjectRef
-                          key={claim}
-                          id={claim}
-                          kind="claim"
-                          to={href(`/claims/${claim}`)}
-                        />
-                      ))}
-                    </span>
-                  ) : (
-                    <span className="rh-text-muted">none linked</span>
-                  )}
-                </Field>
-                <Field label="Remaining uncertainty">
-                  {question.remaining_uncertainty ?? '— not recorded'}
-                </Field>
-              </Fields>
-            </Panel>
-          ))}
+          <Panel title="Still open">
+            {waiting.length > 0 ? (
+              <ul className="rh-web-list rh-web-questions">
+                {waiting.map((group) => (
+                  <QuestionGroupList key={group.kind} group={group} questions={questions} />
+                ))}
+              </ul>
+            ) : (
+              <Empty
+                flat
+                description="A question leaves this list when a researcher resolves it, never because a conversation answered it: a transcript is a proposal, and accepted state is what the project stands on."
+                action={<Link to={href('/')}>Open the conversation to promote a question</Link>}
+              >
+                Every question this project registered has been answered
+              </Empty>
+            )}
+          </Panel>
+
+          <Panel title="Answered">
+            {answered.length > 0 ? (
+              <ul className="rh-web-list rh-web-questions">
+                {answered.map((group) => (
+                  <QuestionGroupList key={group.kind} group={group} questions={questions} />
+                ))}
+              </ul>
+            ) : (
+              <Empty
+                flat
+                description="Answering a question is a researcher act: the claims that settle it are registered first, and the question is resolved against them. What has been answered is kept here rather than deleted, because the answer is part of the record."
+                action={<Link to={href('/claims')}>See the claims that could answer one</Link>}
+              >
+                No question has been answered yet
+              </Empty>
+            )}
+          </Panel>
         </div>
       )}
     </FullPageWorkspace>
   );
+}
+
+/**
+ * One group of questions, in the order the daemon put them in: longest unanswered first.
+ *
+ * The line naming the group is the daemon's own sentence, count and all. A question the
+ * list does not carry is skipped rather than drawn blank — the group and the rows come from
+ * the same read, so that can only mean a filtered read.
+ */
+function QuestionGroupList({
+  group,
+  questions,
+}: {
+  group: QuestionGroup;
+  questions: QuestionSummary[];
+}) {
+  const byId = new Map(questions.map((question) => [question.id, question]));
+  return (
+    <li>
+      <p className="rh-web-questions__group">{group.label}</p>
+      <ul className="rh-web-list rh-web-list--tight rh-web-questions__items">
+        {group.questions.map((id) => {
+          const question = byId.get(id);
+          if (question === undefined) return null;
+          return <QuestionRow key={`${group.kind}:${id}`} question={question} />;
+        })}
+      </ul>
+    </li>
+  );
+}
+
+/**
+ * One question: what it asks, how long it has been on the list, and what bears on it.
+ *
+ * The claims are the only links here, and they are the next step: a question is answered by
+ * registering claims and resolving it against them, so the way out of this row is into a
+ * claim. The row itself links nowhere, because the daemon gives a question no route.
+ */
+function QuestionRow({ question }: { question: QuestionSummary }) {
+  const { href } = useProjectPaths();
+  return (
+    <li>
+      <p className="rh-web-row rh-web-questions__question">
+        <span>{question.question}</span>
+        <StatusBadge status={question.status} vocabulary="questionStatus" describe />
+        {question.stale === 'stale' ? (
+          <StatusBadge status="stale" vocabulary="staleState" describe />
+        ) : null}
+      </p>
+      <p className="rh-text-secondary">
+        {question.opened ? `Registered ${readableDay(question.opened)}. ` : ''}
+        {question.remaining_uncertainty
+          ? `Still uncertain: ${question.remaining_uncertainty}`
+          : 'No remaining uncertainty has been recorded.'}
+      </p>
+      <p className="rh-web-row">
+        {question.claims.length > 0 ? (
+          <>
+            <span className="rh-text-secondary">Bearing on it:</span>
+            {question.claims.map((claim) => (
+              <ObjectRef key={claim} id={claim} kind="claim" to={href(`/claims/${claim}`)} />
+            ))}
+          </>
+        ) : (
+          <span className="rh-text-secondary">No claim bears on it yet.</span>
+        )}
+      </p>
+    </li>
+  );
+}
+
+/**
+ * `2026-09-07` as the day a person reads it: `7 September 2026`.
+ *
+ * Two things are pinned rather than taken from the environment. The date is parsed without
+ * a zone designator, because `new Date('2026-09-07')` is UTC midnight and prints as the day
+ * before in every negative offset — a question would look a day older west of Greenwich
+ * than the daemon said it was. And the format is `en-GB` rather than the viewer's locale,
+ * because the daemon already writes every other date in the cockpit this way ("7 September,
+ * 11:42" on the Overview's change list), and one surface should not read two ways.
+ */
+function readableDay(day: string): string {
+  const parsed = new Date(`${day}T00:00:00`);
+  return Number.isNaN(parsed.getTime())
+    ? day
+    : parsed.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }

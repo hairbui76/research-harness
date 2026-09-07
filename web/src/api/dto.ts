@@ -298,9 +298,26 @@ export interface BatchAcceptResponse {
  * host shares. The summaries inside are the generated ones — the same objects `GET /index`
  * returns, composed by the same functions.
  */
+/**
+ * One line the Claims page groups by: the concern the daemon named, in its words.
+ *
+ * `label` already carries the count inside the sentence ("2 claims ask for more than their
+ * evidence allows"), and `claims` is the daemon's own order. A client that re-derived
+ * either would be deciding what needs work, which is the daemon's judgement (principle
+ * P10).
+ */
+export interface ClaimGroup {
+  kind: string;
+  label: string;
+  count: number;
+  claims: string[];
+}
+
 export interface ClaimList {
   count: number;
   claims: ClaimSummary[];
+  groups: ClaimGroup[];
+  summary: string;
 }
 
 export interface WorkList {
@@ -308,9 +325,26 @@ export interface WorkList {
   works: WorkSummary[];
 }
 
+/**
+ * One line the Questions page groups by, and whether that group is still work.
+ *
+ * `surface` is `waiting` or `settled`: an open question and a blocked one are both work,
+ * an answered one is the record of work already done. `questions` is oldest first, so the
+ * longest unanswered is read first.
+ */
+export interface QuestionGroup {
+  kind: string;
+  label: string;
+  count: number;
+  surface: string;
+  questions: string[];
+}
+
 export interface QuestionList {
   count: number;
   questions: QuestionSummary[];
+  groups: QuestionGroup[];
+  summary: string;
 }
 
 export interface DecisionList {

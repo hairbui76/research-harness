@@ -699,7 +699,66 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
             if question.status in OPEN_QUESTION_STATUSES
         ),
         conflicts=conflicts,
+        conflict_summary=_conflict_summary(conflicts),
+        conflict_groups=_conflict_groups(conflicts),
     )
+
+
+def _conflict_groups(conflicts: tuple[ConflictView, ...]) -> tuple[AttentionGroup, ...]:
+    """The open disagreements, grouped by what kind of disagreement each one is.
+
+    Product 25 lists six kinds and treats them as different questions: an extractor against
+    its verifier is not a taxonomy revision against the classifications that depend on it.
+    Which group a record belongs in is therefore drawn here, beside the store that recorded
+    the kind, and the Conflicts page reads the grouping rather than rebuilding it.
+
+    The store's own order is kept inside every group: it is the order the disagreements were
+    opened in, and nothing on the page re-ranks it.
+    """
+    grouped: dict[str, list[ConflictView]] = {}
+    for conflict in conflicts:
+        grouped.setdefault(conflict.kind, []).append(conflict)
+    return tuple(
+        AttentionGroup(
+            kind=kind,
+            label=f"{len(members)} conflict" if len(members) == 1 else f"{len(members)} conflicts",
+            count=len(members),
+            route="/conflicts",
+            surface="conflict",
+            items=tuple(
+                AttentionItem(
+                    id=conflict.conflict_id,
+                    label=conflict.subject,
+                    detail=conflict.summary,
+                    priority=conflict.tier,
+                    route=_conflict_route(conflict.subject),
+                )
+                for conflict in members
+            ),
+        )
+        for kind, members in grouped.items()
+    )
+
+
+def _conflict_route(subject: str) -> str:
+    """Where one disagreement is decided, or "" when the cockpit has no screen for it.
+
+    A conflict over a staged candidate is resolved on that candidate's review screen, beside
+    the source it was read from (Product 25); a conflict over an object that already exists
+    is read on that object's own page. A subject that is neither — a table, a section — has
+    nowhere of its own, and the item is text rather than a link that goes nowhere useful.
+    """
+    if subject.startswith("cand_"):
+        return f"/review/{subject}"
+    return _object_route(subject)
+
+
+def _conflict_summary(conflicts: tuple[ConflictView, ...]) -> str:
+    """The Conflicts page's own first line: how much is in dispute, and what that means."""
+    if not conflicts:
+        return "Nothing in this project is in dispute."
+    counted = "1 conflict is" if len(conflicts) == 1 else f"{len(conflicts)} conflicts are"
+    return f"{counted} open. Every side is kept, and none of them is preferred until you decide."
 
 
 def _group(

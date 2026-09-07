@@ -63,8 +63,21 @@ function daemonFor(
       [`/objects/${CLAIM}`]: FIXTURES.claim,
     },
     capabilities: {
-      // One list per read, through the capability every host shares.
-      'claim.list': { count: FIXTURES.index.claims.length, claims: FIXTURES.index.claims },
+      // One list per read, through the capability every host shares — and the grouping the
+      // daemon composed around it, which is what the page opens with.
+      'claim.list': {
+        count: FIXTURES.index.claims.length,
+        claims: FIXTURES.index.claims,
+        groups: [
+          {
+            kind: 'overreaching',
+            label: '1 claim asks for more than its evidence allows',
+            count: 1,
+            claims: ['C0001'],
+          },
+        ],
+        summary: '1 claim asks for more than its evidence allows.',
+      },
       'decision.list': { count: FIXTURES.index.decisions.length, decisions: FIXTURES.index.decisions },
       'anchor.list': { count: FIXTURES.index.anchors.length, anchors: FIXTURES.index.anchors },
       'claim.find_support': FIXTURES.claimSupport,
@@ -93,8 +106,90 @@ describe('the claim list', () => {
 
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument());
     expect(screen.getByText('Allowed')).toBeInTheDocument();
-    expect(screen.getByText('L1 Observed subset')).toBeInTheDocument();
-    expect(screen.getByText('L0 Individual')).toBeInTheDocument();
+    expect(screen.getAllByText('L1 Observed subset').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('L0 Individual').length).toBeGreaterThan(0);
+  });
+
+  /**
+   * The page used to open with "1 registered." — the size of the list, on the page whose
+   * whole reason to exist is Product 42 G. It opens with the daemon's sentence about which
+   * claims their evidence cannot carry, and states what it holds after that.
+   */
+  it('opens with the claims their evidence cannot carry, and states its size after', async () => {
+    const { container } = renderView(<ClaimsPage />, {
+      daemon: daemonFor(),
+      route: '/claims',
+      path: '/claims',
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('1 claim asks for more than its evidence allows.'),
+      ).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Claims their evidence cannot carry' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 claim asks for more than its evidence allows')).toBeInTheDocument();
+    expect(
+      screen.getByText(/This project has registered 1 claim/),
+    ).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/\d+ registered\./);
+  });
+
+  it('links each concern to the claim itself and says what it asks against what it may', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimsPage />
+      </ProjectPathProvider>,
+      { daemon: daemonFor(), route: '/projects/prj_abc/claims', path: '/projects/prj_abc/claims' },
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('link', { name: FIXTURES.index.claims[0]!.statement }),
+      ).toHaveAttribute('href', '/projects/prj_abc/claims/C0001'),
+    );
+    expect(
+      screen.getByText(/Asks for L1 Observed subset; its evidence allows L0 Individual\./),
+    ).toBeInTheDocument();
+  });
+
+  it('teaches what the concern list is for when no claim is on it', async () => {
+    const settled = {
+      ...FIXTURES.index.claims[0]!,
+      requested_strength: 'individual',
+    };
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimsPage />
+      </ProjectPathProvider>,
+      {
+        daemon: fakeDaemon({
+          capabilities: {
+            'claim.list': {
+              count: 1,
+              claims: [settled],
+              groups: [],
+              summary: 'Every registered claim stands where its evidence puts it.',
+            },
+          },
+        }),
+        route: '/projects/prj_abc/claims',
+        path: '/projects/prj_abc/claims',
+      },
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Every registered claim stands where its evidence puts it'),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('link', { name: 'Open the review inbox' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/review',
+    );
+    await expectNoAxeViolations(container);
   });
 
   it('reads the one list it shows, not the whole workspace index', async () => {
@@ -376,7 +471,16 @@ describe('the claim list before, without, and after its read', () => {
         <ClaimsPage />
       </ProjectPathProvider>,
       {
-        daemon: fakeDaemon({ capabilities: { 'claim.list': { count: 0, claims: [] } } }),
+        daemon: fakeDaemon({
+          capabilities: {
+            'claim.list': {
+              count: 0,
+              claims: [],
+              groups: [],
+              summary: 'This project has registered no claims yet.',
+            },
+          },
+        }),
         route: '/projects/prj_abc/claims',
         path: '/projects/prj_abc/claims',
       },
