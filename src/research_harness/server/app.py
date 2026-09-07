@@ -1513,7 +1513,11 @@ def _taxonomy_report(root: Path) -> TaxonomyReport:
         )
     group = ResearchGroup(
         key="needs_decision",
-        title="Waiting for a Decision",
+        # Named for what the group is, not for what it is doing. "Waiting for a Decision"
+        # is the Overview's heading for the review queue in a second capitalisation, and
+        # this group is not a queue: it is the terms this project classifies by that no
+        # accepted Decision stands behind.
+        title="Terms without a Decision",
         summary=f"{_counted(len(waiting), 'term')} {_has(len(waiting))} no accepted Decision "
         f"behind {'it' if len(waiting) == 1 else 'them'}",
         detail=(

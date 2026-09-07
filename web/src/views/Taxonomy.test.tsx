@@ -24,7 +24,7 @@ const REPORT = {
   count: 3,
   needs_decision: {
     key: 'needs_decision',
-    title: 'Waiting for a Decision',
+    title: 'Terms without a Decision',
     summary: '2 terms have no accepted Decision behind them',
     detail: 'A term becomes this project’s classification when a Decision approves it.',
     count: 2,
@@ -54,7 +54,7 @@ const NONE = {
   count: 0,
   needs_decision: {
     key: 'needs_decision',
-    title: 'Waiting for a Decision',
+    title: 'Terms without a Decision',
     summary: '0 terms have no accepted Decision behind them',
     detail: 'A term becomes this project’s classification when a Decision approves it.',
     count: 0,
@@ -123,11 +123,11 @@ describe('the taxonomy page', () => {
     const { container } = renderView(<TaxonomyPage />, { daemon: taxonomyDaemon(REPORT) });
 
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 2, name: 'Waiting for a Decision' })).toBeInTheDocument(),
+      expect(screen.getByRole('heading', { level: 2, name: 'Terms without a Decision' })).toBeInTheDocument(),
     );
     // The work is read before the classification it is about.
     const headings = screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent);
-    expect(headings).toEqual(['Waiting for a Decision', 'traffic-shape']);
+    expect(headings).toEqual(['Terms without a Decision', 'traffic-shape']);
     expect(container.querySelector('.rh-full-page__description')).toHaveTextContent(REPORT.summary);
     expect(screen.getByText('padded_fixed · traffic-shape')).toBeInTheDocument();
     expect(screen.getByText('— no Decision approves it yet')).toBeInTheDocument();

@@ -255,6 +255,9 @@ def test_the_taxonomy_page_leads_with_the_terms_no_accepted_decision_stands_behi
 ) -> None:
     report = TaxonomyReport.model_validate(reader.get("/taxonomy").json())
 
+    # Named for what the group is. "Waiting for a Decision" was the Overview's heading for
+    # the review queue in a second capitalisation, and this group is not a queue.
+    assert report.needs_decision.title == "Terms without a Decision"
     assert report.count == 3
     assert report.needs_decision.count == 2
     labels = [item.label for item in report.needs_decision.items]

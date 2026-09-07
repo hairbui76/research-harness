@@ -128,13 +128,13 @@ test('the three rolled-out pages lead with the work the daemon composed', async 
   await expect(page.locator('.rh-full-page__description')).toHaveText(
     /no accepted Decision behind/,
   );
-  await expect(page.getByRole('heading', { level: 2, name: 'Waiting for a Decision' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Terms without a Decision' })).toBeVisible();
   await expect(page.getByText('padded_fixed · traffic-shape')).toBeVisible();
   await expect(page.getByText('— no Decision approves it yet')).toBeVisible();
   // The classification stays a table, and it is the tree the daemon walked.
   await expect(page.getByRole('columnheader', { name: 'Parent' })).toHaveCount(0);
   await expect(page.locator('.rh-web-taxonomy__term[data-depth="1"]')).toHaveCount(1);
-  await leadsWithTheWork(page, 'the taxonomy page', 'Waiting for a Decision', 'traffic-shape');
+  await leadsWithTheWork(page, 'the taxonomy page', 'Terms without a Decision', 'traffic-shape');
   await auditPage(page, 'the taxonomy page');
   await page.screenshot({ path: info.outputPath('taxonomy.png'), fullPage: true });
 
