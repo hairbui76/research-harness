@@ -173,6 +173,104 @@ def stage_overview_project(root: Path) -> None:
     DependencyInvalidation().invalidate(repo, [evidence])
 
 
+def stage_research_pages(root: Path) -> None:
+    """Fill a fresh workspace with what the Stale, Taxonomy and Synthesis pages report.
+
+    Each of those three pages leads with work the daemon composed, so a browser test needs
+    a project where that work exists: a classification with a term no Decision approves, a
+    matrix that declares a reading nobody has recorded, and real decay under both. All of it
+    is written through the daemon's own capabilities.
+
+    Staleness is the one that cannot be asked for and should not be: an object goes stale
+    because something it rests on changed. So the projection is rebuilt and the daemon's own
+    invalidation hook is run over the Decision that approved the taxonomy — exactly what
+    revising that Decision would have done (Product 37, ADR-008).
+    """
+    from tests.e2e.test_web_gate import FIXTURE
+
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.dto import (
+        AcceptDecisionRequest,
+        PutMatrixRequest,
+        PutTaxonomyRequest,
+    )
+    from research_harness.capabilities.handlers import (
+        accept_decision,
+        put_matrix,
+        put_taxonomy,
+    )
+    from research_harness.capabilities.invalidation import DependencyInvalidation
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.base import Provenance
+    from research_harness.domain.enums import DecisionStatus, DecisionType, StaleState
+    from research_harness.domain.ids import DecisionId, SynthesisId, WorkId
+    from research_harness.domain.research import (
+        Decision,
+        MatrixCell,
+        SynthesisMatrix,
+        Taxonomy,
+        TaxonomyTerm,
+    )
+    from research_harness.domain.transitions import HUMAN_ACTOR
+    from research_harness.projection.rebuild import rebuild_workspace
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    registry = build_default_registry()
+    registry.invoke(
+        "corpus.ingest",
+        open_context(root, HUMAN_ACTOR),
+        {"path": str(FIXTURE)},
+        principal=Principal.human(),
+    )
+    human = Provenance.human(HUMAN_ACTOR)
+    approval = Decision(
+        id=DecisionId("D0001"),
+        type=DecisionType.TAXONOMY_REVISION,
+        rationale="separate padded flows from unpadded ones",
+        taxonomy_terms=("padded",),
+        provenance=human,
+    )
+    ctx = open_context(root, HUMAN_ACTOR)
+    accept_decision(ctx, AcceptDecisionRequest(decision=approval))
+    put_taxonomy(
+        ctx,
+        PutTaxonomyRequest(
+            taxonomy=Taxonomy(
+                name="traffic-shape",
+                terms=(
+                    TaxonomyTerm(
+                        term="padded",
+                        definition="a flow whose records are padded to a fixed size",
+                        decision=approval.id,
+                    ),
+                    TaxonomyTerm(term="padded_fixed", parent="padded"),
+                ),
+                provenance=human,
+            ),
+            decision=approval.touch(status=DecisionStatus.ACCEPTED),
+        ),
+    )
+    put_matrix(
+        ctx,
+        PutMatrixRequest(
+            matrix=SynthesisMatrix(
+                id=SynthesisId("S0001"),
+                name="Traffic shape",
+                taxonomy="traffic-shape",
+                works=(WorkId("W0001"),),
+                fields=("tokenization", "dataset"),
+                cells=(MatrixCell(work=WorkId("W0001"), field="tokenization", labels=("padded",)),),
+                stale=StaleState.FRESH,
+                provenance=human,
+            )
+        ),
+    )
+    repo = WorkspaceRepository.open(root)
+    rebuild_workspace(repo)
+    DependencyInvalidation().invalidate(repo, [str(approval.id)])
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -250,6 +348,22 @@ def main() -> None:
                 "project_id": view.project_id,
                 "name": name,
                 "overview_url": f"/projects/{view.project_id}/overview",
+            }
+
+        @app.post("/__test__/research-pages")
+        def research_pages() -> dict[str, str]:
+            """A project the Stale, Taxonomy and Synthesis pages each have work to report.
+
+            Each call builds its own project, so the two viewport runs never share one.
+            """
+            manager: ProjectManager = backend.state.manager
+            name = f"Research pages {next(seeded)}"
+            view = manager.create(directory, name, ReviewPolicy.STRICT)
+            stage_research_pages(Path(view.path))
+            return {
+                "project_id": view.project_id,
+                "name": name,
+                "workspace_url": f"/projects/{view.project_id}",
             }
 
         app.mount("/", backend)
