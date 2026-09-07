@@ -117,7 +117,7 @@
 .rh-web-corpus__questions .rh-button[aria-pressed='true'] {
   background: var(--rh-surface-selected);
   color: var(--rh-text-primary);
-  box-shadow: inset 0 0 0 var(--rh-border-width-strong) var(--rh-border-strong);
+  box-shadow: inset 0 0 0 var(--rh-border-width) var(--rh-border-strong);
 }
 
 /*
