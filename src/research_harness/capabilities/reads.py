@@ -59,6 +59,9 @@ from research_harness.domain.work import Work
 from research_harness.workspace.repository import ObjectNotFoundError, WorkspaceRepository
 
 __all__ = [
+    "CORPUS_MONTHS",
+    "CORPUS_QUESTIONS",
+    "CORPUS_RECENT_WINDOW",
     "READ_CAPABILITY_HANDLERS",
     "AnchorList",
     "AnchorSummary",
@@ -68,9 +71,6 @@ __all__ = [
     "ClaimList",
     "ClaimRef",
     "ClaimSummary",
-    "CORPUS_MONTHS",
-    "CORPUS_QUESTIONS",
-    "CORPUS_RECENT_WINDOW",
     "CorpusAttentionGroup",
     "CorpusAttentionItem",
     "CorpusQuestion",
