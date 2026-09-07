@@ -43,3 +43,132 @@
 .rh-web-synthesis__field {
   inline-size: min(20rem, 100%);
 }
+
+/* The matrix, drawn ------------------------------------------------------------------ */
+
+/*
+ * The sentences a matrix is introduced by. Prose, so they take the reading measure while
+ * the grid under them takes the width.
+ */
+.rh-web-synthesis__lead {
+  margin: 0;
+}
+
+/*
+ * The column a researcher asked to read, answered where the column is rather than under a
+ * form. Empty until one is marked, and then it is what the marked column says.
+ */
+.rh-web-synthesis__reading {
+  margin: 0;
+}
+
+.rh-web-synthesis__reading:empty {
+  display: none;
+}
+
+/* The picker sits at the width of the words it holds, not at the width of the grid. */
+.rh-web-synthesis__picker {
+  inline-size: min(24rem, 100%);
+}
+
+/*
+ * The grid. Its own scroll region is `DataTable`'s, so what is set here is only what a
+ * matrix needs and a research table does not: a row head that stays put while the columns
+ * scroll under it, and a cell that is a control.
+ */
+.rh-web-matrix {
+  min-inline-size: 0;
+}
+
+/*
+ * The work stays on screen while its readings scroll past. Without it a wide matrix asks a
+ * researcher to remember which row they are on, which is the recall this page is fixing.
+ * The fill is the card's own, so a scrolled cell passes under the head rather than through
+ * it.
+ */
+.rh-web-matrix .rh-web-table th[scope='row'] {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--rh-surface-raised);
+  white-space: normal;
+  color: var(--rh-text-primary);
+  min-inline-size: 12rem;
+}
+
+/* How much of this work's row is on record, under the work it is about. */
+.rh-web-matrix__row-summary {
+  display: block;
+  color: var(--rh-text-secondary);
+}
+
+/* The corner cell heads the column of works rather than a field of the matrix. */
+.rh-web-matrix .rh-web-table th.rh-web-matrix__corner {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  background: var(--rh-surface-raised);
+}
+
+/*
+ * A column head and a cell are both controls — one marks the column, one opens the reading
+ * — and neither wears button chrome: a grid of framed buttons would read as a form, and the
+ * thing being pressed is the word already there.
+ */
+.rh-web-matrix__head,
+.rh-web-matrix__cell {
+  display: block;
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rh-web-matrix__head:hover,
+.rh-web-matrix__cell:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.rh-web-matrix__head:focus-visible,
+.rh-web-matrix__cell:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+/*
+ * The column being read. A selection, not a status: it takes the selected surface every
+ * other chosen thing in the cockpit takes, and it never carries a scientific colour —
+ * marking a column says nothing about whether what is in it is true. The words say it too,
+ * in the sentence under the grid and in the pressed state of the head.
+ */
+.rh-web-matrix .rh-web-table th[data-marked='true'],
+.rh-web-matrix .rh-web-table td[data-marked='true'] {
+  background: var(--rh-surface-selected);
+}
+
+/* A reading nobody has taken, in words. Quiet, because a gap is not an error. */
+.rh-web-matrix__blank {
+  color: var(--rh-text-muted);
+}
+
+/* The number behind a reading, with the metric and unit it was recorded under. */
+.rh-web-matrix__measure {
+  display: block;
+  color: var(--rh-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* What a cell rests on, opened under the row it belongs to. */
+.rh-web-matrix .rh-web-table .rh-web-matrix__detail > td {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-web-matrix__opened {
+  max-inline-size: var(--rh-measure-prose);
+}

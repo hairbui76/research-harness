@@ -1,39 +1,45 @@
 /**
- * Synthesis: what the matrices cannot say yet, then the matrices themselves.
+ * Synthesis: what the matrices cannot say yet, then the matrices themselves, drawn.
  *
  * A matrix reads one property across works and proposes nothing. An empty cell means
  * "not recorded", never "the work lacks the property", and novelty is never inferred from
- * one (PRODUCT §7.1, §33) — which is exactly why this page now opens with the gaps. A page
- * that showed only the cells it has would let a reader take the shape of the table for the
- * shape of the field; a page that names the readings nobody has taken cannot.
+ * one (PRODUCT §7.1, §33) — which is why this page still opens with the gaps. A page that
+ * showed only the cells it has would let a reader take the shape of the table for the shape
+ * of the field; a page that names the readings nobody has taken cannot.
  *
- * The matrix stays a table, because a table is what a matrix is: one property read down a
- * column across works, which is the only thing a table does better than a sentence. What
- * left the card-wrapped-table template is everything around it — the coverage of each
- * matrix is a sentence rather than a row of counts, and the gaps are groups of sentences.
+ * What changed is the matrix itself. It used to be a definition list — Id, Taxonomy, Reads,
+ * Recorded, Fields — which is the shape of the stored record, not the shape of the question
+ * a researcher brings: how does this property vary across the works, which of them has no
+ * reading for it, what does a reading rest on, and where do two of them read differently.
+ * None of those is answerable from a list of field names, and the compare form used to ask
+ * the researcher to type back a field name printed two lines above it.
  *
- * Every gap sentence here is the daemon's and every one of them is about the record. None
- * of them is about a work, and nothing on this page proposes anything.
+ * So the matrix is drawn as the instrument it is: works down the rows, its declared fields
+ * across the columns, every cell either the recorded reading or the words "Not recorded",
+ * and every recorded cell openable onto the accepted spans it rests on. The field is picked
+ * from the matrix's own columns — in the picker, or by pressing the column head — and the
+ * column it names is marked in place rather than answered underneath. The grid takes the
+ * full width and scrolls inside its own named region; the sentences stay at the measure.
  *
- * The frame is mounted before the read resolves, and so is the compare form: a field can be
- * compared while the matrix list is still arriving, or after it failed.
+ * Nothing on this page is composed here. Which cell belongs where, which order the rows and
+ * columns are read in, how much of a column is recorded and which labels are on record for
+ * how many works are all the daemon's (`GET /synthesis`), for the reason every research page
+ * follows: a client that decided any of it could disagree with the record (PRODUCT §5 P10).
  */
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, FullPageWorkspace, Input, humaniseTerm } from '@research-harness/design';
-import type { JsonObject, MatrixView, ResearchGroup } from '../api/dto';
+import { Combobox, FullPageWorkspace } from '@research-harness/design';
+import type { ComboboxItem } from '@research-harness/design';
+import type { MatrixCellView, MatrixView, ResearchGroup } from '../api/dto';
 import {
   DataTable,
   Empty,
   ErrorBox,
-  Field,
-  Fields,
   Loading,
   Panel,
   StatusBadge,
   fieldLabel,
 } from '../components/Feedback';
-import { readable } from './EvidenceReview';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
@@ -42,14 +48,8 @@ import './synthesis.css';
 export function SynthesisPage() {
   const { client } = useSession();
   const { href } = useProjectPaths();
-  const [field, setField] = useState('');
-  const [requested, setRequested] = useState<string | null>(null);
 
   const synthesis = useAsync(() => client.synthesis(), [client]);
-  const comparison = useAsync(
-    async () => (requested ? client.compareField(requested) : null),
-    [client, requested],
-  );
 
   const report = synthesis.data;
   const matrices = report?.matrices ?? [];
@@ -61,7 +61,7 @@ export function SynthesisPage() {
     >
       <div className="rh-web-stack">
         {synthesis.loading ? (
-          <Loading what="the synthesis matrices" shape="cards" />
+          <Loading what="the synthesis matrices" shape="table" />
         ) : synthesis.error ? (
           <ErrorBox error={synthesis.error} retry={synthesis.reload} />
         ) : matrices.length === 0 ? (
@@ -90,41 +90,11 @@ export function SynthesisPage() {
                 </Empty>
               )}
             </Panel>
-            {matrices.map((matrix) => (
-              <MatrixPanel key={matrix.id} matrix={matrix} />
+            {matrices.map((matrix, index) => (
+              <MatrixPanel key={matrix.id} matrix={matrix} explain={index === 0} />
             ))}
           </>
         )}
-
-        <Panel title="Compare a field">
-          <form
-            className="rh-web-row"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (field.trim()) setRequested(field.trim());
-            }}
-          >
-            <Input
-              id="compare-field"
-              label="Field"
-              value={field}
-              placeholder="tokenization"
-              fieldClassName="rh-web-synthesis__field"
-              onChange={(event) => setField(event.target.value)}
-            />
-            <Button type="submit" variant="primary" size="sm" disabled={!field.trim()}>
-              Compare
-            </Button>
-          </form>
-
-          {requested && comparison.loading ? <Loading what={requested} shape="table" /> : null}
-          {comparison.error ? (
-            <ErrorBox error={comparison.error} retry={comparison.reload} />
-          ) : null}
-          {comparison.data ? (
-            <ComparisonTable rows={comparison.data.rows} {...(requested ? { field: requested } : {})} />
-          ) : null}
-        </Panel>
       </div>
     </FullPageWorkspace>
   );
@@ -164,73 +134,262 @@ function MatrixGaps({ group, explain }: { group: ResearchGroup; explain: boolean
   );
 }
 
+/** Which cell of a grid is open, in one key. */
+function cellKey(work: string, field: string): string {
+  return `${work}::${field}`;
+}
+
 /**
- * One matrix, stated in the daemon's own sentences.
+ * One matrix: what it lines up, said in the daemon's sentences, and then drawn.
  *
- * Its shape and its coverage used to be a row of counts, one of which — `Cells` — was a
- * bare number a reader had to divide by another to learn anything. Both are sentences the
- * daemon composes, and both are about the record rather than about the corpus.
+ * `explain` puts the rule an empty cell stands for on the page once, under the first grid.
+ * Saying it under every one of them would be the same sentence three times, and the gap
+ * panel above has already said it for the readings nobody has taken.
  */
-function MatrixPanel({ matrix }: { matrix: MatrixView }) {
+function MatrixPanel({ matrix, explain }: { matrix: MatrixView; explain: boolean }) {
+  const [marked, setMarked] = useState<string | null>(null);
+  const [opened, setOpened] = useState<string | null>(null);
+
+  const column = matrix.columns.find((entry) => entry.field === marked) ?? null;
   return (
     <Panel
       title={matrix.name}
       action={
-        matrix.stale === 'stale' ? (
-          <StatusBadge status="stale" vocabulary="staleState" describe />
-        ) : null
+        <span className="rh-web-row">
+          <code className="rh-web-object-id">{matrix.id}</code>
+          {matrix.stale === 'stale' ? (
+            <StatusBadge status="stale" vocabulary="staleState" describe />
+          ) : null}
+        </span>
       }
     >
-      <Fields>
-        <Field label="Id">
-          <code>{matrix.id}</code>
-        </Field>
-        <Field label="Taxonomy">{matrix.taxonomy || 'None — the labels are the matrix’s own'}</Field>
-        <Field label="Reads">{matrix.shape}</Field>
-        <Field label="Recorded">{matrix.coverage}</Field>
-        <Field label="Fields">{matrix.fields.map(fieldLabel).join(', ') || 'None recorded'}</Field>
-      </Fields>
+      <p className="rh-web-synthesis__lead">
+        {matrix.shape}. {matrix.coverage}.
+      </p>
+      <p className="rh-web-synthesis__lead rh-text-secondary">{matrix.labels_from}</p>
+      <FieldPicker matrix={matrix} marked={marked} onMark={setMarked} />
+      <MatrixGrid
+        matrix={matrix}
+        marked={marked}
+        opened={opened}
+        onMark={setMarked}
+        onOpen={setOpened}
+      />
+      <p className="rh-web-synthesis__reading" role="status">
+        {column ? `${fieldLabel(column.field)} — ${column.reading}` : ''}
+      </p>
+      {explain ? (
+        <p className="rh-web-synthesis__detail">
+          An empty cell means &ldquo;not recorded&rdquo;, never &ldquo;absent&rdquo;. Press a
+          recorded one to read the accepted evidence behind it.
+        </p>
+      ) : null}
     </Panel>
   );
 }
 
-export function ComparisonTable({ rows, field }: { rows: JsonObject[]; field?: string }) {
-  if (rows.length === 0) {
-    return (
-      <Empty
-        flat
-        description="No matrix has a value recorded under that name. That is a gap in what has been recorded, not a statement about the works — check the field's spelling against a matrix above."
-      >
-        {field ? `Nothing recorded under “${field}”` : 'Nothing recorded under that field'}
-      </Empty>
-    );
-  }
-  const columns = Object.keys(rows[0] ?? {});
+/**
+ * Pick the field to read down its column, out of the matrix's own columns.
+ *
+ * This was a text box the researcher typed a field name into — a name printed two panels
+ * above it — and a wrong one came back as an empty table that reads uncomfortably like an
+ * absence. A field belongs to a matrix, so the matrix offers its own; the same precedent
+ * the claim screen's evidence picker set. The column heads pick too, for a grid narrow
+ * enough to see all of at once; this is for the one that is not.
+ */
+function FieldPicker({
+  matrix,
+  marked,
+  onMark,
+}: {
+  matrix: MatrixView;
+  marked: string | null;
+  onMark: (field: string | null) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const id = `matrix-field-${matrix.id}`;
+  const wanted = query.trim().toLowerCase();
+  const items: ComboboxItem<string>[] = matrix.columns
+    .filter(
+      (column) =>
+        wanted === '' ||
+        `${fieldLabel(column.field)} ${column.field}`.toLowerCase().includes(wanted),
+    )
+    .map((column) => ({
+      id: column.field,
+      label: fieldLabel(column.field),
+      description: column.coverage,
+      value: column.field,
+    }));
+
   return (
-    <>
+    <div className="rh-web-stack rh-web-stack--tight rh-web-synthesis__picker">
+      <label className="rh-text-label" htmlFor={id}>
+        Read a field down its column
+      </label>
+      <Combobox
+        id={id}
+        label="Read a field down its column"
+        placeholder="Every field this matrix declares"
+        items={items}
+        openOnFocus
+        emptyMessage="This matrix declares no field under that name."
+        query={query}
+        onQueryChange={setQuery}
+        value={marked}
+        onChange={(item) => onMark(item?.value ?? null)}
+      />
+    </div>
+  );
+}
+
+/**
+ * The matrix, drawn: the works it declares down the rows, the fields across the columns.
+ *
+ * Every declared field gets a column and every declared work a row, including the ones
+ * nobody has read: a grid that quietly dropped its unread columns would show a smaller
+ * matrix than the project built. A cell nobody has read says "Not recorded" in words —
+ * never a tint, never a dash, never an empty box a reader is left to interpret.
+ */
+function MatrixGrid({
+  matrix,
+  marked,
+  opened,
+  onMark,
+  onOpen,
+}: {
+  matrix: MatrixView;
+  marked: string | null;
+  opened: string | null;
+  onMark: (field: string | null) => void;
+  onOpen: (key: string | null) => void;
+}) {
+  const { href } = useProjectPaths();
+  const detailId = `matrix-cell-${matrix.id}`;
+  return (
+    <div className="rh-web-matrix">
       <DataTable
-        label="Field comparison"
+        label={`The ${matrix.name} matrix`}
         head={
           <tr>
-            {columns.map((column) => (
-              <th scope="col" key={column}>
-                {humaniseTerm(column)}
+            <th scope="col" className="rh-web-matrix__corner">
+              Work
+            </th>
+            {matrix.columns.map((column) => (
+              <th
+                scope="col"
+                key={column.field}
+                data-marked={column.field === marked ? 'true' : undefined}
+                {...(column.field === marked ? { 'aria-current': 'true' as const } : {})}
+              >
+                <button
+                  type="button"
+                  className="rh-web-matrix__head"
+                  aria-pressed={column.field === marked}
+                  onClick={() => onMark(column.field === marked ? null : column.field)}
+                >
+                  {fieldLabel(column.field)}
+                </button>
               </th>
             ))}
           </tr>
         }
       >
-        {rows.map((row, index) => (
-          <tr key={index}>
-            {columns.map((column) => (
-              <td key={column}>{readable(row[column])}</td>
-            ))}
-          </tr>
-        ))}
+        {matrix.rows.map((row) => {
+          const open = row.cells.find((cell) => cellKey(cell.work, cell.field) === opened) ?? null;
+          return (
+            <Fragment key={row.work}>
+              <tr>
+                <th scope="row">
+                  {row.route ? (
+                    <Link to={href(row.route)}>{row.title || row.work}</Link>
+                  ) : (
+                    (row.title || row.work)
+                  )}{' '}
+                  <code className="rh-web-object-id">{row.work}</code>
+                  <span className="rh-web-matrix__row-summary">{row.summary}</span>
+                </th>
+                {row.cells.map((cell) => {
+                  const key = cellKey(cell.work, cell.field);
+                  return (
+                    <td
+                      key={cell.field}
+                      data-marked={cell.field === marked ? 'true' : undefined}
+                      data-state={cell.recorded ? 'recorded' : 'not-recorded'}
+                    >
+                      <button
+                        type="button"
+                        className="rh-web-matrix__cell"
+                        aria-expanded={key === opened}
+                        {...(key === opened ? { 'aria-controls': detailId } : {})}
+                        onClick={() => onOpen(key === opened ? null : key)}
+                      >
+                        {cell.recorded ? (
+                          <>
+                            <span className="rh-web-matrix__reading">{cell.reading}</span>
+                            {cell.measurement ? (
+                              <span className="rh-web-matrix__measure">{cell.measurement}</span>
+                            ) : null}
+                          </>
+                        ) : (
+                          <span className="rh-web-matrix__blank">Not recorded</span>
+                        )}
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+              {open ? (
+                <tr className="rh-web-matrix__detail">
+                  <td colSpan={matrix.columns.length + 1} id={detailId}>
+                    <CellEvidence cell={open} />
+                  </td>
+                </tr>
+              ) : null}
+            </Fragment>
+          );
+        })}
       </DataTable>
-      <p className="rh-text-secondary">
-        An empty cell means &ldquo;not recorded&rdquo;, never &ldquo;absent&rdquo;.
-      </p>
-    </>
+    </div>
+  );
+}
+
+/**
+ * What one cell rests on: the daemon's sentence about the cell, then the spans themselves.
+ *
+ * A span is quoted exactly as it was accepted. A cell that cites evidence this workspace no
+ * longer holds says which id it cannot reach rather than showing an empty quotation, and a
+ * reading with no evidence behind it says that too — both are facts about the record, and
+ * neither is drawn as an alarm.
+ */
+function CellEvidence({ cell }: { cell: MatrixCellView }) {
+  const { href } = useProjectPaths();
+  return (
+    <div className="rh-web-stack rh-web-stack--tight rh-web-matrix__opened">
+      <p className="rh-text-secondary">{cell.detail}</p>
+      {cell.evidence.length > 0 ? (
+        <ul className="rh-web-list rh-web-list--tight">
+          {cell.evidence.map((span) => (
+            <li key={span.id} className="rh-web-stack rh-web-stack--tight">
+              {span.found && span.route ? (
+                <Link to={href(span.route)}>
+                  {span.title} <code className="rh-web-object-id">{span.id}</code>
+                </Link>
+              ) : (
+                <span>
+                  <code className="rh-web-object-id">{span.id}</code>
+                  <span className="rh-text-secondary">
+                    {' '}
+                    — this workspace no longer holds it
+                  </span>
+                </span>
+              )}
+              {span.measurement ? <p>{span.measurement}</p> : null}
+              {span.quote ? <blockquote className="rh-web-quote">{span.quote}</blockquote> : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
