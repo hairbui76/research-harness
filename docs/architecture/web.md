@@ -474,17 +474,25 @@ than hidden. `indexReferenceProvider` (task W1, over `state.index` and `evidence
 stays mounted behind it. `graph.status` picks: `available: false`, `rebuilding: true`, or a
 status read that fails at all, and the fallback answers instead. That is graph spec §8's
 *direct canonical reads remain possible if the graph is unavailable or rebuilding*, and the
-composer says so once, in the Design System's own wording — `index-rebuilding` for a
-rebuild that is running, `index-absent` for an index nobody has built, `index-unreadable`
-for one that will not open. Only the first is a `loading` state with a progress bar; the
-other two are `partial`, because completion *is* answering, from the project listings, and
-a bar that can never fill is a lie about work in flight. All three offer *Check again*,
-which re-reads the status; the two that a rebuild would fix also offer *Rebuild the index*,
-which calls `state.rebuild` — the cockpit's `research rebuild` — and then re-reads the
-status, so the notice goes when the index is there. `state.rebuild` is `admin` and
-human-only, so a window the daemon treats as an agent host is offered *Check again* alone,
-and a refusal is rendered as the daemon's own sentence. A `graph.autocomplete` call that
-fails after the check falls back for that query rather than emptying the picker.
+composer says so once — as `GraphStatusNote`, one line on the footer row beside the
+destination line, because which index is answering completion is a capability note and not
+a failure of anything the researcher just did. An index nobody has built is the ordinary
+state of a project on its first day; it used to arrive as a framed notice about 220px tall
+and was the loudest object on an empty conversation (wave 2, finding 3).
+
+The line still names the state the daemon reported, in three distinct sentences — rebuilding,
+not built yet, not answering — and only a rebuild that is actually running is `aria-busy`,
+because a state that is not in progress must never look like one. It carries one action.
+Where `state.rebuild` can be run and would fix the index, that is *Rebuild the index* — the
+cockpit's `research rebuild` — which re-reads the status afterwards, so the line goes because
+the index is there rather than because a button was pressed; otherwise it is *Check again*,
+which re-reads the status alone. `state.rebuild` is `admin` and human-only, so a window the
+daemon treats as an agent host is offered *Check again*, and a refusal is rendered as the
+daemon's own sentence beside the line, which stays because nothing was built. Which
+capability is answering completion is on the element as `data-answering` rather than in the
+sentence: `state.index` is a capability name, and the researcher's word for what it holds is
+"the project listings". A `graph.autocomplete` call that fails after the check falls back for
+that query rather than emptying the picker.
 
 **Every token is resolved before it is sent.** `graph.resolve` is the one `graph.*` read
 that does not answer from the index: existence, authority, privacy and anchor freshness come
@@ -549,7 +557,7 @@ out to the evidence and back to the claim is one movement.
 | Part | Capability |
 |---|---|
 | `@` completion | `graph.autocomplete`, or `state.index` + `evidence.list` when the graph cannot answer |
-| Which one answers, and the composer's notice | `graph.status` |
+| Which one answers, and the composer's index line | `graph.status` |
 | Every composer token, and every `rh://` link | `graph.resolve` |
 | The inspector's neighbourhood | `graph.neighbors` (one hop, both directions) |
 | The path to the exact artifact anchor | `graph.provenance` |
