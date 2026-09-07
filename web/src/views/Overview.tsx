@@ -162,6 +162,9 @@ export function OverviewPage() {
                       label: humaniseResearchTokens(entry.label),
                       at: entry.at,
                       when: entry.when,
+                      // Who the daemon says did it, when it says. An entry the record
+                      // attributes to nobody carries nothing rather than a guess.
+                      ...(entry.by ? { by: entry.by } : {}),
                       ...(entry.route ? { href: href(entry.route) } : {}),
                     }),
                   )}

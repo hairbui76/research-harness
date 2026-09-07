@@ -172,7 +172,58 @@ describe('the overview', () => {
     const rendered = Array.from(container.querySelectorAll('.rh-change-list__what')).map(
       (node) => node.textContent,
     );
-    expect(rendered).toEqual(changes.entries.map((entry) => entry.label));
+    // Each row now leads with the subject the daemon attributed the change to (wave 5J).
+    // The daemon's own sentence still follows it word for word, in the order it was given.
+    const subject: Record<string, string> = { researcher: 'You ', daemon: 'The daemon ', '': '' };
+    expect(rendered).toEqual(
+      changes.entries.map((entry) => `${subject[entry.by] ?? ''}${entry.label}`),
+    );
+  });
+
+  it('says who recorded each change, in the words the daemon attributed it to', async () => {
+    /*
+     * The returning researcher's question is which of these she decided and which the
+     * daemon did while she was away. The answer is the daemon's `by`, rendered as the
+     * subject of its own sentence; the page adds no attribution of its own and drops none.
+     */
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    const entries = FIXTURES.overview.since_last_session!.entries;
+    expect(entries.every((entry) => entry.by === 'researcher')).toBe(true);
+    const rows = Array.from(container.querySelectorAll('.rh-change-list__entry'));
+    expect(rows.map((row) => row.getAttribute('data-by'))).toEqual(entries.map(() => 'researcher'));
+    expect(container.querySelector('.rh-change-list__what')).toHaveTextContent(
+      `You ${entries[0]!.label}`,
+    );
+  });
+
+  it('leaves a change the daemon attributed to nobody unattributed', async () => {
+    const unattributed = {
+      ...FIXTURES.overview.since_last_session!,
+      entries: [
+        {
+          ...FIXTURES.overview.since_last_session!.entries[0]!,
+          by: '',
+          label: 'opened a conflict: two readings of Table 1 disagree',
+        },
+      ],
+    };
+    const { container } = renderView(<OverviewPage />, {
+      daemon: fakeDaemon({
+        gets: { '/overview': overviewWith({ since_last_session: unattributed }) },
+      }),
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('Since your last session')).toBeInTheDocument(),
+    );
+    expect(container.querySelector('.rh-change-list__entry')).not.toHaveAttribute('data-by');
+    expect(container.querySelector('.rh-change-list__what')).toHaveTextContent(
+      'opened a conflict: two readings of Table 1 disagree',
+    );
   });
 
   it('says which window it looked at, and offers a next action, when nothing changed', async () => {
