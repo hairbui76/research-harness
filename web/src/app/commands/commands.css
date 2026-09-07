@@ -87,6 +87,12 @@
   margin: 0;
 }
 
+/* One sentence, not a column of prose: the note stays at a reading measure. */
+.rh-web-shortcuts__note {
+  margin: 0;
+  max-inline-size: 68ch;
+}
+
 .rh-web-shortcuts__list {
   margin: 0;
   display: flex;

@@ -6,15 +6,19 @@
  * key must stay out of the way while a researcher is writing a sentence a decision will be
  * recorded with, or answering a dialog they are already inside.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Dialog, DialogBody, DialogHeader, ThemeProvider } from '@research-harness/design';
-import { CommandsProvider, useRegisterCommands } from './CommandsProvider';
+import { CommandsProvider, SINGLE_KEY_SHORTCUTS, useRegisterCommands } from './CommandsProvider';
 import { groupCommands, matchCommands } from './model';
 import { expectNoAxeViolations } from '../../test/harness';
+
+beforeEach(() => {
+  window.localStorage.clear();
+});
 
 const DESTINATIONS = [
   { id: 'overview', label: 'Overview', to: '/overview' },
@@ -155,6 +159,87 @@ describe('the shortcut help sheet', () => {
 
     await user.keyboard('?');
     await expectNoAxeViolations(document.body);
+  });
+});
+
+/**
+ * WCAG 2.1.4: a shortcut bound to a single character must be switchable off.
+ *
+ * The keys here are letters pressed with no modifier at all, and one of them accepts a
+ * candidate. Someone dictating, or driving the cockpit with a switch device, sends stray
+ * characters into the page — so the layer has to be turnable off, and nothing may become
+ * unreachable when it is.
+ */
+describe('turning the single-key shortcuts off', () => {
+  it('is offered in the help sheet and remembered', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('?');
+    const toggle = screen.getByRole('switch', { name: 'Single-key shortcuts' });
+    expect(toggle).toBeChecked();
+
+    await user.click(toggle);
+
+    expect(screen.getByRole('switch', { name: 'Single-key shortcuts' })).not.toBeChecked();
+    expect(window.localStorage.getItem(SINGLE_KEY_SHORTCUTS)).toBe('false');
+  });
+
+  it('stops a single letter from running anything', async () => {
+    const accept = vi.fn();
+    const user = userEvent.setup();
+    window.localStorage.setItem(SINGLE_KEY_SHORTCUTS, 'false');
+    renderShell(<Page accept={accept} />);
+
+    await user.keyboard('a');
+    await user.keyboard('?');
+
+    expect(accept).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog', { name: 'Keyboard shortcuts' })).not.toBeInTheDocument();
+  });
+
+  it('keeps the modifier chord, so the palette is still one keystroke away', async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(SINGLE_KEY_SHORTCUTS, 'false');
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    expect(screen.getByRole('dialog', { name: 'Go to, or do' })).toBeInTheDocument();
+  });
+
+  it('leaves the help sheet reachable through the palette', async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(SINGLE_KEY_SHORTCUTS, 'false');
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+    await user.type(screen.getByRole('combobox'), 'keyboard');
+    await user.keyboard('{Enter}');
+
+    const sheet = await screen.findByRole('dialog', { name: 'Keyboard shortcuts' });
+    expect(sheet).toHaveTextContent('Single-key shortcuts');
+  });
+
+  it('survives a reload, because the preference is not held in the page', async () => {
+    const accept = vi.fn();
+    const user = userEvent.setup();
+    const { unmount } = renderShell(<Page accept={accept} />);
+
+    await user.keyboard('?');
+    await user.click(screen.getByRole('switch', { name: 'Single-key shortcuts' }));
+    unmount();
+
+    renderShell(<Page accept={accept} />);
+    await user.keyboard('a');
+
+    expect(accept).not.toHaveBeenCalled();
+    await user.keyboard('{Control>}k{/Control}');
+    await user.type(screen.getByRole('combobox'), 'keyboard');
+    await user.keyboard('{Enter}');
+    expect(
+      await screen.findByRole('switch', { name: 'Single-key shortcuts' }),
+    ).not.toBeChecked();
   });
 });
 

@@ -11,6 +11,14 @@
  *   while a dialog it did not open is on screen;
  * * the two surfaces the keys summon: the palette on Ctrl/⌘+K and the help sheet on `?`.
  *
+ * Every page shortcut is a single character with no modifier held, which WCAG 2.2 (2.1.4)
+ * says must be switchable off: someone dictating, or driving the cockpit with a switch
+ * device, sends stray characters into the page, and one of these letters accepts a
+ * candidate. The preference lives beside the researcher rather than in the page — the same
+ * `localStorage` pattern the review screen's auto-advance uses — and it is on by default.
+ * With it off, only the modifier chord runs, and the help sheet is still reachable as a
+ * palette command, so nothing on this layer becomes unreachable by turning it off.
+ *
  * The navigation targets come from the shell rather than from this file, because the rail's
  * destinations are already derived once in `Layout` and a palette that listed a different
  * set would be a second navigation model.
@@ -58,6 +66,9 @@ export interface CommandsApi {
   setPaletteOpen: (open: boolean) => void;
   helpOpen: boolean;
   setHelpOpen: (open: boolean) => void;
+  /** Whether a single character with no modifier runs the command it stands for. */
+  singleKeys: boolean;
+  setSingleKeys: (on: boolean) => void;
 }
 
 const NO_SHELL: CommandsApi = {
@@ -67,7 +78,28 @@ const NO_SHELL: CommandsApi = {
   setPaletteOpen: () => {},
   helpOpen: false,
   setHelpOpen: () => {},
+  singleKeys: true,
+  setSingleKeys: () => {},
 };
+
+/** Where the single-key preference lives. Nothing stored means on, which is the default. */
+export const SINGLE_KEY_SHORTCUTS = 'research-harness.shortcuts.single-key';
+
+export function readSingleKeys(): boolean {
+  try {
+    return window.localStorage.getItem(SINGLE_KEY_SHORTCUTS) !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+function writeSingleKeys(on: boolean): void {
+  try {
+    window.localStorage.setItem(SINGLE_KEY_SHORTCUTS, on ? 'true' : 'false');
+  } catch {
+    /* storage disabled: the keys are simply on again next time */
+  }
+}
 
 const CommandsContext = createContext<CommandsApi>(NO_SHELL);
 
@@ -97,7 +129,13 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
   const [pages, setPages] = useState<readonly Registration[]>([]);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [singleKeys, rememberSingleKeys] = useState(readSingleKeys);
   const nextKey = useRef(0);
+
+  const setSingleKeys = useCallback((on: boolean) => {
+    rememberSingleKeys(on);
+    writeSingleKeys(on);
+  }, []);
 
   const register = useCallback((commands: readonly Command[]) => {
     const key = (nextKey.current += 1);
@@ -116,18 +154,33 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
         group: 'Go to',
         run: () => navigate(destination.to),
       }));
-    return [...goTo, ...pages.flatMap((entry) => entry.commands)];
+    // The help sheet as a command, so `?` is a convenience rather than the only way in:
+    // turning the single keys off must not put the switch that turns them back on out of
+    // reach.
+    const help: Command = {
+      id: 'shell:shortcuts',
+      label: 'Keyboard shortcuts',
+      group: 'Anywhere',
+      hint: 'The keys this screen binds, and the switch that turns the single keys off.',
+      run: () => setHelpOpen(true),
+    };
+    return [...goTo, ...pages.flatMap((entry) => entry.commands), help];
   }, [destinations, navigate, pages]);
 
   // The listener is installed once and reads the current commands through a ref: rebinding
   // it on every registration would drop a keystroke pressed while React was re-rendering.
-  const state = useRef({ commands, paletteOpen, helpOpen });
-  state.current = { commands, paletteOpen, helpOpen };
+  const state = useRef({ commands, paletteOpen, helpOpen, singleKeys });
+  state.current = { commands, paletteOpen, helpOpen, singleKeys };
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
       if (event.defaultPrevented || event.repeat) return;
-      const { commands: current, paletteOpen: palette, helpOpen: help } = state.current;
+      const {
+        commands: current,
+        paletteOpen: palette,
+        helpOpen: help,
+        singleKeys: single,
+      } = state.current;
       const shellOverlay = palette || help;
       if (!shellOverlay && foreignDialogOpen(document)) return;
 
@@ -138,6 +191,8 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
         return;
       }
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      // Everything past here is a bare character (WCAG 2.2 2.1.4), including `?`.
+      if (!single) return;
       if (isTypingTarget(event.target)) return;
       if (shellOverlay) return;
 
@@ -157,8 +212,17 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
   }, []);
 
   const api = useMemo<CommandsApi>(
-    () => ({ commands, register, paletteOpen, setPaletteOpen, helpOpen, setHelpOpen }),
-    [commands, helpOpen, paletteOpen, register],
+    () => ({
+      commands,
+      register,
+      paletteOpen,
+      setPaletteOpen,
+      helpOpen,
+      setHelpOpen,
+      singleKeys,
+      setSingleKeys,
+    }),
+    [commands, helpOpen, paletteOpen, register, setSingleKeys, singleKeys],
   );
 
   return (
