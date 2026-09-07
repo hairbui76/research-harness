@@ -1512,9 +1512,26 @@ export interface components {
         };
         /**
          * WorkSummary
-         * @description One Work as the Corpus list shows it.
+         * @description One Work as the Corpus list shows it, and what a researcher asks of it.
+         *
+         *     Identity is the first half. The second half is the four facts a corpus is read for -
+         *     whether this source can be read from at all, what has been accepted from it, whether
+         *     any Claim rests on it, and when it arrived - and every one of them is a judgement over
+         *     canonical state that belongs here rather than in a client (Product 5 P10). A cockpit
+         *     that decided for itself that "no file of this Work has a stored parse" means "cannot be
+         *     read from" would be a second, disagreeing copy of Product 16 living in React.
          */
         WorkSummary: {
+            /**
+             * Added
+             * @default
+             */
+            added: string;
+            /**
+             * Added At
+             * @default
+             */
+            added_at: string;
             /**
              * Artifacts
              * @default []
@@ -1526,12 +1543,22 @@ export interface components {
              */
             authors: string[];
             /**
+             * Claims
+             * @default 0
+             */
+            claims: number;
+            /**
              * Evidence
              * @default 0
              */
             evidence: number;
             /** Id */
             id: string;
+            /**
+             * Readable
+             * @default false
+             */
+            readable: boolean;
             /** Screening */
             screening: string;
             /** Title */

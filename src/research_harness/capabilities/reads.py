@@ -31,7 +31,8 @@ React the raw lists.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from datetime import datetime, timedelta
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -39,6 +40,7 @@ from research_harness.capabilities.context import CapabilityContext
 from research_harness.capabilities.dto import CapabilityRequest
 from research_harness.capabilities.permissions import Permission
 from research_harness.capabilities.registry import CapabilitySpec
+from research_harness.domain.base import utc_now
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
     ClaimScope,
@@ -66,8 +68,13 @@ __all__ = [
     "ClaimList",
     "ClaimRef",
     "ClaimSummary",
+    "CORPUS_MONTHS",
+    "CORPUS_QUESTIONS",
+    "CORPUS_RECENT_WINDOW",
     "CorpusAttentionGroup",
     "CorpusAttentionItem",
+    "CorpusQuestion",
+    "CorpusQuestionKind",
     "DecisionList",
     "DecisionSummary",
     "EvidenceList",
@@ -93,10 +100,13 @@ __all__ = [
     "WorkSummary",
     "WorkspaceIndex",
     "WorkspaceIndexRequest",
+    "answers_question",
     "claim_concern",
     "claim_groups",
     "claim_titles",
     "corpus_attention",
+    "corpus_questions",
+    "evidence_citations",
     "list_anchors",
     "list_claims",
     "list_decisions",
@@ -137,7 +147,15 @@ class ArtifactSummary(_Summary):
 
 
 class WorkSummary(_Summary):
-    """One Work as the Corpus list shows it."""
+    """One Work as the Corpus list shows it, and what a researcher asks of it.
+
+    Identity is the first half. The second half is the four facts a corpus is read for -
+    whether this source can be read from at all, what has been accepted from it, whether
+    any Claim rests on it, and when it arrived - and every one of them is a judgement over
+    canonical state that belongs here rather than in a client (Product 5 P10). A cockpit
+    that decided for itself that "no file of this Work has a stored parse" means "cannot be
+    read from" would be a second, disagreeing copy of Product 16 living in React.
+    """
 
     id: str
     title: str
@@ -148,6 +166,26 @@ class WorkSummary(_Summary):
     versions: int = 0
     evidence: int = 0
     artifacts: tuple[ArtifactSummary, ...] = ()
+    readable: bool = False
+    """Whether any file of this Work has a stored parse.
+
+    A span can only be anchored in a file the project has parsed (Product 16, 42 D), so
+    this is the line between a source that can be read from and one that cannot - and it
+    is one answer over every file, which is the answer the corpus list needs per row.
+    """
+
+    claims: int = 0
+    """How many Claims cite Evidence accepted from this Work.
+
+    Accepted evidence that no Claim rests on is work that has not landed anywhere, and a
+    thousand-row corpus cannot be asked that question one Work at a time.
+    """
+
+    added: str = ""
+    """When this Work entered the corpus, in the words a person reads."""
+
+    added_at: str = ""
+    """The same instant, ISO-8601, so a client can sort or compare without parsing prose."""
 
 
 class CorpusAttentionItem(_Summary):
@@ -178,6 +216,47 @@ class CorpusAttentionGroup(_Summary):
     items: tuple[CorpusAttentionItem, ...] = ()
     more: str = ""
     """What the item cap left out, in words; empty when nothing was left out."""
+
+
+#: Every question `work.list` will narrow the corpus by.
+#:
+#: Closed, so an unknown one is refused by the request model with the six that exist rather
+#: than answered with an empty corpus, and so a host reads them off the published schema.
+#: `CORPUS_QUESTIONS` below carries the same kinds with the words for each; the contract
+#: test holds the two together.
+CorpusQuestionKind = Literal[
+    "screening",
+    "no_file",
+    "unparsed",
+    "unread",
+    "uncited",
+    "recent",
+]
+
+
+class CorpusQuestion(_Summary):
+    """One question a researcher brings to the corpus, as a filter over the works.
+
+    A corpus is not read record by record. It is asked things - which of these thousand
+    works has nothing accepted from it, which cannot be read from yet, which no Claim rests
+    on, which arrived while I was away - and each of those is a line the daemon draws over
+    canonical state. The line and the words for it are one decision, so both are here: a
+    client renders `label` on the control and `summary` beside the narrowed list, and never
+    works out for itself which works answer the question (Product 5 P10).
+
+    `count` is over the whole corpus, not over what the answer carries, so the control says
+    the same number whether or not it is the one currently chosen.
+    """
+
+    kind: str
+    label: str
+    """The words on the control: short, because it sits beside five others."""
+
+    count: int
+    summary: str
+    """The whole sentence the narrowed list is read under: "4 of 1000 works have no
+    readable text yet." The count is inside it, because a corpus reads its own size in
+    sentences everywhere else on the page."""
 
 
 class ClaimSummary(_Summary):
@@ -394,16 +473,41 @@ class WorkspaceIndex(_Summary):
 
 
 class WorkList(_Summary):
-    """`work.list`: the corpus, summarised, and what in it needs a researcher."""
+    """`work.list`: the corpus, summarised, what in it needs a researcher, and what it
+    can be asked."""
 
     count: int = 0
+    """How many works this answer carries: the whole corpus, or the ones the question
+    named."""
+
+    total: int = 0
+    """How many works the corpus holds, whatever this answer was narrowed to. A narrowed
+    list still has to be able to say what it is a part of."""
+
+    question: str = ""
+    """The question this answer was narrowed by, echoed back; empty for the whole corpus.
+
+    The client asked it, so it already knows - but a sentence describing the rows on screen
+    has to be composed from the answer that produced them, not from the request that is
+    still in flight.
+    """
+
     works: tuple[WorkSummary, ...] = ()
     attention: tuple[CorpusAttentionGroup, ...] = ()
     """The sources that cannot yet be read from, in the order a researcher meets them.
 
-    Only the groups with something in them are here: a corpus every source of which is
-    readable answers with none, and the page says so in one sentence rather than in four
+    Always over the whole corpus: this is the page's lead, and a lead that changed every
+    time the list beneath it was narrowed would be describing the filter rather than the
+    corpus. Only the groups with something in them are here: a corpus every source of which
+    is readable answers with none, and the page says so in one sentence rather than in four
     lines of zero.
+    """
+
+    questions: tuple[CorpusQuestion, ...] = ()
+    """What this corpus can be asked, counted over the whole of it.
+
+    Only the questions at least one work answers: an empty result is not a filter, which is
+    the rule the review queue's own filters already keep.
     """
 
 
@@ -506,9 +610,16 @@ class SearchRunList(_Summary):
 
 
 class ListWorksRequest(CapabilityRequest):
-    """`work.list`: the corpus, optionally narrowed to one screening state."""
+    """`work.list`: the corpus, optionally narrowed to one screening state or one question."""
 
     screening: str | None = None
+    question: CorpusQuestionKind | None = None
+    """One of `CORPUS_QUESTIONS`: the narrowing is the daemon's, so the vocabulary is too.
+
+    Typed as a closed set rather than a string, so an unknown question is refused with the
+    ones that exist rather than answered with an empty corpus, and so every host reads the
+    list of them off the published request schema.
+    """
 
 
 class ListClaimsRequest(CapabilityRequest):
@@ -579,14 +690,37 @@ class WorkspaceIndexRequest(CapabilityRequest):
 
 
 def list_works(ctx: CapabilityContext, request: ListWorksRequest) -> WorkList:
-    """`work.list`: the corpus with its files, its evidence counts, and what needs a reader."""
+    """`work.list`: the corpus, what needs a reader, and the questions it can be asked.
+
+    The corpus is answered whole - the daemon imposes no page size - and then narrowed, in
+    that order: the lead and the question counts are facts about the corpus, so they are
+    computed over all of it and stay still while a researcher moves between questions.
+    Only `works` is narrowed, and `question` says by what.
+
+    The citation index is built once for the whole read rather than per Work: asking "does
+    any Claim rest on this?" a thousand times would walk the claims a thousand times.
+    """
     works = [
         work
         for work in ctx.repo.list_works()
         if request.screening is None or work.screening.value == request.screening
     ]
-    summaries = tuple(work_summary(ctx.repo, work) for work in works)
-    return WorkList(count=len(summaries), works=summaries, attention=corpus_attention(summaries))
+    citations = evidence_citations(ctx.repo)
+    summaries = tuple(work_summary(ctx.repo, work, citations=citations) for work in works)
+    now = utc_now()
+    shown = (
+        summaries
+        if request.question is None
+        else tuple(work for work in summaries if answers_question(work, request.question, now=now))
+    )
+    return WorkList(
+        count=len(shown),
+        total=len(summaries),
+        question=request.question or "",
+        works=shown,
+        attention=corpus_attention(summaries),
+        questions=corpus_questions(summaries, now=now),
+    )
 
 
 def list_claims(ctx: CapabilityContext, request: ListClaimsRequest) -> ClaimList:
@@ -868,8 +1002,184 @@ def _corpus_group_view(
     )
 
 
-def work_summary(repo: WorkspaceRepository, work: Work) -> WorkSummary:
-    """One Work with its files, and whether each of them has a stored parse."""
+#: How recently a Work has to have arrived to count as new to a returning researcher.
+#:
+#: A week, stated in the question's own sentence rather than left to be guessed at. The
+#: Overview answers the neighbouring question - what *changed* while you were away - from
+#: the conversation sessions, because a change has to be measured against a sitting. A
+#: corpus does not: "what came in lately" is a fact about the corpus, it has to mean the
+#: same thing in a project with no conversation in it, and a window a page can state in
+#: words is worth more here than one it would have to explain.
+CORPUS_RECENT_WINDOW = timedelta(days=7)
+
+#: What a researcher asks the corpus, in the order the work arrives in.
+#:
+#: The first four are the attention groups themselves - the same line `_corpus_group` draws,
+#: so the lead's "4 works have no readable text yet" and the control that narrows the list
+#: to those four can never disagree about which works they are or how many. The last two are
+#: questions that are not about readiness: evidence accepted that no Claim rests on, and
+#: what arrived lately.
+#:
+#: Each entry is the kind, the words on the control, and the sentence the narrowed list is
+#: read under, singular and plural.
+CORPUS_QUESTIONS: tuple[tuple[str, str, str, str], ...] = (
+    (
+        "screening",
+        "Screened, not decided",
+        "1 of {total} works was screened and never included or excluded.",
+        "{count} of {total} works were screened and never included or excluded.",
+    ),
+    (
+        "no_file",
+        "No file",
+        "1 of {total} works has no file to read from.",
+        "{count} of {total} works have no file to read from.",
+    ),
+    (
+        "unparsed",
+        "No readable text",
+        "1 of {total} works has no readable text yet.",
+        "{count} of {total} works have no readable text yet.",
+    ),
+    (
+        "unread",
+        "Nothing accepted",
+        "1 of {total} works has nothing accepted from it yet.",
+        "{count} of {total} works have nothing accepted from them yet.",
+    ),
+    (
+        "uncited",
+        "Cited by no claim",
+        "1 of {total} works has accepted evidence that no claim cites.",
+        "{count} of {total} works have accepted evidence that no claim cites.",
+    ),
+    (
+        "recent",
+        "Came in this week",
+        "1 of {total} works came into the corpus in the last 7 days.",
+        "{count} of {total} works came into the corpus in the last 7 days.",
+    ),
+)
+
+
+def answers_question(work: WorkSummary, kind: str, *, now: datetime) -> bool:
+    """Whether one Work is one of the works a question is asking about.
+
+    The four readiness questions defer to `_corpus_group`, which is the corpus's own
+    grouping and takes the first missing thing: a Work with no file has nothing accepted
+    from it either, and answering both would be counting the same absence twice and
+    offering two controls that lead to the same row.
+
+    The other two stand on their own. "Cited by no claim" is about accepted evidence that
+    no Claim rests on, so a Work nothing has been accepted from is not in it - that Work's
+    question is the one above. "Came in this week" is the Work's own arrival.
+    """
+    if kind == "uncited":
+        return work.evidence > 0 and work.claims == 0
+    if kind == "recent":
+        return bool(work.added_at) and datetime.fromisoformat(work.added_at) >= now - (
+            CORPUS_RECENT_WINDOW
+        )
+    return _corpus_group(work) == kind
+
+
+def corpus_questions(
+    works: Sequence[WorkSummary], *, now: datetime | None = None
+) -> tuple[CorpusQuestion, ...]:
+    """What this corpus can be asked, counted over the whole of it.
+
+    Only the questions at least one Work answers. A control that narrows a list to nothing
+    is not a filter, it is a dead end wearing a count of zero - the same rule the review
+    queue's own filters keep - and a corpus in good order should offer few of these, not
+    six greyed ones.
+    """
+    moment = now or utc_now()
+    found: list[CorpusQuestion] = []
+    for kind, label, singular, plural in CORPUS_QUESTIONS:
+        count = sum(1 for work in works if answers_question(work, kind, now=moment))
+        if count == 0:
+            continue
+        template = singular if count == 1 else plural
+        found.append(
+            CorpusQuestion(
+                kind=kind,
+                label=label,
+                count=count,
+                summary=template.format(count=count, total=len(works)),
+            )
+        )
+    return tuple(found)
+
+
+def evidence_citations(repo: WorkspaceRepository) -> Mapping[str, frozenset[str]]:
+    """Which Claims cite each accepted Evidence object, read once for the whole corpus.
+
+    A Claim records the Evidence it rests on; nothing on the Evidence side records the
+    Claims that rest on it. So the direction a corpus is read in - "does anything rest on
+    this source?" - has to be inverted here, once, rather than by walking every Claim again
+    for every Work.
+    """
+    found: dict[str, set[str]] = {}
+    for claim in repo.list_claims():
+        for link in claim.relations:
+            found.setdefault(str(link.evidence), set()).add(str(claim.id))
+    return {evidence: frozenset(claims) for evidence, claims in found.items()}
+
+
+def _human_arrival(moment: datetime) -> str:
+    """One arrival in the words a person reads, in the time zone the daemon runs in.
+
+    The day, not the minute: a corpus row is read against the row under it, and a column of
+    clock times would compare two sources by an accident of when someone was at the desk.
+    """
+    local = moment.astimezone()
+    return f"{local.day} {CORPUS_MONTHS[local.month - 1]} {local.year}"
+
+
+#: Month names for an arrival date. The cockpit's locale is the reader's; this is the
+#: daemon's own sentence, and it is written the way every other sentence it composes is.
+CORPUS_MONTHS: tuple[str, ...] = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
+
+
+def work_summary(
+    repo: WorkspaceRepository,
+    work: Work,
+    *,
+    citations: Mapping[str, frozenset[str]] | None = None,
+) -> WorkSummary:
+    """One Work with its files, what has been accepted from it, and what rests on that.
+
+    `citations` is the inverted index `evidence_citations` builds for a whole read. Passing
+    it is an optimisation, never a difference in the answer: a caller with one Work to
+    summarise leaves it out and this reads the Claims itself.
+    """
+    cited = evidence_citations(repo) if citations is None else citations
+    accepted = tuple(str(item.id) for item in repo.iter_evidence(work.id))
+    artifacts = tuple(
+        ArtifactSummary(
+            id=str(artifact.id),
+            version=str(artifact.version),
+            kind=artifact.kind.value,
+            mime_type=artifact.mime_type,
+            original_filename=artifact.original_filename,
+            size_bytes=artifact.size_bytes,
+            parsed=any(True for _ in repo.iter_blocks(artifact.id, work=work.id)),
+        )
+        for artifact in repo.list_artifacts(work.id)
+    )
     return WorkSummary(
         id=str(work.id),
         title=work.title,
@@ -878,19 +1188,12 @@ def work_summary(repo: WorkspaceRepository, work: Work) -> WorkSummary:
         venue=work.venue,
         screening=work.screening.value,
         versions=len(work.versions),
-        evidence=sum(1 for _ in repo.iter_evidence(work.id)),
-        artifacts=tuple(
-            ArtifactSummary(
-                id=str(artifact.id),
-                version=str(artifact.version),
-                kind=artifact.kind.value,
-                mime_type=artifact.mime_type,
-                original_filename=artifact.original_filename,
-                size_bytes=artifact.size_bytes,
-                parsed=any(True for _ in repo.iter_blocks(artifact.id, work=work.id)),
-            )
-            for artifact in repo.list_artifacts(work.id)
-        ),
+        evidence=len(accepted),
+        artifacts=artifacts,
+        readable=any(artifact.parsed for artifact in artifacts),
+        claims=len({claim for item in accepted for claim in cited.get(item, frozenset())}),
+        added=_human_arrival(work.created_at),
+        added_at=work.created_at.isoformat(),
     )
 
 
