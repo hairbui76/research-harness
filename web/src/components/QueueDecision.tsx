@@ -17,9 +17,11 @@
  *   be written about — the same sentence the review screen uses, from the same function —
  *   and the second press writes it. The confirmation is inline on the card, because the row
  *   it is about is what should still be readable while the decision is made.
- * - **Defer** and **Reject**, on every row, taking the researcher's sentence exactly as the
+ * - **Reject** and **Defer**, on every row, taking the researcher's sentence exactly as the
  *   review screen does, because that is what the daemon records with them. The field is a
  *   compact one on the row itself: a dialog would cover the queue the decision is about.
+ *   They are read in the order `REVIEW_DECISIONS` declares, which is the order the review
+ *   bar reads: one vocabulary, one sequence, on both screens.
  * - **Open to decide**, on every row: the screen where the source sits, where Accept lives
  *   for a deeper review, and where Qualify, Edit and Request more evidence live for all of
  *   them. A row that withholds Accept says so in a sentence rather than leaving its absence
@@ -38,7 +40,14 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, REVIEW_DECISION_META, Textarea, useToast } from '@research-harness/design';
+import {
+  Button,
+  REVIEW_DECISIONS,
+  REVIEW_DECISION_META,
+  Textarea,
+  useToast,
+} from '@research-harness/design';
+import type { ReviewDecision } from '@research-harness/design';
 import type { ReviewItem } from '../api/dto';
 import { useProjectPaths } from '../app/projectPaths';
 import { useSession } from '../app/session';
@@ -52,9 +61,25 @@ import {
 } from './ReviewActions';
 import { ErrorBox, candidateName, fieldLabel } from './Feedback';
 
-/** The two decisions every row offers, in the order they are read. */
-const SENTENCE_DECISIONS = ['defer', 'reject'] as const;
-type RowDecision = 'accept' | (typeof SENTENCE_DECISIONS)[number];
+/**
+ * The decisions a row can carry, in the one order both review surfaces read them in.
+ *
+ * The order is not written here. `REVIEW_DECISIONS` declares it once — Accept, Qualify,
+ * Edit, Reject, Defer, Request more evidence — and the review bar renders that list
+ * whole; the row renders the part of it a row offers, filtered rather than retyped. A
+ * researcher who decides one candidate on the queue and the next beside its source reads
+ * the same verbs in the same order, and a decision added to the vocabulary cannot arrive
+ * in two different places on the two screens.
+ */
+export const ROW_DECISIONS: readonly ReviewDecision[] = REVIEW_DECISIONS.filter(
+  (decision) => decision === 'accept' || decision === 'reject' || decision === 'defer',
+);
+
+/** The two a row offers at every tier: neither writes evidence, so neither needs the source. */
+const SENTENCE_DECISIONS = ROW_DECISIONS.filter(
+  (decision): decision is 'defer' | 'reject' => decision !== 'accept',
+);
+type RowDecision = 'accept' | 'defer' | 'reject';
 
 /**
  * Whether this row may be *accepted* where it sits.
@@ -99,9 +124,9 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
   const name = candidateName(item.field, item.work);
   const quote = shortQuote(item.exact_text);
   const acceptable = acceptableInQueue(item);
-  const decisions: RowDecision[] = acceptable
-    ? ['accept', ...SENTENCE_DECISIONS]
-    : [...SENTENCE_DECISIONS];
+  const decisions: RowDecision[] = (
+    acceptable ? ROW_DECISIONS : SENTENCE_DECISIONS
+  ) as RowDecision[];
   // The daemon's judgement, read off the queue item and never recomputed here.
   const hasOpenConflict = item.conflicts.length > 0;
   /** What the decision leaves behind, in the researcher's terms — the conflict included. */

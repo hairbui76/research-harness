@@ -26,6 +26,8 @@ import {
   inboxGroups,
   matchesFilters,
 } from './ReviewInbox';
+import { REVIEW_DECISIONS, REVIEW_DECISION_META } from '@research-harness/design';
+import { ROW_DECISIONS } from '../components/QueueDecision';
 import { CommandsProvider } from '../app/commands';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { fieldLabel } from '../components/Feedback';
@@ -531,12 +533,19 @@ describe('the policy batch of Product 24.4', () => {
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
     const row = screen.getByRole('group', { name: 'Decide Dataset · W0001' });
 
-    // The three decisions the daemon's routine filing leaves to the researcher, and no more.
+    // The three decisions the daemon's routine filing leaves to the researcher, and no
+    // more — in the order the review bar reads them, because both surfaces derive it from
+    // `REVIEW_DECISIONS` and a researcher moving between them reads one order.
     expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
       'Accept',
-      'Defer',
       'Reject',
+      'Defer',
     ]);
+    expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual(
+      REVIEW_DECISIONS.filter((decision) => ROW_DECISIONS.includes(decision)).map(
+        (decision) => REVIEW_DECISION_META[decision].label,
+      ),
+    );
     // Every row is decidable now; only a routine one may be *accepted* where it sits. The
     // deep-review row keeps its own group, and Accept is the one thing missing from it.
     const deep = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
@@ -685,8 +694,8 @@ describe('deciding a row, at every tier', () => {
     const row = screen.getByRole('group', { name: 'Decide Metric result · W0001' });
 
     expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
-      'Defer',
       'Reject',
+      'Defer',
     ]);
     // Where the acceptance is taken instead, said on the row rather than left to be found.
     expect(within(row).getByRole('link', { name: 'Open to decide' })).toHaveAttribute(
