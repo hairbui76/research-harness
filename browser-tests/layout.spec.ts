@@ -10,12 +10,10 @@
  * Both Playwright projects run all of it, and the measure test resizes to 1920x1080 inside
  * the test, because that is the width the critique measured 232-character lines at.
  */
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import type { APIRequestContext, Locator, Page, TestInfo } from '@playwright/test';
 // One run below scopes axe to `.rh-message` rather than the route, so it builds its own;
 // `axeViolations` is the page-level gate every other assertion in this file uses.
-import AxeBuilder from '@axe-core/playwright';
 import { axeViolations } from './axe';
 
 test.beforeEach(async ({ page }, info) => {
