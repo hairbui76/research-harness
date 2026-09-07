@@ -702,8 +702,23 @@ describe('deciding a row, at every tier', () => {
       'href',
       `/review/${DEEP.candidate_id}`,
     );
-    // Both rows the daemon did not file as routine say why Accept is not on them.
-    expect(screen.getAllByText(/Accepting it happens beside the source/)).toHaveLength(2);
+    // Why Accept is not there is a property of the daemon's category, so the group says it
+    // once, above its rows. No row repeats it: printing the same sentence under every deep
+    // review filled the viewport with one fact.
+    expect(within(row).queryByText(/Acceptance for these happens beside the source/)).toBeNull();
+    const deepGroup = screen
+      .getByRole('heading', { name: 'High-risk scientific claims (1)' })
+      .closest('section')!;
+    expect(
+      within(deepGroup).getAllByText(/Acceptance for these happens beside the source/),
+    ).toHaveLength(1);
+    // The group whose rows may be accepted where they sit says nothing of the kind.
+    const routineGroup = screen
+      .getByRole('heading', { name: 'Routine verified candidates (1)' })
+      .closest('section')!;
+    expect(
+      within(routineGroup).queryByText(/Acceptance for these happens beside the source/),
+    ).toBeNull();
   });
 
   it('takes the sentence a rejection needs on the row itself, in a field and never a dialog', async () => {

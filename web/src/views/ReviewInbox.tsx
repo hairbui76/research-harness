@@ -63,7 +63,7 @@ import {
   candidateName,
   fieldLabel,
 } from '../components/Feedback';
-import { QueueDecision } from '../components/QueueDecision';
+import { QueueDecision, acceptableInQueue } from '../components/QueueDecision';
 import { useRegisterCommands } from '../app/commands';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
@@ -352,6 +352,16 @@ export function ReviewInboxPage() {
               <Panel
                 key={category}
                 title={`${categoryLabel(category)} (${group.length})`}
+                // Why no row here carries Accept, said once for the run it is true of.
+                // The daemon's category is what withholds it — routine filing is what
+                // makes a candidate acceptable off a queue row — so the sentence is the
+                // group's, not each row's, and it is printed only where it holds.
+                {...(group.every((item) => !acceptableInQueue(item))
+                  ? {
+                      description:
+                        'Acceptance for these happens beside the source, on its own screen.',
+                    }
+                  : {})}
               >
                 <ul className="rh-web-list rh-web-list--rules">
                   {group.map((item) => (

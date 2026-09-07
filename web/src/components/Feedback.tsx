@@ -200,10 +200,20 @@ export function Empty({
 
 export function Panel({
   title,
+  description,
   action,
   children,
 }: {
   title: ReactNode;
+  /**
+   * One sentence about the whole panel, above its contents.
+   *
+   * It belongs to the group rather than to any row in it, which is the point: a fact that
+   * is true of every row is stated once here instead of under each of them. It sits in the
+   * body rather than the header because the header is a row — the title and its action —
+   * and a sentence in it would sit beside the title rather than under it.
+   */
+  description?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
 }) {
@@ -217,7 +227,12 @@ export function Panel({
         </>
       }
     >
-      <div className="rh-web-stack rh-web-stack--tight">{children}</div>
+      <div className="rh-web-stack rh-web-stack--tight">
+        {description === undefined ? null : (
+          <p className="rh-text-secondary">{description}</p>
+        )}
+        {children}
+      </div>
     </Card>
   );
 }

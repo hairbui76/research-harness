@@ -24,8 +24,9 @@
  *   bar reads: one vocabulary, one sequence, on both screens.
  * - **Open to decide**, on every row: the screen where the source sits, where Accept lives
  *   for a deeper review, and where Qualify, Edit and Request more evidence live for all of
- *   them. A row that withholds Accept says so in a sentence rather than leaving its absence
- *   to be read as a defect.
+ *   them. Why Accept is missing is not this row's fact but its group's — the daemon's
+ *   category is what withholds it — so the queue states it once above the run of rows it
+ *   is true of, and the row carries the way there rather than the reason.
  *
  * Three rules hold all of it to the same standard as the full bar:
  *
@@ -198,12 +199,6 @@ export function QueueDecision({ item, onDecided }: QueueDecisionProps) {
             there, and so are the three decisions no row offers at any tier. */}
         <Link to={href(`/review/${item.candidate_id}`)}>Open to decide</Link>
       </div>
-
-      {acceptable ? null : (
-        <p className="rh-text-secondary">
-          Accepting it happens beside the source, on its own screen.
-        </p>
-      )}
 
       {open === 'accept' ? (
         <div
