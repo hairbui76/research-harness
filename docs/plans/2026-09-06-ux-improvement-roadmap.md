@@ -202,3 +202,11 @@ check reported. Neither of the last two runs without the researcher's yes.
   the toast over the inbox count). Two integration fixes followed: the PDF highlight's 2px
   radius became `--rh-radius-mark` once the detector could read the recorded scale, and the
   corpus filters' pressed ring took the hairline under the new inset-shadow sweep.
+  The finish review ruled *fix* with eight findings — the product record contradicting the
+  tree it sat in, a sentence set in the label role over the Synthesis picker, two orders
+  for the same decision verbs, a sentence repeated under every deep-review row, the project
+  named twice at 768, a flat palette hierarchy, an actorless change entry with no subject,
+  and terms that moved when a neighbour was described — and one fix batch landed all of
+  them, binding the manuscript's bar control to its inspector view below the breakpoint on
+  the way. Logged for a later wave: windowing the Synthesis grid past a few hundred works,
+  and the manuscript inspector's chip-headed finding cards.
