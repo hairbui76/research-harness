@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -131,6 +131,62 @@ describe('AppShell', () => {
     const narrow = render(<Example narrow />);
     await user.click(screen.getByRole('button', { name: 'Project navigation' }));
     await expectNoAxeViolations(narrow.container);
+  });
+
+  it('names the destination on show beside the context it sits in', () => {
+    render(
+      <AppShell
+        narrow
+        rail={<nav aria-label="Sessions">rail</nav>}
+        main={<p>main</p>}
+        barTitle="Latency study"
+        pageLabel="Review inbox"
+      />,
+    );
+
+    // Below the breakpoint the rail is a drawer, so the bar is the only place left that
+    // can say where you are: which workspace, and which of its screens.
+    const bar = screen.getByRole('banner');
+    expect(within(bar).getByText('Latency study')).toBeInTheDocument();
+    expect(within(bar).getByText('Review inbox')).toBeInTheDocument();
+    // The drawer control keeps its own name; the title is text beside it, not on it.
+    expect(within(bar).getByRole('button', { name: 'Project navigation' })).toBeInTheDocument();
+    // The glyph between the two is decoration, and is never read out as one.
+    expect(bar.querySelector('.rh-app-shell__bar-separator')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  });
+
+  it('falls back to the main landmark name when no destination is named', () => {
+    render(<AppShell narrow main={<p>main</p>} mainLabel="Research workspace" />);
+
+    const bar = screen.getByRole('banner');
+    expect(bar).toHaveTextContent('Research workspace');
+    expect(bar.querySelector('.rh-app-shell__bar-page')).toBeNull();
+  });
+
+  it('gives the context away before the page name, and only the context', () => {
+    render(
+      <AppShell
+        narrow
+        main={<p>main</p>}
+        barTitle="A workspace with a very long display name indeed"
+        pageLabel="Manuscript"
+      />,
+    );
+
+    const bar = screen.getByRole('banner');
+    const context = bar.querySelector('.rh-app-shell__bar-context');
+    const page = bar.querySelector('.rh-app-shell__bar-page');
+    // The rule is in the stylesheet, so what a jsdom test can hold is the structure the
+    // stylesheet targets: two parts, each one findable, in that order. `fit.spec.ts`
+    // measures the page name against a real 768px viewport.
+    expect(context).not.toBeNull();
+    expect(page).not.toBeNull();
+    expect(context?.compareDocumentPosition(page as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
   });
 
   it('does not force a drawer without matchMedia', () => {

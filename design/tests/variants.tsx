@@ -34,6 +34,10 @@ const ID_ATTRIBUTES = [
   'aria-activedescendant',
   'aria-owns',
   'headers',
+  // A skip link points at a generated id, so its `href` is one end of the same
+  // relationship — and the only attribute here that also holds ordinary URLs. The
+  // replacement below only touches `rh-<name>-r<counter>`, so `#one` and `/review` survive.
+  'href',
 ];
 
 /**

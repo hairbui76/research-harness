@@ -50,6 +50,11 @@ function Shell({ narrow }: { narrow: boolean }): ReactElement {
     >
       <AppShell
         narrow={narrow}
+        // The narrow bar is the only place these two are readable once the rail is a
+        // drawer, so the specimen passes what the cockpit passes: the open project, and
+        // the destination in the navigation's own words.
+        barTitle={project.name}
+        pageLabel="Conversation"
         rail={rail}
         main={
           <>
