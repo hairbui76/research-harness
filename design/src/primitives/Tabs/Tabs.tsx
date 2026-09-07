@@ -102,10 +102,18 @@ const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   );
 });
 
-/** Bring a tab fully inside the strip without moving anything else on the page. */
+/**
+ * Bring a tab fully inside the strip without moving anything else on the page.
+ *
+ * Instantly, not smoothly: a tab reached with an arrow key has focus the moment the key is
+ * pressed, and the strip has to be showing it at that same moment — an animation that is
+ * still running when the next key lands (or that a busy machine stalls) leaves focus on a
+ * tab a person cannot see. The strip's own chevrons keep the smooth scroll; they move the
+ * strip, not the focus.
+ */
 function revealTab(tab: HTMLElement | null | undefined): void {
   if (!tab || typeof tab.scrollIntoView !== 'function') return;
-  tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  tab.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
 }
 
 export interface TabListProps extends HTMLAttributes<HTMLDivElement> {
