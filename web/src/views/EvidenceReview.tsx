@@ -194,9 +194,12 @@ export function EvidenceReviewPage() {
         <PaneGroup direction="horizontal" defaultSizes={[50, 50]}>
           <Pane minSize={25}>
             <div className="rh-web-review-pane">
+              {/* A proposal in staging, so the span wears the accent and says so. The
+                  accepted tint belongs to a decision, and none has been made here. */}
               <SourcePane
                 artifact={candidate.artifact}
                 context={sourceContext(candidate, item)}
+                authority="candidate"
                 blocks={data.blocks}
                 blockId={blockIdOf(candidate)}
               />

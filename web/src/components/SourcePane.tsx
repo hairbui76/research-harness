@@ -7,6 +7,10 @@
  * and the highlight comes from the block geometry the parse stored — the same geometry the
  * anchor was made against, not a re-derivation.
  *
+ * The mark itself is never this pane's judgement. `authority` says whether the rectangle is
+ * an accepted anchor or a proposal, and the caller answers it, because the accepted tint is
+ * a scientific status colour and a staged candidate has no status yet.
+ *
  * pdf.js lives behind `src/pdf`: `usePdfDocument` loads the document lazily (a researcher
  * who never opens a PDF never pays for a PDF engine) and `PdfPage` renders one page and
  * draws the rectangles. The worker is configured in exactly one place, `src/pdf/worker.ts`,
@@ -22,15 +26,34 @@ import type { PdfRect } from '../pdf';
 import { useSession } from '../app/session';
 import { useAsync } from '../app/useAsync';
 
+/**
+ * What standing the span drawn on the page has.
+ *
+ * The mark carries a scientific status colour, so the caller says which one applies and
+ * this pane never decides: `accepted` is the accepted-status tint of an anchor a decision
+ * was written against, and `candidate` is the accent every model proposal wears. A caller
+ * that does not know is not offered a third word — it says `candidate`, because a status
+ * colour on a decision nobody made is the one reading this pane must never allow.
+ */
+export type SpanAuthority = 'accepted' | 'candidate';
+
+/** How each standing is drawn and what it is called, for the page and for a screen reader. */
+const SPAN: Record<SpanAuthority, { kind: 'anchor' | 'sync'; label: string }> = {
+  accepted: { kind: 'anchor', label: 'Accepted span' },
+  candidate: { kind: 'sync', label: 'Proposed span' },
+};
+
 export interface SourcePaneProps {
   artifact: string;
   context: SourceContext;
+  /** Whether the span drawn on the page is an accepted anchor or a proposal. */
+  authority: SpanAuthority;
   /** The stored parse, when the caller already read it; otherwise this pane reads it. */
   blocks?: ArtifactBlocks | null;
   blockId?: string | null;
 }
 
-export function SourcePane({ artifact, context, blocks, blockId }: SourcePaneProps) {
+export function SourcePane({ artifact, context, authority, blocks, blockId }: SourcePaneProps) {
   const { client } = useSession();
   // One authenticated read of the immutable file. `useAsync` holds the bytes steady, which
   // is what `usePdfDocument` compares its source by.
@@ -40,8 +63,8 @@ export function SourcePane({ artifact, context, blocks, blockId }: SourcePanePro
   const page = context.page ?? 1;
   const box = context.bbox ?? bboxOf(blocks, blockId);
   const highlights = useMemo(
-    () => (box ? [{ id: 'span', rect: toPdfSpace(box), kind: 'anchor' as const, label: 'Accepted span' }] : []),
-    [box],
+    () => (box ? [{ id: 'span', rect: toPdfSpace(box), ...SPAN[authority] }] : []),
+    [box, authority],
   );
 
   const unavailable = bytes.error ?? (pdf.status === 'unavailable' ? pdf.error : null);
