@@ -49,8 +49,15 @@
 }
 
 /*
- * The section's name, in the same label role as a group heading and one ink step darker:
- * it is the thing a researcher reads to find out that this palette holds actions at all.
+ * The section's name — the half of the palette a researcher is reading.
+ *
+ * It used to take the same label role as a group heading, one ink step darker, and at
+ * 11px in the same tracking "Go to" read as a peer of "Waiting" and "The record" rather
+ * than as the half those runs sit inside (`command-palette.png`). It is a heading over
+ * headings, so it takes the `ui` role in primary ink at heading weight, in sentence case:
+ * the label role's uppercase belongs to a `<dt>` or a column name, not above a heading.
+ * The run headings keep the label role in muted ink, and the two now differ in size,
+ * weight and ink at once.
  */
 .rh-web-palette__section-heading {
   /* Sticky, so a list long enough to scroll always says which half is being read. */
@@ -61,11 +68,11 @@
   margin: 0;
   padding-block: var(--rh-space-1);
   padding-inline: var(--rh-space-2);
-  font-size: var(--rh-type-label-size);
-  line-height: var(--rh-type-label-lh);
-  letter-spacing: var(--rh-type-label-ls);
-  font-weight: var(--rh-type-label-weight);
-  color: var(--rh-text-secondary);
+  font-size: var(--rh-type-ui-size);
+  line-height: var(--rh-type-ui-lh);
+  letter-spacing: var(--rh-type-ui-ls);
+  font-weight: var(--rh-type-h4-weight);
+  color: var(--rh-text-primary);
 }
 
 .rh-web-palette__heading {

@@ -106,6 +106,46 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   await expect(actions.getByRole('option', { name: /Keyboard shortcuts/ })).toBeVisible();
   // Eleven destinations fill the pane, so what is in the list is also said above it.
   await expect(page.getByText(/screens to go to, and \d+ actions on this screen\./)).toBeVisible();
+
+  /*
+   * The two headings are not peers, and have to look it.
+   *
+   * "Go to" and "Actions" divide the palette in half; "Waiting", "The record" and
+   * "Outputs" are the rail's own runs inside the first half. Both were set in the same
+   * label role one ink step apart, so "Go to" read as a sibling of the runs rather than
+   * as the half that contains them. The section heading takes the `ui` role in primary
+   * ink; the run headings keep the label role in muted ink.
+   */
+  const hierarchy = await page.evaluate(() => {
+    const read = (selector: string) => {
+      const node = document.querySelector(selector);
+      if (node === null) throw new Error(`no ${selector} in the palette`);
+      const style = getComputedStyle(node);
+      return {
+        size: Number.parseFloat(style.fontSize),
+        weight: Number.parseInt(style.fontWeight, 10),
+        colour: style.color,
+        transform: style.textTransform,
+      };
+    };
+    return {
+      section: read('.rh-web-palette__section-heading'),
+      group: read('.rh-web-palette__heading'),
+    };
+  });
+  expect(
+    hierarchy.section.size,
+    'the palette section heading must not be the size of a run heading',
+  ).toBeGreaterThan(hierarchy.group.size);
+  expect(
+    hierarchy.section.colour,
+    'the palette section heading must not take the run headings’ ink',
+  ).not.toEqual(hierarchy.group.colour);
+  // Heading weight, and sentence case: the label role's uppercase belongs to a `<dt>` or a
+  // column name, and a heading that shouted would trade one flat hierarchy for another.
+  expect(hierarchy.section.weight).toBe(600);
+  expect(hierarchy.section.transform).toEqual('none');
+
   await page.screenshot({ path: info.outputPath('command-palette.png'), fullPage: true });
   await page.getByRole('combobox', { name: 'Search screens and actions' }).fill('corpus');
   await page.keyboard.press('Enter');
