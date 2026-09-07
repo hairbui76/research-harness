@@ -168,7 +168,7 @@ function SelectedAttachment() {
   }
   return (
     <section className="rh-web-stack rh-web-stack--tight">
-      <h3 className="rh-text-h4">{attachment.name}</h3>
+      <h2 className="rh-text-h4">{attachment.name}</h2>
       <AttachmentViewer
         attachment={attachment}
         renderPage={renderAttachmentPage}
@@ -209,7 +209,7 @@ function UsedIn({
   const used = useMemo(() => messagesReferencing(messages, target), [messages, target]);
   return (
     <section className="rh-web-stack rh-web-stack--tight">
-      <h3 className="rh-text-h4">{`Where ${target} was used`}</h3>
+      <h2 className="rh-text-h4">{`Where ${target} was used`}</h2>
       {used.length === 0 ? (
         <AsyncState
           kind="empty"
