@@ -108,15 +108,29 @@ button.rh-evidence-card__id:hover {
   font-size: var(--rh-type-body-sm-size);
 }
 
+/*
+ * The facts are a grid rather than a wrapping row, because one of them can open a sentence.
+ *
+ * In a flex row each fact is as wide as its content, so a sentence opening inside one
+ * widened that fact to the sentence's own measure and re-wrapped the row: focusing
+ * STRENGTH sent ORIGIN and FIELD — the two tab stops after it — onto another line, while
+ * the keyboard was on its way to them. The tracks here are set by the container, so a
+ * sentence changes no column's width, and the sentence itself takes a row of its own
+ * across the whole grid, below every term.
+ */
 .rh-evidence-card__facts {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
   gap: var(--rh-space-2) var(--rh-space-6);
   margin: var(--rh-space-3) 0 0;
 }
 
 .rh-evidence-card__fact {
   min-width: 0;
+}
+
+.rh-evidence-card__fact-hint {
+  grid-column: 1 / -1;
 }
 
 .rh-evidence-card__fact-value {

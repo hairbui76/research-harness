@@ -1,11 +1,12 @@
 import { forwardRef } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Card } from '../../primitives/Card';
 import type { CardProps } from '../../primitives/Card';
 import { Icon } from '../../primitives/Icon';
 import { cx } from '../../utils/cx';
 import { AuthorityBadge } from '../AuthorityBadge';
-import { DescribedTerm } from '../DescribedTerm';
+import { useDescribedTerm } from '../DescribedTerm';
+import type { DescribedTermParts } from '../DescribedTerm';
 import { SourceAnchor } from '../SourceAnchor';
 import type { EvidenceModel, SourceAnchorModel } from '../models';
 
@@ -60,27 +61,12 @@ export interface EvidenceCardProps
   selected?: boolean;
 }
 
-interface FactProps {
+interface FactSpec {
+  key: string;
   label: string;
   value: ReactNode;
-  /** What the product states about this value, when it states anything. */
-  description?: string;
-}
-
-function Fact({ label, value, description }: FactProps): ReactElement | null {
-  if (value === undefined || value === null || value === '') return null;
-  return (
-    <div className="rh-evidence-card__fact">
-      <dt className="rh-text-label">{label}</dt>
-      <dd className="rh-evidence-card__fact-value">
-        {description === undefined ? (
-          value
-        ) : (
-          <DescribedTerm description={description}>{value}</DescribedTerm>
-        )}
-      </dd>
-    </div>
-  );
+  /** The tab stop and the sentence, when the host stated one for this fact. */
+  term: DescribedTermParts;
 }
 
 /**
@@ -111,6 +97,45 @@ export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function 
   ref,
 ) {
   const stale = evidence.stale === true || evidence.anchor.stale === true;
+
+  /*
+   * The five metadata facts, and the sentence each one offers.
+   *
+   * The hooks are called for all five whether or not the host stated a meaning, because a
+   * hook cannot be called conditionally; one given nothing hands back nothing — no tab
+   * stop, no sentence — and the fact renders as plain text. `Work` is the usual such fact:
+   * an identifier means nothing beyond itself.
+   */
+  const facts: FactSpec[] = (
+    [
+      { key: 'work', label: 'Work', value: evidence.workId, term: useDescribedTerm(meanings?.work) },
+      {
+        key: 'type',
+        label: 'Type',
+        value: evidence.evidenceType,
+        term: useDescribedTerm(meanings?.type),
+      },
+      {
+        key: 'strength',
+        label: 'Strength',
+        value: evidence.strength,
+        term: useDescribedTerm(meanings?.strength),
+      },
+      {
+        key: 'origin',
+        label: 'Origin',
+        value: evidence.origin,
+        term: useDescribedTerm(meanings?.origin),
+      },
+      {
+        key: 'field',
+        label: 'Field',
+        value: evidence.field,
+        term: useDescribedTerm(meanings?.field),
+      },
+    ] satisfies FactSpec[]
+  ).filter((fact) => fact.value !== undefined && fact.value !== null && fact.value !== '');
+
   const heading = (
     <span className="rh-evidence-card__title">
       <Icon name="quote" size={16} />
@@ -182,18 +207,39 @@ export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function 
       ) : null}
       {compact ? null : (
         <dl className="rh-evidence-card__facts">
-          <Fact label="Work" value={evidence.workId} {...describedBy(meanings?.work)} />
-          <Fact label="Type" value={evidence.evidenceType} {...describedBy(meanings?.type)} />
-          <Fact label="Strength" value={evidence.strength} {...describedBy(meanings?.strength)} />
-          <Fact label="Origin" value={evidence.origin} {...describedBy(meanings?.origin)} />
-          <Fact label="Field" value={evidence.field} {...describedBy(meanings?.field)} />
+          {facts.map(({ key, label, value, term }) => (
+            <div key={key} className="rh-evidence-card__fact">
+              <dt className="rh-text-label">{label}</dt>
+              <dd className="rh-evidence-card__fact-value">
+                {term.named === null ? (
+                  value
+                ) : (
+                  <>
+                    <span className="rh-described-term__word" {...term.word}>
+                      {value}
+                    </span>
+                    {term.named}
+                  </>
+                )}
+              </dd>
+            </div>
+          ))}
+          {/*
+            Every sentence after every term, and never inside the one it belongs to.
+            The grid gives it a row of its own spanning the whole width, so opening one
+            leaves the terms — which are the next tab stops — exactly where they were.
+          */}
+          {facts.map(({ key, term }) =>
+            term.hint === null ? null : (
+              <div key={`${key}-hint`} className="rh-evidence-card__fact-hint">
+                {term.hint}
+              </div>
+            ),
+          )}
         </dl>
       )}
     </Card>
   );
 });
 
-/** The description prop for a fact, present only when the host stated a meaning for it. */
-function describedBy(description: string | undefined): { description?: string } {
-  return description === undefined ? {} : { description };
-}
+

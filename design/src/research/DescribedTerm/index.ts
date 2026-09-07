@@ -1,2 +1,2 @@
-export { DescribedTerm } from './DescribedTerm';
-export type { DescribedTermProps } from './DescribedTerm';
+export { DescribedTerm, useDescribedTerm } from './DescribedTerm';
+export type { DescribedTermParts, DescribedTermProps } from './DescribedTerm';

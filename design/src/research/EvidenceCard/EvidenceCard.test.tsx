@@ -119,7 +119,32 @@ describe('EvidenceCard', () => {
 
   it('describes nothing at all when it is given no meanings', () => {
     const { container } = render(<EvidenceCard evidence={SAMPLE_EVIDENCE} />);
-    expect(container.querySelector('.rh-described-term')).toBeNull();
+    expect(container.querySelector('.rh-described-term__word')).toBeNull();
+    expect(container.querySelector('.rh-evidence-card__fact [tabindex]')).toBeNull();
+  });
+
+  it('opens a fact’s sentence beneath the terms, never inside the one it belongs to', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <EvidenceCard
+        evidence={SAMPLE_EVIDENCE}
+        meanings={{ strength: 'How directly the source supports the evidence.' }}
+      />,
+    );
+
+    const word = container.querySelector('.rh-described-term__word');
+    await user.click(word!);
+
+    // The sentence is a child of the grid, after every fact — not a child of the fact it
+    // describes. In the row it used to sit in it widened that fact to its own measure and
+    // re-wrapped the whole row, which moved the terms beside it while the keyboard was on
+    // its way to them; from a row of its own it moves nothing.
+    const hint = container.querySelector('.rh-evidence-card__fact-hint');
+    expect(hint).not.toBeNull();
+    expect(hint!.parentElement).toHaveClass('rh-evidence-card__facts');
+    expect(hint!.closest('.rh-evidence-card__fact')).toBeNull();
+    const children = [...container.querySelector('.rh-evidence-card__facts')!.children];
+    expect(children.indexOf(hint!)).toBe(children.length - 1);
   });
 
   it('drops the metadata grid when compact', () => {

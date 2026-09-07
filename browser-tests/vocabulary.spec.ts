@@ -231,7 +231,37 @@ test('every word the review screen prints as a value defines itself to the keybo
     await page.locator('.rh-described-term__word[title], .rh-badge[title]').count(),
   ).toBe(0);
 
+  /*
+   * Describing one term must not move the terms beside it.
+   *
+   * The five facts on the evidence card are a row of tab stops. The sentence used to open
+   * inside the fact that owns it, which widened that fact and re-wrapped the row: focusing
+   * STRENGTH sent ORIGIN and FIELD — the next two tab stops — somewhere else, so the
+   * keyboard walk aimed at a moving target and the eye lost its place. The sentence now
+   * spans its own row beneath the terms, and the terms hold position.
+   */
+  const factWords = page.locator('.rh-evidence-card__facts .rh-described-term__word');
+  const before = await factWords.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const box = node.getBoundingClientRect();
+      return { text: (node.textContent ?? '').trim(), x: Math.round(box.x), y: Math.round(box.y) };
+    }),
+  );
+  expect(before.length, 'the review card must show described facts').toBeGreaterThan(2);
+
   await page.getByText('Direct', { exact: true }).first().click();
   await expect(page.locator(HINT).first()).toContainText('How directly the source supports');
+
+  const after = await factWords.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const box = node.getBoundingClientRect();
+      return { text: (node.textContent ?? '').trim(), x: Math.round(box.x), y: Math.round(box.y) };
+    }),
+  );
+  expect(
+    after.filter((term) => term.text !== 'Direct'),
+    'describing one term moved the terms beside it',
+  ).toEqual(before.filter((term) => term.text !== 'Direct'));
+
   await page.screenshot({ path: info.outputPath('vocabulary-review-described.png'), fullPage: true });
 });
