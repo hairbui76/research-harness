@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
@@ -101,6 +101,109 @@ describe('Message', () => {
     await user.click(screen.getByRole('button', { name: 'Promote this message' }));
     expect(screen.getAllByRole('menuitem')).toHaveLength(1);
     expect(screen.getByRole('menuitem', { name: PROMOTION_TARGET_META.note.label })).toBeInTheDocument();
+  });
+
+  it('names the action row, so the controls read as one group rather than a scatter', () => {
+    render(
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        onCopy={() => undefined}
+        onPromote={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('group', { name: 'Actions for M0042' })).toBeInTheDocument();
+  });
+
+  /*
+   * Eight controls beside one paragraph is not a toolbar, it is a scatter. The row keeps a
+   * primary action on the page — promotion is how a chat answer becomes reviewable state —
+   * and folds the rest into one overflow, without going back to hover: everything is still
+   * reachable by keyboard from the row itself.
+   */
+  it('folds the secondary controls into one overflow when the host asks', async () => {
+    const user = userEvent.setup();
+    const onCopy = vi.fn();
+    render(
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={onCopy}
+        onRetry={() => undefined}
+        onOpenReceipt={() => undefined}
+        onPromote={() => undefined}
+      />,
+    );
+
+    const row = screen.getByRole('group', { name: 'Actions for M0042' });
+    expect(within(row).getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Promote this message',
+      'More actions',
+    ]);
+
+    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Copy message',
+      'Ask again',
+      'Context used (CP0007)',
+    ]);
+
+    await user.click(screen.getByRole('menuitem', { name: 'Copy message' }));
+    expect(onCopy).toHaveBeenCalled();
+  });
+
+  it('keeps recovery on the row: a failed turn does not hide its retry in the overflow', async () => {
+    const user = userEvent.setup();
+    render(
+      <Message
+        message={SAMPLE_FAILED_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={() => undefined}
+        onRetry={() => undefined}
+        onOpenReceipt={() => undefined}
+        onPromote={() => undefined}
+      />,
+    );
+
+    const row = screen.getByRole('group', { name: `Actions for ${SAMPLE_FAILED_MESSAGE.id}` });
+    expect(within(row).getByRole('button', { name: 'Retry this turn' })).toBeInTheDocument();
+
+    await user.click(within(row).getByRole('button', { name: 'More actions' }));
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Copy message',
+      `Context used (${SAMPLE_FAILED_MESSAGE.contextPackId})`,
+    ]);
+  });
+
+  it('leaves a lone secondary control on the row rather than hiding it behind a menu', () => {
+    render(
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={() => undefined}
+        onPromote={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Copy message' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
+  });
+
+  it('has no accessibility violations with the overflow in place', async () => {
+    const { container } = render(
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={() => undefined}
+        onRetry={() => undefined}
+        onOpenReceipt={() => undefined}
+        onPromote={() => undefined}
+      />,
+    );
+    await expectNoAxeViolations(container);
   });
 
   it('has no accessibility violations', async () => {

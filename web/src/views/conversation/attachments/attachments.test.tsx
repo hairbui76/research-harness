@@ -496,7 +496,10 @@ describe('sending with a compatible model', () => {
     renderConversation({ daemon });
     await screen.findByText(/records the accepted claim/, undefined, { timeout: 3000 });
 
-    await user.click(await screen.findByRole('button', { name: /Context used/ }));
+    // The receipt sits in the turn's overflow beside copy and "ask again"; promotion is
+    // the act this row keeps visible.
+    await user.click(await screen.findByRole('button', { name: 'More actions' }));
+    await user.click(await screen.findByRole('menuitem', { name: /Context used/ }));
 
     expect(
       await screen.findByText(/figure-3-latency\.png \(image\/png, 184320 bytes\) — sent/),

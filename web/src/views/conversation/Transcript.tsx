@@ -3,8 +3,13 @@
  *
  * Everything a researcher can do to a message is in its action row rather than on hover
  * (the Design System's `Message` owns that decision): copy, retry, open the `Context used`
- * receipt, promote. Attempts are navigable inside their turn, so a retried question is one
- * row with its history rather than three rows that look like three questions.
+ * receipt, promote. The row is one group with one visible act — promotion, which is how a
+ * chat answer becomes something reviewable — and an overflow for the rest, because this
+ * page adds Inspect, a corpus save per attachment and attempt navigation to the same row,
+ * and eight controls beside one paragraph is a scatter rather than a toolbar. Nothing is
+ * hidden until hover and nothing left the keyboard; a turn that failed keeps its retry in
+ * the open. Attempts are navigable inside their turn, so a retried question is one row
+ * with its history rather than three rows that look like three questions.
  *
  * The Markdown renderer is the application's — `react-markdown` + KaTeX, with raw HTML off
  * and no network fetches (`src/render`) — and `rh://` links are resolved here rather than
@@ -180,6 +185,7 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
         {...(onlyPdf
           ? { renderPage: (pageIndex: number) => renderAttachmentPage(onlyPdf.id, pageIndex) }
           : {})}
+        secondaryActions="menu"
         selected={selection?.kind === 'message' && selection.messageId === message.id}
         onOpenRef={(entity: EntityRefModel) => openRef(entity)}
         onCopy={() => void copyMessage(message)}

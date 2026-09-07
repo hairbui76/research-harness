@@ -292,7 +292,9 @@ exports[`Message theme x density > matches the dark / comfortable snapshot 1`] =
         </div>
       </div>
       <div
+        aria-label="Actions for M0041"
         class="rh-message__actions"
+        role="group"
       />
     </article>
     <article
@@ -476,7 +478,9 @@ exports[`Message theme x density > matches the dark / comfortable snapshot 1`] =
         </div>
       </div>
       <div
+        aria-label="Actions for M0042"
         class="rh-message__actions"
+        role="group"
       >
         <button
           aria-label="Copy message"
@@ -851,7 +855,9 @@ exports[`Message theme x density > matches the dark / compact snapshot 1`] = `
         </div>
       </div>
       <div
+        aria-label="Actions for M0041"
         class="rh-message__actions"
+        role="group"
       />
     </article>
     <article
@@ -1035,7 +1041,9 @@ exports[`Message theme x density > matches the dark / compact snapshot 1`] = `
         </div>
       </div>
       <div
+        aria-label="Actions for M0042"
         class="rh-message__actions"
+        role="group"
       >
         <button
           aria-label="Copy message"
@@ -1410,7 +1418,9 @@ exports[`Message theme x density > matches the light / comfortable snapshot 1`] 
         </div>
       </div>
       <div
+        aria-label="Actions for M0041"
         class="rh-message__actions"
+        role="group"
       />
     </article>
     <article
@@ -1594,7 +1604,9 @@ exports[`Message theme x density > matches the light / comfortable snapshot 1`] 
         </div>
       </div>
       <div
+        aria-label="Actions for M0042"
         class="rh-message__actions"
+        role="group"
       >
         <button
           aria-label="Copy message"
@@ -1969,7 +1981,9 @@ exports[`Message theme x density > matches the light / compact snapshot 1`] = `
         </div>
       </div>
       <div
+        aria-label="Actions for M0041"
         class="rh-message__actions"
+        role="group"
       />
     </article>
     <article
@@ -2153,7 +2167,9 @@ exports[`Message theme x density > matches the light / compact snapshot 1`] = `
         </div>
       </div>
       <div
+        aria-label="Actions for M0042"
         class="rh-message__actions"
+        role="group"
       >
         <button
           aria-label="Copy message"
