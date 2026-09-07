@@ -131,12 +131,18 @@ test('the overview leads with what is waiting, and states what the project holds
   await expect(decided.locator('.rh-change-list__what')).toHaveText(
     /^You accepted methodology decision D0001/,
   );
-  const opened = page.locator('.rh-change-list__entry').filter({ hasText: 'opened a conflict' });
+  const opened = page.locator('.rh-change-list__entry').filter({ hasText: 'was opened' });
   await expect(opened).toHaveCount(1);
   expect(
     await opened.evaluate((node) => node.hasAttribute('data-by')),
     'a conflict opening the record attributes to nobody stays unattributed',
   ).toBe(false);
+  // Unattributed is not subjectless. Every other row here begins "You …"; a verb-initial
+  // fragment among them reads as an instruction, so the entry with no actor is passive and
+  // its subject is the conflict — which says no more about who than the record does.
+  await expect(opened.locator('.rh-change-list__what')).toHaveText(
+    /^A conflict was opened: the staged F1 differs/,
+  );
 
   // "Look again" says when it last looked, and only announces a read the researcher asked
   // for: an automatic one is quiet text (critique H1).

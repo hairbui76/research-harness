@@ -57,7 +57,15 @@ export interface ChangeListEntry {
    * the sentence then stands on its own rather than naming a subject the host never gave.
    */
   by?: ChangeBy | undefined;
-  /** The sentence the host wrote for this change. Never assembled here. */
+  /**
+   * The sentence the host wrote for this change. Never assembled here.
+   *
+   * With `by`, it is verb-initial — "accepted evidence E0001…" — because this list writes
+   * the subject in front of it. Without `by`, nothing is coming, so the host writes a
+   * sentence that already has a subject: a verb-initial fragment standing among rows that
+   * begin "You …" reads as an instruction rather than as a record. The passive is how a
+   * host says an actor is unknown without naming one ("a conflict was opened: …").
+   */
   label: string;
   /** The instant, machine-readable: the `datetime` of the rendered `<time>`. */
   at: string;

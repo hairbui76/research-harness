@@ -1287,14 +1287,21 @@ def _conflict_change(
 ) -> ChangeEntry:
     """One conflict change, worded so that whoever did it can lead the sentence.
 
-    The label begins with the verb — "opened a conflict…", "resolved a conflict…" — because
-    a client puts the actor in front of it ("you resolved a conflict…"). It also stops the
-    row repeating the word the kind already prints beside it.
+    An attributed change begins with the verb — "opened a conflict…", "resolved a
+    conflict…" — because a client writes the actor in front of it ("you resolved a
+    conflict…"). It also stops the row repeating the word the kind already prints beside it.
+
+    An unattributed one has no such word coming. The store keeps no actor for an opening,
+    and a run is the only thing that names one, so a conflict opened outside a run reaches
+    the client with nothing in front of it and a verb-initial fragment then reads as an
+    order — "Opened a conflict: …" beside rows that all say "You …". The passive is what
+    the refusal to guess actually sounds like, so this writes it: the subject is the
+    conflict, and who opened it stays unsaid rather than invented.
     """
     return ChangeEntry(
         id=f"{record.conflict_id}:{verb}",
         kind="conflict",
-        label=f"{verb} a conflict: {summary}",
+        label=f"{verb} a conflict: {summary}" if by else f"a conflict was {verb}: {summary}",
         detail=record.subject,
         at=moment.isoformat(),
         when=_human_moment(moment),

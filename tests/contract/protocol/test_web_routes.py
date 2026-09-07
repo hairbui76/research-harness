@@ -489,7 +489,7 @@ def test_each_change_says_whether_the_researcher_or_the_daemon_recorded_it(
     assert recorded["work"] == "researcher", "the corpus was ingested by the researcher"
     assert recorded["evidence"] == "researcher", "only a researcher accepts evidence"
     assert recorded["decision"] == "researcher"
-    answered = next(entry for entry in changes.entries if entry.label.startswith("resolved"))
+    answered = next(entry for entry in changes.entries if "resolved a conflict" in entry.label)
     assert answered.by == "researcher", "a conflict is answered by the researcher who resolved it"
 
 
@@ -540,13 +540,20 @@ def test_a_conflict_nothing_attributes_is_left_unattributed_rather_than_guessed(
 
     changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
     opened = {
-        entry.detail: entry.by
+        entry.detail: entry
         for entry in changes.entries
-        if entry.kind == "conflict" and entry.label.startswith("opened")
+        if entry.kind == "conflict" and "opened" in entry.label
     }
 
-    assert opened["conf-anonymous"] == ""
-    assert opened["conf-from-a-run"] == "daemon"
+    assert opened["conf-anonymous"].by == ""
+    assert opened["conf-from-a-run"].by == "daemon"
+
+    # And the sentence stands up without the subject a client would otherwise lead it with.
+    # An attributed change is verb-initial, because the client writes "The daemon" in front
+    # of it; an unattributed one has no such word coming, so the daemon writes the passive
+    # rather than handing the client an imperative — "opened a conflict:" reads as an order.
+    assert opened["conf-from-a-run"].label.startswith("opened a conflict:")
+    assert opened["conf-anonymous"].label.startswith("a conflict was opened:")
 
 
 def test_the_change_list_caps_what_it_carries_and_says_what_it_left_out(
