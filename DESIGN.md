@@ -532,8 +532,15 @@ Pages are query containers, not viewport listeners: a research page has to fit w
 rail, an inspector and a draggable divider leave it, so `FullPageWorkspace` queries its own
 inline size (`rh-page`, narrow below 44rem: the toolbar drops under the title and the 20rem
 side column goes under the content), and the inspector queries its own (`rh-inspector`,
-narrow below 20rem). The shell keeps its viewport query because the shell is the window.
-Every overlay portals to `document.body`, which is what makes containment safe.
+narrow below 20rem). The manuscript workspace measures its own inline size the same way
+and switches its whole arrangement below 960px - three columns become the file tree beside
+one tab strip, where the source, the PDF and the audit inspector take turns over the
+document area - because on a 1024px screen the shell's rail leaves it about 768px and a
+viewport query would call that wide; the diagnostics panel inside it queries its own width
+too (`rh-diagnostics`, narrow below 34rem: a row's message takes a line of its own rather
+than a few characters beside a fixed file position). The shell keeps its viewport query
+because the shell is the window. Every overlay portals to `document.body`, which is what
+makes containment safe.
 
 A full page keeps its frame in every state: a sticky header (padding 16px 20px 12px, 1px
 bottom hairline, the `h1`, its description in secondary ink and its toolbar) above a body
