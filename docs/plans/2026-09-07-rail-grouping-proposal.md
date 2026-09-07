@@ -135,3 +135,5 @@ shortcuts and palette names.
     Grouping:  A  /  B  /  C  /  none
     If A or C, keep these names? Waiting · The record · Outputs
     Build it in wave 3, or later?
+
+**Answered 2026-09-08:** A, with those three names kept, and built — shipped in wave 5.
