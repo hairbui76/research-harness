@@ -4,6 +4,7 @@
  */
 
 export * from './models';
+export * from './labels';
 
 export { AuthorityBadge } from './AuthorityBadge';
 export type { AuthorityBadgeProps } from './AuthorityBadge';
