@@ -104,6 +104,8 @@ test('the three rolled-out pages lead with what needs a researcher', async ({
   );
   await expect(page.getByText('1 question is still open', { exact: true })).toBeVisible();
   await expect(page.getByText(/no capture in the corpus re-encrypts a flow/)).toBeVisible();
+  // The group's line already says every row under it is open, so no row repeats it.
+  await expect(page.getByText('Open', { exact: true })).toHaveCount(0);
   const open = (await page.getByRole('heading', { name: 'Still open' }).boundingBox())!;
   const answered = (await page.getByRole('heading', { name: 'Answered' }).boundingBox())!;
   expect(open.y, 'what is still open is read before what has been answered').toBeLessThan(

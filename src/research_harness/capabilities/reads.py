@@ -427,6 +427,16 @@ class QuestionGroup(_Summary):
     a page deciding from `kind` which of its two panels a group belongs in.
     """
 
+    status: str = ""
+    """The one status this group's own line already states, when it states one.
+
+    "1 question is still open" says `open` about every row under it, so a badge repeating
+    it beside each question is the group's name said again. A question whose status the
+    line does not state — a partially answered one, which is still unanswered work — is
+    the row that has something to add, and the page badges that. Which status a group
+    states is part of composing the grouping, so it is decided here (Product 5 P10).
+    """
+
     questions: tuple[str, ...] = ()
     """The questions in this group, oldest first: the longest unanswered is read first."""
 
@@ -886,12 +896,19 @@ CLAIM_CONCERNS: tuple[tuple[str, str, str], ...] = (
     ("stale", "has gone stale", "have gone stale"),
 )
 
-#: The three states a question can be read in, and the sentence each group reads with. The
-#: first two are still work; the third is the record of work already finished.
-QUESTION_CONCERNS: tuple[tuple[str, str, str, str], ...] = (
-    ("unanswered", "waiting", "is still open", "are still open"),
-    ("blocked", "waiting", "is blocked", "are blocked"),
-    ("answered", "settled", "has been answered", "have been answered"),
+#: The three states a question can be read in, the sentence each group reads with, and the
+#: one status that sentence already states. The first two groups are still work; the third
+#: is the record of work already finished.
+QUESTION_CONCERNS: tuple[tuple[str, str, str, str, str], ...] = (
+    ("unanswered", "waiting", "is still open", "are still open", QuestionStatus.OPEN.value),
+    ("blocked", "waiting", "is blocked", "are blocked", QuestionStatus.BLOCKED.value),
+    (
+        "answered",
+        "settled",
+        "has been answered",
+        "have been answered",
+        QuestionStatus.ANSWERED.value,
+    ),
 )
 
 #: Which group a question's own status puts it in.
@@ -953,12 +970,13 @@ def question_groups(questions: tuple[QuestionSummary, ...]) -> tuple[QuestionGro
             label=_counted("question", len(found[kind]), singular, plural),
             count=len(found[kind]),
             surface=surface,
+            status=status,
             questions=tuple(
                 entry.id
                 for entry in sorted(found[kind], key=lambda entry: (entry.opened, entry.id))
             ),
         )
-        for kind, surface, singular, plural in QUESTION_CONCERNS
+        for kind, surface, singular, plural, status in QUESTION_CONCERNS
         if kind in found
     )
 

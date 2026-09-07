@@ -74,6 +74,7 @@ function questionsDaemon() {
             label: '1 question is still open',
             count: 1,
             surface: 'waiting',
+            status: 'open',
             questions: [QUESTION.id],
           },
         ],

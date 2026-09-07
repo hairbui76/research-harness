@@ -979,6 +979,28 @@ def test_question_list_groups_what_is_still_open_and_reads_the_oldest_first(
     assert result["summary"] == "2 questions are still open."
 
 
+def test_a_question_group_states_the_one_status_its_own_line_already_says(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """So a row badges its status only where the status is what the row has to add.
+
+    "1 question is still open" says `open` about every row under it, and a badge repeating
+    that beside each question would be the group's name said twice. Which status a group
+    states is part of composing the grouping, so the daemon says it.
+    """
+    _create_question(corpus, registry)
+    _create_question(
+        corpus, registry, question_id="RQ0002", text="Which captures re-encrypt a flow?"
+    )
+    _answer_question(corpus, registry, "RQ0002")
+
+    groups = {
+        group["kind"]: group["status"] for group in _call(reader, "question.list", {})["groups"]
+    }
+
+    assert groups == {"unanswered": "open", "answered": "answered"}
+
+
 def test_question_list_says_when_every_question_it_holds_has_been_answered(
     reader: TestClient, corpus: Path, registry: CapabilityRegistry
 ) -> None:

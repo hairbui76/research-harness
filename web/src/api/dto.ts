@@ -368,13 +368,15 @@ export interface WorkList {
  *
  * `surface` is `waiting` or `settled`: an open question and a blocked one are both work,
  * an answered one is the record of work already done. `questions` is oldest first, so the
- * longest unanswered is read first.
+ * longest unanswered is read first. `status` is the one status the group's own line
+ * already states, so a row only badges its status when it has something else to say.
  */
 export interface QuestionGroup {
   kind: string;
   label: string;
   count: number;
   surface: string;
+  status: string;
   questions: string[];
 }
 

@@ -131,7 +131,7 @@ function QuestionGroupList({
         {group.questions.map((id) => {
           const question = byId.get(id);
           if (question === undefined) return null;
-          return <QuestionRow key={`${group.kind}:${id}`} question={question} />;
+          return <QuestionRow key={`${group.kind}:${id}`} question={question} group={group} />;
         })}
       </ul>
     </li>
@@ -144,14 +144,22 @@ function QuestionGroupList({
  * The claims are the only links here, and they are the next step: a question is answered by
  * registering claims and resolving it against them, so the way out of this row is into a
  * claim. The row itself links nowhere, because the daemon gives a question no route.
+ *
+ * The status is badged only where it is the subject. Under "1 question is still open" every
+ * row is open, and an `Open` badge beside each of them is the group's own name repeated; a
+ * partially answered question in that same group is the row that has something to add, and
+ * it badges. Which status a group already states is the daemon's (`QuestionGroup.status`).
+ * Staleness is not the group in either panel, so it always badges.
  */
-function QuestionRow({ question }: { question: QuestionSummary }) {
+function QuestionRow({ question, group }: { question: QuestionSummary; group: QuestionGroup }) {
   const { href } = useProjectPaths();
   return (
     <li>
       <p className="rh-web-row rh-web-questions__question">
         <span>{question.question}</span>
-        <StatusBadge status={question.status} vocabulary="questionStatus" describe />
+        {question.status === group.status ? null : (
+          <StatusBadge status={question.status} vocabulary="questionStatus" describe />
+        )}
         {question.stale === 'stale' ? (
           <StatusBadge status="stale" vocabulary="staleState" describe />
         ) : null}

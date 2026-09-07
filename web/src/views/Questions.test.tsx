@@ -64,6 +64,8 @@ function questionsDaemon(
             label: waiting.length === 1 ? '1 question is still open' : `${waiting.length} questions are still open`,
             count: waiting.length,
             surface: 'waiting',
+            // The one status this group's own line already states (`QuestionGroup.status`).
+            status: 'open',
             questions: waiting.map((question) => question.id),
           },
         ]
@@ -75,6 +77,7 @@ function questionsDaemon(
             label: answered.length === 1 ? '1 question has been answered' : `${answered.length} questions have been answered`,
             count: answered.length,
             surface: 'settled',
+            status: 'answered',
             questions: answered.map((question) => question.id),
           },
         ]
@@ -154,6 +157,34 @@ describe('the questions page', () => {
 
     await waitFor(() => expect(screen.getByText('Partially answered')).toBeInTheDocument());
     expect(container.textContent).not.toContain('partially_answered');
+  });
+
+  /**
+   * A status is badged where it is the subject, and the group's own line is already the
+   * subject of every row under it: "1 question is still open" says `open` about all of
+   * them. The row that has something to add is the one the line does not describe.
+   */
+  it('badges a status only where the group’s own line does not already state it', async () => {
+    const partly = {
+      ...QUESTION,
+      id: 'RQ0009',
+      question: 'Which captures re-encrypt a flow?',
+      status: 'partially_answered',
+    };
+    renderView(<QuestionsPage />, { daemon: questionsDaemon([QUESTION, partly]) });
+
+    await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
+    expect(screen.getByText('Partially answered')).toBeInTheDocument();
+    expect(screen.queryByText('Open')).not.toBeInTheDocument();
+  });
+
+  it('keeps the stale badge, because staleness is never the group', async () => {
+    const decayed = { ...QUESTION, id: 'RQ0010', stale: 'stale' };
+    renderView(<QuestionsPage />, { daemon: questionsDaemon([decayed]) });
+
+    await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
+    expect(screen.getByText('Stale')).toBeInTheDocument();
+    expect(screen.queryByText('Open')).not.toBeInTheDocument();
   });
 
   /**
