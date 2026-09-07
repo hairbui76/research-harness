@@ -64,7 +64,7 @@
   position: absolute;
   pointer-events: none;
   border: var(--rh-border-width) solid var(--rh-highlight-on-paper-border);
-  border-radius: 2px;
+  border-radius: var(--rh-radius-mark);
   background: var(--rh-highlight-on-paper);
   mix-blend-mode: multiply;
 }

@@ -158,6 +158,7 @@ typography:
     lineHeight: 1.5
     letterSpacing: "normal"
 rounded:
+  mark: "2px"
   control: "4px"
   nav: "6px"
   card: "8px"
