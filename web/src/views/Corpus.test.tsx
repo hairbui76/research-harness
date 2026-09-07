@@ -107,6 +107,186 @@ describe('the corpus list', () => {
   });
 });
 
+/**
+ * What the daemon says needs a researcher among these sources.
+ *
+ * Shaped exactly as `work.list` answers it: the group's whole line is the daemon's
+ * sentence, each item is one Work with the cockpit path the daemon chose for it, and
+ * `more` is what the daemon's own cap left out. Nothing here is derived in the view — that
+ * is the property the tests below are about.
+ */
+const NEEDS_A_RESEARCHER = [
+  {
+    kind: 'unparsed',
+    label: '4 works have no readable text yet',
+    count: 4,
+    items: [
+      {
+        id: 'W0002',
+        label: 'Encrypted flow taxonomies',
+        detail: 'its one file has no stored parse',
+        route: '/corpus/W0002',
+      },
+      {
+        id: 'W0003',
+        label: 'A tokenizer comparison',
+        detail: 'none of its 2 files has a stored parse',
+        route: '/corpus/W0003',
+      },
+      { id: 'W0004', label: 'An unregistered draft', detail: '', route: '' },
+    ],
+    more: '1 more is in the list below.',
+  },
+];
+
+function needyCorpusDaemon() {
+  return fakeDaemon({
+    capabilities: {
+      'work.list': { count: 1, works: [WORK], attention: NEEDS_A_RESEARCHER },
+    },
+  });
+}
+
+/**
+ * Every number on the page that nothing labels.
+ *
+ * A `<dd>` answers the `<dt>` beside it and a cell answers its column header, so neither is
+ * a number standing on its own — that is the comparative reading a table is for. What the
+ * rule forbids is the other thing: a count rendered as a figure with nothing around it,
+ * which is the stat tile the Overview was rebuilt to leave behind.
+ */
+function bareNumbers(container: HTMLElement): string[] {
+  return Array.from(container.querySelectorAll('*'))
+    .filter(
+      (node) =>
+        node.children.length === 0 &&
+        !['DD', 'TD', 'TH'].includes(node.tagName) &&
+        /^\d+([.,]\d+)?%?$/.test((node.textContent ?? '').trim()),
+    )
+    .map((node) => node.outerHTML);
+}
+
+/**
+ * The corpus opens with what needs a researcher.
+ *
+ * PRODUCT §14 and §16 decide when a source is not yet something a project can read from —
+ * a screening decision left half-taken, no file, no stored parse, nothing accepted — and
+ * the daemon draws every one of those lines. What is asserted here is that the page reads
+ * them in that order: the work first, the size of the corpus after it, and no number
+ * standing anywhere on its own.
+ */
+describe('what needs a researcher among the sources', () => {
+  it('names the work before it says how much the project holds', async () => {
+    const { container } = renderView(<CorpusPage />, {
+      daemon: needyCorpusDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument(),
+    );
+    const named = screen.getByText('4 works have no readable text yet');
+    expect(
+      named.compareDocumentPosition(corpusCount()) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'the size of the corpus is read after what needs a researcher',
+    ).toBeTruthy();
+    expect(corpusCount()).toHaveTextContent('1 works.');
+    expect(bareNumbers(container), 'no number stands on its own').toEqual([]);
+  });
+
+  it('points a named work at itself, and one the daemon gave no page at nothing', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      {
+        daemon: needyCorpusDaemon(),
+        route: '/projects/prj_abc/corpus',
+        path: '/projects/prj_abc/corpus',
+      },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('link', { name: 'Encrypted flow taxonomies' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/corpus/W0002',
+    );
+    // No route, so no link: the reader is already on the corpus, and a link to the page
+    // under their feet is not a next step.
+    expect(screen.getByText('An unregistered draft')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'An unregistered draft' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('says what the daemon left out of the group, in the daemon’s own words', async () => {
+    renderView(<CorpusPage />, {
+      daemon: needyCorpusDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('1 more is in the list below.')).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/its one file has no stored parse/)).toBeInTheDocument();
+  });
+
+  it('teaches what would put a source here when the daemon names none', async () => {
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      {
+        daemon: corpusDaemon(),
+        route: '/projects/prj_abc/corpus',
+        path: '/projects/prj_abc/corpus',
+      },
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Nothing among these sources needs a researcher'),
+      ).toBeInTheDocument(),
+    );
+    // The page never works a group out for itself: the daemon named none, so there is none.
+    expect(screen.queryByText(/no readable text yet/)).not.toBeInTheDocument();
+    expect(screen.getByText(/no file has been attached to it/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Open the conversation to attach another source' }),
+    ).toHaveAttribute('href', '/projects/prj_abc/');
+    await expectNoAxeViolations(container);
+  });
+
+  it('keeps naming it while the daemon is silent, because it was true when it spoke', async () => {
+    const daemon = needyCorpusDaemon();
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() =>
+      expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument(),
+    );
+    daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
+    await waitFor(() => expect(corpusCount()).toHaveTextContent(/has not answered since/));
+    expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument();
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderView(<CorpusPage />, {
+      daemon: needyCorpusDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('4 works have no readable text yet')).toBeInTheDocument(),
+    );
+    await expectNoAxeViolations(container);
+  });
+});
+
 describe('one accepted piece of evidence', () => {
   it('links its Work inside the project', async () => {
     renderView(
@@ -184,6 +364,20 @@ describe('the questions screen', () => {
  * the shell's skip link had nowhere to land and a researcher could not tell which page had
  * failed. The frame is asserted first in each of these, the state second.
  */
+/**
+ * The live line that counts the corpus.
+ *
+ * The page has more than one polite live region now: an `Empty` is one, and the lead group
+ * shows one whenever nothing among the sources needs a researcher. So the count is asked
+ * for by the region it belongs to — the works, named by their own heading — rather than by
+ * being the only `status` on the screen. The assertions on it are unchanged.
+ */
+function corpusCount(): HTMLElement {
+  return within(
+    screen.getByRole('region', { name: 'Every work in the corpus' }),
+  ).getByRole('status');
+}
+
 const REFUSAL = 'the workspace lock is held by another process';
 
 /** A daemon that has not answered yet, so the page stays in its loading state. */
@@ -229,7 +423,7 @@ describe('the corpus before, without, and after its read', () => {
     expect(
       screen.getByText('The sources this project reads from, and the files kept for each.'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('1 works.');
+    expect(corpusCount()).toHaveTextContent('1 works.');
     expect(screen.queryByText(/anchor replayed/)).not.toBeInTheDocument();
   });
 
@@ -404,7 +598,7 @@ describe('a corpus of a thousand works', () => {
   it('mounts a window of it, not all of it', async () => {
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     const list = screen.getByRole('list', { name: 'Works in the corpus' });
     const mounted = within(list).getAllByRole('listitem');
     expect(mounted.length).toBeGreaterThan(0);
@@ -418,7 +612,7 @@ describe('a corpus of a thousand works', () => {
     const list = THOUSAND;
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     const item = within(screen.getByRole('list', { name: 'Works in the corpus' })).getAllByRole(
       'listitem',
     )[0]!;
@@ -432,14 +626,14 @@ describe('a corpus of a thousand works', () => {
     const user = userEvent.setup();
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     // Windowing costs the browser's own find-in-page, so the page carries a find of its
     // own — over the whole corpus, not over the window.
     await user.type(screen.getByRole('searchbox'), 'study 0987');
     await waitFor(() =>
       expect(screen.getByText('Synthetic corpus study 0987')).toBeInTheDocument(),
     );
-    expect(screen.getByRole('status')).toHaveTextContent('Showing 1 of 1000 works.');
+    expect(corpusCount()).toHaveTextContent('Showing 1 of 1000 works.');
     expect(screen.getByRole('link', { name: 'W0987' })).toHaveAttribute('href', '/corpus/W0987');
   });
 
@@ -447,20 +641,20 @@ describe('a corpus of a thousand works', () => {
     const user = userEvent.setup();
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     await user.type(screen.getByRole('searchbox'), 'nothing matches this');
     await waitFor(() =>
       expect(screen.getByText('No work matches this find')).toBeInTheDocument(),
     );
     expect(screen.getByText(/The find only hides/)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Clear the find' }));
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
   });
 
   it('keeps the list one named, keyboard-reachable scroll region', async () => {
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     const list = screen.getByRole('list', { name: 'Works in the corpus' });
     expect(list).toHaveAttribute('tabindex', '0');
 
@@ -481,7 +675,7 @@ describe('a corpus of a thousand works', () => {
   it('draws each mounted work exactly as it drew it before', async () => {
     renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     const first = within(screen.getByRole('list', { name: 'Works in the corpus' }))
       .getAllByRole('listitem')[0]!;
     // The card, its fields and its nested file table are the ones the page always drew; the
@@ -501,7 +695,7 @@ describe('a corpus of a thousand works', () => {
       path: '/corpus',
     });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('1000 works.'));
     await expectNoAxeViolations(container);
   });
 });
@@ -519,14 +713,14 @@ describe('the corpus while the daemon is silent', () => {
     const flaky = flakyDaemon(manyWorks(3));
     renderView(<CorpusPage />, { daemon: flaky.daemon, route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
 
     // The daemon goes away, and something asks it for something. The transport records the
     // silence; the page keeps the list it was given and stops claiming it is live.
     flaky.stop();
     daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
     await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent(
+      expect(corpusCount()).toHaveTextContent(
         'The last corpus the daemon sent: 3 works. It has not answered since.',
       ),
     );
@@ -542,11 +736,11 @@ describe('the corpus while the daemon is silent', () => {
       path: '/corpus',
     });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
     flaky.stop();
     daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
     await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent(/has not answered since/),
+      expect(corpusCount()).toHaveTextContent(/has not answered since/),
     );
 
     // The frame is what says which screen this is. It survives, so the skip link still
@@ -563,17 +757,17 @@ describe('the corpus while the daemon is silent', () => {
     const flaky = flakyDaemon(manyWorks(2));
     renderView(<CorpusPage />, { daemon: flaky.daemon, route: '/corpus', path: '/corpus' });
 
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('2 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('2 works.'));
     const before = flaky.daemon.calls.length;
     daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
     await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent(/has not answered since/),
+      expect(corpusCount()).toHaveTextContent(/has not answered since/),
     );
 
     daemonReachability.reset();
     // No reload, no button: the page asks again because the daemon came back.
     await waitFor(() => expect(flaky.daemon.calls.length).toBeGreaterThan(before));
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('2 works.'));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('2 works.'));
   });
 
   it('still shows a refusal as a refusal, because a refusal is the daemon answering', async () => {

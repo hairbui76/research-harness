@@ -92,7 +92,6 @@ import type {
   SynctexView,
   TraceView,
   WorkList,
-  WorkSummary,
   WorkspaceIndex,
   WorkView,
 } from './dto';
@@ -415,10 +414,17 @@ export class HarnessClient {
     return (await this.call<ClaimList>('claim.list', request)).claims;
   }
 
-  /** The corpus, optionally narrowed to one screening state. */
-  async works(screening?: string | null): Promise<WorkSummary[]> {
+  /**
+   * The corpus, optionally narrowed to one screening state.
+   *
+   * The whole answer, not only its rows: `work.list` also says which of those sources
+   * cannot yet be read from and why, and that judgement is the daemon's (Product 5 P10).
+   * Handing back `works` alone would leave the Corpus page to re-derive it from `screening`
+   * and `parsed`, which is the one thing a client must not do.
+   */
+  async works(screening?: string | null): Promise<WorkList> {
     const request: Record<string, Json> = screening ? { screening } : {};
-    return (await this.call<WorkList>('work.list', request)).works;
+    return await this.call<WorkList>('work.list', request);
   }
 
   /** The research questions, optionally narrowed to one status. */

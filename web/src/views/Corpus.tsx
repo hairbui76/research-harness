@@ -1,6 +1,17 @@
 /**
  * Corpus: works, their revisions, their immutable files, and whether each file is parsed.
  *
+ * The page opens with what needs a researcher among these sources — a source screened and
+ * never included, one with no file behind it, one whose files have no stored parse, one
+ * nothing has been accepted from — and only then says how many works the project holds.
+ * Which of those a Work belongs in is decided by the daemon and arrives with the list
+ * (`work.list`'s `attention`); a cockpit that re-derived it from `screening` and `parsed`
+ * would be a second, disagreeing copy of Product 14 and 16 living in React (P10).
+ *
+ * The works themselves stay the instrument they are. A researcher reads this list by
+ * running an eye down shared columns — files, versions, sizes, whether each file is parsed
+ * — and that is what a table is for; the lead names the work, the table compares the rows.
+ *
  * The corpus list is windowed. `work.list` answers the whole corpus in one read — the
  * daemon imposes no page size, and PRODUCT §5 P10 forbids the cockpit inventing one — so a
  * project of a thousand works used to mount a thousand cards, each with its own nested file
@@ -37,9 +48,17 @@ import {
   Input,
   VirtualList,
   formatFileSize,
+  humaniseResearchTokens,
+  useId,
 } from '@research-harness/design';
 import type { EvidenceModel } from '@research-harness/design';
-import type { EvidenceSummary, WorkSummary } from '../api/dto';
+import type {
+  CorpusAttentionGroup,
+  CorpusAttentionItem,
+  EvidenceSummary,
+  WorkList,
+  WorkSummary,
+} from '../api/dto';
 import type { HarnessClient } from '../api/client';
 import {
   DataTable,
@@ -81,10 +100,15 @@ export function matchesWork(work: WorkSummary, query: string): boolean {
 export function CorpusPage() {
   const { client } = useSession();
   const { href } = useProjectPaths();
-  // `work.list`: this view needs the corpus and nothing else on the navigation.
+  // `work.list`: the corpus, and the daemon's own reading of which of these sources cannot
+  // be read from yet. This view needs nothing else on the navigation.
   const state = useAsync(() => client.works(), [client]);
   const [query, setQuery] = useState('');
   const outage = useDaemonOutage();
+  // The works are a region of their own, named by their own heading, so a screen-reader
+  // user can jump past the lead straight into the list — and so the live count below is
+  // reachable as part of something rather than as one more announcement on the page.
+  const worksHeading = useId(undefined, 'rh-web-corpus-works');
 
   // The last corpus the daemon actually sent.
   //
@@ -92,10 +116,13 @@ export function CorpusPage() {
   // came before, but a daemon that has gone quiet has said nothing about the corpus — the
   // list on screen is still true of the last moment it spoke. So the list is kept and
   // labelled for what it is, rather than thrown away to show an empty page; `state.data`
-  // going null on a failed re-read does not take it with it.
-  const kept = useRef<WorkSummary[] | null>(null);
+  // going null on a failed re-read does not take it with it. The whole answer is kept,
+  // groups and all: what needed a researcher a minute ago still does.
+  const kept = useRef<WorkList | null>(null);
   if (state.data !== null) kept.current = state.data;
-  const works = state.data ?? kept.current ?? [];
+  const answer = state.data ?? kept.current;
+  const works = answer?.works ?? [];
+  const attention = answer?.attention ?? [];
   const stale = outage !== null && works.length > 0;
 
   // The daemon came back: ask again, so the page catches up without a reload.
@@ -151,38 +178,118 @@ export function CorpusPage() {
         </Empty>
       ) : (
         <div className="rh-web-corpus">
-          <p className="rh-text-secondary" role="status">
-            {stale
-              ? `The last corpus the daemon sent: ${works.length} works. It has not answered since.`
-              : query
-                ? `Showing ${shown.length} of ${works.length} works.`
-                : `${works.length} works.`}
-          </p>
-          {shown.length === 0 ? (
-            <Empty
-              description="The find only hides. Every work the daemon listed is still in the corpus underneath it."
-              action={
-                <Button size="sm" variant="secondary" onClick={() => setQuery('')}>
-                  Clear the find
-                </Button>
-              }
-            >
-              No work matches this find
-            </Empty>
-          ) : (
-            <VirtualList
-              className="rh-web-corpus__list"
-              label="Works in the corpus"
-              items={shown}
-              itemKey={(work) => work.id}
-              estimatedItemHeight={WORK_CARD_HEIGHT}
-              renderItem={(work) => <WorkCard work={work} client={client} href={href} />}
-            />
-          )}
+          <Panel title="Sources that need a researcher">
+            {attention.length > 0 ? (
+              <ul className="rh-web-list rh-web-corpus__attention">
+                {attention.map((group) => (
+                  <NeedsAResearcher key={group.kind} group={group} href={href} />
+                ))}
+              </ul>
+            ) : (
+              <Empty
+                flat
+                description="A source waits for a researcher while a screening decision has been left half-taken, while no file has been attached to it, while none of its files has a stored parse — nothing can be anchored in a file the project cannot read — or while nothing has been accepted from it yet. None of that is true of this corpus."
+                action={
+                  <Link to={href('/')}>Open the conversation to attach another source</Link>
+                }
+              >
+                Nothing among these sources needs a researcher
+              </Empty>
+            )}
+          </Panel>
+
+          <section className="rh-web-corpus__works" aria-labelledby={worksHeading}>
+            <h2 className="rh-text-h3" id={worksHeading}>
+              Every work in the corpus
+            </h2>
+            <p className="rh-text-secondary" role="status">
+              {stale
+                ? `The last corpus the daemon sent: ${works.length} works. It has not answered since.`
+                : query
+                  ? `Showing ${shown.length} of ${works.length} works.`
+                  : `${works.length} works.`}
+            </p>
+            {shown.length === 0 ? (
+              <Empty
+                description="The find only hides. Every work the daemon listed is still in the corpus underneath it."
+                action={
+                  <Button size="sm" variant="secondary" onClick={() => setQuery('')}>
+                    Clear the find
+                  </Button>
+                }
+              >
+                No work matches this find
+              </Empty>
+            ) : (
+              <VirtualList
+                className="rh-web-corpus__list"
+                label="Works in the corpus"
+                items={shown}
+                itemKey={(work) => work.id}
+                estimatedItemHeight={WORK_CARD_HEIGHT}
+                renderItem={(work) => <WorkCard work={work} client={client} href={href} />}
+              />
+            )}
+          </section>
         </div>
       )}
     </FullPageWorkspace>
   );
+}
+
+/**
+ * One reason a source is not yet something this project can read from.
+ *
+ * The line is the daemon's whole sentence, count and all, because deciding which works
+ * belong in this group and deciding how to say so are one judgement (P10). Under it are
+ * the first few of them, indented, each a link to the work itself — and, where the daemon
+ * had something to add about that one work rather than about all of them, what it added.
+ *
+ * `more` is what the cap left out, in the daemon's words. It exists because the group is a
+ * lead rather than a second list: the works it counts are all in the list underneath it.
+ */
+function NeedsAResearcher({
+  group,
+  href,
+}: {
+  group: CorpusAttentionGroup;
+  href: (path: string) => string;
+}) {
+  return (
+    <li>
+      <p className="rh-web-corpus__group">{humaniseResearchTokens(group.label)}</p>
+      {group.items.length > 0 ? (
+        <ul className="rh-web-list rh-web-list--tight rh-web-corpus__group-items">
+          {group.items.map((item) => (
+            <li key={item.id}>
+              <WorkLink item={item} href={href} />
+              {item.detail ? (
+                <span className="rh-text-secondary"> — {humaniseResearchTokens(item.detail)}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {group.more ? <p className="rh-web-corpus__more">{group.more}</p> : null}
+    </li>
+  );
+}
+
+/**
+ * One work in a lead group, pointed at itself where the daemon gave it a page.
+ *
+ * A work with no route of its own is not linked back to the corpus: the reader is already
+ * on the corpus, and a link to the page under their feet is not a next step.
+ */
+function WorkLink({
+  item,
+  href,
+}: {
+  item: CorpusAttentionItem;
+  href: (path: string) => string;
+}) {
+  if (!item.route) return <>{item.label}</>;
+  return <Link to={href(item.route)}>{item.label}</Link>;
 }
 
 /**
