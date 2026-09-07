@@ -29,6 +29,7 @@ import os
 import secrets
 import threading
 from collections.abc import Callable, Mapping, Sequence
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -46,11 +47,13 @@ from research_harness.capabilities.extra_handlers import ReviewInbox, StaleRepor
 from research_harness.capabilities.permissions import Permission, Principal
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.claims.service import next_decision_id
+from research_harness.domain.base import utc_now
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
     ClaimStatus,
     ManuscriptAnchorStatus,
     QuestionStatus,
+    ResearchEventType,
     StaleState,
 )
 from research_harness.domain.errors import ResearchHarnessError
@@ -79,6 +82,7 @@ from research_harness.protocol.dto import (
     CandidateView,
     CapabilityCatalog,
     CapabilityResponse,
+    ChangeEntry,
     ConflictPosition,
     ConflictView,
     CountEntry,
@@ -87,6 +91,7 @@ from research_harness.protocol.dto import (
     ObjectView,
     OverviewCounts,
     OverviewReport,
+    RecentChanges,
     RunStatus,
     WorkspaceIndex,
     WorkSummary,
@@ -95,6 +100,7 @@ from research_harness.protocol.dto import (
 from research_harness.server.routes_attachments import register_attachment_routes
 from research_harness.server.routes_manuscript import register_manuscript_routes
 from research_harness.server.routes_sessions import register_session_routes
+from research_harness.workspace.conversations import ConversationStore
 from research_harness.workspace.repository import ObjectNotFoundError, WorkspaceRepository
 
 __all__ = [
@@ -564,6 +570,56 @@ STALE_LIMIT = 500
 #: How many items of each attention group the overview carries; the rest live in its view.
 ATTENTION_ITEMS = 5
 
+#: How many changes the Overview carries. It is a first screen, not a log viewer: the rest
+#: stay where they were written, in `events/research.jsonl`.
+CHANGE_ITEMS = 8
+
+#: The window "what changed" falls back to when the project has fewer than two conversation
+#: sessions to bound one with. Stated in `RecentChanges` and said in words on the page.
+RECENT_WINDOW = timedelta(days=7)
+
+#: Which research surface each reportable event moved. Everything else in the log — a parse,
+#: a search run, a revalidation — is machinery rather than a change of scientific state, and
+#: a returning researcher is not asked to read it.
+CHANGE_KINDS: Mapping[ResearchEventType, str] = {
+    ResearchEventType.WORK_INGESTED: "work",
+    ResearchEventType.EVIDENCE_ACCEPTED: "evidence",
+    ResearchEventType.CLAIM_CREATED: "claim",
+    ResearchEventType.CLAIM_AUDITED: "claim",
+    ResearchEventType.CLAIM_QUALIFIED: "claim",
+    ResearchEventType.CLAIM_OVERRIDDEN: "claim",
+    ResearchEventType.CLAIM_SUPERSEDED: "claim",
+    ResearchEventType.DECISION_ACCEPTED: "decision",
+    ResearchEventType.DECISION_SUPERSEDED: "decision",
+}
+
+#: Which id prefix has a screen of its own in the cockpit, and where. An id whose type is
+#: not here is shown inside its list rather than linked to a page that cannot hold it.
+OBJECT_ROUTES: Mapping[type[ResearchId], str] = {
+    WorkId: "/corpus",
+    EvidenceId: "/evidence",
+    ClaimId: "/claims",
+    ArtifactId: "/source",
+}
+
+#: Month names, so a change reads identically on every machine. `strftime('%B')` follows the
+#: process locale, and a research log whose wording depends on `LC_TIME` is one two
+#: researchers cannot compare.
+MONTHS = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
+
 #: Claim statuses that can carry a manuscript sentence. Anything else is a sentence the
 #: accepted state does not support yet, which is what Product 26 counts on the Overview.
 SUPPORTING_CLAIM_STATUSES: frozenset[ClaimStatus] = frozenset(
@@ -587,12 +643,25 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
     ctx = open_context(root, caller.actor)
     inbox = _read_result(registry, "review.inbox", {}, ctx, caller, ReviewInbox)
     stale = _read_result(registry, "state.stale", {"limit": STALE_LIMIT}, ctx, caller, StaleReport)
-    conflicts = _conflict_views(ConflictStore(repo.layout.research_dir).list(status="open"))
+    store = ConflictStore(repo.layout.research_dir)
+    conflicts = _conflict_views(store.list(status="open"))
     works = repo.list_works()
     claims = {claim.id: claim for claim in repo.list_claims()}
     questions = repo.list_questions()
     anchors = tuple(repo.iter_anchors())
     unsupported = _unsupported_anchors(anchors, claims)
+    attention = (
+        _group("review_items", "review item", "/review", inbox.count, _review_items(inbox)),
+        _group("conflicts", "conflict", "/conflicts", len(conflicts), _conflict_items(conflicts)),
+        _group("stale", "stale object", "/stale", stale.count, _stale_items(stale), "stale"),
+        _group(
+            "unsupported_manuscript_claims",
+            "unsupported manuscript claim",
+            "/manuscript",
+            len(unsupported),
+            unsupported,
+        ),
+    )
 
     return OverviewReport(
         project=repo.config.name,
@@ -611,20 +680,9 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
             matrices=len(repo.list_matrices()),
             manuscript_anchors=len(anchors),
         ),
-        attention=(
-            _group("review_items", "review item", "/review", inbox.count, _review_items(inbox)),
-            _group(
-                "conflicts", "conflict", "/conflicts", len(conflicts), _conflict_items(conflicts)
-            ),
-            _group("stale", "stale object", "/stale", stale.count, _stale_items(stale)),
-            _group(
-                "unsupported_manuscript_claims",
-                "unsupported manuscript claim",
-                "/manuscript",
-                len(unsupported),
-                unsupported,
-            ),
-        ),
+        attention_summary=_attention_summary(attention),
+        attention=attention,
+        since_last_session=_since_last_session(repo, store.list()),
         claim_health=tuple(
             CountEntry(key=status.value, count=count)
             for status, count in (
@@ -645,7 +703,12 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
 
 
 def _group(
-    kind: str, noun: str, route: str, count: int, items: tuple[AttentionItem, ...]
+    kind: str,
+    noun: str,
+    route: str,
+    count: int,
+    items: tuple[AttentionItem, ...],
+    surface: str = "decide",
 ) -> AttentionGroup:
     """One attention surface: its size in words, where it lives, and its first few items."""
     plural = noun if count == 1 else f"{noun}s"
@@ -655,7 +718,39 @@ def _group(
         count=count,
         route=route,
         items=items[:ATTENTION_ITEMS],
+        surface=surface,
     )
+
+
+def _attention_summary(groups: Sequence[AttentionGroup]) -> str:
+    """The one line the Overview leads with: what needs a researcher, in the daemon's words.
+
+    It is written here rather than assembled in a client because deciding what counts as
+    waiting is the same judgement that built the groups (Product 5 P10). Each group already
+    states its own size in words, so the sentence only has to join them.
+    """
+    waiting = [group for group in groups if group.count]
+    if not waiting:
+        return "Nothing needs a researcher right now."
+    verb = "needs" if len(waiting) == 1 and waiting[0].count == 1 else "need"
+    return f"{_join_phrases([group.label for group in waiting])} {verb} a researcher."
+
+
+def _join_phrases(phrases: Sequence[str]) -> str:
+    """`a`, `a and b`, `a, b and c` — one list read as one sentence."""
+    if len(phrases) <= 1:
+        return "".join(phrases)
+    return f"{', '.join(phrases[:-1])} and {phrases[-1]}"
+
+
+def _object_route(object_id: str) -> str:
+    """Where the cockpit shows one object, or "" when it has no screen of its own."""
+    try:
+        parsed = parse_id(object_id)
+    except ResearchHarnessError:
+        return ""
+    base = OBJECT_ROUTES.get(type(parsed))
+    return f"{base}/{parsed}" if base else ""
 
 
 def _review_items(inbox: ReviewInbox) -> tuple[AttentionItem, ...]:
@@ -666,6 +761,7 @@ def _review_items(inbox: ReviewInbox) -> tuple[AttentionItem, ...]:
             label=f"{item.get('field', '?')} · {item.get('work', '?')}",
             detail="; ".join(str(reason) for reason in item.get("reasons", ())),
             priority=int(item.get("priority", 0)),
+            route=f"/review/{item.get('candidate_id', '')}",
         )
         for item in inbox.items
     )
@@ -690,8 +786,164 @@ def _stale_items(stale: StaleReport) -> tuple[AttentionItem, ...]:
             label=mark.object_id,
             detail=mark.reason,
             priority=mark.priority,
+            route=_object_route(mark.object_id),
         )
         for mark in stale.marks
+    )
+
+
+# -- what changed since the researcher last worked ---------------------------
+
+
+def _since_last_session(
+    repo: WorkspaceRepository, conflicts: Sequence[ConflictRecord]
+) -> RecentChanges:
+    """What moved while the researcher was away, newest first (the DTO states the rule).
+
+    Two sources, because scientific state and disagreements are recorded in two places: the
+    Git-visible semantic event log (Product 19.3) says what was ingested, accepted, promoted
+    and decided, and the conflict store says which disagreements opened and which the
+    researcher answered. Both already carry their own sentence and their own instant, so
+    nothing here interprets anything — it selects a window, merges, orders and caps.
+    """
+    since, basis = _change_window(repo)
+    dated = [*_event_changes(repo, since), *_conflict_changes(conflicts, since)]
+    dated.sort(key=lambda pair: pair[0], reverse=True)
+    entries = tuple(entry for _, entry in dated[:CHANGE_ITEMS])
+    left_out = len(dated) - len(entries)
+    if not dated and not _has_history(repo):
+        basis = "no_history"
+    return RecentChanges(
+        basis=basis,
+        since=since.isoformat(),
+        summary=_change_summary(basis, since, len(dated)),
+        more=(
+            ""
+            if left_out <= 0
+            else f"{left_out} more {'change is' if left_out == 1 else 'changes are'} "
+            "recorded in this project's event log."
+        ),
+        entries=entries,
+        total=len(dated),
+    )
+
+
+def _change_window(repo: WorkspaceRepository) -> tuple[datetime, str]:
+    """When the researcher last stopped working, and which rule said so.
+
+    The session before the most recent one is the boundary, so a researcher who comes back
+    sees the work of their own last sitting as well as anything that happened after it. One
+    session cannot bound a window and neither can none, so the fallback is `RECENT_WINDOW`.
+    """
+    ends = sorted(
+        (
+            session.last_message_at
+            for session in ConversationStore.for_repository(repo).list_sessions()
+            if session.last_message_at is not None
+        ),
+        reverse=True,
+    )
+    if len(ends) >= 2:
+        return ends[1], "previous_session"
+    return utc_now() - RECENT_WINDOW, "recent_window"
+
+
+def _has_history(repo: WorkspaceRepository) -> bool:
+    """True once this project has ever recorded a change worth reporting."""
+    return any(event.event in CHANGE_KINDS for event in repo.iter_events())
+
+
+def _change_summary(basis: str, since: datetime, count: int) -> str:
+    """The window and its size in one sentence, so no client has to infer either."""
+    if basis == "no_history":
+        return "No research activity has been recorded in this project yet."
+    window = (
+        f"since your previous session ended on {_human_moment(since)}"
+        if basis == "previous_session"
+        else "in the last seven days"
+    )
+    if count == 0:
+        return f"Nothing has changed {window}."
+    return f"{count} {'change' if count == 1 else 'changes'} {window}."
+
+
+def _human_moment(moment: datetime) -> str:
+    """One instant in the words a person reads, in the time zone the daemon runs in."""
+    local = moment.astimezone()
+    return f"{local.day} {MONTHS[local.month - 1]}, {local:%H:%M}"
+
+
+def _event_changes(
+    repo: WorkspaceRepository, since: datetime
+) -> list[tuple[datetime, ChangeEntry]]:
+    """Works added, evidence accepted, claims moved and decisions taken, from the log."""
+    found: list[tuple[datetime, ChangeEntry]] = []
+    for event in repo.iter_events():
+        kind = CHANGE_KINDS.get(event.event)
+        if kind is None or event.occurred_at < since:
+            continue
+        subject = str(event.subjects[0]) if event.subjects else ""
+        found.append(
+            (
+                event.occurred_at,
+                ChangeEntry(
+                    id=f"{event.event.value}:{event.occurred_at.isoformat()}:{subject}",
+                    kind=kind,
+                    label=event.summary,
+                    detail=subject,
+                    at=event.occurred_at.isoformat(),
+                    when=_human_moment(event.occurred_at),
+                    route=_object_route(subject),
+                ),
+            )
+        )
+    return found
+
+
+def _conflict_changes(
+    conflicts: Sequence[ConflictRecord], since: datetime
+) -> list[tuple[datetime, ChangeEntry]]:
+    """Disagreements opened, and disagreements a researcher answered, in the same window.
+
+    A conflict that opened and was answered inside one window is two changes, because it is
+    two things a returning researcher would want to know happened.
+    """
+    found: list[tuple[datetime, ChangeEntry]] = []
+    for record in conflicts:
+        if record.created_at >= since:
+            found.append(
+                (
+                    record.created_at,
+                    _conflict_change(record, record.created_at, "opened", record.summary),
+                )
+            )
+        resolution = record.resolution
+        if resolution is not None and resolution.resolved_at >= since:
+            found.append(
+                (
+                    resolution.resolved_at,
+                    _conflict_change(
+                        record,
+                        resolution.resolved_at,
+                        "resolved",
+                        f"{record.summary} — resolved as {resolution.choice}: {resolution.reason}",
+                    ),
+                )
+            )
+    return found
+
+
+def _conflict_change(
+    record: ConflictRecord, moment: datetime, verb: str, summary: str
+) -> ChangeEntry:
+    return ChangeEntry(
+        id=f"{record.conflict_id}:{verb}",
+        kind="conflict",
+        label=f"Conflict {verb}: {summary}",
+        detail=record.subject,
+        at=moment.isoformat(),
+        when=_human_moment(moment),
+        route="/conflicts",
     )
 
 

@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import re
 from collections.abc import Iterator
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,9 +34,13 @@ from research_harness.capabilities.dto import InitProjectRequest
 from research_harness.capabilities.handlers import init_project
 from research_harness.capabilities.permissions import Principal
 from research_harness.capabilities.registry import CapabilityRegistry
+from research_harness.domain.base import Provenance
+from research_harness.domain.conversation import Message, MessageRole, TextBlock
 from research_harness.domain.transitions import HUMAN_ACTOR
+from research_harness.evidence.conflicts import ConflictKind, ConflictRecord, ConflictStore
 from research_harness.protocol.dto import ArtifactBlocks, OverviewReport, WorkspaceIndex
 from research_harness.server.app import (
+    CHANGE_ITEMS,
     DEV_ENV,
     DEV_ORIGINS,
     WEB_DIST_ENV,
@@ -44,6 +49,8 @@ from research_harness.server.app import (
     ensure_token,
     web_dist,
 )
+from research_harness.workspace.conversations import ConversationStore
+from research_harness.workspace.repository import WorkspaceRepository
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "synthetic_research_paper.pdf"
@@ -206,6 +213,21 @@ def host_reader(corpus: Path, registry: CapabilityRegistry) -> Iterator[TestClie
         yield test_client
 
 
+@pytest.fixture
+def bare(tmp_path: Path) -> Path:
+    """A registered project with nothing in it: no work, no evidence, no history at all."""
+    return init_project(InitProjectRequest(root=tmp_path / "fresh", name="fresh")).root
+
+
+@pytest.fixture
+def bare_reader(bare: Path, registry: CapabilityRegistry) -> Iterator[TestClient]:
+    """The daemon over a project on its first day."""
+    token = ensure_token(bare)
+    with TestClient(create_app(bare, registry=registry)) as test_client:
+        test_client.headers["Authorization"] = f"Bearer {token}"
+        yield test_client
+
+
 # -- artifact bytes ----------------------------------------------------------
 
 
@@ -334,6 +356,137 @@ def test_an_overview_of_a_workspace_with_a_claim_reports_its_status(
 
     assert overview.counts.claims == 1
     assert [(entry.key, entry.count) for entry in overview.claim_health] == [("unverified", 1)]
+
+
+# -- what changed since the researcher last worked ----------------------------
+
+
+def test_a_project_with_no_recorded_research_says_so_rather_than_showing_an_empty_box(
+    bare_reader: TestClient,
+) -> None:
+    """A project nobody has worked in yet has no history, and the honest answer is words."""
+    changes = OverviewReport.model_validate(bare_reader.get("/overview").json()).since_last_session
+
+    assert changes.basis == "no_history"
+    assert changes.entries == ()
+    assert changes.total == 0
+    assert "no research activity" in changes.summary.lower()
+    assert changes.more == ""
+
+
+def test_the_change_list_reports_one_entry_of_each_kind_newest_first(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """Works added, evidence accepted, claims promoted, decisions taken, conflicts moved."""
+    _accept_a_candidate(corpus, registry)
+    _create_claim(corpus, registry)
+    _accept_a_decision(corpus, registry)
+    _open_a_conflict(corpus, "conf-open", resolve=False)
+    _open_a_conflict(corpus, "conf-closed", resolve=True)
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    assert changes.basis == "recent_window"
+    assert {entry.kind for entry in changes.entries} == {
+        "work",
+        "evidence",
+        "claim",
+        "decision",
+        "conflict",
+    }
+    moments = [datetime.fromisoformat(entry.at) for entry in changes.entries]
+    assert moments == sorted(moments, reverse=True), "the newest change is read first"
+    assert all(entry.label and entry.when and entry.id for entry in changes.entries)
+    work = next(entry for entry in changes.entries if entry.kind == "work")
+    assert work.route == f"/corpus/{WORK}", "a change leads to the object it changed"
+    assert changes.total == len(changes.entries)
+    assert changes.more == ""
+
+
+def test_the_change_list_caps_what_it_carries_and_says_what_it_left_out(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The Overview is a first screen, not a log viewer: the rest stays in the event log."""
+    for index in range(12):
+        _open_a_conflict(corpus, f"conf-{index}", resolve=False)
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    assert len(changes.entries) == CHANGE_ITEMS
+    assert changes.total > CHANGE_ITEMS
+    assert str(changes.total - CHANGE_ITEMS) in changes.more
+
+
+def test_the_window_opens_at_the_end_of_the_session_before_the_latest_one(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """Two sessions: the researcher's most recent sitting, and everything after it."""
+    _end_a_session(corpus, "the sitting before last")
+    _end_a_session(corpus, "the last sitting")
+    _create_claim(corpus, registry)
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    assert changes.basis == "previous_session"
+    assert [entry.kind for entry in changes.entries] == ["claim"], (
+        "ingesting the corpus happened before that session ended, so it is not news"
+    )
+    assert "previous session" in changes.summary
+
+
+def test_one_session_is_not_two_so_the_window_is_the_documented_seven_days(
+    reader: TestClient, corpus: Path
+) -> None:
+    """A project with one conversation cannot bound a window, and says which rule it used."""
+    _end_a_session(corpus, "the only sitting")
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    assert changes.basis == "recent_window"
+    assert "seven days" in changes.summary
+    assert [entry.kind for entry in changes.entries] == ["work"]
+
+
+def test_the_overview_says_in_one_line_what_needs_a_researcher(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The page's description is the daemon's sentence, not a count a client assembled."""
+    assert (
+        OverviewReport.model_validate(reader.get("/overview").json()).attention_summary
+        == "Nothing needs a researcher right now."
+    )
+
+    _open_a_conflict(corpus, "conf-one", resolve=False)
+
+    assert (
+        OverviewReport.model_validate(reader.get("/overview").json()).attention_summary
+        == "1 conflict needs a researcher."
+    )
+
+
+def test_every_attention_group_says_which_surface_it_belongs_to(reader: TestClient) -> None:
+    """Waiting for a decision and having gone stale are different states, and the daemon says so."""
+    groups = {
+        group.kind: group.surface
+        for group in OverviewReport.model_validate(reader.get("/overview").json()).attention
+    }
+
+    assert groups["review_items"] == "decide"
+    assert groups["conflicts"] == "decide"
+    assert groups["unsupported_manuscript_claims"] == "decide"
+    assert groups["stale"] == "stale"
+
+
+def test_a_waiting_review_item_leads_to_the_candidate_and_not_only_to_the_queue(
+    reader: TestClient, corpus: Path
+) -> None:
+    _stage_candidates(corpus)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+    queue = next(group for group in overview.attention if group.kind == "review_items")
+
+    assert queue.count > 0
+    assert all(item.route == f"/review/{item.id}" for item in queue.items)
 
 
 def test_the_index_lists_everything_the_navigation_shows(
@@ -626,4 +779,76 @@ def _create_claim(root: Path, registry: CapabilityRegistry) -> None:
         open_context(root, HUMAN_ACTOR),
         {"claim": make_claim().model_dump(mode="json")},
         principal=Principal.human(),
+    )
+
+
+def _stage_candidates(root: Path) -> None:
+    """The Gate P11 candidates, staged through the scripted extractor and verifier."""
+    from tests.e2e.test_web_gate import stage_candidates
+
+    stage_candidates(root)
+
+
+def _accept_a_candidate(root: Path, registry: CapabilityRegistry) -> None:
+    """One staged candidate accepted as canonical Evidence, so the log records a review."""
+    _stage_candidates(root)
+    ctx = open_context(root, HUMAN_ACTOR)
+    inbox = registry.invoke("review.inbox", ctx, {}, principal=Principal.human())
+    candidate = next(
+        item
+        for item in inbox.items
+        if item["field"] == "dataset"  # type: ignore[union-attr]
+    )
+    registry.invoke(
+        "review.accept",
+        open_context(root, HUMAN_ACTOR),
+        {"candidate_id": candidate["candidate_id"]},
+        principal=Principal.human(),
+    )
+
+
+def _accept_a_decision(root: Path, registry: CapabilityRegistry) -> None:
+    registry.invoke(
+        "decision.accept",
+        open_context(root, HUMAN_ACTOR),
+        {
+            "decision": {
+                "type": "methodology",
+                "status": "proposed",
+                "title": "count only held-out splits",
+                "rationale": "the pilot split leaks between train and test",
+                "provenance": {"source": "human", "actor": HUMAN_ACTOR},
+            }
+        },
+        principal=Principal.human(),
+    )
+
+
+def _open_a_conflict(root: Path, subject: str, *, resolve: bool) -> None:
+    """One disagreement on record, optionally already answered by the researcher."""
+    store = ConflictStore(WorkspaceRepository.open(root).layout.research_dir)
+    record = store.open_or_put(
+        ConflictRecord(
+            kind=ConflictKind.CANDIDATE_VS_ACCEPTED,
+            subject=subject,
+            summary=f"the staged reading of {subject} differs from the accepted one",
+        )
+    )
+    if resolve:
+        store.resolve(record.conflict_id, "accept", "the accepted reading still holds", HUMAN_ACTOR)
+
+
+def _end_a_session(root: Path, title: str) -> None:
+    """A conversation with one message in it, so the project records when it was last used."""
+    store = ConversationStore(WorkspaceRepository.open(root).layout)
+    session = store.create_session(title=title, provenance=Provenance.human())
+    store.append_message(
+        session.id,
+        lambda message_id: Message(
+            id=message_id,
+            session=session.id,
+            role=MessageRole.USER,
+            blocks=(TextBlock(text="where did the held-out split come from?"),),
+            provenance=Provenance.human(),
+        ),
     )

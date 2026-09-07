@@ -16,6 +16,8 @@ export { EvidenceCard } from './EvidenceCard';
 export type { EvidenceCardProps } from './EvidenceCard';
 export { ClaimCard } from './ClaimCard';
 export type { ClaimCardProps } from './ClaimCard';
+export { ChangeList, CHANGE_KINDS, CHANGE_KIND_META } from './ChangeList';
+export type { ChangeKind, ChangeKindMeta, ChangeListEntry, ChangeListProps } from './ChangeList';
 export { ProvenancePath } from './ProvenancePath';
 export type { ProvenancePathOrientation, ProvenancePathProps } from './ProvenancePath';
 export { ContextReceipt } from './ContextReceipt';

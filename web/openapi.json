@@ -313,6 +313,11 @@
           "route": {
             "title": "Route",
             "type": "string"
+          },
+          "surface": {
+            "default": "decide",
+            "title": "Surface",
+            "type": "string"
           }
         },
         "required": [
@@ -345,6 +350,11 @@
             "default": 0,
             "title": "Priority",
             "type": "integer"
+          },
+          "route": {
+            "default": "",
+            "title": "Route",
+            "type": "string"
           }
         },
         "required": [
@@ -645,6 +655,51 @@
           "ok"
         ],
         "title": "CapabilityResponse",
+        "type": "object"
+      },
+      "ChangeEntry": {
+        "additionalProperties": false,
+        "description": "One thing that changed while the researcher was away, as the daemon recorded it.",
+        "properties": {
+          "at": {
+            "title": "At",
+            "type": "string"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "route": {
+            "default": "",
+            "title": "Route",
+            "type": "string"
+          },
+          "when": {
+            "title": "When",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "at",
+          "when"
+        ],
+        "title": "ChangeEntry",
         "type": "object"
       },
       "ClaimSummary": {
@@ -1152,6 +1207,11 @@
             "title": "Attention",
             "type": "array"
           },
+          "attention_summary": {
+            "default": "",
+            "title": "Attention Summary",
+            "type": "string"
+          },
           "claim_health": {
             "default": [],
             "items": {
@@ -1196,6 +1256,9 @@
           "review_policy": {
             "title": "Review Policy",
             "type": "string"
+          },
+          "since_last_session": {
+            "$ref": "#/components/schemas/RecentChanges"
           },
           "workspace": {
             "title": "Workspace",
@@ -1288,6 +1351,47 @@
           "stale"
         ],
         "title": "QuestionSummary",
+        "type": "object"
+      },
+      "RecentChanges": {
+        "additionalProperties": false,
+        "description": "`OverviewReport.since_last_session`: what changed while the researcher was away.\n\n**Where the window opens.** The daemon reads this project's conversation sessions,\nkeeps the ones that recorded a message, and orders them by that message, newest first.\nWith two or more, the window opens at the end of the session *before* the most recent\none, so what a researcher sees on returning is the work of their last sitting and\neverything after it — which is the question \"what changed since I last worked\" actually\nasks. With fewer than two sessions there is nothing to bound a window with, so the\nwindow is the last seven days. `basis` names which rule applied (`previous_session`,\n`recent_window`, or `no_history` for a project that has recorded no research yet) and\n`summary` says it in words, so nothing on screen has to guess.\n\n**What counts as a change.** Works added, evidence accepted, claims promoted or\nreclassified, and decisions taken, read from the Git-visible semantic event log\n(Product 19.3); conflicts opened or resolved, read from the conflict store. Newest\nfirst, capped, with `more` saying in words what the cap left out. Every judgement here\nis the daemon's: a client displays this list and never rebuilds it (Product 5 P10).",
+        "properties": {
+          "basis": {
+            "default": "no_history",
+            "title": "Basis",
+            "type": "string"
+          },
+          "entries": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ChangeEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "more": {
+            "default": "",
+            "title": "More",
+            "type": "string"
+          },
+          "since": {
+            "default": "",
+            "title": "Since",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "RecentChanges",
         "type": "object"
       },
       "RunStatus": {

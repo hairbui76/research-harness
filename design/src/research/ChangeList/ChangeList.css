@@ -1,0 +1,63 @@
+/*
+ * One change per row, read as a sentence: what kind of thing moved, what happened, when.
+ *
+ * The row wraps rather than switching layout at a breakpoint, so the same list works in a
+ * page column and in an inspector pane without either one needing a media query. The rule
+ * between rows is the package's hairline and nothing heavier — a run of changes is a list,
+ * not a stack of cards.
+ */
+.rh-change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rh-change-list__entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--rh-space-2) var(--rh-space-3);
+  padding-block: var(--rh-space-2);
+}
+
+.rh-change-list__entry + .rh-change-list__entry {
+  border-block-start: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+/* The kind is a word first and a glyph second, so it survives greyscale and a projector. */
+.rh-change-list__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  flex: 0 0 auto;
+  inline-size: 7.5rem;
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  letter-spacing: var(--rh-type-label-ls);
+  text-transform: uppercase;
+}
+
+.rh-change-list__what {
+  flex: 1 1 16rem;
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.rh-change-list__link {
+  color: var(--rh-text-link);
+}
+
+/* A timestamp is measurement, so it is set in the numeral face and aligned as a column. */
+.rh-change-list__when {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  color: var(--rh-text-muted);
+  font-family: var(--rh-font-mono);
+  font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

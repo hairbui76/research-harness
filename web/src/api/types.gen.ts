@@ -484,6 +484,11 @@ export interface components {
             label: string;
             /** Route */
             route: string;
+            /**
+             * Surface
+             * @default decide
+             */
+            surface: string;
         };
         /**
          * AttentionItem
@@ -504,6 +509,11 @@ export interface components {
              * @default 0
              */
             priority: number;
+            /**
+             * Route
+             * @default
+             */
+            route: string;
         };
         /**
          * BlockView
@@ -631,6 +641,32 @@ export interface components {
             } | null;
             /** Run Id */
             run_id?: string | null;
+        };
+        /**
+         * ChangeEntry
+         * @description One thing that changed while the researcher was away, as the daemon recorded it.
+         */
+        ChangeEntry: {
+            /** At */
+            at: string;
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /**
+             * Route
+             * @default
+             */
+            route: string;
+            /** When */
+            when: string;
         };
         /**
          * ClaimSummary
@@ -899,6 +935,11 @@ export interface components {
              */
             attention: components["schemas"]["AttentionGroup"][];
             /**
+             * Attention Summary
+             * @default
+             */
+            attention_summary: string;
+            /**
              * Claim Health
              * @default []
              */
@@ -928,6 +969,7 @@ export interface components {
             project: string;
             /** Review Policy */
             review_policy: string;
+            since_last_session?: components["schemas"]["RecentChanges"];
             /** Workspace */
             workspace: string;
         };
@@ -967,6 +1009,58 @@ export interface components {
             stale: string;
             /** Status */
             status: string;
+        };
+        /**
+         * RecentChanges
+         * @description `OverviewReport.since_last_session`: what changed while the researcher was away.
+         *
+         *     **Where the window opens.** The daemon reads this project's conversation sessions,
+         *     keeps the ones that recorded a message, and orders them by that message, newest first.
+         *     With two or more, the window opens at the end of the session *before* the most recent
+         *     one, so what a researcher sees on returning is the work of their last sitting and
+         *     everything after it — which is the question "what changed since I last worked" actually
+         *     asks. With fewer than two sessions there is nothing to bound a window with, so the
+         *     window is the last seven days. `basis` names which rule applied (`previous_session`,
+         *     `recent_window`, or `no_history` for a project that has recorded no research yet) and
+         *     `summary` says it in words, so nothing on screen has to guess.
+         *
+         *     **What counts as a change.** Works added, evidence accepted, claims promoted or
+         *     reclassified, and decisions taken, read from the Git-visible semantic event log
+         *     (Product 19.3); conflicts opened or resolved, read from the conflict store. Newest
+         *     first, capped, with `more` saying in words what the cap left out. Every judgement here
+         *     is the daemon's: a client displays this list and never rebuilds it (Product 5 P10).
+         */
+        RecentChanges: {
+            /**
+             * Basis
+             * @default no_history
+             */
+            basis: string;
+            /**
+             * Entries
+             * @default []
+             */
+            entries: components["schemas"]["ChangeEntry"][];
+            /**
+             * More
+             * @default
+             */
+            more: string;
+            /**
+             * Since
+             * @default
+             */
+            since: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
         };
         /**
          * RunStatus

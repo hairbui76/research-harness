@@ -9,6 +9,7 @@
 @import './SourceAnchor/SourceAnchor.css';
 @import './EvidenceCard/EvidenceCard.css';
 @import './ClaimCard/ClaimCard.css';
+@import './ChangeList/ChangeList.css';
 @import './ProvenancePath/ProvenancePath.css';
 @import './ContextReceipt/ContextReceipt.css';
 @import './ReviewDecisionBar/ReviewDecisionBar.css';
