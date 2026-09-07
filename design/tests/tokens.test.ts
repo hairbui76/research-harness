@@ -389,6 +389,55 @@ describe('the reading floor', () => {
   });
 });
 
+/*
+ * The floor holds where density does the multiplying, too.
+ *
+ * `density.css` states the rule — "whatever it multiplies must still land at or above
+ * `--rh-type-reading-min-size` for anything a researcher reads" — and until the browser
+ * detector measured it, nothing held a stylesheet to it. `.rh-badge--sm` computed
+ * 11px x 0.929 = 10.2px inside every `data-density="compact"` subtree.
+ *
+ * A badge is the case the rule is about. Its whole content is one word of one of the
+ * daemon's controlled vocabularies — "Accepted", "Stale", "Partially supported" — read off
+ * the screen and acted on, which is reading text however small the box around it is. The
+ * other roles density scales are ids, timestamps and code: `mono` and `label` live below
+ * the floor by design, and the ramp says so. So this holds the badge, at both densities,
+ * the way `browser-tests/typography.spec.ts` measures it in Chromium.
+ */
+describe('a badge is a word, not a chip of metadata', () => {
+  it('keeps every badge size at or above the reading floor in both densities', () => {
+    const floor = px(compactAll, '--rh-type-reading-min-size');
+    const scale = Number(resolve(compactAll, compactAll.get('--rh-density-font-scale') as string));
+    const css = readFileSync(join(src, 'primitives/Badge/Badge.css'), 'utf8').replace(
+      /\/\*[\s\S]*?\*\//g,
+      '',
+    );
+    const measured: string[] = [];
+    const offenders: string[] = [];
+
+    for (const rule of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selector = (rule[1] ?? '').trim();
+      const declaration = /font-size\s*:\s*([^;}]+)/.exec(rule[2] ?? '');
+      if (declaration === null) continue;
+      const value = (declaration[1] ?? '').trim();
+      const role = /var\(\s*(--rh-type-[\w-]+-size)\s*\)/.exec(value);
+      if (role === null) continue;
+      const declared = px(compactAll, role[1] as string);
+      const floored = /max\(/.test(value) && /--rh-type-reading-min-size/.test(value);
+      const dense = /var\(--rh-density-font-scale\)/.test(value) ? declared * scale : declared;
+      const rendered = floored ? Math.max(floor, dense) : dense;
+      measured.push(selector);
+      if (rendered + 0.001 < floor) {
+        offenders.push(`${selector} renders ${rendered.toFixed(2)}px in a compact subtree`);
+      }
+    }
+
+    // The guard on the guard: a renamed class must not turn this into a test of nothing.
+    expect(measured).toContain('.rh-badge--sm');
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('the pointer-target floor', () => {
   it('declares the 24px minimum from WCAG 2.2 SC 2.5.8', () => {
     expect(px(base, '--rh-control-target-min')).toBe(24);

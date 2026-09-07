@@ -255,6 +255,13 @@ test('a transcript row carries one toolbar, with the rest behind More actions', 
   // The act that turns an answer into scientific state is the one with a name on it.
   await expect(toolbar.getByRole('button', { name: 'Promote…' })).toBeVisible();
 
+  // The answer's own prose holds a reading measure. It ran about 114 characters at 1440,
+  // because the cap the package puts on a message's prose is written for a host that
+  // renders bare elements and this renderer wraps its output in `.rh-md`.
+  const line = await measureInCharacters(page, '.rh-message[data-role="assistant"] .rh-md > p');
+  expect(line, 'the answer must be a measured run of text').toBeGreaterThan(20);
+  expect(line, `a transcript line ran ${line.toFixed(0)} characters`).toBeLessThanOrEqual(75);
+
   await toolbar.getByRole('button', { name: 'More actions' }).click();
   const overflow = page.getByRole('menu', { name: /^More actions for / });
   await expect(overflow).toBeVisible();

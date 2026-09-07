@@ -18,8 +18,9 @@
  *    instead.
  * 3. Every button and non-inline link is at least a 24x24 pointer target (WCAG 2.2
  *    SC 2.5.8). Compact density used to take an icon button to 22x22.
- * 4. A research table's cell is at least 12px. The cells used to compute to 11.15px,
- *    because the compact wrapper's font scale was applied to a 12px role.
+ * 4. A research table's cell and a small badge are at least 12px. The cells used to compute
+ *    to 11.15px and the badges to 10.2px, because the compact wrapper's font scale was
+ *    applied to a role that was already at or under the floor.
  *
  * The Corpus is the surface the table check runs on: a brand-new project has no rows, so
  * the shipped `.rh-web-table` rule is measured on an element mounted into the real page,
@@ -192,13 +193,16 @@ test('a compact surface stays dense without going under either floor', async ({
     host.setAttribute('data-density', 'compact');
     host.innerHTML =
       '<table class="rh-web-table"><tbody><tr><td id="rh-cell-probe">A traffic classifier study</td></tr></tbody></table>' +
-      '<button id="rh-target-probe" type="button" class="rh-icon-button rh-icon-button--sm rh-button--ghost"></button>';
+      '<button id="rh-target-probe" type="button" class="rh-icon-button rh-icon-button--sm rh-button--ghost"></button>' +
+      '<span id="rh-badge-probe" class="rh-badge rh-badge--sm">Partially supported</span>';
     document.body.appendChild(host);
     const cell = host.querySelector('#rh-cell-probe') as HTMLElement;
     const target = host.querySelector('#rh-target-probe') as HTMLElement;
+    const badge = host.querySelector('#rh-badge-probe') as HTMLElement;
     const box = target.getBoundingClientRect();
     const out = {
       cell: Number.parseFloat(getComputedStyle(cell).fontSize),
+      badge: Number.parseFloat(getComputedStyle(badge).fontSize),
       body: Number.parseFloat(getComputedStyle(document.body).fontSize),
       target: { width: box.width, height: box.height },
     };
@@ -212,6 +216,13 @@ test('a compact surface stays dense without going under either floor', async ({
   ).toBeGreaterThanOrEqual(READING_FLOOR);
   // Still a queue, not prose: dense text, above the floor rather than through it.
   expect(measured.cell).toBeLessThan(measured.body);
+
+  // A badge's whole content is one word of one of the daemon's vocabularies, so it reads at
+  // the reading floor too. It used to compute to 11px x 0.929 = 10.2px in here.
+  expect(
+    measured.badge,
+    `a compact small badge computed to ${measured.badge}px`,
+  ).toBeGreaterThanOrEqual(READING_FLOOR);
 
   expect(
     Math.min(measured.target.width, measured.target.height),

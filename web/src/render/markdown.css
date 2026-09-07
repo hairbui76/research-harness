@@ -32,6 +32,22 @@
   margin: 0 0 var(--rh-space-3);
 }
 
+/*
+ * The measure.
+ *
+ * An answer in a 1440px window ran about 114 characters a line — half as far again as an
+ * eye tracks back from reliably — because the cap the Design System puts on a message's
+ * prose is written for a host that renders bare elements, and this renderer wraps its
+ * output in `.rh-md`. The cap goes where the elements actually are, on the direct children
+ * only: a paragraph inside a table cell, a line of code, an image or a PDF page is scanned
+ * rather than read and keeps every pixel of the pane. `--rh-measure-prose` is the cockpit's
+ * one reading measure, the same one the research pages set their sentences at. Nothing is
+ * centred: the cap shortens the line, it does not move it.
+ */
+.rh-md > :where(p, ul, ol, dl, blockquote, h1, h2, h3, h4, h5, h6) {
+  max-inline-size: var(--rh-measure-prose);
+}
+
 .rh-md h1,
 .rh-md h2,
 .rh-md h3,

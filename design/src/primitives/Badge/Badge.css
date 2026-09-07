@@ -17,9 +17,20 @@
   vertical-align: middle;
 }
 
+/*
+ * The small badge, floored the way a table cell is.
+ *
+ * It took the `label` role and let density scale it, which put a status word at 10.2px in
+ * every compact subtree — under the size the ramp says nothing a researcher reads may
+ * render at. A badge is not a metadata chip: its whole content is one word of one of the
+ * daemon's vocabularies, read off the screen and acted on. Small is the box, not the word.
+ */
 .rh-badge--sm {
   padding: 1px var(--rh-space-1);
-  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  font-size: max(
+    var(--rh-type-reading-min-size),
+    calc(var(--rh-type-label-size) * var(--rh-density-font-scale))
+  );
 }
 
 /* Scientific status. Colour is the third channel here, after the glyph and the label. */
