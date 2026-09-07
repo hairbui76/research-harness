@@ -35,6 +35,7 @@
  * `StatusBadge` never signals with colour alone: every badge renders the daemon's own word
  * beside its glyph (DS spec §12.6).
  */
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   AsyncState,
@@ -45,8 +46,17 @@ import {
   ScrollArea,
   Skeleton,
   AUTHORITY_LABELS,
+  humaniseTerm,
+  researchDescription,
+  researchLabel,
+  useId,
 } from '@research-harness/design';
-import type { AuthorityLabel, BadgeProps, IconName } from '@research-harness/design';
+import type {
+  AuthorityLabel,
+  BadgeProps,
+  IconName,
+  VocabularyName,
+} from '@research-harness/design';
 
 /**
  * What is about to arrive, so the placeholder can be shaped like it: a table of rows, a
@@ -270,6 +280,7 @@ const ICONS: Record<string, IconName> = {
   ambiguous: 'circle-help',
   relocated: 'arrow-right',
   partially_supported: 'info',
+  insufficient_evidence: 'circle-help',
   unverified: 'circle-dashed',
   supported: 'circle-check',
   verified: 'circle-check',
@@ -278,26 +289,114 @@ const ICONS: Record<string, IconName> = {
 };
 
 export interface StatusBadgeProps {
-  /** The daemon's own word. Rendered verbatim unless `children` replaces it. */
+  /** The daemon's own word: the value, not the label. */
   status: string;
+  /**
+   * Which controlled vocabulary the word belongs to, so the badge can say the product's
+   * word for it and — with `describe` — what it means. Without one the identifier is
+   * humanised, which is right for a word that stands on its own and wrong for a word a
+   * vocabulary explains.
+   */
+  vocabulary?: VocabularyName;
   size?: 'sm' | 'md';
+  /**
+   * Put the vocabulary's one-line meaning on the page: the badge takes a tab stop, is
+   * `aria-describedby` that sentence, and prints it underneath on focus or hover. Turn it
+   * on where the status is the subject of the row or the screen; leave it off where the
+   * status is incidental, and where the sentence would repeat one already on screen.
+   */
+  describe?: boolean;
+  /** Override the visible wording. The vocabulary still supplies the meaning. */
   children?: ReactNode;
 }
 
-export function StatusBadge({ status, size = 'sm', children }: StatusBadgeProps) {
+/**
+ * One word of one of the daemon's vocabularies, drawn as a badge.
+ *
+ * The scientific authorities go to `AuthorityBadge`, which owns their palette, their glyph
+ * and their sentence. Everything else — a queue category, a verifier's verdict, an anchor
+ * verdict, a screening state — is application feedback about an object, so it wears a tone
+ * and carries its vocabulary's sentence in the same shape the authority badge uses.
+ */
+export function StatusBadge({
+  status,
+  vocabulary,
+  size = 'sm',
+  describe = false,
+  children,
+}: StatusBadgeProps) {
+  const descriptionId = useId(undefined, 'rh-web-status');
+  const [shown, setShown] = useState(false);
+
+  const label = children ?? (vocabulary === undefined ? undefined : researchLabel(vocabulary, status));
   if (isAuthority(status)) {
     return (
       <AuthorityBadge
         authority={status}
         size={size}
-        {...(children === undefined ? {} : { label: children })}
+        describe={describe}
+        {...(label === undefined ? {} : { label })}
       />
     );
   }
+
+  const description = vocabulary === undefined ? undefined : researchDescription(vocabulary, status);
+  const describing = describe && description !== undefined;
   const icon = ICONS[status];
-  return (
-    <Badge tone={TONES[status] ?? 'neutral'} size={size} {...(icon ? { icon } : { icon: null })}>
-      {children ?? status}
+  const badge = (
+    <Badge
+      tone={TONES[status] ?? 'neutral'}
+      size={size}
+      {...(icon ? { icon } : { icon: null })}
+      {...(describing
+        ? {
+            tabIndex: 0,
+            'aria-describedby': descriptionId,
+            onFocus: () => setShown(true),
+            onBlur: () => setShown(false),
+            onMouseEnter: () => setShown(true),
+            onMouseLeave: () => setShown(false),
+          }
+        : {})}
+    >
+      {label ?? humaniseTerm(status)}
     </Badge>
   );
+  if (!describing) return badge;
+
+  // The Design System's describable badge, reused rather than restated: these two classes
+  // are how the package draws a badge with its meaning under it, and a second shape for
+  // the same idea would be a second design.
+  return (
+    <span className="rh-authority-badge__described">
+      {badge}
+      <span id={descriptionId} className="rh-visually-hidden">
+        {description}
+      </span>
+      {shown ? (
+        <span className="rh-authority-badge__hint" aria-hidden="true">
+          {description}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+/**
+ * The word for one interrogation field.
+ *
+ * A project's schema names its own questions, so a field the baseline schema does not
+ * declare falls back to the humanised identifier rather than to the identifier itself.
+ */
+export function fieldLabel(field: string): string {
+  return researchLabel('candidateField', field);
+}
+
+/**
+ * What one staged candidate is called, everywhere it is named: the field's word, then the
+ * work the span was read from. The review screen's heading, the queue row, the
+ * decide-and-next links, the batch report and the palette all say the same thing.
+ */
+export function candidateName(field: string, work: string): string {
+  return `${fieldLabel(field)} · ${work}`;
 }

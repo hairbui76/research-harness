@@ -9,7 +9,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { Empty, ErrorBox, Loading } from './Feedback';
+import { Empty, ErrorBox, Loading, StatusBadge, candidateName, fieldLabel } from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
 
 describe('waiting for a read', () => {
@@ -110,5 +110,74 @@ describe('a read that failed', () => {
   it('offers no retry when there is nothing to retry', () => {
     render(<ErrorBox error="the daemon refused" />);
     expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * The daemon's vocabularies on a badge.
+ *
+ * A researcher reads `High-risk scientific claims`, never `high_risk`, and — where the
+ * word is one they have to tell apart from a neighbouring one — the meaning is on the page
+ * rather than in a `title` nobody can reach.
+ */
+describe('a status badge', () => {
+  it('says the vocabulary’s word, never the daemon’s identifier', () => {
+    render(<StatusBadge status="high_risk" vocabulary="reviewCategory" />);
+
+    expect(screen.getByText('High-risk scientific claims')).toBeInTheDocument();
+    expect(screen.queryByText('high_risk')).not.toBeInTheDocument();
+  });
+
+  it('humanises a word no vocabulary was named for', () => {
+    render(<StatusBadge status="partially_supported" />);
+    expect(screen.getByText('Partially supported')).toBeInTheDocument();
+  });
+
+  it('keeps the scientific status family for an authority word', () => {
+    const { container } = render(<StatusBadge status="contested" vocabulary="claimStatus" />);
+
+    expect(container.querySelector('[data-authority="contested"]')).toBeInTheDocument();
+    expect(screen.getByText('Contested')).toBeInTheDocument();
+  });
+
+  it('makes the meaning reachable from the keyboard, with no title attribute', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <StatusBadge status="partially_supported" vocabulary="verdict" describe />,
+    );
+
+    const badge = container.querySelector('.rh-badge')!;
+    expect(badge).not.toHaveAttribute('title');
+    const describedBy = badge.getAttribute('aria-describedby');
+    expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(/confirmed part of it/);
+
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+    await user.tab();
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /confirmed part of it/,
+    );
+  });
+
+  it('stays out of the tab order when it is not describing itself', () => {
+    const { container } = render(<StatusBadge status="routine" vocabulary="reviewCategory" />);
+    expect(container.querySelector('.rh-badge')).not.toHaveAttribute('tabindex');
+  });
+
+  it('has no automatically detectable accessibility violation while describing itself', async () => {
+    const { container } = render(
+      <StatusBadge status="high_risk" vocabulary="reviewCategory" describe />,
+    );
+    await expectNoAxeViolations(container);
+  });
+});
+
+describe('what a staged candidate is called', () => {
+  it('is the field’s word beside the work it was read from', () => {
+    expect(fieldLabel('metric_result')).toBe('Metric result');
+    expect(candidateName('metric_result', 'W0001')).toBe('Metric result · W0001');
+  });
+
+  it('humanises a field a project’s own schema declared', () => {
+    expect(fieldLabel('traffic_representation_family')).toBe('Traffic representation family');
   });
 });

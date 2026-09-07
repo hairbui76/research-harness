@@ -28,6 +28,9 @@ import {
   PaneHandle,
   REVIEW_DECISION_META,
   Switch,
+  humaniseResearchTokens,
+  humaniseTerm,
+  researchLabel,
 } from '@research-harness/design';
 import type { EvidenceModel, ReviewDecision } from '@research-harness/design';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -41,6 +44,8 @@ import {
   Loading,
   Panel,
   StatusBadge,
+  candidateName,
+  fieldLabel,
 } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { ReviewActions } from '../components/ReviewActions';
@@ -151,7 +156,11 @@ export function EvidenceReviewPage() {
         label: 'Next candidate',
         group: 'This candidate',
         shortcut: 'n',
-        hint: 'Open the next one in the queue’s own order.',
+        // The palette names the candidate the way the link and the heading do, so a
+        // researcher choosing from it knows what they are about to open.
+        hint: next
+          ? `Open ${candidateName(next.field, next.work)}, next in the queue’s own order.`
+          : 'Nothing is after this one in the queue.',
         run: () => openCandidate(next),
       },
       {
@@ -159,7 +168,9 @@ export function EvidenceReviewPage() {
         label: 'Previous candidate',
         group: 'This candidate',
         shortcut: 'p',
-        hint: 'Go back to the one before it.',
+        hint: previous
+          ? `Go back to ${candidateName(previous.field, previous.work)}.`
+          : 'Nothing is before this one in the queue.',
         run: () => openCandidate(previous),
       },
     ],
@@ -173,22 +184,33 @@ export function EvidenceReviewPage() {
   return (
     <FullPageWorkspace
       className="rh-web-review"
-      title={candidate ? `${candidate.field} · ${candidate.work}` : `Candidate ${candidateId}`}
+      title={
+        candidate
+          ? candidateName(candidate.field, candidate.work)
+          : `Candidate ${candidateId}`
+      }
       description="A staged proposal, beside the page it was read off. Nothing here is accepted state."
       toolbar={
         <>
-          <StatusBadge status="candidate" size="md" />
+          {/* The two states this screen is about: what the proposal is, and why the queue
+              put it here. Both say what they mean on focus or hover. */}
+          <StatusBadge status="candidate" size="md" describe />
           {item ? (
-            <StatusBadge status={item.category} size="md">
-              {item.category.replace('_', ' ')}
-            </StatusBadge>
+            <StatusBadge status={item.category} vocabulary="reviewCategory" size="md" describe />
           ) : null}
         </>
       }
     >
       {state.loading ? <Loading what={`candidate ${candidateId}`} /> : null}
       {state.error ? <ErrorBox error={state.error} retry={state.reload} /> : null}
-      {!state.loading && !state.error && !data ? <Empty>No candidate {candidateId}.</Empty> : null}
+      {!state.loading && !state.error && !data ? (
+        <Empty
+          description="Nothing is staged under that id. A candidate that has been decided leaves the queue and keeps its record on the work it was read from."
+          action={<Link to={href('/review')}>Back to the review inbox</Link>}
+        >
+          {`No candidate ${candidateId} is waiting`}
+        </Empty>
+      ) : null}
 
       {data && candidate ? (
         <PaneGroup direction="horizontal" defaultSizes={[50, 50]}>
@@ -231,12 +253,12 @@ export function EvidenceReviewPage() {
                   <div className="rh-web-next__moves">
                     {previous ? (
                       <Link to={href(`/review/${previous.candidate_id}`)}>
-                        Previous: {previous.field} · {previous.work}
+                        Previous: {candidateName(previous.field, previous.work)}
                       </Link>
                     ) : null}
                     {next ? (
                       <Link to={href(`/review/${next.candidate_id}`)}>
-                        Next: {next.field} · {next.work}
+                        Next: {candidateName(next.field, next.work)}
                       </Link>
                     ) : (
                       <span className="rh-text-secondary">Last in the queue.</span>
@@ -301,10 +323,15 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
       <Panel title="Proposal">
         <Fields>
           <Field label="Anchor">
-            <StatusBadge status={candidate.anchor_status} /> block{' '}
+            <StatusBadge status={candidate.anchor_status} vocabulary="anchorStatus" /> block{' '}
             <code>{String(source.block ?? '?')}</code> · page {String(source.page ?? '?')}
           </Field>
-          {item ? <Field label="Why it is here">{item.reasons.join('; ') || 'routine'}</Field> : null}
+          {item ? (
+            <Field label="Why it is here">
+              {humaniseResearchTokens(item.reasons.join('; ')) ||
+                researchLabel('reviewCategory', 'routine')}
+            </Field>
+          ) : null}
           <Field label="Work">
             <ObjectRef id={candidate.work} kind="work" to={href(`/corpus/${candidate.work}`)} />
           </Field>
@@ -315,7 +342,9 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
       {content.negative_state ? (
         <Panel title="Absence">
           <Fields>
-            <Field label="State">{String(content.negative_state)}</Field>
+            <Field label="State">
+              {researchLabel('negativeState', String(content.negative_state))}
+            </Field>
           </Fields>
           <p className="rh-text-secondary">
             Absence is a state, not a finding: only an audited decision turns “not reported”
@@ -327,8 +356,10 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
       <Panel title="Verification">
         {candidate.verification ? (
           <Fields>
-            <Field label="Verdict">{candidate.verdict ?? 'unverified'}</Field>
-            <Field label="Verifier">{candidate.verifier ?? 'none'}</Field>
+            <Field label="Verdict">
+              <StatusBadge status={candidate.verdict ?? 'unverified'} vocabulary="verdict" describe />
+            </Field>
+            <Field label="Verifier">{candidate.verifier ?? '— none recorded'}</Field>
             <Field label="Rationale">
               {String((candidate.verification as JsonObject).rationale ?? '')}
             </Field>
@@ -371,9 +402,7 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
                 {conflict.positions.map((position) => (
                   <tr key={position.label}>
                     <th scope="row">{position.label}</th>
-                    <td>
-                      <code>{JSON.stringify(position.decision)}</code>
-                    </td>
+                    <td>{readable(position.decision)}</td>
                     <td>{position.rationale ?? '—'}</td>
                   </tr>
                 ))}
@@ -407,10 +436,12 @@ function proposedEvidence(
     workId: candidate.work,
     workLabel: candidate.work,
     quote: String(content.exact_text ?? ''),
-    field: candidate.field,
-    evidenceType: String(evidence.evidence_type ?? ''),
-    strength: String(evidence.strength ?? ''),
-    origin: String(evidence.origin ?? ''),
+    field: fieldLabel(candidate.field),
+    // The card prints these three verbatim, so it is given the researcher's word for each
+    // rather than the daemon's identifier.
+    evidenceType: researchLabel('evidenceType', String(evidence.evidence_type ?? '')),
+    strength: researchLabel('evidenceStrength', String(evidence.strength ?? '')),
+    origin: researchLabel('evidenceOrigin', String(evidence.origin ?? '')),
     authority: 'candidate',
     anchor: {
       artifactId: candidate.artifact,
@@ -429,7 +460,7 @@ function NumericPanel({ numeric }: { numeric: JsonObject }) {
         <Field label="Metric">{String(numeric.metric ?? '—')}</Field>
         <Field label="Unit">{String(numeric.unit ?? '—')}</Field>
         <Field label="Dataset">{String(numeric.dataset ?? '—')}</Field>
-        <Field label="Condition">{JSON.stringify(numeric.condition ?? {})}</Field>
+        <Field label="Condition">{readable(numeric.condition)}</Field>
         <Field label="Table">
           {String(numeric.source_table ?? '—')} · row {String(numeric.source_row ?? '—')} · column{' '}
           {String(numeric.source_column ?? '—')}
@@ -439,7 +470,26 @@ function NumericPanel({ numeric }: { numeric: JsonObject }) {
   );
 }
 
-/** The diff PRODUCT §25 asks for: what accepting each side would change. */
+/**
+ * A free-form object the daemon sent, as a line rather than as JSON.
+ *
+ * A position's decision and a number's condition are open dictionaries — the daemon does
+ * not fix their keys, so nothing here can name them in advance. What it can do is stop
+ * printing braces and quotation marks at a researcher: each key is humanised, each value
+ * is read out in the vocabulary's own words, and an empty one says so.
+ */
+export function readable(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—';
+  if (Array.isArray(value)) return value.length === 0 ? '—' : value.map(readable).join(', ');
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) return '—';
+    return entries.map(([key, item]) => `${humaniseTerm(key)}: ${readable(item)}`).join(' · ');
+  }
+  return humaniseResearchTokens(String(value));
+}
+
+/** The diff of what accepting each side would change (Conflict-first UX). */
 export function ProposedChanges({ changes }: { changes: JsonObject[] }) {
   if (!changes.length) return null;
   return (
@@ -457,9 +507,9 @@ export function ProposedChanges({ changes }: { changes: JsonObject[] }) {
       {changes.map((change, index) => (
         <tr key={index}>
           <th scope="row">{String(change.position ?? '')}</th>
-          <td>{String(change.field ?? '')}</td>
-          <td>{String(change.from ?? '—')}</td>
-          <td>{String(change.to ?? '—')}</td>
+          <td>{change.field === undefined ? '—' : humaniseTerm(String(change.field))}</td>
+          <td>{readable(change.from)}</td>
+          <td>{readable(change.to)}</td>
         </tr>
       ))}
     </DataTable>

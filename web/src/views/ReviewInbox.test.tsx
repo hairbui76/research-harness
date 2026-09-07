@@ -20,12 +20,14 @@ import type { ReviewItem } from '../api/dto';
 import {
   CATEGORY_ORDER,
   ReviewInboxPage,
+  ReviewRow,
   groupByCategory,
   inboxGroups,
   matchesFilters,
 } from './ReviewInbox';
 import { CommandsProvider } from '../app/commands';
 import { ProjectPathProvider } from '../app/projectPaths';
+import { fieldLabel } from '../components/Feedback';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 import type { FakeDaemon } from '../test/harness';
 
@@ -124,7 +126,7 @@ describe('the review inbox view', () => {
     expect(screen.getByText('High-risk scientific claims (1)')).toBeInTheDocument();
     expect(screen.getByText('Ambiguous extractions (1)')).toBeInTheDocument();
     expect(screen.getByText('Routine verified candidates (1)')).toBeInTheDocument();
-    expect(screen.getByText('metric_result')).toBeInTheDocument();
+    expect(screen.getByText('Metric result')).toBeInTheDocument();
     expect(screen.getByText('94.32')).toBeInTheDocument();
   });
 
@@ -155,16 +157,59 @@ describe('the review inbox view', () => {
   it('links every item to its own source-beside-decision screen', async () => {
     renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     const first = QUEUE.items[0]!;
-    const link = screen.getByText(first.field).closest('a');
+    const link = screen.getByText(fieldLabel(first.field)).closest('a');
     expect(link).toHaveAttribute('href', `/review/${first.candidate_id}`);
+  });
+
+  it('prints no identifier a researcher would have to decode', async () => {
+    const { container } = renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
+    const text = container.textContent ?? '';
+    for (const token of ['metric_result', 'method_summary', 'high_risk', 'partially_supported']) {
+      expect(text).not.toContain(token);
+    }
+    // The daemon's own sentence survives; only its vocabulary is read out in words.
+    expect(text).toContain('the verifier reported partially supported');
+    expect(text).toContain('Tier 2 — deep review');
+  });
+
+  it('puts the meaning of the two states a row is about within reach', async () => {
+    const user = userEvent.setup();
+    const { container } = renderView(<ReviewRow item={QUEUE.items[0]!} />, {
+      daemon: queueDaemon(),
+      route: '/review',
+      path: '/review',
+    });
+
+    const category = screen.getByText('High-risk scientific claims').closest('.rh-badge')!;
+    expect(category).toHaveAttribute('tabindex', '0');
+    expect(category).not.toHaveAttribute('title');
+    expect(
+      container.querySelector(`#${category.getAttribute('aria-describedby')}`),
+    ).toHaveTextContent(/carries a number/);
+
+    await user.tab();
+    await user.tab();
+    expect(category).toHaveFocus();
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /carries a number/,
+    );
+  });
+
+  it('finds a candidate by the word the row shows as well as by the daemon’s field name', () => {
+    const metric = QUEUE.items.find((item) => item.field === 'metric_result')!;
+
+    expect(matchesFilters(metric, { ...NO_FILTERS, text: 'metric result' })).toBe(true);
+    expect(matchesFilters(metric, { ...NO_FILTERS, text: 'metric_result' })).toBe(true);
   });
 
   it('shows no model-confidence number, because the daemon reports none', async () => {
     const { container } = renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     expect(container.textContent?.toLowerCase()).not.toContain('confidence');
   });
 
@@ -189,7 +234,7 @@ describe('the review inbox view', () => {
   it('has no automatically detectable accessibility violation', async () => {
     const { container } = renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     await expectNoAxeViolations(container);
   });
 });
@@ -203,8 +248,8 @@ describe('narrowing the queue on screen', () => {
     await user.type(screen.getByRole('textbox', { name: /Filter/ }), 'transformer');
 
     await waitFor(() => expect(screen.getByText(/Showing 1 of 3/)).toBeInTheDocument());
-    expect(screen.queryByText('metric_result')).not.toBeInTheDocument();
-    expect(screen.getByText('method_summary')).toBeInTheDocument();
+    expect(screen.queryByText('Metric result')).not.toBeInTheDocument();
+    expect(screen.getByText('Method summary')).toBeInTheDocument();
     expect(screen.queryByText(/High-risk scientific claims \(/)).not.toBeInTheDocument();
   });
 
@@ -220,7 +265,7 @@ describe('narrowing the queue on screen', () => {
     expect(screen.queryByText('Nothing is waiting for review')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Clear the filters' }));
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
   });
 
   it('filters by category without moving the groups it keeps', async () => {
@@ -242,7 +287,7 @@ describe('the keyboard', () => {
     const user = userEvent.setup();
     renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     const rows = screen.getAllByRole('link', { name: /·/ });
 
     await user.keyboard('j');
@@ -257,7 +302,7 @@ describe('the keyboard', () => {
     const user = userEvent.setup();
     renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     const filter = screen.getByRole('textbox', { name: /Filter/ });
     await user.click(filter);
     await user.keyboard('jk');
@@ -319,7 +364,7 @@ describe('the policy batch of Product 24.4', () => {
     await waitFor(() =>
       expect(screen.getByText(/tier 2 needs deep review/)).toBeInTheDocument(),
     );
-    expect(screen.getByText(/verdict is partially_supported, not supported/)).toBeInTheDocument();
+    expect(screen.getByText(/verdict is partially supported, not supported/)).toBeInTheDocument();
   });
 
   it('accepts only after the second press, and reports what was written', async () => {
@@ -380,7 +425,7 @@ describe('the policy batch of Product 24.4', () => {
     );
     expect(
       screen.getByRole('list', { name: 'Candidates that meet the batch conditions' }),
-    ).toHaveTextContent('dataset · W0001');
+    ).toHaveTextContent('Dataset · W0001');
     expect(screen.getByText('Nothing is waiting for review')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /Accept the routine candidates/ }),
@@ -458,7 +503,7 @@ describe('the review inbox inside a project', () => {
 
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
     const first = QUEUE.items[0]!;
-    const link = screen.getByRole('link', { name: new RegExp(first.field) });
+    const link = screen.getByRole('link', { name: new RegExp(fieldLabel(first.field)) });
     expect(link).toHaveAttribute('href', `/projects/prj_abc/review/${first.candidate_id}`);
   });
 
@@ -467,7 +512,9 @@ describe('the review inbox inside a project', () => {
 
     await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
     const first = QUEUE.items[0]!;
-    expect(screen.getByRole('link', { name: new RegExp(first.field) })).toHaveAttribute(
+    expect(
+      screen.getByRole('link', { name: new RegExp(fieldLabel(first.field)) }),
+    ).toHaveAttribute(
       'href',
       `/review/${first.candidate_id}`,
     );
@@ -479,7 +526,7 @@ describe('the palette on the inbox', () => {
     const user = userEvent.setup();
     renderInbox(queueDaemon());
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     await user.keyboard('{Control>}k{/Control}');
 
     const palette = screen.getByRole('dialog', { name: 'Go to, or do' });
@@ -498,7 +545,7 @@ describe('outside the shell', () => {
       path: '/review',
     });
 
-    await waitFor(() => expect(screen.getByText('metric_result')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });
