@@ -89,6 +89,62 @@ describe('ChangeList', () => {
     expect(screen.getByText('revised the transport taxonomy')).toBeInTheDocument();
   });
 
+  it('puts the researcher in front of her own change, in words rather than a colour', () => {
+    render(
+      <ChangeList
+        entries={[{ ...ENTRIES[1]!, by: 'researcher' }]}
+        label="What changed since your last session"
+      />,
+    );
+
+    const sentence = screen.getByText(/accepted evidence E0001/).closest('p');
+    expect(sentence).toHaveTextContent('You accepted evidence E0001 anchored in A0001-1');
+  });
+
+  it('names the daemon for the ones it recorded', () => {
+    render(
+      <ChangeList
+        entries={[
+          {
+            id: 'conflict.opened',
+            kind: 'conflict',
+            by: 'daemon',
+            label: 'opened a conflict: two readings of Table 1 disagree',
+            at: '2026-09-06T16:41:00+00:00',
+            when: '6 September, 16:41',
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText(/opened a conflict/).closest('p')).toHaveTextContent(
+      'The daemon opened a conflict: two readings of Table 1 disagree',
+    );
+  });
+
+  it('leaves a change the record does not attribute unattributed', () => {
+    const { container } = render(<ChangeList entries={ENTRIES} />);
+
+    const sentences = Array.from(container.querySelectorAll('.rh-change-list__what')).map(
+      (node) => node.textContent,
+    );
+    expect(sentences).toEqual(ENTRIES.map((entry) => entry.label));
+    expect(container.querySelector('.rh-change-list__by')).toBeNull();
+  });
+
+  it('says who acted inside the sentence, never as a badge', () => {
+    const { container } = render(
+      <ChangeList entries={[{ ...ENTRIES[0]!, by: 'researcher' }]} />,
+    );
+
+    const subject = container.querySelector('.rh-change-list__by');
+    expect(subject).not.toBeNull();
+    expect(subject!.closest('.rh-change-list__what')).not.toBeNull();
+    expect(container.querySelectorAll('.rh-badge')).toHaveLength(0);
+    // The row states it for a host that wants to style or test one side of the record.
+    expect(container.querySelector('.rh-change-list__entry')).toHaveAttribute('data-by', 'researcher');
+  });
+
   it('has no accessibility violations', async () => {
     const { container } = render(<ChangeList entries={ENTRIES} onOpen={() => undefined} />);
     await expectNoAxeViolations(container);
@@ -96,3 +152,19 @@ describe('ChangeList', () => {
 });
 
 describeThemeDensitySnapshots('ChangeList', () => <ChangeList entries={ENTRIES} />);
+
+describeThemeDensitySnapshots('ChangeList attributed', () => (
+  <ChangeList
+    entries={[
+      { ...ENTRIES[0]!, by: 'researcher' },
+      {
+        id: 'conflict.opened',
+        kind: 'conflict',
+        by: 'daemon',
+        label: 'opened a conflict: two readings of Table 1 disagree',
+        at: '2026-09-06T16:41:00+00:00',
+        when: '6 September, 16:41',
+      },
+    ]}
+  />
+));

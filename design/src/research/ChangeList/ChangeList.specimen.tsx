@@ -8,8 +8,9 @@ const SINCE_LAST_SESSION: ChangeListEntry[] = [
   {
     id: 'conflict.opened',
     kind: 'conflict',
+    by: 'daemon',
     label:
-      'Conflict opened: the staged storage modulus differs from the accepted reading of Table 1',
+      'opened a conflict: the staged storage modulus differs from the accepted reading of Table 1',
     at: '2026-09-06T16:41:00+00:00',
     when: '6 September, 16:41',
     href: '/conflicts',
@@ -17,6 +18,7 @@ const SINCE_LAST_SESSION: ChangeListEntry[] = [
   {
     id: 'decision.accepted',
     kind: 'decision',
+    by: 'researcher',
     label: 'accepted D0002: count only held-out splits',
     at: '2026-09-06T14:03:00+00:00',
     when: '6 September, 14:03',
@@ -24,6 +26,7 @@ const SINCE_LAST_SESSION: ChangeListEntry[] = [
   {
     id: 'claim.audited',
     kind: 'claim',
+    by: 'researcher',
     label: 'audited C0041: qualified at L1 observed subset',
     at: '2026-09-06T13:58:00+00:00',
     when: '6 September, 13:58',
@@ -32,6 +35,7 @@ const SINCE_LAST_SESSION: ChangeListEntry[] = [
   {
     id: 'evidence.accepted',
     kind: 'evidence',
+    by: 'researcher',
     label: 'accepted evidence E0482 anchored in A0017-3',
     at: '2026-09-06T11:20:00+00:00',
     when: '6 September, 11:20',
@@ -40,6 +44,7 @@ const SINCE_LAST_SESSION: ChangeListEntry[] = [
   {
     id: 'work.ingested',
     kind: 'work',
+    by: 'researcher',
     label: 'registered W0017 from hydrogel-stiffness-neurites.pdf',
     at: '2026-09-05T09:12:00+00:00',
     when: '5 September, 09:12',
@@ -58,6 +63,24 @@ export const specimens: Array<{ name: string; render: () => ReactNode }> = [
       <div style={{ maxWidth: 300 }}>
         <ChangeList entries={SINCE_LAST_SESSION.slice(0, 1)} onOpen={() => undefined} />
       </div>
+    ),
+  },
+  {
+    name: 'A change the record attributes to nobody',
+    render: () => (
+      <ChangeList
+        entries={[
+          {
+            id: 'conflict.anonymous',
+            kind: 'conflict',
+            label: 'opened a conflict: the staged reading of cand_0007 differs from the accepted one',
+            at: '2026-09-06T07:12:00+00:00',
+            when: '6 September, 07:12',
+            href: '/conflicts',
+          },
+        ]}
+        onOpen={() => undefined}
+      />
     ),
   },
   {

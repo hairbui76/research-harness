@@ -48,6 +48,16 @@
   overflow-wrap: anywhere;
 }
 
+/*
+ * The row is a sentence, so it starts like one. The host writes verb-initial summaries
+ * ("accepted evidence E0001…") which read as a fragment on their own and as prose behind
+ * the subject in front of them; capitalising the first letter here is the one rule that
+ * makes both cases a sentence without this package rewriting a word the daemon chose.
+ */
+.rh-change-list__what::first-letter {
+  text-transform: capitalize;
+}
+
 .rh-change-list__link {
   color: var(--rh-text-link);
 }
