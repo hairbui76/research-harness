@@ -1,11 +1,94 @@
 # Research Harness — PRODUCT.md
 
+<!-- impeccable:product-schema 1 -->
+
 **Status:** Product design baseline  
 **Version:** 0.1  
 **Primary mode:** Personal research workstation  
 **Primary users:** Individual researchers conducting literature-heavy technical research and academic writing  
 **Deployment model:** Local-first, single-user, multi-client  
 **Reference architecture:** Independent research core with plugin/profile ideas inspired by modern agent harnesses; not a fork or runtime dependency of DeepSeek Harness.
+
+---
+
+<!--
+The sections below are the Impeccable product record (schema 1). They add the canonical
+headings this file never had; they summarise, and never replace, the numbered sections that
+follow, each summary carrying the `(from §n)` it was drawn from. A fact marked `(inferred)`
+was read off the repository rather than stated in it and awaits the researcher's correction.
+-->
+
+## Platform
+
+web
+
+## Users
+
+- **Primary user:** an individual researcher doing literature-heavy technical research and academic writing (from the status block, §1).
+- **Situation:** a local-first, single-user workstation serving several clients over one workspace — no server, no team account, no shared instance (from the status block, §34).
+- **Job:** turn scholarly sources into evidence, claims, decisions and manuscript prose that stay inspectable months later, deciding every acceptance personally (from §1, §5 P4, §41).
+- **Attention** is the scarce resource: review is asynchronous, batchable, conflict-first and source-visible, never interrupt-driven (from §5 P8, §24.2).
+- (inferred) The researcher is also the installer and operator — the docs describe one person running `uv sync`, `research app` and the daemon, and no separate administrator, librarian or second-reviewer role appears anywhere (README.md, docs/guide/install.md).
+
+## Product Purpose
+
+Research Harness converts scholarly sources into durable evidence, auditable claims, explicit research decisions and traceable manuscript prose, keeping the chain source → evidence → interpretation → claim → synthesis → manuscript inspectable and rebuildable (from §1, §45). Success is what §41 lists: ingest a paper once and retain source-anchored knowledge, switch model providers without migrating scientific state, delete every machine index and rebuild without changing a conclusion, and click from a manuscript sentence through claim and evidence to the exact PDF span.
+
+## Positioning
+
+- The mechanism a neighbouring product could not truthfully copy: canonical scientific state in readable, Git-versionable files with every index a disposable projection (from §5 P2, P7, §8.1); a candidate/accepted split in which model output enters staging and only a persisted human decision creates accepted state (from §8.3, §5 P4, §24); and a provider- and host-neutral core in which no frontend owns research logic (from §5 P9, P10, §21).
+- What it is not, stated by the product itself: not a PDF chatbot, not a generic RAG application, not an autonomous multi-agent swarm (from §1, §4).
+
+## Operating Context
+
+- Four surfaces over one core — CLI, Web cockpit, VS Code, and agent hosts (Claude, ChatGPT) over MCP — none of which duplicates research logic (from §1, §26–§29).
+- (inferred) Only the Web cockpit is a design surface: the CLI is text (§27) and the VS Code extension is manuscript tooling inside the editor's own chrome (§28), so both are hosts of this product rather than native design languages, and `## Platform` is `web` with no iOS, Android or desktop language to maintain.
+- A workspace is a folder holding `research.yaml`; the daemon binds `127.0.0.1:8765` behind a token; `.research/` holds the SQLite, FTS and vector projections, which are always regenerable (README.md, from §8.1).
+- The rituals that shape the interface: a Review Inbox ordered by scientific priority rather than arrival (from §24.2), promotion of a conversation selection into a Note, Question, Claim candidate or Decision candidate (from §26), evidence review that shows the exact source beside the proposed decision (from §26), and staleness that marks downstream objects instead of silently rewriting them (from §37).
+
+## Capabilities and Constraints
+
+- The confirmed functional boundary is §40's must-have list, from local ingest and page-anchored parsing through canonical YAML/JSONL state, the review workflow, claim audit, the CLI, the local daemon, the MCP capability server and stale propagation.
+- Review policy is **strict** by default; the actions are Accept, Accept with qualification, Edit, Reject, Defer and Request more evidence, and partial acceptance must be possible (from §24, §24.3).
+- **There is no undo.** Acceptance writes authority, so the ceremony belongs before the write and nothing may imitate an undo afterwards (from §24; `docs/plans/2026-09-06-ux-improvement-roadmap.md`, "Rules that bind every wave").
+- Terminology future work must preserve: Work / Version / Artifact, Evidence, Claim, Decision, Question, Note, Synthesis, Taxonomy, Conflict, Stale; the six scientific states accepted, candidate, qualified, contested, stale and private; and the distinct absence states `not_found`, `not_reported`, `absent`, `not_applicable`, `unclear` (from §7, §9, §5 P5; design/README.md).
+- Constraints that bind the interface: fonts, icons, styles and components must work locally with no CDN request (from §26); no automatic background upload of the corpus, every provider declares what content leaves the workstation, and a project may disable external-model egress entirely (from §34).
+- Explicitly undecided: the grouping of the rail's eleven destinations, proposed in `docs/plans/2026-09-07-rail-grouping-proposal.md` and waiting for the researcher; and DESIGN.md, which does not exist, so the incumbent visual world is coded but undocumented.
+
+## Brand Commitments
+
+- The product name is **Research Harness**, and the sentence it leads with everywhere is "Models may propose; evidence must justify; the researcher decides" (from §1; README.md).
+- Voice: researcher vocabulary rather than internal enums, a control that restates what it is about to write before it writes it, and no confidence number standing in for evidence (from §10.5, §24; `web/.impeccable/critique/2026-09-07T13-12-06Z__src-app-layout-tsx.md`). (inferred) This voice is read off the shipped copy and the critique; no written voice guide exists in the repository.
+- The binding rules of the incumbent design world, recorded in the roadmap and enforced by the design package: one warm ramp with a paper surface that carries its own ink; an accent reserved for model activity and the primary action that never says whether a claim is true; six scientific status families kept distinct from that accent; and a craft floor — no coloured side border above 1px, no gradient text, no kicker labels, no emoji as icons, skeletons rather than spinners, and empty states that teach (`docs/plans/2026-09-06-ux-improvement-roadmap.md`; design/README.md).
+
+## Evidence on Hand
+
+Real, with paths:
+
+- **Design package** `design/` — semantic tokens, a dark and a light theme, accessible primitives, and three gates that fail the build: `design/scripts/check-tokens.mjs`, `design/scripts/check-contrast.mjs`, `design/scripts/token-usage.mjs` (design/README.md).
+- **Critique snapshots** `web/.impeccable/critique/2026-09-06T16-27-46Z__src-app-layout-tsx.md` (20/40) and `web/.impeccable/critique/2026-09-07T13-12-06Z__src-app-layout-tsx.md` (25/40, closed).
+- **Plans** `docs/plans/2026-09-06-ux-improvement-roadmap.md` (the binding rules and the wave log) and `docs/plans/2026-09-07-rail-grouping-proposal.md` (open).
+- **A real research session**, run end to end through the shipped CLI with real papers and real discovery providers, exported as 45 canonical files: `docs/dogfood/structured-traffic/`, written up in `docs/plans/dogfood-2026-09-03.md` and `docs/plans/dogfood-2026-09-03-v1.1.md`.
+- **Browser coverage** `browser-tests/*.spec.ts`, including the axe harness `browser-tests/axe.ts` with landmark and heading rules. The gate writes screenshots and traces to `.task-gate/browser-results/`, which is gitignored: regenerate them with `pnpm run task:check` rather than citing a stored image.
+- **Demo corpus** `src/research_harness/demo/synthetic_research_paper.pdf` — synthetic, labelled as such, offline, no API key.
+
+Absent, and not to be fabricated: no named users, testimonials, case studies, press, adopters or institutional endorsement; no benchmark result against a public corpus; no pricing, licensing or support claim (the repository carries no LICENSE file); no logo, wordmark or other brand asset; no DESIGN.md. The annotated browser captures cited by the current critique lived under `/tmp/critique-B/` and no longer exist.
+
+## Product Principles
+
+1. **Models may propose; evidence must justify; the researcher decides.** Human authority is explicit, and an override is persisted as a visible research decision rather than applied quietly (from §1, §5 P4, §38).
+2. **Conversation is not project knowledge.** Only accepted research objects are, and nothing becomes accepted state automatically (from §1, §26).
+3. **Canonical state is readable files; everything else is a rebuildable projection.** Deleting an index must not change a conclusion (from §5 P2, P7, §8.1).
+4. **Absence of evidence is not evidence of absence, and confidence is not scope.** The distinct absence states and the claim-scope ladder are product invariants, not presentation details (from §5 P5, P6, §10.2, §11).
+5. **Researcher attention is the scarce resource.** A surface is judged by whether the next decision is reachable, not by how much it displays (from §5 P8, §24.2).
+
+## Accessibility & Inclusion
+
+- WCAG 2.2 AA is the accessibility baseline and status is never communicated through colour alone (from §26). Each of the six scientific states renders an icon and a label beside its palette, so the state survives greyscale and a colour-blind reader (`design/src/primitives/Badge/status.ts`, design/README.md).
+- Contrast is gated rather than asserted: `design/scripts/check-contrast.mjs` resolves every token chain and computes WCAG 2.2 ratios for each declared pair — 4.5:1 for text, 3:1 for non-text, compositing the paper highlights through `mix-blend-mode: multiply` — and fails the lint.
+- A reading floor of 12px (`--rh-type-reading-min-size`) holds at every density, and no pointer target falls below 24px (WCAG 2.2 SC 2.5.8, `--rh-control-target-min`).
+- Keyboard reachability is tested, not assumed: the design package covers keyboard operation and runs `axe-core`, the browser suite runs axe route-wide, and `prefers-reduced-motion: reduce` collapses the motion tokens for anyone who asks for it.
+- (inferred) No assistive technology, disability or locale requirement has been stated by the researcher. The commitments above are the ones the code and docs already enforce; internationalisation is not among them.
 
 ---
 
