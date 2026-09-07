@@ -30,8 +30,13 @@ import {
   ErrorNotice,
   ProvenancePath,
   SourceAnchor,
+  humaniseTerm,
 } from '@research-harness/design';
-import type { EntityRefModel, SourceAnchorModel } from '@research-harness/design';
+import type {
+  EntityRefModel,
+  ProvenancePathModel,
+  SourceAnchorModel,
+} from '@research-harness/design';
 import type { HarnessClient } from '../../../api/client';
 import type { SessionVisibility } from '../../../api/dto';
 import { headingFor } from './mappers';
@@ -101,7 +106,7 @@ export function ReferenceDetails({
         ) : (
           <>
             <ProvenancePath
-              path={provenance.path}
+              path={readableRelations(provenance.path)}
               orientation="vertical"
               onOpen={onOpen}
               label={`Provenance of ${entity.id}`}
@@ -141,6 +146,23 @@ export function ReferenceDetails({
   );
 }
 
+/**
+ * The same chain, with each edge named in words.
+ *
+ * The graph's edge kinds are identifiers — `anchored_at`, `derived_from` — and the chain
+ * prints the edge between two steps as it is given. Humanising them here changes nothing
+ * about the walk: the edge is still the daemon's, spelled the way a person reads it.
+ */
+function readableRelations(path: ProvenancePathModel): ProvenancePathModel {
+  return {
+    steps: path.steps.map((step) =>
+      step.relation === undefined
+        ? step
+        : { ...step, relation: humaniseTerm(step.relation).toLowerCase() },
+    ),
+  };
+}
+
 /** What the resolver said, and — when it objected — exactly what it said. */
 function Resolution({
   entity,
@@ -177,10 +199,9 @@ function Group({
 }) {
   return (
     <section className="rh-web-stack rh-web-stack--tight">
-      <h4 className="rh-text-body-sm rh-web-graph__relation">
-        {headingFor(group)}
-        <code>{group.relation}</code>
-      </h4>
+      {/* The heading is the relation, in the researcher's words. The daemon's own edge
+          name beside it said the same thing twice, in a form nobody reads. */}
+      <h4 className="rh-text-body-sm rh-web-graph__relation">{headingFor(group)}</h4>
       <ul className="rh-web-list rh-web-list--tight">
         {group.neighbours.map((neighbour) => (
           <li key={`${neighbour.ref.id}:${neighbour.direction}`} className="rh-web-row">

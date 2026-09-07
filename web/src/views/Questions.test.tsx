@@ -86,6 +86,16 @@ describe('the questions page', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('says a status in the product’s words rather than as an identifier', async () => {
+    const partly = { ...QUESTION, id: 'RQ0002', status: 'partially_answered' };
+    const { container } = renderView(<QuestionsPage />, {
+      daemon: questionsDaemon([partly]),
+    });
+
+    await waitFor(() => expect(screen.getByText('Partially answered')).toBeInTheDocument());
+    expect(container.textContent).not.toContain('partially_answered');
+  });
+
   it('counts what arrived once the read has answered', async () => {
     renderView(<QuestionsPage />, { daemon: questionsDaemon([QUESTION]) });
 

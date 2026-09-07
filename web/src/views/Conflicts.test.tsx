@@ -75,6 +75,43 @@ describe('the conflicts page', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('names the two sides in words, and reads each position out as a line', async () => {
+    const { container } = renderView(<ConflictsPage />, {
+      daemon: overviewWith([
+        {
+          conflict_id: 'conf_0f2a1c33d4e5b607',
+          kind: 'provider_disagreement',
+          subject: 'cand_44c1f007fc0db0b2',
+          summary: 'two providers read metric_result differently',
+          tier: 2,
+          status: 'open',
+          created_at: '2026-09-05T10:00:00Z',
+          differing_fields: ['metric_result'],
+          positions: [
+            {
+              label: 'a/model-x',
+              provider: 'a',
+              model: 'model-x',
+              decision: { value: '94.32', unit: 'percent' },
+              rationale: 'the table reports it as a percentage',
+            },
+          ],
+          proposed_changes: [],
+        },
+      ]),
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText('Provider against provider')).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/Disagrees on: Metric result/)).toBeInTheDocument();
+    expect(screen.getByText(/Tier 2 — deep review/)).toBeInTheDocument();
+    expect(screen.getByText('two providers read metric result differently')).toBeInTheDocument();
+    expect(screen.getByText('Value: 94.32 · Unit: percent')).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/[{}]/);
+    await expectNoAxeViolations(container);
+  });
+
   it('counts the open conflicts once the read has answered', async () => {
     renderView(<ConflictsPage />, { daemon: overviewWith(FIXTURES.overview.conflicts) });
 

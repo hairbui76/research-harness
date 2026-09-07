@@ -8,7 +8,7 @@
  * survive loading, a refusal and a project where nothing is stale.
  */
 import { Link } from 'react-router-dom';
-import { FullPageWorkspace } from '@research-harness/design';
+import { FullPageWorkspace, humaniseResearchTokens } from '@research-harness/design';
 import { DataTable, Empty, ErrorBox, Loading, StatusBadge } from '../components/Feedback';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
@@ -68,7 +68,7 @@ export function StalePage() {
                 <code>{mark.object_id}</code> <StatusBadge status="stale" />
               </th>
               <td>{PRIORITY_LABELS[mark.priority] ?? mark.priority}</td>
-              <td>{mark.reason}</td>
+              <td>{humaniseResearchTokens(mark.reason)}</td>
               <td>
                 <code>{mark.source_change}</code>
               </td>

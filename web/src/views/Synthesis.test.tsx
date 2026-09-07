@@ -88,6 +88,34 @@ describe('the synthesis page', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('reads a recorded cell out rather than printing its JSON', async () => {
+    const { container } = renderView(<SynthesisPage />, {
+      daemon: synthesisDaemon({
+        'synthesis.compare': {
+          field: 'metric_result',
+          rows: [
+            {
+              work: 'W0001',
+              metric_result: { value: '94.32', unit: 'percent' },
+              author_limitation: null,
+            },
+          ],
+        },
+      }),
+    });
+
+    await waitFor(() => expect(screen.getByLabelText('Field')).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('Field'), { target: { value: 'metric_result' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('columnheader', { name: 'Metric result' })).toBeInTheDocument(),
+    );
+    expect(screen.getByText('Value: 94.32 · Unit: percent')).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/[{}]/);
+    expect(container.textContent).not.toContain('author_limitation');
+  });
+
   it('tells a field with no rows apart from a project with no matrix', async () => {
     renderView(<SynthesisPage />, {
       daemon: synthesisDaemon({ 'synthesis.compare': { field: 'tokenization', rows: [] } }),

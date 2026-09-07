@@ -51,7 +51,7 @@ export function QuestionsPage() {
             <Panel
               key={question.id}
               title={question.question}
-              action={<StatusBadge status={question.status} />}
+              action={<StatusBadge status={question.status} vocabulary="questionStatus" />}
             >
               <Fields>
                 <Field label="Id">

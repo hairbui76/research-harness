@@ -431,7 +431,7 @@ describe('the inspector’s graph pane', () => {
     const path = await screen.findByRole('navigation', { name: 'Provenance of C0001' });
     expect(within(path).getByText('E0482')).toBeInTheDocument();
     expect(within(path).getByText('supports')).toBeInTheDocument();
-    expect(within(path).getByText('anchored_at')).toBeInTheDocument();
+    expect(within(path).getByText('anchored at')).toBeInTheDocument();
     expect(within(path).getByText('A0017-3')).toBeInTheDocument();
     // And the exact place it ended.
     expect(screen.getByText('A0017-3 · p.6 · B0081 · chars 418–512')).toBeInTheDocument();
