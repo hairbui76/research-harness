@@ -598,11 +598,30 @@ describe('what counts as the daemon not answering', () => {
     expect(daemonReachability.get()?.reason).toContain('Failed to fetch');
   });
 
-  it.each([502, 503, 504])('counts a %i from whatever is in front of it', async (status) => {
+  it.each([502, 504])('counts a %i, which this daemon never sends itself', async (status) => {
     renderView(<CorpusPage />, { daemon: gatewayDaemon(status), route: '/corpus', path: '/corpus' });
 
     await waitFor(() => expect(daemonReachability.get()).not.toBeNull());
     expect(daemonReachability.get()?.reason).toContain(String(status));
+  });
+
+  it('does not count a 503: that is the daemon saying it cannot open the workspace', async () => {
+    // `server/app.py::_open_repo` raises one, with a sentence a researcher can act on.
+    // Reading it as silence would replace the only message that says what to do about it.
+    const daemon: FakeDaemon = {
+      fetch: (async () =>
+        new Response('the workspace lock is held by another process', {
+          status: 503,
+        })) as unknown as typeof fetch,
+      calls: [],
+      capabilityCalls: () => [],
+    };
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() =>
+      expect(screen.getByText('the workspace lock is held by another process')).toBeInTheDocument(),
+    );
+    expect(daemonReachability.get()).toBeNull();
   });
 
   it('does not count a 500: that is the daemon answering with a fault', async () => {

@@ -160,11 +160,20 @@ type OutageListener = () => void;
 /**
  * Which HTTP statuses mean "nothing answered" rather than "the daemon said no".
  *
- * A 500 is the daemon answering with a fault and belongs to the page that asked for it; a
- * 502, 503 or 504 is a proxy saying there is nothing behind it. `0` is what a fetch that
- * never reached a server reports on the rare browser that resolves rather than rejects.
+ * The list is short because this daemon is a local process the cockpit is served by, not a
+ * service behind a fleet of proxies. A 500 is the daemon answering with a fault and belongs
+ * to the page that asked for it. A **503 is not on this list**, deliberately: the daemon
+ * itself raises one when a workspace cannot be opened (`server/app.py::_open_repo`), with a
+ * sentence a researcher can act on — "the workspace lock is held by another process" — and
+ * reading that as silence would replace the one message that says what to do. 502 and 504
+ * are statuses this daemon never sends, so seeing one means something in front of it is
+ * answering for a process that is not there. `0` is what a fetch that never reached a
+ * server reports on the rare browser that resolves rather than rejects.
+ *
+ * The signal that actually fires in practice is the rejected fetch below: `ECONNREFUSED`
+ * for a daemon that has stopped.
  */
-const UNANSWERED_STATUSES: ReadonlySet<number> = new Set([0, 502, 503, 504]);
+const UNANSWERED_STATUSES: ReadonlySet<number> = new Set([0, 502, 504]);
 
 class DaemonReachability {
   private outage: DaemonOutage | null = null;
@@ -357,7 +366,7 @@ export class HarnessClient {
     try {
       return JSON.parse(body) as CapabilityResponse;
     } catch {
-      throw new HarnessRequestError(response.status, path, `${response.status} on ${path}`);
+      throw new HarnessRequestError(response.status, path, plainRefusal(body, response.status, path));
     }
   }
 
@@ -1222,6 +1231,20 @@ export class HarnessClient {
     }
     return (await response.json()) as T;
   }
+}
+
+/**
+ * A non-JSON body, as a sentence to show a researcher — or the status, when it is not one.
+ *
+ * The daemon answers a route refusal in plain text (`server/app.py::_open_repo` sends "the
+ * workspace lock is held by another process"), and that sentence is the whole point of the
+ * message. Anything long or marked up is a proxy's error page for a process that is not
+ * there, and printing HTML at a researcher explains nothing.
+ */
+function plainRefusal(body: string, status: number, path: string): string {
+  const text = body.trim();
+  if (text.length > 0 && text.length <= 300 && !text.includes('<')) return text;
+  return `${status} on ${path}`;
 }
 
 /**

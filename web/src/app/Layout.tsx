@@ -199,6 +199,7 @@ function Shell() {
     error,
     canMutate,
     principal: overview?.principal,
+    offline: outage !== null,
   });
 
   const rail: WorkspaceRailProps = {
@@ -418,7 +419,14 @@ function principalStatus(input: {
   error: string | null;
   canMutate: boolean;
   principal: string | undefined;
+  offline: boolean;
 }): ProviderStatus | undefined {
+  // While the daemon is silent the rail is a status chip, not an explanation: the notice in
+  // `main` is where the sentence lives. `Failed to fetch` is the browser's words for it and
+  // says nothing a researcher can act on, so the chip says the state instead.
+  if (input.offline) {
+    return { label: "Daemon", state: "offline", detail: "Not answering" };
+  }
   if (input.error) {
     return { label: "Daemon", state: "offline", detail: input.error };
   }
