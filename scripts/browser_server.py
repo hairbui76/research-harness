@@ -273,6 +273,51 @@ def stage_large_corpus(root: Path, works: int) -> None:
                 tx.store_artifact_bytes(artifact, payload)
 
 
+def stage_corpus_readiness(root: Path, *, needs_a_researcher: bool) -> None:
+    """A corpus whose sources are in different states of readiness, or in none.
+
+    The Corpus page opens with what needs a researcher among its sources, and that is a
+    fact about the corpus rather than about the screen: a file with no stored parse cannot
+    have a span anchored in it at all (Product 16), and a source nothing has been accepted
+    from is work still to do. Both are built here through the daemon's own services, so the
+    browser test reads a page composed from real state.
+
+    With ``needs_a_researcher`` the workspace holds one ingested and parsed paper nothing
+    has been accepted from, and four synthetic works whose one file has never been parsed —
+    two groups, in the order the daemon puts them in. Without it, the same paper has a
+    candidate accepted against it, so every source in the corpus has been read from and the
+    page has to say so in its own empty state rather than in four lines of zero.
+    """
+    from tests.e2e.test_web_gate import FIXTURE, WORK
+
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.transitions import HUMAN_ACTOR
+
+    registry = build_default_registry()
+    human = Principal.human()
+
+    def call(capability: str, request: dict[str, object]) -> object:
+        return registry.invoke(
+            capability, open_context(root, HUMAN_ACTOR), request, principal=human
+        )
+
+    if not needs_a_researcher:
+        stage_review_queue(root)
+        inbox = call("review.inbox", {})
+        dataset = next(item for item in inbox.items if item["field"] == "dataset")  # type: ignore[attr-defined]
+        call("review.accept", {"candidate_id": dataset["candidate_id"]})
+        return
+
+    call("corpus.ingest", {"path": str(FIXTURE)})
+    call("work.parse", {"work": str(WORK)})
+    # Four more sources with a file each and no parse of any of them: the same rows the
+    # thousand-work fixture writes, which is what a freshly ingested PDF looks like before
+    # `work.parse` has run over it.
+    stage_large_corpus(root, 4)
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -383,6 +428,35 @@ def main() -> None:
                     "corpus_url": f"/projects/{view.project_id}/corpus",
                 }
                 large[works] = answer
+                return answer
+
+        readiness: dict[bool, dict[str, str]] = {}
+        readiness_lock = Lock()
+
+        @app.post("/__test__/corpus-readiness")
+        def corpus_readiness(needs_a_researcher: bool = True) -> dict[str, str]:
+            """A project whose corpus has sources in more than one state of readiness.
+
+            Shared between callers asking for the same corpus, like the large one: parsing
+            a paper and accepting a candidate is real work, this screen only reads what it
+            leaves behind, and building one project per viewport would double the cost of
+            the run to prove nothing. The lock is because FastAPI runs a plain `def`
+            handler on a threadpool and the two viewport runs arrive together.
+            """
+            with readiness_lock:
+                existing = readiness.get(needs_a_researcher)
+                if existing is not None:
+                    return existing
+                manager: ProjectManager = backend.state.manager
+                name = f"Corpus readiness {next(seeded)}"
+                view = manager.create(directory, name, ReviewPolicy.STRICT)
+                stage_corpus_readiness(Path(view.path), needs_a_researcher=needs_a_researcher)
+                answer = {
+                    "project_id": view.project_id,
+                    "name": name,
+                    "corpus_url": f"/projects/{view.project_id}/corpus",
+                }
+                readiness[needs_a_researcher] = answer
                 return answer
 
         app.mount("/", backend)
