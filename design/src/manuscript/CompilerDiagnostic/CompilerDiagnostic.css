@@ -97,3 +97,14 @@ button.rh-diagnostic__button:hover {
   font-size: var(--rh-type-mono-size);
   color: var(--rh-text-muted);
 }
+
+/* Same rule as the audit row beside it: a narrow panel spends a line, not the message. */
+@container rh-diagnostics (max-width: 34rem) {
+  .rh-diagnostic__button {
+    flex-wrap: wrap;
+  }
+
+  .rh-diagnostic__message {
+    flex-basis: 100%;
+  }
+}

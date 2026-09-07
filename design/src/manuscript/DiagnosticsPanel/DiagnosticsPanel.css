@@ -1,4 +1,16 @@
+/*
+ * The panel is a query container, because its rows are laid out against its width.
+ *
+ * It is handed a full-width strip under the document on a wide screen, the whole document
+ * area below the manuscript's breakpoint, and a 24rem side column when the host asks for
+ * one - a range of about three to one. A diagnostic row and an audit finding both put a
+ * message beside a fixed file position, and at the narrow end the message was squeezed to
+ * a few characters and broke `sections/results.tex` across four lines. So the rows ask the
+ * panel how much room there is, not the window.
+ */
 .rh-diagnostics-panel {
+  container-type: inline-size;
+  container-name: rh-diagnostics;
   display: flex;
   flex-direction: column;
   gap: var(--rh-space-4);
