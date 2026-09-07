@@ -354,7 +354,7 @@ export function ManuscriptPage() {
         onInspectorOpenChange={setInspectorOpen}
         toolbar={
           <>
-            <h1 className="rh-text-h4">Manuscript</h1>
+            <h1 className="rh-text-h1">Manuscript</h1>
             <span className="rh-text-secondary">{`${files.tree.root}/${entryFile}`}</span>
             <Button
               type="button"

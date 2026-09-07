@@ -55,7 +55,7 @@ button.rh-source-anchor__open:hover {
 .rh-source-anchor__quote {
   margin: 0;
   padding-inline-start: var(--rh-space-3);
-  border-inline-start: 2px solid var(--rh-border-default);
+  border-inline-start: var(--rh-border-width-strong) solid var(--rh-border-default);
   color: var(--rh-text-primary);
   font-family: var(--rh-font-serif);
   font-size: var(--rh-type-body-size);

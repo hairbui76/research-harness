@@ -10,7 +10,7 @@ exports[`token contract > matches the density scales 1`] = `
   },
   "compact": {
     "--rh-control-height-md": "28px",
-    "--rh-control-height-sm": "22px",
+    "--rh-control-height-sm": "var(--rh-control-target-min)",
     "--rh-control-padding-md": "var(--rh-space-2)",
     "--rh-density-font-scale": "0.929",
     "--rh-density-gap": "var(--rh-space-1)",

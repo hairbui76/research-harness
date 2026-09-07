@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { readFileSync, readdirSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -191,6 +191,10 @@ const REQUIRED_FOUNDATION = [
   '--rh-ease-standard',
   '--rh-scale-hover',
   '--rh-scale-press',
+  '--rh-type-reading-min-size',
+  '--rh-control-target-min',
+  '--rh-border-width',
+  '--rh-border-width-strong',
 ];
 
 describe('token contract', () => {
@@ -300,6 +304,137 @@ function snapshotOf(tokens: Map<string, string>): Record<string, string> {
     const value = tokens.get(token);
     if (value === undefined) continue;
     out[token] = resolve(tokens, value);
+  }
+  return out;
+}
+
+/**
+ * The type scale, the reading floor and the pointer-target floor.
+ *
+ * These are the invariants a heading, a caption or a control cannot be allowed to break
+ * silently: one ramp with a deliberate ratio, no heading set smaller than the body it
+ * introduces, no reading text below 12px on any surface at any density, and no control
+ * whose box falls under the 24px pointer target (WCAG 2.2 SC 2.5.8). They are asserted
+ * against the token source for the same reason the rest of this file is: jsdom resolves
+ * no `var()`, so the stylesheet is the only honest place to read them.
+ */
+function px(tokens: Map<string, string>, token: string): number {
+  const value = resolve(tokens, tokens.get(token) as string);
+  const match = /^(-?[\d.]+)px$/.exec(value.trim());
+  expect(match, `${token} should be a px length, got ${value}`).not.toBeNull();
+  return Number(match?.[1]);
+}
+
+function ratio(tokens: Map<string, string>, bigger: string, smaller: string): number {
+  return px(tokens, `--rh-type-${bigger}-size`) / px(tokens, `--rh-type-${smaller}-size`);
+}
+
+/** Every token that applies when `data-density="compact"` is set, base values included. */
+const compactAll = new Map([...comfortable, ...compact]);
+
+const HEADING_STEPS: readonly [string, string][] = [
+  ['display', 'h1'],
+  ['h1', 'h2'],
+  ['h2', 'h3'],
+  ['h3', 'h4'],
+];
+
+describe('the type scale', () => {
+  it.each(HEADING_STEPS)('steps from %s to %s by a product ratio', (bigger, smaller) => {
+    const step = ratio(base, bigger, smaller);
+    // Operate mode: 1.125-1.2. A wider ratio is a marketing ramp, and there are more type
+    // roles on a research page than on a landing page, so exaggerated contrast is noise.
+    expect(step, `${bigger}/${smaller} is ${step.toFixed(3)}`).toBeGreaterThanOrEqual(1.125);
+    expect(step, `${bigger}/${smaller} is ${step.toFixed(3)}`).toBeLessThanOrEqual(1.2);
+  });
+
+  it('never sets a heading smaller than the body text it introduces', () => {
+    const body = px(base, '--rh-type-body-size');
+    for (const role of ['display', 'h1', 'h2', 'h3', 'h4']) {
+      expect(
+        px(base, `--rh-type-${role}-size`),
+        `${role} must not be smaller than body`,
+      ).toBeGreaterThanOrEqual(body);
+    }
+  });
+
+  it('separates the smallest heading from body by weight, since size no longer can', () => {
+    expect(px(base, '--rh-type-h4-size')).toBe(px(base, '--rh-type-body-size'));
+    expect(Number(base.get('--rh-type-h4-weight'))).toBeGreaterThan(
+      Number(base.get('--rh-type-body-weight')),
+    );
+  });
+});
+
+describe('the reading floor', () => {
+  it('declares one floor for every size a researcher reads', () => {
+    expect(px(base, '--rh-type-reading-min-size')).toBe(12);
+  });
+
+  it('keeps body and dense body above it', () => {
+    const floor = px(base, '--rh-type-reading-min-size');
+    expect(px(base, '--rh-type-body-size')).toBeGreaterThan(floor);
+    expect(px(base, '--rh-type-body-sm-size')).toBeGreaterThan(floor);
+  });
+
+  it('keeps dense body above it after the compact density has scaled it', () => {
+    const floor = px(compactAll, '--rh-type-reading-min-size');
+    const scale = Number(resolve(compactAll, compactAll.get('--rh-density-font-scale') as string));
+    const scaled = px(compactAll, '--rh-type-body-sm-size') * scale;
+    expect(scaled, `compact body-sm renders at ${scaled.toFixed(2)}px`).toBeGreaterThanOrEqual(
+      floor,
+    );
+  });
+});
+
+describe('the pointer-target floor', () => {
+  it('declares the 24px minimum from WCAG 2.2 SC 2.5.8', () => {
+    expect(px(base, '--rh-control-target-min')).toBe(24);
+  });
+
+  it.each([
+    ['comfortable', comfortable],
+    ['compact', compactAll],
+  ])('keeps every control height at or above it in %s density', (_density, tokens) => {
+    const floor = px(tokens, '--rh-control-target-min');
+    for (const token of ['--rh-control-height-sm', '--rh-control-height-md']) {
+      expect(px(tokens, token)).toBeGreaterThanOrEqual(floor);
+    }
+  });
+});
+
+describe('border widths', () => {
+  it('names the hairline and the one emphatic width above it', () => {
+    expect(px(base, '--rh-border-width')).toBe(1);
+    expect(px(base, '--rh-border-width-strong')).toBe(2);
+  });
+
+  it('ships no third width: every stylesheet states its borders in tokens', () => {
+    const literals: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [index, line] of css.split('\n').entries()) {
+          if (/^\s*(?:border|outline)[a-z-]*\s*:/.test(line) && /\b\d+px\b/.test(line)) {
+            if (/border-radius/.test(line)) continue;
+            literals.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+          }
+        }
+      }
+    }
+    expect(literals).toEqual([]);
+  });
+});
+
+function cssFilesUnder(root: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name.startsWith('.')) {
+      continue;
+    }
+    const full = join(root, entry.name);
+    if (entry.isDirectory()) out.push(...cssFilesUnder(full));
+    else if (entry.name.endsWith('.css')) out.push(full);
   }
   return out;
 }

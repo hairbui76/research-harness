@@ -294,6 +294,22 @@ describe('the workspace', () => {
     expect(names).toContain('manuscript.read_file');
   });
 
+  /**
+   * The workspace's toolbar is compact, which is why its title was set in `rh-text-h4` —
+   * 13px, smaller than the body text under it and a sixth of the size the same `<h1>`
+   * carries on every research page. An `<h1>` is what names a screen, for the eye and for
+   * the screen reader that lands on it from the skip link, so it is the page-title role
+   * here as well. jsdom resolves no stylesheet; the class *is* the assertion.
+   */
+  it('names the screen with the same h1 the research pages use', async () => {
+    renderWorkspace();
+    await opened();
+
+    const title = screen.getByRole('heading', { level: 1, name: 'Manuscript' });
+    expect(title).toHaveClass('rh-text-h1');
+    expect(title.className).not.toMatch(/rh-text-(?:h[234]|body|ui|label)\b/);
+  });
+
   it('remembers the pane layout in this browser, and survives a refusal to store it', async () => {
     renderWorkspace();
     await opened();

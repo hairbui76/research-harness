@@ -187,6 +187,14 @@ export function Fields({ children }: { children: ReactNode }) {
 /**
  * A research table: compact density, and a horizontally scrollable region that is
  * keyboard-reachable and named once it actually scrolls (WCAG 2.2 2.5.7 / 2.1.1).
+ *
+ * The compact wrapper stays. A corpus or a review queue is read by running the eye down a
+ * column, and that is what close rows are for; handing the choice back to nine pages would
+ * only mean nine pages making it again. What was wrong was the *text*: the density's font
+ * scale used to take a 12px cell to 11.15px, under the size anything readable may be.
+ * That is fixed where it was broken — `--rh-type-body-sm-size` is 13px and
+ * `.rh-web-table` floors its computed size at `--rh-type-reading-min-size` — so the rows
+ * stay dense and the words stay legible, which were never the same decision.
  */
 export function DataTable({
   label,

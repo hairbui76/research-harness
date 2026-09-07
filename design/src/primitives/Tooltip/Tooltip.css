@@ -4,7 +4,7 @@
   padding: var(--rh-space-2) var(--rh-space-3);
   background: var(--rh-surface-inverse);
   color: var(--rh-text-inverse);
-  border: 1px solid var(--rh-border-strong);
+  border: var(--rh-border-width) solid var(--rh-border-strong);
   border-radius: var(--rh-radius-control);
   font-family: var(--rh-font-sans);
   font-size: var(--rh-type-body-sm-size);

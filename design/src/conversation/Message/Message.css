@@ -4,7 +4,10 @@
   gap: var(--rh-space-2);
   min-width: 0;
   padding: var(--rh-space-3) var(--rh-space-4);
-  border-inline-start: 2px solid transparent;
+  /* The role stripe is a hairline, not a bar. What a turn is is said by its header, its
+     surface and — for a failure — its own words; a thicker coloured edge would only be
+     shouting the same thing in a third voice. */
+  border-inline-start: var(--rh-border-width) solid transparent;
 }
 
 .rh-message[data-role='user'] {

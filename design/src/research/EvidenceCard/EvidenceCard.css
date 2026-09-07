@@ -50,7 +50,7 @@ button.rh-evidence-card__id:hover {
 .rh-evidence-card__quote {
   margin: 0;
   padding-inline-start: var(--rh-space-3);
-  border-inline-start: 2px solid var(--rh-border-default);
+  border-inline-start: var(--rh-border-width-strong) solid var(--rh-border-default);
   font-family: var(--rh-font-serif);
   font-size: var(--rh-type-lead-size);
   line-height: var(--rh-type-lead-lh);

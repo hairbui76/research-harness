@@ -4,6 +4,11 @@
   justify-content: center;
   width: var(--rh-control-height-md);
   height: var(--rh-control-height-md);
+  /* An icon button is the smallest thing in the system a pointer has to hit, and the one
+     most likely to be dropped into a dense row. The box never goes under the target floor
+     however small the surrounding density makes the glyph (WCAG 2.2 SC 2.5.8). */
+  min-inline-size: var(--rh-control-target-min);
+  min-block-size: var(--rh-control-target-min);
   padding: 0;
   border: var(--rh-border-width) solid transparent;
   border-radius: var(--rh-radius-control);

@@ -54,17 +54,17 @@ is the comment at the top of `src/tokens/semantic.css`; the shape is:
 | Group | Names |
 | --- | --- |
 | Surfaces | `--rh-surface-{canvas,pane,raised,paper,inverse,subtle,selected,scrim}` |
-| Borders | `--rh-border-{subtle,default,strong}`, `--rh-border-on-paper` |
+| Borders | `--rh-border-{subtle,default,strong}`, `--rh-border-on-paper`, `--rh-border-width{,-strong}` |
 | Text | `--rh-text-{primary,secondary,muted,inverse,link,on-accent}`, `--rh-text-on-paper{,-secondary,-muted}` |
 | Paper marks | `--rh-highlight-on-paper{,-anchor,-match}` and each one's `-border` |
 | AI/action accent | `--rh-accent{,-hover,-subtle,-border,-fg,-text}` |
 | Focus | `--rh-focus-ring{,-width,-offset}` |
 | Scientific status | `--rh-status-<accepted\|candidate\|qualified\|contested\|stale\|private>-<fg\|bg\|border>` |
 | Feedback | `--rh-feedback-<success\|error\|warning\|info>-<fg\|bg\|border>` |
-| Type | `--rh-font-{sans,serif,mono}`, `--rh-type-<role>-{size,lh,ls,weight}` |
+| Type | `--rh-font-{sans,serif,mono}`, `--rh-type-<role>-{size,lh,ls,weight}`, `--rh-type-reading-min-size` |
 | Space / radius | `--rh-space-{1,2,3,4,5,6,8,10,12,16}`, `--rh-radius-{control,nav,card,pill}` |
 | Motion | `--rh-duration-{fast,base,slow}`, `--rh-ease-standard`, `--rh-scale-{hover,press}` |
-| Density | `--rh-density-{row,gap,pad,font-scale}` |
+| Density | `--rh-density-{row,gap,pad,font-scale}`, `--rh-control-{target-min,height-sm,height-md}` |
 
 Three rules make the contract hold:
 
@@ -122,6 +122,51 @@ node scripts/check-contrast.mjs --json   # the same data, for tooling
 Because it gates, some choices are forced: the resting border of an input or a secondary
 button is `--rh-border-strong`, not the lighter hairline used for separators, because the
 edge is the only thing that says where the control is.
+
+## Type, density and the two floors
+
+One family, one ramp, a fixed px scale — no fluid `clamp()`, because a research page is
+viewed at a stable size and a title that shrank inside a pane would only look wrong there.
+
+| Role | Size | Weight | For |
+| --- | --- | --- | --- |
+| `display` | 26px | 600 | the one step above a page title |
+| `h1` | 22px | 600 | the page's name — every `<h1>` in the cockpit |
+| `h2` | 19px | 600 | a section |
+| `h3` | 16px | 600 | a panel or card header |
+| `h4` | 14px | 600 | the smallest heading: body size, told apart by weight |
+| `lead` | 16px | 400 | a standfirst, and the serif voice of a quotation |
+| `body` | 14px | 400 | reading text |
+| `body-sm` | 13px | 400 | reading text on a dense surface |
+| `ui` | 13px | 500 | buttons, tabs, menu items, table headers |
+| `mono` | 12px | 400 | ids, provenance, code, compiler output |
+| `label` | 11px | 600 | mono, uppercase metadata chip — never a sentence |
+
+Each heading step is about 1.16 of the one below (26/22/19/16/14), inside the 1.125–1.2 a
+product interface wants: there are more type roles on a research page than on a landing
+page, and stretching the ramp past that reads as noise rather than as hierarchy. The ramp
+stops *at* body size. `h4` is 14px like body and separates itself by weight, because a
+heading smaller than the paragraph under it inverts what a heading is for.
+
+Two floors bound what density is allowed to do:
+
+- `--rh-type-reading-min-size` (12px) — nothing a researcher reads renders below it on any
+  surface at any density. `--rh-density-font-scale` compresses dense surfaces; a compact
+  `body-sm` lands at 12.08px, and `.rh-web-table` clamps its computed size at the floor as
+  well, so a future scale cannot quietly drop through it. The two roles that sit under the
+  floor are not reading text: `label` is a metadata chip and `mono` is code.
+- `--rh-control-target-min` (24px) — the smallest a pointer target may be (WCAG 2.2
+  SC 2.5.8). Compact density takes `--rh-control-height-sm` down to exactly it, and
+  `Button` and `IconButton` state it again as a `min-block-size`/`min-inline-size`, so a
+  16px glyph still sits in a 24px box.
+
+Border width is a token too, and there are two of them. `--rh-border-width` (1px) is every
+separator, card edge and control boundary, and every coloured stripe down the side of a
+row, a card or a notice — weight is not allowed to stand in for meaning the words and the
+icon already carry. `--rh-border-width-strong` (2px) is reserved for the two marks that are
+indicators rather than edges: the selected tab and the rule beside quoted matter.
+`tests/tokens.test.ts` fails on a numeric border width anywhere under `design/src` or
+`web/src`.
 
 ## No CDN
 
