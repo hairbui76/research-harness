@@ -28,19 +28,26 @@ import { expect, test } from '@playwright/test';
 import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
 import { axeViolations } from './axe';
 
-/** The eleven rail destinations of PRODUCT §26, conversation first. `''` is the root. */
+/**
+ * The eleven rail destinations of PRODUCT §26, conversation first. `''` is the root.
+ *
+ * `label` is the word the rail calls the destination — and, below the shell's breakpoint,
+ * the word the collapsed bar has to call it too, because the rail saying it is behind a
+ * button by then. It is written out here rather than read from the app so that a label
+ * silently changing on one of the two surfaces fails this walk.
+ */
 const DESTINATIONS = [
-  { path: '', name: 'conversation' },
-  { path: 'overview', name: 'overview' },
-  { path: 'review', name: 'review' },
-  { path: 'conflicts', name: 'conflicts' },
-  { path: 'stale', name: 'stale' },
-  { path: 'corpus', name: 'corpus' },
-  { path: 'claims', name: 'claims' },
-  { path: 'questions', name: 'questions' },
-  { path: 'synthesis', name: 'synthesis' },
-  { path: 'taxonomy', name: 'taxonomy' },
-  { path: 'manuscript', name: 'manuscript' },
+  { path: '', name: 'conversation', label: 'Conversation' },
+  { path: 'overview', name: 'overview', label: 'Overview' },
+  { path: 'review', name: 'review', label: 'Review inbox' },
+  { path: 'conflicts', name: 'conflicts', label: 'Conflicts' },
+  { path: 'stale', name: 'stale', label: 'Stale' },
+  { path: 'corpus', name: 'corpus', label: 'Corpus' },
+  { path: 'claims', name: 'claims', label: 'Claims' },
+  { path: 'questions', name: 'questions', label: 'Questions' },
+  { path: 'synthesis', name: 'synthesis', label: 'Synthesis' },
+  { path: 'taxonomy', name: 'taxonomy', label: 'Taxonomy' },
+  { path: 'manuscript', name: 'manuscript', label: 'Manuscript' },
 ];
 
 /** A laptop, and a tablet held upright. The shell's drawer breakpoint (960px) is between. */
@@ -205,6 +212,25 @@ for (const screen of SCREENS) {
       expect(await axeViolations(page), `${destination.name} at ${label}`).toEqual([]);
 
       if (screen.width === 768) {
+        // The rail is a drawer at this width, so the bar is the only thing on screen that
+        // can say where you are. It says both halves: the project, and this destination.
+        const bar = page.locator('header.rh-app-shell__bar');
+        await expect(
+          bar,
+          `${destination.name} must be named in the collapsed bar at ${label}`,
+        ).toContainText(destination.label);
+        await expect(bar.locator('.rh-app-shell__bar-context')).not.toBeEmpty();
+
+        // And it says it whole. The name beside it is the half that gives up room, so a
+        // clipped destination is a defect rather than a narrow window.
+        const clipped = await bar
+          .locator('.rh-app-shell__bar-page')
+          .evaluate((node) => node.scrollWidth - node.clientWidth);
+        expect(
+          clipped,
+          `${destination.name} is cut off in the collapsed bar at ${label}`,
+        ).toBeLessThanOrEqual(0);
+
         await page.screenshot({
           path: info.outputPath(`${destination.name}-768.png`),
           fullPage: true,

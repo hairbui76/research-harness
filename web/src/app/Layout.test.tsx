@@ -49,6 +49,47 @@ function renderShell(daemon = fakeDaemon(), token: string | null = 'local-token'
   return renderView(<Layout />, { daemon, token, route: '/review', path: '*' });
 }
 
+/**
+ * The shell's own bar, the one it draws below its breakpoint.
+ *
+ * Selected by class rather than by role: `main` carries a second `<header>` — the project
+ * bar — and jsdom's role mapping does not scope either of them, so "the banner" is
+ * ambiguous here in a way it is not in a browser.
+ */
+function shellBar(): HTMLElement {
+  const bar = document.querySelector('.rh-app-shell__bar');
+  expect(bar).not.toBeNull();
+  expect((bar as HTMLElement).tagName).toBe('HEADER');
+  return bar as HTMLElement;
+}
+
+/**
+ * A window narrower than the shell's breakpoint, for the layout where the rail is a drawer.
+ *
+ * jsdom has no `matchMedia` at all, so the shell answers "wide" and never draws its bar.
+ * The stub answers the one query the shell asks — and returns it here, so the tests that
+ * need a wide window are not left in a narrow one.
+ */
+function stubNarrowViewport(): () => void {
+  const original = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+  const query = (media: string): MediaQueryList =>
+    ({
+      matches: /max-width:\s*960px/.test(media),
+      media,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+  Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: query });
+  return () => {
+    if (original) Object.defineProperty(window, 'matchMedia', original);
+    else Reflect.deleteProperty(window, 'matchMedia');
+  };
+}
+
 describe('the project rail', () => {
   it('lists the research navigation with the counts the daemon reported', async () => {
     renderShell();
@@ -192,6 +233,52 @@ describe('the shell', () => {
 
     await screen.findByRole('navigation', { name: 'Project navigation' });
     await expectNoAxeViolations(container);
+  });
+
+  it('names the workspace and the destination in the collapsed bar', async () => {
+    const restore = stubNarrowViewport();
+    try {
+      renderShell();
+
+      // Below the breakpoint the rail is a drawer, so the bar is the only thing left on
+      // screen that can say which screen this is. It says it in the rail's own words.
+      await waitFor(() =>
+        expect(within(shellBar()).getByText(FIXTURES.overview.project)).toBeInTheDocument(),
+      );
+      const bar = shellBar();
+      expect(within(bar).getByText('Review inbox')).toBeInTheDocument();
+      // And the control that opens the drawer keeps the name it is found by.
+      expect(
+        within(bar).getByRole('button', { name: 'Project navigation' }),
+      ).toBeInTheDocument();
+    } finally {
+      restore();
+    }
+  });
+
+  it('follows the route it is on, and names no destination the navigation has not got', async () => {
+    const restore = stubNarrowViewport();
+    try {
+      const user = userEvent.setup();
+      renderShell();
+
+      await waitFor(() =>
+        expect(within(shellBar()).getByText('Review inbox')).toBeInTheDocument(),
+      );
+
+      // The destinations are in the drawer at this width, so this is the whole narrow
+      // journey: open the rail, go somewhere, and read where you are from the bar.
+      await user.click(within(shellBar()).getByRole('button', { name: 'Project navigation' }));
+      await user.click(await screen.findByRole('link', { name: /Corpus/ }));
+
+      await waitFor(() => expect(within(shellBar()).getByText('Corpus')).toBeInTheDocument());
+      const bar = shellBar();
+      expect(within(bar).queryByText('Review inbox')).not.toBeInTheDocument();
+      // The workspace is still named beside it, whichever screen is on show.
+      expect(within(bar).getByText(FIXTURES.overview.project)).toBeInTheDocument();
+    } finally {
+      restore();
+    }
   });
 });
 
@@ -339,6 +426,22 @@ describe('the project rail on a multi-project host', () => {
       'href',
       '/projects/prj_abc/',
     );
+  });
+
+  it('names the open project and the destination in the collapsed bar', async () => {
+    const restore = stubNarrowViewport();
+    try {
+      setupMulti();
+
+      // The registry's name for the project, not the daemon's name for the workspace: two
+      // windows on two projects must be told apart from the bar alone.
+      await waitFor(() =>
+        expect(within(shellBar()).getByText('Latency study')).toBeInTheDocument(),
+      );
+      expect(within(shellBar()).getByText('Review inbox')).toBeInTheDocument();
+    } finally {
+      restore();
+    }
   });
 
   it('switches project by navigating, so the URL says which one is open', async () => {

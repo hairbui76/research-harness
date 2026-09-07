@@ -52,14 +52,43 @@
   background: var(--rh-surface-pane);
 }
 
+/*
+ * The bar's one line: the context, then the destination on show.
+ *
+ * `overflow: hidden` on the row and `min-inline-size: 0` on the context are what make the
+ * ellipsis land on the context alone. The destination is `flex: none`, so it keeps its
+ * whole name at every width the shell claims to support; if a name were ever longer than
+ * the bar itself, this row clips it rather than widening the page.
+ */
 .rh-app-shell__bar-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rh-space-2);
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--rh-type-h4-size);
   font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-app-shell__bar-context {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: var(--rh-type-body-weight);
+  color: var(--rh-text-secondary);
+}
+
+.rh-app-shell__bar-separator {
+  flex: none;
+  color: var(--rh-text-muted);
+}
+
+.rh-app-shell__bar-page {
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rh-app-shell__body {

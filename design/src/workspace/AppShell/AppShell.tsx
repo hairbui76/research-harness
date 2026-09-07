@@ -24,6 +24,20 @@ export interface AppShellProps extends HTMLAttributes<HTMLDivElement> {
   breakpoint?: number;
   skipLinkLabel?: string;
   mainLabel?: string;
+  /**
+   * What the narrow bar leads with. Defaults to `mainLabel`.
+   *
+   * Below the breakpoint the rail is a drawer, so whatever the rail names — for the
+   * cockpit, the project this window has open — has nowhere else left to be read.
+   */
+  barTitle?: ReactNode;
+  /**
+   * The destination on show, in the navigation's own words ("Review inbox").
+   *
+   * It is the half of the bar a small screen must not take away: the title beside it
+   * gives up its room first, and only it.
+   */
+  pageLabel?: ReactNode;
   railLabel?: string;
   inspectorLabel?: string;
 }
@@ -144,6 +158,8 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
     breakpoint = 960,
     skipLinkLabel = 'Skip to main content',
     mainLabel = 'Workspace',
+    barTitle,
+    pageLabel,
     railLabel = 'Project navigation',
     inspectorLabel = 'Research inspector',
     className,
@@ -194,7 +210,22 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
               onClick={() => onRailOpenChange?.(!railOpen)}
             />
           ) : null}
-          <span className="rh-app-shell__bar-title">{mainLabel}</span>
+          {/*
+            Where you are, in two parts: the context this screen belongs to, and the screen
+            itself. The context is the part that ellipsises when the window is narrow — a
+            page whose own name has been cut is a page that has not been named at all.
+          */}
+          <span className="rh-app-shell__bar-title">
+            <span className="rh-app-shell__bar-context">{barTitle ?? mainLabel}</span>
+            {pageLabel === undefined ? null : (
+              <>
+                <span className="rh-app-shell__bar-separator" aria-hidden="true">
+                  ·
+                </span>
+                <span className="rh-app-shell__bar-page">{pageLabel}</span>
+              </>
+            )}
+          </span>
           {inspector !== undefined ? (
             <IconButton
               icon="panel-right"

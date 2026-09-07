@@ -199,6 +199,13 @@ function Shell() {
     });
   }, [location.pathname, overview, projectId]);
 
+  // What the shell's narrow bar says, and the reason it says two things. Below the
+  // breakpoint the rail is a drawer: the project it names, and the destination it marks
+  // with `aria-current`, both disappear behind a button. The bar carries them instead —
+  // the registry's name for the open project, and the destination in the rail's own words,
+  // read off the same list the rail is built from so the two can never disagree.
+  const currentDestination = items.find((item) => item.active);
+
   const providerStatus = principalStatus({
     loading,
     error,
@@ -224,6 +231,8 @@ function Shell() {
     <CommandsProvider destinations={items}>
       <AppShell
         mainLabel="Research workspace"
+        barTitle={active ? active.display_name : project.name}
+        {...(currentDestination ? { pageLabel: currentDestination.label } : {})}
         railOpen={railOpen}
         onRailOpenChange={setRailOpen}
         // The inspector belongs to the conversation; the research pages have their own.

@@ -12,7 +12,7 @@ exports[`AppShell theme x density > matches the dark / comfortable snapshot 1`] 
   >
     <a
       class="rh-app-shell__skip"
-      href="#rh-appshell-r9-main"
+      href="#rh-appshell-ID-main"
     >
       Skip to main content
     </a>
@@ -65,7 +65,7 @@ exports[`AppShell theme x density > matches the dark / compact snapshot 1`] = `
   >
     <a
       class="rh-app-shell__skip"
-      href="#rh-appshell-ra-main"
+      href="#rh-appshell-ID-main"
     >
       Skip to main content
     </a>
@@ -118,7 +118,7 @@ exports[`AppShell theme x density > matches the light / comfortable snapshot 1`]
   >
     <a
       class="rh-app-shell__skip"
-      href="#rh-appshell-rb-main"
+      href="#rh-appshell-ID-main"
     >
       Skip to main content
     </a>
@@ -171,7 +171,7 @@ exports[`AppShell theme x density > matches the light / compact snapshot 1`] = `
   >
     <a
       class="rh-app-shell__skip"
-      href="#rh-appshell-rc-main"
+      href="#rh-appshell-ID-main"
     >
       Skip to main content
     </a>

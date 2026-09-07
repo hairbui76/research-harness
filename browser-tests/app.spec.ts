@@ -51,15 +51,28 @@ test('project creation and rename persist through the real API and reload', asyn
   expect(errors).toEqual([]);
 });
 
-test('project home has accessible controls and fits the viewport', async ({ page, request }, info) => {
+test('project home teaches what a project is, at both widths', async ({ page, request }, info) => {
+  const original = page.viewportSize();
   const response = await request.get('/__test__/bootstrap');
   const { nonce } = await response.json();
   await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
   await expect(page.getByRole('button', { name: 'New project', exact: true })).toBeEnabled();
   await expect(page.locator('html')).toHaveAttribute('data-theme', info.project.name.endsWith('light') ? 'light' : 'dark');
-  expect(await axeViolations(page), 'Project home').toEqual([]);
-  const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
-  expect(fits, 'Project home must not overflow horizontally').toBeTruthy();
+
+  // This is the first screen of the product, and the only one that can define the object
+  // every other screen belongs to. It has to do that on a laptop and on a tablet held
+  // upright — the two widths the cockpit claims to support — without overflowing either.
+  for (const width of [1440, 768]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect(page.getByText(/A project is a folder on this machine/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+    expect(await axeViolations(page), `Project home at ${width}`).toEqual([]);
+    const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    expect(fits, `Project home must not overflow horizontally at ${width}`).toBeTruthy();
+    await page.screenshot({ path: info.outputPath(`project-home-${width}.png`), fullPage: true });
+  }
+
+  if (original) await page.setViewportSize(original);
   await page.screenshot({ path: info.outputPath('project-home.png'), fullPage: true });
 });
 
