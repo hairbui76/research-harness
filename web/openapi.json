@@ -1116,6 +1116,69 @@
         "title": "MatrixSummary",
         "type": "object"
       },
+      "MatrixView": {
+        "additionalProperties": false,
+        "description": "One synthesis matrix as its page states it: what it reads, and how much it has read.",
+        "properties": {
+          "cells": {
+            "default": 0,
+            "title": "Cells",
+            "type": "integer"
+          },
+          "coverage": {
+            "default": "",
+            "title": "Coverage",
+            "type": "string"
+          },
+          "fields": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "recorded": {
+            "default": 0,
+            "title": "Recorded",
+            "type": "integer"
+          },
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "stale": {
+            "default": "fresh",
+            "title": "Stale",
+            "type": "string"
+          },
+          "taxonomy": {
+            "default": "",
+            "title": "Taxonomy",
+            "type": "string"
+          },
+          "works": {
+            "default": 0,
+            "title": "Works",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "MatrixView",
+        "type": "object"
+      },
       "ObjectView": {
         "additionalProperties": false,
         "description": "One canonical object, read through the repository's typed accessors.",
@@ -1412,6 +1475,52 @@
         "title": "RecentChanges",
         "type": "object"
       },
+      "ResearchGroup": {
+        "additionalProperties": false,
+        "description": "One group of items a research page reads: what it is, its size, and where it leads.\n\nThe Overview settled this shape: a line naming the group and stating its size in words,\na sentence teaching what the objects in it are, and the items themselves indented under\nit. Which group an object belongs in is a scientific judgement, so the daemon draws\nevery line and a client renders what it was handed (Product 5 P10).\n\nThere is deliberately no count on this model that a client could print on its own:\n`summary` is the whole sentence a reader sees, and `count` exists so a client can tell\nan empty group from a full one, not so it can compose a number into words of its own.",
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "items": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AttentionItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "key": {
+            "default": "",
+            "title": "Key",
+            "type": "string"
+          },
+          "route": {
+            "default": "",
+            "title": "Route",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "title": "ResearchGroup",
+        "type": "object"
+      },
       "RunStatus": {
         "additionalProperties": false,
         "description": "A durable workflow run: the answer to \"is it done yet?\" without an open connection.",
@@ -1501,6 +1610,110 @@
         "title": "StageView",
         "type": "object"
       },
+      "StaleOverview": {
+        "additionalProperties": false,
+        "description": "`GET /stale`: what went out of date and why, grouped by scientific impact.\n\nStaleness is decay the daemon declares, never a client's guess: an object is here\nbecause something it rests on changed, and nothing is ever silently re-anchored\n(Product 37, ADR-008). The groups are the priority tiers Product 37 names, highest\nscientific impact first, and each item carries the daemon's own reason for it — the\nsame `AttentionItem` the Overview's \"Gone stale\" group is built from, so the two\nsurfaces cannot drift into two different accounts of the same decay.",
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "groups": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ResearchGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "more": {
+            "default": "",
+            "title": "More",
+            "type": "string"
+          },
+          "reported": {
+            "default": 0,
+            "title": "Reported",
+            "type": "integer"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "title": "StaleOverview",
+        "type": "object"
+      },
+      "SynthesisReport": {
+        "additionalProperties": false,
+        "description": "`GET /synthesis`: what the matrices cannot say yet, then the matrices themselves.\n\nA matrix reads one property across works and proposes nothing. An empty cell means\n\"not recorded\", never \"the work lacks the property\", and novelty is never inferred from\na missing cell (Product 7.1, 33). So the gaps below are stated as gaps in the record:\neach one names a reading nobody has taken, and none of them says anything about a work.",
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "gaps": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ResearchGroup"
+            },
+            "title": "Gaps",
+            "type": "array"
+          },
+          "matrices": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MatrixView"
+            },
+            "title": "Matrices",
+            "type": "array"
+          },
+          "missing": {
+            "default": 0,
+            "title": "Missing",
+            "type": "integer"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "title": "SynthesisReport",
+        "type": "object"
+      },
+      "TaxonomyReport": {
+        "additionalProperties": false,
+        "description": "`GET /taxonomy`: what needs a researcher first, then the classification itself.\n\nA taxonomy is a researcher-approved project decision rather than a universal domain\nfact (Product 32), so the question this page opens with is which terms no accepted\nDecision stands behind — a term with none, or one whose Decision has been superseded,\nclassifies works on an authority the project never granted.",
+        "properties": {
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "needs_decision": {
+            "$ref": "#/components/schemas/ResearchGroup"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "taxonomies": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyView"
+            },
+            "title": "Taxonomies",
+            "type": "array"
+          }
+        },
+        "title": "TaxonomyReport",
+        "type": "object"
+      },
       "TaxonomySummary": {
         "additionalProperties": false,
         "description": "One project taxonomy and the Decisions that approved its terms.",
@@ -1531,6 +1744,89 @@
           "name"
         ],
         "title": "TaxonomySummary",
+        "type": "object"
+      },
+      "TaxonomyTermView": {
+        "additionalProperties": false,
+        "description": "One approved term, its place in the tree, and the Decision standing behind it.",
+        "properties": {
+          "approved": {
+            "default": false,
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "decision": {
+            "default": "",
+            "title": "Decision",
+            "type": "string"
+          },
+          "decision_status": {
+            "default": "",
+            "title": "Decision Status",
+            "type": "string"
+          },
+          "definition": {
+            "default": "",
+            "title": "Definition",
+            "type": "string"
+          },
+          "depth": {
+            "default": 0,
+            "title": "Depth",
+            "type": "integer"
+          },
+          "parent": {
+            "default": "",
+            "title": "Parent",
+            "type": "string"
+          },
+          "term": {
+            "title": "Term",
+            "type": "string"
+          }
+        },
+        "required": [
+          "term"
+        ],
+        "title": "TaxonomyTermView",
+        "type": "object"
+      },
+      "TaxonomyView": {
+        "additionalProperties": false,
+        "description": "One project taxonomy, its terms already ordered as the tree they form.",
+        "properties": {
+          "approved": {
+            "default": 0,
+            "title": "Approved",
+            "type": "integer"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "terms": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyTermView"
+            },
+            "title": "Terms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "TaxonomyView",
         "type": "object"
       },
       "ValidationError": {
@@ -2363,6 +2659,63 @@
           }
         },
         "summary": "Attachment Preview"
+      }
+    },
+    "/stale": {
+      "get": {
+        "description": "What went out of date and why, grouped by scientific impact (Product 37).\n\nStaleness is decay this daemon declares. A client never computes one, and the\nreasons here are the same ones the Overview's own stale group carries.",
+        "operationId": "stale_stale_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaleOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Stale"
+      }
+    },
+    "/synthesis": {
+      "get": {
+        "description": "The matrices, and the readings nobody has recorded for them (Product 7.1).",
+        "operationId": "synthesis_synthesis_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SynthesisReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Synthesis"
+      }
+    },
+    "/taxonomy": {
+      "get": {
+        "description": "The classification, and the terms no accepted Decision stands behind (Product 32).",
+        "operationId": "taxonomy_taxonomy_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Taxonomy"
       }
     }
   }

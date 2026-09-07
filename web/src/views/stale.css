@@ -1,0 +1,48 @@
+/*
+ * What the Stale page needs and no package component owns. Semantic tokens only.
+ *
+ * There is no rule here that colours a row by how stale it is. Staleness is one state, the
+ * tier is already the panel's own heading, and a scale of warmth down the page would be a
+ * second, wordless ranking beside the daemon's.
+ */
+
+/* A tier and the objects in it, read as one block: the Overview's own group spacing. */
+.rh-web-stale__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-stale__group > p {
+  margin: 0;
+}
+
+/* What going stale costs in this tier: quiet, and above the objects it explains. */
+.rh-web-stale__detail {
+  color: var(--rh-text-secondary);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/*
+ * The objects, indented under the line that names their tier by one space unit.
+ *
+ * Two classes, because `.rh-web-list` zeroes the margin at the same specificity and the
+ * application stylesheet is emitted after this one: a single class here would lose the
+ * cascade by position and the indentation the group's shape depends on would silently
+ * not happen.
+ */
+.rh-web-list.rh-web-stale__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* A stale object is named by its id, so the ids line up down the column. */
+.rh-web-stale__items code {
+  font-family: var(--rh-font-mono);
+}
+
+/* What the cap left out, in the daemon's words: the page's last, quietest line. */
+.rh-web-stale__more {
+  margin: 0;
+  color: var(--rh-text-secondary);
+  max-inline-size: var(--rh-measure-prose);
+}

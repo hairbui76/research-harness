@@ -355,6 +355,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/stale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stale
+         * @description What went out of date and why, grouped by scientific impact (Product 37).
+         *
+         *     Staleness is decay this daemon declares. A client never computes one, and the
+         *     reasons here are the same ones the Overview's own stale group carries.
+         */
+        get: operations["stale_stale_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/synthesis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Synthesis
+         * @description The matrices, and the readings nobody has recorded for them (Product 7.1).
+         */
+        get: operations["synthesis_synthesis_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/taxonomy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Taxonomy
+         * @description The classification, and the terms no accepted Decision stands behind (Product 32).
+         */
+        get: operations["taxonomy_taxonomy_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -857,6 +920,56 @@ export interface components {
             works: number;
         };
         /**
+         * MatrixView
+         * @description One synthesis matrix as its page states it: what it reads, and how much it has read.
+         */
+        MatrixView: {
+            /**
+             * Cells
+             * @default 0
+             */
+            cells: number;
+            /**
+             * Coverage
+             * @default
+             */
+            coverage: string;
+            /**
+             * Fields
+             * @default []
+             */
+            fields: string[];
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Recorded
+             * @default 0
+             */
+            recorded: number;
+            /**
+             * Shape
+             * @default
+             */
+            shape: string;
+            /**
+             * Stale
+             * @default fresh
+             */
+            stale: string;
+            /**
+             * Taxonomy
+             * @default
+             */
+            taxonomy: string;
+            /**
+             * Works
+             * @default 0
+             */
+            works: number;
+        };
+        /**
          * ObjectView
          * @description One canonical object, read through the repository's typed accessors.
          */
@@ -1078,6 +1191,56 @@ export interface components {
             total: number;
         };
         /**
+         * ResearchGroup
+         * @description One group of items a research page reads: what it is, its size, and where it leads.
+         *
+         *     The Overview settled this shape: a line naming the group and stating its size in words,
+         *     a sentence teaching what the objects in it are, and the items themselves indented under
+         *     it. Which group an object belongs in is a scientific judgement, so the daemon draws
+         *     every line and a client renders what it was handed (Product 5 P10).
+         *
+         *     There is deliberately no count on this model that a client could print on its own:
+         *     `summary` is the whole sentence a reader sees, and `count` exists so a client can tell
+         *     an empty group from a full one, not so it can compose a number into words of its own.
+         */
+        ResearchGroup: {
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+            /**
+             * Items
+             * @default []
+             */
+            items: components["schemas"]["AttentionItem"][];
+            /**
+             * Key
+             * @default
+             */
+            key: string;
+            /**
+             * Route
+             * @default
+             */
+            route: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+        };
+        /**
          * RunStatus
          * @description A durable workflow run: the answer to "is it done yet?" without an open connection.
          */
@@ -1123,6 +1286,107 @@ export interface components {
             status: string;
         };
         /**
+         * StaleOverview
+         * @description `GET /stale`: what went out of date and why, grouped by scientific impact.
+         *
+         *     Staleness is decay the daemon declares, never a client's guess: an object is here
+         *     because something it rests on changed, and nothing is ever silently re-anchored
+         *     (Product 37, ADR-008). The groups are the priority tiers Product 37 names, highest
+         *     scientific impact first, and each item carries the daemon's own reason for it — the
+         *     same `AttentionItem` the Overview's "Gone stale" group is built from, so the two
+         *     surfaces cannot drift into two different accounts of the same decay.
+         */
+        StaleOverview: {
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /**
+             * Groups
+             * @default []
+             */
+            groups: components["schemas"]["ResearchGroup"][];
+            /**
+             * More
+             * @default
+             */
+            more: string;
+            /**
+             * Reported
+             * @default 0
+             */
+            reported: number;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+        };
+        /**
+         * SynthesisReport
+         * @description `GET /synthesis`: what the matrices cannot say yet, then the matrices themselves.
+         *
+         *     A matrix reads one property across works and proposes nothing. An empty cell means
+         *     "not recorded", never "the work lacks the property", and novelty is never inferred from
+         *     a missing cell (Product 7.1, 33). So the gaps below are stated as gaps in the record:
+         *     each one names a reading nobody has taken, and none of them says anything about a work.
+         */
+        SynthesisReport: {
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /**
+             * Gaps
+             * @default []
+             */
+            gaps: components["schemas"]["ResearchGroup"][];
+            /**
+             * Matrices
+             * @default []
+             */
+            matrices: components["schemas"]["MatrixView"][];
+            /**
+             * Missing
+             * @default 0
+             */
+            missing: number;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+        };
+        /**
+         * TaxonomyReport
+         * @description `GET /taxonomy`: what needs a researcher first, then the classification itself.
+         *
+         *     A taxonomy is a researcher-approved project decision rather than a universal domain
+         *     fact (Product 32), so the question this page opens with is which terms no accepted
+         *     Decision stands behind — a term with none, or one whose Decision has been superseded,
+         *     classifies works on an authority the project never granted.
+         */
+        TaxonomyReport: {
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            needs_decision?: components["schemas"]["ResearchGroup"];
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Taxonomies
+             * @default []
+             */
+            taxonomies: components["schemas"]["TaxonomyView"][];
+        };
+        /**
          * TaxonomySummary
          * @description One project taxonomy and the Decisions that approved its terms.
          */
@@ -1141,6 +1405,72 @@ export interface components {
             terms: {
                 [key: string]: unknown;
             }[];
+        };
+        /**
+         * TaxonomyTermView
+         * @description One approved term, its place in the tree, and the Decision standing behind it.
+         */
+        TaxonomyTermView: {
+            /**
+             * Approved
+             * @default false
+             */
+            approved: boolean;
+            /**
+             * Decision
+             * @default
+             */
+            decision: string;
+            /**
+             * Decision Status
+             * @default
+             */
+            decision_status: string;
+            /**
+             * Definition
+             * @default
+             */
+            definition: string;
+            /**
+             * Depth
+             * @default 0
+             */
+            depth: number;
+            /**
+             * Parent
+             * @default
+             */
+            parent: string;
+            /** Term */
+            term: string;
+        };
+        /**
+         * TaxonomyView
+         * @description One project taxonomy, its terms already ordered as the tree they form.
+         */
+        TaxonomyView: {
+            /**
+             * Approved
+             * @default 0
+             */
+            approved: number;
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /** Name */
+            name: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Terms
+             * @default []
+             */
+            terms: components["schemas"]["TaxonomyTermView"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -1712,6 +2042,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stale_stale_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaleOverview"];
+                };
+            };
+        };
+    };
+    synthesis_synthesis_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SynthesisReport"];
+                };
+            };
+        };
+    };
+    taxonomy_taxonomy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaxonomyReport"];
                 };
             };
         };

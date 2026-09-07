@@ -1,0 +1,45 @@
+/*
+ * What the Synthesis page needs and no package component owns. Semantic tokens only.
+ *
+ * Nothing here draws attention to a gap with colour. A column nobody has read is not an
+ * error and not a warning: it is a reading that has not been taken, and giving it an alarm
+ * tone would be the page proposing something about the works, which is the one thing a
+ * synthesis surface must never do.
+ */
+
+/* One matrix's gaps, read as one block: the same shape the Stale page's groups have. */
+.rh-web-synthesis__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-synthesis__group > p {
+  margin: 0;
+}
+
+/* What an unrecorded reading is, and what it is not: the page's quieter voice. */
+.rh-web-synthesis__detail {
+  color: var(--rh-text-secondary);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/*
+ * The gaps, indented under the line that names their matrix by one space unit. Two
+ * classes, because `.rh-web-list` zeroes the margin at the same specificity and is emitted
+ * after this file, so a single class would lose the cascade by position.
+ */
+.rh-web-list.rh-web-synthesis__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* A column of a matrix is the project's own word for a property, so it is set apart. */
+.rh-web-synthesis__column,
+.rh-web-synthesis__items code {
+  font-family: var(--rh-font-mono);
+}
+
+/* The compare field sits on one line with the button that submits it. */
+.rh-web-synthesis__field {
+  inline-size: min(20rem, 100%);
+}

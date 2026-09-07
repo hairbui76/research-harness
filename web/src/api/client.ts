@@ -85,11 +85,14 @@ import type {
   SessionSummaryView,
   SessionTranscript,
   SessionView,
+  StaleOverview,
   StaleReport,
   StateRebuildReport,
   SuggestionCandidate,
   SuggestionRequest,
   SynctexView,
+  SynthesisReport,
+  TaxonomyReport,
   TraceView,
   WorkList,
   WorkSummary,
@@ -310,6 +313,21 @@ export class HarnessClient {
 
   overview(): Promise<OverviewReport> {
     return this.get<OverviewReport>('/overview');
+  }
+
+  /** What went stale and why, grouped by scientific impact — the daemon's own grouping. */
+  staleOverview(): Promise<StaleOverview> {
+    return this.get<StaleOverview>('/stale');
+  }
+
+  /** The classification, and the terms no accepted Decision stands behind (Product 32). */
+  taxonomy(): Promise<TaxonomyReport> {
+    return this.get<TaxonomyReport>('/taxonomy');
+  }
+
+  /** The matrices, and the readings nobody has recorded for them (Product 7.1). */
+  synthesis(): Promise<SynthesisReport> {
+    return this.get<SynthesisReport>('/synthesis');
   }
 
   object(objectId: string): Promise<ObjectView> {

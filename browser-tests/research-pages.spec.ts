@@ -31,7 +31,9 @@ const PAGES: { path: string; heading: string | null; action: string }[] = [
   { path: 'claims', heading: 'Claims', action: 'Open the conversation to promote a claim' },
   { path: 'questions', heading: 'Questions', action: 'Open the conversation to promote a question' },
   { path: 'conflicts', heading: 'Conflicts', action: 'Open the review inbox' },
-  { path: 'stale', heading: 'Stale objects', action: 'See what else needs attention' },
+  // The Stale page now teaches with the Overview's own sentence about staleness, and
+  // offers the Overview's own next step, so one rule is not described twice.
+  { path: 'stale', heading: 'Stale objects', action: 'Open the corpus this project rests on' },
   { path: 'synthesis', heading: 'Synthesis', action: 'See the works a matrix would read' },
   { path: 'taxonomy', heading: 'Taxonomy', action: 'Open the conversation to propose a term' },
 ];

@@ -42,6 +42,13 @@ EXPECTED_ROUTES: set[tuple[str, frozenset[str]]] = {
     ("/index", frozenset({"GET"})),
     ("/blocks/{artifact_id}", frozenset({"GET"})),
     ("/overview", frozenset({"GET"})),
+    # Wave 3K adds three more composed reads for the cockpit. Which group an object belongs
+    # in, which order the groups are read in, and the words a count is stated inside are
+    # scientific judgements, so they are decided here rather than in React (Product 5 P10) -
+    # and, like every read above, none of them writes.
+    ("/stale", frozenset({"GET"})),
+    ("/taxonomy", frozenset({"GET"})),
+    ("/synthesis", frozenset({"GET"})),
     # Phase 19 added the attachment surface. The POST is the *one* documented write that is
     # not a capability call (v1.1 plan §0.4): it writes session-only bytes through the same
     # `AttachmentService.add` that `attachment.add` calls, is authorised as that capability
