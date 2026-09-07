@@ -42,6 +42,7 @@ import type {
   RailItem,
 } from "@research-harness/design";
 import type { ProjectView } from "../api/projects";
+import { clockTime } from "../components/Feedback";
 // The shortcut layer wraps the shell so a page's commands and the rail's destinations meet
 // in one palette; it renders the palette and the help sheet itself.
 import { CommandsProvider } from "./commands";
@@ -102,7 +103,7 @@ function DaemonOfflineNotice({
   command,
   onRetry,
 }: {
-  outage: { path: string; reason: string };
+  outage: { path: string; reason: string; lastReadAt: string | null };
   command: string;
   onRetry: () => void;
 }) {
@@ -114,9 +115,10 @@ function DaemonOfflineNotice({
         description={
           <>
             The daemon behind this window stopped responding. Every page keeps the last
-            answer it was given and says so; nothing here has been thrown away. If you
-            stopped it, start it again with <code>{command}</code> — this window picks the
-            connection back up on its own, and the pages re-read themselves.
+            answer it was given{outage.lastReadAt === null ? '' : `, read at ${clockTime(outage.lastReadAt)}`};
+            nothing here has been thrown away. If you stopped it, start it again with{' '}
+            <code>{command}</code> — this window picks the connection back up on its own, and
+            the pages re-read themselves.
           </>
         }
         detail={`${outage.reason}\n${outage.path}`}

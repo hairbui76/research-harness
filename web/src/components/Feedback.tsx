@@ -114,10 +114,12 @@ export function Loading({ what, shape = 'text' }: { what: string; shape?: Loadin
  * There are two whys and they read differently. A *refusal* is the daemon answering: it has
  * a sentence of its own, and that sentence is the whole point of the box. Silence is not an
  * answer, and the shell already says so once, at the top of the window, in words that cover
- * every page at once — so restating "could not answer / Failed to fetch" here would be the
- * same fact stated twice and worse, which is exactly the stacked-notice pattern this
- * cockpit is trying to leave behind. During an outage the box says only what is local to
- * this page: that it has nothing to show yet, that nothing was lost, and how to ask again.
+ * every page at once — the cause, the command, what is safe, and one way to ask again. A
+ * second notice here was the same condition stated twice with a second retry button under
+ * the first, which is exactly the stacked-notice pattern this cockpit is trying to leave
+ * behind. So during an outage a page that has nothing left to show says one quiet line — no
+ * box, no tone, no button — and a page that still has its last answer keeps it
+ * (`useAsync`) and says nothing here at all.
  */
 export function ErrorBox({ error, retry }: { error: string; retry?: () => void }) {
   const outage = useDaemonOutage();
@@ -125,15 +127,12 @@ export function ErrorBox({ error, retry }: { error: string; retry?: () => void }
     ? [{ label: 'Try again', onClick: retry, iconStart: 'refresh-cw' as const }]
     : undefined;
   if (outage) {
-    // No safety line and no cause: the notice at the top of the window carries both, for
-    // every page at once. One sentence, and the way to ask again.
     return (
-      <ErrorNotice
-        kind="retryable"
-        title="Waiting for the daemon"
-        description="This page will read itself again as soon as the daemon answers."
-        {...(actions ? { actions } : {})}
-      />
+      <p className="rh-text-secondary" role="status">
+        {outage.lastReadAt === null
+          ? 'Nothing has been read here yet. This page reads itself as soon as the daemon answers.'
+          : `Last read at ${clockTime(outage.lastReadAt)}. This page reads itself again as soon as the daemon answers.`}
+      </p>
     );
   }
   return (
@@ -145,6 +144,19 @@ export function ErrorBox({ error, retry }: { error: string; retry?: () => void }
       {...(actions ? { actions } : {})}
     />
   );
+}
+
+/**
+ * A time of day, in the reader's own locale, for a sentence about how old something is.
+ *
+ * The clock and not the date: an outage lasts minutes and a researcher reads "14:32", not
+ * an ISO instant. A time this window cannot parse is printed as it came rather than as
+ * "Invalid Date".
+ */
+export function clockTime(iso: string): string {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return iso;
+  return at.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
 
 /**

@@ -161,6 +161,13 @@ test('a daemon that stops answering becomes one polite notice, and comes back', 
   await expect(notice).toContainText('Your draft is safe.');
   await expect(notice).toContainText('research app');
 
+  // One condition, one notice, one way to ask again. The capture used to show two, because
+  // the open page put its own "Try again: Waiting for the daemon" under this one.
+  const retries = await page.getByRole('button', { name: /again/i }).allInnerTexts();
+  expect(retries, `the page offered ${retries.length} ways to ask again`).toEqual([
+    'Ask the daemon again',
+  ]);
+
   // The page frame is still mounted underneath it: the heading, its description, and the
   // navigation that gets a researcher to another screen.
   await expect(page.getByRole('heading', { level: 1, name: 'Claims' })).toBeVisible();

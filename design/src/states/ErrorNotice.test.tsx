@@ -6,17 +6,23 @@ import { describeThemeDensitySnapshots } from '../../tests/variants';
 import { ErrorNotice } from './ErrorNotice';
 
 describe('ErrorNotice', () => {
-  it('leads the title with the kind, in the title’s own type', () => {
+  it('names its kind on the icon, and leaves the title its own sentence', () => {
+    /*
+     * The kind used to lead the title — "Blocked: privacy rule blocked this request" — so
+     * every notice in the product opened with the word that told a reader least. It is the
+     * icon's accessible name now: still named in text rather than by colour, which is the
+     * rule it was there for, and named once instead of beside the sentence that says it.
+     */
     const { container } = render(
       <ErrorNotice kind="blocked" title="Privacy rule blocked this request" />,
     );
     const notice = screen.getByRole('alert');
-    expect(notice).toHaveTextContent('Blocked:');
     expect(notice).toHaveTextContent('Privacy rule blocked this request');
-    // Not a label standing above the heading: the kind is the first words of the title's
-    // own sentence, and carries no size, tracking or case of its own.
-    const lead = container.querySelector('.rh-error-notice__kind');
-    expect(lead?.closest('.rh-error-notice__title')).not.toBeNull();
+    expect(container.querySelector('.rh-error-notice__title')?.textContent).toBe(
+      'Privacy rule blocked this request',
+    );
+    const named = container.querySelector('.rh-error-notice__icon .rh-visually-hidden');
+    expect(named).toHaveTextContent('Blocked');
   });
 
   it('is polite for partial and stale, assertive for blocked and fatal', () => {

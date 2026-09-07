@@ -67,13 +67,22 @@ export const ErrorNotice = forwardRef<HTMLDivElement, ErrorNoticeProps>(function
       className={cx('rh-error-notice', className)}
       {...rest}
     >
+      {/*
+        The kind names the glyph rather than the sentence.
+
+        Every notice used to open its title with its own category — "Try again: the daemon
+        stopped answering", "Blocked: connected as unknown" — so the first words a
+        researcher read were the ones that told them least, on every notice in the product.
+        The rule the label exists for still holds, and holds better: the state is named in
+        text, and the text names the thing that would otherwise be carrying it alone — the
+        icon and its tinted hairline. The visible title is the sentence.
+      */}
       <span className="rh-error-notice__icon">
         <Icon name={icon ?? meta.icon} size={16} />
+        <span className="rh-visually-hidden">{meta.label}</span>
       </span>
       <div className="rh-error-notice__body">
-        <p className="rh-error-notice__title">
-          <span className="rh-error-notice__kind">{meta.label}:</span> {title}
-        </p>
+        <p className="rh-error-notice__title">{title}</p>
         {description !== undefined ? (
           <p className="rh-error-notice__description">{description}</p>
         ) : null}

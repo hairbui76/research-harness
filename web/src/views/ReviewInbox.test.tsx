@@ -12,10 +12,11 @@
  * with `dry_run`, restates what the write will do, and renders the answer — including a
  * refusal under the default strict policy, in the daemon's own words.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import { daemonReachability } from '../api/client';
 import type { ReviewItem } from '../api/dto';
 import {
   CATEGORY_ORDER,
@@ -589,6 +590,34 @@ describe('the policy batch of Product 24.4', () => {
       screen.queryByRole('button', { name: /Accept the routine candidates/ }),
     ).not.toBeInTheDocument();
   });
+});
+
+describe('the queue while the daemon is silent', () => {
+  afterEach(() => daemonReachability.reset());
+
+  it('says one quiet line rather than a second notice under the shell’s', async () => {
+    /*
+     * An outage is one condition, and the shell states it once for the whole window, with
+     * the cause, the command, what is safe and the one way to ask again. The page's part is
+     * the part that is local to it: how old what it has is — as a line, not as a second
+     * notice with a second retry button (`daemon-offline.png`).
+     */
+    const silent = {
+      fetch: (async () => {
+        throw new TypeError('Failed to fetch');
+      }) as unknown as typeof fetch,
+      calls: [],
+      capabilityCalls: () => [],
+    };
+    renderInbox(silent);
+
+    await waitFor(() =>
+      expect(screen.getByText(/reads itself.*as soon as the daemon answers/)).toBeInTheDocument(),
+    );
+    expect(screen.queryByText(/Waiting for the daemon/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+  });
+
 });
 
 describe('the review inbox inside a project', () => {

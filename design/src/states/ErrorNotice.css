@@ -12,8 +12,8 @@
 
 /*
  * The tone tints the whole hairline rather than a thick rule down one edge: a coloured
- * side tab is a decoration the notice does not need, and the kind is written out in words
- * beside the icon anyway.
+ * side tab is a decoration the notice does not need, and the kind is the icon's own name
+ * anyway, so colour is never carrying it alone.
  */
 .rh-error-notice[data-tone='warning'] {
   border-color: var(--rh-feedback-warning-border);
@@ -56,18 +56,6 @@
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
   font-weight: var(--rh-type-label-weight);
-}
-
-/*
- * The kind is written out; the tinted hairline is only a second signal.
- *
- * It leads the title's own sentence — "Blocked: connected as unknown" — in the title's own
- * type and weight, and carries nothing of its own. Set apart above the heading, in 11px
- * uppercase with wide tracking, it was a kicker, and a kicker is the one thing on the
- * craft floor no brief earns back.
- */
-.rh-error-notice__kind {
-  color: inherit;
 }
 
 .rh-error-notice__description {

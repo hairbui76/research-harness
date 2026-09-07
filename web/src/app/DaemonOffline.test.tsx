@@ -144,6 +144,31 @@ describe('the daemon stops answering', () => {
     expect(screen.getByRole('navigation', { name: 'Project navigation' })).toBe(rail);
   });
 
+  it('offers exactly one way to ask again, in the one notice that states the outage', async () => {
+    /*
+     * `daemon-offline.png` caught the same condition stated twice: this notice, and the open
+     * page's own "Try again: Waiting for the daemon" under it, each with its own retry
+     * button. One condition, one notice, one way to ask again.
+     */
+    renderShell(silentDaemon());
+
+    await waitFor(() => expect(notice()).toBeInTheDocument());
+    expect(
+      screen.getAllByRole('button', { name: /again/i }).map((button) => button.textContent),
+    ).toEqual(['Ask the daemon again']);
+  });
+
+  it('says when the window last had an answer, so what is on screen has an age', async () => {
+    const flaky = flakyDaemon();
+    renderShell(flaky.daemon);
+
+    await screen.findByRole('navigation', { name: 'Project navigation' });
+    flaky.stop();
+    daemonReachability.unanswered('/overview', 'TypeError: Failed to fetch');
+
+    await waitFor(() => expect(notice()).toHaveTextContent(/read at \d/));
+  });
+
   it('has no automatically detectable accessibility violation', async () => {
     const { container } = renderShell(silentDaemon());
 

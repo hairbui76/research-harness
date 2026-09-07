@@ -39,6 +39,11 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / comforta
           d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
         />
       </svg>
+      <span
+        class="rh-visually-hidden"
+      >
+        Blocked
+      </span>
     </span>
     <div
       class="rh-error-notice__body"
@@ -46,13 +51,6 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / comforta
       <p
         class="rh-error-notice__title"
       >
-        <span
-          class="rh-error-notice__kind"
-        >
-          Blocked
-          :
-        </span>
-         
         A privacy rule blocked this request
       </p>
       <p
@@ -159,6 +157,11 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / compact 
           d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
         />
       </svg>
+      <span
+        class="rh-visually-hidden"
+      >
+        Blocked
+      </span>
     </span>
     <div
       class="rh-error-notice__body"
@@ -166,13 +169,6 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the dark / compact 
       <p
         class="rh-error-notice__title"
       >
-        <span
-          class="rh-error-notice__kind"
-        >
-          Blocked
-          :
-        </span>
-         
         A privacy rule blocked this request
       </p>
       <p
@@ -279,6 +275,11 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the light / comfort
           d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
         />
       </svg>
+      <span
+        class="rh-visually-hidden"
+      >
+        Blocked
+      </span>
     </span>
     <div
       class="rh-error-notice__body"
@@ -286,13 +287,6 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the light / comfort
       <p
         class="rh-error-notice__title"
       >
-        <span
-          class="rh-error-notice__kind"
-        >
-          Blocked
-          :
-        </span>
-         
         A privacy rule blocked this request
       </p>
       <p
@@ -399,6 +393,11 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the light / compact
           d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"
         />
       </svg>
+      <span
+        class="rh-visually-hidden"
+      >
+        Blocked
+      </span>
     </span>
     <div
       class="rh-error-notice__body"
@@ -406,13 +405,6 @@ exports[`ErrorNotice > ErrorNotice theme x density > matches the light / compact
       <p
         class="rh-error-notice__title"
       >
-        <span
-          class="rh-error-notice__kind"
-        >
-          Blocked
-          :
-        </span>
-         
         A privacy rule blocked this request
       </p>
       <p

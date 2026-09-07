@@ -155,6 +155,13 @@ export interface DaemonOutage {
   path: string;
   /** What the transport said, verbatim. */
   reason: string;
+  /**
+   * When this window last had a round trip answered, as an ISO instant, or null if it never
+   * has. It is what a page's remaining content is *as of*: while the daemon is silent the
+   * cockpit keeps what it was given, and the one thing that makes that honest is saying how
+   * old it is.
+   */
+  lastReadAt: string | null;
 }
 
 type OutageListener = () => void;
@@ -179,6 +186,8 @@ const UNANSWERED_STATUSES: ReadonlySet<number> = new Set([0, 502, 504]);
 
 class DaemonReachability {
   private outage: DaemonOutage | null = null;
+  /** When a round trip was last answered. The age of whatever is still on screen. */
+  private answeredAt: string | null = null;
   private readonly listeners = new Set<OutageListener>();
 
   /** The current outage, or null while the daemon is answering. Stable between changes. */
@@ -193,6 +202,7 @@ class DaemonReachability {
 
   /** A round trip completed: whatever the daemon said, it is there. */
   readonly answered = (): void => {
+    this.answeredAt = new Date().toISOString();
     if (this.outage === null) return;
     this.outage = null;
     this.announce();
@@ -201,7 +211,7 @@ class DaemonReachability {
   /** A round trip never completed. The first one wins, so the notice names where it began. */
   readonly unanswered = (path: string, reason: string): void => {
     if (this.outage !== null) return;
-    this.outage = { path, reason };
+    this.outage = { path, reason, lastReadAt: this.answeredAt };
     this.announce();
   };
 
