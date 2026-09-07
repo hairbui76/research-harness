@@ -28,6 +28,47 @@ body,
   min-block-size: 0;
 }
 
+/* The reading measure --------------------------------------------------------------- */
+
+/*
+ * One measure for prose across the cockpit.
+ *
+ * At 1920px an uncapped research paragraph ran about 232 characters and a transcript line
+ * about 182; past roughly 80 the eye stops finding the start of the next line. 68ch is the
+ * measure this cockpit already shipped — `AsyncState`, `ErrorNotice` and both review
+ * screens each cap at it — so it becomes a name here rather than a fifth copy of the
+ * number.
+ *
+ * What is capped is prose: page descriptions, panel paragraphs and state copy, the text a
+ * researcher reads. What is not is everything scanned rather than read — tables, code
+ * blocks, the source quote, the PDF pane — which keeps every pixel the page gives it. The
+ * cap is on the line, never on the block, so text stays flush with the left edge of its
+ * column and nothing is centred.
+ */
+:root {
+  --rh-measure-prose: 68ch;
+}
+
+/* Prose a page marks as prose. */
+.rh-web-measure,
+.rh-full-page__description {
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/*
+ * A paragraph inside a research page's body. Zero-specificity so that anything with an
+ * opinion of its own — a state's own cap, a quote, a table cell — still wins.
+ */
+:where(.rh-full-page__content) p {
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/* What is read at whatever width it is given. */
+.rh-full-page__content :where(table, pre, .rh-web-source, .rh-pdf) p,
+.rh-web-quote {
+  max-inline-size: none;
+}
+
 /* Layout primitives used across the research pages ---------------------------------- */
 
 /* A vertical run of cards, panels and paragraphs. */

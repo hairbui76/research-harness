@@ -67,6 +67,22 @@
   font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
 }
 
+/*
+ * The measure.
+ *
+ * A transcript line in a 1920px window ran about 182 characters, which is roughly two and
+ * a half times what an eye tracks back from reliably. The cap is on the prose blocks the
+ * host's Markdown renderer produces rather than on the body, because a code block, a
+ * table, an image and a PDF page are scanned rather than read and keep the whole width of
+ * the pane. Nothing is centred: the cap shortens the line, it does not move it.
+ *
+ * `--rh-measure-prose` is the cockpit's one reading measure; the fallback keeps the
+ * package correct on its own.
+ */
+.rh-message .rh-message-content__text > :where(p, ul, ol, dl, blockquote, h1, h2, h3, h4, h5, h6) {
+  max-inline-size: var(--rh-measure-prose, 68ch);
+}
+
 /* Actions stay on the page instead of appearing on hover: promotion and the receipt are
    how conversation becomes reviewable state, and they must be findable by keyboard. */
 .rh-message__actions {

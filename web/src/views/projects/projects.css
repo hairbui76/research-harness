@@ -33,8 +33,10 @@
   line-height: var(--rh-type-h1-lh);
 }
 
+/* The one sentence on this screen that is read rather than scanned. */
 .rh-projects__lede {
   margin: var(--rh-space-1) 0 0;
+  max-inline-size: var(--rh-measure-prose);
   color: var(--rh-text-muted);
 }
 
