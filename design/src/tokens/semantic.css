@@ -24,7 +24,6 @@
  * Text          --rh-text-primary | --rh-text-secondary | --rh-text-muted
  *               --rh-text-inverse      on --rh-surface-inverse
  *               --rh-text-link         link ink; links are underlined, never colour-only
- *               --rh-text-on-accent    alias of --rh-accent-fg
  *               --rh-text-on-paper | --rh-text-on-paper-secondary | --rh-text-on-paper-muted
  * Accent        --rh-accent            AI/action accent: model activity, the primary
  *                                      send/run action, active reference tracking, and

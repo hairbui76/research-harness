@@ -1,4 +1,12 @@
+/*
+ * The inspector is a query container: 22rem beside a page, 85vw as a drawer, and whatever a
+ * host gives it in between. Nothing about how it lays out follows from the window's width,
+ * so nothing here asks the window. Overlays portal to `document.body`, so containment here
+ * traps no menu or tooltip.
+ */
 .rh-research-inspector {
+  container-type: inline-size;
+  container-name: rh-inspector;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -79,4 +87,24 @@
   min-height: 0;
   overflow: auto;
   padding: var(--rh-space-3);
+}
+
+/*
+ * A narrow inspector.
+ *
+ * The header puts the kind, the label and the actions on one wrapping line, which reads as
+ * one sentence while there is room for one and as ragged fragments once there is not. Below
+ * this width each part takes its own line, and the panel gives its content back the space
+ * its padding was taking.
+ */
+@container rh-inspector (max-width: 20rem) {
+  .rh-research-inspector__following {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--rh-space-1);
+  }
+
+  .rh-research-inspector__panel {
+    padding: var(--rh-space-2);
+  }
 }

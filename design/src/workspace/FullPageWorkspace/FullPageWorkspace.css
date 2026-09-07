@@ -6,7 +6,23 @@
  * pixels down a stacked review screen — stretches the document that far with nothing in
  * it, giving the window a second scrollbar that scrolls into blank canvas.
  */
+/*
+ * The page is a query container, because the page is what has to fit.
+ *
+ * A research page is a pane, not a window: the rail takes 16rem of it, the conversation's
+ * inspector takes another 22rem when it is open, and a `PaneGroup` divider can take more.
+ * A viewport query cannot see any of that — at 1440px it says "wide" to a page that has
+ * 520px to draw in — so the queries below ask this element's own inline size instead. The
+ * shell keeps its viewport query (`AppShell`'s `breakpoint`), because the shell really is
+ * the window.
+ *
+ * Containment is safe here for one specific reason: every overlay in the package portals to
+ * `document.body` (`hooks/usePortal`), so no menu, popover, tooltip, dialog or toast is a
+ * descendant of this element and none of them can be trapped by its containing block.
+ */
 .rh-full-page {
+  container-type: inline-size;
+  container-name: rh-page;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -95,4 +111,35 @@
   border-top: var(--rh-border-width) solid var(--rh-border-subtle);
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
+}
+
+/*
+ * A narrow page pane.
+ *
+ * Two things stop working long before the window is narrow, and both are about this pane's
+ * own width. A toolbar sharing a baseline with the title has to wrap mid-control once the
+ * title takes the room, so below this width it takes a row of its own and starts at the
+ * same edge as the heading. And a side panel that is a third of a 520px pane is 170px —
+ * narrower than the labels in it — so it stops being a column and goes under the content,
+ * which is where a summary belongs when there is only one column left.
+ */
+@container rh-page (max-width: 44rem) {
+  .rh-full-page__header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--rh-space-3);
+  }
+
+  .rh-full-page__body {
+    flex-direction: column;
+  }
+
+  .rh-full-page[data-side='start'] .rh-full-page__body {
+    flex-direction: column-reverse;
+  }
+
+  .rh-full-page__side {
+    inline-size: 100%;
+    max-inline-size: none;
+  }
 }

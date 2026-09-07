@@ -30,7 +30,6 @@
   --rh-text-muted: var(--rh-palette-warm-600);
   --rh-text-inverse: var(--rh-palette-warm-100);
   --rh-text-link: var(--rh-palette-off-black);
-  --rh-text-on-accent: var(--rh-accent-fg);
 
   /* Reading-surface ink */
   --rh-text-on-paper: var(--rh-palette-paper-ink);

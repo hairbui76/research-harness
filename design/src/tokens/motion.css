@@ -4,11 +4,14 @@
  * system uses 1.02 and 0.98 and reserves motion for direct manipulation.
  *
  * No entrance animation on scroll, no parallax, no looping ambient motion.
+ *
+ * Two durations, not three. `fast` is a state change on a control and `base` is
+ * everything that moves; nothing in the system was ever slow enough to want a third, and
+ * a duration nothing reads is a speed nobody chose.
  */
 :root {
   --rh-duration-fast: 120ms;
   --rh-duration-base: 200ms;
-  --rh-duration-slow: 400ms;
   --rh-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   --rh-scale-hover: 1.02;
   --rh-scale-press: 0.98;
@@ -23,7 +26,6 @@
   :root {
     --rh-duration-fast: 1ms;
     --rh-duration-base: 1ms;
-    --rh-duration-slow: 1ms;
     --rh-scale-hover: 1;
     --rh-scale-press: 1;
   }

@@ -33,7 +33,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AppShell, ProjectRail, useToast } from "@research-harness/design";
+import { AppShell, ErrorNotice, ProjectRail, useToast } from "@research-harness/design";
 import type {
   ProjectAction,
   ProjectModel,
@@ -45,6 +45,7 @@ import type { ProjectView } from "../api/projects";
 // The shortcut layer wraps the shell so a page's commands and the rail's destinations meet
 // in one palette; it renders the palette and the help sheet itself.
 import { CommandsProvider } from "./commands";
+import { useDaemonOutage } from "./daemonStatus";
 import { useOptionalHost } from "./host";
 import type { Host } from "./host";
 import { projectHref, useProjectPaths } from "./projectPaths";
@@ -87,8 +88,55 @@ type WorkspaceRailProps = Pick<
   | "sessionList"
 >;
 
+/**
+ * The daemon has stopped answering: said once, politely, without taking the cockpit away.
+ *
+ * `role="status"` rather than `alert`, and never a dialog: an outage is a condition to live
+ * with for a moment, not an interruption to acknowledge. It states what is safe, what comes
+ * back on its own, and the one thing a researcher can do about it — and it goes away by
+ * itself the moment any request succeeds, because the transport that noticed the silence is
+ * the same one that notices the answer.
+ */
+function DaemonOfflineNotice({
+  outage,
+  command,
+  onRetry,
+}: {
+  outage: { path: string; reason: string };
+  command: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="rh-web-token-bar">
+      <ErrorNotice
+        kind="retryable"
+        title="Research Harness is not answering"
+        description={
+          <>
+            The daemon behind this window stopped responding. Every page keeps the last
+            answer it was given and says so; nothing here has been thrown away. If you
+            stopped it, start it again with <code>{command}</code> — this window picks the
+            connection back up on its own, and the pages re-read themselves.
+          </>
+        }
+        detail={`${outage.reason}\n${outage.path}`}
+        detailLabel="Which request went unanswered"
+        safety={{
+          draft: "safe",
+          source: "safe",
+          note: "An unsent message stays in the composer, and nothing was written.",
+        }}
+        actions={[
+          { label: "Ask the daemon again", onClick: onRetry, iconStart: "refresh-cw" },
+        ]}
+      />
+    </div>
+  );
+}
+
 function Shell() {
-  const { overview, canMutate, error, loading } = useSession();
+  const { overview, canMutate, error, loading, refresh } = useSession();
+  const outage = useDaemonOutage();
   const conversation = useConversation();
   const location = useLocation();
   const host = useOptionalHost();
@@ -151,6 +199,7 @@ function Shell() {
     error,
     canMutate,
     principal: overview?.principal,
+    offline: outage !== null,
   });
 
   const rail: WorkspaceRailProps = {
@@ -199,7 +248,22 @@ function Shell() {
         main={
           <>
             {active ? <WorkspaceHeader project={active} /> : null}
-            <TokenBar />
+            {/*
+              One notice, not two. While the daemon is silent the token bar would say the
+              same thing a second time and offer a token to a process that is not there to
+              take one, so the outage owns the strip until the daemon answers again — and
+              then the bar comes back, because "this window may only read" is a different
+              fact that survives the reconnection.
+            */}
+            {outage ? (
+              <DaemonOfflineNotice
+                outage={outage}
+                command={registry ? "research app" : "research serve"}
+                onRetry={refresh}
+              />
+            ) : (
+              <TokenBar />
+            )}
             <div className="rh-web-route">
               <Outlet />
             </div>
@@ -355,7 +419,14 @@ function principalStatus(input: {
   error: string | null;
   canMutate: boolean;
   principal: string | undefined;
+  offline: boolean;
 }): ProviderStatus | undefined {
+  // While the daemon is silent the rail is a status chip, not an explanation: the notice in
+  // `main` is where the sentence lives. `Failed to fetch` is the browser's words for it and
+  // says nothing a researcher can act on, so the chip says the state instead.
+  if (input.offline) {
+    return { label: "Daemon", state: "offline", detail: "Not answering" };
+  }
   if (input.error) {
     return { label: "Daemon", state: "offline", detail: input.error };
   }

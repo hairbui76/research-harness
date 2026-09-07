@@ -57,6 +57,7 @@ import type {
   IconName,
   VocabularyName,
 } from '@research-harness/design';
+import { useDaemonOutage } from '../app/daemonStatus';
 
 /**
  * What is about to arrive, so the placeholder can be shaped like it: a table of rows, a
@@ -106,14 +107,41 @@ export function Loading({ what, shape = 'text' }: { what: string; shape?: Loadin
   );
 }
 
+/**
+ * A read did not produce a page, and why.
+ *
+ * There are two whys and they read differently. A *refusal* is the daemon answering: it has
+ * a sentence of its own, and that sentence is the whole point of the box. Silence is not an
+ * answer, and the shell already says so once, at the top of the window, in words that cover
+ * every page at once — so restating "could not answer / Failed to fetch" here would be the
+ * same fact stated twice and worse, which is exactly the stacked-notice pattern this
+ * cockpit is trying to leave behind. During an outage the box says only what is local to
+ * this page: that it has nothing to show yet, that nothing was lost, and how to ask again.
+ */
 export function ErrorBox({ error, retry }: { error: string; retry?: () => void }) {
+  const outage = useDaemonOutage();
+  const actions = retry
+    ? [{ label: 'Try again', onClick: retry, iconStart: 'refresh-cw' as const }]
+    : undefined;
+  if (outage) {
+    // No safety line and no cause: the notice at the top of the window carries both, for
+    // every page at once. One sentence, and the way to ask again.
+    return (
+      <ErrorNotice
+        kind="retryable"
+        title="Waiting for the daemon"
+        description="This page will read itself again as soon as the daemon answers."
+        {...(actions ? { actions } : {})}
+      />
+    );
+  }
   return (
     <ErrorNotice
       kind={retry ? 'retryable' : 'fatal'}
       title="The daemon refused or could not answer"
       description={error}
       safety={{ source: 'safe' }}
-      {...(retry ? { actions: [{ label: 'Try again', onClick: retry, iconStart: 'refresh-cw' }] } : {})}
+      {...(actions ? { actions } : {})}
     />
   );
 }

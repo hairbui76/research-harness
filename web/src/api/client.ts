@@ -133,6 +133,127 @@ export class CapabilityError extends Error {
   }
 }
 
+/**
+ * The daemon has stopped answering, as one fact the whole window shares.
+ *
+ * A refusal and an outage are different events and the cockpit used to render them the
+ * same way: the rail said `Daemon — offline`, `TokenBar` offered a token form for a daemon
+ * that was not there to take one, and whichever page happened to be open put its own red
+ * box in the body. Three notices, one cause, and none of them said what would come back on
+ * its own.
+ *
+ * So the transport records it once. Every `HarnessClient` — the legacy one, the
+ * project-scoped copies, the byte reads — reports each round trip here, and the shell
+ * renders a single polite notice from it. `path` and `reason` are the daemon's own words
+ * about the request that went unanswered, kept for the technical detail rather than for the
+ * sentence.
+ */
+export interface DaemonOutage {
+  /** The route that went unanswered; the first one, so the notice does not chase the newest. */
+  path: string;
+  /** What the transport said, verbatim. */
+  reason: string;
+}
+
+type OutageListener = () => void;
+
+/**
+ * Which HTTP statuses mean "nothing answered" rather than "the daemon said no".
+ *
+ * The list is short because this daemon is a local process the cockpit is served by, not a
+ * service behind a fleet of proxies. A 500 is the daemon answering with a fault and belongs
+ * to the page that asked for it. A **503 is not on this list**, deliberately: the daemon
+ * itself raises one when a workspace cannot be opened (`server/app.py::_open_repo`), with a
+ * sentence a researcher can act on — "the workspace lock is held by another process" — and
+ * reading that as silence would replace the one message that says what to do. 502 and 504
+ * are statuses this daemon never sends, so seeing one means something in front of it is
+ * answering for a process that is not there. `0` is what a fetch that never reached a
+ * server reports on the rare browser that resolves rather than rejects.
+ *
+ * The signal that actually fires in practice is the rejected fetch below: `ECONNREFUSED`
+ * for a daemon that has stopped.
+ */
+const UNANSWERED_STATUSES: ReadonlySet<number> = new Set([0, 502, 504]);
+
+class DaemonReachability {
+  private outage: DaemonOutage | null = null;
+  private readonly listeners = new Set<OutageListener>();
+
+  /** The current outage, or null while the daemon is answering. Stable between changes. */
+  readonly get = (): DaemonOutage | null => this.outage;
+
+  readonly subscribe = (listener: OutageListener): (() => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  /** A round trip completed: whatever the daemon said, it is there. */
+  readonly answered = (): void => {
+    if (this.outage === null) return;
+    this.outage = null;
+    this.announce();
+  };
+
+  /** A round trip never completed. The first one wins, so the notice names where it began. */
+  readonly unanswered = (path: string, reason: string): void => {
+    if (this.outage !== null) return;
+    this.outage = { path, reason };
+    this.announce();
+  };
+
+  /**
+   * Forget the outage. For tests, which share one module across their cases.
+   *
+   * Subscriptions survive it: a listener belongs to a mounted component, and dropping it
+   * here would leave that component reading a value it can never be told has changed.
+   */
+  readonly reset = (): void => {
+    this.answered();
+  };
+
+  private announce(): void {
+    for (const listener of [...this.listeners]) listener();
+  }
+}
+
+/**
+ * Whether the local daemon is answering, for this window.
+ *
+ * One per window rather than one per client on purpose: a cockpit talks to exactly one
+ * daemon process, and the project-scoped clients `AppClient.workspaceClient` mints are
+ * routes into that same process. "The daemon is not answering" is therefore a fact about
+ * the window, not about whichever client happened to ask last.
+ */
+export const daemonReachability = new DaemonReachability();
+
+/** The message a rejected fetch carries, or the best description of whatever was thrown. */
+function transportReason(cause: unknown): string {
+  if (cause instanceof Error) return `${cause.name}: ${cause.message}`;
+  return String(cause);
+}
+
+/** Wraps a transport so that every request it makes reports whether anything answered. */
+function reporting(impl: typeof fetch): typeof fetch {
+  return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const where = typeof input === 'string' ? input : String((input as URL).toString?.() ?? input);
+    let response: Response;
+    try {
+      response = await impl(input as RequestInfo, init);
+    } catch (cause) {
+      daemonReachability.unanswered(where, transportReason(cause));
+      throw cause;
+    }
+    if (UNANSWERED_STATUSES.has(response.status)) {
+      daemonReachability.unanswered(where, `${response.status} on ${where}`);
+    } else {
+      daemonReachability.answered();
+    }
+    return response;
+  };
+}
+
 /** Base URL: the daemon serves the built bundle itself, so same origin is the default. */
 export function defaultBaseUrl(): string {
   const configured = import.meta.env?.VITE_API_BASE;
@@ -144,12 +265,16 @@ export class HarnessClient {
   /** Where this client's routes hang; a project-scoped client carries the project prefix. */
   readonly baseUrl: string;
   private readonly token: string | null;
+  /** The transport as the routes use it: the caller's, wrapped to report reachability. */
   private readonly http: typeof fetch;
+  /** The caller's transport, unwrapped, so a copy of this client wraps it once and not twice. */
+  private readonly transport: typeof fetch;
 
   constructor(options: ClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? defaultBaseUrl()).replace(/\/$/, '');
     this.token = options.token ?? null;
-    this.http = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
+    this.transport = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
+    this.http = reporting(this.transport);
   }
 
   /** True when this client holds the local token and may therefore ask to mutate. */
@@ -159,7 +284,7 @@ export class HarnessClient {
 
   /** A copy of this client carrying a different token; used when the researcher pastes one. */
   withToken(token: string | null): HarnessClient {
-    return new HarnessClient({ baseUrl: this.baseUrl, token, fetchImpl: this.http });
+    return new HarnessClient({ baseUrl: this.baseUrl, token, fetchImpl: this.transport });
   }
 
   /**
@@ -170,7 +295,7 @@ export class HarnessClient {
    * to know about that, because the paths beneath the prefix did not change (design §6).
    */
   withBaseUrl(baseUrl: string): HarnessClient {
-    return new HarnessClient({ baseUrl, token: this.token, fetchImpl: this.http });
+    return new HarnessClient({ baseUrl, token: this.token, fetchImpl: this.transport });
   }
 
   // -- reads -----------------------------------------------------------------
@@ -221,7 +346,15 @@ export class HarnessClient {
 
   // -- calls -----------------------------------------------------------------
 
-  /** Invoke one capability. A refusal comes back as `ok: false`, not as a thrown error. */
+  /**
+   * Invoke one capability. A refusal comes back as `ok: false`, not as a thrown error.
+   *
+   * A body that is not JSON is the one exception, and it is not a refusal: a daemon that
+   * has gone away answers through a proxy in HTML, or not at all. Parsing that and letting
+   * a `SyntaxError` out told the caller the JSON was malformed when what happened was that
+   * nothing answered, so the status becomes a `HarnessRequestError` the same way a route's
+   * refusal does.
+   */
   async invoke(name: CapabilityName, request: Json = {}): Promise<CapabilityResponse> {
     const path = `/capabilities/${name}`;
     const response = await this.http(`${this.baseUrl}${path}`, {
@@ -229,7 +362,12 @@ export class HarnessClient {
       headers: { ...this.headers(), 'Content-Type': 'application/json' },
       body: JSON.stringify(request ?? {}),
     });
-    return (await response.json()) as CapabilityResponse;
+    const body = await response.text();
+    try {
+      return JSON.parse(body) as CapabilityResponse;
+    } catch {
+      throw new HarnessRequestError(response.status, path, plainRefusal(body, response.status, path));
+    }
   }
 
   /** Invoke one capability and insist that it worked, for the callers that only have one path. */
@@ -1050,7 +1188,12 @@ export class HarnessClient {
    * because the run's events belong to the caller's lifecycle, not to the client's.
    */
   get stream(): { baseUrl: string; token: string | null; fetchImpl: typeof fetch } {
-    return { baseUrl: this.baseUrl, token: this.token, fetchImpl: this.http };
+    // The caller's own transport, not the reachability-reporting wrapper. An event stream
+    // is a long-lived connection the daemon is entitled to close, and a stream ending is
+    // routine; treating one as "the daemon is not answering" would put a notice on screen
+    // every time a run finished. Reachability is judged from request/response round trips,
+    // which either complete or do not.
+    return { baseUrl: this.baseUrl, token: this.token, fetchImpl: this.transport };
   }
 
   /**
@@ -1088,6 +1231,20 @@ export class HarnessClient {
     }
     return (await response.json()) as T;
   }
+}
+
+/**
+ * A non-JSON body, as a sentence to show a researcher — or the status, when it is not one.
+ *
+ * The daemon answers a route refusal in plain text (`server/app.py::_open_repo` sends "the
+ * workspace lock is held by another process"), and that sentence is the whole point of the
+ * message. Anything long or marked up is a proxy's error page for a process that is not
+ * there, and printing HTML at a researcher explains nothing.
+ */
+function plainRefusal(body: string, status: number, path: string): string {
+  const text = body.trim();
+  if (text.length > 0 && text.length <= 300 && !text.includes('<')) return text;
+  return `${status} on ${path}`;
 }
 
 /**

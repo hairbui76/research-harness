@@ -112,3 +112,30 @@
   flex-direction: column;
   gap: var(--rh-space-1);
 }
+
+/*
+ * A narrow centre pane.
+ *
+ * The composer's controls answer the pane they are in, not the window: with the session
+ * list and the inspector both open, a 1440px window can leave the composer 400px, and a
+ * viewport query would call that wide. `rh-centre` is declared by the workspace component
+ * (`design/src/workspace/ConversationWorkspace`), so the question asked here is the one
+ * that matters — how much room this composer actually has.
+ *
+ * Below it the model cluster stops sharing a line with what follows it and takes the width,
+ * so the picker and its effort level stay readable instead of being squeezed to their
+ * minimum, and the attachment tray's sentences wrap as sentences rather than as columns.
+ */
+@container rh-centre (max-width: 30rem) {
+  .rh-web-composer__model {
+    display: flex;
+    inline-size: 100%;
+  }
+
+  .rh-web-attachments__hint,
+  .rh-web-attachments__note,
+  .rh-web-attachments__unavailable {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

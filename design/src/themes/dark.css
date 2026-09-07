@@ -40,7 +40,6 @@
   --rh-text-muted: var(--rh-palette-warm-400);
   --rh-text-inverse: var(--rh-palette-warm-975);
   --rh-text-link: var(--rh-palette-warm-100);
-  --rh-text-on-accent: var(--rh-accent-fg);
 
   /* Reading-surface ink. `paper` is near-white in both themes, so it carries its own text
      tokens: the theme's primary/secondary/muted inks would be illegible on it. */

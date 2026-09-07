@@ -26,18 +26,19 @@
   border-block-start: var(--rh-border-width) solid var(--rh-border-subtle);
 }
 
-/* The kind is a word first and a glyph second, so it survives greyscale and a projector. */
+/*
+ * The kind is a word first and a glyph second, so it survives greyscale and a projector.
+ * It leads the sentence in the sentence's own case, tracking and size — a lead-in, not a
+ * kicker — and is told apart by weight and a quieter ink.
+ */
 .rh-change-list__kind {
   display: inline-flex;
   align-items: center;
   gap: var(--rh-space-1);
   flex: 0 0 auto;
-  inline-size: 7.5rem;
+  inline-size: 9rem;
   color: var(--rh-text-muted);
-  font-family: var(--rh-font-mono);
-  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .rh-change-list__what {
