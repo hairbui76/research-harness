@@ -11,11 +11,14 @@
  * (`api/client.test.ts`), so what is asserted here is that this view adds no prefix logic
  * of its own on top of it.
  */
-import { describe, expect, it } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CorpusPage, EvidencePage, WorkPage } from './Corpus';
 import { QuestionsPage } from './Questions';
 import { ProjectPathProvider } from '../app/projectPaths';
+import { daemonReachability } from '../api/client';
+import type { WorkSummary } from '../api/dto';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 import type { FakeDaemon } from '../test/harness';
 
@@ -219,9 +222,14 @@ describe('the corpus before, without, and after its read', () => {
     renderView(<CorpusPage />, { daemon: corpusDaemon(), route: '/corpus', path: '/corpus' });
 
     await waitFor(() => expect(screen.getByText(/works\./)).toBeInTheDocument());
+    // The count moved out of the description and into a live region beside the list. It
+    // had to: the find can now narrow the list, and a count that only says how many the
+    // daemon sent would be wrong the moment a researcher typed. The description is what
+    // the page is, which does not change while it loads or while it is narrowed.
     expect(
-      screen.getByText('1 works. The sources this project reads from, and the files kept for each.'),
+      screen.getByText('The sources this project reads from, and the files kept for each.'),
     ).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('1 works.');
     expect(screen.queryByText(/anchor replayed/)).not.toBeInTheDocument();
   });
 
@@ -293,5 +301,320 @@ describe('a work that is not in this corpus', () => {
     // A refusal is a refusal, not an absence: the page says which one it is.
     await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
     expect(screen.getByRole('heading', { level: 1, name: 'W9999' })).toBeInTheDocument();
+  });
+});
+
+
+/**
+ * A corpus far past anything a screen can hold.
+ *
+ * Shaped exactly like the daemon's own summary — the fixture is a real `work.list` row —
+ * so what the window mounts is the card the page really draws, nested file table and all.
+ */
+function manyWorks(count: number): WorkSummary[] {
+  return Array.from({ length: count }, (_unused, index) => {
+    const id = `W${String(index + 1).padStart(4, '0')}`;
+    return {
+      ...WORK,
+      id,
+      title: `Synthetic corpus study ${String(index + 1).padStart(4, '0')}`,
+      artifacts: WORK.artifacts.map((artifact) => ({ ...artifact, id: `A${id.slice(1)}-1` })),
+    } as WorkSummary;
+  });
+}
+
+const THOUSAND = manyWorks(1000);
+
+function largeCorpusDaemon() {
+  return fakeDaemon({
+    capabilities: { 'work.list': { count: THOUSAND.length, works: THOUSAND } },
+  });
+}
+
+/**
+ * A daemon that is not there at all: every request rejects the way `fetch` does when
+ * nothing is listening on the port.
+ *
+ * This is the shape of `ECONNREFUSED` in a browser — a rejected promise, not a status — and
+ * it is what the transport has to recognise, because a daemon that has gone away never gets
+ * as far as sending a refusal.
+ */
+function silentDaemon(): FakeDaemon {
+  const fetchImpl = async () => {
+    throw new TypeError('Failed to fetch');
+  };
+  return {
+    fetch: fetchImpl as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
+
+/** A daemon behind a proxy with nothing behind it. */
+function gatewayDaemon(status: number): FakeDaemon {
+  const fetchImpl = async () => new Response('<html>bad gateway</html>', { status });
+  return {
+    fetch: fetchImpl as unknown as typeof fetch,
+    calls: [],
+    capabilityCalls: () => [],
+  };
+}
+
+/**
+ * One daemon that answers, then stops, then answers again.
+ *
+ * `stop()` and `start()` are called from the test rather than from a timer, so the moment
+ * the daemon goes quiet is the moment the assertion is about.
+ */
+function flakyDaemon(works: WorkSummary[]) {
+  let live = true;
+  const inner = fakeDaemon({ capabilities: { 'work.list': { count: works.length, works } } });
+  const daemon: FakeDaemon = {
+    fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (!live) throw new TypeError('Failed to fetch');
+      return inner.fetch(input, init);
+    }) as unknown as typeof fetch,
+    calls: inner.calls,
+    capabilityCalls: inner.capabilityCalls,
+  };
+  return {
+    daemon,
+    stop: () => {
+      live = false;
+    },
+    start: () => {
+      live = true;
+    },
+  };
+}
+
+// The transport records one outage per window, so a case that took the daemon away has to
+// give it back before the next one runs.
+afterEach(() => daemonReachability.reset());
+
+/**
+ * The corpus past a few hundred works.
+ *
+ * `work.list` answers the whole corpus in one read and the daemon imposes no page size, so
+ * the only bound on what the page mounts is the one the page puts there. These assert that
+ * there is one, that the corpus is still whole underneath it, and that nothing a researcher
+ * could reach before is now out of reach.
+ */
+describe('a corpus of a thousand works', () => {
+  it('mounts a window of it, not all of it', async () => {
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    const list = screen.getByRole('list', { name: 'Works in the corpus' });
+    const mounted = within(list).getAllByRole('listitem');
+    expect(mounted.length).toBeGreaterThan(0);
+    // The window plus its overscan. The number is not the contract; that it is bounded, and
+    // bounded far below the corpus, is.
+    expect(mounted.length).toBeLessThan(40);
+    expect(screen.queryByText('Synthetic corpus study 0900')).not.toBeInTheDocument();
+  });
+
+  it('says how much of the corpus is on screen, and how much there is', async () => {
+    const list = THOUSAND;
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    const item = within(screen.getByRole('list', { name: 'Works in the corpus' })).getAllByRole(
+      'listitem',
+    )[0]!;
+    // Each item states where it sits in the whole corpus, so a screen reader is told the
+    // size of the list rather than the size of the window.
+    expect(item).toHaveAttribute('aria-setsize', String(list.length));
+    expect(item).toHaveAttribute('aria-posinset', '1');
+  });
+
+  it('reaches a work far down the corpus without scrolling to it', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    // Windowing costs the browser's own find-in-page, so the page carries a find of its
+    // own — over the whole corpus, not over the window.
+    await user.type(screen.getByRole('searchbox'), 'study 0987');
+    await waitFor(() =>
+      expect(screen.getByText('Synthetic corpus study 0987')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Showing 1 of 1000 works.');
+    expect(screen.getByRole('link', { name: 'W0987' })).toHaveAttribute('href', '/corpus/W0987');
+  });
+
+  it('says the find only hides, and offers the way back', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await user.type(screen.getByRole('searchbox'), 'nothing matches this');
+    await waitFor(() =>
+      expect(screen.getByText('No work matches this find')).toBeInTheDocument(),
+    );
+    expect(screen.getByText(/The find only hides/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Clear the find' }));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+  });
+
+  it('keeps the list one named, keyboard-reachable scroll region', async () => {
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    const list = screen.getByRole('list', { name: 'Works in the corpus' });
+    expect(list).toHaveAttribute('tabindex', '0');
+
+    // End reaches the end of the corpus from the keyboard, without a mouse and without a
+    // scrollbar: the last work in the corpus mounts.
+    fireEvent.keyDown(list, { key: 'End' });
+    await waitFor(() =>
+      expect(screen.getByText('Synthetic corpus study 1000')).toBeInTheDocument(),
+    );
+    expect(within(list).getAllByRole('listitem').length).toBeLessThan(40);
+
+    fireEvent.keyDown(list, { key: 'Home' });
+    await waitFor(() =>
+      expect(screen.getByText('Synthetic corpus study 0001')).toBeInTheDocument(),
+    );
+  });
+
+  it('draws each mounted work exactly as it drew it before', async () => {
+    renderView(<CorpusPage />, { daemon: largeCorpusDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    const first = within(screen.getByRole('list', { name: 'Works in the corpus' }))
+      .getAllByRole('listitem')[0]!;
+    // The card, its fields and its nested file table are the ones the page always drew; the
+    // window changed when they mount, not what they are.
+    expect(within(first).getByRole('heading', { name: 'Synthetic corpus study 0001' })).toBeInTheDocument();
+    expect(within(first).getByRole('link', { name: 'W0001' })).toBeInTheDocument();
+    expect(within(first).getByRole('table')).toBeInTheDocument();
+    expect(within(first).getByRole('columnheader', { name: 'Parsed' })).toBeInTheDocument();
+    expect(first.querySelector('[data-density="compact"]')).not.toBeNull();
+    expect(first.querySelector('.rh-web-table')).not.toBeNull();
+  });
+
+  it('has no automatically detectable accessibility violation', async () => {
+    const { container } = renderView(<CorpusPage />, {
+      daemon: largeCorpusDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1000 works.'));
+    await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * The corpus when the daemon stops answering.
+ *
+ * An outage is not a refusal. A refusal is the daemon speaking, and its answer replaces
+ * what came before; silence says nothing about the corpus, so the list a researcher was
+ * reading is still true of the last moment the daemon spoke. Throwing it away to show an
+ * empty screen loses a page for no gain.
+ */
+describe('the corpus while the daemon is silent', () => {
+  it('keeps the last corpus it was given, and says that is what it is', async () => {
+    const flaky = flakyDaemon(manyWorks(3));
+    renderView(<CorpusPage />, { daemon: flaky.daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3 works.'));
+
+    // The daemon goes away, and something asks it for something. The transport records the
+    // silence; the page keeps the list it was given and stops claiming it is live.
+    flaky.stop();
+    daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'The last corpus the daemon sent: 3 works. It has not answered since.',
+      ),
+    );
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(screen.getByText('Synthetic corpus study 0001')).toBeInTheDocument();
+  });
+
+  it('keeps the page frame: the heading, the description and the toolbar', async () => {
+    const flaky = flakyDaemon(manyWorks(3));
+    const { container } = renderView(<CorpusPage />, {
+      daemon: flaky.daemon,
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3 works.'));
+    flaky.stop();
+    daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(/has not answered since/),
+    );
+
+    // The frame is what says which screen this is. It survives, so the skip link still
+    // lands somewhere and the find still works over the list that is on screen.
+    expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument();
+    expect(
+      screen.getByText('The sources this project reads from, and the files kept for each.'),
+    ).toBeInTheDocument();
+    expect(container.querySelector('.rh-full-page__toolbar')).not.toBeNull();
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+  });
+
+  it('reads the corpus again by itself once the daemon answers', async () => {
+    const flaky = flakyDaemon(manyWorks(2));
+    renderView(<CorpusPage />, { daemon: flaky.daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('2 works.'));
+    const before = flaky.daemon.calls.length;
+    daemonReachability.unanswered('/capabilities/work.list', 'TypeError: Failed to fetch');
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(/has not answered since/),
+    );
+
+    daemonReachability.reset();
+    // No reload, no button: the page asks again because the daemon came back.
+    await waitFor(() => expect(flaky.daemon.calls.length).toBeGreaterThan(before));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('2 works.'));
+  });
+
+  it('still shows a refusal as a refusal, because a refusal is the daemon answering', async () => {
+    renderView(<CorpusPage />, { daemon: refusingDaemon('work.list') });
+
+    await waitFor(() => expect(screen.getByText(REFUSAL)).toBeInTheDocument());
+    expect(screen.queryByText(/has not answered since/)).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * What the transport notices.
+ *
+ * The whole offline state hangs off one judgement — did anything answer? — so the two
+ * shapes that mean "no" are asserted here rather than inferred from the screen.
+ */
+describe('what counts as the daemon not answering', () => {
+  it('counts a rejected fetch', async () => {
+    renderView(<CorpusPage />, { daemon: silentDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(daemonReachability.get()).not.toBeNull());
+    expect(daemonReachability.get()?.reason).toContain('Failed to fetch');
+  });
+
+  it.each([502, 503, 504])('counts a %i from whatever is in front of it', async (status) => {
+    renderView(<CorpusPage />, { daemon: gatewayDaemon(status), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(daemonReachability.get()).not.toBeNull());
+    expect(daemonReachability.get()?.reason).toContain(String(status));
+  });
+
+  it('does not count a 500: that is the daemon answering with a fault', async () => {
+    const daemon: FakeDaemon = {
+      fetch: (async () => new Response('{"detail":"boom"}', { status: 500 })) as unknown as typeof fetch,
+      calls: [],
+      capabilityCalls: () => [],
+    };
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument());
+    expect(daemonReachability.get()).toBeNull();
   });
 });

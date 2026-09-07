@@ -1,0 +1,47 @@
+/*
+ * Layout for the corpus list, and nothing else.
+ *
+ * The corpus is the one research page whose length nothing bounds: `work.list` answers the
+ * whole corpus in a single read, and a project of a thousand works used to mount a thousand
+ * cards — each with its own nested file table — before the first one could be read. So the
+ * list is windowed (`VirtualList`), and windowing needs exactly one thing from CSS that the
+ * page frame does not already give it: a height to window against.
+ *
+ * `FullPageWorkspace` is the scroller for a research page, and it stays the scroller here.
+ * The list takes the height the body has left and scrolls inside it, so the page does not
+ * also scroll: one scroller, in the same place a researcher already found it.
+ *
+ * Colour, spacing and type are the Design System's; `check-tokens.mjs` scans `web/src` and
+ * fails the lint on a literal.
+ */
+
+.rh-web-corpus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+  min-block-size: 0;
+  block-size: 100%;
+}
+
+.rh-web-corpus__list {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  /* The list is a window onto the page, not a panel: it takes the page's own surface. */
+  background: transparent;
+}
+
+/*
+ * One work, inside the window.
+ *
+ * The card is the same card the page has always drawn. What the window adds is the gap
+ * between two of them, which cannot be a margin: the item's measured height is what the
+ * list places the next one by, and a collapsing margin is not in it.
+ */
+.rh-web-corpus__list .rh-virtual-list__item {
+  padding-block-end: var(--rh-space-3);
+}
+
+/* The find field sits in the page toolbar and takes a readable share of it. */
+.rh-web-corpus__find {
+  inline-size: min(22rem, 100%);
+}
