@@ -123,6 +123,7 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
     return (
       <AsyncState
         kind="empty"
+        hideKind
         title="Nothing said yet"
         description="Ask a question below. Nothing you send becomes accepted state on its own."
       />

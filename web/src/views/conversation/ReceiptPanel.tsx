@@ -82,7 +82,7 @@ export function ReceiptPanel() {
       />
     );
   }
-  if (view === null) return <AsyncState kind="empty" compact title="No receipt open" />;
+  if (view === null) return <AsyncState kind="empty" compact hideKind title="No receipt open" />;
 
   const onOpen = (entity: EntityRefModel): void => openRef(entity);
 

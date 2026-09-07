@@ -1,5 +1,6 @@
 /**
- * The inspector's Conflicts tab, when the read behind it failed.
+ * The inspector's Conflicts tab, when the read behind it failed — and what its empty states
+ * print above their own sentence.
  *
  * Five of the six tabs fetch for themselves and already render a refusal. Conflicts does
  * not: it renders what `GET /overview` returned, so when that read failed it used to say
@@ -97,5 +98,15 @@ describe('the inspector’s conflicts tab', () => {
     await openConflicts();
 
     expect(screen.getByText('No open conflicts')).toBeInTheDocument();
+  });
+
+  it('says it once: no generic label above a title that already names the state', async () => {
+    const daemon = fakeDaemon({ gets: { '/overview': { ...FIXTURES.overview, conflicts: [] } } });
+    renderInspector(daemon);
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Conflicts/ })).toBeInTheDocument());
+    await openConflicts();
+
+    expect(screen.getByText('No open conflicts')).toBeInTheDocument();
+    expect(screen.queryByText('Nothing here yet')).not.toBeInTheDocument();
   });
 });

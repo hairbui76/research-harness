@@ -250,7 +250,7 @@ function EvidenceTab({ client, onOpen }: TabProps) {
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
   const evidence = state.data ?? [];
   if (evidence.length === 0) {
-    return <AsyncState kind="empty" compact title="No accepted evidence yet" />;
+    return <AsyncState kind="empty" compact hideKind title="No accepted evidence yet" />;
   }
   return (
     <ul className="rh-web-list rh-web-list--tight">
@@ -277,7 +277,7 @@ function ClaimsTab({ client, onOpen }: TabProps) {
   if (state.loading) return <AsyncState kind="loading" compact title="Reading claims" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
   const claims = state.data ?? [];
-  if (claims.length === 0) return <AsyncState kind="empty" compact title="No claims yet" />;
+  if (claims.length === 0) return <AsyncState kind="empty" compact hideKind title="No claims yet" />;
   return (
     <ul className="rh-web-list rh-web-list--tight">
       {claims.slice(0, 40).map((claim) => (
@@ -309,7 +309,7 @@ function ReviewTab({
   if (state.loading) return <AsyncState kind="loading" compact title="Reading the review queue" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
   const items = state.data?.items ?? [];
-  if (items.length === 0) return <AsyncState kind="empty" compact title="The queue is empty" />;
+  if (items.length === 0) return <AsyncState kind="empty" compact hideKind title="The queue is empty" />;
   return (
     <ul className="rh-web-list rh-web-list--tight">
       {items.slice(0, 40).map((item) => (
@@ -357,7 +357,7 @@ function ConflictsTab({
 }) {
   if (error) return <Failed error={error} retry={retry} />;
   const conflicts = overview?.conflicts ?? [];
-  if (conflicts.length === 0) return <AsyncState kind="empty" compact title="No open conflicts" />;
+  if (conflicts.length === 0) return <AsyncState kind="empty" compact hideKind title="No open conflicts" />;
   return (
     <ul className="rh-web-list rh-web-list--tight">
       {conflicts.map((conflict) => (
@@ -376,7 +376,7 @@ function StaleTab({ client, onOpen }: TabProps) {
   if (state.loading) return <AsyncState kind="loading" compact title="Reading the stale set" />;
   if (state.error) return <Failed error={state.error} retry={state.reload} />;
   const marks = state.data?.marks ?? [];
-  if (marks.length === 0) return <AsyncState kind="empty" compact title="Nothing is stale" />;
+  if (marks.length === 0) return <AsyncState kind="empty" compact hideKind title="Nothing is stale" />;
   return (
     <ul className="rh-web-list rh-web-list--tight">
       {marks.map((mark) => (
