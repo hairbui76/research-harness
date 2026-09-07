@@ -173,6 +173,116 @@ def stage_overview_project(root: Path) -> None:
     DependencyInvalidation().invalidate(repo, [evidence])
 
 
+def stage_rollout_project(root: Path) -> None:
+    """Fill a fresh workspace with the work the three rolled-out research pages lead with.
+
+    Each of Claims, Questions and Conflicts opens with what needs a researcher, so the
+    browser test needs one of each: a Claim asking for more of the scope ladder than its
+    evidence allows (Product 42 G's failure state), a Question nobody has answered, and two
+    open disagreements — one over a staged candidate, which is decided on the candidate's own
+    review screen, and one over the Claim, which is decided on the Claim's page. Everything
+    is written through the daemon's own services; nothing here reaches production code.
+    """
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.transitions import HUMAN_ACTOR
+    from research_harness.evidence.conflicts import ConflictKind, ConflictRecord, ConflictStore
+    from research_harness.projection.rebuild import rebuild_workspace
+    from research_harness.providers.models.cross_verify import ProviderPosition
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    stage_review_queue(root)
+    registry = build_default_registry()
+    human = Principal.human()
+
+    def call(capability: str, request: dict[str, object]) -> object:
+        return registry.invoke(
+            capability, open_context(root, HUMAN_ACTOR), request, principal=human
+        )
+
+    inbox = call("review.inbox", {})
+    dataset = next(item for item in inbox.items if item["field"] == "dataset")  # type: ignore[attr-defined]
+    metric = next(item for item in inbox.items if item["field"] == "metric_result")  # type: ignore[attr-defined]
+    accepted = call("review.accept", {"candidate_id": dataset["candidate_id"]})
+    evidence = str(accepted.evidence)  # type: ignore[attr-defined]
+    call(
+        "claim.create",
+        {
+            "claim": {
+                "statement": "Byte-level tokenization improves recall on encrypted traffic",
+                "type": "prevalence",
+                "semantics": {
+                    "subject": "byte-level tokenization",
+                    "predicate": "improves",
+                    "object": "recall",
+                },
+                "scope": {
+                    "level": "field_generalization",
+                    "corpus": "encrypted traffic classifiers",
+                },
+                # Asks for L3 on evidence audited at L0: the claim the Claims page leads with.
+                "assessment": {
+                    "requested_strength": "field_generalization",
+                    "allowed_strength": "individual",
+                },
+                "provenance": {"source": "human", "actor": HUMAN_ACTOR},
+            }
+        },
+    )
+    call(
+        "claim.relate",
+        {"claim_id": "C0001", "relation": {"evidence": evidence, "relation": "supports"}},
+    )
+    call(
+        "question.create",
+        {
+            "question": {
+                "id": "RQ0001",
+                "question": "Does byte-level tokenization survive re-encryption?",
+                "claims": ["C0001"],
+                "remaining_uncertainty": "no capture in the corpus re-encrypts a flow",
+                "provenance": {"source": "human", "actor": HUMAN_ACTOR},
+            }
+        },
+    )
+
+    repo = WorkspaceRepository.open(root)
+    store = ConflictStore(repo.layout.research_dir)
+    store.open_or_put(
+        ConflictRecord(
+            kind=ConflictKind.CANDIDATE_VS_ACCEPTED,
+            subject="C0001",
+            summary="the staged F1 differs from the accepted reading of Table 1",
+        )
+    )
+    store.open_or_put(
+        ConflictRecord(
+            kind=ConflictKind.PROVIDER_DISAGREEMENT,
+            subject=str(metric["candidate_id"]),
+            summary="two providers read metric_result differently",
+            differing_fields=("metric_result",),
+            positions=(
+                ProviderPosition(
+                    provider="scripted",
+                    model="model-x",
+                    fingerprint="a" * 64,
+                    decision={"value": "94.32", "unit": "percent"},
+                    rationale="the table reports it as a percentage",
+                ),
+                ProviderPosition(
+                    provider="scripted",
+                    model="model-y",
+                    fingerprint="b" * 64,
+                    decision={"value": "0.9432", "unit": "ratio"},
+                    rationale="the caption reports it as a ratio",
+                ),
+            ),
+        )
+    )
+    rebuild_workspace(repo)
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -250,6 +360,22 @@ def main() -> None:
                 "project_id": view.project_id,
                 "name": name,
                 "overview_url": f"/projects/{view.project_id}/overview",
+            }
+
+        @app.post("/__test__/rollout-project")
+        def rollout_project() -> dict[str, str]:
+            """A project the Claims, Questions and Conflicts pages all have work to show.
+
+            Each call builds its own project, so the two viewport runs never share one.
+            """
+            manager: ProjectManager = backend.state.manager
+            name = f"Rollout study {next(seeded)}"
+            view = manager.create(directory, name, ReviewPolicy.STRICT)
+            stage_rollout_project(Path(view.path))
+            return {
+                "project_id": view.project_id,
+                "name": name,
+                "workspace_url": f"/projects/{view.project_id}",
             }
 
         app.mount("/", backend)

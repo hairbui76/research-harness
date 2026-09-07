@@ -160,8 +160,8 @@ export function ClaimsPage() {
 
           <Panel title="Every claim">
             <p className="rh-text-secondary rh-web-claims__holdings">
-              All {counted(claims.length, 'claim')} this project has registered, each asking
-              for one rung of the scope ladder and allowed another.
+              This project has registered {counted(claims.length, 'claim')}: what each asks
+              for, beside what its evidence allows.
             </p>
             <DataTable
               label="Registered claims"

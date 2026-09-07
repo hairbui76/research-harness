@@ -22,8 +22,14 @@
   font-weight: var(--rh-type-h4-weight);
 }
 
-/* The records of a kind, indented under it by one space unit, as an attention group is. */
-.rh-web-conflicts__items {
+/*
+ * Indentation is written as `.rh-web-list.<name>` on purpose. `.rh-web-list` in the shared
+ * sheet sets `margin: 0`, the bundler emits that sheet after every view stylesheet, and
+ * `margin: 0` and `margin-inline-start` resolve to the same used value — so at equal
+ * specificity the shared rule wins and the indent silently disappears. Two classes settle
+ * it in the cascade rather than with `!important`.
+ */
+.rh-web-list.rh-web-conflicts__items {
   margin-inline-start: var(--rh-space-4);
 }
 

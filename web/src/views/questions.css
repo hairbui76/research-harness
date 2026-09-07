@@ -21,8 +21,14 @@
   font-weight: var(--rh-type-h4-weight);
 }
 
-/* The questions of a group, indented under it by one space unit. */
-.rh-web-questions__items {
+/*
+ * Indentation is written as `.rh-web-list.<name>` on purpose. `.rh-web-list` in the shared
+ * sheet sets `margin: 0`, the bundler emits that sheet after every view stylesheet, and
+ * `margin: 0` and `margin-inline-start` resolve to the same used value — so at equal
+ * specificity the shared rule wins and the indent silently disappears. Two classes settle
+ * it in the cascade rather than with `!important`.
+ */
+.rh-web-list.rh-web-questions__items {
   margin-inline-start: var(--rh-space-4);
 }
 
@@ -37,7 +43,8 @@
   max-inline-size: var(--rh-measure-prose);
 }
 
-/* The question itself is the subject of its row, and reads heavier than what follows it. */
-.rh-web-questions__question > span:first-child {
-  font-weight: var(--rh-type-h4-weight);
-}
+/*
+ * The question itself is *not* set heavier. The line above it already is — that is the
+ * group — and two weights stacked with nothing between them read as one block shouting
+ * twice. The question is separated from the sentence under it by the indent and by colour.
+ */

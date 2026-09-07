@@ -146,24 +146,36 @@ function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: Confli
           ? `Disagrees on: ${conflict.differing_fields.map(fieldLabel).join(', ')}`
           : 'The fields it disagrees on were not recorded'}
       </p>
-      <DataTable
-        label={`Positions in ${conflict.conflict_id}`}
-        head={
-          <tr>
-            <th scope="col">Position</th>
-            <th scope="col">Decision</th>
-            <th scope="col">Rationale</th>
-          </tr>
-        }
-      >
-        {conflict.positions.map((position) => (
-          <tr key={position.label}>
-            <th scope="row">{position.label}</th>
-            <td>{readable(position.decision)}</td>
-            <td>{position.rationale ?? '—'}</td>
-          </tr>
-        ))}
-      </DataTable>
+      {/*
+        The sides, compared. A table earns its place here and nowhere else on this page: N
+        answers read against the same three columns is the reading a table exists for. A
+        record that kept no positions gets the sentence instead — a header row with nothing
+        under it is a table pretending to hold a comparison nobody made.
+      */}
+      {conflict.positions.length > 0 ? (
+        <DataTable
+          label={`Positions in ${conflict.conflict_id}`}
+          head={
+            <tr>
+              <th scope="col">Position</th>
+              <th scope="col">Decision</th>
+              <th scope="col">Rationale</th>
+            </tr>
+          }
+        >
+          {conflict.positions.map((position) => (
+            <tr key={position.label}>
+              <th scope="row">{position.label}</th>
+              <td>{readable(position.decision)}</td>
+              <td>{position.rationale ?? '—'}</td>
+            </tr>
+          ))}
+        </DataTable>
+      ) : (
+        <p className="rh-text-secondary">
+          The record kept no side-by-side answers; what disagreed is in the sentence above.
+        </p>
+      )}
       <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
     </li>
   );

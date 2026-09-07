@@ -132,7 +132,7 @@ describe('the claim list', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('1 claim asks for more than its evidence allows')).toBeInTheDocument();
     expect(
-      screen.getByText(/All 1 claim this project has registered/),
+      screen.getByText(/This project has registered 1 claim/),
     ).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/\d+ registered\./);
   });
