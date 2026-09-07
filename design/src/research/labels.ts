@@ -282,11 +282,28 @@ export const DECISION_STATUS_META: Vocabulary = {
   superseded: { label: 'Superseded' },
 };
 
+/**
+ * Where a work stands on the way from a discovery result to a corpus member (Product 14).
+ *
+ * It was the one vocabulary in the product with no meanings written down, so a thousand-row
+ * corpus separated these four by tint alone. Each sentence restates the pipeline Product 14
+ * draws — discovery result, candidate work, screening, source acquisition, included corpus —
+ * and decides nothing about any work.
+ */
 export const SCREENING_STATE_META: Vocabulary = {
-  discovered: { label: 'Discovered' },
-  screened: { label: 'Screened' },
-  included: { label: 'Included' },
-  excluded: { label: 'Excluded' },
+  discovered: {
+    label: 'Discovered',
+    description: 'A discovery run returned it. A discovery result is not a corpus member.',
+  },
+  screened: {
+    label: 'Screened',
+    description: 'It has been through screening, the step between a candidate work and acquiring its source.',
+  },
+  included: { label: 'Included', description: 'It is a member of this project’s research corpus.' },
+  excluded: {
+    label: 'Excluded',
+    description: 'Screening ruled it out, and the reason is recorded with it.',
+  },
 };
 
 export const STALE_STATE_META: Vocabulary = {

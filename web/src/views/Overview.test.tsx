@@ -80,6 +80,23 @@ describe('the overview', () => {
     );
   });
 
+  it('says one badge vocabulary in the attention card, and the rest in words', async () => {
+    /*
+     * The card carried three: the described status badges, a warning "waiting" chip and a
+     * neutral "clear" one. The daemon's own label already states the count — "2 review
+     * items", "0 conflicts" — and the card is titled "Waiting for a decision", so both
+     * chips repeated something already on screen. What a zero needs is a sentence.
+     */
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Waiting for a decision')).toBeInTheDocument());
+    const attention = container.querySelector('.rh-web-attention') as HTMLElement;
+    expect(within(attention).queryByText('waiting')).toBeNull();
+    expect(within(attention).queryByText('clear')).toBeNull();
+    expect(attention.querySelectorAll('.rh-badge')).toHaveLength(0);
+    expect(within(attention).getAllByText('— nothing waiting here').length).toBeGreaterThan(0);
+  });
+
   it('leads with the group that has work in it', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 

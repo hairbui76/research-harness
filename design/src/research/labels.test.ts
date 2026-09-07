@@ -22,6 +22,7 @@ import {
   RESEARCH_VOCABULARIES,
   REVIEW_CATEGORY_META,
   REVIEW_TIER_META,
+  SCREENING_STATE_META,
   VERIFICATION_VERDICT_META,
   humaniseResearchTokens,
   humaniseTerm,
@@ -216,6 +217,15 @@ describe('the words themselves', () => {
   it('reads an evidence type as the statement it carries', () => {
     expect(termLabel(EVIDENCE_TYPE_META, 'experimental_result')).toBe('Experimental result');
     expect(termLabel(EVIDENCE_TYPE_META, 'bibliographic_metadata')).toBe('Bibliographic metadata');
+  });
+
+  it('says where a screening state sits between a discovery result and the corpus', () => {
+    // The one vocabulary that stated no meanings, so a thousand-row corpus separated its
+    // four values by tint alone. Each sentence restates Product 14's own pipeline.
+    expect(termDescription(SCREENING_STATE_META, 'discovered')).toMatch(/not a corpus member/);
+    expect(termDescription(SCREENING_STATE_META, 'screened')).toMatch(/screening/);
+    expect(termDescription(SCREENING_STATE_META, 'included')).toMatch(/research corpus/);
+    expect(termDescription(SCREENING_STATE_META, 'excluded')).toMatch(/reason is recorded/);
   });
 
   it('reads a claim relation as the edge it is', () => {

@@ -125,6 +125,12 @@ describe('the inspector with nothing followed', () => {
     expect(
       screen.getByText('Open a reference or inspect a message to see what the graph joins it to.'),
     ).toBeInTheDocument();
+    // And says it once: the receipt's own "No receipt open" card under it was the same
+    // emptiness stacked twice in one tab.
+    expect(screen.queryByText('No receipt open')).toBeNull();
+    expect(screen.getAllByText(/^No|^Nothing/).map((node) => node.textContent)).toEqual([
+      'Nothing selected',
+    ]);
   });
 });
 

@@ -21,7 +21,6 @@
 import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Badge,
   Button,
   ChangeList,
   FullPageWorkspace,
@@ -239,10 +238,13 @@ export function OverviewPage() {
 }
 
 /**
- * One surface that is waiting: the daemon's own count in words, its state, and its first
- * few items. `waiting` and `clear` are application feedback about a queue, not scientific
- * status — a candidate nobody has read yet is not "accepted", so neither badge borrows a
- * scientific colour.
+ * One surface that is waiting: the daemon's own count in words, and its first few items.
+ *
+ * The count is in the label the daemon composed — "2 review items", "0 conflicts" — so a
+ * `waiting` chip beside it repeated the card's own title and a `clear` chip repeated the
+ * zero. Two badge vocabularies for something already said in words, in a card that also
+ * carries the described status badges; the one that says something the label does not is
+ * the sentence a group with nothing in it gets.
  */
 function WaitingGroup({ group }: { group: AttentionGroup }) {
   const { href } = useProjectPaths();
@@ -250,14 +252,8 @@ function WaitingGroup({ group }: { group: AttentionGroup }) {
     <li data-work={group.count > 0 ? '' : undefined}>
       <p className="rh-web-row">
         <Link to={href(group.route)}>{group.label}</Link>
-        {group.count > 0 ? (
-          <Badge tone="warning" size="sm" icon="inbox">
-            waiting
-          </Badge>
-        ) : (
-          <Badge tone="neutral" size="sm" icon="circle-check">
-            clear
-          </Badge>
+        {group.count > 0 ? null : (
+          <span className="rh-text-secondary">— nothing waiting here</span>
         )}
       </p>
       {group.items.length > 0 ? (

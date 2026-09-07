@@ -309,7 +309,10 @@ function WorkCard({
   href: (path: string) => string;
 }) {
   return (
-    <Panel title={work.title} action={<StatusBadge status={work.screening} />}>
+    <Panel
+      title={work.title}
+      action={<StatusBadge status={work.screening} vocabulary="screeningState" />}
+    >
       <Fields>
         <Field label="Id">
           <ObjectRef id={work.id} kind="work" to={href(`/corpus/${work.id}`)} />
@@ -387,7 +390,18 @@ export function WorkPage() {
           ? `${work.id} · ${work.authors.join(', ') || 'no authors recorded'}`
           : 'One work in the corpus, with its files and what has been accepted from it.'
       }
-      {...(work ? { toolbar: <StatusBadge status={work.screening} size="md" /> } : {})}
+      {...(work
+        ? {
+            toolbar: (
+              <StatusBadge
+                status={work.screening}
+                vocabulary="screeningState"
+                size="md"
+                describe
+              />
+            ),
+          }
+        : {})}
     >
       {state.loading ? (
         <Loading what={`work ${workId}`} shape="cards" />
@@ -410,7 +424,9 @@ export function WorkPage() {
               <Field label="Authors">{work.authors.join(', ') || '—'}</Field>
               <Field label="Year">{work.year ?? '—'}</Field>
               <Field label="Venue">{work.venue ?? '—'}</Field>
-              <Field label="Screening">{work.screening}</Field>
+              {/* The badge in the toolbar is this work's screening state, with its
+                  meaning attached; a second copy of the word in the identity list would
+                  say the same thing twice. */}
               <Field label="Identifiers">
                 <code>{JSON.stringify(work.identifiers)}</code>
               </Field>

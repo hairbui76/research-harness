@@ -321,6 +321,12 @@ const TONES: Record<string, BadgeProps['tone']> = {
 };
 
 const ICONS: Record<string, IconName> = {
+  // Screening (Product 14): where a work stands between a discovery result and the corpus.
+  // These four used to separate by tint alone, in a list that can run to a thousand rows.
+  discovered: 'search',
+  screened: 'filter',
+  included: 'library',
+  excluded: 'circle-x',
   conflict: 'alert-triangle',
   unsupported: 'circle-x',
   error: 'alert-circle',

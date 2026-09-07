@@ -53,6 +53,7 @@ export function InspectorPane() {
     selectMessage,
     navigateTo,
     openRef,
+    receipt,
   } = useConversation();
 
   const messages = transcript.transcript?.messages ?? [];
@@ -112,7 +113,11 @@ export function InspectorPane() {
             <GraphContextPanel enabled={tab === 'context'} />
             {/* Attachments (task W2): the fourth place `Save to corpus` is offered. */}
             <SelectedAttachment />
-            <ReceiptPanel />
+            {/* One absence, said once. With nothing followed and no receipt open, the graph
+                pane's card already says what this tab is for and what to do about it; a
+                second card under it saying no receipt is open was the same emptiness
+                stacked twice. */}
+            {selection || receipt ? <ReceiptPanel /> : null}
           </Stack>
         ),
         evidence: (
