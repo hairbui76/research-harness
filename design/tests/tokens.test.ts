@@ -503,6 +503,36 @@ describe('border widths', () => {
 });
 
 /**
+ * An icon is a registry glyph, never a character.
+ *
+ * `Icon` is the single choke point for iconography, so sizing, colour and the
+ * decorative/meaningful distinction stay in one place. A tick typed into a stylesheet
+ * escapes all three: it takes the reader's font rather than the system's 2px stroke, it
+ * cannot be sized with the rest of the set, and it is text, so it joins the accessible name
+ * of whatever it decorates. The combobox marked its chosen option with `content: ' ✓'`; the
+ * mark is `<Icon name="check">` now, and this is what keeps the next one out.
+ */
+describe('an icon is drawn, not typed', () => {
+  it('sets no glyph as generated content in any stylesheet', () => {
+    const glyphs: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of cssFilesUnder(root)) {
+        const css = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+        for (const [index, line] of css.split('\n').entries()) {
+          const declaration = /^\s*content\s*:\s*(.*)$/.exec(line);
+          if (declaration === null) continue;
+          // Anything outside printable ASCII in a `content` string is a drawn mark.
+          if (/[^\x20-\x7e]/.test(declaration[1]!)) {
+            glyphs.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+          }
+        }
+      }
+    }
+    expect(glyphs).toEqual([]);
+  });
+});
+
+/**
  * The kicker ban, held mechanically.
  *
  * Every state component names its kind in words, which is right: colour is never the only

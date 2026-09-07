@@ -7,6 +7,7 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
+import { Icon } from '../Icon';
 import { useControllableState } from '../../hooks/useControllableState';
 import { useDismiss } from '../../hooks/useDismiss';
 import { useId } from '../../hooks/useId';
@@ -292,16 +293,25 @@ function ComboboxInner<T>(
                   if (item.disabled !== true) select(item);
                 }}
               >
-                {renderItem ? (
-                  renderItem(item, { active, selected })
-                ) : (
-                  <>
-                    <span className="rh-combobox__option-label">{item.label}</span>
-                    {item.description ? (
-                      <span className="rh-combobox__option-description">{item.description}</span>
-                    ) : null}
-                  </>
-                )}
+                <span className="rh-combobox__option-content">
+                  {renderItem ? (
+                    renderItem(item, { active, selected })
+                  ) : (
+                    <>
+                      <span className="rh-combobox__option-label">{item.label}</span>
+                      {item.description ? (
+                        <span className="rh-combobox__option-description">{item.description}</span>
+                      ) : null}
+                    </>
+                  )}
+                </span>
+                {/* The mark for what is chosen, from the registry rather than as a glyph in
+                    the text. `aria-selected` already carries it to a screen reader, so the
+                    icon is decorative — the same division `Menu` draws between an item's
+                    icon and its label. */}
+                {selected ? (
+                  <Icon name="check" size={14} className="rh-combobox__option-check" />
+                ) : null}
               </div>
             );
           });

@@ -44,8 +44,8 @@
 
 .rh-combobox__option {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: var(--rh-space-2);
   min-height: var(--rh-density-row);
   padding: var(--rh-space-2) var(--rh-density-pad);
   border-radius: var(--rh-radius-nav);
@@ -71,8 +71,18 @@
   background: var(--rh-surface-selected);
 }
 
-.rh-combobox__option[aria-selected='true'] .rh-combobox__option-label::after {
-  content: ' ✓';
+/* The label and its second line, so the check sits beside the pair rather than under one. */
+.rh-combobox__option-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* What is chosen, drawn by `Icon` from the registry; the row keeps its width for it. */
+.rh-combobox__option-check {
+  flex: none;
   color: var(--rh-text-secondary);
 }
 
