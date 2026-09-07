@@ -15,6 +15,10 @@ describe('navigationForProject', () => {
     // Identity, not just equality: the rail memoises on it, and a fresh array every render
     // would rebuild the whole rail on a host that has no projects at all.
     expect(navigationForProject(null)).toBe(NAVIGATION);
+    // Taxonomy moved above Synthesis on 2026-09-08 (roadmap 3L, option A): a group is a run
+    // of consecutive entries, Taxonomy belongs to "The record" and Synthesis to "Outputs",
+    // so the two had to swap for either name to describe a contiguous run. Nothing else
+    // about either entry changed — same label, route, icon and shortcut.
     expect(navigationForProject(null).map((entry) => entry.to)).toEqual([
       '/',
       OVERVIEW_PATH,
@@ -24,8 +28,8 @@ describe('navigationForProject', () => {
       '/corpus',
       '/claims',
       '/questions',
-      '/synthesis',
       '/taxonomy',
+      '/synthesis',
       '/manuscript',
     ]);
   });
@@ -48,8 +52,40 @@ describe('navigationForProject', () => {
     expect(rail.map((entry) => entry.label)).toEqual(NAVIGATION.map((entry) => entry.label));
     expect(rail.map((entry) => entry.icon)).toEqual(NAVIGATION.map((entry) => entry.icon));
     expect(rail.map((entry) => entry.end)).toEqual(NAVIGATION.map((entry) => entry.end));
+    expect(rail.map((entry) => entry.group)).toEqual(NAVIGATION.map((entry) => entry.group));
     // An entry that matched no extra paths does not acquire an empty list of them.
     expect(rail.every((entry) => entry.alsoMatches === undefined)).toBe(true);
+  });
+
+  it('files the eight named pages under the rail’s three groups', () => {
+    // Roadmap 3L, option A. The rail draws a group as a run of consecutive entries, so the
+    // grouping lives in this order and nowhere else; Conversation and Overview are the ways
+    // into a project rather than a category, and carry no group at all.
+    expect(NAVIGATION.map((entry) => [entry.id, entry.group])).toEqual([
+      ['conversation', undefined],
+      ['overview', undefined],
+      ['review', 'Waiting'],
+      ['conflicts', 'Waiting'],
+      ['stale', 'Waiting'],
+      ['corpus', 'The record'],
+      ['claims', 'The record'],
+      ['questions', 'The record'],
+      ['taxonomy', 'The record'],
+      ['synthesis', 'Outputs'],
+      ['manuscript', 'Outputs'],
+    ]);
+  });
+
+  it('carries the group into a project-scoped rail', () => {
+    // Without this the multi-project host would draw eleven flat destinations again, which
+    // is the shape option A was written to end.
+    const rail = navigationForProject('prj_abc');
+    expect(rail.filter((entry) => entry.group === 'Waiting').map((entry) => entry.to)).toEqual([
+      '/projects/prj_abc/review',
+      '/projects/prj_abc/conflicts',
+      '/projects/prj_abc/stale',
+    ]);
+    expect(rail.find((entry) => entry.id === 'manuscript')?.group).toBe('Outputs');
   });
 
   it('prefixes every extra path an entry counts as active for', () => {

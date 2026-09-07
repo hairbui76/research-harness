@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
@@ -31,6 +31,41 @@ const items: RailItem[] = [
   { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library' },
   { id: 'claims', label: 'Claims', to: '/claims', icon: 'bookmark', active: true },
   { id: 'review', label: 'Review inbox', icon: 'inbox', count: 4 },
+];
+
+/**
+ * The rail the cockpit builds: two ways in, then three named runs of destinations.
+ *
+ * The names are the proposal's own (`docs/plans/2026-09-07-rail-grouping-proposal.md`,
+ * option A), and the shape is the one property the component has to hold — a group is a run
+ * of consecutive items sharing a word, not a field the caller nests by hand.
+ */
+const groupedItems: RailItem[] = [
+  { id: 'conversation', label: 'Conversation', to: '/', icon: 'messages-square' },
+  { id: 'overview', label: 'Overview', to: '/overview', icon: 'microscope' },
+  { id: 'review', label: 'Review inbox', to: '/review', icon: 'inbox', count: 12, group: 'Waiting' },
+  {
+    id: 'conflicts',
+    label: 'Conflicts',
+    to: '/conflicts',
+    icon: 'alert-triangle',
+    count: 3,
+    group: 'Waiting',
+  },
+  { id: 'stale', label: 'Stale', to: '/stale', icon: 'clock', count: 5, group: 'Waiting' },
+  { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library', group: 'The record' },
+  { id: 'claims', label: 'Claims', to: '/claims', icon: 'scale', group: 'The record' },
+  { id: 'questions', label: 'Questions', to: '/questions', icon: 'circle-help', group: 'The record' },
+  { id: 'taxonomy', label: 'Taxonomy', to: '/taxonomy', icon: 'git-branch', group: 'The record' },
+  { id: 'synthesis', label: 'Synthesis', to: '/synthesis', icon: 'layers', group: 'Outputs' },
+  {
+    id: 'manuscript',
+    label: 'Manuscript',
+    to: '/manuscript',
+    icon: 'file-code',
+    count: 2,
+    group: 'Outputs',
+  },
 ];
 
 describe('ProjectRail', () => {
@@ -250,6 +285,90 @@ describe('ProjectRail', () => {
     expect(container.querySelector('button.rh-project-rail__project')).toBeNull();
   });
 
+  it('names each run of grouped destinations and leaves the ungrouped ones flat', () => {
+    render(<ProjectRail project={project} items={groupedItems} onNavigate={vi.fn()} />);
+
+    // Each group is a list of its own, named by the heading a researcher can read.
+    for (const [name, labels] of [
+      ['Waiting', ['Review inbox', 'Conflicts', 'Stale']],
+      ['The record', ['Corpus', 'Claims', 'Questions', 'Taxonomy']],
+      ['Outputs', ['Synthesis', 'Manuscript']],
+    ] as const) {
+      const group = screen.getByRole('list', { name });
+      expect(screen.getByText(name)).toBeInTheDocument();
+      expect(
+        within(group)
+          .getAllByRole('link')
+          .map((link) => link.textContent?.replace(/\d+ \w[\w ]*items/, '').trim()),
+      ).toEqual([...labels]);
+    }
+
+    // Conversation and Overview keep no heading: they are the ways in, not a category.
+    const nav = screen.getByRole('list', { name: 'Research' });
+    expect(
+      Array.from(nav.children)
+        .filter((child) => child.querySelector(':scope > .rh-project-rail__nav-item') !== null)
+        .map((child) => child.textContent),
+    ).toEqual(['Conversation', 'Overview']);
+  });
+
+  it('keeps every destination’s name and count under a group', () => {
+    render(<ProjectRail project={project} items={groupedItems} onNavigate={vi.fn()} />);
+
+    expect(screen.getAllByRole('link')).toHaveLength(groupedItems.length);
+    expect(
+      screen.getByRole('link', { name: 'Review inbox 12 Review inbox items' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Manuscript 2 Manuscript items' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Taxonomy' })).toHaveAttribute('href', '/taxonomy');
+  });
+
+  it('adds no tab stop for a heading', () => {
+    const { container } = render(
+      <ProjectRail project={project} items={groupedItems} onNavigate={vi.fn()} />,
+    );
+
+    // A heading is text. The only things Tab reaches in this rail are the eleven links and
+    // the collapse control — the drawer path of `browser-tests/app.spec.ts` counts on it.
+    expect(container.querySelectorAll('a, button, [tabindex]')).toHaveLength(
+      groupedItems.length + 1,
+    );
+    expect(screen.queryByRole('button', { name: 'Waiting' })).not.toBeInTheDocument();
+    expect(screen.getByText('Waiting').tagName).toBe('P');
+  });
+
+  it('keeps a group’s name when the rail collapses, without printing the heading', () => {
+    render(
+      <ProjectRail
+        project={project}
+        items={groupedItems}
+        onNavigate={vi.fn()}
+        defaultCollapsed
+      />,
+    );
+
+    // The strip is icons wide; the word survives as the list’s accessible name.
+    expect(screen.getByRole('list', { name: 'Waiting' })).toBeInTheDocument();
+    expect(screen.getByText('Waiting')).toHaveClass('rh-visually-hidden');
+  });
+
+  it('has no axe violations with grouped destinations', async () => {
+    const { container } = render(
+      <ProjectRail
+        project={project}
+        projects={projects}
+        items={groupedItems}
+        onNavigate={vi.fn()}
+        onNewSession={vi.fn()}
+        onOpenSettings={vi.fn()}
+        providerStatus={{ label: 'Local Ollama', state: 'ok' }}
+      />,
+    );
+    await expectNoAxeViolations(container);
+  });
+
   it('has no axe violations', async () => {
     const { container } = render(
       <ProjectRail
@@ -307,6 +426,18 @@ describeThemeDensitySnapshots('ProjectRail multi-project', () => (
     onOpenProjectHome={() => undefined}
     onProjectAction={() => undefined}
     items={items}
+    onNavigate={() => undefined}
+    onNewSession={() => undefined}
+    onOpenSettings={() => undefined}
+    providerStatus={{ label: 'Local Ollama', state: 'ok' }}
+  />
+));
+
+
+describeThemeDensitySnapshots('ProjectRail grouped', () => (
+  <ProjectRail
+    project={project}
+    items={groupedItems}
     onNavigate={() => undefined}
     onNewSession={() => undefined}
     onOpenSettings={() => undefined}

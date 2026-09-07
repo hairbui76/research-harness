@@ -190,6 +190,9 @@ function Shell() {
         label: entry.label,
         to: entry.to,
         icon: entry.icon,
+        // The rail's heading for this entry, straight off the table (roadmap 3L). The rail
+        // cuts the runs itself, so the order of this list is the whole grouping.
+        ...(entry.group === undefined ? {} : { group: entry.group }),
         ...(group && group.count > 0 ? { count: group.count } : {}),
         ...(isActive(entry, location.pathname) ? { active: true } : {}),
       };

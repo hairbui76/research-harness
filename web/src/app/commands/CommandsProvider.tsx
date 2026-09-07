@@ -55,6 +55,8 @@ export interface CommandDestination {
   id: string;
   label: string;
   to?: string | undefined;
+  /** The rail's heading for it, so the palette files a page where the navigation does. */
+  group?: string | undefined;
 }
 
 export interface CommandsApi {
@@ -151,7 +153,9 @@ export function CommandsProvider({ destinations = [], children }: CommandsProvid
       .map<Command>((destination) => ({
         id: `go:${destination.id}`,
         label: destination.label,
-        group: 'Go to',
+        // The rail's own heading, and "Go to" for a destination that carries none — the two
+        // surfaces must not call the same page by two different names (roadmap 3L).
+        group: destination.group ?? 'Go to',
         run: () => navigate(destination.to),
       }));
     // The help sheet as a command, so `?` is a convenience rather than the only way in:

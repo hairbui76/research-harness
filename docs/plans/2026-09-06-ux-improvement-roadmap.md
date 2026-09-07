@@ -168,3 +168,19 @@ check reported. Neither of the last two runs without the researcher's yes.
   box, not a CSS cause, and the composer's egress line already takes secondary ink.
   Open for the researcher: the rail grouping (3L), `impeccable document` for DESIGN.md, and
   `impeccable init` for the PRODUCT.md schema; the manuscript route at 768px is logged.
+- 2026-09-08 (wave 5, 3L): the researcher answered the rail grouping proposal — option A,
+  its three names kept, built now — and it is built as proposed. `RailItem` takes an
+  optional `group`; `ProjectRail` draws one run of consecutive items per name under a
+  visible heading that is the run's accessible name (a paragraph referenced by
+  `aria-labelledby` on the run's own list), sentence case at label size in the muted ink of
+  the palette's "Go to" heading, hidden to the eye but not to a screen reader when the rail
+  collapses to icons. `NAVIGATION` carries the names — Waiting (Review inbox, Conflicts,
+  Stale), The record (Corpus, Claims, Questions, Taxonomy), Outputs (Synthesis, Manuscript)
+  — `navigationForProject` passes them through, and the palette files a destination under
+  the rail's heading rather than one flat "Go to", so the two surfaces cannot call a page by
+  two names. Conversation and Overview stay unheaded, the ways in rather than a category.
+  Nothing else about a destination moved: same labels, routes, icons, counts, shortcuts and
+  `end` flags, and no group adds a focusable element. The one deliberate change is order —
+  Taxonomy now precedes Synthesis, because a group is a run of consecutive entries and
+  Taxonomy belongs to the record while Synthesis is an output; the two assertions that
+  encoded the old order say why they changed.

@@ -17,6 +17,14 @@ export interface RailItem {
   /** Review inbox size, conflict count, stale count. Rendered as text beside the label. */
   count?: number;
   active?: boolean;
+  /**
+   * The heading this destination is listed under.
+   *
+   * A group is a run of consecutive items sharing the name, so the caller keeps one flat
+   * list in the order it wants read and the rail draws the headings. Omit it and the item
+   * is listed on its own, which is what the ways into a project are.
+   */
+  group?: string;
 }
 
 /**

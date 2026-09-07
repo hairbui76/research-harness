@@ -31,6 +31,24 @@ const PROJECT_ACTIONS: readonly { action: ProjectAction; label: string; icon: Ic
 const BLOCKED: readonly ProjectAvailability[] = ['unavailable', 'invalid', 'incompatible'];
 
 /**
+ * The destinations, cut into the runs the rail draws.
+ *
+ * A group is a run of *consecutive* items naming it, so the caller hands over one flat list
+ * in the order it wants read and never nests anything. The same rule the command palette
+ * groups by, for the same reason: the order is the caller's and is never rearranged, so a
+ * name used twice in two places stays two runs rather than silently teleporting an item.
+ */
+function railRuns(items: readonly RailItem[]): { group?: string; items: RailItem[] }[] {
+  const runs: { group?: string; items: RailItem[] }[] = [];
+  for (const item of items) {
+    const last = runs.at(-1);
+    if (last && last.group === item.group) last.items.push(item);
+    else runs.push({ ...(item.group === undefined ? {} : { group: item.group }), items: [item] });
+  }
+  return runs;
+}
+
+/**
  * What the rail says about a project besides its name: why it cannot be opened, and how
  * much of the researcher's work is still running in it.
  */
@@ -59,7 +77,10 @@ export interface ProjectRailProps extends HTMLAttributes<HTMLElement> {
   newSessionLabel?: string;
   /** The session history — `SessionList` in the Web client. */
   sessionList?: ReactNode;
-  /** Corpus, Claims, Questions, Synthesis, Taxonomy, Manuscript, Review, Conflicts, Stale. */
+  /**
+   * The research destinations, in the order they are read. Consecutive items naming the
+   * same `group` are drawn as one run under that heading; the rest stand on their own.
+   */
   items?: readonly RailItem[];
   onNavigate?: (item: RailItem) => void;
   onOpenSettings?: () => void;
@@ -139,6 +160,47 @@ export const ProjectRail = forwardRef<HTMLElement, ProjectRailProps>(function Pr
     openStatus.length > 0
       ? `Project: ${project.name}. ${openStatus.join('. ')}. Switch project`
       : `Project: ${project.name}. Switch project`;
+
+  /** One destination, identical whether or not a heading stands over it. */
+  function renderNavItem(item: RailItem): ReactElement {
+    const content = (
+      <>
+        <Icon name={item.icon} size={16} />
+        {isCollapsed ? (
+          <span className="rh-visually-hidden">{item.label}</span>
+        ) : (
+          <span className="rh-project-rail__nav-label">{item.label}</span>
+        )}
+        {item.count === undefined ? null : (
+          <span className="rh-project-rail__nav-count">
+            {item.count}
+            <span className="rh-visually-hidden">{` ${item.label} items`}</span>
+          </span>
+        )}
+      </>
+    );
+    const shared = {
+      className: 'rh-project-rail__nav-item',
+      'aria-current': item.active ? ('page' as const) : undefined,
+      'data-active': item.active ? '' : undefined,
+      onClick: () => onNavigate?.(item),
+    };
+    return (
+      <li key={item.id}>
+        <MaybeTooltip collapsed={isCollapsed} content={item.label}>
+          {item.to === undefined ? (
+            <button type="button" {...shared}>
+              {content}
+            </button>
+          ) : (
+            <a href={item.to} {...shared}>
+              {content}
+            </a>
+          )}
+        </MaybeTooltip>
+      </li>
+    );
+  }
 
   const openStatusNode =
     openStatus.length > 0 ? (
@@ -313,45 +375,35 @@ export const ProjectRail = forwardRef<HTMLElement, ProjectRailProps>(function Pr
 
       {items !== undefined && items.length > 0 ? (
         <ul className="rh-project-rail__nav" aria-label={navLabel}>
-          {items.map((item) => {
-            const content = (
-              <>
-                <Icon name={item.icon} size={16} />
-                {isCollapsed ? (
-                  <span className="rh-visually-hidden">{item.label}</span>
-                ) : (
-                  <span className="rh-project-rail__nav-label">{item.label}</span>
-                )}
-                {item.count === undefined ? null : (
-                  <span className="rh-project-rail__nav-count">
-                    {item.count}
-                    <span className="rh-visually-hidden">{` ${item.label} items`}</span>
-                  </span>
-                )}
-              </>
-            );
-            const shared = {
-              className: 'rh-project-rail__nav-item',
-              'aria-current': item.active ? ('page' as const) : undefined,
-              'data-active': item.active ? '' : undefined,
-              onClick: () => onNavigate?.(item),
-            };
-            return (
-              <li key={item.id}>
-                <MaybeTooltip collapsed={isCollapsed} content={item.label}>
-                  {item.to === undefined ? (
-                    <button type="button" {...shared}>
-                      {content}
-                    </button>
-                  ) : (
-                    <a href={item.to} {...shared}>
-                      {content}
-                    </a>
+          {railRuns(items).map((run, index) =>
+            run.group === undefined ? (
+              run.items.map(renderNavItem)
+            ) : (
+              <li key={`${run.group}-${index}`} className="rh-project-rail__nav-group">
+                {/*
+                 * The heading is text and the list's accessible name at once: a researcher
+                 * reads it, a screen reader announces it on entering the run, and Tab never
+                 * lands on it. Collapsed to icons there is no room to print it, so the word
+                 * stays in the accessible name alone.
+                 */}
+                <p
+                  id={`${baseId}-group-${index}`}
+                  className={cx(
+                    'rh-project-rail__nav-heading',
+                    isCollapsed && 'rh-visually-hidden',
                   )}
-                </MaybeTooltip>
+                >
+                  {run.group}
+                </p>
+                <ul
+                  className="rh-project-rail__nav-items"
+                  aria-labelledby={`${baseId}-group-${index}`}
+                >
+                  {run.items.map(renderNavItem)}
+                </ul>
               </li>
-            );
-          })}
+            ),
+          )}
         </ul>
       ) : null}
 
