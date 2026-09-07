@@ -146,7 +146,42 @@ describe('Project Home', () => {
     expect(within(row).getByText('Unavailable')).toBeInTheDocument();
     expect(within(row).getByRole('button', { name: 'Open' })).toBeDisabled();
     expect(within(row).getByText(/is not readable from here/)).toBeInTheDocument();
-    expect(within(row).getByRole('button', { name: 'Locate' })).toBeInTheDocument();
+    // The rail's verb, not a second one for the same act.
+    expect(within(row).getByRole('button', { name: 'Locate folder' })).toBeInTheDocument();
+  });
+
+  /*
+   * One vocabulary for the lifecycle.
+   *
+   * The rail offers these four in a "Project actions" menu; this screen used to offer an
+   * overlapping subset as flat buttons, in another order, under other verbs. A researcher
+   * who learns them in one place must recognise them in the other, so the set, the order,
+   * the words and the affordance are the rail's.
+   */
+  it('offers the rail\u2019s project actions, in the rail\u2019s words and order', async () => {
+    const user = userEvent.setup();
+    setup({ projects: [AVAILABLE] });
+
+    const row = rows()[0] as HTMLElement;
+    await user.click(within(row).getByRole('button', { name: 'Project actions' }));
+
+    expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
+      'Show in file manager',
+      'Locate folder',
+      'Rename',
+      'Forget project',
+    ]);
+  });
+
+  it('keeps one visible action per row: the one that opens the workspace', () => {
+    setup({ projects: [AVAILABLE, BUSY] });
+
+    for (const row of rows()) {
+      expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
+        'Open',
+        'Project actions',
+      ]);
+    }
   });
 
   it.each([
@@ -161,7 +196,9 @@ describe('Project Home', () => {
     expect(within(row).getByText(label)).toBeInTheDocument();
     expect(within(row).getByRole('button', { name: 'Open' })).toBeDisabled();
     expect(within(row).getByText('research.yaml does not parse.')).toBeInTheDocument();
-    expect(within(row).queryByRole('button', { name: 'Locate' })).not.toBeInTheDocument();
+    // Locating helps a folder that moved, not one whose contents the host rejected: the
+    // action stays in the menu rather than being promoted beside Open.
+    expect(within(row).queryByRole('button', { name: 'Locate folder' })).not.toBeInTheDocument();
   });
 
   it('opens a project at its own URL', async () => {
@@ -177,7 +214,8 @@ describe('Project Home', () => {
     const user = userEvent.setup();
     const { spies } = setup({ projects: [AVAILABLE] });
 
-    await user.click(screen.getByRole('button', { name: 'Show in file manager' }));
+    await user.click(screen.getByRole('button', { name: 'Project actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Show in file manager' }));
 
     await waitFor(() => expect(spies.revealProject).toHaveBeenCalledWith('prj_abc'));
   });

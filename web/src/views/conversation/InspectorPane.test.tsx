@@ -110,3 +110,35 @@ describe('the inspector’s conflicts tab', () => {
     expect(screen.queryByText('Nothing here yet')).not.toBeInTheDocument();
   });
 });
+
+/*
+ * Six tabs measuring about 734px live in a pane that is about 352px wide, so two of them —
+ * Conflicts and Stale, the two that say something is wrong — used to be off the end of the
+ * strip with nothing on screen admitting they existed. The strip is a scroller now, and the
+ * contract this file can check without a browser is the one that matters most: every tab is
+ * in the document, in the daemon's order, and the arrow keys walk all six of them.
+ * `browser-tests/layout.spec.ts` checks that each one is actually scrolled into view.
+ */
+describe('the inspector’s tab strip', () => {
+  const LABELS = ['Context', 'Evidence', 'Claims', 'Review inbox', 'Conflicts', 'Stale'];
+
+  it('carries all six tabs, and the arrow keys reach every one of them', async () => {
+    const user = userEvent.setup();
+    renderInspector(fakeDaemon());
+    await waitFor(() => expect(screen.getAllByRole('tab')).toHaveLength(6));
+
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.map((tab) => tab.textContent?.replace(/\d+.*$/, '').trim())).toEqual(LABELS);
+
+    (tabs[0] as HTMLElement).focus();
+    for (let index = 1; index < tabs.length; index += 1) {
+      await user.keyboard('{ArrowRight}');
+      expect(tabs[index]).toHaveFocus();
+    }
+
+    // The strip is one row that scrolls, not a row that clips.
+    const list = screen.getByRole('tablist');
+    expect(list.parentElement).toHaveClass('rh-tabs__strip');
+    expect(list).toHaveAttribute('data-overflow', 'scroll');
+  });
+});

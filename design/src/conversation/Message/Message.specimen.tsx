@@ -6,6 +6,7 @@ import {
   SAMPLE_STREAMING_MESSAGE,
   SAMPLE_USER_MESSAGE,
 } from '../samples';
+import { Button } from '../../primitives/Button';
 import { Message } from './Message';
 
 export const title = 'Message';
@@ -30,6 +31,39 @@ export const specimens: Array<{ name: string; render: () => ReactNode }> = [
           onPromote={noop}
         />
       </div>
+    ),
+  },
+  {
+    name: 'One toolbar: a host\u2019s own controls, promotion, and an overflow',
+    render: () => (
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        actions={
+          <Button size="sm" variant="ghost" iconStart="crosshair" onClick={noop}>
+            Inspect
+          </Button>
+        }
+        onCopy={noop}
+        onRetry={noop}
+        onOpenReceipt={noop}
+        onPromote={noop}
+      />
+    ),
+  },
+  {
+    name: 'A failed turn keeps its retry on the row, whatever the host folded',
+    render: () => (
+      <Message
+        message={SAMPLE_FAILED_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={noop}
+        onRetry={noop}
+        onOpenReceipt={noop}
+        onPromote={noop}
+      />
     ),
   },
   {

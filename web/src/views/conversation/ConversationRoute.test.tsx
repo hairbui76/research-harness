@@ -416,6 +416,39 @@ describe('reopening a session', () => {
 
 /* -- §10.2 / §10.3 / §10.6 the receipt ------------------------------------ */
 
+describe('the action row of a turn', () => {
+  /*
+   * The transcript adds Inspect, a corpus save per attachment and attempt navigation to a
+   * row that already carried copy, retry, the receipt and promotion — eight controls
+   * beside one paragraph. The row now reads as one toolbar: the act that leads somewhere
+   * stays on the page, the rest are one keystroke away in a named overflow, and none of it
+   * waits for a hover.
+   */
+  it('shows the act that leads somewhere and folds the rest into one overflow', async () => {
+    renderConversation({ daemon: fakeDaemon({ capabilities: answers() }) });
+    await transcriptReady();
+
+    const row = screen.getByRole('group', { name: 'Actions for M0042' });
+    expect(
+      within(row)
+        .getAllByRole('button')
+        .map((button) => button.getAttribute('aria-label') ?? button.textContent),
+    ).toEqual(['Inspect', 'Promote this message', 'More actions']);
+  });
+});
+
+/**
+ * Open the `Context used` receipt for the one assistant turn in the fixture.
+ *
+ * The turn's row keeps promotion visible and folds copy, "ask again" and the receipt into
+ * one overflow, so the receipt is two keystrokes away rather than one — still on the row,
+ * still in the tab order, never behind a hover.
+ */
+async function openReceipt(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  await user.click(screen.getByRole('button', { name: 'More actions' }));
+  await user.click(await screen.findByRole('menuitem', { name: 'Context used (CP0007)' }));
+}
+
 describe('Context used', () => {
   it('lists the accepted evidence and the prior-session excerpt that were sent', async () => {
     const daemon = fakeDaemon({ capabilities: answers() });
@@ -423,7 +456,7 @@ describe('Context used', () => {
     renderConversation({ daemon });
     await transcriptReady();
 
-    await user.click(screen.getByRole('button', { name: 'Context used (CP0007)' }));
+    await openReceipt(user);
 
     const inspector = await screen.findByRole('region', { name: 'Research inspector' });
     await within(inspector).findByText('Context used');
@@ -444,7 +477,7 @@ describe('Context used', () => {
     renderConversation({ daemon });
     await transcriptReady();
 
-    await user.click(screen.getByRole('button', { name: 'Context used (CP0007)' }));
+    await openReceipt(user);
     const inspector = await screen.findByRole('region', { name: 'Research inspector' });
 
     await within(inspector).findByText('Privacy policy');
@@ -463,7 +496,7 @@ describe('Context used', () => {
     renderConversation({ daemon });
     await transcriptReady();
 
-    await user.click(screen.getByRole('button', { name: 'Context used (CP0007)' }));
+    await openReceipt(user);
     const inspector = await screen.findByRole('region', { name: 'Research inspector' });
 
     await within(inspector).findByText('Accepted state was used');
@@ -806,7 +839,7 @@ describe('sending', () => {
     renderConversation({ daemon: fakeDaemon({ capabilities }) });
     await transcriptReady();
 
-    await user.click(screen.getByRole('button', { name: 'Context used (CP0007)' }));
+    await openReceipt(user);
     const inspector = await screen.findByRole('region', { name: 'Research inspector' });
     await within(inspector).findByText('Receipt unavailable');
   });

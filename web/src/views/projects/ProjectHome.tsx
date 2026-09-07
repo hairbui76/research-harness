@@ -23,10 +23,12 @@ import {
   Button,
   Card,
   ErrorNotice,
+  Icon,
+  Menu,
   PROJECT_AVAILABILITY_META,
   formatTimestamp,
 } from '@research-harness/design';
-import type { BadgeTone } from '@research-harness/design';
+import type { BadgeTone, IconName, ProjectAction } from '@research-harness/design';
 import type { ProjectAvailability, ProjectView } from '../../api/projects';
 import { APP_TOKEN_MISSING_EXPLANATION, useHost } from '../../app/host';
 import { projectHref } from '../../app/projectPaths';
@@ -36,6 +38,22 @@ import './projects.css';
 
 /** The availabilities a researcher may open a workspace in. A lock is not a wall. */
 const OPENABLE: readonly ProjectAvailability[] = ['available', 'busy'];
+
+/**
+ * The lifecycle actions, in the rail's order and the rail's words.
+ *
+ * The rail keeps these four behind one "Project actions" menu; this screen used to spread
+ * an overlapping subset across five flat buttons, in another order, under shorter verbs.
+ * A researcher should not have to learn the vocabulary twice, so this list mirrors
+ * `PROJECT_ACTIONS` in the Design System's `ProjectRail` exactly, and `browser-tests/
+ * layout.spec.ts` compares the two on screen so the copies cannot drift apart.
+ */
+const PROJECT_ACTION_ITEMS: readonly { action: ProjectAction; label: string; icon: IconName }[] = [
+  { action: 'reveal', label: 'Show in file manager', icon: 'folder-open' },
+  { action: 'locate', label: 'Locate folder', icon: 'search' },
+  { action: 'rename', label: 'Rename', icon: 'pen-line' },
+  { action: 'forget', label: 'Forget project', icon: 'trash-2' },
+];
 
 /** What each availability is called on this screen. The rail's `null` means "available". */
 export function availabilityLabel(availability: ProjectAvailability): string {
@@ -198,6 +216,12 @@ function ProjectRow({
   const lastOpened = project.last_opened_at
     ? `Last opened ${formatTimestamp(project.last_opened_at)}`
     : 'Never opened';
+  const perform: Record<ProjectAction, () => void> = {
+    reveal: onReveal,
+    locate: onLocate,
+    rename: onRename,
+    forget: onForget,
+  };
 
   return (
     <Card as="li" className="rh-projects__card" padding="md">
@@ -228,18 +252,35 @@ function ProjectRow({
           <Button variant="primary" disabled={!openable} onClick={onOpen}>
             Open
           </Button>
+          {/*
+            * The one action promoted out of the menu, and only where it is the repair.
+            * A folder that moved is the single failure a researcher can fix from this
+            * screen, so on an unavailable row Locate stands beside a disabled Open rather
+            * than behind a menu; it keeps the menu's own words, and stays in the menu too.
+            */}
           {project.availability === 'unavailable' ? (
-            <Button onClick={onLocate}>Locate</Button>
+            <Button iconStart="search" onClick={onLocate}>
+              Locate folder
+            </Button>
           ) : null}
-          <Button variant="ghost" onClick={onRename}>
-            Rename
-          </Button>
-          <Button variant="ghost" onClick={onReveal}>
-            Show in file manager
-          </Button>
-          <Button variant="ghost" onClick={onForget}>
-            Forget
-          </Button>
+          <Menu placement="bottom" align="end">
+            <Menu.Trigger asChild>
+              <Button variant="ghost" iconStart="more-horizontal">
+                Project actions
+              </Button>
+            </Menu.Trigger>
+            <Menu.Content aria-label={`Actions for ${project.display_name}`}>
+              {PROJECT_ACTION_ITEMS.map(({ action, label, icon }) => (
+                <Menu.Item
+                  key={action}
+                  icon={<Icon name={icon} size={14} />}
+                  onSelect={() => perform[action]()}
+                >
+                  {label}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu>
         </div>
       </div>
     </Card>
