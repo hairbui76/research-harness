@@ -98,3 +98,15 @@ check reported. Neither of the last two runs without the researcher's yes.
 ## Status log
 
 - 2026-09-06: critique recorded (20/40); wave 1 dispatched as four agents.
+- 2026-09-07: wave 1 integrated on `main`. All four agents' branches merged; the full gate
+  passed twice (before and after the finish review); the Impeccable detector reports nothing
+  on `web/src` or `design/src`. The finish review's eight fixes landed in one batch: the
+  candidate's span no longer wears the accepted tint, toasts sit top-right off the decision
+  controls and only writes carry the success tone, the inbox never re-ranks the daemon's
+  order, single-key shortcuts have an off switch, no kicker labels remain, batch accept sits
+  below the queue, the review screen at 768px scrolls as one page, and the inbox empties
+  follow the shared pattern. Two environment defects were fixed on the way: `core.hooksPath`
+  held an absolute path the hook installer refused, and two CLI help tests depended on the
+  caller's shell not forcing colour. Wave 2 started with 2F and 2I; 2E and 2G follow now;
+  2H (axe rules, narrow tests, container queries, virtualisation, offline, dead tokens) runs
+  after those merge because it touches every test file.
