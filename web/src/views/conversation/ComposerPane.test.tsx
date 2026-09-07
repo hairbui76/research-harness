@@ -54,10 +54,15 @@ function answers(extra: Answers = {}): Answers {
   };
 }
 
-function renderConversation(options: { daemon: FakeDaemon; session: string }) {
+function renderConversation(options: {
+  daemon: FakeDaemon;
+  session: string;
+  /** `null` is a window that may read and not write, the way the route is told apart. */
+  token?: string | null;
+}) {
   const client = new HarnessClient({
     baseUrl: 'http://daemon.test',
-    token: 'local-token',
+    token: options.token === undefined ? 'local-token' : options.token,
     fetchImpl: options.daemon.fetch,
   });
   return render(
@@ -316,6 +321,30 @@ describe('the composer after the disclosure', () => {
     expect(
       await screen.findByText('Sends to codex · gpt-5.5 — leaves this machine'),
     ).toBeInTheDocument();
+  });
+
+  it('follows the per-message model a read-only window may still pick', async () => {
+    // The record is bound to a runtime and this window may not change that. What it may
+    // still do is choose where *this* message goes, so the line reads the selection rather
+    // than the binding — otherwise it would name a destination the message is not using.
+    const asHost = { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' };
+    const daemon = fakeDaemon({ gets: { '/overview': asHost }, capabilities: answers() });
+    const user = userEvent.setup();
+    renderConversation({ daemon, session: RUNTIME, token: null });
+    await transcriptReady();
+
+    await screen.findByText(
+      'Sends to Codex CLI · gpt-5.5 — leaves this machine for chatgpt.com',
+    );
+    const menu = await openMenu(user);
+    await user.click(within(menu).getByRole('menuitem', { name: /^Local small/ }));
+
+    await screen.findByText('Sends to Local small — stays on this machine');
+    // Nothing durable moved; only this message's destination did.
+    expect(daemon.capabilityCalls().some((call) => call.name === 'session.configure')).toBe(
+      false,
+    );
+    expect(screen.getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
   });
 
   it('has no automatically detectable violation with the line on screen', async () => {
