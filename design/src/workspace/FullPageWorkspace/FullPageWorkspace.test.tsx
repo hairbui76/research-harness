@@ -7,7 +7,7 @@ import { FullPageWorkspace } from './FullPageWorkspace';
 describe('FullPageWorkspace', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
-    document.documentElement.style.removeProperty('--rh-page-header-height');
+    document.documentElement.style.removeProperty('--rh-page-header-bottom');
   });
 
   it('makes the title the page heading and names the region with it', () => {
@@ -72,11 +72,15 @@ describe('FullPageWorkspace', () => {
     expect(container.querySelector('.rh-full-page__content')).not.toHaveAttribute('aria-busy');
   });
 
-  it('publishes its header height, so a fixed overlay can sit under it', () => {
-    // jsdom has no `ResizeObserver` and no layout engine, so both are supplied: the height
-    // is whatever the observed element reports, and the point of the test is that the frame
+  it('publishes where its header ends, so a fixed overlay can start there', () => {
+    // jsdom has no `ResizeObserver` and no layout engine, so both are supplied: the edge is
+    // whatever the observed element reports, and the point of the test is that the frame
     // publishes it on the root and takes it back down again. The toast viewport is the
     // reason — it is portalled outside this frame and cannot read a value scoped to it.
+    //
+    // The *bottom* edge, not the height: a research page stacks the shell's bar and the
+    // project's breadcrumb above this header, and an overlay offset by heights it happens
+    // to know about lands on the one it does not.
     const observed: Element[] = [];
     vi.stubGlobal(
       'ResizeObserver',
@@ -89,15 +93,16 @@ describe('FullPageWorkspace', () => {
     );
     const root = document.documentElement;
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      bottom: 178,
       height: 96,
     } as DOMRect);
 
     const { container, unmount } = render(<FullPageWorkspace title="Corpus">rows</FullPageWorkspace>);
-    expect(root.style.getPropertyValue('--rh-page-header-height')).toBe('96px');
+    expect(root.style.getPropertyValue('--rh-page-header-bottom')).toBe('178px');
     expect(observed).toEqual([container.querySelector('.rh-full-page__header')]);
 
     unmount();
-    expect(root.style.getPropertyValue('--rh-page-header-height')).toBe('');
+    expect(root.style.getPropertyValue('--rh-page-header-bottom')).toBe('');
   });
 
   it('has no axe violations', async () => {

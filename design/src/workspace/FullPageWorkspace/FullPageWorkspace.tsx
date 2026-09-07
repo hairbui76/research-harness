@@ -4,17 +4,23 @@ import { cx } from '../../utils/cx';
 import { useId } from '../../hooks/useId';
 
 /**
- * The sticky header's own height, published on the root so a fixed overlay can sit under it.
+ * Where the sticky header ends, in the window, published so a fixed overlay can start there.
  *
  * The same problem `--rh-app-shell-bar-height` solves, one level in: the toast viewport is
- * portalled outside this frame, so it cannot read a value scoped to it, and at a narrow
- * width the top of the window is not empty chrome — it is the page's `h1` and the sentence
- * under it. Unlike the shell's bar this height is not a sum of tokens (a title wraps, a
- * toolbar wraps under it), so it is measured. Where there is no layout engine and no
- * `ResizeObserver` — jsdom, SSR — nothing is published and the overlay falls back to
- * clearing the shell's bar alone.
+ * portalled outside this frame, so it cannot read a value scoped to it, and the top of the
+ * window is not empty chrome — it is the page's `h1`, the sentence under it and the toolbar
+ * beside them, which is content a researcher is reading rather than content they have read.
+ *
+ * The *bottom edge*, not the height. Between the shell's bar and this header sits whatever
+ * the application put there — the project's breadcrumb, on every research page — and an
+ * overlay offset by two known heights would still land on the third. A viewport-relative
+ * bottom is the whole answer whatever is stacked above it, and the header is sticky, so the
+ * number does not move while the page scrolls.
+ *
+ * Where there is no layout engine and no `ResizeObserver` — jsdom, SSR — nothing is
+ * published and the overlay falls back to clearing the shell's bar alone.
  */
-const PAGE_HEADER_HEIGHT = '--rh-page-header-height';
+const PAGE_HEADER_BOTTOM = '--rh-page-header-bottom';
 
 export interface FullPageWorkspaceProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   /** The page's `h1`. Rich content is allowed, so this is not the DOM `title` attribute. */
@@ -75,20 +81,31 @@ export const FullPageWorkspace = forwardRef<HTMLElement, FullPageWorkspaceProps>
 
     useLayoutEffect(() => {
       const node = headerRef.current;
+      const view = node?.ownerDocument.defaultView;
       const root = node?.ownerDocument.documentElement;
-      if (!node || !root) return;
+      if (!node || !root || !view) return;
+      let published = '';
       const publish = (): void => {
-        root.style.setProperty(PAGE_HEADER_HEIGHT, `${node.getBoundingClientRect().height}px`);
+        const value = `${Math.max(0, Math.round(node.getBoundingClientRect().bottom))}px`;
+        if (value === published) return;
+        published = value;
+        root.style.setProperty(PAGE_HEADER_BOTTOM, value);
       };
       publish();
-      if (typeof ResizeObserver === 'undefined') {
-        return () => root.style.removeProperty(PAGE_HEADER_HEIGHT);
-      }
-      const observer = new ResizeObserver(publish);
-      observer.observe(node);
+      // Anything that moves the header's bottom edge: its own content reflowing, the window
+      // changing shape, and — for a header sticky inside a scroller that is itself inside a
+      // scrolled page — a scroll anywhere above it. The write is skipped when the value has
+      // not changed, so the scroll listener costs a rect read.
+      view.addEventListener('resize', publish);
+      view.addEventListener('scroll', publish, true);
+      const observer =
+        typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(publish);
+      observer?.observe(node);
       return () => {
-        observer.disconnect();
-        root.style.removeProperty(PAGE_HEADER_HEIGHT);
+        view.removeEventListener('resize', publish);
+        view.removeEventListener('scroll', publish, true);
+        observer?.disconnect();
+        root.style.removeProperty(PAGE_HEADER_BOTTOM);
       };
     }, []);
 
