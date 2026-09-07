@@ -86,6 +86,25 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   expect(errors).toEqual([]);
 });
 
+/**
+ * Put every scroller back where a researcher starts reading.
+ *
+ * Below 1100px the two review panes stack, and the page workspace — not the document — is
+ * what scrolls. A decision is taken at the bottom of that stack, so a capture made straight
+ * afterwards prints a screen nobody ever sees: the proposal clipped under the sticky header,
+ * the source pane above the fold, and blank canvas below. The source is reachable the whole
+ * time; the capture simply has to start from the top, and the assertion below is what says
+ * so rather than the screenshot.
+ */
+async function toTop(page: import('@playwright/test').Page): Promise<void> {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    for (const node of Array.from(document.querySelectorAll('*'))) {
+      if (node instanceof HTMLElement && node.scrollTop > 0) node.scrollTop = 0;
+    }
+  });
+}
+
 test('deciding a candidate offers the next one in the queue’s own order', async ({ page, request }, info) => {
   await seedQueue(page, request);
 
@@ -97,7 +116,16 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
   await page.getByLabel('Why this is being put aside').fill('waiting for the appendix');
   await page.getByRole('button', { name: 'Defer', exact: true }).nth(1).click();
   await expect(page.getByText('Candidate deferred.').first()).toBeVisible();
+  await toTop(page);
   await page.screenshot({ path: info.outputPath('review-decided.png'), fullPage: true });
+
+  // Source beside decision holds at both widths: the page the span was read off, the
+  // section it sits in, and the exact text are all reachable without leaving the screen.
+  const rendered = page.getByRole('img', { name: /^page 4 of / });
+  await rendered.scrollIntoViewIfNeeded();
+  await expect(rendered).toBeVisible();
+  await expect(page.getByText('4 Results', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Source text' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Next: method_summary · W0001' }).click();
   await expect(page.getByRole('heading', { name: 'method_summary · W0001', level: 1 })).toBeVisible();

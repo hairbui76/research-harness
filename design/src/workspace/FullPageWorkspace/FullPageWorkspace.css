@@ -1,4 +1,13 @@
+/*
+ * `position: relative` is load-bearing, not decoration. This is the scroll container a
+ * research page lives in, and `overflow` alone does not make it the containing block for
+ * an absolutely positioned descendant. Without it, every visually hidden label inside a
+ * tall page resolves against the document instead, and its static position — two thousand
+ * pixels down a stacked review screen — stretches the document that far with nothing in
+ * it, giving the window a second scrollbar that scrolls into blank canvas.
+ */
 .rh-full-page {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;

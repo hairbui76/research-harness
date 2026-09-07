@@ -1,6 +1,9 @@
 .rh-toast-viewport {
   position: fixed;
-  z-index: 80;
+  /* The token the layer was named for. A raw 80 sat under `--rh-z-sticky`, which never
+     showed while the viewport was at the bottom of the window and hid it behind the page
+     header the moment it moved to the top. */
+  z-index: var(--rh-z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--rh-space-3);
