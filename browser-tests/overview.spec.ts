@@ -32,6 +32,35 @@ async function bareNumbers(page: import('@playwright/test').Page): Promise<strin
   });
 }
 
+/**
+ * The whole page, not the part that happens to be on screen.
+ *
+ * A research page is its own scroll container: `.rh-full-page` is `overflow: auto` at the
+ * height of the pane, so the document is exactly one viewport tall and `fullPage` captures
+ * only the first screenful — the seeded Overview's captures stopped at the first claim
+ * health line, with the open questions and the colophon missing from the record. An element
+ * screenshot does not help either, because that element's box *is* the visible one.
+ *
+ * Growing the viewport to the page's own scroll height puts all of it on one screen for the
+ * capture, and the viewport is restored afterwards so nothing measured later sees a
+ * different layout.
+ */
+async function captureWholePage(
+  page: import('@playwright/test').Page,
+  path: string,
+): Promise<void> {
+  const viewport = page.viewportSize()!;
+  const tall = await page
+    .locator('.rh-full-page')
+    .evaluate((node) => node.scrollHeight - node.clientHeight);
+  await page.setViewportSize({
+    width: viewport.width,
+    height: Math.min(viewport.height + Math.ceil(Math.max(tall, 0)) + 16, 8000),
+  });
+  await page.screenshot({ path, fullPage: true });
+  await page.setViewportSize(viewport);
+}
+
 async function auditPage(page: import('@playwright/test').Page, name: string): Promise<void> {
   expect(await axeViolations(page), `${name} must have no accessibility violations`).toEqual([]);
   const fits = await page.evaluate(
@@ -81,7 +110,12 @@ test('the overview leads with what is waiting, and states what the project holds
   // Every group has something to say, and each says it in words.
   await expect(page.getByRole('link', { name: '2 review items' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Gone stale' })).toBeVisible();
-  await expect(page.getByText(/upstream E0001 changed/)).toBeVisible();
+  // The stale object is named by what it is, and so is the evidence that moved under it.
+  await expect(
+    page.getByText(
+      /upstream evidence “dataset · Deep Representations for Encrypted Network Traffic” changed/,
+    ),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Since your last session' })).toBeVisible();
   await expect(page.getByText('accepted methodology decision D0001')).toBeVisible();
   await expect(page.getByText(/changes in the last seven days\./)).toBeVisible();
@@ -118,7 +152,7 @@ test('the overview leads with what is waiting, and states what the project holds
 
   expect(await bareNumbers(page), 'no number stands on its own').toEqual([]);
   await auditPage(page, 'the overview');
-  await page.screenshot({ path: info.outputPath('overview.png'), fullPage: true });
+  await captureWholePage(page, info.outputPath('overview.png'));
   expect(errors).toEqual([]);
 });
 
@@ -169,6 +203,6 @@ test('every group of a new project teaches what it is for and offers one next ac
 
   expect(await bareNumbers(page), 'no number stands on its own').toEqual([]);
   await auditPage(page, 'the overview of a new project');
-  await page.screenshot({ path: info.outputPath('overview-new-project.png'), fullPage: true });
+  await captureWholePage(page, info.outputPath('overview-new-project.png'));
   expect(errors).toEqual([]);
 });
