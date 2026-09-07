@@ -12,10 +12,16 @@
   pointer-events: none;
 }
 
-/* Below the app shell's own bar, so a notification never covers the title bar's controls
-   — and, on a wide window where there is no bar, it still clears the top edge. */
+/*
+ * Below the app shell's own bar, so a notification never covers the title bar's controls —
+ * and, on a wide window where there is no bar, it still clears the top edge. Below the
+ * page's own header too, wherever one is mounted: the `h1`, the sentence under it and the
+ * toolbar beside them are content a researcher is reading, not chrome. The frame publishes
+ * that header's bottom edge in window coordinates, so this clears whatever is stacked above
+ * it — on a research page, the project's breadcrumb sits between the two.
+ */
 .rh-toast-viewport[data-placement^='top'] {
-  top: var(--rh-app-shell-bar-height, 0px);
+  top: max(var(--rh-app-shell-bar-height, 0px), var(--rh-page-header-bottom, 0px));
 }
 
 .rh-toast-viewport[data-placement^='bottom'] {
@@ -37,26 +43,16 @@
 }
 
 /*
- * At a narrow width the top corner is not empty chrome.
+ * At a narrow width a 26rem card in the corner is most of the row it lands on, so it takes
+ * the width instead and reads as the strip it has become.
  *
- * On a desktop window the page's header runs the full width and the top right is canvas, so
- * a notification there covers nothing. At 768px the same corner is the page's own
- * breadcrumb, its `h1` and the sentence under it — and a toast landing on "Nothing here is
- * accepted state." hides a sentence the researcher is reading rather than one they have
- * already read. So the viewport clears the page header as well as the shell's bar, and
- * spans the width instead of hanging in a corner of it.
- *
- * It stays at the top: the bottom of a narrow review screen is wherever the decision
- * controls happen to have been scrolled to, and covering those is the defect wave one
- * moved the viewport away from.
+ * It stays at the top at every width: the bottom of a narrow review screen is wherever the
+ * decision controls happen to have been scrolled to, and covering those is the defect wave
+ * one moved the viewport away from.
  */
 @media (max-width: 768px) {
   .rh-toast-viewport {
     width: 100%;
-  }
-
-  .rh-toast-viewport[data-placement^='top'] {
-    top: calc(var(--rh-app-shell-bar-height, 0px) + var(--rh-page-header-height, 0px));
   }
 }
 

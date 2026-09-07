@@ -517,18 +517,22 @@ describe('the tab strip’s overflow fade', () => {
  * top — the bottom of a narrow review screen is wherever the decision controls happen to
  * have been scrolled to.
  */
-describe('the toast viewport at a narrow width', () => {
+describe('the toast viewport', () => {
   const css = read('primitives/Toast/Toast.css');
 
-  it('clears the shell bar and the page header, and spans the width', () => {
+  it('starts below the shell bar and below the page header, at every width', () => {
+    const rule = /\.rh-toast-viewport\[data-placement\^='top'\]\s*\{([^}]*)\}/.exec(css);
+    expect(rule, 'Toast.css declares no top-placement rule').not.toBeNull();
+    expect(rule![1]).toContain('--rh-app-shell-bar-height');
+    expect(rule![1]).toContain('--rh-page-header-bottom');
+  });
+
+  it('takes the width at a narrow one, and still stays at the top', () => {
     const narrow = /@media \(max-width: 768px\)\s*\{([\s\S]*?)\n\}/.exec(css);
     expect(narrow, 'Toast.css declares no narrow-width rule').not.toBeNull();
-    const rules = narrow![1]!;
-    expect(rules).toContain('--rh-app-shell-bar-height');
-    expect(rules).toContain('--rh-page-header-height');
-    expect(rules).toContain('width: 100%');
+    expect(narrow![1]).toContain('width: 100%');
     // Still the top: bottom is where a narrow review screen's decision controls can be.
-    expect(rules).not.toContain("[data-placement^='bottom']");
+    expect(narrow![1]).not.toContain("[data-placement^='bottom']");
   });
 });
 
