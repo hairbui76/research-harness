@@ -3,19 +3,22 @@ import axe from 'axe-core';
 /**
  * Shared axe-core harness for the Design System tests.
  *
- * Rules that need a layout engine or a whole document are disabled: jsdom computes no
- * geometry, so `color-contrast` cannot run there (contrast is verified separately against
- * the token values), and page-level landmark rules do not apply to a component fragment.
+ * Two rules are off, for two different reasons:
+ *
+ * * `color-contrast` — jsdom applies no stylesheet and paints nothing, so the rule has no
+ *   colours to compare. `scripts/check-contrast.mjs` gates every token pair the system
+ *   declares, and the cockpit's browser suite runs axe's own rule on every route in both
+ *   themes.
+ * * `region` — a component is rendered here without a page around it, so its content
+ *   belongs to no landmark through no fault of its own. The rule runs route-wide in the
+ *   browser suite.
+ *
+ * The page-level rules this list used to also hold (`bypass`, `document-title`,
+ * `html-has-lang`, `landmark-one-main`, `page-has-heading-one`) are on: they match the root
+ * `html` element, which a fragment context never includes, so they suppressed nothing.
+ * `heading-order` and the `landmark-*` rules do run against a fragment, and are on.
  */
-const DEFAULT_DISABLED_RULES = [
-  'color-contrast',
-  'region',
-  'page-has-heading-one',
-  'landmark-one-main',
-  'html-has-lang',
-  'document-title',
-  'bypass',
-];
+const DEFAULT_DISABLED_RULES = ['color-contrast', 'region'];
 
 export interface AxeCheckOptions {
   /** Extra rule ids to disable for this assertion. */
