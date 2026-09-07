@@ -19,19 +19,22 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Button,
   ClaimCard,
+  Combobox,
   FullPageWorkspace,
   Input,
   ProvenancePath,
   Select,
   Textarea,
+  researchLabel,
   useToast,
 } from '@research-harness/design';
-import type { ClaimModel } from '@research-harness/design';
+import type { ClaimModel, ComboboxItem } from '@research-harness/design';
 import type {
   AnchorSummary,
   ClaimSummary,
   ClaimSupport,
   DecisionSummary,
+  EvidenceSummary,
   JsonObject,
   ObjectView,
 } from '../api/dto';
@@ -45,12 +48,14 @@ import {
   Panel,
   StatusBadge,
   authorityOf,
+  fieldLabel,
 } from '../components/Feedback';
 import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 
+/** The claim statuses an audit may record, in the order the product lists them. */
 const CLAIM_STATUSES = [
   'unverified',
   'supported',
@@ -59,6 +64,7 @@ const CLAIM_STATUSES = [
   'unsupported',
 ] as const;
 
+/** The scope ladder, L0 to L4. The rung a claim may stand on, never how sure anyone is. */
 const SCOPES = [
   'individual',
   'observed_subset',
@@ -66,6 +72,24 @@ const SCOPES = [
   'field_generalization',
   'universal_or_absence',
 ] as const;
+
+/** How one evidence object may be related to a claim. */
+const RELATIONS = [
+  'supports',
+  'qualifies',
+  'contradicts',
+  'contextualizes',
+  'exemplifies',
+  'incomparable_under_current_evidence',
+] as const;
+
+/** The rung this claim stands on, as the ladder writes it. */
+function scopeOf(scope: JsonObject, assessment: JsonObject): string {
+  const level = scope.level ?? assessment.allowed_strength;
+  return level === undefined || level === null
+    ? '— not recorded'
+    : researchLabel('claimScope', String(level));
+}
 
 export function ClaimsPage() {
   const { client } = useSession();
@@ -122,11 +146,11 @@ export function ClaimsPage() {
                 <div className="rh-text-secondary">{claim.statement}</div>
               </th>
               <td>
-                <StatusBadge status={claim.status} />
-                {claim.stale === 'stale' ? <StatusBadge status="stale" /> : null}
+                <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
+                {claim.stale === 'stale' ? <StatusBadge status="stale" describe /> : null}
               </td>
-              <td>{claim.requested_strength}</td>
-              <td>{claim.allowed_strength}</td>
+              <td>{researchLabel('claimScope', claim.requested_strength)}</td>
+              <td>{researchLabel('claimScope', claim.allowed_strength)}</td>
               <td className="rh-text-secondary">
                 {claim.supporting} supporting · {claim.qualifying} qualifying ·{' '}
                 {claim.contradicting} contradicting
@@ -177,7 +201,9 @@ export function ClaimDetailPage() {
             toolbar: (
               <StatusBadge
                 status={assessment.status ? String(assessment.status) : 'unverified'}
+                vocabulary="claimStatus"
                 size="md"
+                describe
               />
             ),
           }
@@ -243,9 +269,10 @@ function ClaimDetail({
   const model: ClaimModel = {
     id: claimId,
     text: String(claim.statement ?? ''),
-    claimType: String(claim.type ?? 'unrecorded'),
-    scope: String(scope.level ?? assessment.allowed_strength ?? 'unrecorded'),
-    status: String(assessment.status ?? 'unverified'),
+    // The card prints these three verbatim, so it is handed the product's word for each.
+    claimType: claim.type ? researchLabel('claimType', String(claim.type)) : '— not recorded',
+    scope: scopeOf(scope, assessment),
+    status: researchLabel('claimStatus', String(assessment.status ?? 'unverified')),
     authority: authorityOf(String(assessment.status ?? 'unverified'), stale),
     stale,
     support: {
@@ -279,9 +306,15 @@ function ClaimDetail({
 
       <Panel title="Scope">
         <Fields>
-          <Field label="Status">{String(assessment.status ?? '')}</Field>
-          <Field label="Requested strength">{String(assessment.requested_strength ?? '')}</Field>
-          <Field label="Allowed strength">{String(assessment.allowed_strength ?? '')}</Field>
+          {/* The status is on the badge in the page header; repeating it here would be the
+              same fact twice. What this panel adds is the pair the product exists to keep
+              honest: what the claim asks for, beside what its evidence allows. */}
+          <Field label="Requested strength">
+            {researchLabel('claimScope', String(assessment.requested_strength ?? ''))}
+          </Field>
+          <Field label="Allowed strength">
+            {researchLabel('claimScope', String(assessment.allowed_strength ?? ''))}
+          </Field>
           {/*
             The funnel `claim.update_coverage` recorded and `claim.audit` reads, rendered as
             it was written. Nothing here is recomputed: coverage is what separates "we found
@@ -292,13 +325,15 @@ function ClaimDetail({
             {String(coverage.examined_works ?? 0)} of {String(coverage.relevant_works ?? 0)}{' '}
             relevant works examined
             {coverage.unresolved_works ? ` · ${String(coverage.unresolved_works)} unresolved` : ''}
-            {` · overturn risk ${String(coverage.overturn_risk ?? 'unknown')}`}
+            {` · overturn risk ${researchLabel('overturnRisk', String(coverage.overturn_risk ?? 'unknown')).toLowerCase()}`}
           </Field>
           <Field label="Search runs">
             {(coverage.search_runs as string[] | undefined)?.join(', ') || '— none recorded'}
             {coverage.cutoff ? ` · up to ${String(coverage.cutoff)}` : ''}
           </Field>
-          <Field label="Freshness">{String(claim.stale ?? 'fresh')}</Field>
+          <Field label="Freshness">
+            {researchLabel('staleState', String(claim.stale ?? 'fresh'))}
+          </Field>
         </Fields>
       </Panel>
 
@@ -318,14 +353,18 @@ function ClaimDetail({
               <li key={decision.id}>
                 <p className="rh-web-row">
                   <code>{decision.id}</code>
-                  <StatusBadge status={decision.status} />
-                  <span className="rh-text-secondary">{decision.type}</span>
+                  <StatusBadge status={decision.status} vocabulary="decisionStatus" />
+                  <span className="rh-text-secondary">
+                    {researchLabel('decisionType', decision.type)}
+                  </span>
                 </p>
                 <p className="rh-text-secondary">{decision.rationale}</p>
                 {decision.auditor_recommendation ? (
                   <p className="rh-text-secondary">
-                    auditor said {decision.auditor_recommendation}; researcher chose{' '}
-                    {decision.researcher_selected}
+                    The auditor recommended{' '}
+                    {researchLabel('claimScope', decision.auditor_recommendation)}; the
+                    researcher chose{' '}
+                    {researchLabel('claimScope', String(decision.researcher_selected ?? ''))}.
                   </p>
                 ) : null}
               </li>
@@ -350,7 +389,7 @@ function ClaimDetail({
                   <code>
                     {anchor.file}:{anchor.line_start}
                   </code>
-                  <StatusBadge status={anchor.status} />
+                  <StatusBadge status={anchor.status} vocabulary="anchorStatus" />
                   {anchor.stale === 'stale' ? <StatusBadge status="stale" /> : null}
                 </p>
                 <p className="rh-text-secondary">{anchor.sentence}</p>
@@ -439,7 +478,7 @@ function RelationList({
           {links.map((link) => (
             <li key={`${title}:${link.evidence}`} className="rh-web-stack rh-web-stack--tight">
               <ProvenancePath
-                label={`${claimId} ${link.relation ?? 'related'} ${link.evidence}`}
+                label={`${claimId} ${relationWord(link.relation)} ${link.evidence}`}
                 onOpen={(entity) => {
                   if (entity.href) navigate(entity.href);
                 }}
@@ -454,7 +493,7 @@ function RelationList({
                       },
                     },
                     {
-                      relation: link.relation ?? 'related',
+                      relation: relationWord(link.relation),
                       // No authority badge on the chip: the relation list already sits
                       // under "Accepted evidence", and a badge inside the link would put
                       // the word into the link's own name.
@@ -493,6 +532,12 @@ function RelationList({
   );
 }
 
+/** The edge label between two steps of a chain, in the sentence case a chain reads in. */
+function relationWord(relation: string | undefined): string {
+  if (relation === undefined) return 'is related to';
+  return researchLabel('claimRelation', relation).toLowerCase();
+}
+
 function AuditForm({
   disabled,
   current,
@@ -522,7 +567,7 @@ function AuditForm({
       >
         {CLAIM_STATUSES.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {researchLabel('claimStatus', value)}
           </option>
         ))}
       </Select>
@@ -534,7 +579,7 @@ function AuditForm({
       >
         {SCOPES.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {researchLabel('claimScope', value)}
           </option>
         ))}
       </Select>
@@ -585,13 +630,13 @@ function OverrideForm({
       </p>
       <Select
         id="override-scope"
-        label={`Scope you are choosing instead of ${recommendation}`}
+        label={`Scope you are choosing instead of ${researchLabel('claimScope', recommendation)}`}
         value={selected}
         onChange={(event) => setSelected(event.target.value)}
       >
         {SCOPES.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {researchLabel('claimScope', value)}
           </option>
         ))}
       </Select>
@@ -616,6 +661,53 @@ function OverrideForm({
   );
 }
 
+/**
+ * One accepted Evidence object, as the picker offers it.
+ *
+ * The id leads, because it is what a researcher who already knows the object types and
+ * what the daemon is about to be sent; the field's word and the work say which one it is
+ * without opening it; the quoted span underneath is what the relation will rest on.
+ */
+export function evidenceOptionLabel(entry: EvidenceSummary): string {
+  const field = entry.field === null ? 'No field recorded' : fieldLabel(entry.field);
+  return `${entry.id} · ${field} · ${entry.work}`;
+}
+
+/**
+ * The accepted evidence that matches what has been typed so far.
+ *
+ * Every term has to appear somewhere in the option — its id, its field, its work or its
+ * quoted text — so `E0001`, `metric`, `Metric result` and a phrase from the span all find
+ * the same object. The `·` of a filled-in option is not a term: selecting one must not
+ * empty the list it was selected from.
+ */
+export function matchingEvidence(
+  evidence: readonly EvidenceSummary[],
+  query: string,
+): EvidenceSummary[] {
+  const terms = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((term) => term !== '' && term !== '·');
+  if (terms.length === 0) return [...evidence];
+  return evidence.filter((entry) => {
+    const haystack = `${evidenceOptionLabel(entry)} ${entry.field ?? ''} ${entry.exact_text}`;
+    return terms.every((term) => haystack.toLowerCase().includes(term));
+  });
+}
+
+/** An id a researcher typed in full, for the case where the list could not be read. */
+const EVIDENCE_ID = /^E\d+$/;
+
+/**
+ * Relate one accepted Evidence object to this claim.
+ *
+ * The evidence is chosen from the project's own accepted evidence rather than recalled: an
+ * id typed from memory is the one input on this screen that a researcher cannot check
+ * before pressing the button, and a wrong one records a relation to the wrong span. The id
+ * stays visible in every option, so knowing it is still the fastest way to find it — and
+ * it remains typable in full when the list itself could not be read.
+ */
 function RelateForm({
   disabled,
   onSubmit,
@@ -623,46 +715,84 @@ function RelateForm({
   disabled: boolean;
   onSubmit: (evidence: string, relation: string) => void;
 }) {
-  const [evidence, setEvidence] = useState('');
+  const { client } = useSession();
+  const accepted = useAsync(() => client.evidence(), [client]);
+  const [query, setQuery] = useState('');
+  const [chosen, setChosen] = useState<EvidenceSummary | null>(null);
   const [relation, setRelation] = useState('supports');
+
+  const evidence = accepted.data ?? [];
+  const matches = matchingEvidence(evidence, query);
+  const options: ComboboxItem<EvidenceSummary>[] = matches.map((entry) => ({
+    id: entry.id,
+    label: evidenceOptionLabel(entry),
+    description: entry.exact_text,
+    value: entry,
+  }));
+  const typed = query.trim().toUpperCase();
+  const evidenceId = chosen?.id ?? (EVIDENCE_ID.test(typed) ? typed : null);
+
   return (
     <form
       className="rh-web-stack rh-web-stack--tight rh-web-prompt"
       onSubmit={(event) => {
         event.preventDefault();
-        if (!evidence.trim()) return;
-        onSubmit(evidence.trim(), relation);
+        if (evidenceId === null) return;
+        onSubmit(evidenceId, relation);
       }}
     >
       <h3 className="rh-text-h4">Relate evidence</h3>
-      <Input
-        id="relate-evidence"
-        label="Evidence id"
-        value={evidence}
-        placeholder="E0001"
-        onChange={(event) => setEvidence(event.target.value)}
-      />
+      <div className="rh-web-stack rh-web-stack--tight">
+        <label className="rh-text-label" htmlFor="relate-evidence">
+          Accepted evidence
+        </label>
+        <Combobox
+          id="relate-evidence"
+          label="Accepted evidence"
+          placeholder="Search by id, field, work or quoted text"
+          items={options}
+          openOnFocus
+          disabled={disabled}
+          loading={accepted.loading}
+          loadingMessage="Reading the accepted evidence…"
+          emptyMessage={
+            evidence.length === 0
+              ? 'This project has no accepted evidence yet. A candidate becomes evidence in the review inbox.'
+              : 'No accepted evidence matches that.'
+          }
+          query={query}
+          onQueryChange={(next) => {
+            setQuery(next);
+            // Choosing an option fills the box with that option's own line, which is not a
+            // researcher editing the search: only text that no longer names the chosen
+            // object un-chooses it.
+            setChosen((current) =>
+              current !== null && next === evidenceOptionLabel(current) ? current : null,
+            );
+          }}
+          value={chosen?.id ?? null}
+          onChange={(item) => setChosen(item?.value ?? null)}
+        />
+        {accepted.error ? (
+          <ErrorBox error={accepted.error} retry={accepted.reload} />
+        ) : chosen ? (
+          <p className="rh-text-secondary">{chosen.exact_text}</p>
+        ) : null}
+      </div>
       <Select
         id="relate-relation"
         label="Relation"
         value={relation}
         onChange={(event) => setRelation(event.target.value)}
       >
-        {[
-          'supports',
-          'qualifies',
-          'contradicts',
-          'contextualizes',
-          'exemplifies',
-          'incomparable_under_current_evidence',
-        ].map((value) => (
+        {RELATIONS.map((value) => (
           <option key={value} value={value}>
-            {value}
+            {researchLabel('claimRelation', value)}
           </option>
         ))}
       </Select>
       <div className="rh-web-row">
-        <Button type="submit" variant="primary" size="sm" disabled={disabled || !evidence.trim()}>
+        <Button type="submit" variant="primary" size="sm" disabled={disabled || evidenceId === null}>
           Relate
         </Button>
       </div>

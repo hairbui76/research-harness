@@ -8,12 +8,50 @@
  */
 import { describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ClaimDetailPage, ClaimsPage } from './Claims';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
 import type { FakeDaemon } from '../test/harness';
 
 const CLAIM = 'C0001';
+
+/**
+ * The project's accepted evidence, as `evidence.list` reports it. Hand-declared like the
+ * `EvidenceSummary` interface itself, whose names the daemon's contract test asserts.
+ */
+const ACCEPTED = [
+  {
+    id: 'E0001',
+    work: 'W0001',
+    artifact: 'A0001-1',
+    field: 'metric_result',
+    status: 'accepted',
+    origin: 'source_observed',
+    evidence_type: 'experimental_result',
+    strength: 'direct',
+    review_tier: 2,
+    verdict: 'supported',
+    exact_text: 'TrafficLM reaches an F1 of 94.32 on CICIDS2017',
+    qualification: null,
+    stale: 'fresh',
+  },
+  {
+    id: 'E0002',
+    work: 'W0002',
+    artifact: 'A0002-1',
+    field: 'method_summary',
+    status: 'accepted',
+    origin: 'source_observed',
+    evidence_type: 'method_description',
+    strength: 'direct',
+    review_tier: 1,
+    verdict: 'supported',
+    exact_text: 'The encoder is a twelve layer transformer',
+    qualification: null,
+    stale: 'fresh',
+  },
+];
 
 function daemonFor(
   overview: unknown = FIXTURES.overview,
@@ -30,6 +68,7 @@ function daemonFor(
       'decision.list': { count: FIXTURES.index.decisions.length, decisions: FIXTURES.index.decisions },
       'anchor.list': { count: FIXTURES.index.anchors.length, anchors: FIXTURES.index.anchors },
       'claim.find_support': FIXTURES.claimSupport,
+      'evidence.list': { count: ACCEPTED.length, evidence: ACCEPTED },
       'claim.audit': { capability: 'claim.audit', objects: [CLAIM] },
       'claim.relate': { capability: 'claim.relate', objects: [CLAIM] },
       'decision.accept': { capability: 'decision.accept', objects: ['D0001'] },
@@ -54,8 +93,8 @@ describe('the claim list', () => {
 
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument());
     expect(screen.getByText('Allowed')).toBeInTheDocument();
-    expect(screen.getByText('observed_subset')).toBeInTheDocument();
-    expect(screen.getByText('individual')).toBeInTheDocument();
+    expect(screen.getByText('L1 Observed subset')).toBeInTheDocument();
+    expect(screen.getByText('L0 Individual')).toBeInTheDocument();
   });
 
   it('reads the one list it shows, not the whole workspace index', async () => {
@@ -151,13 +190,22 @@ describe('the claim detail', () => {
     expect(applied?.request).toEqual({ claim_id: CLAIM, decision_id: 'D0001' });
   });
 
-  it('relates evidence as one directed edge', async () => {
+  it('relates evidence picked out of the project’s own accepted evidence', async () => {
+    const user = userEvent.setup();
     const daemon = daemonFor();
     renderDetail(daemon);
 
-    await waitFor(() => expect(screen.getByLabelText('Evidence id')).toBeInTheDocument());
-    fireEvent.change(screen.getByLabelText('Evidence id'), { target: { value: 'E0002' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Relate' }));
+    const picker = await screen.findByRole('combobox', { name: 'Accepted evidence' });
+    // Nothing is relatable until something real has been chosen: an id typed from memory
+    // is the one input on this screen that cannot be checked before the button is pressed.
+    expect(screen.getByRole('button', { name: 'Relate' })).toBeDisabled();
+
+    await user.type(picker, 'transformer');
+    const option = await screen.findByRole('option', { name: /E0002/ });
+    expect(option).toHaveTextContent('Method summary');
+    expect(option).toHaveTextContent('W0002');
+    await user.click(option);
+    await user.click(screen.getByRole('button', { name: 'Relate' }));
 
     await waitFor(() => {
       const call = daemon.capabilityCalls().find((entry) => entry.name === 'claim.relate');
@@ -166,6 +214,36 @@ describe('the claim detail', () => {
         relation: { evidence: 'E0002', relation: 'supports' },
       });
     });
+  });
+
+  it('still takes an id in full, for a researcher who knows it', async () => {
+    const user = userEvent.setup();
+    const daemon = daemonFor();
+    renderDetail(daemon);
+
+    const picker = await screen.findByRole('combobox', { name: 'Accepted evidence' });
+    await user.type(picker, 'E0001');
+    expect(await screen.findByRole('option', { name: /E0001/ })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Relate' }));
+
+    await waitFor(() => {
+      const call = daemon.capabilityCalls().find((entry) => entry.name === 'claim.relate');
+      expect(call?.request).toEqual({
+        claim_id: CLAIM,
+        relation: { evidence: 'E0001', relation: 'supports' },
+      });
+    });
+  });
+
+  it('says the vocabulary in words, never as the daemon’s identifiers', async () => {
+    const { container } = renderDetail();
+
+    await waitFor(() => expect(screen.getByText('Requested strength')).toBeInTheDocument());
+    const text = container.textContent ?? '';
+    for (const token of ['observed_subset', 'field_generalization', 'metric_result']) {
+      expect(text).not.toContain(token);
+    }
+    expect(text).toContain('L1 Observed subset');
   });
 
   it('disables auditing and overriding for an agent host', async () => {
@@ -177,6 +255,7 @@ describe('the claim detail', () => {
     );
     expect(screen.getByRole('button', { name: 'Accept the override' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Relate' })).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: 'Accepted evidence' })).toBeDisabled();
   });
 
   it('has no automatically detectable accessibility violation', async () => {
