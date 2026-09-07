@@ -945,6 +945,16 @@ export interface components {
              */
             claim_health: components["schemas"]["CountEntry"][];
             /**
+             * Conflict Groups
+             * @default []
+             */
+            conflict_groups: components["schemas"]["AttentionGroup"][];
+            /**
+             * Conflict Summary
+             * @default
+             */
+            conflict_summary: string;
+            /**
              * Conflicts
              * @default []
              */
@@ -1001,6 +1011,11 @@ export interface components {
             claims: string[];
             /** Id */
             id: string;
+            /**
+             * Opened
+             * @default
+             */
+            opened: string;
             /** Question */
             question: string;
             /** Remaining Uncertainty */

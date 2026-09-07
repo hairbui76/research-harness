@@ -1220,6 +1220,19 @@
             "title": "Claim Health",
             "type": "array"
           },
+          "conflict_groups": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AttentionGroup"
+            },
+            "title": "Conflict Groups",
+            "type": "array"
+          },
+          "conflict_summary": {
+            "default": "",
+            "title": "Conflict Summary",
+            "type": "string"
+          },
           "conflicts": {
             "default": [],
             "items": {
@@ -1318,6 +1331,11 @@
           },
           "id": {
             "title": "Id",
+            "type": "string"
+          },
+          "opened": {
+            "default": "",
+            "title": "Opened",
             "type": "string"
           },
           "question": {

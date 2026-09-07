@@ -434,3 +434,18 @@ class OverviewReport(BaseModel):
     claim_health: tuple[CountEntry, ...] = ()
     open_questions: tuple[AttentionItem, ...] = ()
     conflicts: tuple[ConflictView, ...] = ()
+    conflict_summary: str = ""
+    """One line naming what is in dispute, for the Conflicts page's own description.
+
+    Written here for the same reason `attention_summary` is: deciding that a disagreement
+    is still open, and saying so in words, is one judgement and it is the daemon's.
+    """
+
+    conflict_groups: tuple[AttentionGroup, ...] = ()
+    """The open conflicts grouped by the kind of disagreement they are (Product 25).
+
+    Each group's `kind` is the conflict kind the store recorded, so a client reads the
+    grouping instead of switching on `kind` to build it; each item's `route` is where that
+    one disagreement is decided — the candidate's review screen, the object's own page, or
+    nowhere when the cockpit has no screen for its subject.
+    """

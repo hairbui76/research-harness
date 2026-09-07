@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 import re
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +36,7 @@ from research_harness.capabilities.permissions import Principal
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.domain.base import Provenance
 from research_harness.domain.conversation import Message, MessageRole, TextBlock
+from research_harness.domain.ids import ClaimId
 from research_harness.domain.transitions import HUMAN_ACTOR
 from research_harness.evidence.conflicts import ConflictKind, ConflictRecord, ConflictStore
 from research_harness.protocol.dto import ArtifactBlocks, OverviewReport, WorkspaceIndex
@@ -62,8 +63,10 @@ ARTIFACT = "A0001-1"
 #: no HTTP route returns are listed: the rest are generated from `web/openapi.json` and
 #: cannot drift by construction.
 WEB_RESPONSE_TYPES = {
+    "ClaimGroup": "claim.list",
     "ClaimList": "claim.list",
     "WorkList": "work.list",
+    "QuestionGroup": "question.list",
     "QuestionList": "question.list",
     "DecisionList": "decision.list",
     "AnchorList": "anchor.list",
@@ -477,6 +480,51 @@ def test_every_attention_group_says_which_surface_it_belongs_to(reader: TestClie
     assert groups["stale"] == "stale"
 
 
+def test_the_overview_groups_the_open_conflicts_by_the_kind_of_disagreement(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The Conflicts page reads its grouping; it never decides from `kind` which is which."""
+    _open_a_conflict(corpus, "C0001", resolve=False)
+    _open_a_conflict(corpus, "cand_44c1f007fc0db0b2", resolve=False)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+    groups = overview.conflict_groups
+
+    assert [group.kind for group in groups] == ["candidate_vs_accepted"]
+    assert groups[0].count == 2
+    assert groups[0].label == "2 conflicts"
+    assert groups[0].surface == "conflict"
+    assert overview.conflict_summary.startswith("2 conflicts are open")
+
+
+def test_an_open_conflict_leads_to_where_that_disagreement_is_decided(
+    reader: TestClient, corpus: Path
+) -> None:
+    """A candidate is decided in the review screen; a Claim on its own page; nothing else links."""
+    _open_a_conflict(corpus, "cand_44c1f007fc0db0b2", resolve=False)
+    _open_a_conflict(corpus, "C0001", resolve=False)
+    _open_a_conflict(corpus, "table-1", resolve=False)
+
+    routes = {
+        item.label: item.route
+        for group in OverviewReport.model_validate(reader.get("/overview").json()).conflict_groups
+        for item in group.items
+    }
+
+    assert routes["cand_44c1f007fc0db0b2"] == "/review/cand_44c1f007fc0db0b2"
+    assert routes["C0001"] == "/claims/C0001"
+    assert routes["table-1"] == ""
+
+
+def test_a_project_with_nothing_in_dispute_says_so_in_its_own_sentence(
+    bare_reader: TestClient,
+) -> None:
+    overview = OverviewReport.model_validate(bare_reader.get("/overview").json())
+
+    assert overview.conflict_groups == ()
+    assert overview.conflict_summary == "Nothing in this project is in dispute."
+
+
 def test_a_waiting_review_item_leads_to_the_candidate_and_not_only_to_the_queue(
     reader: TestClient, corpus: Path
 ) -> None:
@@ -636,6 +684,88 @@ def test_claim_list_filters_server_side_rather_than_handing_back_everything(
     assert _call(reader, "claim.list", {"type": "descriptive"})["count"] == 1
 
 
+def test_claim_list_groups_the_claims_whose_evidence_cannot_carry_them(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """Product 42 G: a claim asking for more than its evidence allows is the failure state.
+
+    Which claims those are is the same judgement the summaries already record, so the list
+    draws the line and orders the groups; the Claims page reads them (Product 5 P10).
+    """
+    _create_claim(corpus, registry)
+    _create_overreaching_claim(corpus, registry)
+
+    result = _call(reader, "claim.list", {})
+
+    assert [group["kind"] for group in result["groups"]] == ["overreaching"]
+    assert result["groups"][0]["label"] == "1 claim asks for more than its evidence allows"
+    assert result["groups"][0]["claims"] == ["C0002"]
+    assert result["summary"] == "1 claim asks for more than its evidence allows."
+
+
+def test_claim_list_says_the_work_is_done_rather_than_reporting_its_size(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """The page's first sentence names work. A project with none says that, not "1 claim"."""
+    assert _call(reader, "claim.list", {})["summary"] == (
+        "This project has registered no claims yet."
+    )
+
+    _create_claim(corpus, registry)
+
+    assert _call(reader, "claim.list", {})["groups"] == []
+    assert _call(reader, "claim.list", {})["summary"] == (
+        "Every registered claim stands where its evidence puts it."
+    )
+
+
+def test_question_list_groups_what_is_still_open_and_reads_the_oldest_first(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """Product 31: a question stays open until a researcher resolves it, so age is the order."""
+    _create_question(corpus, registry)
+    _create_question(corpus, registry, question_id="RQ0002", text="Which metrics are comparable?")
+    _create_question(corpus, registry, question_id="RQ0003", text="What did the pilot split leak?")
+    _answer_question(corpus, registry, "RQ0002")
+
+    result = _call(reader, "question.list", {})
+    groups = {group["kind"]: group for group in result["groups"]}
+
+    assert [group["kind"] for group in result["groups"]] == ["unanswered", "answered"]
+    assert groups["unanswered"]["surface"] == "waiting"
+    assert groups["answered"]["surface"] == "settled"
+    assert groups["unanswered"]["questions"] == ["RQ0001", "RQ0003"]
+    assert groups["answered"]["questions"] == ["RQ0002"]
+    assert groups["unanswered"]["label"] == "2 questions are still open"
+    assert result["summary"] == "2 questions are still open."
+
+
+def test_question_list_says_when_every_question_it_holds_has_been_answered(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    assert _call(reader, "question.list", {})["summary"] == (
+        "This project has registered no questions yet."
+    )
+
+    _create_question(corpus, registry)
+    _answer_question(corpus, registry, "RQ0001")
+
+    assert _call(reader, "question.list", {})["summary"] == (
+        "Every question this project registered has been answered."
+    )
+
+
+def test_a_question_says_when_it_was_registered_so_the_oldest_is_visible(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """The order alone does not say "longest"; the date each row carries does."""
+    _create_question(corpus, registry)
+
+    opened = _call(reader, "question.list", {})["questions"][0]["opened"]
+
+    assert opened == datetime.now(UTC).date().isoformat()
+
+
 def test_an_agent_host_may_read_every_list_the_navigation_shows(
     host_reader: TestClient,
 ) -> None:
@@ -756,17 +886,48 @@ def _artifact_hash(client: TestClient) -> str:
     return str(_object(client, ARTIFACT)["file_hash"]).removeprefix("sha256:")
 
 
-def _create_question(root: Path, registry: CapabilityRegistry) -> None:
+def _create_question(
+    root: Path,
+    registry: CapabilityRegistry,
+    question_id: str = "RQ0001",
+    text: str = "Which tokenizations survive short encrypted flows?",
+) -> None:
     registry.invoke(
         "question.create",
         open_context(root, HUMAN_ACTOR),
         {
             "question": {
-                "id": "RQ0001",
-                "question": "Which tokenizations survive short encrypted flows?",
+                "id": question_id,
+                "question": text,
                 "provenance": {"source": "human", "actor": HUMAN_ACTOR},
             }
         },
+        principal=Principal.human(),
+    )
+
+
+def _create_overreaching_claim(root: Path, registry: CapabilityRegistry) -> None:
+    """A claim asking for L3 on evidence that allows L0: the state Product 42 G forbids."""
+    from tests.contract.protocol.conftest import make_claim
+
+    claim = make_claim(claim_id=ClaimId("C0002"), statement="Existing systems generally agree")
+    payload = claim.model_dump(mode="json")
+    payload["assessment"]["requested_strength"] = "field_generalization"
+    payload["assessment"]["allowed_strength"] = "individual"
+    registry.invoke(
+        "claim.create",
+        open_context(root, HUMAN_ACTOR),
+        {"claim": payload},
+        principal=Principal.human(),
+    )
+
+
+def _answer_question(root: Path, registry: CapabilityRegistry, question: str) -> None:
+    """One question resolved, so the list has a settled group as well as a waiting one."""
+    registry.invoke(
+        "question.update",
+        open_context(root, HUMAN_ACTOR),
+        {"question_id": question, "status": "answered"},
         principal=Principal.human(),
     )
 

@@ -2981,6 +2981,39 @@
       },
       "response_schema": {
         "$defs": {
+          "ClaimGroup": {
+            "additionalProperties": false,
+            "description": "One line the Claims page groups by: the concern, in words, and whose it is.",
+            "properties": {
+              "claims": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Claims",
+                "type": "array"
+              },
+              "count": {
+                "default": 0,
+                "title": "Count",
+                "type": "integer"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "label"
+            ],
+            "title": "ClaimGroup",
+            "type": "object"
+          },
           "ClaimSummary": {
             "additionalProperties": false,
             "description": "One Claim as the Claim explorer lists it: what it asks, and what it may say.",
@@ -3069,6 +3102,19 @@
             "default": 0,
             "title": "Count",
             "type": "integer"
+          },
+          "groups": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/ClaimGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
           }
         },
         "title": "ClaimList",
@@ -20713,6 +20759,44 @@
       },
       "response_schema": {
         "$defs": {
+          "QuestionGroup": {
+            "additionalProperties": false,
+            "description": "One line the Questions page groups by: what this group is waiting on.",
+            "properties": {
+              "count": {
+                "default": 0,
+                "title": "Count",
+                "type": "integer"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "questions": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Questions",
+                "type": "array"
+              },
+              "surface": {
+                "default": "waiting",
+                "title": "Surface",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "label"
+            ],
+            "title": "QuestionGroup",
+            "type": "object"
+          },
           "QuestionSummary": {
             "additionalProperties": false,
             "description": "One ResearchQuestion and what currently bears on it.",
@@ -20727,6 +20811,11 @@
               },
               "id": {
                 "title": "Id",
+                "type": "string"
+              },
+              "opened": {
+                "default": "",
+                "title": "Opened",
                 "type": "string"
               },
               "question": {
@@ -20772,6 +20861,14 @@
             "title": "Count",
             "type": "integer"
           },
+          "groups": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/QuestionGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
           "questions": {
             "default": [],
             "items": {
@@ -20779,6 +20876,11 @@
             },
             "title": "Questions",
             "type": "array"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
           }
         },
         "title": "QuestionList",
@@ -31294,6 +31396,11 @@
               },
               "id": {
                 "title": "Id",
+                "type": "string"
+              },
+              "opened": {
+                "default": "",
+                "title": "Opened",
                 "type": "string"
               },
               "question": {
