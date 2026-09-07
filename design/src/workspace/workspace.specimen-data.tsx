@@ -16,15 +16,35 @@ export const projects: ProjectModel[] = [
   { id: 'P2', name: 'Reef survey', path: '/home/researcher/projects/reef' },
 ];
 
+/** Three named runs, in the order the rail reads them, and the two ways in above them. */
 export const railItems: RailItem[] = [
-  { id: 'corpus', label: 'Corpus', to: '#corpus', icon: 'library' },
-  { id: 'claims', label: 'Claims', to: '#claims', icon: 'bookmark', active: true },
-  { id: 'questions', label: 'Questions', to: '#questions', icon: 'circle-help' },
-  { id: 'synthesis', label: 'Synthesis', to: '#synthesis', icon: 'layers' },
-  { id: 'manuscript', label: 'Manuscript', to: '#manuscript', icon: 'file-code' },
-  { id: 'review', label: 'Review inbox', icon: 'inbox', count: 4 },
-  { id: 'conflicts', label: 'Conflicts', icon: 'alert-triangle', count: 1 },
-  { id: 'stale', label: 'Stale', icon: 'clock', count: 3 },
+  { id: 'corpus', label: 'Corpus', to: '#corpus', icon: 'library', group: 'The record' },
+  {
+    id: 'claims',
+    label: 'Claims',
+    to: '#claims',
+    icon: 'bookmark',
+    active: true,
+    group: 'The record',
+  },
+  {
+    id: 'questions',
+    label: 'Questions',
+    to: '#questions',
+    icon: 'circle-help',
+    group: 'The record',
+  },
+  { id: 'synthesis', label: 'Synthesis', to: '#synthesis', icon: 'layers', group: 'Outputs' },
+  {
+    id: 'manuscript',
+    label: 'Manuscript',
+    to: '#manuscript',
+    icon: 'file-code',
+    group: 'Outputs',
+  },
+  { id: 'review', label: 'Review inbox', icon: 'inbox', count: 4, group: 'Waiting' },
+  { id: 'conflicts', label: 'Conflicts', icon: 'alert-triangle', count: 1, group: 'Waiting' },
+  { id: 'stale', label: 'Stale', icon: 'clock', count: 3, group: 'Waiting' },
 ];
 
 export const providerOk: ProviderStatus = {

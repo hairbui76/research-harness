@@ -143,6 +143,40 @@ button.rh-project-rail__project[data-state='open'] {
   padding-top: var(--rh-space-2);
 }
 
+/*
+ * A run of destinations under the word they share.
+ *
+ * Sentence case at label size in muted ink — the palette's "Go to" heading, so the rail and
+ * the palette read the same and neither becomes an uppercase micro-label. The heading is a
+ * paragraph, not a control: it names the list beside it through `aria-labelledby` and adds
+ * no tab stop to the rail.
+ */
+.rh-project-rail__nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-block-start: var(--rh-space-2);
+}
+
+.rh-project-rail__nav-heading {
+  margin: 0;
+  padding-inline: var(--rh-space-2);
+  font-size: var(--rh-type-label-size);
+  line-height: var(--rh-type-label-lh);
+  letter-spacing: var(--rh-type-label-ls);
+  font-weight: var(--rh-type-label-weight);
+  color: var(--rh-text-muted);
+}
+
+.rh-project-rail__nav-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .rh-project-rail__nav-item {
   display: flex;
   align-items: center;

@@ -1,5 +1,2897 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`ProjectRail grouped theme x density > matches the dark / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="dark"
+>
+  <nav
+    aria-label="Project navigation"
+    class="rh-project-rail"
+    id="rh-projectrail-ID"
+  >
+    <div
+      class="rh-project-rail__head"
+    >
+      <p
+        class="rh-project-rail__project"
+        title="/home/r/thermal"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-folder rh-icon"
+          data-icon="folder"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+          />
+        </svg>
+        <span
+          class="rh-project-rail__project-name"
+        >
+          Thermal tolerance
+        </span>
+      </p>
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the rail"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-project-rail__collapse"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-left rh-icon"
+          data-icon="panel-left"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M9 3v18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-project-rail__new"
+    >
+      <button
+        class="rh-button rh-button--primary rh-button--sm rh-button--full"
+        data-variant="primary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New session
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Research"
+      class="rh-project-rail__nav"
+    >
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-messages-square rh-icon"
+            data-icon="messages-square"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+            />
+            <path
+              d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Conversation
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/overview"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-microscope rh-icon"
+            data-icon="microscope"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 18h8"
+            />
+            <path
+              d="M3 22h18"
+            />
+            <path
+              d="M14 22a7 7 0 1 0 0-14h-1"
+            />
+            <path
+              d="M9 14h2"
+            />
+            <path
+              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+            />
+            <path
+              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Overview
+          </span>
+        </a>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-1"
+        >
+          Waiting
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-1"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/review"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-inbox rh-icon"
+                data-icon="inbox"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <polyline
+                  points="22 12 16 12 14 15 10 15 8 12 2 12"
+                />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Review inbox
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                12
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Review inbox items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/conflicts"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-triangle-alert rh-icon"
+                data-icon="alert-triangle"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                />
+                <path
+                  d="M12 9v4"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Conflicts
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                3
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Conflicts items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Stale
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                5
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Stale items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-2"
+        >
+          The record
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-2"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/corpus"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-library rh-icon"
+                data-icon="library"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m16 6 4 14"
+                />
+                <path
+                  d="M12 6v14"
+                />
+                <path
+                  d="M8 8v12"
+                />
+                <path
+                  d="M4 4v16"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Corpus
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/claims"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Claims
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/questions"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-question-mark rh-icon"
+                data-icon="circle-help"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Questions
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/taxonomy"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-git-branch rh-icon"
+                data-icon="git-branch"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 6a9 9 0 0 0-9 9V3"
+                />
+                <circle
+                  cx="18"
+                  cy="6"
+                  r="3"
+                />
+                <circle
+                  cx="6"
+                  cy="18"
+                  r="3"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Taxonomy
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-3"
+        >
+          Outputs
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-3"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/synthesis"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layers rh-icon"
+                data-icon="layers"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                />
+                <path
+                  d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                />
+                <path
+                  d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Synthesis
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/manuscript"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Manuscript
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                2
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Manuscript items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div
+      class="rh-project-rail__foot"
+    >
+      <p
+        class="rh-project-rail__provider"
+        data-tone="success"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          <span
+            class="rh-project-rail__provider-name"
+          >
+            Local Ollama
+          </span>
+          <span
+            class="rh-project-rail__provider-state"
+          >
+            Ready
+          </span>
+        </span>
+      </p>
+      <button
+        class="rh-button rh-button--ghost rh-button--sm"
+        data-variant="ghost"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings rh-icon"
+            data-icon="settings"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Settings
+          </span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</div>
+`;
+
+exports[`ProjectRail grouped theme x density > matches the dark / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="dark"
+>
+  <nav
+    aria-label="Project navigation"
+    class="rh-project-rail"
+    id="rh-projectrail-ID"
+  >
+    <div
+      class="rh-project-rail__head"
+    >
+      <p
+        class="rh-project-rail__project"
+        title="/home/r/thermal"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-folder rh-icon"
+          data-icon="folder"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+          />
+        </svg>
+        <span
+          class="rh-project-rail__project-name"
+        >
+          Thermal tolerance
+        </span>
+      </p>
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the rail"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-project-rail__collapse"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-left rh-icon"
+          data-icon="panel-left"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M9 3v18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-project-rail__new"
+    >
+      <button
+        class="rh-button rh-button--primary rh-button--sm rh-button--full"
+        data-variant="primary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New session
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Research"
+      class="rh-project-rail__nav"
+    >
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-messages-square rh-icon"
+            data-icon="messages-square"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+            />
+            <path
+              d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Conversation
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/overview"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-microscope rh-icon"
+            data-icon="microscope"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 18h8"
+            />
+            <path
+              d="M3 22h18"
+            />
+            <path
+              d="M14 22a7 7 0 1 0 0-14h-1"
+            />
+            <path
+              d="M9 14h2"
+            />
+            <path
+              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+            />
+            <path
+              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Overview
+          </span>
+        </a>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-1"
+        >
+          Waiting
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-1"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/review"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-inbox rh-icon"
+                data-icon="inbox"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <polyline
+                  points="22 12 16 12 14 15 10 15 8 12 2 12"
+                />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Review inbox
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                12
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Review inbox items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/conflicts"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-triangle-alert rh-icon"
+                data-icon="alert-triangle"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                />
+                <path
+                  d="M12 9v4"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Conflicts
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                3
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Conflicts items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Stale
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                5
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Stale items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-2"
+        >
+          The record
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-2"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/corpus"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-library rh-icon"
+                data-icon="library"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m16 6 4 14"
+                />
+                <path
+                  d="M12 6v14"
+                />
+                <path
+                  d="M8 8v12"
+                />
+                <path
+                  d="M4 4v16"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Corpus
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/claims"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Claims
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/questions"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-question-mark rh-icon"
+                data-icon="circle-help"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Questions
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/taxonomy"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-git-branch rh-icon"
+                data-icon="git-branch"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 6a9 9 0 0 0-9 9V3"
+                />
+                <circle
+                  cx="18"
+                  cy="6"
+                  r="3"
+                />
+                <circle
+                  cx="6"
+                  cy="18"
+                  r="3"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Taxonomy
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-3"
+        >
+          Outputs
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-3"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/synthesis"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layers rh-icon"
+                data-icon="layers"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                />
+                <path
+                  d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                />
+                <path
+                  d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Synthesis
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/manuscript"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Manuscript
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                2
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Manuscript items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div
+      class="rh-project-rail__foot"
+    >
+      <p
+        class="rh-project-rail__provider"
+        data-tone="success"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          <span
+            class="rh-project-rail__provider-name"
+          >
+            Local Ollama
+          </span>
+          <span
+            class="rh-project-rail__provider-state"
+          >
+            Ready
+          </span>
+        </span>
+      </p>
+      <button
+        class="rh-button rh-button--ghost rh-button--sm"
+        data-variant="ghost"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings rh-icon"
+            data-icon="settings"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Settings
+          </span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</div>
+`;
+
+exports[`ProjectRail grouped theme x density > matches the light / comfortable snapshot 1`] = `
+<div
+  data-density="comfortable"
+  data-theme="light"
+>
+  <nav
+    aria-label="Project navigation"
+    class="rh-project-rail"
+    id="rh-projectrail-ID"
+  >
+    <div
+      class="rh-project-rail__head"
+    >
+      <p
+        class="rh-project-rail__project"
+        title="/home/r/thermal"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-folder rh-icon"
+          data-icon="folder"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+          />
+        </svg>
+        <span
+          class="rh-project-rail__project-name"
+        >
+          Thermal tolerance
+        </span>
+      </p>
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the rail"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-project-rail__collapse"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-left rh-icon"
+          data-icon="panel-left"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M9 3v18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-project-rail__new"
+    >
+      <button
+        class="rh-button rh-button--primary rh-button--sm rh-button--full"
+        data-variant="primary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New session
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Research"
+      class="rh-project-rail__nav"
+    >
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-messages-square rh-icon"
+            data-icon="messages-square"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+            />
+            <path
+              d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Conversation
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/overview"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-microscope rh-icon"
+            data-icon="microscope"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 18h8"
+            />
+            <path
+              d="M3 22h18"
+            />
+            <path
+              d="M14 22a7 7 0 1 0 0-14h-1"
+            />
+            <path
+              d="M9 14h2"
+            />
+            <path
+              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+            />
+            <path
+              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Overview
+          </span>
+        </a>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-1"
+        >
+          Waiting
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-1"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/review"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-inbox rh-icon"
+                data-icon="inbox"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <polyline
+                  points="22 12 16 12 14 15 10 15 8 12 2 12"
+                />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Review inbox
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                12
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Review inbox items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/conflicts"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-triangle-alert rh-icon"
+                data-icon="alert-triangle"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                />
+                <path
+                  d="M12 9v4"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Conflicts
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                3
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Conflicts items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Stale
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                5
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Stale items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-2"
+        >
+          The record
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-2"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/corpus"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-library rh-icon"
+                data-icon="library"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m16 6 4 14"
+                />
+                <path
+                  d="M12 6v14"
+                />
+                <path
+                  d="M8 8v12"
+                />
+                <path
+                  d="M4 4v16"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Corpus
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/claims"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Claims
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/questions"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-question-mark rh-icon"
+                data-icon="circle-help"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Questions
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/taxonomy"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-git-branch rh-icon"
+                data-icon="git-branch"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 6a9 9 0 0 0-9 9V3"
+                />
+                <circle
+                  cx="18"
+                  cy="6"
+                  r="3"
+                />
+                <circle
+                  cx="6"
+                  cy="18"
+                  r="3"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Taxonomy
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-3"
+        >
+          Outputs
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-3"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/synthesis"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layers rh-icon"
+                data-icon="layers"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                />
+                <path
+                  d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                />
+                <path
+                  d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Synthesis
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/manuscript"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Manuscript
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                2
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Manuscript items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div
+      class="rh-project-rail__foot"
+    >
+      <p
+        class="rh-project-rail__provider"
+        data-tone="success"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          <span
+            class="rh-project-rail__provider-name"
+          >
+            Local Ollama
+          </span>
+          <span
+            class="rh-project-rail__provider-state"
+          >
+            Ready
+          </span>
+        </span>
+      </p>
+      <button
+        class="rh-button rh-button--ghost rh-button--sm"
+        data-variant="ghost"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings rh-icon"
+            data-icon="settings"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Settings
+          </span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</div>
+`;
+
+exports[`ProjectRail grouped theme x density > matches the light / compact snapshot 1`] = `
+<div
+  data-density="compact"
+  data-theme="light"
+>
+  <nav
+    aria-label="Project navigation"
+    class="rh-project-rail"
+    id="rh-projectrail-ID"
+  >
+    <div
+      class="rh-project-rail__head"
+    >
+      <p
+        class="rh-project-rail__project"
+        title="/home/r/thermal"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-folder rh-icon"
+          data-icon="folder"
+          fill="none"
+          focusable="false"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+          />
+        </svg>
+        <span
+          class="rh-project-rail__project-name"
+        >
+          Thermal tolerance
+        </span>
+      </p>
+      <button
+        aria-expanded="true"
+        aria-label="Collapse the rail"
+        class="rh-icon-button rh-icon-button--sm rh-button--ghost rh-project-rail__collapse"
+        data-variant="ghost"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-panel-left rh-icon"
+          data-icon="panel-left"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            height="18"
+            rx="2"
+            width="18"
+            x="3"
+            y="3"
+          />
+          <path
+            d="M9 3v18"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="rh-project-rail__new"
+    >
+      <button
+        class="rh-button rh-button--primary rh-button--sm rh-button--full"
+        data-variant="primary"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus rh-icon"
+            data-icon="plus"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            New session
+          </span>
+        </span>
+      </button>
+    </div>
+    <ul
+      aria-label="Research"
+      class="rh-project-rail__nav"
+    >
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-messages-square rh-icon"
+            data-icon="messages-square"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+            />
+            <path
+              d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Conversation
+          </span>
+        </a>
+      </li>
+      <li>
+        <a
+          class="rh-project-rail__nav-item"
+          href="/overview"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-microscope rh-icon"
+            data-icon="microscope"
+            fill="none"
+            focusable="false"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 18h8"
+            />
+            <path
+              d="M3 22h18"
+            />
+            <path
+              d="M14 22a7 7 0 1 0 0-14h-1"
+            />
+            <path
+              d="M9 14h2"
+            />
+            <path
+              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
+            />
+            <path
+              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
+            />
+          </svg>
+          <span
+            class="rh-project-rail__nav-label"
+          >
+            Overview
+          </span>
+        </a>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-1"
+        >
+          Waiting
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-1"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/review"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-inbox rh-icon"
+                data-icon="inbox"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <polyline
+                  points="22 12 16 12 14 15 10 15 8 12 2 12"
+                />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Review inbox
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                12
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Review inbox items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/conflicts"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-triangle-alert rh-icon"
+                data-icon="alert-triangle"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                />
+                <path
+                  d="M12 9v4"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Conflicts
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                3
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Conflicts items
+                </span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/stale"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock rh-icon"
+                data-icon="clock"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 6v6l4 2"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Stale
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                5
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Stale items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-2"
+        >
+          The record
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-2"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/corpus"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-library rh-icon"
+                data-icon="library"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m16 6 4 14"
+                />
+                <path
+                  d="M12 6v14"
+                />
+                <path
+                  d="M8 8v12"
+                />
+                <path
+                  d="M4 4v16"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Corpus
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/claims"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-scale rh-icon"
+                data-icon="scale"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3v18"
+                />
+                <path
+                  d="m19 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
+                />
+                <path
+                  d="m5 8 3 8a5 5 0 0 1-6 0zV7"
+                />
+                <path
+                  d="M7 21h10"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Claims
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/questions"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-question-mark rh-icon"
+                data-icon="circle-help"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                />
+                <path
+                  d="M12 17h.01"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Questions
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/taxonomy"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-git-branch rh-icon"
+                data-icon="git-branch"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 6a9 9 0 0 0-9 9V3"
+                />
+                <circle
+                  cx="18"
+                  cy="6"
+                  r="3"
+                />
+                <circle
+                  cx="6"
+                  cy="18"
+                  r="3"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Taxonomy
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li
+        class="rh-project-rail__nav-group"
+      >
+        <p
+          class="rh-project-rail__nav-heading"
+          id="rh-projectrail-ID-group-3"
+        >
+          Outputs
+        </p>
+        <ul
+          aria-labelledby="rh-projectrail-ID-group-3"
+          class="rh-project-rail__nav-items"
+        >
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/synthesis"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layers rh-icon"
+                data-icon="layers"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                />
+                <path
+                  d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                />
+                <path
+                  d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Synthesis
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="rh-project-rail__nav-item"
+              href="/manuscript"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="16"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-project-rail__nav-label"
+              >
+                Manuscript
+              </span>
+              <span
+                class="rh-project-rail__nav-count"
+              >
+                2
+                <span
+                  class="rh-visually-hidden"
+                >
+                   Manuscript items
+                </span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div
+      class="rh-project-rail__foot"
+    >
+      <p
+        class="rh-project-rail__provider"
+        data-tone="success"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-circle-check rh-icon"
+          data-icon="circle-check"
+          fill="none"
+          focusable="false"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path
+            d="m16 9-5.5 5.5L8 12"
+          />
+        </svg>
+        <span>
+          <span
+            class="rh-project-rail__provider-name"
+          >
+            Local Ollama
+          </span>
+          <span
+            class="rh-project-rail__provider-state"
+          >
+            Ready
+          </span>
+        </span>
+      </p>
+      <button
+        class="rh-button rh-button--ghost rh-button--sm"
+        data-variant="ghost"
+        type="button"
+      >
+        <span
+          class="rh-button__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings rh-icon"
+            data-icon="settings"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="rh-button__label"
+          >
+            Settings
+          </span>
+        </span>
+      </button>
+    </div>
+  </nav>
+</div>
+`;
+
 exports[`ProjectRail multi-project theme x density > matches the dark / comfortable snapshot 1`] = `
 <div
   data-density="comfortable"
