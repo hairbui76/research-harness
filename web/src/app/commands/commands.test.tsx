@@ -296,6 +296,18 @@ describe('the palette’s two sections', () => {
     expect(within(actions).queryByRole('option', { name: /Corpus/ })).toBeNull();
   });
 
+  it('says how much of each is on offer, before the list is scrolled', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    // Three destinations, and the page's Accept beside the shell's own help command.
+    expect(
+      screen.getByText('3 screens to go to, and 2 actions on this screen.'),
+    ).toBeInTheDocument();
+  });
+
   it('offers the actions group on a screen that registers none of its own', async () => {
     const user = userEvent.setup();
     render(

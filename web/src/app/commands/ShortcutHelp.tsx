@@ -13,7 +13,7 @@
  */
 import { Dialog, DialogBody, DialogHeader, Switch } from '@research-harness/design';
 import { SHELL_SHORTCUTS, useCommands } from './CommandsProvider';
-import { CHORD_HEADING, groupCommands, shortcutLabel } from './model';
+import { CHORD_HEADING, GO_SECTION, groupCommands, shortcutLabel } from './model';
 import { ShortcutKeys } from './ShortcutKeys';
 
 export function ShortcutHelp() {
@@ -88,8 +88,12 @@ export function ShortcutHelp() {
                       <ShortcutKeys command={command} singleKeys={singleKeys} />
                     </dt>
                     <dd>
-                      <span className="rh-web-shortcuts__label">{command.label}</span>{' '}
-                      <span className="rh-text-secondary">{command.group}</span>
+                      <span className="rh-web-shortcuts__label">{command.label}</span>
+                      {/* The rail's heading for it, and nothing where the rail gives it
+                          none: "Conversation Go to" is not a sentence anybody reads. */}
+                      {command.group === GO_SECTION ? null : (
+                        <> <span className="rh-text-secondary">{command.group}</span></>
+                      )}
                     </dd>
                   </div>
                 ))}

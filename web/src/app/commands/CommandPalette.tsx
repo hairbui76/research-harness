@@ -19,8 +19,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogBody, DialogHeader, Input, useId } from '@research-harness/design';
 import { useCommands } from './CommandsProvider';
-import { matchCommands, sectionCommands } from './model';
+import { DO_SECTION, GO_SECTION, matchCommands, sectionCommands } from './model';
+import type { CommandSection } from './model';
 import { ShortcutKeys } from './ShortcutKeys';
+
+/** How many commands a section holds, in the words its own name is read with. */
+function counted(section: CommandSection | undefined, singular: string): string {
+  const count = section === undefined ? 0 : section.loose.length + section.groups.reduce(
+    (total, [, items]) => total + items.length,
+    0,
+  );
+  if (count === 0) return `no ${singular}s`;
+  return `${count} ${count === 1 ? singular : `${singular}s`}`;
+}
 
 export function CommandPalette() {
   const { commands, paletteOpen, setPaletteOpen, singleKeys } = useCommands();
@@ -125,6 +136,20 @@ export function CommandPalette() {
             }
           }}
         />
+
+        {/*
+          One line saying what is in the list, before any of it is scrolled to. Eleven
+          destinations fill the list on their own, so the actions section is below the fold
+          on a tall rail — and the whole point of the section is that a power user learns
+          this screen has actions without typing anything (critique H7, Alex).
+        */}
+        {matches.length > 0 ? (
+          <p className="rh-web-palette__summary">
+            {counted(sections.find((section) => section.name === GO_SECTION), 'screen')} to go
+            to, and {counted(sections.find((section) => section.name === DO_SECTION), 'action')}{' '}
+            on this screen.
+          </p>
+        ) : null}
 
         <div id={listId} role="listbox" aria-label="Screens and actions" className="rh-web-palette__list">
           {sections.map((section) => (

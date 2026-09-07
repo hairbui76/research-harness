@@ -95,13 +95,33 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   await page.getByRole('button', { name: 'Clear the filters' }).click();
   await expect(page.getByText('3 waiting.')).toBeVisible();
 
-  // The palette reaches the rail's destinations without the rail being on screen.
+  // The palette reaches the rail's destinations without the rail being on screen, says
+  // which two keys get there without it, and shows that this screen has actions at all
+  // before anything is typed (wave 5J).
   await page.keyboard.press('Control+k');
   await expect(page.getByRole('dialog', { name: 'Go to, or do' })).toBeVisible();
+  await expect(page.getByRole('option', { name: /Corpus/ }).locator('kbd')).toHaveText(['g', 'c']);
+  const actions = page.getByRole('group', { name: 'Actions' });
+  await expect(actions).toBeVisible();
+  await expect(actions.getByRole('option', { name: /Keyboard shortcuts/ })).toBeVisible();
+  // Eleven destinations fill the pane, so what is in the list is also said above it.
+  await expect(page.getByText(/screens to go to, and \d+ actions on this screen\./)).toBeVisible();
   await page.screenshot({ path: info.outputPath('command-palette.png'), fullPage: true });
   await page.getByRole('combobox', { name: 'Search screens and actions' }).fill('corpus');
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Corpus', level: 1 })).toBeVisible();
+
+  // And the chord itself: `g` opens it, says so, and the letter after it goes to the screen
+  // whose name that letter is in. The heading is clicked first only to put the caret
+  // somewhere that is not a text box, which is where a researcher's hands would leave it.
+  await page.getByRole('heading', { name: 'Corpus', level: 1 }).click();
+  await page.keyboard.press('g');
+  const waiting = page.locator('.rh-web-chord');
+  await expect(waiting).toHaveText(/Go to a screen/);
+  await page.screenshot({ path: info.outputPath('chord-waiting.png'), fullPage: true });
+  await page.keyboard.press('r');
+  await expect(page.getByRole('heading', { name: 'Review inbox', level: 1 })).toBeVisible();
+  await expect(waiting).toHaveCount(0);
 
   expect(errors).toEqual([]);
 });
@@ -229,11 +249,16 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Previous: Metric result · W0001' })).toBeVisible();
 
-  // `?` teaches the keys rather than leaving them to be guessed.
+  // `?` teaches the keys rather than leaving them to be guessed — the screen's own single
+  // keys, and the chords that go somewhere, each under their own heading (wave 5J).
   await page.keyboard.press('?');
   const help = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
   await expect(help).toBeVisible();
   await expect(help).toContainText('Request more evidence');
+  await expect(help.getByRole('heading', { name: 'Go to a screen' })).toBeVisible();
+  await expect(
+    help.locator('.rh-web-shortcuts__row', { hasText: 'Review inbox' }).locator('kbd'),
+  ).toHaveText(['g', 'r']);
   await page.screenshot({ path: info.outputPath('shortcut-help.png'), fullPage: true });
 });
 
