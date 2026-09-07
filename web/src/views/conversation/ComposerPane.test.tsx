@@ -371,7 +371,8 @@ describe('the composer after the disclosure', () => {
     // still opens the receipt that names what was sent. The composer's line is an addition
     // to those, never a replacement for them (binding spec §10).
     expect(screen.getByText('session:codex/gpt-5.5 (reasoning high)')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Context used (CP0007)' }));
+    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Context used (CP0007)' }));
     const inspector = await screen.findByRole('region', { name: 'Research inspector' });
     await waitFor(() =>
       expect(within(inspector).getByText('Context used')).toBeInTheDocument(),
