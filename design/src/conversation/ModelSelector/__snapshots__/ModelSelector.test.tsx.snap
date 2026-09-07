@@ -29,40 +29,6 @@ exports[`ModelSelector theme x density > matches the dark / comfortable snapshot
           >
             Claude Opus 5
           </span>
-          <span
-            class="rh-model-selector__egress"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-globe rh-icon"
-              data-icon="globe"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <path
-                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-              />
-              <path
-                d="M2 12h20"
-              />
-            </svg>
-            <span>
-              External
-            </span>
-          </span>
         </span>
       </span>
       <svg
@@ -117,40 +83,6 @@ exports[`ModelSelector theme x density > matches the dark / compact snapshot 1`]
             class="rh-model-selector__name"
           >
             Claude Opus 5
-          </span>
-          <span
-            class="rh-model-selector__egress"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-globe rh-icon"
-              data-icon="globe"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <path
-                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-              />
-              <path
-                d="M2 12h20"
-              />
-            </svg>
-            <span>
-              External
-            </span>
           </span>
         </span>
       </span>
@@ -207,40 +139,6 @@ exports[`ModelSelector theme x density > matches the light / comfortable snapsho
           >
             Claude Opus 5
           </span>
-          <span
-            class="rh-model-selector__egress"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-globe rh-icon"
-              data-icon="globe"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <path
-                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-              />
-              <path
-                d="M2 12h20"
-              />
-            </svg>
-            <span>
-              External
-            </span>
-          </span>
         </span>
       </span>
       <svg
@@ -295,40 +193,6 @@ exports[`ModelSelector theme x density > matches the light / compact snapshot 1`
             class="rh-model-selector__name"
           >
             Claude Opus 5
-          </span>
-          <span
-            class="rh-model-selector__egress"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-globe rh-icon"
-              data-icon="globe"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-              />
-              <path
-                d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-              />
-              <path
-                d="M2 12h20"
-              />
-            </svg>
-            <span>
-              External
-            </span>
           </span>
         </span>
       </span>

@@ -201,7 +201,7 @@ function Group({
     <section className="rh-web-stack rh-web-stack--tight">
       {/* The heading is the relation, in the researcher's words. The daemon's own edge
           name beside it said the same thing twice, in a form nobody reads. */}
-      <h4 className="rh-text-body-sm rh-web-graph__relation">{headingFor(group)}</h4>
+      <h4 className="rh-text-h4 rh-web-graph__relation">{headingFor(group)}</h4>
       <ul className="rh-web-list rh-web-list--tight">
         {group.neighbours.map((neighbour) => (
           <li key={`${neighbour.ref.id}:${neighbour.direction}`} className="rh-web-row">

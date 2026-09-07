@@ -11,19 +11,6 @@
   white-space: nowrap;
 }
 
-/* Egress is a word beside its glyph everywhere it appears: "leaves the machine" is not a
-   thing to encode in a colour. */
-.rh-model-selector__egress {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--rh-text-muted);
-  font-family: var(--rh-font-mono);
-  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
-}
-
 .rh-model-selector__menu {
   max-inline-size: 26rem;
 }

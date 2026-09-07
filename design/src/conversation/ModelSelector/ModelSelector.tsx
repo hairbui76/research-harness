@@ -64,7 +64,6 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
     const selected =
       options.find((option) => option.id === value) ??
       groups.flatMap((group) => group.options).find((option) => option.id === value);
-    const selectedEgress = selected ? EGRESS_META[selected.egressClass] : undefined;
 
     const renderItem = (option: ModelOption): ReactElement => {
       const egress = EGRESS_META[option.egressClass];
@@ -127,12 +126,6 @@ export const ModelSelector = forwardRef<HTMLButtonElement, ModelSelectorProps>(
               <span className="rh-model-selector__name">
                 {selected?.label ?? fallbackLabel ?? 'Select a model'}
               </span>
-              {selectedEgress ? (
-                <span className="rh-model-selector__egress">
-                  <Icon name={selectedEgress.icon} size={14} />
-                  <span>{selectedEgress.label}</span>
-                </span>
-              ) : null}
             </span>
           </Button>
         </Menu.Trigger>

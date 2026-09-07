@@ -46,8 +46,9 @@
 
 .rh-state[data-compact] .rh-state__body {
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--rh-space-3);
+  gap: var(--rh-space-2) var(--rh-space-3);
 }
 
 /* The state is named in words; colour and icon only reinforce it. */

@@ -68,7 +68,7 @@ export function ConversationPage() {
         onInspectorOpenChange={setInspectorOpen}
         toolbar={
           <div className="rh-web-row">
-            <h1 className="rh-text-h3">{session?.title ?? 'Conversation'}</h1>
+            <h1 className="rh-text-h1">{session?.title ?? 'Conversation'}</h1>
             {session ? (
               <>
                 <code>{session.id}</code>

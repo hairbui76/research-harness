@@ -40,13 +40,15 @@ const RUNTIME_GROUPS: readonly ModelOptionGroup[] = [
 ];
 
 describe('ModelSelector', () => {
-  it('names the current model and where its requests go', () => {
+  it('names the current model, and leaves where a message goes to the composer', () => {
     render(
       <ModelSelector options={SAMPLE_MODELS} value="local-llama" onChange={() => undefined} />,
     );
     const trigger = screen.getByRole('button', { name: /Model: Llama 3.1 70B/ });
     expect(trigger).toHaveTextContent('Llama 3.1 70B');
-    expect(trigger).toHaveTextContent('Local');
+    // Egress is stated in a sentence under the composer and in words on every option; an
+    // uppercase tag on the trigger would say it a third time, in a kicker.
+    expect(trigger).not.toHaveTextContent('Local');
   });
 
   it('states egress and vision in words on every option', async () => {
