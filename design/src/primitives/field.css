@@ -39,15 +39,19 @@
   line-height: var(--rh-type-body-sm-lh);
 }
 
-/* The glyph is the point: an error is never signalled by red text alone. */
+/*
+ * The glyph is the point: an error is never signalled by red text alone. The sentence
+ * beside it is what stands between the researcher and submitting the form, so it is read
+ * at reading size while the field's description, which is scanned, stays dense.
+ */
 .rh-field__error {
   display: flex;
   align-items: flex-start;
   gap: var(--rh-space-1);
   margin: 0;
   color: var(--rh-feedback-error-fg);
-  font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
-  line-height: var(--rh-type-body-sm-lh);
+  font-size: calc(var(--rh-type-body-size) * var(--rh-density-font-scale));
+  line-height: var(--rh-type-body-lh);
 }
 
 .rh-field__error .rh-icon {

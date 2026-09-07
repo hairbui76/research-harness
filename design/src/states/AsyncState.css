@@ -76,12 +76,13 @@
   font-weight: var(--rh-type-label-weight);
 }
 
+/* What the state means and what happens next: a sentence, so reading size. */
 .rh-state__description {
   margin: 0;
   max-inline-size: 68ch;
   color: var(--rh-text-secondary);
-  font-size: var(--rh-type-body-sm-size);
-  line-height: var(--rh-type-body-sm-lh);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
 }
 
 .rh-state__safety {

@@ -11,14 +11,18 @@
   gap: var(--rh-space-2);
 }
 
-/* The reason a decision cannot be recorded is text on the page, not a tooltip. */
+/*
+ * The reason a decision cannot be recorded is text on the page, not a tooltip — and it is
+ * read before the researcher can do anything else, so it is set at reading size.
+ */
 .rh-review-decision-bar__reason {
   display: flex;
   align-items: baseline;
   gap: var(--rh-space-1);
   margin: 0;
   color: var(--rh-text-secondary);
-  font-size: var(--rh-type-body-sm-size);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
 }
 
 /*

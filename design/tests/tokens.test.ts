@@ -530,6 +530,31 @@ describe('the toast viewport at a narrow width', () => {
   });
 });
 
+/**
+ * `body-sm` is for rows, cells and chips; a sentence is `body`.
+ *
+ * 13px, and 12.08px once the compact density has scaled it, is the right size for a table
+ * cell or a badge's hint — text that is scanned beside something else. It is the wrong size
+ * for a sentence a researcher has to read before they can act: what a state means, what a
+ * notice is about, why a decision cannot be recorded, what is wrong with a field.
+ */
+describe('the sentences a researcher reads before acting', () => {
+  const READING: readonly [string, string][] = [
+    ['states/AsyncState.css', '.rh-state__description'],
+    ['states/ErrorNotice.css', '.rh-error-notice__description'],
+    ['research/ReviewDecisionBar/ReviewDecisionBar.css', '.rh-review-decision-bar__reason'],
+    ['primitives/field.css', '.rh-field__error'],
+  ];
+
+  it.each(READING)('sets %s %s at reading size, not at row size', (file, selector) => {
+    const css = read(file);
+    const rule = new RegExp(`\\${selector}\\s*\\{([^}]*)\\}`).exec(css);
+    expect(rule, `${file} declares no ${selector} rule`).not.toBeNull();
+    expect(rule![1]).toContain('--rh-type-body-size');
+    expect(rule![1]).not.toContain('--rh-type-body-sm-size');
+  });
+});
+
 function filesUnder(root: string, ends: (name: string) => boolean): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
