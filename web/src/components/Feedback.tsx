@@ -42,6 +42,7 @@ import {
   AuthorityBadge,
   Badge,
   Card,
+  DescribedTerm,
   ErrorNotice,
   ScrollArea,
   Skeleton,
@@ -50,6 +51,7 @@ import {
   humaniseTerm,
   researchDescription,
   researchLabel,
+  researchMeaning,
   useId,
 } from '@research-harness/design';
 import type {
@@ -220,12 +222,51 @@ export function Panel({
   );
 }
 
-/** A definition row: the label the daemon uses, and the value it reported. */
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export interface FieldProps {
+  /** The label the daemon uses for this key. */
+  label: string;
+  /**
+   * Which controlled vocabulary the value belongs to, so the row can print the product's
+   * word for it and — with `describe` — what it means.
+   */
+  vocabulary?: VocabularyName;
+  /** The daemon's own value, when this row carries one word of that vocabulary. */
+  value?: string;
+  /**
+   * Put the vocabulary's meaning on the page: the value takes a tab stop, is
+   * `aria-describedby` its sentence, and prints it underneath while it has focus — the
+   * same act `StatusBadge` performs for a state that is a badge. A value the product says
+   * nothing about stays plain text rather than offering a tab stop that leads nowhere.
+   */
+  describe?: boolean;
+  /** What the row shows, when it is not one word of a vocabulary. */
+  children?: ReactNode;
+}
+
+/**
+ * A definition row: the label the daemon uses, and the value it reported.
+ *
+ * Most of what a review screen prints is a `<dd>` rather than a badge — an absence state,
+ * a strength, an origin — and those were the words a first-timer met with nothing on the
+ * page to define them (critique 2026-09-07, heuristic 10). Naming the row's vocabulary is
+ * what lets it spell the value in the product's word; adding `describe` is what puts the
+ * meaning one press away.
+ */
+export function Field({ label, vocabulary, value, describe = false, children }: FieldProps) {
+  const word =
+    children ?? (vocabulary !== undefined && value !== undefined
+      ? researchLabel(vocabulary, value)
+      : null);
+  const meaning =
+    describe && vocabulary !== undefined && value !== undefined
+      ? researchMeaning(vocabulary, value)
+      : undefined;
   return (
     <div className="rh-web-field">
       <dt className="rh-text-label">{label}</dt>
-      <dd>{children}</dd>
+      <dd>
+        {meaning === undefined ? word : <DescribedTerm description={meaning}>{word}</DescribedTerm>}
+      </dd>
     </div>
   );
 }

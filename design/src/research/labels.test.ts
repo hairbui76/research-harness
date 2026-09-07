@@ -14,12 +14,14 @@ import {
   CLAIM_SCOPE_META,
   CLAIM_STATUS_META,
   CLAIM_TYPE_META,
+  ANCHOR_STATUS_META,
   CONFLICT_KIND_META,
   EVIDENCE_ORIGIN_META,
   EVIDENCE_STRENGTH_META,
   EVIDENCE_TYPE_META,
   NEGATIVE_STATE_META,
   RESEARCH_VOCABULARIES,
+  RESEARCH_VOCABULARY_DESCRIPTIONS,
   REVIEW_CATEGORY_META,
   REVIEW_TIER_META,
   SCREENING_STATE_META,
@@ -28,6 +30,8 @@ import {
   humaniseTerm,
   researchDescription,
   researchLabel,
+  researchMeaning,
+  researchVocabularyDescription,
   termDescription,
   termLabel,
 } from './labels';
@@ -155,6 +159,14 @@ describe('every vocabulary the daemon exposes', () => {
       }
     }
   });
+
+  it('writes what it states about a whole vocabulary the same way', () => {
+    for (const [name, description] of Object.entries(RESEARCH_VOCABULARY_DESCRIPTIONS)) {
+      expect(RESEARCH_VOCABULARIES).toHaveProperty(name);
+      expect(description).toMatch(/[.!?]$/);
+      expect(description).not.toMatch(/_/);
+    }
+  });
 });
 
 describe('the words themselves', () => {
@@ -194,7 +206,28 @@ describe('the words themselves', () => {
     for (const origin of ['author_interpreted', 'researcher_inferred', 'model_proposed']) {
       expect(termDescription(EVIDENCE_ORIGIN_META, origin)).toMatch(/only a researcher/);
     }
-    expect(termDescription(EVIDENCE_ORIGIN_META, 'source_observed')).toBeUndefined();
+  });
+
+  /**
+   * `source_observed` used to be asserted as having no meaning at all, which was true of
+   * PRODUCT §9.1 — it lists the six values and defines none. It was not true of the
+   * product: the extractor's role contract tells a model to separate exactly these three
+   * ("`source_observed` for something measured or reported, `author_claimed` for what the
+   * authors assert"), and `roles/schemas.py` says why `external_metadata` is not one of
+   * them. A first-timer reading ORIGIN: Source observed had none of that on screen, so the
+   * sentences the product already writes are now here.
+   */
+  it('separates the three origins the extractor is told to tell apart', () => {
+    expect(termDescription(EVIDENCE_ORIGIN_META, 'source_observed')).toMatch(
+      /measured or reported/,
+    );
+    expect(termDescription(EVIDENCE_ORIGIN_META, 'author_claimed')).toMatch(/authors assert/);
+    expect(termDescription(EVIDENCE_ORIGIN_META, 'external_metadata')).toMatch(/provenance/);
+  });
+
+  it('says what a valid anchor is, beside what a stale one is', () => {
+    expect(termDescription(ANCHOR_STATUS_META, 'valid')).toMatch(/still replays/);
+    expect(termDescription(ANCHOR_STATUS_META, 'stale')).toMatch(/source moved/);
   });
 
   it('keeps absence and a missing keyword apart', () => {
@@ -289,5 +322,51 @@ describe('the vocabulary reached by name', () => {
       'Needs a second reader',
     );
     expect(researchDescription('reviewCategory', 'needs_a_second_reader')).toBeUndefined();
+  });
+});
+
+/**
+ * The vocabularies PRODUCT enumerates without defining a single member.
+ *
+ * Evidence type and evidence strength are bare lists in §9.2 and §9.3, so no member of
+ * either carries a sentence and none is invented for it. What the product does state is
+ * what the axis is for, and that is what a page falls back to, so STRENGTH over "Direct"
+ * is no longer a word with nothing behind it.
+ */
+describe('what the product states about a vocabulary rather than a value', () => {
+  it('states the axis for the vocabularies whose members it never defines', () => {
+    expect(researchVocabularyDescription('evidenceStrength')).toBe(
+      'How directly the source supports the evidence.',
+    );
+    expect(researchVocabularyDescription('evidenceType')).toBe(
+      'What kind of statement the evidence carries.',
+    );
+    expect(researchVocabularyDescription('evidenceOrigin')).toMatch(/what the source does/);
+    expect(researchVocabularyDescription('reviewTier')).toMatch(/property of the question/);
+    expect(researchVocabularyDescription('anchorStatus')).toMatch(/stored parse/);
+    expect(researchVocabularyDescription('negativeState')).toMatch(/missing keyword/);
+  });
+
+  it('states nothing about a vocabulary the product does not describe as a whole', () => {
+    expect(researchVocabularyDescription('claimType')).toBeUndefined();
+    expect(researchVocabularyDescription('decisionType')).toBeUndefined();
+  });
+
+  it('prefers the value’s own meaning and falls back to the vocabulary’s', () => {
+    // `derived` is the one strength PRODUCT §9.3 says something about, so it keeps its own
+    // sentence; its two neighbours borrow the axis.
+    expect(researchMeaning('evidenceStrength', 'derived')).toMatch(/never shown as direct/);
+    expect(researchMeaning('evidenceStrength', 'direct')).toBe(
+      'How directly the source supports the evidence.',
+    );
+    expect(researchMeaning('evidenceType', 'experimental_result')).toBe(
+      'What kind of statement the evidence carries.',
+    );
+    expect(researchMeaning('reviewTier', '2')).toMatch(/Interpretation/);
+  });
+
+  it('leaves a word the product says nothing about anywhere undescribed', () => {
+    expect(researchMeaning('claimType', 'descriptive')).toBeUndefined();
+    expect(researchMeaning('candidateField', 'traffic_unit')).toBeUndefined();
   });
 });

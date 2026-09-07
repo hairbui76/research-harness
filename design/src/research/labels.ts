@@ -37,18 +37,35 @@ export type Vocabulary = Readonly<Record<string, TermMeta>>;
 
 /**
  * Accepting an interpretive origin is a judgement, so the domain reserves it for a person
- * (`INTERPRETIVE_ORIGINS`); the other three carry no stated meaning beyond their name.
+ * (`INTERPRETIVE_ORIGINS`).
+ *
+ * The other three are the ones the extractor's own role contract tells a model to
+ * separate — "`source_observed` for something measured or reported, `author_claimed` for
+ * what the authors assert" (`roles/extractor.py`) — and `external_metadata`, which
+ * `roles/schemas.py` excludes from that list because it "describe[s] how a record was
+ * produced, which is provenance, not what the source says". PRODUCT §9.1 lists the six
+ * values; those two files are where the product says what they are, so the sentences
+ * below restate them and add nothing.
  */
 const INTERPRETIVE =
   'Interpretive: accepting it is a judgement only a researcher may make.';
 
 export const EVIDENCE_ORIGIN_META: Vocabulary = {
-  source_observed: { label: 'Source observed' },
-  author_claimed: { label: 'Author claimed' },
+  source_observed: {
+    label: 'Source observed',
+    description: 'Something the source measured or reported, visible in the artifact itself.',
+  },
+  author_claimed: {
+    label: 'Author claimed',
+    description: 'What the authors assert, rather than something the source measured.',
+  },
   author_interpreted: { label: 'Author interpreted', description: INTERPRETIVE },
   researcher_inferred: { label: 'Researcher inferred', description: INTERPRETIVE },
   model_proposed: { label: 'Model proposed', description: INTERPRETIVE },
-  external_metadata: { label: 'External metadata' },
+  external_metadata: {
+    label: 'External metadata',
+    description: 'How the record was produced, which is provenance rather than what the source says.',
+  },
 };
 
 export const EVIDENCE_TYPE_META: Vocabulary = {
@@ -68,6 +85,13 @@ export const EVIDENCE_TYPE_META: Vocabulary = {
   bibliographic_metadata: { label: 'Bibliographic metadata' },
 };
 
+/**
+ * PRODUCT §9.3 lists the three strengths and states one thing about one of them, so
+ * `direct` and `indirect` have no sentence here and are not given one. What the axis
+ * means is stated (`domain/enums.py`: "How directly the source supports the evidence"),
+ * and that sentence lives in `RESEARCH_VOCABULARY_DESCRIPTIONS` below, where a value with
+ * no meaning of its own falls back to it.
+ */
 export const EVIDENCE_STRENGTH_META: Vocabulary = {
   direct: { label: 'Direct' },
   indirect: { label: 'Indirect' },
@@ -240,7 +264,12 @@ export const REVIEW_TIER_META: Vocabulary = {
 
 /** What replaying an anchor against the stored parse said. */
 export const ANCHOR_STATUS_META: Vocabulary = {
-  valid: { label: 'Valid' },
+  valid: {
+    label: 'Valid',
+    // The review guide's own wording for the condition a routine candidate has to meet:
+    // "the anchor still replays as valid" (docs/guide/review.md).
+    description: 'The anchor still replays against the stored parse.',
+  },
   stale: {
     label: 'Stale',
     description: 'The source moved after the anchor was recorded; nothing is silently re-anchored.',
@@ -370,6 +399,41 @@ export const RESEARCH_VOCABULARIES = {
 export type VocabularyName = keyof typeof RESEARCH_VOCABULARIES;
 
 /**
+ * What the product states about a whole vocabulary, for values it never defines one by one.
+ *
+ * PRODUCT §9.2 and §9.3 list the fourteen evidence types and the three strengths as bare
+ * enumerations: nothing in the product says what `experimental_result` or `direct` means,
+ * so a page reading TYPE over "Experimental result" or STRENGTH over "Direct" had nothing
+ * to explain it, which is what a first-timer met on the review screen. What the product
+ * *does* state is what each axis is for, in the daemon's own enumerations
+ * (`domain/enums.py`), the extractor's role contract, and PRODUCT §11 and §24.1. Those
+ * sentences are these, restated and nothing more.
+ *
+ * A value with a meaning of its own keeps it; this is the fallback under it, never a
+ * replacement for it, and a vocabulary whose axis the product does not state is absent
+ * here rather than given a sentence someone made up.
+ */
+export const RESEARCH_VOCABULARY_DESCRIPTIONS: Partial<Record<VocabularyName, string>> = {
+  // "Epistemic origin of an evidence object" (Product 9.1), classified "by what the source
+  // does, not by what you believe" (`roles/extractor.py`).
+  evidenceOrigin:
+    'Where a statement comes from, classified by what the source does rather than by what a reader believes.',
+  // "What kind of statement the evidence carries" (Product 9.2, `domain/enums.py`).
+  evidenceType: 'What kind of statement the evidence carries.',
+  // "How directly the source supports the evidence" (Product 9.3, `domain/enums.py`).
+  evidenceStrength: 'How directly the source supports the evidence.',
+  // "The following states must be different… A missing keyword is not sufficient evidence
+  // of absence" (Product 11).
+  negativeState:
+    'Absence states the product keeps apart, because a missing keyword is not sufficient evidence of absence.',
+  // The tier is a property of the question (Product 24.1).
+  reviewTier:
+    'How much reading the question needs — a property of the question, not of the answer or of any model’s confidence.',
+  // What `review.stale` reports and refuses to repair (docs/guide/review.md, ADR-008).
+  anchorStatus: 'What replaying the anchor against the stored parse said.',
+};
+
+/**
  * A readable phrase for an identifier no vocabulary documents: `_`, `-` and `.` become
  * spaces, `:` keeps its place because a split candidate is staged as
  * `<field>:interpretation`, and the first letter is capitalised. It adds no meaning — it
@@ -398,6 +462,25 @@ export function researchLabel(name: VocabularyName, value: string): string {
 /** The one line the named vocabulary states about a value. */
 export function researchDescription(name: VocabularyName, value: string): string | undefined {
   return termDescription(RESEARCH_VOCABULARIES[name], value);
+}
+
+/** The one line the product states about a whole vocabulary, when it states one. */
+export function researchVocabularyDescription(name: VocabularyName): string | undefined {
+  return RESEARCH_VOCABULARY_DESCRIPTIONS[name];
+}
+
+/**
+ * The meaning to put on the page beside one value: the value's own sentence when the
+ * product states one, and otherwise what it states about the vocabulary the value belongs
+ * to.
+ *
+ * This is what a surface asks for when it makes a word reachable, so that a vocabulary
+ * that defines its axis but not its members still teaches something, and a word the
+ * product says nothing about anywhere stays undescribed rather than taking a tab stop that
+ * leads to nothing.
+ */
+export function researchMeaning(name: VocabularyName, value: string): string | undefined {
+  return researchDescription(name, value) ?? researchVocabularyDescription(name);
 }
 
 /**

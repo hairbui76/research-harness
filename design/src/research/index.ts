@@ -8,12 +8,14 @@ export * from './labels';
 
 export { AuthorityBadge } from './AuthorityBadge';
 export type { AuthorityBadgeProps } from './AuthorityBadge';
+export { DescribedTerm } from './DescribedTerm';
+export type { DescribedTermProps } from './DescribedTerm';
 export { EntityRef } from './EntityRef';
 export type { EntityRefElement, EntityRefProps, EntityRefSize } from './EntityRef';
 export { SourceAnchor } from './SourceAnchor';
 export type { SourceAnchorProps, SourceAnchorVariant } from './SourceAnchor';
 export { EvidenceCard } from './EvidenceCard';
-export type { EvidenceCardProps } from './EvidenceCard';
+export type { EvidenceCardProps, EvidenceFactMeanings } from './EvidenceCard';
 export { ClaimCard } from './ClaimCard';
 export type { ClaimCardProps } from './ClaimCard';
 export { ChangeList, CHANGE_BY_META, CHANGE_KINDS, CHANGE_KIND_META } from './ChangeList';

@@ -74,6 +74,54 @@ describe('EvidenceCard', () => {
     expect(screen.getByText(SAMPLE_EVIDENCE.workLabel)).toBeInTheDocument();
   });
 
+  /**
+   * The four metadata facts are vocabulary words — `Experimental result`, `Direct`,
+   * `Source observed` — and a first-timer met them on the review screen with nothing to
+   * say what they meant (critique 2026-09-07, heuristic 10, Jordan). The host passes the
+   * sentences the product states; the card makes them reachable the way the authority
+   * badge above them already is.
+   */
+  it('makes a fact’s meaning reachable when it is given one', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <EvidenceCard
+        evidence={SAMPLE_EVIDENCE}
+        meanings={{ strength: 'How directly the source supports the evidence.' }}
+      />,
+    );
+
+    const word = container.querySelector('.rh-described-term__word');
+    expect(word).toHaveTextContent(SAMPLE_EVIDENCE.strength);
+    expect(word).not.toHaveAttribute('title');
+    const describedBy = word?.getAttribute('aria-describedby');
+    expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(
+      'How directly the source supports the evidence.',
+    );
+
+    word?.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    await user.click(word!);
+    expect(container.querySelector('.rh-described-term__hint')).toHaveTextContent(
+      'How directly the source supports the evidence.',
+    );
+  });
+
+  it('leaves a fact the product says nothing about out of the tab order', () => {
+    const { container } = render(
+      <EvidenceCard
+        evidence={SAMPLE_EVIDENCE}
+        meanings={{ strength: 'How directly the source supports the evidence.' }}
+      />,
+    );
+    // One described fact, not four: `Work`, `Type` and `Origin` were given no sentence
+    // here, so they stay plain text rather than offering a tab stop that leads nowhere.
+    expect(container.querySelectorAll('.rh-described-term__word')).toHaveLength(1);
+  });
+
+  it('describes nothing at all when it is given no meanings', () => {
+    const { container } = render(<EvidenceCard evidence={SAMPLE_EVIDENCE} />);
+    expect(container.querySelector('.rh-described-term')).toBeNull();
+  });
+
   it('drops the metadata grid when compact', () => {
     const { container } = render(<EvidenceCard evidence={SAMPLE_EVIDENCE} compact />);
     expect(container.querySelector('.rh-evidence-card__facts')).toBeNull();
@@ -81,7 +129,15 @@ describe('EvidenceCard', () => {
 
   it('has no accessibility violations', async () => {
     const { container } = render(
-      <EvidenceCard evidence={SAMPLE_EVIDENCE} onOpen={() => undefined} />,
+      <EvidenceCard
+        evidence={SAMPLE_EVIDENCE}
+        onOpen={() => undefined}
+        meanings={{
+          type: 'What kind of statement the evidence carries.',
+          strength: 'How directly the source supports the evidence.',
+          origin: 'Something the source measured or reported, visible in the artifact itself.',
+        }}
+      />,
     );
     await expectNoAxeViolations(container);
   });

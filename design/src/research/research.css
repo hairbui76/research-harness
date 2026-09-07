@@ -5,6 +5,7 @@
  */
 
 @import './AuthorityBadge/AuthorityBadge.css';
+@import './DescribedTerm/DescribedTerm.css';
 @import './EntityRef/EntityRef.css';
 @import './SourceAnchor/SourceAnchor.css';
 @import './EvidenceCard/EvidenceCard.css';

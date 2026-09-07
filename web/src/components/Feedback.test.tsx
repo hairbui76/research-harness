@@ -12,7 +12,17 @@ import { fileURLToPath } from 'node:url';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { DataTable, Empty, ErrorBox, Loading, StatusBadge, candidateName, fieldLabel } from './Feedback';
+import {
+  DataTable,
+  Empty,
+  ErrorBox,
+  Field,
+  Fields,
+  Loading,
+  StatusBadge,
+  candidateName,
+  fieldLabel,
+} from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
 
 describe('waiting for a read', () => {
@@ -219,6 +229,97 @@ describe('a status badge', () => {
   it('has no automatically detectable accessibility violation while describing itself', async () => {
     const { container } = render(
       <StatusBadge status="high_risk" vocabulary="reviewCategory" describe />,
+    );
+    await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * A definition row whose value is one word of a vocabulary.
+ *
+ * The review screen prints most of its vocabulary as `<dd>`s rather than badges — the
+ * absence state, the metadata facts — and a `<dd>` had no way to say what its word meant.
+ * `Field` gets the mechanism the badge already has, in the same shape, so a reader learns
+ * one gesture rather than two.
+ */
+describe('a definition row that carries a vocabulary word', () => {
+  it('prints the vocabulary’s word for the daemon’s value', () => {
+    render(
+      <Fields>
+        <Field label="State" vocabulary="negativeState" value="not_reported" />
+      </Fields>,
+    );
+
+    expect(screen.getByText('Not reported')).toBeInTheDocument();
+    expect(screen.queryByText('not_reported')).not.toBeInTheDocument();
+  });
+
+  it('leaves a row that was given children exactly as it was', () => {
+    const { container } = render(
+      <Fields>
+        <Field label="Verifier">scripted/scripted-1</Field>
+      </Fields>,
+    );
+
+    expect(screen.getByText('scripted/scripted-1')).toBeInTheDocument();
+    expect(container.querySelector('.rh-described-term')).toBeNull();
+    expect(container.querySelector('dd')).not.toHaveAttribute('tabindex');
+  });
+
+  it('makes the meaning reachable from the keyboard, with no title attribute', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <Fields>
+        <Field label="State" vocabulary="negativeState" value="absent" describe />
+      </Fields>,
+    );
+
+    const word = container.querySelector('.rh-described-term__word')!;
+    expect(word).not.toHaveAttribute('title');
+    const describedBy = word.getAttribute('aria-describedby');
+    expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(/audited conclusion/);
+
+    expect(container.querySelector('.rh-described-term__hint')).toBeNull();
+    // A pointer only passing over the word leaves the panel where it was.
+    await user.hover(word);
+    expect(container.querySelector('.rh-described-term__hint')).toBeNull();
+
+    await user.tab();
+    expect(container.querySelector('.rh-described-term__hint')).toHaveTextContent(
+      /audited conclusion/,
+    );
+  });
+
+  it('falls back to what the product states about the vocabulary itself', () => {
+    const { container } = render(
+      <Fields>
+        <Field label="Strength" vocabulary="evidenceStrength" value="direct" describe />
+      </Fields>,
+    );
+
+    const word = container.querySelector('.rh-described-term__word')!;
+    expect(word).toHaveTextContent('Direct');
+    expect(
+      container.querySelector(`#${word.getAttribute('aria-describedby')}`),
+    ).toHaveTextContent('How directly the source supports the evidence.');
+  });
+
+  it('stays plain text for a word the product says nothing about', () => {
+    const { container } = render(
+      <Fields>
+        <Field label="Type" vocabulary="claimType" value="descriptive" describe />
+      </Fields>,
+    );
+
+    expect(screen.getByText('Descriptive')).toBeInTheDocument();
+    expect(container.querySelector('.rh-described-term')).toBeNull();
+  });
+
+  it('has no automatically detectable accessibility violation while describing itself', async () => {
+    const { container } = render(
+      <Fields>
+        <Field label="State" vocabulary="negativeState" value="absent" describe />
+      </Fields>,
     );
     await expectNoAxeViolations(container);
   });

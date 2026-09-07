@@ -16,6 +16,9 @@ import { axeViolations } from './axe';
  *   is about, its one-line meaning is on the page — named by the badge, and printed under
  *   it when the badge takes focus. No `title` attribute, which is reachable by neither the
  *   keyboard nor touch.
+ * - **And so is the meaning of a word that is not a state.** The tier, the evidence type,
+ *   the strength and the origin stand as values rather than badges, and each answers the
+ *   same gesture: a tab stop, a sentence named by it, the sentence printed underneath.
  */
 
 /** Identifiers the daemon uses internally and a researcher never has to read. */
@@ -138,4 +141,97 @@ test('a state says what it means, and says it to the keyboard', async ({ page, r
   // Not one of these meanings hides in a `title`, which neither the keyboard nor touch
   // can reach.
   expect(await page.locator('.rh-badge[title]').count()).toBe(0);
+});
+
+/** Every word on a screen that offers its meaning, whether it is drawn as a badge or not. */
+const DESCRIBED = '.rh-described-term__word, .rh-badge[tabindex="0"]';
+
+/** The sentence a described word is currently printing for the eye. */
+const HINT = '.rh-described-term__hint, .rh-authority-badge__hint';
+
+/**
+ * Walk the page with Tab, and read every meaning it offers on the way.
+ *
+ * The walk is the assertion: a sentence that only a mouse can open, or that lives in a
+ * `title`, is exactly what this screen is not allowed to have. Each described word must
+ * take a tab stop, name its own sentence for a screen reader, and print that same sentence
+ * under itself while it holds focus.
+ */
+async function tabThroughMeanings(
+  page: import('@playwright/test').Page,
+): Promise<Map<string, string>> {
+  // The page reads itself before it has any of these, so wait for the first one rather
+  // than walking an empty screen and concluding it says nothing.
+  await expect(page.locator(DESCRIBED).first()).toBeVisible({ timeout: 15_000 });
+  const total = await page.locator(DESCRIBED).count();
+  const found = new Map<string, string>();
+
+  await page.locator('h1').first().click();
+  for (let step = 0; step < 200 && found.size < total; step += 1) {
+    await page.keyboard.press('Tab');
+    const focused = page.locator(':focus');
+    if ((await focused.count()) === 0) continue;
+    const describes = await focused.evaluate(
+      (element) =>
+        element.classList.contains('rh-described-term__word') ||
+        (element.classList.contains('rh-badge') && element.hasAttribute('aria-describedby')),
+    );
+    if (!describes) continue;
+
+    const word = ((await focused.textContent()) ?? '').trim();
+    expect(await focused.getAttribute('title'), `"${word}" hides its meaning in a title`).toBeNull();
+    const describedBy = await focused.getAttribute('aria-describedby');
+    expect(describedBy, `"${word}" names no sentence`).toBeTruthy();
+    const sentence = ((await page.locator(`#${describedBy}`).textContent()) ?? '').trim();
+    expect(sentence.length, `"${word}" is named by an empty sentence`).toBeGreaterThan(0);
+
+    // The visible half is the same sentence, and it is there because this word has focus.
+    await expect(page.locator(HINT).first()).toHaveText(sentence);
+    found.set(word, sentence);
+  }
+  return found;
+}
+
+test('every word the review screen prints as a value defines itself to the keyboard', async ({
+  page,
+  request,
+}, info) => {
+  await seedQueue(page, request);
+
+  // The queue first: the tier is the phrase a first-timer meets before anything else, and
+  // it is not a badge, so it has to answer the same gesture the badges beside it do.
+  const inbox = await tabThroughMeanings(page);
+  expect([...inbox.keys()]).toContain('Tier 2 — deep review');
+  expect(inbox.get('Tier 2 — deep review')).toMatch(/Interpretation/);
+  expect(inbox.get('High-risk scientific claims')).toMatch(/carries a number/);
+
+  // Captured with the sentence open, because what is being reviewed is the sentence in
+  // place: the row keeps its shape and the meaning sits under the word it explains.
+  await page.getByText('Tier 2 — deep review').first().click();
+  await expect(page.locator(HINT).first()).toContainText('Interpretation');
+  await page.screenshot({ path: info.outputPath('vocabulary-inbox-tier.png'), fullPage: true });
+
+  await page.getByRole('link', { name: /Metric result · W0001/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Metric result · W0001', level: 1 }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  const review = await tabThroughMeanings(page);
+  // The four the critique named as undefined, and the states this screen is about.
+  expect(review.get('Experimental result')).toMatch(/kind of statement/);
+  expect(review.get('Direct')).toMatch(/How directly the source supports/);
+  expect(review.get('Source observed')).toMatch(/measured or reported/);
+  expect(review.get('Metric result')).toMatch(/measured result/);
+  expect(review.get('Valid')).toMatch(/still replays/);
+  expect(review.get('Supported')).toMatch(/independent reader/);
+  expect(review.get('Candidate')).toMatch(/Proposed and awaiting review/);
+
+  // Nowhere on the screen is a meaning hidden where a keyboard or a touch cannot reach it.
+  expect(
+    await page.locator('.rh-described-term__word[title], .rh-badge[title]').count(),
+  ).toBe(0);
+
+  await page.getByText('Direct', { exact: true }).first().click();
+  await expect(page.locator(HINT).first()).toContainText('How directly the source supports');
+  await page.screenshot({ path: info.outputPath('vocabulary-review-described.png'), fullPage: true });
 });

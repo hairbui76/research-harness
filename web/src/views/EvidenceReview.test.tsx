@@ -54,6 +54,32 @@ function daemonFor(overview: unknown = FIXTURES.overview) {
   });
 }
 
+/**
+ * The same candidate, recording an absence instead of a number, so the Absence panel is on
+ * screen. `not_reported` is one of the four states the extractor may report; `absent` is
+ * an audited conclusion and is never extracted (PRODUCT §11).
+ */
+function daemonForAbsence() {
+  const candidate = FIXTURES.candidate as unknown as {
+    evidence: { content: Record<string, unknown> };
+  };
+  const absence = {
+    ...candidate,
+    evidence: {
+      ...candidate.evidence,
+      content: { ...candidate.evidence.content, numeric: null, negative_state: 'not_reported' },
+    },
+  };
+  return fakeDaemon({
+    gets: {
+      '/overview': FIXTURES.overview,
+      [`/candidates/${ITEM.candidate_id}`]: absence,
+      [`/blocks/${ITEM.artifact}`]: FIXTURES.blocks,
+    },
+    capabilities: { 'review.inbox': FIXTURES.reviewInbox },
+  });
+}
+
 /** The review screen inside the shortcut layer, which is where the shell mounts it. */
 function withShell(ui: ReactElement): ReactElement {
   return <CommandsProvider>{ui}</CommandsProvider>;
@@ -130,6 +156,69 @@ describe('source beside decision', () => {
     expect(
       container.querySelector(`#${verdict.getAttribute('aria-describedby')}`),
     ).toHaveTextContent(/independent reader/);
+  });
+
+  /**
+   * The words a first-timer meets, defined where they stand.
+   *
+   * "Tier 2 — deep review", "Ambiguous extractions", `STRENGTH: Direct` and
+   * `ORIGIN: Source observed` were on this screen with nothing on the page to say what
+   * they meant (critique 2026-09-07, heuristic 10, Jordan). Each is now reachable the way
+   * the authority badge above them already was: a tab stop, a sentence named by it, and
+   * the same sentence printed underneath on focus.
+   */
+  it('defines the metadata facts it prints, one press away', async () => {
+    const user = userEvent.setup();
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Verification')).toBeInTheDocument());
+
+    const meanings: Record<string, RegExp> = {
+      'Experimental result': /kind of statement/,
+      Direct: /How directly the source supports/,
+      'Source observed': /measured or reported/,
+      'Metric result': /measured result/,
+    };
+    for (const [word, sentence] of Object.entries(meanings)) {
+      const found = [...container.querySelectorAll('.rh-described-term__word')].find(
+        (element) => element.textContent === word,
+      );
+      expect(found, `no described fact reads "${word}"`).toBeDefined();
+      expect(found).not.toHaveAttribute('title');
+      expect(
+        container.querySelector(`#${found!.getAttribute('aria-describedby')}`),
+      ).toHaveTextContent(sentence);
+
+      // Clicking the word focuses it, which is how a pointer reaches the same sentence
+      // the keyboard does.
+      await user.click(found!);
+      expect(container.querySelector('.rh-described-term__hint')).toHaveTextContent(sentence);
+    }
+  });
+
+  it('says what a valid anchor is, where it says the anchor is valid', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Anchor')).toBeInTheDocument());
+    const anchor = screen.getByText('Valid').closest('.rh-badge')!;
+    expect(anchor).not.toHaveAttribute('title');
+    expect(anchor).toHaveAttribute('tabindex', '0');
+    expect(
+      container.querySelector(`#${anchor.getAttribute('aria-describedby')}`),
+    ).toHaveTextContent(/still replays/);
+  });
+
+  it('says what an absence state is, where the candidate records one', async () => {
+    const { container } = renderReview(daemonForAbsence());
+
+    await waitFor(() => expect(screen.getByText('Absence')).toBeInTheDocument());
+    const state = [...container.querySelectorAll('.rh-described-term__word')].find(
+      (element) => element.textContent === 'Not reported',
+    );
+    expect(state).toBeDefined();
+    expect(
+      container.querySelector(`#${state!.getAttribute('aria-describedby')}`),
+    ).toHaveTextContent(/missing keyword/);
   });
 
   it('reads an open dictionary out as a line, never as JSON', async () => {
