@@ -1,11 +1,10 @@
 /**
  * The questions page in every state it can be in.
  *
- * The project-scoped links this page draws are covered in `Corpus.test.tsx`, beside the
- * other screens where a Claim id becomes a link. What is asserted here is the frame — the
- * `h1` survives loading and refusal, and the empty state teaches what a question is — and
- * the reading order the Overview proved: the page opens with what is still open, in the
- * daemon's own words and the daemon's own order, and never with the size of the list.
+ * What is asserted here is the frame — the `h1` survives loading and refusal, and the empty
+ * state teaches what a question is — the reading order the Overview proved: the page opens
+ * with what is still open, in the daemon's own words and the daemon's own order, and never
+ * with the size of the list; and the project-scoped links it draws, under both hosts.
  */
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
@@ -244,6 +243,26 @@ describe('the questions page', () => {
     expect(screen.getByRole('link', { name: `C0001 ${CLAIM.title}` })).toHaveAttribute(
       'href',
       '/projects/prj_abc/claims/C0001',
+    );
+  });
+
+  /**
+   * Under `research app` a claim link has to land inside the project on screen; under
+   * `research serve` it has to be exactly the path it has always been. These two used to
+   * live in `Corpus.test.tsx`, beside the other screens where an id becomes a link; they
+   * belong with the rest of this page.
+   */
+  it('keeps the bare path when there is no project', async () => {
+    renderView(<QuestionsPage />, {
+      daemon: questionsDaemon([OLDER]),
+      route: '/questions',
+      path: '/questions',
+    });
+
+    await waitFor(() => expect(screen.getByText(OLDER.question)).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: `C0001 ${CLAIM.title}` })).toHaveAttribute(
+      'href',
+      '/claims/C0001',
     );
   });
 

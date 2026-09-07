@@ -1,21 +1,23 @@
 /**
- * Corpus and Questions links, under both hosts.
+ * The corpus screens, under both hosts.
  *
- * These two screens are where a Work id becomes a link most often — the corpus list, the
- * evidence page's Source panel, and the claims a question is answered by. Under
- * `research app` every one of them has to land inside the project on screen; under
- * `research serve` every one of them has to be exactly the path it has always been.
+ * This is where a Work id becomes a link most often — the corpus list and the evidence
+ * page's Source panel. Under `research app` every one of them has to land inside the
+ * project on screen; under `research serve` every one of them has to be exactly the path
+ * it has always been.
  *
  * The byte links beside them are the other half of the same rule and belong to the client,
  * not the view: `client.artifactBytesUrl` is already project-scoped by its base URL
  * (`api/client.test.ts`), so what is asserted here is that this view adds no prefix logic
  * of its own on top of it.
+ *
+ * The Questions page's own project-scoped links are asserted in `Questions.test.tsx`,
+ * beside the rest of that page.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CorpusPage, EvidencePage, WorkPage } from './Corpus';
-import { QuestionsPage } from './Questions';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { daemonReachability } from '../api/client';
 import type { WorkSummary } from '../api/dto';
@@ -42,45 +44,6 @@ function evidenceDaemon() {
           content: { exact_text: 'the accepted span' },
           source: { work: WORK.id, artifact: ARTIFACT.id, page: 3, block: 'B0081' },
         },
-      },
-    },
-  });
-}
-
-const QUESTION = {
-  id: 'RQ0001',
-  question: 'Does the encoding survive re-encryption?',
-  status: 'open',
-  claims: ['C0001'],
-  // `bearing` is `claims` with the statement the Claims page names each of them by.
-  bearing: [{ id: 'C0001', title: 'Byte-level tokenization improves recall.' }],
-  remaining_uncertainty: null,
-  stale: 'fresh',
-  opened: '2026-03-12',
-};
-
-/**
- * `question.list` as the daemon answers it: the row, plus the group it composed around it.
- * The Questions page renders the daemon's grouping rather than building one, so a fixture
- * without `groups` would leave the page with nothing to draw.
- */
-function questionsDaemon() {
-  return fakeDaemon({
-    capabilities: {
-      'question.list': {
-        count: 1,
-        questions: [QUESTION],
-        groups: [
-          {
-            kind: 'unanswered',
-            label: '1 question is still open',
-            count: 1,
-            surface: 'waiting',
-            status: 'open',
-            questions: [QUESTION.id],
-          },
-        ],
-        summary: '1 question is still open.',
       },
     },
   });
@@ -341,39 +304,6 @@ describe('one accepted piece of evidence', () => {
       'href',
       `/corpus/${WORK.id}`,
     );
-  });
-});
-
-describe('the questions screen', () => {
-  it('links the claims that bear on a question inside the project', async () => {
-    renderView(
-      <ProjectPathProvider projectId="prj_abc">
-        <QuestionsPage />
-      </ProjectPathProvider>,
-      {
-        daemon: questionsDaemon(),
-        route: '/projects/prj_abc/questions',
-        path: '/projects/prj_abc/questions',
-      },
-    );
-
-    await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
-    expect(
-      screen.getByRole('link', { name: 'C0001 Byte-level tokenization improves recall.' }),
-    ).toHaveAttribute('href', '/projects/prj_abc/claims/C0001');
-  });
-
-  it('keeps the bare path when there is no project', async () => {
-    renderView(<QuestionsPage />, {
-      daemon: questionsDaemon(),
-      route: '/questions',
-      path: '/questions',
-    });
-
-    await waitFor(() => expect(screen.getByText(QUESTION.question)).toBeInTheDocument());
-    expect(
-      screen.getByRole('link', { name: 'C0001 Byte-level tokenization improves recall.' }),
-    ).toHaveAttribute('href', '/claims/C0001');
   });
 });
 
