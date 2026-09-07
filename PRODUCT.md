@@ -53,26 +53,28 @@ Research Harness converts scholarly sources into durable evidence, auditable cla
 - **There is no undo.** Acceptance writes authority, so the ceremony belongs before the write and nothing may imitate an undo afterwards (from §24; `docs/plans/2026-09-06-ux-improvement-roadmap.md`, "Rules that bind every wave").
 - Terminology future work must preserve: Work / Version / Artifact, Evidence, Claim, Decision, Question, Note, Synthesis, Taxonomy, Conflict, Stale; the six scientific states accepted, candidate, qualified, contested, stale and private; and the distinct absence states `not_found`, `not_reported`, `absent`, `not_applicable`, `unclear` (from §7, §9, §5 P5; design/README.md).
 - Constraints that bind the interface: fonts, icons, styles and components must work locally with no CDN request (from §26); no automatic background upload of the corpus, every provider declares what content leaves the workstation, and a project may disable external-model egress entirely (from §34).
-- Explicitly undecided: the grouping of the rail's eleven destinations, proposed in `docs/plans/2026-09-07-rail-grouping-proposal.md` and waiting for the researcher; and DESIGN.md, which does not exist, so the incumbent visual world is coded but undocumented.
+- Resolved on 2026-09-08: the grouping of the rail's eleven destinations, proposed in `docs/plans/2026-09-07-rail-grouping-proposal.md`, was answered as option A and is built — Conversation and Overview stay unheaded as the ways in, and the nine below them run under Waiting, The record and Outputs, with the palette filing a destination under the rail's own heading so the two surfaces cannot call a page by two names.
+- Resolved on 2026-09-08: the incumbent visual world is recorded in `DESIGN.md`, extracted from the shipped system, with `.impeccable/design.json` beside it. Its tokens are normative: the design package's three gates and the mechanical detector read the recorded scales, and a value outside them is a defect rather than a variation.
 
 ## Brand Commitments
 
 - The product name is **Research Harness**, and the sentence it leads with everywhere is "Models may propose; evidence must justify; the researcher decides" (from §1; README.md).
 - Voice: researcher vocabulary rather than internal enums, a control that restates what it is about to write before it writes it, and no confidence number standing in for evidence (from §10.5, §24; `web/.impeccable/critique/2026-09-07T13-12-06Z__src-app-layout-tsx.md`). (inferred) This voice is read off the shipped copy and the critique; no written voice guide exists in the repository.
-- The binding rules of the incumbent design world, recorded in the roadmap and enforced by the design package: one warm ramp with a paper surface that carries its own ink; an accent reserved for model activity and the primary action that never says whether a claim is true; six scientific status families kept distinct from that accent; and a craft floor — no coloured side border above 1px, no gradient text, no kicker labels, no emoji as icons, skeletons rather than spinners, and empty states that teach (`docs/plans/2026-09-06-ux-improvement-roadmap.md`; design/README.md).
+- The binding rules of the incumbent design world, recorded in `DESIGN.md` and the roadmap and enforced by the design package: one warm ramp with a paper surface that carries its own ink; an accent reserved for model activity and the primary action that never says whether a claim is true; six scientific status families kept distinct from that accent; and a craft floor — no coloured side border above 1px, no gradient text, no kicker labels, no emoji as icons, skeletons rather than spinners, and empty states that teach (DESIGN.md; `docs/plans/2026-09-06-ux-improvement-roadmap.md`; design/README.md).
 
 ## Evidence on Hand
 
 Real, with paths:
 
+- **Design record** `DESIGN.md` and `.impeccable/design.json` — the incumbent world written down from the shipped artifact: the ramp, the type roles and their named rules, the layout, and the craft floor.
 - **Design package** `design/` — semantic tokens, a dark and a light theme, accessible primitives, and three gates that fail the build: `design/scripts/check-tokens.mjs`, `design/scripts/check-contrast.mjs`, `design/scripts/token-usage.mjs` (design/README.md).
 - **Critique snapshots** `web/.impeccable/critique/2026-09-06T16-27-46Z__src-app-layout-tsx.md` (20/40) and `web/.impeccable/critique/2026-09-07T13-12-06Z__src-app-layout-tsx.md` (25/40, closed).
-- **Plans** `docs/plans/2026-09-06-ux-improvement-roadmap.md` (the binding rules and the wave log) and `docs/plans/2026-09-07-rail-grouping-proposal.md` (open).
+- **Plans** `docs/plans/2026-09-06-ux-improvement-roadmap.md` (the binding rules and the wave log) and `docs/plans/2026-09-07-rail-grouping-proposal.md` (answered option A on 2026-09-08 and built).
 - **A real research session**, run end to end through the shipped CLI with real papers and real discovery providers, exported as 45 canonical files: `docs/dogfood/structured-traffic/`, written up in `docs/plans/dogfood-2026-09-03.md` and `docs/plans/dogfood-2026-09-03-v1.1.md`.
 - **Browser coverage** `browser-tests/*.spec.ts`, including the axe harness `browser-tests/axe.ts` with landmark and heading rules. The gate writes screenshots and traces to `.task-gate/browser-results/`, which is gitignored: regenerate them with `pnpm run task:check` rather than citing a stored image.
 - **Demo corpus** `src/research_harness/demo/synthetic_research_paper.pdf` — synthetic, labelled as such, offline, no API key.
 
-Absent, and not to be fabricated: no named users, testimonials, case studies, press, adopters or institutional endorsement; no benchmark result against a public corpus; no pricing, licensing or support claim (the repository carries no LICENSE file); no logo, wordmark or other brand asset; no DESIGN.md. The annotated browser captures cited by the current critique lived under `/tmp/critique-B/` and no longer exist.
+Absent, and not to be fabricated: no named users, testimonials, case studies, press, adopters or institutional endorsement; no benchmark result against a public corpus; no pricing, licensing or support claim (the repository carries no LICENSE file); no logo, wordmark or other brand asset. The annotated browser captures cited by the current critique lived under `/tmp/critique-B/` and no longer exist.
 
 ## Product Principles
 
