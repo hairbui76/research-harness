@@ -1,0 +1,33 @@
+/*
+ * What the Conflicts page needs and no package component owns. Semantic tokens only.
+ *
+ * Nothing here tints a conflict. The scientific status families say what the corpus has
+ * accepted; an open disagreement is a question nobody has answered, so it wears the
+ * neutral vocabulary the queue wears and says everything it means in words.
+ */
+
+/* One kind of disagreement: the line naming it, then the records under it. */
+.rh-web-conflicts > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+/*
+ * The kind reads as the group's own line — the product's word for it, then the daemon's
+ * phrase for how many there are. Not a heading: the panel above already is one.
+ */
+.rh-web-conflicts__kind {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+/* The records of a kind, indented under it by one space unit, as an attention group is. */
+.rh-web-conflicts__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+.rh-web-conflicts__items > li > p {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+}

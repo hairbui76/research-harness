@@ -1,0 +1,43 @@
+/*
+ * What the Questions page needs and no package component owns. Semantic tokens only.
+ *
+ * Nothing here draws a number: how long a question has waited is read from the day it was
+ * registered and from its place in the list, both of which are words.
+ */
+
+/* One group: the line naming it, then the questions under it. */
+.rh-web-questions > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+/*
+ * The daemon's sentence about the group is the group's own line, at the weight a heading in
+ * this column would take. It is not a heading: the panel above already is one.
+ */
+.rh-web-questions__group {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+/* The questions of a group, indented under it by one space unit. */
+.rh-web-questions__items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+.rh-web-questions__items > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-questions__items p {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/* The question itself is the subject of its row, and reads heavier than what follows it. */
+.rh-web-questions__question > span:first-child {
+  font-weight: var(--rh-type-h4-weight);
+}

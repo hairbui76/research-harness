@@ -50,10 +50,34 @@ const QUESTION = {
   status: 'open',
   claims: ['C0001'],
   remaining_uncertainty: null,
+  stale: 'fresh',
+  opened: '2026-03-12',
 };
 
+/**
+ * `question.list` as the daemon answers it: the row, plus the group it composed around it.
+ * The Questions page renders the daemon's grouping rather than building one, so a fixture
+ * without `groups` would leave the page with nothing to draw.
+ */
 function questionsDaemon() {
-  return fakeDaemon({ capabilities: { 'question.list': { count: 1, questions: [QUESTION] } } });
+  return fakeDaemon({
+    capabilities: {
+      'question.list': {
+        count: 1,
+        questions: [QUESTION],
+        groups: [
+          {
+            kind: 'unanswered',
+            label: '1 question is still open',
+            count: 1,
+            surface: 'waiting',
+            questions: [QUESTION.id],
+          },
+        ],
+        summary: '1 question is still open.',
+      },
+    },
+  });
 }
 
 describe('the corpus list', () => {
