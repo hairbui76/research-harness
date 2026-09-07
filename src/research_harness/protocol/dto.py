@@ -579,6 +579,79 @@ class TaxonomyReport(BaseModel):
     taxonomies: tuple[TaxonomyView, ...] = ()
 
 
+class MatrixEvidenceView(BaseModel):
+    """One accepted Evidence object a matrix cell rests on, as the grid opens it."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    title: str = ""
+    """What the review queue called it — `field · work` — or "" when nothing answers to it."""
+
+    route: str = ""
+    quote: str = ""
+    """The exact recorded span, never shortened: a span that is trimmed is not the span."""
+
+    measurement: str = ""
+    """The measured value with its metric and unit, when this evidence carries one."""
+
+    found: bool = True
+    """False when the workspace no longer holds the object the cell cites."""
+
+
+class MatrixCellView(BaseModel):
+    """One work/field cell of a matrix: what was recorded there, and what it rests on.
+
+    `recorded` is false for a cell nobody has read yet. That is a gap in the record and
+    never a reading of the work: no absence, no novelty and no confidence is derived from
+    it anywhere (Product 7.1, 11, 33).
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    work: str
+    field: str
+    recorded: bool = False
+    reading: str = ""
+    """The labels recorded in this cell, as one phrase. Empty when nothing was recorded."""
+
+    measurement: str = ""
+    """The number behind the reading, with its metric and unit, when there is one."""
+
+    detail: str = ""
+    """What this cell is, in words: what it was read from, or what a blank one means."""
+
+    evidence: tuple[MatrixEvidenceView, ...] = ()
+
+
+class MatrixColumnView(BaseModel):
+    """One field of a matrix, read down the works: how much of it is recorded, and how."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    field: str
+    recorded: int = 0
+    coverage: str = ""
+    """How much of this column is recorded, in words. Never a claim about the works."""
+
+    reading: str = ""
+    """How the column reads across the works: which labels were recorded, and for how many."""
+
+
+class MatrixRowView(BaseModel):
+    """One work of a matrix, with the cell recorded for it under every declared field."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    work: str
+    title: str = ""
+    route: str = ""
+    summary: str = ""
+    """How much of this row is recorded, in words."""
+
+    cells: tuple[MatrixCellView, ...] = ()
+
+
 class MatrixView(BaseModel):
     """One synthesis matrix as its page states it: what it reads, and how much it has read."""
 
@@ -599,6 +672,20 @@ class MatrixView(BaseModel):
 
     coverage: str = ""
     """How much of the matrix has been recorded, in words. Never a claim about the works."""
+
+    labels_from: str = ""
+    """Which vocabulary the labels in this matrix come from, in words (Product 32)."""
+
+    columns: tuple[MatrixColumnView, ...] = ()
+    """The matrix's fields in its own declared order, each read down the works."""
+
+    rows: tuple[MatrixRowView, ...] = ()
+    """The matrix's works in its own declared order, each with a cell per declared field.
+
+    The grid is the matrix, so it is composed here: which cell belongs where, which order
+    the rows and the columns are read in, and the words every cell is stated in are the
+    daemon's, not a client's (Product 5 P10).
+    """
 
 
 class SynthesisReport(BaseModel):

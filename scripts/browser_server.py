@@ -526,6 +526,83 @@ def stage_corpus_readiness(root: Path, *, needs_a_researcher: bool) -> None:
     stage_large_corpus(root, 4)
 
 
+def stage_synthesis_grid(root: Path) -> None:
+    """A matrix with every state of a cell the Synthesis grid has to draw.
+
+    The grid answers four questions at once — how a property varies across the works, which
+    of them has no reading for it, what a reading rests on, and where two of them read
+    differently — so the fixture has to hold all four. Two works, so a column can carry two
+    different readings. One cell read from an accepted span, one from a numeric span that
+    keeps its metric and unit (Product 12), one reading with no evidence recorded behind it,
+    and three cells nobody has read at all.
+
+    Everything is written through the daemon's own services: the paper is ingested, parsed
+    and interrogated by the scripted providers the gate already uses, and the two spans the
+    matrix cites are accepted in the review queue. Nothing here reaches production code.
+    """
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.dto import PutMatrixRequest
+    from research_harness.capabilities.handlers import put_matrix
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.base import Provenance
+    from research_harness.domain.enums import StaleState
+    from research_harness.domain.ids import EvidenceId, SynthesisId, WorkId
+    from research_harness.domain.research import MatrixCell, SynthesisMatrix
+    from research_harness.domain.transitions import HUMAN_ACTOR
+    from research_harness.projection.rebuild import rebuild_workspace
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    stage_review_queue(root)
+    # One more real work, so a column has two works to be read across.
+    stage_large_corpus(root, 1)
+    registry = build_default_registry()
+    human = Principal.human()
+
+    def call(capability: str, request: dict[str, object]) -> object:
+        return registry.invoke(
+            capability, open_context(root, HUMAN_ACTOR), request, principal=human
+        )
+
+    inbox = call("review.inbox", {})
+    spans: dict[str, EvidenceId] = {}
+    for field in ("dataset", "metric_result"):
+        staged = next(item for item in inbox.items if item["field"] == field)  # type: ignore[attr-defined]
+        accepted = call("review.accept", {"candidate_id": staged["candidate_id"]})
+        spans[field] = EvidenceId(str(accepted.evidence))  # type: ignore[attr-defined]
+
+    first, second = WorkId("W0001"), WorkId("W0002")
+    put_matrix(
+        open_context(root, HUMAN_ACTOR),
+        PutMatrixRequest(
+            matrix=SynthesisMatrix(
+                id=SynthesisId("S0001"),
+                name="Traffic representation",
+                works=(first, second),
+                fields=("dataset", "metric_result", "tokenization"),
+                cells=(
+                    MatrixCell(
+                        work=first,
+                        field="dataset",
+                        labels=("cicids2017",),
+                        evidence=(spans["dataset"],),
+                    ),
+                    MatrixCell(
+                        work=first,
+                        field="metric_result",
+                        labels=("reported",),
+                        evidence=(spans["metric_result"],),
+                    ),
+                    MatrixCell(work=second, field="dataset", labels=("unsw_nb15",)),
+                ),
+                stale=StaleState.FRESH,
+                provenance=Provenance.human(HUMAN_ACTOR),
+            )
+        ),
+    )
+    rebuild_workspace(WorkspaceRepository.open(root))
+
+
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
     bundle = root / "web/dist"
@@ -698,6 +775,22 @@ def main() -> None:
                 }
                 readiness[needs_a_researcher] = answer
                 return answer
+
+        @app.post("/__test__/synthesis-grid")
+        def synthesis_grid() -> dict[str, str]:
+            """A project whose matrix has every state of a cell the Synthesis grid draws.
+
+            Each call builds its own project, so the two viewport runs never share one.
+            """
+            manager: ProjectManager = backend.state.manager
+            name = f"Synthesis grid {next(seeded)}"
+            view = manager.create(directory, name, ReviewPolicy.STRICT)
+            stage_synthesis_grid(Path(view.path))
+            return {
+                "project_id": view.project_id,
+                "name": name,
+                "workspace_url": f"/projects/{view.project_id}",
+            }
 
         app.mount("/", backend)
         uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")

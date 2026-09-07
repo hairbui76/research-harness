@@ -911,6 +911,129 @@ export interface components {
             workspace: string;
         };
         /**
+         * MatrixCellView
+         * @description One work/field cell of a matrix: what was recorded there, and what it rests on.
+         *
+         *     `recorded` is false for a cell nobody has read yet. That is a gap in the record and
+         *     never a reading of the work: no absence, no novelty and no confidence is derived from
+         *     it anywhere (Product 7.1, 11, 33).
+         */
+        MatrixCellView: {
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+            /**
+             * Evidence
+             * @default []
+             */
+            evidence: components["schemas"]["MatrixEvidenceView"][];
+            /** Field */
+            field: string;
+            /**
+             * Measurement
+             * @default
+             */
+            measurement: string;
+            /**
+             * Reading
+             * @default
+             */
+            reading: string;
+            /**
+             * Recorded
+             * @default false
+             */
+            recorded: boolean;
+            /** Work */
+            work: string;
+        };
+        /**
+         * MatrixColumnView
+         * @description One field of a matrix, read down the works: how much of it is recorded, and how.
+         */
+        MatrixColumnView: {
+            /**
+             * Coverage
+             * @default
+             */
+            coverage: string;
+            /** Field */
+            field: string;
+            /**
+             * Reading
+             * @default
+             */
+            reading: string;
+            /**
+             * Recorded
+             * @default 0
+             */
+            recorded: number;
+        };
+        /**
+         * MatrixEvidenceView
+         * @description One accepted Evidence object a matrix cell rests on, as the grid opens it.
+         */
+        MatrixEvidenceView: {
+            /**
+             * Found
+             * @default true
+             */
+            found: boolean;
+            /** Id */
+            id: string;
+            /**
+             * Measurement
+             * @default
+             */
+            measurement: string;
+            /**
+             * Quote
+             * @default
+             */
+            quote: string;
+            /**
+             * Route
+             * @default
+             */
+            route: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+        };
+        /**
+         * MatrixRowView
+         * @description One work of a matrix, with the cell recorded for it under every declared field.
+         */
+        MatrixRowView: {
+            /**
+             * Cells
+             * @default []
+             */
+            cells: components["schemas"]["MatrixCellView"][];
+            /**
+             * Route
+             * @default
+             */
+            route: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /** Work */
+            work: string;
+        };
+        /**
          * MatrixSummary
          * @description One synthesis matrix: its rows, its fields, and whether it has gone stale.
          */
@@ -950,6 +1073,11 @@ export interface components {
              */
             cells: number;
             /**
+             * Columns
+             * @default []
+             */
+            columns: components["schemas"]["MatrixColumnView"][];
+            /**
              * Coverage
              * @default
              */
@@ -961,6 +1089,11 @@ export interface components {
             fields: string[];
             /** Id */
             id: string;
+            /**
+             * Labels From
+             * @default
+             */
+            labels_from: string;
             /** Name */
             name: string;
             /**
@@ -968,6 +1101,11 @@ export interface components {
              * @default 0
              */
             recorded: number;
+            /**
+             * Rows
+             * @default []
+             */
+            rows: components["schemas"]["MatrixRowView"][];
             /**
              * Shape
              * @default

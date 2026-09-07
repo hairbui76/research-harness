@@ -19,6 +19,7 @@ Three properties are asserted hardest.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -28,12 +29,14 @@ from starlette.testclient import TestClient
 from research_harness.capabilities.context import open_context
 from research_harness.capabilities.dto import (
     AcceptDecisionRequest,
+    AcceptEvidenceRequest,
     InitProjectRequest,
     PutMatrixRequest,
     PutTaxonomyRequest,
 )
 from research_harness.capabilities.handlers import (
     accept_decision,
+    accept_evidence,
     init_project,
     put_matrix,
     put_taxonomy,
@@ -42,8 +45,24 @@ from research_harness.capabilities.invalidation import DependencyInvalidation
 from research_harness.capabilities.permissions import Principal
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.domain.base import Provenance
-from research_harness.domain.enums import DecisionStatus, DecisionType, StaleState
-from research_harness.domain.ids import DecisionId, SynthesisId, WorkId
+from research_harness.domain.enums import (
+    DecisionStatus,
+    DecisionType,
+    EvidenceOrigin,
+    EvidenceStrength,
+    EvidenceType,
+    ReviewAction,
+    ReviewTier,
+    StaleState,
+    VerificationVerdict,
+)
+from research_harness.domain.evidence import (
+    Evidence,
+    EvidenceContent,
+    NumericValue,
+    SourceAnchor,
+)
+from research_harness.domain.ids import BlockId, DecisionId, EvidenceId, SynthesisId, WorkId
 from research_harness.domain.research import (
     Decision,
     MatrixCell,
@@ -60,7 +79,10 @@ from research_harness.protocol.dto import (
     TaxonomyReport,
 )
 from research_harness.server.app import (
+    _matrix_columns,
     _matrix_gaps,
+    _matrix_rows,
+    _measured,
     _ordered_terms,
     _term_standing,
     create_app,
@@ -75,6 +97,8 @@ MATRIX = SynthesisId("S0001")
 TAXONOMY = "traffic-shape"
 APPROVAL = DecisionId("D0001")
 UNRECORDED = DecisionId("D0404")
+SPAN = EvidenceId("E0001")
+SPAN_TEXT = "each record is padded to a fixed size before the flow is tokenised"
 HUMAN = Provenance.human(HUMAN_ACTOR)
 
 
@@ -104,18 +128,64 @@ def _taxonomy() -> Taxonomy:
     )
 
 
-def _matrix() -> SynthesisMatrix:
-    """One matrix that declares two readings for one work and has recorded one of them."""
+def _matrix(evidence: tuple[EvidenceId, ...] = ()) -> SynthesisMatrix:
+    """One matrix that declares two readings for one work and has recorded one of them.
+
+    The recorded cell cites the evidence it was read from, because a matrix cell is only
+    as good as the span behind it (Product 9): the grid has to be able to open one.
+    """
     return SynthesisMatrix(
         id=MATRIX,
         name="Traffic shape",
         taxonomy=TAXONOMY,
         works=(WORK,),
         fields=("tokenization", "dataset"),
-        cells=(MatrixCell(work=WORK, field="tokenization", labels=("padded",)),),
+        cells=(MatrixCell(work=WORK, field="tokenization", labels=("padded",), evidence=evidence),),
         stale=StaleState.FRESH,
         provenance=HUMAN,
     )
+
+
+def _accept_span(root: Path) -> EvidenceId:
+    """Accept one Evidence object anchored in the ingested paper, as the researcher.
+
+    Written through `evidence.accept` rather than into the workspace, so the object the
+    matrix cell cites is accepted state that arrived the way accepted state has to.
+    """
+    repo = WorkspaceRepository.open(root)
+    work = repo.get_work(WORK)
+    artifact = repo.get_artifact(work.artifacts[0])
+    candidate = Evidence(
+        id=SPAN,
+        source=SourceAnchor(
+            work=WORK,
+            version=work.versions[0],
+            artifact=artifact.id,
+            file_hash=artifact.file_hash,
+            block=BlockId("B0007"),
+            text_hash=f"sha256:{hashlib.sha256(SPAN_TEXT.encode()).hexdigest()}",
+            page=3,
+            section_path=("Experiments",),
+            char_start=0,
+            char_end=len(SPAN_TEXT),
+        ),
+        content=EvidenceContent(exact_text=SPAN_TEXT, field="tokenization", labels=("padded",)),
+        origin=EvidenceOrigin.SOURCE_OBSERVED,
+        evidence_type=EvidenceType.EXPERIMENTAL_SETUP,
+        strength=EvidenceStrength.DIRECT,
+        review_tier=ReviewTier.TIER_1,
+        provenance=HUMAN,
+    )
+    accept_evidence(
+        open_context(root, HUMAN_ACTOR),
+        AcceptEvidenceRequest(
+            candidate=candidate,
+            review_action=ReviewAction.ACCEPT,
+            verdict=VerificationVerdict.SUPPORTED,
+            rationale="read the span in the source",
+        ),
+    )
+    return SPAN
 
 
 @pytest.fixture
@@ -139,7 +209,7 @@ def pages(tmp_path: Path, registry: CapabilityRegistry) -> Path:
             taxonomy=_taxonomy(), decision=_approval().touch(status=DecisionStatus.ACCEPTED)
         ),
     )
-    put_matrix(ctx, PutMatrixRequest(matrix=_matrix()))
+    put_matrix(ctx, PutMatrixRequest(matrix=_matrix((_accept_span(root),))))
     repo = WorkspaceRepository.open(root)
     rebuild_workspace(repo)
     DependencyInvalidation().invalidate(repo, [str(APPROVAL)])
@@ -352,6 +422,11 @@ def test_a_gap_is_stated_about_the_record_and_never_about_a_work(reader: TestCli
         *(item.detail for group in report.gaps for item in group.items),
         *(matrix.coverage for matrix in report.matrices),
         *(matrix.shape for matrix in report.matrices),
+        *(matrix.labels_from for matrix in report.matrices),
+        *(column.coverage for matrix in report.matrices for column in matrix.columns),
+        *(column.reading for matrix in report.matrices for column in matrix.columns),
+        *(row.summary for matrix in report.matrices for row in matrix.rows),
+        *(cell.detail for matrix in report.matrices for row in matrix.rows for cell in row.cells),
     ]
     for sentence in stated:
         lowered = sentence.lower()
@@ -388,6 +463,129 @@ def test_a_project_with_no_matrix_says_what_a_matrix_would_do(bare_reader: TestC
     assert report.matrices == ()
     assert report.gaps == ()
     assert report.summary.startswith("No matrix has been built yet")
+
+
+# -- the matrix as a grid ----------------------------------------------------
+
+
+def test_a_matrix_arrives_as_the_grid_it_is_in_the_order_it_declares(reader: TestClient) -> None:
+    """Rows are the matrix's works and columns its fields, both in its own declared order.
+
+    Which cell belongs where is the matrix's own structure, so the daemon composes it. A
+    client that paired works with fields itself could disagree with the record about what
+    was read for what (Product 5 P10).
+    """
+    report = SynthesisReport.model_validate(reader.get("/synthesis").json())
+    matrix = report.matrices[0]
+
+    assert [column.field for column in matrix.columns] == ["tokenization", "dataset"]
+    assert [row.work for row in matrix.rows] == [str(WORK)]
+    row = matrix.rows[0]
+    assert [cell.field for cell in row.cells] == ["tokenization", "dataset"]
+    assert row.title, "a row is headed by the work's own title, not by its id alone"
+    assert row.route == f"/corpus/{WORK}"
+    assert row.summary == "1 of 2 readings recorded"
+
+
+def test_a_cell_nobody_has_read_states_the_gap_and_reads_nothing_into_it(
+    reader: TestClient,
+) -> None:
+    """A blank cell is a gap in the record: it says so in words and claims nothing."""
+    report = SynthesisReport.model_validate(reader.get("/synthesis").json())
+    blank = next(
+        cell for row in report.matrices[0].rows for cell in row.cells if cell.field == "dataset"
+    )
+
+    assert blank.recorded is False
+    assert blank.reading == ""
+    assert blank.evidence == ()
+    assert "gap in the record" in blank.detail
+    assert "never a reading of the work" in blank.detail
+
+
+def test_a_recorded_cell_carries_the_evidence_it_rests_on(reader: TestClient) -> None:
+    """A reading is only as good as its source, so the cell opens onto the exact span."""
+    report = SynthesisReport.model_validate(reader.get("/synthesis").json())
+    cell = next(
+        cell
+        for row in report.matrices[0].rows
+        for cell in row.cells
+        if cell.field == "tokenization"
+    )
+
+    assert cell.recorded is True
+    assert cell.reading == "padded"
+    assert cell.detail == "Read from 1 accepted evidence span."
+    span = cell.evidence[0]
+    assert span.id == str(SPAN)
+    assert span.found is True
+    assert span.quote == SPAN_TEXT, "the recorded span is quoted exactly, never shortened"
+    assert span.route == f"/evidence/{SPAN}"
+    assert span.title, "the span is named the way the review queue named it"
+
+
+def test_a_cell_citing_evidence_the_workspace_no_longer_holds_says_so() -> None:
+    """An id nothing answers to is reported as unresolved rather than as a quotable span."""
+    matrix = _matrix((EvidenceId("E0404"),))
+
+    rows = _matrix_rows(matrix, {}, lambda _object_id: "")
+
+    span = rows[0].cells[0].evidence[0]
+    assert span.found is False
+    assert span.quote == ""
+    assert span.title == ""
+    assert "no longer" in rows[0].cells[0].detail
+
+
+def test_a_column_states_how_it_reads_across_the_works_without_preferring_one() -> None:
+    """Two works read differently is a fact about the record, stated as counts of it."""
+    matrix = SynthesisMatrix(
+        id=MATRIX,
+        name="Traffic shape",
+        works=(WORK, WorkId("W0002"), WorkId("W0003")),
+        fields=("dataset", "tokenization"),
+        cells=(
+            MatrixCell(work=WORK, field="dataset", labels=("cicids2017",)),
+            MatrixCell(work=WorkId("W0002"), field="dataset", labels=("unsw_nb15",)),
+        ),
+        provenance=HUMAN,
+    )
+
+    dataset, tokenization = _matrix_columns(matrix)
+
+    assert dataset.recorded == 2
+    assert dataset.coverage == "2 of 3 works read for it"
+    assert dataset.reading == (
+        "2 of 3 works read for it. Recorded: cicids2017 (1 work), unsw_nb15 (1 work). "
+        "The works read for it do not all record the same label."
+    )
+    assert tokenization.recorded == 0
+    assert tokenization.coverage == "No work in this matrix has been read for it yet"
+    assert tokenization.reading == (
+        "No work in this matrix has been read for it yet, so there is nothing to read across it."
+    )
+
+
+def test_a_measured_reading_keeps_the_metric_and_the_unit_it_was_recorded_with() -> None:
+    """Product 12: a number without its metric and its unit is not the number that was read."""
+    numeric = NumericValue(
+        raw="94.32",
+        parsed=94.32,
+        unit="percent",
+        metric="F1",
+        dataset="CICIDS2017",
+        source_table="T004",
+    )
+
+    assert _measured(numeric) == "F1 94.32 percent"
+    assert _measured(numeric.model_copy(update={"unit": None})) == "F1 94.32"
+
+
+def test_the_grid_says_which_vocabulary_its_labels_come_from(reader: TestClient) -> None:
+    """A taxonomy is a project's approved decision, so the grid names the one it used."""
+    report = SynthesisReport.model_validate(reader.get("/synthesis").json())
+
+    assert report.matrices[0].labels_from == "Its labels come from the traffic-shape taxonomy."
 
 
 # -- the reads stay reads ----------------------------------------------------

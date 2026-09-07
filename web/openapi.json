@@ -1087,6 +1087,162 @@
         "title": "HealthReport",
         "type": "object"
       },
+      "MatrixCellView": {
+        "additionalProperties": false,
+        "description": "One work/field cell of a matrix: what was recorded there, and what it rests on.\n\n`recorded` is false for a cell nobody has read yet. That is a gap in the record and\nnever a reading of the work: no absence, no novelty and no confidence is derived from\nit anywhere (Product 7.1, 11, 33).",
+        "properties": {
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MatrixEvidenceView"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "measurement": {
+            "default": "",
+            "title": "Measurement",
+            "type": "string"
+          },
+          "reading": {
+            "default": "",
+            "title": "Reading",
+            "type": "string"
+          },
+          "recorded": {
+            "default": false,
+            "title": "Recorded",
+            "type": "boolean"
+          },
+          "work": {
+            "title": "Work",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work",
+          "field"
+        ],
+        "title": "MatrixCellView",
+        "type": "object"
+      },
+      "MatrixColumnView": {
+        "additionalProperties": false,
+        "description": "One field of a matrix, read down the works: how much of it is recorded, and how.",
+        "properties": {
+          "coverage": {
+            "default": "",
+            "title": "Coverage",
+            "type": "string"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "reading": {
+            "default": "",
+            "title": "Reading",
+            "type": "string"
+          },
+          "recorded": {
+            "default": 0,
+            "title": "Recorded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "field"
+        ],
+        "title": "MatrixColumnView",
+        "type": "object"
+      },
+      "MatrixEvidenceView": {
+        "additionalProperties": false,
+        "description": "One accepted Evidence object a matrix cell rests on, as the grid opens it.",
+        "properties": {
+          "found": {
+            "default": true,
+            "title": "Found",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "measurement": {
+            "default": "",
+            "title": "Measurement",
+            "type": "string"
+          },
+          "quote": {
+            "default": "",
+            "title": "Quote",
+            "type": "string"
+          },
+          "route": {
+            "default": "",
+            "title": "Route",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "MatrixEvidenceView",
+        "type": "object"
+      },
+      "MatrixRowView": {
+        "additionalProperties": false,
+        "description": "One work of a matrix, with the cell recorded for it under every declared field.",
+        "properties": {
+          "cells": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MatrixCellView"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "route": {
+            "default": "",
+            "title": "Route",
+            "type": "string"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "work": {
+            "title": "Work",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work"
+        ],
+        "title": "MatrixRowView",
+        "type": "object"
+      },
       "MatrixSummary": {
         "additionalProperties": false,
         "description": "One synthesis matrix: its rows, its fields, and whether it has gone stale.",
@@ -1150,6 +1306,14 @@
             "title": "Cells",
             "type": "integer"
           },
+          "columns": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MatrixColumnView"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
           "coverage": {
             "default": "",
             "title": "Coverage",
@@ -1167,6 +1331,11 @@
             "title": "Id",
             "type": "string"
           },
+          "labels_from": {
+            "default": "",
+            "title": "Labels From",
+            "type": "string"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -1175,6 +1344,14 @@
             "default": 0,
             "title": "Recorded",
             "type": "integer"
+          },
+          "rows": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MatrixRowView"
+            },
+            "title": "Rows",
+            "type": "array"
           },
           "shape": {
             "default": "",
