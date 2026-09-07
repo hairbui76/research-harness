@@ -476,7 +476,7 @@ function BatchAccept({ items, onAccepted }: BatchAcceptProps) {
 
           {skipped.length > 0 ? (
             <>
-              <h3 className="rh-text-label">Left in the queue</h3>
+              <h3 className="rh-text-h4">Left in the queue</h3>
               <ul
                 className="rh-web-list rh-web-list--tight"
                 aria-label="Candidates the batch would leave in the queue"

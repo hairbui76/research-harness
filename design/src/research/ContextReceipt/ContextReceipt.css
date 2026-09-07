@@ -123,7 +123,9 @@
   border-radius: var(--rh-radius-control);
   background: var(--rh-feedback-warning-bg);
   color: var(--rh-feedback-warning-fg);
-  font-size: calc(var(--rh-type-label-size) * var(--rh-density-font-scale));
+  /* A chip that is *read* — the reason a reference was left out of the pack — so the
+     density scale does not get to take the 11px label under 10.2px on a compact surface. */
+  font-size: var(--rh-type-label-size);
   font-weight: var(--rh-type-ui-weight);
   text-transform: uppercase;
   letter-spacing: var(--rh-type-label-ls);

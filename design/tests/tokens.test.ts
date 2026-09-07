@@ -459,15 +459,49 @@ describe('the states name their kind without a kicker', () => {
   });
 });
 
-function cssFilesUnder(root: string): string[] {
+/**
+ * A heading is read, so it is set at a size a person reads.
+ *
+ * `--rh-type-label-size` is 11px, under the 12px reading floor 2F declared, and
+ * `.rh-text-label` also sets mono, uppercase and 0.08em tracking: it is the treatment for a
+ * metadata chip beside a value — a `<dt>`, a menu group, a `WORK`/`TYPE`/`STRENGTH` key —
+ * and never for the heading of a section a researcher reads their way through. `h4` is the
+ * smallest heading in the scale and is body-sized; its weight is what makes it a heading.
+ */
+describe('headings are not label chips', () => {
+  it('sets no heading element in the metadata label treatment', () => {
+    const offenders: string[] = [];
+    for (const root of [src, join(src, '..', '..', 'web', 'src')]) {
+      for (const file of sourceFilesUnder(root)) {
+        const source = readFileSync(file, 'utf8');
+        for (const [index, line] of source.split('\n').entries()) {
+          if (/<h[1-6][^>]*\brh-text-label\b/.test(line)) {
+            offenders.push(`${relative(src, file)}:${index + 1}: ${line.trim()}`);
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+function filesUnder(root: string, ends: (name: string) => boolean): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name.startsWith('.')) {
       continue;
     }
     const full = join(root, entry.name);
-    if (entry.isDirectory()) out.push(...cssFilesUnder(full));
-    else if (entry.name.endsWith('.css')) out.push(full);
+    if (entry.isDirectory()) out.push(...filesUnder(full, ends));
+    else if (ends(entry.name)) out.push(full);
   }
   return out;
+}
+
+function sourceFilesUnder(root: string): string[] {
+  return filesUnder(root, (name) => name.endsWith('.tsx'));
+}
+
+function cssFilesUnder(root: string): string[] {
+  return filesUnder(root, (name) => name.endsWith('.css'));
 }

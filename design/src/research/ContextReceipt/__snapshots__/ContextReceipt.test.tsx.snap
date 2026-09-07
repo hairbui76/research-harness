@@ -157,7 +157,7 @@ exports[`ContextReceipt theme x density > matches the dark / comfortable snapsho
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Token budget by class
           </h3>
@@ -416,7 +416,7 @@ exports[`ContextReceipt theme x density > matches the dark / comfortable snapsho
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Included (
             3
@@ -737,7 +737,7 @@ exports[`ContextReceipt theme x density > matches the dark / comfortable snapsho
           data-omitted=""
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Omitted (
             2
@@ -1294,7 +1294,7 @@ exports[`ContextReceipt theme x density > matches the dark / compact snapshot 1`
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Token budget by class
           </h3>
@@ -1553,7 +1553,7 @@ exports[`ContextReceipt theme x density > matches the dark / compact snapshot 1`
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Included (
             3
@@ -1874,7 +1874,7 @@ exports[`ContextReceipt theme x density > matches the dark / compact snapshot 1`
           data-omitted=""
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Omitted (
             2
@@ -2431,7 +2431,7 @@ exports[`ContextReceipt theme x density > matches the light / comfortable snapsh
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Token budget by class
           </h3>
@@ -2690,7 +2690,7 @@ exports[`ContextReceipt theme x density > matches the light / comfortable snapsh
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Included (
             3
@@ -3011,7 +3011,7 @@ exports[`ContextReceipt theme x density > matches the light / comfortable snapsh
           data-omitted=""
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Omitted (
             2
@@ -3568,7 +3568,7 @@ exports[`ContextReceipt theme x density > matches the light / compact snapshot 1
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Token budget by class
           </h3>
@@ -3827,7 +3827,7 @@ exports[`ContextReceipt theme x density > matches the light / compact snapshot 1
           class="rh-context-receipt__section"
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Included (
             3
@@ -4148,7 +4148,7 @@ exports[`ContextReceipt theme x density > matches the light / compact snapshot 1
           data-omitted=""
         >
           <h3
-            class="rh-text-label"
+            class="rh-text-h4"
           >
             Omitted (
             2

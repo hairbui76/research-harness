@@ -53,7 +53,7 @@ export function ShortcutHelp() {
           </section>
 
           <section className="rh-web-shortcuts__group">
-            <h3 className="rh-text-label">Anywhere</h3>
+            <h3 className="rh-text-h4">Anywhere</h3>
             <dl className="rh-web-shortcuts__list">
               {anywhere.map((entry) => (
                 <div key={entry.shortcut} className="rh-web-shortcuts__row">
@@ -71,7 +71,7 @@ export function ShortcutHelp() {
 
           {groups.map(([group, items]) => (
             <section key={group} className="rh-web-shortcuts__group">
-              <h3 className="rh-text-label">{group}</h3>
+              <h3 className="rh-text-h4">{group}</h3>
               <dl className="rh-web-shortcuts__list">
                 {items.map((command) => (
                   <div key={command.id} className="rh-web-shortcuts__row">

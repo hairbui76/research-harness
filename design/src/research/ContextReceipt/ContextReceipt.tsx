@@ -147,7 +147,7 @@ export const ContextReceipt = forwardRef<HTMLElement, ContextReceiptProps>(funct
         <p className="rh-context-receipt__egress-note">{egress.hint}</p>
 
         <section className="rh-context-receipt__section">
-          <h3 className="rh-text-label">Token budget by class</h3>
+          <h3 className="rh-text-h4">Token budget by class</h3>
           <ul className="rh-context-receipt__allocation">
             {receipt.allocation.map((entry) => (
               <li key={entry.cls} className="rh-context-receipt__allocation-row">
@@ -166,7 +166,7 @@ export const ContextReceipt = forwardRef<HTMLElement, ContextReceiptProps>(funct
         </section>
 
         <section className="rh-context-receipt__section">
-          <h3 className="rh-text-label">
+          <h3 className="rh-text-h4">
             Included ({receipt.included.length})
           </h3>
           {included.length === 0 ? (
@@ -189,7 +189,7 @@ export const ContextReceipt = forwardRef<HTMLElement, ContextReceiptProps>(funct
         </section>
 
         <section className="rh-context-receipt__section" data-omitted="">
-          <h3 className="rh-text-label">
+          <h3 className="rh-text-h4">
             Omitted ({receipt.omitted.length})
           </h3>
           {omitted.length === 0 ? (
