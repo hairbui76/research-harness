@@ -121,8 +121,11 @@ check reported. Neither of the last two runs without the researcher's yes.
   menu, combobox and `<dt>` label chips are labels, not kickers, and stay; the 2px
   quotation rule stays; the model trigger's EXTERNAL/LOCAL tag goes, since the composer
   states egress in a sentence). One fix batch of twelve commits landed all of it, plus a
-  browser capture of a transcript row with its overflow. Wave 1 was pushed at 11:56; the
-  push had to go over HTTPS because this network drops most TCP connects to GitHub.
+  browser capture of a transcript row with its overflow. Its gate failed once more on the
+  way (the transcript capture met the dark muted-ink defect the coverage work had already
+  fixed, and the toast still covered the page header) and passed after two repairs. Wave 1
+  was pushed at 11:56 and wave 2 at 14:34; both pushes had to go over HTTPS because this
+  network drops most TCP connects to GitHub.
 - 2026-09-07 (wave 3, in progress): the Overview proof page (3J) is built — the page opens
   with the daemon's sentence about what needs a researcher, then what is waiting, what went
   stale, what changed since the last session (a new server-composed section with a stated
