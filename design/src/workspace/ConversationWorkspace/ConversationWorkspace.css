@@ -15,7 +15,18 @@
   min-height: 0;
 }
 
+/*
+ * The centre pane is a query container.
+ *
+ * It is the one pane whose width nobody can predict: the session list on one side and the
+ * inspector on the other are both resizable and both optional, so a 1440px window can leave
+ * the transcript and its composer anything from 400px to the whole shell. What the composer
+ * does about that is in `web/src/views/conversation/conversation.css`, which asks this
+ * container rather than the window.
+ */
 .rh-conversation-workspace__centre {
+  container-type: inline-size;
+  container-name: rh-centre;
   display: flex;
   flex-direction: column;
   min-width: 0;
