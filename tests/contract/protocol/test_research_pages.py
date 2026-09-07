@@ -561,7 +561,9 @@ def test_a_column_states_how_it_reads_across_the_works_without_preferring_one() 
     )
     assert tokenization.recorded == 0
     assert tokenization.coverage == "No work in this matrix has been read for it yet"
-    assert "nothing to read across" in tokenization.reading
+    assert tokenization.reading == (
+        "No work in this matrix has been read for it yet, so there is nothing to read across it."
+    )
 
 
 def test_a_measured_reading_keeps_the_metric_and_the_unit_it_was_recorded_with() -> None:

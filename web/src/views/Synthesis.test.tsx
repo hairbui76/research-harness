@@ -51,7 +51,7 @@ const MATRIX = {
       recorded: 0,
       coverage: 'No work in this matrix has been read for it yet',
       reading:
-        'No work in this matrix has been read for it yet, so there is nothing to read across it yet.',
+        'No work in this matrix has been read for it yet, so there is nothing to read across it.',
     },
   ],
   rows: [
@@ -71,7 +71,7 @@ const MATRIX = {
           evidence: [
             {
               id: 'E0001',
-              title: 'tokenization · Padding and flow shape',
+              title: 'metric_result · Padding and flow shape',
               route: '/evidence/E0001',
               quote: 'each record is padded to a fixed size before the flow is tokenised',
               measurement: 'F1 94.32 percent',
@@ -324,7 +324,7 @@ describe('the synthesis page', () => {
       screen.getByText('each record is padded to a fixed size before the flow is tokenised'),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /tokenization · Padding and flow shape/ }),
+      screen.getByRole('link', { name: /metric result · Padding and flow shape/ }),
     ).toHaveAttribute('href', '/projects/prj_abc/evidence/E0001');
     expect(container.textContent).not.toMatch(/[{}]/);
   });
@@ -367,7 +367,7 @@ describe('the synthesis page', () => {
     );
     expect(
       screen.getByText(
-        'Dataset — No work in this matrix has been read for it yet, so there is nothing to read across it yet.',
+        'Dataset — No work in this matrix has been read for it yet, so there is nothing to read across it.',
       ),
     ).toBeInTheDocument();
     await expectNoAxeViolations(container);

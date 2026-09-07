@@ -28,7 +28,7 @@
  */
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Combobox, FullPageWorkspace } from '@research-harness/design';
+import { Combobox, FullPageWorkspace, humaniseResearchTokens } from '@research-harness/design';
 import type { ComboboxItem } from '@research-harness/design';
 import type { MatrixCellView, MatrixView, ResearchGroup } from '../api/dto';
 import {
@@ -181,7 +181,8 @@ function MatrixPanel({ matrix, explain }: { matrix: MatrixView; explain: boolean
       {explain ? (
         <p className="rh-web-synthesis__detail">
           An empty cell means &ldquo;not recorded&rdquo;, never &ldquo;absent&rdquo;. Press a
-          recorded one to read the accepted evidence behind it.
+          recorded cell to read the accepted evidence behind it, or a column head to read that
+          field down the works.
         </p>
       ) : null}
     </Panel>
@@ -361,6 +362,11 @@ function MatrixGrid({
  * longer holds says which id it cannot reach rather than showing an empty quotation, and a
  * reading with no evidence behind it says that too — both are facts about the record, and
  * neither is drawn as an alarm.
+ *
+ * A span repeats its measured value only when the cell above is not already showing it: one
+ * number on screen twice is one account too many, and the second one reads as a second
+ * reading. The span is named the way every other surface names it (`AttentionName`), so the
+ * field inside that name is spelled in words rather than as the identifier it is stored as.
  */
 function CellEvidence({ cell }: { cell: MatrixCellView }) {
   const { href } = useProjectPaths();
@@ -373,7 +379,8 @@ function CellEvidence({ cell }: { cell: MatrixCellView }) {
             <li key={span.id} className="rh-web-stack rh-web-stack--tight">
               {span.found && span.route ? (
                 <Link to={href(span.route)}>
-                  {span.title} <code className="rh-web-object-id">{span.id}</code>
+                  {humaniseResearchTokens(span.title)}{' '}
+                  <code className="rh-web-object-id">{span.id}</code>
                 </Link>
               ) : (
                 <span>
@@ -384,7 +391,9 @@ function CellEvidence({ cell }: { cell: MatrixCellView }) {
                   </span>
                 </span>
               )}
-              {span.measurement ? <p>{span.measurement}</p> : null}
+              {span.measurement && span.measurement !== cell.measurement ? (
+                <p>{span.measurement}</p>
+              ) : null}
               {span.quote ? <blockquote className="rh-web-quote">{span.quote}</blockquote> : null}
             </li>
           ))}

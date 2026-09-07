@@ -1819,7 +1819,7 @@ def _column_reading(recorded: int, works: int, counts: Counter[str]) -> str:
     """
     coverage = _column_coverage(recorded, works)
     if not recorded:
-        return f"{coverage}, so there is nothing to read across it yet."
+        return f"{coverage}, so there is nothing to read across it."
     listed = ", ".join(
         f"{label} ({_counted(count, 'work')})"
         for label, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))

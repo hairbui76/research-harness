@@ -101,11 +101,12 @@ test('the matrix is a grid a property can be read down', async ({ page, request 
   // -- a recorded cell reaches the span it rests on --------------------------
   await page.getByText('reported', { exact: true }).click();
   await expect(page.getByText('Read from 1 accepted evidence span.')).toBeVisible();
-  const span = page.getByRole('link', { name: /metric_result/ });
+  const span = page.getByRole('link', { name: /metric result/ });
   await expect(span).toBeVisible();
   expect(await span.getAttribute('href')).toContain('/evidence/');
-  // The number keeps the metric and the unit it was recorded under (PRODUCT §12).
-  await expect(page.getByText('F1 94.32 percent').first()).toBeVisible();
+  // The number keeps the metric and the unit it was recorded under (PRODUCT §12), and it
+  // is on the page once: the cell carries it, so the opened span does not repeat it.
+  await expect(page.getByText('F1 94.32 percent')).toHaveCount(1);
   await page.screenshot({ path: info.outputPath('synthesis-evidence.png'), fullPage: true });
   await auditPage(page, 'the synthesis page with a cell opened');
 
@@ -124,7 +125,11 @@ test('the matrix is a grid a property can be read down', async ({ page, request 
     'aria-current',
     'true',
   );
-  await expect(page.getByText(/^Tokenization — No work in this matrix has been read/)).toBeVisible();
+  await expect(
+    page.getByText(
+      'Tokenization — No work in this matrix has been read for it yet, so there is nothing to read across it.',
+    ),
+  ).toBeVisible();
   await page.screenshot({ path: info.outputPath('synthesis-column.png'), fullPage: true });
   await auditPage(page, 'the synthesis page with a column read down');
 
