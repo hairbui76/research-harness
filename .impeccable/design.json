@@ -208,9 +208,9 @@
       "name": "Tabs",
       "kind": "nav",
       "refersTo": "tab",
-      "description": "UI-type tabs over a hairline strip; the selected tab carries the 2px accent marker, one of the two 2px marks in the system.",
+      "description": "UI-type tabs over a hairline strip; the selected tab carries the 2px marker in primary ink, one of the two 2px marks in the system. Navigation is never where the accent is spent.",
       "html": "<div class=\"ds-tabs\"><button class=\"ds-tab\" data-state=\"selected\">Evidence</button><button class=\"ds-tab\">Claims</button><button class=\"ds-tab\">Conflicts</button></div>",
-      "css": ".ds-tabs { display: flex; gap: var(--rh-space-1); border-bottom: var(--rh-border-width) solid var(--rh-border-subtle); font-family: var(--rh-font-sans); } .ds-tab { display: inline-flex; align-items: center; min-height: var(--rh-density-row); padding: var(--rh-space-2) var(--rh-density-pad); border: 0; border-bottom: var(--rh-border-width-strong) solid transparent; border-radius: var(--rh-radius-nav) var(--rh-radius-nav) 0 0; background: transparent; color: var(--rh-text-secondary); font-size: var(--rh-type-ui-size); line-height: var(--rh-type-ui-lh); font-weight: var(--rh-type-ui-weight); cursor: pointer; transition: color var(--rh-duration-fast) var(--rh-ease-standard), background-color var(--rh-duration-fast) var(--rh-ease-standard), border-color var(--rh-duration-fast) var(--rh-ease-standard); } .ds-tab:hover { color: var(--rh-text-primary); background: var(--rh-surface-subtle); } .ds-tab[data-state='selected'] { color: var(--rh-text-primary); border-bottom-color: var(--rh-accent); } .ds-tab:focus-visible { outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring); outline-offset: var(--rh-focus-ring-offset); }"
+      "css": ".ds-tabs { display: flex; gap: var(--rh-space-1); border-bottom: var(--rh-border-width) solid var(--rh-border-subtle); font-family: var(--rh-font-sans); } .ds-tab { display: inline-flex; align-items: center; min-height: var(--rh-density-row); padding: var(--rh-space-2) var(--rh-density-pad); border: 0; border-bottom: var(--rh-border-width-strong) solid transparent; border-radius: var(--rh-radius-nav) var(--rh-radius-nav) 0 0; background: transparent; color: var(--rh-text-secondary); font-size: var(--rh-type-ui-size); line-height: var(--rh-type-ui-lh); font-weight: var(--rh-type-ui-weight); cursor: pointer; transition: color var(--rh-duration-fast) var(--rh-ease-standard), background-color var(--rh-duration-fast) var(--rh-ease-standard), border-color var(--rh-duration-fast) var(--rh-ease-standard); } .ds-tab:hover { color: var(--rh-text-primary); background: var(--rh-surface-subtle); } .ds-tab[data-state='selected'] { color: var(--rh-text-primary); border-bottom-color: var(--rh-text-primary); } .ds-tab:focus-visible { outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring); outline-offset: var(--rh-focus-ring-offset); }"
     },
     {
       "name": "Notice",
@@ -242,7 +242,7 @@
       "Nothing is fetched at runtime: system font stacks, bundled icons, no CDN."
     ],
     "rules": [
-      { "name": "The Model's Orange Rule", "body": "The accent marks model activity, the primary send/run action, active reference tracking and selected AI provenance. It is not an emphasis colour, not a hover colour, not a link colour, and it never says anything about whether a claim is true.", "section": "colors" },
+      { "name": "The Model's Orange Rule", "body": "The accent marks model activity, the primary send/run action, active reference tracking and selected AI provenance. It is not an emphasis colour, not a hover colour, not a link colour, not a navigation colour \u2014 which tab you are on and which option the keyboard is on are both said in ink \u2014 and it never says anything about whether a claim is true.", "section": "colors" },
       { "name": "The Third Channel Rule", "body": "A scientific status renders a glyph and a label before it renders a tint. Every status and feedback tone must survive greyscale; a border colour or a fill is never the only signal.", "section": "colors" },
       { "name": "The Two Homes Rule", "body": "A colour literal may appear in `palette.css` and the two theme files and nowhere else. Every component and every cockpit stylesheet addresses colour by semantic name (`--rh-surface-*`, `--rh-text-*`, `--rh-status-*`); the lint fails on a literal.", "section": "colors" },
       { "name": "The Paper Keeps Its Ink Rule", "body": "Anything drawn on the reading surface follows the page, not the theme: the paper's ink is dark and its marks are light in both modes, and the surface is always applied together with its ink, never as a background alone.", "section": "colors" },
@@ -265,7 +265,7 @@
       "Do honour reduced motion through the tokens: durations collapse to 1ms and the hover and press scales become 1."
     ],
     "donts": [
-      "Don't use the accent as an emphasis, hover, link or decoration colour, or on anything that states scientific truth.",
+      "Don't use the accent as an emphasis, hover, link, navigation or decoration colour, or on anything that states scientific truth.",
       "Don't put a scientific status colour on anything that is not a scientific state, or a feedback tone on anything that is.",
       "Don't draw a coloured side border, stripe or tab thicker than 1px on a card, row or notice; 2px belongs only to the selected tab marker and the quotation rule.",
       "Don't set a kicker or eyebrow: no 11px uppercase word before a sentence or above a heading. The `label` role names groups, columns and definition terms only.",

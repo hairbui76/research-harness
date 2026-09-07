@@ -457,7 +457,9 @@ Both themes:
 ### Named Rules
 **The Model's Orange Rule.** The accent marks model activity, the primary send/run action,
 active reference tracking and selected AI provenance. It is not an emphasis colour, not a
-hover colour, not a link colour, and it never says anything about whether a claim is true.
+hover colour, not a link colour, not a navigation colour — which tab you are on and which
+option the keyboard is on are both said in ink — and it never says anything about whether a
+claim is true.
 
 **The Third Channel Rule.** A scientific status renders a glyph and a label before it
 renders a tint. Every status and feedback tone must survive greyscale; a border colour or a
@@ -588,10 +590,10 @@ inspector tabs, removable tags, and the text-shaped skeleton bar. Nothing else i
 past 8px.
 
 Borders are always solid, 1px, on the semantic hairline tokens; the only dashed rule is the
-hairline above a decision prompt. Tabs draw their 2px marker on the bottom (or right, when
-vertical) edge of a 6px-topped tab. Quoted matter carries a 2px `strong` (review screen) or
-`default` (evidence card, conflict notice) rule on its start edge with 12px inset; a stale
-quote turns that rule the stale status border.
+hairline above a decision prompt. Tabs draw their 2px marker in primary ink on the bottom
+(or right, when vertical) edge of a 6px-topped tab. Quoted matter carries a 2px `strong`
+(review screen) or `default` (evidence card, conflict notice) rule on its start edge with
+12px inset; a stale quote turns that rule the stale status border.
 
 ## Components
 
@@ -653,7 +655,8 @@ quote turns that rule the stale status border.
   standing sits in the foot in feedback ink with the word beside it.
 - **Tabs:** `ui` type on a 36px-minimum tab padded 8px 12px, secondary ink over a strip
   with a bottom hairline. Hover to `subtle` fill and primary ink; selected is primary ink
-  with a 2px accent marker on the bottom edge (right edge when vertical). A strip that
+  with a 2px marker in that same ink on the bottom edge (right edge when vertical) — a tab
+  strip is navigation, and navigation is never where the accent is spent. A strip that
   overflows fades its clipped end over 48px and shows a scroll control; the inspector's six
   tabs wrap to two rows instead.
 - **Skip link:** first in the tab order, `raised` fill with a `strong` hairline, off-canvas
@@ -663,6 +666,11 @@ quote turns that rule the stale status border.
 - **Menu:** `raised` at 4px padding, `default` hairline, 8px corners, 12rem to 22rem wide.
   Items are 36px rows at 8px 12px with 6px corners; hover is `selected` fill; group labels
   are the `label` role; hints are mono muted.
+- **Combobox / listbox:** a `raised` panel under the text box at 4px padding, `default`
+  hairline, 8px corners, 18rem tall at most. Options are 36px rows at 8px 12px with 6px
+  corners; the active one — where the keyboard is, since focus stays in the text box — takes
+  the `selected` fill and nothing else, and the chosen one carries the registry's `check` at
+  14px in secondary ink at the end of the row.
 - **Dialog:** centred on the scrim at 24px padding, `raised` fill, `default` hairline, 8px
   corners, `h4` title, secondary-ink body, right-aligned footer at 12px gap. Sizes 24rem,
   34rem, 52rem. Used only where inline confirmation cannot work.
@@ -711,8 +719,8 @@ clipped or capped to the prose measure.
   and press scales become 1.
 
 ### Don't:
-- **Don't** use the accent as an emphasis, hover, link or decoration colour, or on anything
-  that states scientific truth.
+- **Don't** use the accent as an emphasis, hover, link, navigation or decoration colour, or
+  on anything that states scientific truth.
 - **Don't** put a scientific status colour on anything that is not a scientific state, or a
   feedback tone on anything that is.
 - **Don't** draw a coloured side border, stripe or tab thicker than 1px on a card, row or
