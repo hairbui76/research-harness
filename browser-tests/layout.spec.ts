@@ -12,7 +12,7 @@
  */
 import { expect, test } from '@playwright/test';
 import type { APIRequestContext, Locator, Page, TestInfo } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript((theme) => {
@@ -129,10 +129,7 @@ test('prose holds a reading measure on a 1920px screen while the page does not o
     wide!.content * 0.8,
   );
 
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(results.violations).toEqual([]);
+  expect(await axeViolations(page), 'the corpus page at 1920px').toEqual([]);
 
   const fits = await page.evaluate(
     () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -174,10 +171,7 @@ test('every inspector tab is reachable from the keyboard at both widths', async 
       if (index < 5) await page.keyboard.press('ArrowRight');
     }
 
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-      .analyze();
-    expect(results.violations, `axe at ${width}px`).toEqual([]);
+    expect(await axeViolations(page), `axe at ${width}px`).toEqual([]);
 
     const fits = await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -230,10 +224,7 @@ test('the rail and Project Home offer the same project actions in the same words
   );
   expect(fromHome, 'Project Home must offer the rail’s actions verbatim').toEqual(fromRail);
 
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-    .analyze();
-  expect(results.violations).toEqual([]);
+  expect(await axeViolations(page), 'Project home with its actions menu').toEqual([]);
 
   await page.screenshot({ path: info.outputPath('project-home-actions.png'), fullPage: true });
   expect(errors).toEqual([]);

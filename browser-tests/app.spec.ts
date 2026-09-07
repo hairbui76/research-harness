@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript((theme) => {
@@ -57,8 +57,7 @@ test('project home has accessible controls and fits the viewport', async ({ page
   await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
   await expect(page.getByRole('button', { name: 'New project', exact: true })).toBeEnabled();
   await expect(page.locator('html')).toHaveAttribute('data-theme', info.project.name.endsWith('light') ? 'light' : 'dark');
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-  expect(results.violations).toEqual([]);
+  expect(await axeViolations(page), 'Project home').toEqual([]);
   const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
   expect(fits, 'Project home must not overflow horizontally').toBeTruthy();
   await page.screenshot({ path: info.outputPath('project-home.png'), fullPage: true });

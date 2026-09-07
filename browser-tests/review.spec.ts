@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { axeViolations } from './axe';
 
 /**
  * The review loop in a real browser, against the real daemon.
@@ -44,8 +44,7 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   await expect(page.getByText('Routine verified candidates (1)')).toBeVisible();
   await expect(page.getByRole('link', { name: /Metric result · W0001/ })).toBeVisible();
 
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-  expect(results.violations).toEqual([]);
+  expect(await axeViolations(page), 'the review inbox').toEqual([]);
   const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
   expect(fits, 'The review inbox must not overflow horizontally').toBeTruthy();
   await page.screenshot({ path: info.outputPath('review-inbox.png'), fullPage: true });
