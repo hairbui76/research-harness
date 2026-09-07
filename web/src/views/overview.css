@@ -80,3 +80,22 @@
   margin: 0;
   max-inline-size: var(--rh-measure-prose);
 }
+
+/*
+ * When the page last read, beside the button that reads again.
+ *
+ * Secondary ink and the numeral face: it is a measurement a researcher glances at, and it
+ * sits on the toolbar's own baseline beside the control it qualifies. The size is floored
+ * the way a table cell is — it is read off the screen and acted on, so no density takes it
+ * under `--rh-type-reading-min-size`.
+ */
+.rh-web-overview__read {
+  color: var(--rh-text-secondary);
+  font-family: var(--rh-font-mono);
+  font-size: max(
+    var(--rh-type-reading-min-size),
+    calc(var(--rh-type-mono-size) * var(--rh-density-font-scale))
+  );
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { OverviewPage } from './Overview';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { FIXTURES, expectNoAxeViolations, fakeDaemon, renderView } from '../test/harness';
@@ -366,6 +367,49 @@ describe('the overview inside a project', () => {
       FIXTURES.overview.attention
         .filter((group) => group.surface === 'decide')
         .map((group) => group.route),
+    );
+  });
+});
+
+/**
+ * "Look again" says when it last looked (critique H1: it never did).
+ *
+ * The time is the read's own: the transport stamps every answered round trip, and the
+ * session hands that instant on, so the page reports when its content arrived rather than
+ * running a clock of its own. It is quiet text until a researcher presses the button — a
+ * page that announced every automatic read would talk over the work — and from that press
+ * on it is a polite live region, because the answer to "is this current?" is the one thing
+ * a manual refresh is asking for.
+ */
+describe('when the overview last read', () => {
+  it('states the time of the read beside “Look again”', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText(FIXTURES.overview.project)).toBeInTheDocument());
+    const read = await screen.findByText(/^Read at \d{1,2}:\d{2}/);
+    expect(read.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
+    expect(container.querySelector('.rh-web-overview__read')).toBe(read);
+  });
+
+  it('says nothing about a read that has not happened', () => {
+    renderView(<OverviewPage />, { daemon: pendingDaemon() });
+
+    expect(screen.queryByText(/^Read at /)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Look again' })).toBeInTheDocument();
+  });
+
+  it('stays quiet until the researcher asks again, and is polite when it answers', async () => {
+    const user = userEvent.setup();
+    renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    const read = await screen.findByText(/^Read at /);
+    expect(read, 'an automatic read announces nothing').not.toHaveAttribute('role');
+
+    await user.click(screen.getByRole('button', { name: 'Look again' }));
+
+    // `status` is the polite one: it waits for a pause instead of interrupting.
+    await waitFor(() =>
+      expect(screen.getByText(/^Read at /)).toHaveAttribute('role', 'status'),
     );
   });
 });
