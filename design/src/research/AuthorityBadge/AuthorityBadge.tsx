@@ -15,10 +15,15 @@ export interface AuthorityBadgeProps extends Omit<BadgeProps, 'status' | 'tone' 
    * Make the standard one-line explanation reachable.
    *
    * The badge takes a tab stop, is `aria-describedby` its own sentence, and prints that
-   * sentence under itself while it has focus or the pointer — the same way
-   * `ReviewDecisionBar` explains the six decisions. A native `title` reaches neither the
-   * keyboard nor touch, and a tooltip is a convenience layer: where a researcher has to
-   * know Qualified from Contested in order to act, the meaning belongs on the page.
+   * sentence under itself while it has focus — the same way `ReviewDecisionBar` explains
+   * the six decisions. A native `title` reaches neither the keyboard nor touch, and a
+   * tooltip is a convenience layer: where a researcher has to know Qualified from
+   * Contested in order to act, the meaning belongs on the page.
+   *
+   * Focus, and not hover, is what opens it. A badge sits in a row beside links a
+   * researcher is aiming at, and a sentence that appeared under it as the pointer passed
+   * would move those links out from under the pointer. Clicking the badge focuses it, so
+   * the meaning is one press away either way; the `help` cursor says the press is there.
    *
    * Turn it on where the status is the subject — a review screen's header, a queue row's
    * own state, a claims table's status column — and leave it off where the status is
@@ -102,8 +107,6 @@ function DescribedAuthorityBadge({
         'aria-describedby': descriptionId,
         onFocus: () => setShown(true),
         onBlur: () => setShown(false),
-        onMouseEnter: () => setShown(true),
-        onMouseLeave: () => setShown(false),
       })}
       {/* The named half, for assistive technology. */}
       <span id={descriptionId} className="rh-visually-hidden">
@@ -111,7 +114,8 @@ function DescribedAuthorityBadge({
       </span>
       {/* The visible half is the same sentence, so it is hidden from assistive technology:
           hearing the meaning twice is worse than hearing it once. It sits under the badge
-          rather than over it, so nothing the pointer is already on can move away. */}
+          and in flow, where a scrolling table cannot clip it the way it would clip an
+          overlay. */}
       {shown ? (
         <span className="rh-authority-badge__hint" aria-hidden="true">
           {sentence}

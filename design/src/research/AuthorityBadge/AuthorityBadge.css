@@ -1,4 +1,5 @@
-/* A describable badge is focusable, so it says where the keyboard is. */
+/* A describable badge is focusable, so it says where the keyboard is — and the cursor
+   says the press is worth making. */
 .rh-authority-badge[tabindex] {
   cursor: help;
 }
@@ -7,8 +8,8 @@
  * The badge and the sentence that explains it.
  *
  * The sentence sits under the badge, in flow, so it can never be clipped by a scrolling
- * table or a narrow pane the way an overlay would be — and so the badge itself does not
- * move when the pointer arrives on it.
+ * table or a narrow pane the way an overlay would be. It appears on focus rather than on
+ * hover, so a pointer crossing a row never moves the links in that row.
  */
 .rh-authority-badge__described {
   display: inline-flex;

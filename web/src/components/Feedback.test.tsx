@@ -152,6 +152,11 @@ describe('a status badge', () => {
     expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(/confirmed part of it/);
 
     expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+    // A pointer only passing over the badge leaves the row where it was: the sentence
+    // opens on focus, and clicking the badge is what focuses it.
+    await user.hover(badge);
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+
     await user.tab();
     expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
       /confirmed part of it/,

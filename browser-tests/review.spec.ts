@@ -42,7 +42,7 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   await expect(page.getByText('High-risk scientific claims (1)')).toBeVisible();
   await expect(page.getByText('Ambiguous extractions (1)')).toBeVisible();
   await expect(page.getByText('Routine verified candidates (1)')).toBeVisible();
-  await expect(page.getByRole('link', { name: /metric_result · W0001/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Metric result · W0001/ })).toBeVisible();
 
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   expect(results.violations).toEqual([]);
@@ -54,10 +54,10 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   await page.getByRole('button', { name: /Accept the routine candidates/ }).click();
   await expect(page.getByText('1 routine candidate meets the batch conditions.')).toBeVisible();
   const meets = page.getByRole('list', { name: 'Candidates that meet the batch conditions' });
-  await expect(meets.getByRole('listitem')).toHaveText(['dataset · W0001']);
+  await expect(meets.getByRole('listitem')).toHaveText(['Dataset · W0001']);
   const left = page.getByRole('list', { name: 'Candidates the batch would leave in the queue' });
   await expect(left.getByText(/numeric evidence is never low risk/)).toBeVisible();
-  await expect(left.getByText(/verdict is partially_supported, not supported/)).toBeVisible();
+  await expect(left.getByText(/verdict is partially supported, not supported/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Accept 1 candidate' })).toBeEnabled();
   await page.screenshot({ path: info.outputPath('review-batch-preview.png'), fullPage: true });
   await page.getByRole('button', { name: 'Cancel' }).click();
@@ -66,8 +66,8 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   const filter = page.getByRole('textbox', { name: /Filter by field/ });
   await filter.fill('transformer');
   await expect(page.getByText('Showing 1 of 3 waiting.')).toBeVisible();
-  await expect(page.getByRole('link', { name: /method_summary · W0001/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /metric_result · W0001/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Method summary · W0001/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Metric result · W0001/ })).toHaveCount(0);
 
   await filter.fill('no span says this');
   await expect(page.getByText(/No candidate matches these filters/)).toBeVisible();
@@ -108,9 +108,11 @@ async function toTop(page: import('@playwright/test').Page): Promise<void> {
 test('deciding a candidate offers the next one in the queue’s own order', async ({ page, request }, info) => {
   await seedQueue(page, request);
 
-  await page.getByRole('link', { name: /metric_result · W0001/ }).click();
-  await expect(page.getByRole('heading', { name: 'metric_result · W0001', level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Next: method_summary · W0001' })).toBeVisible();
+  await page.getByRole('link', { name: /Metric result · W0001/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Metric result · W0001', level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Next: Method summary · W0001' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Defer', exact: true }).click();
   await page.getByLabel('Why this is being put aside').fill('waiting for the appendix');
@@ -127,9 +129,11 @@ test('deciding a candidate offers the next one in the queue’s own order', asyn
   await expect(page.getByText('4 Results', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Source text' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Next: method_summary · W0001' }).click();
-  await expect(page.getByRole('heading', { name: 'method_summary · W0001', level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Previous: metric_result · W0001' })).toBeVisible();
+  await page.getByRole('link', { name: 'Next: Method summary · W0001' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Method summary · W0001', level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Previous: Metric result · W0001' })).toBeVisible();
 
   // `?` teaches the keys rather than leaving them to be guessed.
   await page.keyboard.press('?');

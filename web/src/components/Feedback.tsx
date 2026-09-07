@@ -301,7 +301,7 @@ export interface StatusBadgeProps {
   size?: 'sm' | 'md';
   /**
    * Put the vocabulary's one-line meaning on the page: the badge takes a tab stop, is
-   * `aria-describedby` that sentence, and prints it underneath on focus or hover. Turn it
+   * `aria-describedby` that sentence, and prints it underneath while it has focus. Turn it
    * on where the status is the subject of the row or the screen; leave it off where the
    * status is incidental, and where the sentence would repeat one already on screen.
    */
@@ -354,8 +354,6 @@ export function StatusBadge({
             'aria-describedby': descriptionId,
             onFocus: () => setShown(true),
             onBlur: () => setShown(false),
-            onMouseEnter: () => setShown(true),
-            onMouseLeave: () => setShown(false),
           }
         : {})}
     >
