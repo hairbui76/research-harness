@@ -124,6 +124,10 @@ test('the cockpit sets one h1, no heading under body, and no target under 24px',
     await page.goto(`${workspace}/${surface}`);
     const heading = page.getByRole('heading', { level: 1 });
     await expect(heading, `${surface} must name itself with an h1`).toBeVisible();
+    // The frame arrives before its body does, and a half-rendered page would be measured
+    // for whatever happened to be mounted — which is how a 21px action link stayed hidden
+    // from this check on a fast machine and appeared on a slow one.
+    await page.waitForLoadState('networkidle');
 
     const sizes = await headingSizes(page);
     h1Sizes.set(surface, sizes.h1);

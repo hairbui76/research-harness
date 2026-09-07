@@ -51,6 +51,22 @@ body,
   min-width: 0;
 }
 
+/*
+ * A link on one of these rows is a control, not a word in a sentence.
+ *
+ * The row lays its children out as flex items, so a bare link here is standing alone —
+ * a page's one next action, a count that navigates to what is waiting. Its own box is a
+ * single line tall (21px), under the pointer target, so it takes the floor and centres
+ * its text inside it. A link inside a paragraph is left alone: sharing the line box of
+ * the text around it is SC 2.5.8's own exception, and stretching it would only push the
+ * sentence apart.
+ */
+.rh-web-row > a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--rh-control-target-min);
+}
+
 .rh-web-list {
   list-style: none;
   margin: 0;
