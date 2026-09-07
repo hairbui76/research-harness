@@ -46,6 +46,24 @@
   gap: var(--rh-space-2);
 }
 
+/*
+ * The list and the line that says what it is. Their own gap, tighter than the page's, so
+ * the caption reads as the list's rather than as another section of the screen.
+ */
+.rh-projects__listing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-3);
+}
+
+.rh-projects__list-note {
+  margin: 0;
+  max-inline-size: var(--rh-measure-prose);
+  color: var(--rh-text-muted);
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+}
+
 .rh-projects__list {
   list-style: none;
   margin: 0;

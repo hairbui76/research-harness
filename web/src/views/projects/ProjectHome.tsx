@@ -95,8 +95,20 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
       <header className="rh-projects__header">
         <div>
           <h1 className="rh-projects__title">Your research projects</h1>
+          {/*
+            The one paragraph that defines the object this screen lists. Nothing else in
+            the product ever says it: a researcher who has not opened a project yet has
+            not met the rail, the review inbox or a claim, and a list of folder names
+            teaches none of the three. What a project *is* comes from PRODUCT §8.1 — a
+            folder holding the canonical research state — and what opening one does is
+            the sentence the rest of the cockpit is built on.
+          */}
           <p className="rh-projects__lede">
-            Every workspace this application has been shown, most recently opened first.
+            A project is a folder on this machine that holds one body of research — its
+            corpus, evidence, claims, questions and manuscript — in files that stay
+            readable without this application. Opening one points the whole cockpit at
+            that folder; forgetting one removes it from this list and leaves the folder
+            exactly where it is.
           </p>
         </div>
         <div className="rh-projects__actions">
@@ -167,26 +179,49 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
         host.projects.length === 0 ? (
           <AsyncState
             kind="empty"
+            // The title names the state in this screen's own words, so the component's
+            // generic label above it would be a kicker saying it twice.
+            hideKind
             title="No projects yet"
             description={
               'Create a project to start a new workspace, or open a folder that already ' +
               'holds one. Research Harness only ever sees folders you choose.'
             }
+            // The pattern's third part: one real next step, and the only one that can end
+            // this state from here. It carries its own words rather than the header
+            // button's, so a researcher reading the state is never told to press a
+            // control they cannot see the name of twice over.
+            actions={[
+              {
+                label: 'Create your first project',
+                onClick: () => setDialog({ kind: 'create' }),
+                variant: 'primary',
+                iconStart: 'plus',
+                disabled: !lifecycle.ready,
+              },
+            ]}
           />
         ) : (
-          <ul className="rh-projects__list" aria-label="Registered projects">
-            {host.projects.map((project) => (
-              <ProjectRow
-                key={project.project_id}
-                project={project}
-                onOpen={() => navigate(projectHref(project.project_id, '/'))}
-                onLocate={() => setDialog({ kind: 'locate', project })}
-                onRename={() => setDialog({ kind: 'rename', project })}
-                onForget={() => setDialog({ kind: 'forget', project })}
-                onReveal={() => void reveal(project)}
-              />
-            ))}
-          </ul>
+          // The note is the list's own caption, not part of the lead: it describes what
+          // the rows are and the order they are in, which is a fact about the list.
+          <div className="rh-projects__listing">
+            <p className="rh-projects__list-note">
+              Every workspace this application has been shown, most recently opened first.
+            </p>
+            <ul className="rh-projects__list" aria-label="Registered projects">
+              {host.projects.map((project) => (
+                <ProjectRow
+                  key={project.project_id}
+                  project={project}
+                  onOpen={() => navigate(projectHref(project.project_id, '/'))}
+                  onLocate={() => setDialog({ kind: 'locate', project })}
+                  onRename={() => setDialog({ kind: 'rename', project })}
+                  onForget={() => setDialog({ kind: 'forget', project })}
+                  onReveal={() => void reveal(project)}
+                />
+              ))}
+            </ul>
+          </div>
         )
       ) : null}
 

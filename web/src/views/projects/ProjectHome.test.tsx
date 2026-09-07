@@ -109,6 +109,36 @@ describe('Project Home', () => {
     expect(screen.getByText(/Create a project to start a new workspace/)).toBeInTheDocument();
   });
 
+  it('says what a project is, and what opening one does, above the list', () => {
+    setup({ projects: [AVAILABLE] });
+
+    // A first-timer arrives here before anything in this product has a name. The lead is
+    // the only sentence that can define the object the whole screen is a list of.
+    const lead = screen.getByText(/A project is a folder on this machine/);
+    expect(lead).toHaveTextContent(/Opening one points the whole cockpit at that folder/);
+    expect(lead).toHaveTextContent(/forgetting one removes it from this list/);
+
+    // And it leads: one registered project is a card under a paragraph, not a card alone.
+    const list = screen.getByRole('list', { name: 'Registered projects' });
+    expect(lead.compareDocumentPosition(list)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
+      screen.getByText(/Every workspace this application has been shown/),
+    ).toBeInTheDocument();
+  });
+
+  it('offers the one step that ends the empty state, and says what it will do', async () => {
+    const user = userEvent.setup();
+    setup({ projects: [] });
+
+    // The shared empty-state pattern: the fact, then what a project is for, then one real
+    // next action — which here is the only way a first project can come to exist.
+    expect(screen.getByText('No projects yet')).toBeInTheDocument();
+    expect(screen.getByText(/Create a project to start a new workspace/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Create your first project' }));
+
+    expect(await screen.findByRole('dialog', { name: 'New project' })).toBeInTheDocument();
+  });
+
   it('keeps the order the host returned, most recently opened first', () => {
     setup({ projects: [BUSY, AVAILABLE, MOVED] });
 
