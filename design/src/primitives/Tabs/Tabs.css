@@ -126,9 +126,20 @@
   background: var(--rh-surface-subtle);
 }
 
+/*
+ * Which tab you are on, said in the page's own ink.
+ *
+ * The marker used to be `--rh-accent`, and the accent means model activity, the primary
+ * send/run action, active reference tracking and AI provenance — never navigation, and never
+ * emphasis. A strip that is read dozens of times a session is the last place to spend it: on
+ * an inspector where the model had done nothing, the loudest colour on screen was the tab a
+ * researcher had clicked. Primary ink is the same ink the selected label already takes, and
+ * the marker keeps the strong width, which is what a tab marker and the rule beside quoted
+ * matter are for.
+ */
 .rh-tabs__tab[data-state='selected'] {
   color: var(--rh-text-primary);
-  border-bottom-color: var(--rh-accent);
+  border-bottom-color: var(--rh-text-primary);
 }
 
 .rh-tabs[data-orientation='vertical'] .rh-tabs__tab {
@@ -139,7 +150,7 @@
 }
 
 .rh-tabs[data-orientation='vertical'] .rh-tabs__tab[data-state='selected'] {
-  border-right-color: var(--rh-accent);
+  border-right-color: var(--rh-text-primary);
 }
 
 .rh-tabs__tab[aria-disabled='true'] {

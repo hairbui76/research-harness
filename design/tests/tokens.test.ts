@@ -612,6 +612,36 @@ describe('the tab strip’s overflow fade', () => {
 });
 
 /**
+ * Which tab you are on is not model activity.
+ *
+ * `--rh-accent` marks model activity, the primary send/run action, active reference tracking
+ * and selected AI provenance — the package README says so, and says the accent is not an
+ * emphasis colour. Navigation is not on that list, and the tab strip is navigation: the
+ * inspector's six tabs and the manuscript's are read dozens of times a session, so the
+ * orange under the selected one was the accent's loudest appearance on a screen where the
+ * model had done nothing. The marker is the page's own ink at the strong width, which the
+ * selected tab already takes for its label, and it stays 2px — a tab marker and the rule
+ * beside quoted matter are what that width is for.
+ */
+describe('the selected tab’s marker', () => {
+  const css = read('primitives/Tabs/Tabs.css');
+
+  it('is drawn in ink at the strong width, in both orientations', () => {
+    const markers = [...css.matchAll(/border-(?:bottom|right)-color:\s*([^;]+);/g)].map(
+      (match) => match[1]!.trim(),
+    );
+    expect(markers).toHaveLength(2);
+    for (const marker of markers) expect(marker).toBe('var(--rh-text-primary)');
+    expect(css).toContain('border-bottom: var(--rh-border-width-strong) solid transparent');
+  });
+
+  it('spends no accent on navigation', () => {
+    // Declarations only: the rule above says in a comment which colour it stopped using.
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, '')).not.toContain('--rh-accent');
+  });
+});
+
+/**
  * A notification lands on chrome, never on what is being read or reached for.
  *
  * Wave one moved the viewport off the review screen's decision controls and under the app
