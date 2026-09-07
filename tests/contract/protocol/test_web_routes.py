@@ -898,12 +898,26 @@ def test_the_state_every_work_is_ingested_in_is_not_an_open_decision() -> None:
 
 def test_a_group_larger_than_the_page_shows_says_what_it_left_out() -> None:
     """The cap is the page's, and the sentence that admits it is the daemon's."""
+    groups = corpus_attention(tuple(_work(f"W{index:04d}", evidence=0) for index in range(1, 12)))
+
+    assert groups[0].count == 11
+    assert groups[0].label == "11 works have nothing accepted from them yet"
+    assert len(groups[0].items) == 8
+    assert groups[0].more == "3 more are in the list below."
+
+
+def test_a_group_the_page_can_hold_names_every_work_rather_than_a_sentence() -> None:
+    """A cap sentence is neither a work nor a link, so a group that fits does not need one.
+
+    "1 more is in the list below" leaves a reader to go and find that work themselves. Up
+    to the cap the group names every work it counts, each of them a link to itself, and the
+    sentence disappears because there is nothing it would be standing in for.
+    """
     groups = corpus_attention(tuple(_work(f"W{index:04d}", evidence=0) for index in range(1, 7)))
 
     assert groups[0].count == 6
-    assert groups[0].label == "6 works have nothing accepted from them yet"
-    assert len(groups[0].items) == 3
-    assert groups[0].more == "3 more are in the list below."
+    assert len(groups[0].items) == 6
+    assert groups[0].more == ""
 
 
 def test_a_corpus_every_source_of_which_can_be_read_names_nothing() -> None:

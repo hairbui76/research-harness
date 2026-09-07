@@ -101,7 +101,10 @@ test('the corpus names the sources that need a researcher before it says how muc
   const lead = page.locator('.rh-web-corpus__attention');
   await expect(lead.getByText('4 works have no readable text yet')).toBeVisible();
   await expect(lead.getByText('1 work has nothing accepted from it yet')).toBeVisible();
-  await expect(lead.getByText('1 more is in the list below.')).toBeVisible();
+  // A group this size names every work it counts: a cap sentence is neither a work nor a
+  // link, and a reader who wanted that work would have to go and find it.
+  await expect(lead.getByText(/more (is|are) in the list below\./)).toHaveCount(0);
+  await expect(lead.getByRole('link')).toHaveCount(5);
 
   // A named work leads to itself, never back to the corpus the reader is standing on.
   const named = lead.getByRole('link').first();

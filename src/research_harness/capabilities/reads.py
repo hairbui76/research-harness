@@ -733,9 +733,14 @@ def read_index(ctx: CapabilityContext, request: WorkspaceIndexRequest) -> Worksp
 
 
 #: How many works one corpus attention group names before it defers to the list itself.
-#: Three, because a group's job is to make the trouble concrete and reachable, and every one
-#: of the works it counts is already in the list underneath it.
-CORPUS_ATTENTION_ITEMS = 3
+#:
+#: Eight, because a group is read as a set of items and its cap sentence is not one: "1 more
+#: is in the list below" is neither a work nor a link, and a reader who wants that work has
+#: to go and find it. Below this size the group names every work it counts and no sentence
+#: stands in for one. Above it the sentence is a genuine cap rather than a dangling pointer
+#: — a lead is not a second copy of the corpus — and the count in the group's own line
+#: already says how many there are.
+CORPUS_ATTENTION_ITEMS = 8
 
 #: Why a source is not yet something this project can read from, in the order a researcher
 #: meets them: a screening decision left half-taken keeps a Work out of the corpus proper
