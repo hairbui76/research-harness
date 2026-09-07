@@ -161,20 +161,6 @@ export function ReviewInboxPage() {
             </p>
           ) : null}
 
-          {/* The panel outlives the queue on purpose: a batch that accepted everything
-              empties the list it reported on, and the receipt for a write of accepted
-              state must not disappear with it. */}
-          {canMutate && (items.length > 0 || written) ? (
-            <BatchAccept
-              items={items}
-              onAccepted={() => {
-                setWritten(true);
-                state.reload();
-                refresh();
-              }}
-            />
-          ) : null}
-
           {items.length === 0 ? (
             <Empty>
               Nothing is waiting for review. Interrogate a work in{' '}
@@ -202,6 +188,22 @@ export function ReviewInboxPage() {
               </Panel>
             ))
           )}
+
+          {/* Last, because it acts on the routine tier: a conflict is what the queue puts
+              first, and this panel and its caveat used to push that group down the page.
+              It outlives the queue on purpose — a batch that accepted everything empties
+              the list it reported on, and the receipt for a write of accepted state must
+              not disappear with it. */}
+          {canMutate && (items.length > 0 || written) ? (
+            <BatchAccept
+              items={items}
+              onAccepted={() => {
+                setWritten(true);
+                state.reload();
+                refresh();
+              }}
+            />
+          ) : null}
         </div>
       ) : null}
     </FullPageWorkspace>

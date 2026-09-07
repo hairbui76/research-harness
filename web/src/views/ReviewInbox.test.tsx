@@ -272,6 +272,18 @@ describe('the policy batch of Product 24.4', () => {
     mutations: [],
   };
 
+  it('sits below the queue, so the highest-priority group is what opens the page', async () => {
+    renderInbox(queueDaemon({ 'review.accept_batch': DRY_RUN }));
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    const panels = screen.getAllByRole('heading', { level: 2 }).map((node) => node.textContent);
+
+    expect(panels).toContain('Batch accept');
+    expect(panels.indexOf('Batch accept')).toBeGreaterThan(
+      panels.indexOf('High-risk scientific claims (1)'),
+    );
+  });
+
   it('previews with a dry run, and writes nothing until the restatement is answered', async () => {
     const user = userEvent.setup();
     const daemon = queueDaemon({ 'review.accept_batch': DRY_RUN });
