@@ -102,7 +102,6 @@ test('the corpus names the sources that need a researcher before it says how muc
   await expect(lead.getByText('4 works have no readable text yet')).toBeVisible();
   await expect(lead.getByText('1 work has nothing accepted from it yet')).toBeVisible();
   await expect(lead.getByText('1 more is in the list below.')).toBeVisible();
-  await expect(lead.getByText('its one file has no stored parse').first()).toBeVisible();
 
   // A named work leads to itself, never back to the corpus the reader is standing on.
   const named = lead.getByRole('link').first();

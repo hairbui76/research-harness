@@ -701,7 +701,9 @@ def test_an_unparsed_source_is_named_before_one_nothing_was_accepted_from(
 
     assert [group["kind"] for group in result["attention"]] == ["unparsed"]
     assert result["attention"][0]["label"] == "1 work has no readable text yet"
-    assert result["attention"][0]["items"][0]["detail"] == "its one file has no stored parse"
+    # Nothing to add: the group's own line already said it, and a detail repeating it under
+    # every work in the group is the same sentence printed three times.
+    assert result["attention"][0]["items"][0]["detail"] == ""
 
 
 def test_a_source_is_named_by_the_first_thing_missing_from_it() -> None:
@@ -729,7 +731,7 @@ def test_a_source_is_named_by_the_first_thing_missing_from_it() -> None:
         ("unread", 1),
     ], "a Work already read from, and one screened out, ask for nothing"
     assert groups[0].items[0].id == "W0001"
-    assert groups[2].items[0].detail == "its one file has no stored parse"
+    assert groups[2].items[0].detail == "", "one unreadable file is what the group line says"
 
 
 def test_the_state_every_work_is_ingested_in_is_not_an_open_decision() -> None:

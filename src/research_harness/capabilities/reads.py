@@ -723,11 +723,10 @@ def _corpus_detail(kind: str, work: WorkSummary) -> str:
     Empty where there is nothing to add: three copies of the group's own sentence teach a
     reader nothing the line above them did not already say.
     """
-    if kind == "unparsed":
-        files = len(work.artifacts)
-        if files == 1:
-            return "its one file has no stored parse"
-        return f"none of its {files} files has a stored parse"
+    if kind == "unparsed" and len(work.artifacts) > 1:
+        # Only the plural is news. "Its one file has no stored parse" under a line that
+        # already said "4 works have no readable text yet" is the same sentence three times.
+        return f"none of its {len(work.artifacts)} files has a stored parse"
     return ""
 
 

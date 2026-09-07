@@ -121,12 +121,7 @@ const NEEDS_A_RESEARCHER = [
     label: '4 works have no readable text yet',
     count: 4,
     items: [
-      {
-        id: 'W0002',
-        label: 'Encrypted flow taxonomies',
-        detail: 'its one file has no stored parse',
-        route: '/corpus/W0002',
-      },
+      { id: 'W0002', label: 'Encrypted flow taxonomies', detail: '', route: '/corpus/W0002' },
       {
         id: 'W0003',
         label: 'A tokenizer comparison',
@@ -232,7 +227,7 @@ describe('what needs a researcher among the sources', () => {
     await waitFor(() =>
       expect(screen.getByText('1 more is in the list below.')).toBeInTheDocument(),
     );
-    expect(screen.getByText(/its one file has no stored parse/)).toBeInTheDocument();
+    expect(screen.getByText(/none of its 2 files has a stored parse/)).toBeInTheDocument();
   });
 
   it('teaches what would put a source here when the daemon names none', async () => {

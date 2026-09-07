@@ -23,7 +23,9 @@
 .rh-web-corpus {
   display: flex;
   flex-direction: column;
-  gap: var(--rh-space-4);
+  /* Generous between the lead and the works, so the heading below has more room above it
+     than under it and the two parts of the page read as two things. */
+  gap: var(--rh-space-6);
   min-block-size: 0;
   block-size: 100%;
 }
@@ -61,11 +63,17 @@
   max-inline-size: var(--rh-measure-prose);
 }
 
-.rh-web-corpus__group-items {
+/*
+ * The works a group names, indented under it by one space unit — the shape every attention
+ * group on the Overview keeps. The two-class selector is deliberate: `.rh-web-list` zeroes
+ * the margin of every list in the cockpit and would otherwise win on source order.
+ */
+.rh-web-corpus__attention .rh-web-corpus__group-items {
   margin-inline-start: var(--rh-space-4);
 }
 
-/* What the group's cap left out, in the daemon's words: quiet, and under the works it did show. */
+/* What the group's cap left out, in the daemon's words: quiet, and in line with the works
+   it did show. */
 .rh-web-corpus__more {
   margin: 0;
   margin-inline-start: var(--rh-space-4);
