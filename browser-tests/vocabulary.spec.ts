@@ -91,6 +91,9 @@ test('the queue and the review screen print no identifier a researcher must deco
   for (const identifier of IDENTIFIERS) {
     expect(review, `the review screen shows "${identifier}"`).not.toContain(identifier);
   }
+  // The staging handle the daemon minted for this proposal. It addresses the card and the
+  // URL; it is not a word a researcher reads (2E).
+  expect(review, 'the review screen prints a `cand_` identifier').not.toMatch(/cand_[0-9a-f]/);
   // An open dictionary is read out as a line; braces belong in a file, not on a page.
   expect(review).not.toMatch(/[{}]/);
 

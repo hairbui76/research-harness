@@ -19,6 +19,36 @@
   line-height: var(--rh-type-mono-lh);
 }
 
+/*
+ * The name the page calls this evidence by. Sans, at the card header's own size: it is a
+ * heading, not a handle, and mono here would dress a sentence up as an identifier.
+ */
+.rh-evidence-card__name {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: none;
+  color: var(--rh-text-primary);
+  font-family: var(--rh-font-sans);
+  font-size: var(--rh-type-h4-size);
+  font-weight: var(--rh-type-h4-weight);
+  line-height: var(--rh-type-h4-lh);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.rh-evidence-card__name {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rh-border-strong);
+  text-underline-offset: 2px;
+}
+
+button.rh-evidence-card__name:hover {
+  text-decoration-color: currentcolor;
+}
+
 button.rh-evidence-card__id {
   cursor: pointer;
   text-decoration: underline;

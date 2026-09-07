@@ -11,6 +11,16 @@ import type { EvidenceModel, SourceAnchorModel } from '../models';
 export interface EvidenceCardProps
   extends Omit<CardProps, 'header' | 'footer' | 'children' | 'onSelect'> {
   evidence: EvidenceModel;
+  /**
+   * What this evidence is called on the page that is showing it.
+   *
+   * Given, it is the card's heading and the object's identifier is not printed at all —
+   * it stays on the element as `data-evidence-id` for anything that has to address it.
+   * Omitted, the heading is the identifier and the work label beside it, which is right
+   * where the identifier is the researcher's own handle for the object (an accepted
+   * `EV0012`) and wrong where it is the daemon's (`cand_<hex>`).
+   */
+  title?: ReactNode;
   /** Open the evidence object itself. */
   onOpen?: (evidence: EvidenceModel) => void;
   /** Open the source at the exact anchor. */
@@ -46,23 +56,48 @@ function Fact({ label, value }: FactProps): ReactElement | null {
  * truncated to a single line. Everything else — type, strength, origin, the extracted
  * number — is metadata around it. The card renders the authority it is given and offers no
  * way to change it: acceptance happens in a review flow, through `ReviewDecisionBar`.
+ *
+ * The heading is `title` when the host has a name for this evidence, and the object's own
+ * identifier only when it has not.
  */
 export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function EvidenceCard(
-  { evidence, onOpen, onOpenAnchor, actions, compact = false, selected = false, className, ...rest },
+  {
+    evidence,
+    title,
+    onOpen,
+    onOpenAnchor,
+    actions,
+    compact = false,
+    selected = false,
+    className,
+    ...rest
+  },
   ref,
 ) {
   const stale = evidence.stale === true || evidence.anchor.stale === true;
-  const title = (
+  const heading = (
     <span className="rh-evidence-card__title">
       <Icon name="quote" size={16} />
-      {onOpen ? (
-        <button type="button" className="rh-evidence-card__id" onClick={() => onOpen(evidence)}>
-          {evidence.id}
-        </button>
+      {title !== undefined ? (
+        onOpen ? (
+          <button type="button" className="rh-evidence-card__name" onClick={() => onOpen(evidence)}>
+            {title}
+          </button>
+        ) : (
+          <span className="rh-evidence-card__name">{title}</span>
+        )
       ) : (
-        <span className="rh-evidence-card__id">{evidence.id}</span>
+        <>
+          {onOpen ? (
+            <button type="button" className="rh-evidence-card__id" onClick={() => onOpen(evidence)}>
+              {evidence.id}
+            </button>
+          ) : (
+            <span className="rh-evidence-card__id">{evidence.id}</span>
+          )}
+          <span className="rh-evidence-card__work">{evidence.workLabel}</span>
+        </>
       )}
-      <span className="rh-evidence-card__work">{evidence.workLabel}</span>
     </span>
   );
 
@@ -72,11 +107,12 @@ export const EvidenceCard = forwardRef<HTMLElement, EvidenceCardProps>(function 
       as="article"
       className={cx('rh-evidence-card', selected && 'is-selected', className)}
       data-authority={evidence.authority}
+      data-evidence-id={evidence.id}
       data-stale={stale ? '' : undefined}
       data-selected={selected || undefined}
       header={
         <>
-          {title}
+          {heading}
           <span className="rh-evidence-card__badges">
             <AuthorityBadge authority={evidence.authority} size="sm" />
             {stale ? <AuthorityBadge authority="stale" size="sm" /> : null}

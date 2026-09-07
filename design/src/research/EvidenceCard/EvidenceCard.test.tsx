@@ -52,6 +52,28 @@ describe('EvidenceCard', () => {
     expect(onOpenAnchor).toHaveBeenCalledWith(SAMPLE_EVIDENCE.anchor);
   });
 
+  it('names the evidence with the name it is given, and prints no identifier then', () => {
+    const { container } = render(
+      <EvidenceCard evidence={SAMPLE_EVIDENCE} title="Metric result · W0001" />,
+    );
+    expect(screen.getByText('Metric result · W0001')).toBeInTheDocument();
+    // 2E: the daemon's own identifier is addressable, never printed, once the card has
+    // the name the page already calls this evidence by.
+    expect(container).not.toHaveTextContent(SAMPLE_EVIDENCE.id);
+    expect(container.querySelector('.rh-evidence-card')).toHaveAttribute(
+      'data-evidence-id',
+      SAMPLE_EVIDENCE.id,
+    );
+  });
+
+  it('falls back to the object id when it is given no name', () => {
+    const { container } = render(<EvidenceCard evidence={SAMPLE_EVIDENCE} />);
+    expect(container.querySelector('.rh-evidence-card__id')).toHaveTextContent(
+      SAMPLE_EVIDENCE.id,
+    );
+    expect(screen.getByText(SAMPLE_EVIDENCE.workLabel)).toBeInTheDocument();
+  });
+
   it('drops the metadata grid when compact', () => {
     const { container } = render(<EvidenceCard evidence={SAMPLE_EVIDENCE} compact />);
     expect(container.querySelector('.rh-evidence-card__facts')).toBeNull();

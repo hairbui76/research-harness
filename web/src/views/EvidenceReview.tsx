@@ -318,7 +318,13 @@ function Proposal({ candidate, item }: { candidate: CandidateView; item: ReviewI
 
   return (
     <>
-      <EvidenceCard evidence={proposedEvidence(candidate, evidence, content, source)} />
+      {/* The card is named the way the h1, the queue row, the palette and the
+          decide-and-next links name it. A `cand_<hex>` is the daemon's handle for a
+          proposal, not a word a researcher reads (2E). */}
+      <EvidenceCard
+        title={candidateName(candidate.field, candidate.work)}
+        evidence={proposedEvidence(candidate, evidence, content, source)}
+      />
 
       <Panel title="Proposal">
         <Fields>

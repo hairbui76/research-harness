@@ -379,6 +379,22 @@ describe('the screen a researcher spends their day on', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('never prints the candidate’s own identifier, on the card or anywhere else', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Source text')).toBeInTheDocument());
+    // 2E: `cand_<hex>` is the daemon's handle. The evidence card carries the same name the
+    // h1, the queue row and the decide-and-next links use.
+    expect(container.textContent ?? '').not.toContain(ITEM.candidate_id);
+    expect(container.querySelector('.rh-evidence-card__name')).toHaveTextContent(
+      candidateName(ITEM.field, ITEM.work),
+    );
+    expect(container.querySelector('.rh-evidence-card')).toHaveAttribute(
+      'data-evidence-id',
+      ITEM.candidate_id,
+    );
+  });
+
   it('reaches every review decision from the keyboard, in the order it is read', async () => {
     const user = userEvent.setup();
     renderReview();
