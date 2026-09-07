@@ -12,7 +12,7 @@ does both (ADR-004).
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -374,6 +374,19 @@ class ChangeEntry(BaseModel):
 
     route: str = ""
     """Where the changed object lives, when the cockpit has a screen for it."""
+
+    by: Literal["researcher", "daemon", ""] = ""
+    """Who the record says did it: the researcher, the daemon, or nothing at all.
+
+    Read off the record and never inferred from the kind of change. The semantic event log
+    stores the actor of every mutation it describes — `human`/`human:<name>` is the
+    researcher (Product 7.3), anything else is the daemon's own machinery — and a resolved
+    conflict stores the researcher who answered it. The one change nothing attributes is a
+    conflict *opening*: the conflict store keeps no actor for it, so an opening is the
+    daemon's only when the record names the run that produced it, and otherwise carries the
+    empty string. A client says "you" or "the daemon" for the two named values and leaves an
+    unattributed change unattributed; it never fills the gap in (Product 5 P10).
+    """
 
 
 class RecentChanges(BaseModel):

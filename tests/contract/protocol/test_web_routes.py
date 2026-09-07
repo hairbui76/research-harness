@@ -469,6 +469,85 @@ def test_the_change_list_reports_one_entry_of_each_kind_newest_first(
     assert changes.more == ""
 
 
+def test_each_change_says_whether_the_researcher_or_the_daemon_recorded_it(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """A returning researcher has to tell her own decisions from what ran without her.
+
+    The attribution is read off the record and nowhere else: the event log stores the actor
+    of every mutation it describes, and a resolved conflict stores the researcher who
+    answered it. Nothing here is inferred from the kind of change.
+    """
+    _accept_a_candidate(corpus, registry)
+    _accept_a_decision(corpus, registry)
+    _open_a_conflict(corpus, "conf-closed", resolve=True)
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    recorded = {entry.kind: entry.by for entry in changes.entries}
+    assert recorded["work"] == "researcher", "the corpus was ingested by the researcher"
+    assert recorded["evidence"] == "researcher", "only a researcher accepts evidence"
+    assert recorded["decision"] == "researcher"
+    answered = next(entry for entry in changes.entries if entry.label.startswith("resolved"))
+    assert answered.by == "researcher", "a conflict is answered by the researcher who resolved it"
+
+
+def test_a_change_the_researcher_did_not_make_is_attributed_to_the_daemon(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The log's actor decides, so an event no researcher recorded says the daemon.
+
+    Every capability that writes one of these events requires human authority today, so the
+    only way to put a non-human actor in the log is to write the line the way the log stores
+    it. That is the point: the Overview reads the actor it was given rather than assuming
+    the researcher was behind every change.
+    """
+    from research_harness.domain.enums import ResearchEventType
+    from research_harness.domain.research import ResearchEvent
+    from research_harness.workspace.serialization import dump_jsonl_line
+
+    layout = WorkspaceRepository.open(corpus).layout
+    with layout.events_file.open("a", encoding="utf-8") as stream:
+        stream.write(
+            dump_jsonl_line(
+                ResearchEvent(
+                    event=ResearchEventType.WORK_INGESTED,
+                    subjects=(WorkId("W0002"),),
+                    actor="model:scripted-extractor",
+                    summary="registered W0002 from a discovery run",
+                )
+            )
+        )
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+
+    proposed = next(entry for entry in changes.entries if entry.detail == "W0002")
+    assert proposed.by == "daemon"
+
+
+def test_a_conflict_nothing_attributes_is_left_unattributed_rather_than_guessed(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The conflict store records no actor for an opening, so the entry claims none.
+
+    A conflict that names the run it came out of was opened by that run — the daemon — and
+    says so. One that names nothing is left unattributed: inventing an actor for it would be
+    the cockpit deciding what the record does not say.
+    """
+    _open_a_conflict(corpus, "conf-anonymous", resolve=False)
+    _open_a_conflict(corpus, "conf-from-a-run", resolve=False, run="run_0001")
+
+    changes = OverviewReport.model_validate(reader.get("/overview").json()).since_last_session
+    opened = {
+        entry.detail: entry.by
+        for entry in changes.entries
+        if entry.kind == "conflict" and entry.label.startswith("opened")
+    }
+
+    assert opened["conf-anonymous"] == ""
+    assert opened["conf-from-a-run"] == "daemon"
+
+
 def test_the_change_list_caps_what_it_carries_and_says_what_it_left_out(
     reader: TestClient, corpus: Path
 ) -> None:
@@ -1352,14 +1431,19 @@ def _make_the_claim_stale(root: Path, registry: CapabilityRegistry) -> None:
     DependencyInvalidation().invalidate(repo, evidence)
 
 
-def _open_a_conflict(root: Path, subject: str, *, resolve: bool) -> None:
-    """One disagreement on record, optionally already answered by the researcher."""
+def _open_a_conflict(root: Path, subject: str, *, resolve: bool, run: str | None = None) -> None:
+    """One disagreement on record, optionally already answered by the researcher.
+
+    `run` is the run that produced it, which is the only thing the store keeps about who
+    opened a conflict; a record without one is a conflict nothing in the workspace attributes.
+    """
     store = ConflictStore(WorkspaceRepository.open(root).layout.research_dir)
     record = store.open_or_put(
         ConflictRecord(
             kind=ConflictKind.CANDIDATE_VS_ACCEPTED,
             subject=subject,
             summary=f"the staged reading of {subject} differs from the accepted one",
+            run_id=run,
         )
     )
     if resolve:
