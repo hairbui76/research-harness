@@ -38,7 +38,7 @@
   padding: var(--rh-space-3) var(--rh-space-4);
   background: var(--rh-surface-raised);
   color: var(--rh-text-primary);
-  border: 1px solid var(--rh-border-default);
+  border: var(--rh-border-width) solid var(--rh-border-default);
   border-radius: var(--rh-radius-card);
   font-family: var(--rh-font-sans);
   pointer-events: auto;
@@ -117,7 +117,7 @@
 .rh-toast__action {
   flex: none;
   padding: var(--rh-space-1) var(--rh-space-3);
-  border: 1px solid var(--rh-border-default);
+  border: var(--rh-border-width) solid var(--rh-border-default);
   border-radius: var(--rh-radius-control);
   background: transparent;
   color: var(--rh-text-link);
@@ -134,7 +134,7 @@
   width: var(--rh-space-6);
   height: var(--rh-space-6);
   padding: 0;
-  border: 1px solid transparent;
+  border: var(--rh-border-width) solid transparent;
   border-radius: var(--rh-radius-control);
   background: transparent;
   color: var(--rh-text-muted);

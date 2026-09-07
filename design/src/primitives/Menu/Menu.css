@@ -7,7 +7,7 @@
   padding: var(--rh-space-1);
   background: var(--rh-surface-raised);
   color: var(--rh-text-primary);
-  border: 1px solid var(--rh-border-default);
+  border: var(--rh-border-width) solid var(--rh-border-default);
   border-radius: var(--rh-radius-card);
   font-family: var(--rh-font-sans);
   font-size: var(--rh-type-ui-size);

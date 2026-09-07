@@ -13,7 +13,7 @@
   display: flex;
   align-items: stretch;
   gap: var(--rh-space-1);
-  border-bottom: 1px solid var(--rh-border-subtle);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
   min-width: 0;
   overflow-x: auto;
 }
@@ -21,7 +21,7 @@
 .rh-tabs[data-orientation='vertical'] > .rh-tabs__list {
   flex-direction: column;
   border-bottom: 0;
-  border-right: 1px solid var(--rh-border-subtle);
+  border-right: var(--rh-border-width) solid var(--rh-border-subtle);
   overflow-x: visible;
 }
 
@@ -33,7 +33,7 @@
   min-height: var(--rh-density-row);
   padding: var(--rh-space-2) var(--rh-density-pad);
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: var(--rh-border-width-strong) solid transparent;
   border-radius: var(--rh-radius-nav) var(--rh-radius-nav) 0 0;
   background: transparent;
   color: var(--rh-text-secondary);
@@ -62,7 +62,7 @@
 
 .rh-tabs[data-orientation='vertical'] .rh-tabs__tab {
   border-bottom: 0;
-  border-right: 2px solid transparent;
+  border-right: var(--rh-border-width-strong) solid transparent;
   border-radius: var(--rh-radius-nav) 0 0 var(--rh-radius-nav);
   justify-content: flex-start;
 }

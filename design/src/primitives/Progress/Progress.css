@@ -31,7 +31,7 @@
   overflow: hidden;
   width: 100%;
   background: var(--rh-surface-subtle);
-  border: 1px solid var(--rh-border-subtle);
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
   border-radius: var(--rh-radius-pill);
 }
 

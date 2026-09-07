@@ -19,7 +19,7 @@
   padding: var(--rh-space-6);
   background: var(--rh-surface-raised);
   color: var(--rh-text-primary);
-  border: 1px solid var(--rh-border-default);
+  border: var(--rh-border-width) solid var(--rh-border-default);
   border-radius: var(--rh-radius-card);
   font-family: var(--rh-font-sans);
 }
@@ -71,7 +71,7 @@
   width: var(--rh-space-8);
   height: var(--rh-space-8);
   padding: 0;
-  border: 1px solid transparent;
+  border: var(--rh-border-width) solid transparent;
   border-radius: var(--rh-radius-control);
   background: transparent;
   color: var(--rh-text-secondary);

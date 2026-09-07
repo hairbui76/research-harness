@@ -41,15 +41,15 @@
 .rh-pane-handle[data-direction='horizontal'] {
   width: var(--rh-space-2);
   cursor: col-resize;
-  border-left: 1px solid var(--rh-border-subtle);
-  border-right: 1px solid var(--rh-border-subtle);
+  border-left: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-right: var(--rh-border-width) solid var(--rh-border-subtle);
 }
 
 .rh-pane-handle[data-direction='vertical'] {
   height: var(--rh-space-2);
   cursor: row-resize;
-  border-top: 1px solid var(--rh-border-subtle);
-  border-bottom: 1px solid var(--rh-border-subtle);
+  border-top: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
 }
 
 .rh-pane-handle:hover {

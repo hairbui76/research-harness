@@ -24,7 +24,9 @@
   gap: var(--rh-space-2);
   min-width: 0;
   padding: var(--rh-space-1) var(--rh-space-2);
-  border-inline-start: 2px solid var(--rh-status-candidate-border);
+  /* A hairline, like every other coloured edge in the system: the severity is already a
+     word in a chip beside it, so the stripe only has to locate the row. */
+  border-inline-start: var(--rh-border-width) solid var(--rh-status-candidate-border);
   border-radius: var(--rh-radius-control);
   font-size: var(--rh-type-body-sm-size);
 }
