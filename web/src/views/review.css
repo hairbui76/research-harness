@@ -128,6 +128,26 @@
 }
 
 /*
+ * The decision's first row: what was recorded, and whether the queue moves on by itself.
+ *
+ * Auto-advance is the one preference a fast reviewer changes, and it used to sit under six
+ * buttons and two links inside a pinned panel — below the card's own fold, which is the one
+ * fold scrolling the page does not open. It sits beside the outcome instead. The switch
+ * keeps to the end of the row so the sentence about the last decision leads it.
+ */
+.rh-web-decide__lede {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-3);
+  min-width: 0;
+}
+
+.rh-web-decide__advance {
+  margin-inline-start: auto;
+}
+
+/*
  * The source, travelling with the pinned decision when the panes stack.
  *
  * It is hidden where the panes sit side by side: there the source pane *is* beside the

@@ -376,6 +376,30 @@ export function EvidenceReviewPage() {
                   />
 
                   <Panel title="Decide">
+                    {/*
+                        The first row of the decision: what the last one recorded, and
+                        whether the queue moves on by itself. Alex's complaint was that the
+                        switch sat under six buttons and two links, below the card's own
+                        fold, so the one preference a fast reviewer wants was the one thing
+                        they had to scroll inside a pinned panel to reach.
+                    */}
+                    <div className="rh-web-decide__lede">
+                      {outcome ? (
+                        <p className="rh-web-next__outcome" role="status">
+                          Candidate {outcome}.
+                        </p>
+                      ) : null}
+                      <Switch
+                        label="Open the next candidate after a decision"
+                        checked={autoAdvance}
+                        onCheckedChange={(on) => {
+                          setAutoAdvance(on);
+                          writeAutoAdvance(on);
+                        }}
+                        fieldClassName="rh-web-decide__advance"
+                      />
+                    </div>
+
                     <div ref={decideRef}>
                       <ReviewActions
                         candidate={candidate}
@@ -388,11 +412,6 @@ export function EvidenceReviewPage() {
                     </div>
 
                     <div className="rh-web-next">
-                      {outcome ? (
-                        <p className="rh-web-next__outcome" role="status">
-                          Candidate {outcome}.
-                        </p>
-                      ) : null}
                       <div className="rh-web-next__moves">
                         {previous ? (
                           <Link to={href(`/review/${previous.candidate_id}`)}>
@@ -407,14 +426,6 @@ export function EvidenceReviewPage() {
                           <span className="rh-text-secondary">Last in the queue.</span>
                         )}
                       </div>
-                      <Switch
-                        label="Open the next candidate after a decision"
-                        checked={autoAdvance}
-                        onCheckedChange={(on) => {
-                          setAutoAdvance(on);
-                          writeAutoAdvance(on);
-                        }}
-                      />
                     </div>
                   </Panel>
                 </div>

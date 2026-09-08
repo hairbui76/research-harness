@@ -837,3 +837,33 @@ describe('the pinned decision names what it stands on', () => {
     expect(container.querySelector('.rh-web-decide__more')).not.toBeNull();
   });
 });
+
+describe('auto-advance is asked for, and asked for where it is used', () => {
+  it('sits in the decision’s first row, before the six actions', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    const advance = screen.getByRole('switch', { name: /next candidate/i });
+    const accept = screen.getByRole('button', { name: 'Accept' });
+    expect(decidePanel().contains(advance)).toBe(true);
+    expect(advance.compareDocumentPosition(accept) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  /*
+   * The default stays off, and the reason is the product's rather than the screen's.
+   *
+   * An acceptance writes authority and no `review.*` capability takes one back, so the
+   * keystroke after a decision must land on the candidate the researcher was looking at,
+   * not on whichever one the queue advanced to while they were reading the outcome. The
+   * throughput complaint is answered by where the switch is, not by what it starts as.
+   */
+  it('starts off on a machine that has never been asked', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    expect(screen.getByRole('switch', { name: /next candidate/i })).not.toBeChecked();
+    expect(window.localStorage.getItem(AUTO_ADVANCE_KEY)).toBeNull();
+  });
+});
