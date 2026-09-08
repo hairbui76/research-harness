@@ -272,3 +272,116 @@ test('every word the review screen prints as a value defines itself to the keybo
 
   await page.screenshot({ path: info.outputPath('vocabulary-review-described.png'), fullPage: true });
 });
+
+/**
+ * The row holds still while a pointer asks a badge what it means.
+ *
+ * This is wave two's defect, written as an assertion so it cannot come back. The sentence
+ * used to open inside the badge's own box, which is a column: it widened that column, the
+ * row re-wrapped, and the link the pointer was aiming at moved out from under it. That is
+ * why the meaning was given to the keyboard alone, and why a mouse never learned what
+ * `Candidate` meant. The sentence now takes a line of its own beneath the row, so the row's
+ * first line — the link, the two badges, the tier — keeps every box it had.
+ *
+ * Measured against the row's own corner rather than the viewport, because a pointer
+ * arriving at a badge can scroll the page and a scrolled page moves everything equally.
+ * What is being asserted is the layout, so the origin is the layout's.
+ */
+test('a pointer resting on a queue badge never moves the row it is reading', async ({
+  page,
+  request,
+}, info) => {
+  await seedQueue(page, request);
+
+  const row = page.locator('a[data-review-row]').first();
+  await expect(row).toBeVisible({ timeout: 15_000 });
+
+  /**
+   * Every word on the row's own line: the link, the two badges, the tier.
+   *
+   * The link is the one the critique names, but the badges and the tier beside it are what
+   * a pointer is aiming at next, and a sentence breaking the line where it stands would
+   * send them to the row below while leaving the link exactly where it was. So the whole
+   * line is measured, against the row's own corner.
+   */
+  const readRow = (): Promise<{ text: string; x: number; y: number; width: number }[]> =>
+    page.evaluate(() => {
+      const link = document.querySelector('a[data-review-row]');
+      const item = link?.closest('li');
+      if (link === null || item === null || item === undefined) {
+        throw new Error('the queue shows no row');
+      }
+      const origin = item.getBoundingClientRect();
+      const words = [link, ...item.querySelectorAll('.rh-badge, .rh-described-term__word')];
+      return words.map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          text: (node.textContent ?? '').trim(),
+          x: Math.round(box.x - origin.x),
+          y: Math.round(box.y - origin.y),
+          width: Math.round(box.width),
+        };
+      });
+    });
+
+  const before = await readRow();
+  expect(before.length, 'the queue row shows no words to measure').toBeGreaterThan(3);
+
+  const category = page
+    .locator('.rh-badge[tabindex="0"]')
+    .filter({ hasText: 'High-risk scientific claims' })
+    .first();
+  await category.hover();
+  // The sentence waits for a pointer that stays, and then it is on the page for the eye.
+  await expect(page.locator(HINT).first()).toContainText('carries a number', {
+    timeout: 15_000,
+  });
+
+  expect(await readRow(), 'describing a badge moved the words beside it').toEqual(before);
+  await page.screenshot({ path: info.outputPath('vocabulary-inbox-hovered.png'), fullPage: true });
+
+  // And the word a pointer cannot even see as a tab stop says so for itself: the tier is
+  // not a badge, and it answers the same gesture.
+  const tier = page
+    .locator('.rh-described-term__word')
+    .filter({ hasText: 'Tier 2 — deep review' })
+    .first();
+  await tier.hover();
+  await expect(page.locator(HINT).first()).toContainText('Interpretation', { timeout: 15_000 });
+  expect(await readRow(), 'describing the tier moved the words beside it').toEqual(before);
+  await page.screenshot({ path: info.outputPath('vocabulary-inbox-tier-hovered.png') });
+});
+
+/**
+ * Green says accepted, and says nothing else.
+ *
+ * `success`, `error` and `info` are not separate hues — they resolve to the accepted,
+ * contested and candidate families themselves — so a badge wearing the success tone is a
+ * badge painting something in the accepted green. Four did: a verified extraction, a
+ * supported claim, a valid anchor, an included work, none of which is accepted state. The
+ * review screen is where three of them stood beside a `Candidate` and an accepted count.
+ */
+test('nothing but accepted state is painted in the accepted green', async ({ page, request }) => {
+  await seedQueue(page, request);
+
+  const green = () => page.locator('.rh-badge[data-tone="success"]');
+  expect(await green().count(), 'the review inbox paints a feedback badge green').toBe(0);
+
+  await page.getByRole('link', { name: /Metric result · W0001/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Metric result · W0001', level: 1 }),
+  ).toBeVisible({ timeout: 15_000 });
+
+  // The anchor's `Valid` and the verifier's `Supported` are on this screen, one column
+  // from the candidate's authority. Neither is accepted state and neither is green.
+  await expect(page.getByText('Valid', { exact: true }).first()).toBeVisible();
+  expect(await green().count(), 'the review screen paints a feedback badge green').toBe(0);
+
+  // The one badge that may be green is the one that says so.
+  for (const badge of await page.locator('.rh-badge[data-status]').all()) {
+    const status = await badge.getAttribute('data-status');
+    expect(['accepted', 'candidate', 'qualified', 'contested', 'stale', 'private']).toContain(
+      status,
+    );
+  }
+});

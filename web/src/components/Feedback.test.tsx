@@ -311,26 +311,25 @@ describe('a status badge', () => {
    */
   it('gives a row’s sentence a line of its own, and no width of its own', () => {
     const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'styles.css'), 'utf8');
+    const wrapper =
+      /\.rh-web-row \.rh-authority-badge__described,\s*\.rh-web-row \.rh-described-term \{([^}]*)\}/.exec(
+        css,
+      )?.[1] ?? '';
+    const hint =
+      /\.rh-web-row \.rh-authority-badge__hint,\s*\.rh-web-row \.rh-described-term__hint \{([^}]*)\}/.exec(
+        css,
+      )?.[1] ?? '';
 
-    for (const container of ['.rh-web-row', '.rh-web-table']) {
-      const wrapper = new RegExp(
-        `\\${container} \\.rh-authority-badge__described,\\s*\\${container} \\.rh-described-term \\{([^}]*)\\}`,
-      ).exec(css)?.[1] ?? '';
-      const hint = new RegExp(
-        `\\${container} \\.rh-authority-badge__hint,\\s*\\${container} \\.rh-described-term__hint \\{([^}]*)\\}`,
-      ).exec(css)?.[1] ?? '';
-
-      expect(wrapper, `${container} keeps the sentence inside a box`).toContain(
-        'display: contents',
-      );
-      // A definite width contributes exactly that much to intrinsic sizing, so the
-      // sentence widens neither the row nor a column every other row shares…
-      expect(hint, `${container} lets the sentence set a width`).toContain('inline-size: 0');
-      // …and the percentage minimum is what gives it the whole line to be read on.
-      expect(hint, `${container} denies the sentence its own line`).toContain(
-        'min-inline-size: 100%',
-      );
-    }
+    // The sentence is a member of the row, not of a box inside it that would widen.
+    expect(wrapper, 'the row keeps the sentence inside a box').toContain('display: contents');
+    // It is laid out after every word, because in the source it stands between its own
+    // badge and the next one, and a line breaking there would push that one down.
+    expect(hint, 'the sentence breaks the line where it stands').toContain('order: 1');
+    // A definite width contributes exactly that much to intrinsic sizing, so the sentence
+    // widens neither the row nor a table column every other row shares…
+    expect(hint, 'the sentence sets a width of its own').toContain('inline-size: 0');
+    // …and the percentage minimum is what gives it the whole line to be read on.
+    expect(hint, 'the sentence is denied its own line').toContain('min-inline-size: 100%');
   });
 
   it('has no automatically detectable accessibility violation while describing itself', async () => {
