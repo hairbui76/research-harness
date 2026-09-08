@@ -390,9 +390,7 @@ def test_the_order_vocabulary_is_the_one_the_request_accepts() -> None:
         ("added", ["W0003", "W0001", "W0002"]),
     ],
 )
-def test_each_order_reads_the_corpus_by_the_fact_it_names(
-    kind: str, ascending: list[str]
-) -> None:
+def test_each_order_reads_the_corpus_by_the_fact_it_names(kind: str, ascending: list[str]) -> None:
     """Each order reads one fact of the row, and reverses whole when it is reversed.
 
     Title is compared with case folded, because a corpus sorted by capitalisation is a
@@ -489,9 +487,7 @@ def test_an_unknown_order_is_refused_rather_than_read_in_the_default_one(
     """A typo must not read as "the corpus's own order": the vocabulary is closed."""
     registry = build_default_registry()
     with pytest.raises(Exception) as refusal:
-        registry.invoke(
-            "work.list", populated, {"order": "relevance"}, principal=Principal.human()
-        )
+        registry.invoke("work.list", populated, {"order": "relevance"}, principal=Principal.human())
     assert "relevance" in str(refusal.value) or "order" in str(refusal.value)
 
 
