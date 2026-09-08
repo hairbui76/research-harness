@@ -108,6 +108,49 @@ body,
   min-block-size: var(--rh-control-target-min);
 }
 
+/*
+ * Where a described word's sentence goes when the thing it sits in cannot grow.
+ *
+ * A badge or a term that explains itself draws the sentence under the word, which is right
+ * in a `<dd>` and wrong in a row: the wrapper is a column, so a sentence opening inside it
+ * widens that column and re-wraps the row, and the row's own link — what the pointer was
+ * aiming at — moves. That is the defect wave two answered by refusing the pointer
+ * altogether; the sentence now opens to a pointer that rests, so the row has to hold still
+ * on its own.
+ *
+ * It does, in three moves. The wrapper becomes `display: contents`, so the badge and its
+ * sentence are members of the row itself rather than of a box inside it. `order` sends the
+ * sentence to the end, because in the source it stands between its own badge and whatever
+ * follows — a second badge, the tier — and a line breaking there would push those onto the
+ * next line, which is the same defect one item along. And the sentence takes a line of its
+ * own: `min-inline-size: 100%` is wider than any line can hold, so the flex layout can only
+ * put it on the next one, below every item already placed. The row's first line keeps its
+ * height and its items keep their boxes; the row grows downward.
+ *
+ * Reordering is safe here and nowhere near the tab order: the sentence is `aria-hidden`
+ * decoration for the eye, the words it explains are the focusable things, and the copy a
+ * screen reader hears is the `aria-describedby` half, which never moves.
+ *
+ * `inline-size: 0` is what keeps it from widening anything: a definite width contributes
+ * exactly that much to intrinsic sizing, so the sentence adds nothing to what the row asks
+ * for — nor, when the row is inside a table cell, to a column every other row shares —
+ * while the percentage minimum still gives it the full width to be read at. The reading
+ * measure is the row's here rather than 52ch, because the row is what the sentence
+ * belongs to.
+ */
+.rh-web-row .rh-authority-badge__described,
+.rh-web-row .rh-described-term {
+  display: contents;
+}
+
+.rh-web-row .rh-authority-badge__hint,
+.rh-web-row .rh-described-term__hint {
+  order: 1;
+  inline-size: 0;
+  min-inline-size: 100%;
+  max-inline-size: none;
+}
+
 .rh-web-list {
   list-style: none;
   margin: 0;

@@ -1,8 +1,7 @@
 /*
  * A word with its meaning under it — the same shape `AuthorityBadge` draws, for a term
  * that is not a badge. The sentence sits in flow under the word, so a scrolling pane
- * cannot clip it the way it would clip an overlay, and it opens on focus rather than on
- * hover so that a pointer crossing a row never moves what is under it.
+ * cannot clip it the way it would clip an overlay.
  */
 .rh-described-term {
   display: inline-flex;
@@ -14,6 +13,20 @@
 /* Focusable, so it says where the keyboard is — and the cursor says the press is there. */
 .rh-described-term__word {
   cursor: help;
+}
+
+/*
+ * What a pointer can see.
+ *
+ * A tab stop is invisible: before this, a mouse had no way to learn that the word would
+ * explain itself, which is what left twenty-one vocabularies definable by keyboard only.
+ * The dotted underline is drawn in the word's own ink — it states that there is something
+ * to ask, and never a second colour — and it is dotted, not solid, because a solid
+ * underline in this cockpit is a link.
+ */
+.rh-described-term__word[tabindex] {
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 0.2em;
 }
 
 .rh-described-term__hint {

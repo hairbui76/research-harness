@@ -1,15 +1,15 @@
-/* A describable badge is focusable, so it says where the keyboard is — and the cursor
-   says the press is worth making. */
-.rh-authority-badge[tabindex] {
-  cursor: help;
-}
+/* The cursor and the dotted underline that say a badge will explain itself live on
+   `.rh-badge[tabindex]`, so the toned badges a cockpit builds on the primitive wear the
+   same affordance as the six authorities. */
 
 /*
  * The badge and the sentence that explains it.
  *
  * The sentence sits under the badge, in flow, so it can never be clipped by a scrolling
- * table or a narrow pane the way an overlay would be. It appears on focus rather than on
- * hover, so a pointer crossing a row never moves the links in that row.
+ * table or a narrow pane the way an overlay would be. Focus, a pointer that rests and a
+ * long press all open it; a pointer merely crossing the row does not, because the sentence
+ * waits for the pointer to stay. Where the sentence would still reflow the row it belongs
+ * to — a queue row, a table cell — the surface gives it a line of its own instead.
  */
 .rh-authority-badge__described {
   display: inline-flex;

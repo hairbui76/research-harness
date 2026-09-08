@@ -9,9 +9,10 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DESCRIBED_TERM_HOVER_MS, DESCRIBED_TERM_PRESS_MS } from '@research-harness/design';
 import {
   DataTable,
   Empty,
@@ -20,10 +21,44 @@ import {
   Fields,
   Loading,
   StatusBadge,
+  TONES,
   candidateName,
   fieldLabel,
 } from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
+
+/**
+ * A pointer that rests on a word, and a finger that holds it.
+ *
+ * React derives `pointerenter` from `pointerover`, and jsdom has no `PointerEvent` to
+ * carry `pointerType` — the property that tells a long press from a click — so the touch
+ * events are built by hand. The clock is the test's, because what is asserted is a delay.
+ */
+function pointerRestsOn(element: Element, ms: number) {
+  fireEvent.pointerOver(element, { pointerType: 'mouse' });
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
+function pointerLeaves(element: Element) {
+  act(() => {
+    fireEvent.pointerOut(element, { pointerType: 'mouse' });
+  });
+}
+
+function fingerHolds(element: Element, ms: number) {
+  const down = new Event('pointerdown', { bubbles: true, cancelable: true });
+  Object.defineProperty(down, 'pointerType', { value: 'touch' });
+  fireEvent(element, down);
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('waiting for a read', () => {
   it('announces the wait once, politely, and draws no spinner', () => {
@@ -211,7 +246,8 @@ describe('a status badge', () => {
 
     expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
     // A pointer only passing over the badge leaves the row where it was: the sentence
-    // opens on focus, and clicking the badge is what focuses it.
+    // waits for a pointer that stays, so one crossing the row on its way to a link opens
+    // nothing.
     await user.hover(badge);
     expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
 
@@ -221,9 +257,79 @@ describe('a status badge', () => {
     );
   });
 
+  it('makes the meaning reachable to a pointer that rests on the badge', () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <StatusBadge status="partially_supported" vocabulary="verdict" describe />,
+    );
+    const badge = container.querySelector('.rh-badge')!;
+
+    // One rest, watched across the moment it becomes a rest: a pointer crossing the row
+    // is gone before this, and a pointer asking the question is still here after it.
+    pointerRestsOn(badge, DESCRIBED_TERM_HOVER_MS - 1);
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /confirmed part of it/,
+    );
+
+    pointerLeaves(badge);
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+  });
+
+  it('answers a long press, which is the only gesture a finger has', () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <StatusBadge status="partially_supported" vocabulary="verdict" describe />,
+    );
+    const badge = container.querySelector('.rh-badge')!;
+
+    fingerHolds(badge, DESCRIBED_TERM_PRESS_MS);
+    // The press focuses the badge, so a finger and a Tab key leave one state behind them.
+    expect(badge).toHaveFocus();
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /confirmed part of it/,
+    );
+  });
+
   it('stays out of the tab order when it is not describing itself', () => {
     const { container } = render(<StatusBadge status="routine" vocabulary="reviewCategory" />);
     expect(container.querySelector('.rh-badge')).not.toHaveAttribute('tabindex');
+  });
+
+  /*
+   * The slot, asserted as the rule it is.
+   *
+   * jsdom lays nothing out, so the browser suite is where the row is measured holding
+   * still (`browser-tests/vocabulary.spec.ts`). What can be asserted here is the rule that
+   * makes it hold: in a queue row and in a table cell, the sentence is not a box inside the
+   * row — the wrapper disappears, and the sentence takes a full line that contributes
+   * nothing to what the row or the column asks for.
+   */
+  it('gives a row’s sentence a line of its own, and no width of its own', () => {
+    const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'styles.css'), 'utf8');
+    const wrapper =
+      /\.rh-web-row \.rh-authority-badge__described,\s*\.rh-web-row \.rh-described-term \{([^}]*)\}/.exec(
+        css,
+      )?.[1] ?? '';
+    const hint =
+      /\.rh-web-row \.rh-authority-badge__hint,\s*\.rh-web-row \.rh-described-term__hint \{([^}]*)\}/.exec(
+        css,
+      )?.[1] ?? '';
+
+    // The sentence is a member of the row, not of a box inside it that would widen.
+    expect(wrapper, 'the row keeps the sentence inside a box').toContain('display: contents');
+    // It is laid out after every word, because in the source it stands between its own
+    // badge and the next one, and a line breaking there would push that one down.
+    expect(hint, 'the sentence breaks the line where it stands').toContain('order: 1');
+    // A definite width contributes exactly that much to intrinsic sizing, so the sentence
+    // widens neither the row nor a table column every other row shares…
+    expect(hint, 'the sentence sets a width of its own').toContain('inline-size: 0');
+    // …and the percentage minimum is what gives it the whole line to be read on.
+    expect(hint, 'the sentence is denied its own line').toContain('min-inline-size: 100%');
   });
 
   it('has no automatically detectable accessibility violation while describing itself', async () => {
@@ -280,7 +386,8 @@ describe('a definition row that carries a vocabulary word', () => {
     expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(/audited conclusion/);
 
     expect(container.querySelector('.rh-described-term__hint')).toBeNull();
-    // A pointer only passing over the word leaves the panel where it was.
+    // A pointer only passing over the word leaves the panel where it was: the sentence
+    // waits for a pointer that stays.
     await user.hover(word);
     expect(container.querySelector('.rh-described-term__hint')).toBeNull();
 
@@ -322,6 +429,92 @@ describe('a definition row that carries a vocabulary word', () => {
       </Fields>,
     );
     await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * Which colour system a word may speak.
+ *
+ * DESIGN.md states the rule twice over — no scientific status colour on something that is
+ * not a scientific state, no feedback tone on something that is — and in a badge those are
+ * one rule, because `success`, `error` and `info` resolve to the accepted, contested and
+ * candidate families themselves. So the test is a list: every word this module tones, and
+ * what it is. A word that is a scientific state has no business here at all.
+ */
+describe('the colour a state is allowed to wear', () => {
+  /** Every toned word, and the application condition it reports. */
+  const FEEDBACK: Record<string, string> = {
+    conflict: 'a review queue category: why the queue is holding this',
+    high_risk: 'a review queue category',
+    ambiguous: 'a review queue category',
+    routine: 'a review queue category',
+    contradicted: 'a verifier’s verdict: what an independent read said',
+    partially_supported: 'a verifier’s verdict',
+    missing: 'an anchor’s replay result',
+    relocated: 'an anchor’s replay result',
+    error: 'the kind of a notice',
+    warning: 'the kind of a notice',
+    info: 'the kind of a notice',
+    unsupported:
+      'a claim’s scientific state, kept on the contested red the row’s own marker already ' +
+      'wears; moving it into that family would be the product classifying it, which is the ' +
+      'researcher’s to do',
+  };
+
+  it('tones nothing but application feedback', () => {
+    for (const value of Object.keys(TONES)) {
+      expect(FEEDBACK[value], `"${value}" wears a tone with no reason on record`).toBeTruthy();
+    }
+  });
+
+  it('spends the accepted green on accepted state and nowhere else', () => {
+    // A verified extraction, a supported claim, a valid anchor and an included work are
+    // all things a machine established. Only a persisted human decision creates authority,
+    // and green is what says so.
+    expect(Object.entries(TONES).filter(([, tone]) => tone === 'success')).toEqual([]);
+    for (const value of ['verified', 'supported', 'valid', 'included']) {
+      expect(TONES[value], `"${value}" is green again`).toBeUndefined();
+    }
+  });
+
+  it('keeps the feedback amber off a candidate that simply has no verdict yet', () => {
+    const { container } = render(
+      <StatusBadge status="unverified" vocabulary="verdict">
+        Unverified
+      </StatusBadge>,
+    );
+
+    // It sits beside the scientific blue of `Candidate` on the same row, and an absent
+    // verdict is not a warning: it is the resting state of every candidate ever staged.
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-tone', 'neutral');
+    expect(container.querySelector('[data-icon]')).toHaveAttribute('data-icon', 'circle-dashed');
+  });
+
+  /**
+   * Screening is a pipeline, not an authority: a discovery result, a screened candidate, a
+   * corpus member, a rejection. `Included` used to wear the accepted green one column from
+   * a count of accepted evidence, so a thousand-row corpus said "accepted" about
+   * membership. All four are neutral now, and the glyph is what tells them apart — which
+   * is the channel that survives greyscale anyway.
+   */
+  it.each([
+    ['discovered', 'search'],
+    ['screened', 'filter'],
+    ['included', 'library'],
+    ['excluded', 'circle-x'],
+  ])('draws screening state %s neutral, told apart by its own glyph', (state, glyph) => {
+    const { container } = render(<StatusBadge status={state} vocabulary="screeningState" />);
+
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-tone', 'neutral');
+    expect(container.querySelector('[data-icon]')).toHaveAttribute('data-icon', glyph);
+    expect(container.querySelector('.rh-badge')).not.toHaveAttribute('data-status');
+  });
+
+  it('still sends a scientific authority to its own family', () => {
+    const { container } = render(<StatusBadge status="accepted" vocabulary="evidenceStatus" />);
+
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-status', 'accepted');
+    expect(container.querySelector('.rh-badge')).not.toHaveAttribute('data-tone');
   });
 });
 

@@ -187,8 +187,14 @@ export function ClaimsPage() {
                     <div className="rh-text-secondary">{claim.statement}</div>
                   </th>
                   <td>
-                    <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
-                    {claim.stale === 'stale' ? <StatusBadge status="stale" describe /> : null}
+                    {/* A row, so the sentence a badge opens takes a line of its own inside
+                        the cell instead of widening the column — and a column belongs to
+                        every claim on the page, so one badge explaining itself would
+                        otherwise move all of them. */}
+                    <span className="rh-web-row">
+                      <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
+                      {claim.stale === 'stale' ? <StatusBadge status="stale" describe /> : null}
+                    </span>
                   </td>
                   <td>{researchLabel('claimScope', claim.requested_strength)}</td>
                   <td>{researchLabel('claimScope', claim.allowed_strength)}</td>

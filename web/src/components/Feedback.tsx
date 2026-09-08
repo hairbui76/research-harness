@@ -35,7 +35,6 @@
  * `StatusBadge` never signals with colour alone: every badge renders the daemon's own word
  * beside its glyph (DS spec §12.6).
  */
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   AsyncState,
@@ -52,7 +51,7 @@ import {
   researchDescription,
   researchLabel,
   researchMeaning,
-  useId,
+  useDescribedTerm,
 } from '@research-harness/design';
 import type {
   AuthorityLabel,
@@ -355,8 +354,41 @@ export function authorityOf(status: string, stale?: boolean): AuthorityLabel {
  * which owns their presentation. What is left is the review queue's categories, the
  * verifier's verdicts, screening states and anchor verdicts: application feedback about an
  * object, not a statement of its scientific authority.
+ *
+ * ## Green is the accepted state's, and nothing else's
+ *
+ * The feedback tones are not separate hues: `success` resolves to the same green as the
+ * accepted status family, `error` to the same red as contested, `info` to the same blue as
+ * candidate (`themes/dark.css`). So "a feedback tone on a scientific state" and "a
+ * scientific family colour on something that is not one" are, in a badge, the same defect
+ * — and DESIGN.md forbids both.
+ *
+ * Four words used to commit it by wearing `success`, and the corpus showed the cost:
+ * `Included` sat in the accepted green one column from a count of accepted evidence, so
+ * membership of the corpus and acceptance by a researcher read as the same thing. They are
+ * not the same thing, and the difference is the product's whole claim: only a persisted
+ * human decision creates authority. A verified extraction is not accepted; a supported
+ * claim is not accepted; an anchor that still replays is not accepted; a screened work is
+ * not accepted. None of them is green any more. Each keeps its own glyph, which is what
+ * told them apart in greyscale all along, and green now appears on exactly one badge in
+ * the cockpit: the one that says `Accepted`.
+ *
+ * `unverified` was the other crossing and the louder one. It is what the queue shows when
+ * *nothing has verified a candidate yet* — the resting state of every candidate ever
+ * staged — and it wore amber, the one hue the system reserves for application feedback,
+ * beside the scientific blue of `Candidate` on the same row. An absent verdict is not a
+ * warning. It is neutral, with the dashed circle that says "not settled".
+ *
+ * `unsupported` stays `error`. It is a claim's scientific state, so by the letter of the
+ * rule it should not wear a feedback tone at all — but the tone is the contested red, and
+ * `authorityOf` already paints an unsupported claim's marker in the contested family two
+ * columns away. Moving the badge into that family would be the product classifying an
+ * unsupported claim as contested, which is a scientific statement and belongs to the
+ * researcher, not to a stylesheet.
  */
-const TONES: Record<string, BadgeProps['tone']> = {
+export const TONES: Record<string, BadgeProps['tone']> = {
+  // A conflict, a broken anchor and a contradicted candidate are conditions the
+  // application is reporting about its own work, which is what a feedback tone is for.
   conflict: 'error',
   unsupported: 'error',
   error: 'error',
@@ -367,18 +399,21 @@ const TONES: Record<string, BadgeProps['tone']> = {
   warning: 'warning',
   relocated: 'warning',
   partially_supported: 'warning',
-  unverified: 'warning',
-  supported: 'success',
-  verified: 'success',
-  valid: 'success',
-  included: 'success',
   routine: 'neutral',
   info: 'info',
 };
 
+/**
+ * The glyph beside each word.
+ *
+ * It is the channel that survives greyscale, and for the words that carry no tone it is
+ * now the only channel there is: four neutral screening badges are told apart here and
+ * nowhere else.
+ */
 const ICONS: Record<string, IconName> = {
   // Screening (Product 14): where a work stands between a discovery result and the corpus.
-  // These four used to separate by tint alone, in a list that can run to a thousand rows.
+  // A discovery result, a screened candidate, a member and a rejection — four steps of one
+  // pipeline, none of which is accepted state, all of them neutral and told apart by these.
   discovered: 'search',
   screened: 'filter',
   included: 'library',
@@ -392,6 +427,8 @@ const ICONS: Record<string, IconName> = {
   relocated: 'arrow-right',
   partially_supported: 'info',
   insufficient_evidence: 'circle-help',
+  // Nothing has verified this yet: a dashed circle, because the verdict is not settled
+  // rather than bad.
   unverified: 'circle-dashed',
   supported: 'circle-check',
   verified: 'circle-check',
@@ -412,9 +449,10 @@ export interface StatusBadgeProps {
   size?: 'sm' | 'md';
   /**
    * Put the vocabulary's one-line meaning on the page: the badge takes a tab stop, is
-   * `aria-describedby` that sentence, and prints it underneath while it has focus. Turn it
-   * on where the status is the subject of the row or the screen; leave it off where the
-   * status is incidental, and where the sentence would repeat one already on screen.
+   * `aria-describedby` that sentence, and prints it underneath when a reader asks — with
+   * focus, with a pointer that rests on it, or with a long press. Turn it on where the
+   * status is the subject of the row or the screen; leave it off where the status is
+   * incidental, and where the sentence would repeat one already on screen.
    */
   describe?: boolean;
   /** Override the visible wording. The vocabulary still supplies the meaning. */
@@ -436,8 +474,11 @@ export function StatusBadge({
   describe = false,
   children,
 }: StatusBadgeProps) {
-  const descriptionId = useId(undefined, 'rh-web-status');
-  const [shown, setShown] = useState(false);
+  const description = vocabulary === undefined ? undefined : researchDescription(vocabulary, status);
+  // The package's own hook, so the three gestures that open a meaning — focus, a pointer
+  // that rests, a long press — are decided in one place for every word in the cockpit. It
+  // is called unconditionally, above the authority branch, because it is a hook.
+  const term = useDescribedTerm(describe ? description : undefined);
 
   const label = children ?? (vocabulary === undefined ? undefined : researchLabel(vocabulary, status));
   if (isAuthority(status)) {
@@ -451,38 +492,29 @@ export function StatusBadge({
     );
   }
 
-  const description = vocabulary === undefined ? undefined : researchDescription(vocabulary, status);
-  const describing = describe && description !== undefined;
   const icon = ICONS[status];
   const badge = (
     <Badge
       tone={TONES[status] ?? 'neutral'}
       size={size}
       {...(icon ? { icon } : { icon: null })}
-      {...(describing
-        ? {
-            tabIndex: 0,
-            'aria-describedby': descriptionId,
-            onFocus: () => setShown(true),
-            onBlur: () => setShown(false),
-          }
-        : {})}
+      {...term.word}
     >
       {label ?? humaniseTerm(status)}
     </Badge>
   );
-  if (!describing) return badge;
+  if (term.named === null) return badge;
 
   // The Design System's describable badge, reused rather than restated: these two classes
   // are how the package draws a badge with its meaning under it, and a second shape for
-  // the same idea would be a second design.
+  // the same idea would be a second design. Where a row cannot grow — a queue row, a table
+  // cell — the cockpit's stylesheet hands the sentence a line of its own beneath the row
+  // by these same names, so the row's own links never move.
   return (
     <span className="rh-authority-badge__described">
       {badge}
-      <span id={descriptionId} className="rh-visually-hidden">
-        {description}
-      </span>
-      {shown ? (
+      {term.named}
+      {term.shown ? (
         <span className="rh-authority-badge__hint" aria-hidden="true">
           {description}
         </span>

@@ -45,6 +45,10 @@ const ID_ATTRIBUTES = [
  * so generated ids would make every snapshot break whenever a test is added above it.
  * The wiring still matters, so ids are normalised rather than dropped: identical
  * placeholders on both ends of a relationship prove the pairing is intact.
+ *
+ * A prefix is one or more words (`rh-input`, `rh-described-term`). It used to be read as
+ * exactly one, which left every multi-word prefix un-normalised and its snapshot breaking
+ * on the counter — which is the failure this function exists to prevent.
  */
 function normaliseGeneratedIds<T extends Node>(node: T): T {
   const clone = node.cloneNode(true) as T;
@@ -57,7 +61,7 @@ function normaliseGeneratedIds<T extends Node>(node: T): T {
     for (const attribute of ID_ATTRIBUTES) {
       const value = element.getAttribute(attribute);
       if (value === null) continue;
-      element.setAttribute(attribute, value.replace(/(rh-[a-z]+)-r[0-9a-z]+/g, '$1-ID'));
+      element.setAttribute(attribute, value.replace(/(rh(?:-[a-z]+)+)-r[0-9a-z]+/g, '$1-ID'));
     }
   }
   return clone;

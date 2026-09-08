@@ -280,7 +280,10 @@ export type {
 // research semantics and conversation (DS2a)
 export {
   AuthorityBadge,
+  DESCRIBED_TERM_HOVER_MS,
+  DESCRIBED_TERM_PRESS_MS,
   DescribedTerm,
+  useDescribedTerm,
   EntityRef,
   SourceAnchor,
   EvidenceCard,
@@ -340,6 +343,7 @@ export {
 } from './research';
 export type {
   AuthorityBadgeProps,
+  DescribedTermParts,
   DescribedTermProps,
   EntityRefProps,
   EntityRefElement,

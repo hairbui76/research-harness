@@ -9,7 +9,7 @@ exports[`DescribedTerm theme x density > matches the dark / comfortable snapshot
     class="rh-described-term"
   >
     <span
-      aria-describedby="rh-described-term-r5"
+      aria-describedby="rh-described-term-ID"
       class="rh-described-term__word"
       tabindex="0"
     >
@@ -17,7 +17,7 @@ exports[`DescribedTerm theme x density > matches the dark / comfortable snapshot
     </span>
     <span
       class="rh-visually-hidden"
-      id="rh-described-term-r5"
+      id="rh-described-term-ID"
     >
       How directly the source supports the evidence.
     </span>
@@ -34,7 +34,7 @@ exports[`DescribedTerm theme x density > matches the dark / compact snapshot 1`]
     class="rh-described-term"
   >
     <span
-      aria-describedby="rh-described-term-r6"
+      aria-describedby="rh-described-term-ID"
       class="rh-described-term__word"
       tabindex="0"
     >
@@ -42,7 +42,7 @@ exports[`DescribedTerm theme x density > matches the dark / compact snapshot 1`]
     </span>
     <span
       class="rh-visually-hidden"
-      id="rh-described-term-r6"
+      id="rh-described-term-ID"
     >
       How directly the source supports the evidence.
     </span>
@@ -59,7 +59,7 @@ exports[`DescribedTerm theme x density > matches the light / comfortable snapsho
     class="rh-described-term"
   >
     <span
-      aria-describedby="rh-described-term-r7"
+      aria-describedby="rh-described-term-ID"
       class="rh-described-term__word"
       tabindex="0"
     >
@@ -67,7 +67,7 @@ exports[`DescribedTerm theme x density > matches the light / comfortable snapsho
     </span>
     <span
       class="rh-visually-hidden"
-      id="rh-described-term-r7"
+      id="rh-described-term-ID"
     >
       How directly the source supports the evidence.
     </span>
@@ -84,7 +84,7 @@ exports[`DescribedTerm theme x density > matches the light / compact snapshot 1`
     class="rh-described-term"
   >
     <span
-      aria-describedby="rh-described-term-r8"
+      aria-describedby="rh-described-term-ID"
       class="rh-described-term__word"
       tabindex="0"
     >
@@ -92,7 +92,7 @@ exports[`DescribedTerm theme x density > matches the light / compact snapshot 1`
     </span>
     <span
       class="rh-visually-hidden"
-      id="rh-described-term-r8"
+      id="rh-described-term-ID"
     >
       How directly the source supports the evidence.
     </span>

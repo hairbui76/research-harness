@@ -33,6 +33,23 @@
   );
 }
 
+/*
+ * A badge that takes a tab stop is one that describes itself.
+ *
+ * Badges are never interactive, so the only reason one is focusable is that its meaning is
+ * on the page. A tab stop is invisible to a pointer, so the badge says the same thing in
+ * two ways a pointer can see: a dotted underline in the badge's own ink — dotted, because
+ * a solid underline in this cockpit is a link — and the `help` cursor.
+ */
+.rh-badge[tabindex] {
+  cursor: help;
+}
+
+.rh-badge[tabindex] .rh-badge__label {
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 0.2em;
+}
+
 /* Scientific status. Colour is the third channel here, after the glyph and the label. */
 .rh-badge--status-accepted {
   background: var(--rh-status-accepted-bg);
