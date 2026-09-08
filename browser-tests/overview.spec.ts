@@ -170,9 +170,14 @@ test('the overview leads with what is waiting, and states what the project holds
   // project itself last changed — the returning researcher's question, which a read time
   // cannot answer (third critique).
   const read = page.locator('.rh-web-overview__read');
+  const changed = page.locator('.rh-web-overview__changed');
   const age = page.locator('.rh-web-overview__age');
   await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
-  await expect(age).toHaveText(/^Changed .+ ago · Read at \d{1,2}:\d{2}/);
+  // The words the page actually has for an age: "just now" for a project seeded seconds ago,
+  // and a counted unit for anything older. The two halves are separate elements, so each is
+  // asserted for what it holds and the line is asserted for holding both in that order.
+  await expect(changed).toHaveText(/^Changed (just now|\d+ (minute|hour|day)s? ago) · $/);
+  await expect(age).toHaveText(/^Changed .+ · Read at \d{1,2}:\d{2}/);
   expect(
     await age.evaluate((node) => node.getAttribute('role')),
     'an automatic read announces nothing',
