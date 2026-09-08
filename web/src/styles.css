@@ -132,10 +132,11 @@ body,
  * screen reader hears is the `aria-describedby` half, which never moves.
  *
  * `inline-size: 0` is what keeps it from widening anything: a definite width contributes
- * exactly that much to intrinsic sizing, so the sentence adds nothing to what the row (or,
- * below, a table column shared by every other row) asks for, while the percentage minimum
- * still gives it the full width to be read at. The reading measure is the row's here
- * rather than 52ch, because the row is what the sentence belongs to.
+ * exactly that much to intrinsic sizing, so the sentence adds nothing to what the row asks
+ * for — nor, when the row is inside a table cell, to a column every other row shares —
+ * while the percentage minimum still gives it the full width to be read at. The reading
+ * measure is the row's here rather than 52ch, because the row is what the sentence
+ * belongs to.
  */
 .rh-web-row .rh-authority-badge__described,
 .rh-web-row .rh-described-term {
