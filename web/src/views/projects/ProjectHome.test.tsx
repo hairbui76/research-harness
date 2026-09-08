@@ -91,10 +91,40 @@ function setup(options: SetupOptions = {}) {
   return { ...view, appClient, daemon, refreshProjects, spies };
 }
 
+/**
+ * The project rows, and not the run each of them sits in.
+ *
+ * The registry is grouped by when each project was last opened, so the list named
+ * "Registered projects" holds one item per run and the rows live in a nested list under
+ * each run's naming line. A row is a list item whose own list is not the outer one.
+ */
 function rows(): HTMLElement[] {
-  return within(screen.getByRole('list', { name: 'Registered projects' })).getAllByRole(
-    'listitem',
-  );
+  const list = screen.getByRole('list', { name: 'Registered projects' });
+  return within(list)
+    .getAllByRole('listitem')
+    .filter((item) => item.closest('ul') !== list);
+}
+
+/** Each run as a researcher reads it: its naming line, and the projects under it. */
+function groups(): { line: string; projects: (string | null)[] }[] {
+  const list = screen.getByRole('list', { name: 'Registered projects' });
+  return within(list)
+    .getAllByRole('list')
+    .map((group) => ({
+      line: document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent ?? '',
+      projects: within(group)
+        .getAllByRole('listitem')
+        .map((row) => within(row).getByRole('heading').textContent),
+    }));
+}
+
+function rowNames(): (string | null)[] {
+  return rows().map((row) => within(row).getByRole('heading').textContent);
+}
+
+/** The one field that narrows the list. Its label is hidden, so it is asked for by name. */
+function find(): HTMLElement {
+  return screen.getByRole('searchbox', { name: 'Find a project by name or folder' });
 }
 
 describe('Project Home', () => {
@@ -176,11 +206,88 @@ describe('Project Home', () => {
   it('keeps the order the host returned, most recently opened first', () => {
     setup({ projects: [BUSY, AVAILABLE, MOVED] });
 
-    expect(rows().map((row) => within(row).getByRole('heading').textContent)).toEqual([
-      'Thermal tolerance',
-      'Latency study',
-      'Reef survey',
-    ]);
+    expect(rowNames()).toEqual(['Thermal tolerance', 'Latency study', 'Reef survey']);
+  });
+
+  /*
+   * A registry that grows stays readable, and the daemon still decides the order.
+   *
+   * `registry.py` sorts by `last_opened_at`, newest first, and PRODUCT §5 P10 leaves that
+   * judgement where it is made. Grouping only cuts that one sequence into the three ages
+   * a researcher actually asks about — what did I have open today, what this week, what
+   * before that — so no project ever moves past another.
+   */
+  it('cuts the list into the three ages, and keeps the host order inside each', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-08T12:00:00Z'));
+    try {
+      setup({
+        projects: [
+          projectView({ project_id: 'prj_1', display_name: 'Kelp cover', last_opened_at: '2026-09-08T09:30:00Z' }),
+          projectView({ project_id: 'prj_2', display_name: 'Reef survey', last_opened_at: '2026-09-08T01:05:00Z' }),
+          projectView({ project_id: 'prj_3', display_name: 'Thermal tolerance', last_opened_at: '2026-09-05T22:00:00Z' }),
+          projectView({ project_id: 'prj_4', display_name: 'Latency study', last_opened_at: '2026-09-02T08:00:00Z' }),
+          projectView({ project_id: 'prj_5', display_name: 'Salt marsh', last_opened_at: '2026-09-01T23:59:00Z' }),
+        ],
+      });
+
+      // The naming line carries the count and is the run's accessible name, so a screen
+      // reader is told which age it has entered and how much of it there is.
+      expect(groups()).toEqual([
+        { line: 'Today — 2 projects', projects: ['Kelp cover', 'Reef survey'] },
+        { line: 'This week — 2 projects', projects: ['Thermal tolerance', 'Latency study'] },
+        { line: 'Earlier — 1 project', projects: ['Salt marsh'] },
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('draws no age that has nothing in it', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-08T12:00:00Z'));
+    try {
+      setup({ projects: [projectView({ last_opened_at: '2026-06-01T10:00:00Z' })] });
+
+      expect(groups().map((group) => group.line)).toEqual(['Earlier — 1 project']);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('narrows the list to what was typed, over a name and over a folder', async () => {
+    const user = userEvent.setup();
+    setup({ projects: [BUSY, AVAILABLE, MOVED] });
+
+    await user.type(find(), 'reef');
+    expect(rowNames()).toEqual(['Reef survey']);
+
+    await user.clear(find());
+    await user.type(find(), '/research/latency');
+    expect(rowNames()).toEqual(['Latency study']);
+  });
+
+  it('says a find only hides, and offers to clear it', async () => {
+    const user = userEvent.setup();
+    setup({ projects: [BUSY, AVAILABLE] });
+
+    await user.type(find(), 'plankton');
+
+    expect(screen.getByText('No project matches this find')).toBeInTheDocument();
+    expect(screen.getByText(/The find only hides/)).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Registered projects' })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Clear the find' }));
+
+    expect(rowNames()).toEqual(['Thermal tolerance', 'Latency study']);
+  });
+
+  it('offers no find where there is nothing to find', () => {
+    setup({ projects: [] });
+
+    expect(
+      screen.queryByRole('searchbox', { name: 'Find a project by name or folder' }),
+    ).toBeNull();
   });
 
   it('states the folder, the last time it was opened, and what is running in it', () => {

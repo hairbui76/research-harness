@@ -15,7 +15,7 @@
  *
  * Nothing on this screen deletes anything. Forget removes a row from a list.
  */
-import { useId, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AsyncState,
@@ -24,6 +24,7 @@ import {
   Card,
   ErrorNotice,
   Icon,
+  Input,
   Menu,
   PROJECT_AVAILABILITY_META,
   formatTimestamp,
@@ -31,6 +32,7 @@ import {
 import type { BadgeTone, IconName, ProjectAction } from '@research-harness/design';
 import type { ProjectAvailability, ProjectView } from '../../api/projects';
 import { APP_TOKEN_MISSING_EXPLANATION, useHost } from '../../app/host';
+import { Empty } from '../../components/Feedback';
 import { projectHref } from '../../app/projectPaths';
 import { ProjectDialogs, describeCause, useProjectLifecycle } from './ProjectDialogs';
 import type { ProjectDialog } from './ProjectDialogs';
@@ -64,6 +66,91 @@ function availabilityTone(availability: ProjectAvailability): BadgeTone {
   return PROJECT_AVAILABILITY_META[availability].tone;
 }
 
+/** `1 project` / `2 projects` — a count is only ever read inside the thing it counts. */
+function counted(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+/**
+ * Whether one project answers what was typed into the find field.
+ *
+ * Every term has to match somewhere, and a term may match the name a researcher gave the
+ * workspace or the folder it lives in — the two things a row prints and the two ways a
+ * researcher remembers a project. It only ever *hides*: the registry's order is the
+ * host's (`registry.py` sorts by `last_opened_at`), and a find that reordered it would be
+ * this screen deciding which workspace matters (PRODUCT §5 P10).
+ */
+export function matchesProject(project: ProjectView, query: string): boolean {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+  const haystack = `${project.display_name} ${project.path}`.toLowerCase();
+  return terms.every((term) => haystack.includes(term));
+}
+
+/**
+ * The three ages a registered project can have, newest first.
+ *
+ * Not a taxonomy of projects — a reading of one timestamp. The names answer the question
+ * a researcher opens this screen with ("where was I?") at the resolution they can hold:
+ * today, the week behind it, and everything before that.
+ */
+const AGES = ['Today', 'This week', 'Earlier'] as const;
+type ProjectAge = (typeof AGES)[number];
+
+/** The UTC day an instant falls on, as a whole number, so two of them subtract. */
+function utcDay(at: Date): number {
+  return Math.floor(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()) / 86_400_000);
+}
+
+/**
+ * Which age a project's last opening falls in, counted in UTC.
+ *
+ * UTC because the row prints its timestamp in UTC (`formatTimestamp`), and a group that
+ * said "Today" over a row dated yesterday would be the screen disagreeing with itself.
+ * "This week" is the six days before today, not a calendar week: a Monday morning where
+ * everything opened last week fell into "Earlier" would answer no question at all.
+ *
+ * A project the host sent with no opening at all sorts last there and reads "Never
+ * opened" on its row; the control plane always sends one, so this is the defensive branch.
+ */
+export function ageOf(lastOpenedAt: string | null, now: Date): ProjectAge {
+  if (lastOpenedAt === null) return 'Earlier';
+  const at = new Date(lastOpenedAt);
+  if (Number.isNaN(at.getTime())) return 'Earlier';
+  const days = utcDay(now) - utcDay(at);
+  if (days <= 0) return 'Today';
+  if (days < 7) return 'This week';
+  return 'Earlier';
+}
+
+export interface ProjectAgeGroup {
+  age: ProjectAge;
+  projects: ProjectView[];
+}
+
+/**
+ * The host's list cut into its runs, in the host's own order.
+ *
+ * A project keeps its place: the daemon already returns the registry newest-first, so
+ * every run is a slice of that one sequence and an age with nothing in it is not drawn.
+ */
+export function groupByAge(
+  projects: readonly ProjectView[],
+  now: Date,
+): ProjectAgeGroup[] {
+  const held = new Map<ProjectAge, ProjectView[]>();
+  for (const project of projects) {
+    const age = ageOf(project.last_opened_at, now);
+    const run = held.get(age);
+    if (run === undefined) held.set(age, [project]);
+    else run.push(project);
+  }
+  return AGES.flatMap((age) => {
+    const run = held.get(age);
+    return run === undefined ? [] : [{ age, projects: run }];
+  });
+}
+
 export interface ProjectHomeProps {
   /**
    * A project id from the address bar that the registry does not know — a stale bookmark,
@@ -79,7 +166,13 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
   const lifecycle = useProjectLifecycle();
   const [dialog, setDialog] = useState<ProjectDialog>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
   const listingId = useId();
+  const shown = useMemo(
+    () => host.projects.filter((project) => matchesProject(project, query)),
+    [host.projects, query],
+  );
+  const groups = useMemo(() => groupByAge(shown, new Date()), [shown]);
 
   const close = (): void => setDialog(null);
   const reveal = async (project: ProjectView): Promise<void> => {
@@ -203,6 +296,23 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
                 Every workspace this application has been shown, most recently opened first.
               </p>
             </div>
+            {/*
+              One field, and only where there is something to narrow. It hides rows; it
+              never asks the host again and never re-sorts what came back.
+            */}
+            {host.projects.length > 0 ? (
+              <Input
+                label="Find a project by name or folder"
+                hideLabel
+                size="sm"
+                type="search"
+                iconStart="search"
+                placeholder="Name or folder"
+                fieldClassName="rh-projects__find"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            ) : null}
           </div>
 
           {host.projects.length === 0 ? (
@@ -230,18 +340,52 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
                 },
               ]}
             />
+          ) : shown.length === 0 ? (
+            <Empty
+              description={
+                'The find only hides. Every workspace this application has been shown is ' +
+                'still registered underneath it.'
+              }
+              action={
+                <Button size="sm" variant="secondary" onClick={() => setQuery('')}>
+                  Clear the find
+                </Button>
+              }
+            >
+              No project matches this find
+            </Empty>
           ) : (
             <ul className="rh-projects__list" aria-label="Registered projects">
-              {host.projects.map((project) => (
-                <ProjectRow
-                  key={project.project_id}
-                  project={project}
-                  onOpen={() => navigate(projectHref(project.project_id, '/'))}
-                  onLocate={() => setDialog({ kind: 'locate', project })}
-                  onRename={() => setDialog({ kind: 'rename', project })}
-                  onForget={() => setDialog({ kind: 'forget', project })}
-                  onReveal={() => void reveal(project)}
-                />
+              {groups.map((group, index) => (
+                <li key={group.age} className="rh-projects__group">
+                  {/*
+                    The naming line and the run's accessible name at once, the way the
+                    rail names its own runs: a researcher reads it, a screen reader is
+                    told which age it has entered, and Tab never lands on it. The count
+                    belongs on it because it is a fact about the run, and because it is
+                    the only place a researcher can see how much of the registry each
+                    age holds without counting rows.
+                  */}
+                  <p className="rh-projects__group-heading" id={`${listingId}-age-${index}`}>
+                    {`${group.age} — ${counted(group.projects.length, 'project')}`}
+                  </p>
+                  <ul
+                    className="rh-projects__rows"
+                    aria-labelledby={`${listingId}-age-${index}`}
+                  >
+                    {group.projects.map((project) => (
+                      <ProjectRow
+                        key={project.project_id}
+                        project={project}
+                        onOpen={() => navigate(projectHref(project.project_id, '/'))}
+                        onLocate={() => setDialog({ kind: 'locate', project })}
+                        onRename={() => setDialog({ kind: 'rename', project })}
+                        onForget={() => setDialog({ kind: 'forget', project })}
+                        onReveal={() => void reveal(project)}
+                      />
+                    ))}
+                  </ul>
+                </li>
               ))}
             </ul>
           )}

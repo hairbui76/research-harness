@@ -82,7 +82,38 @@
   line-height: var(--rh-type-body-sm-lh);
 }
 
+/* The field that narrows the list, beside the section it narrows. */
+.rh-projects__find {
+  inline-size: 18rem;
+  max-inline-size: 100%;
+}
+
+/*
+ * The runs, and the rows inside them. The gap between two runs is wider than the gap
+ * between two rows, so the naming line belongs to what follows it rather than floating
+ * between two neighbours.
+ */
 .rh-projects__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-5);
+}
+
+.rh-projects__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-projects__group-heading {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-projects__rows {
   list-style: none;
   margin: 0;
   padding: 0;
