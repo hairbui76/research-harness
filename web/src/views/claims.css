@@ -51,3 +51,21 @@
   margin: 0;
   max-inline-size: var(--rh-measure-prose);
 }
+
+/*
+ * One row of "Every claim": the assertion, then the identity it is filed under.
+ *
+ * The cell used to open with the id chip and the authority badge and set the sentence under
+ * them in secondary ink, which made the machine identity the first thing read on the page
+ * whose subject is what the project asserts. The sentence now leads at the cell's own ink,
+ * and the id follows it on the next line — near enough to belong to it, quiet enough not to
+ * compete with it. `flex-start` because the id chip is shorter than a wrapped sentence and
+ * a centred chip under a two-line claim reads as a caption for the wrong thing.
+ */
+.rh-web-claims__row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-1);
+  max-inline-size: var(--rh-measure-prose);
+}

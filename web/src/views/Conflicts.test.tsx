@@ -52,6 +52,8 @@ function overviewWith(
     differing_fields?: string[];
     positions?: unknown[];
   }[],
+  /** Routes the daemon chose for subjects that are not staged candidates, by subject. */
+  routes: Record<string, string> = {},
 ): FakeDaemon {
   const kinds = [...new Set(conflicts.map((conflict) => conflict.kind))];
   const conflict_groups = kinds.map((kind) => {
@@ -68,7 +70,9 @@ function overviewWith(
         label: conflict.name ?? conflict.subject,
         detail: conflict.summary,
         priority: conflict.tier,
-        route: conflict.subject.startsWith('cand_') ? `/review/${conflict.subject}` : '',
+        route: conflict.subject.startsWith('cand_')
+          ? `/review/${conflict.subject}`
+          : (routes[conflict.subject] ?? ''),
       })),
     };
   });
@@ -256,6 +260,73 @@ describe('the conflicts page', () => {
 
     await waitFor(() => expect(screen.getByText(/Disagrees on: Metric result/)).toBeInTheDocument());
     expect(screen.getByRole('table')).toBeInTheDocument();
+    // The assertion that a record with a table offers no action was inverted in wave 6, on
+    // purpose: it was the reason a provider-against-provider conflict — the one kind that
+    // always keeps its positions — read as two answers and nothing to do about either
+    // (third critique, H3). The queue's own wording only survives where the daemon named no
+    // route; this record names one, so the deep link is asserted here instead.
+    expect(screen.queryByRole('link', { name: 'Decide it in the review inbox' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Decide it beside the source' })).toBeInTheDocument();
+  });
+
+  /**
+   * The third critique's H3 and its minor observation, in one row: a provider disagreement
+   * keeps its positions, so it never met the branch that offered somewhere to go, and it was
+   * the only kind of conflict the page left a researcher looking at with no next step.
+   */
+  it('gives a provider-against-provider conflict the deep link to where it is decided', async () => {
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ConflictsPage />
+      </ProjectPathProvider>,
+      {
+        daemon: overviewWith([CONFLICT]),
+        route: '/projects/prj_abc/conflicts',
+        path: '/projects/prj_abc/conflicts',
+      },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('Provider against provider')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('table'), 'both sides are still kept').toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Decide it beside the source' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/review/cand_44c1f007fc0db0b2',
+    );
+  });
+
+  /**
+   * A conflict over an object that already exists is read on that object's own page, which
+   * is the daemon's rule (`_conflict_route`) and not this page's guess.
+   */
+  it('sends a conflict over an existing object to that object’s page', async () => {
+    const claim = {
+      ...CONFLICT,
+      conflict_id: 'conf_33333333',
+      kind: 'candidate_vs_accepted',
+      subject: 'C0001',
+      name: 'TrafficLM reaches an F1 of 94.32 on CICIDS2017',
+      summary: 'the staged F1 differs from the accepted reading of Table 1',
+    };
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ConflictsPage />
+      </ProjectPathProvider>,
+      {
+        daemon: overviewWith([claim], { C0001: '/claims/C0001' }),
+        route: '/projects/prj_abc/conflicts',
+        path: '/projects/prj_abc/conflicts',
+      },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText('Candidate against accepted state')).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('link', { name: 'Read it on its own page' })).toHaveAttribute(
+      'href',
+      '/projects/prj_abc/claims/C0001',
+    );
     expect(screen.queryByRole('link', { name: 'Decide it in the review inbox' })).toBeNull();
   });
 

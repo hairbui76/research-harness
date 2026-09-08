@@ -169,6 +169,24 @@ for (const screen of SCREENS) {
       `the workspace toolbar must be in view at ${screen.label}`,
     ).toBeInViewport();
 
+    /*
+     * 1b. The toolbar spends no room on a state nobody asked about.
+     *
+     * Save is an act with nothing to act on while the buffer's own chip reads "Saved", and
+     * the reason there is no SyncTeX map was a permanent row above the editor whether or not
+     * anyone ever tried to jump — two lines of the third critique's minor observations, and
+     * on this route the width they cost is the whole point.
+     */
+    const save = page.getByRole('button', { name: 'Save' });
+    await expect(save, `Save offers nothing on a saved buffer at ${screen.label}`).toBeDisabled();
+    const because = await save.getAttribute('aria-describedby');
+    expect(because, 'a disabled Save says why, at the control').toBeTruthy();
+    await expect(page.locator(`#${because}`)).toHaveText('Saved');
+    await expect(
+      page.locator('.rh-source-editor__note'),
+      'nothing states an absence before it is asked about',
+    ).toHaveCount(0);
+
     // 2. The primary act, in the viewport before anybody scrolls for it.
     const compile = page.getByRole('button', { name: 'Compile' });
     await expect(compile, `Compile must exist at ${screen.label}`).toBeVisible();

@@ -1529,6 +1529,11 @@
           "counts": {
             "$ref": "#/components/schemas/OverviewCounts"
           },
+          "last_changed_at": {
+            "default": "",
+            "title": "Last Changed At",
+            "type": "string"
+          },
           "next_decision_id": {
             "default": "",
             "title": "Next Decision Id",

@@ -74,9 +74,11 @@ describe('the overview', () => {
     const rendered = Array.from(
       container.querySelectorAll('.rh-web-attention > li > p > a'),
     ).map((node) => node.textContent);
+    // `count > 0` joined this filter in wave 6: a group with nothing in it is no longer a
+    // row at all, so the rows are exactly the decision surfaces that have work.
     expect(rendered).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => group.label),
     );
   });
@@ -87,6 +89,11 @@ describe('the overview', () => {
      * neutral "clear" one. The daemon's own label already states the count — "2 review
      * items", "0 conflicts" — and the card is titled "Waiting for a decision", so both
      * chips repeated something already on screen. What a zero needs is a sentence.
+     *
+     * The assertion that a zero group printed "— nothing waiting here" was deleted here on
+     * purpose in wave 6: that phrase only existed on a row whose own text was "0 conflicts",
+     * and the third critique's finding is that the row should not be printed at all. What a
+     * zero says now is asserted below, in one line for all of them.
      */
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
@@ -95,7 +102,44 @@ describe('the overview', () => {
     expect(within(attention).queryByText('waiting')).toBeNull();
     expect(within(attention).queryByText('clear')).toBeNull();
     expect(attention.querySelectorAll('.rh-badge')).toHaveLength(0);
-    expect(within(attention).getAllByText('— nothing waiting here').length).toBeGreaterThan(0);
+  });
+
+  it('prints no row for a group with nothing in it', async () => {
+    /*
+     * The third critique's minor observation: "0 unsupported manuscript claims — nothing
+     * waiting here" is a row that states a zero and then states it again. A surface with
+     * nothing waiting is not work, so it is not a line in a list of work.
+     */
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Waiting for a decision')).toBeInTheDocument());
+    const rows = Array.from(container.querySelectorAll('.rh-web-attention > li')).map(
+      (node) => node.textContent ?? '',
+    );
+    expect(rows.length, 'only the groups with work are rows').toBe(1);
+    expect(rows.every((row) => !/(^|\s)0\s/.test(row)), 'no row of zeros').toBe(true);
+  });
+
+  it('names the surfaces with nothing waiting once, in one line under the work', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Waiting for a decision')).toBeInTheDocument());
+    const clear = container.querySelector('.rh-web-overview__clear') as HTMLElement;
+    expect(clear).not.toBeNull();
+    // The daemon reported `conflicts` and `unsupported_manuscript_claims` at zero; `stale`
+    // has its own panel and is never named here.
+    expect(clear).toHaveTextContent(
+      'Nothing is waiting in conflicts or unsupported manuscript claims.',
+    );
+    expect(clear.textContent).not.toContain('stale');
+    // Each one keeps the route the daemon gave it, so the page loses no way in.
+    expect(within(clear).getByRole('link', { name: 'conflicts' })).toHaveAttribute(
+      'href',
+      '/conflicts',
+    );
+    expect(
+      within(clear).getByRole('link', { name: 'unsupported manuscript claims' }),
+    ).toHaveAttribute('href', '/manuscript');
   });
 
   it('leads with the group that has work in it', async () => {
@@ -310,9 +354,11 @@ describe('the overview inside a project', () => {
     const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li > p > a')).map(
       (node) => node.getAttribute('href'),
     );
+    // Only the groups with work are rows now; the ones that are clear keep their routes in
+    // the one line below the list, which the list test above asserts.
     expect(hrefs).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => `/projects/prj_abc${group.route}`),
     );
   });
@@ -365,7 +411,7 @@ describe('the overview inside a project', () => {
     );
     expect(hrefs).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => group.route),
     );
   });
@@ -382,6 +428,33 @@ describe('the overview inside a project', () => {
  * a manual refresh is asking for.
  */
 describe('when the overview last read', () => {
+  it('says when the project last changed, beside when the page read it', async () => {
+    /*
+     * The returning researcher's finding in the third critique: "Read at 08:43" says how old
+     * the *reading* is, and she asked how old the *work* is. The instant is the daemon's —
+     * `last_changed_at`, the newest change it holds — and the page only says how long ago
+     * that was, in words, next to the clock time it already had.
+     */
+    const hour = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const { container } = renderView(<OverviewPage />, {
+      daemon: fakeDaemon({ gets: { '/overview': overviewWith({ last_changed_at: hour }) } }),
+    });
+
+    await screen.findByText(/^Read at /);
+    const age = container.querySelector('.rh-web-overview__age') as HTMLElement;
+    expect(age.textContent).toMatch(/^Changed 2 hours ago · Read at \d{1,2}:\d{2}/);
+    expect(age.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
+  });
+
+  it('says nothing about a change in a project that has recorded none', async () => {
+    renderView(<OverviewPage />, {
+      daemon: fakeDaemon({ gets: { '/overview': overviewWith({ last_changed_at: '' }) } }),
+    });
+
+    const read = await screen.findByText(/^Read at /);
+    expect(read.parentElement?.textContent).not.toContain('Changed');
+  });
+
   it('states the time of the read beside “Look again”', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
@@ -407,9 +480,12 @@ describe('when the overview last read', () => {
 
     await user.click(screen.getByRole('button', { name: 'Look again' }));
 
-    // `status` is the polite one: it waits for a pause instead of interrupting.
+    // `status` is the polite one: it waits for a pause instead of interrupting. It moved
+    // from the read time to the line holding it in wave 6, because the answer to "is this
+    // still current?" is now two facts — when the project changed, and when this read — and
+    // announcing only the second of them would answer the wrong half of the question.
     await waitFor(() =>
-      expect(screen.getByText(/^Read at /)).toHaveAttribute('role', 'status'),
+      expect(screen.getByText(/^Read at /).parentElement).toHaveAttribute('role', 'status'),
     );
   });
 });

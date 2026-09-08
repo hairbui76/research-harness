@@ -213,8 +213,17 @@ button.rh-project-rail__project[data-state='open'] {
   white-space: nowrap;
 }
 
+/*
+ * How many things are waiting on that destination.
+ *
+ * The pill's height still comes from the text — a count beside a 36px nav row must not grow
+ * the row — but it had no block inset at all, so the numeral sat against a 1px border on
+ * both edges and the browser detector read it as cramped. One hairline's worth of inset is
+ * the smallest amount that gives the pill an inside without changing the row's height.
+ */
 .rh-project-rail__nav-count {
   flex: none;
+  padding-block: var(--rh-border-width);
   padding-inline: var(--rh-space-2);
   border: var(--rh-border-width) solid var(--rh-border-subtle);
   border-radius: var(--rh-radius-pill);

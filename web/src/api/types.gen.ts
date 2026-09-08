@@ -1253,6 +1253,11 @@ export interface components {
             conflicts: components["schemas"]["ConflictView"][];
             counts?: components["schemas"]["OverviewCounts"];
             /**
+             * Last Changed At
+             * @default
+             */
+            last_changed_at: string;
+            /**
              * Next Decision Id
              * @default
              */

@@ -73,7 +73,15 @@
   gap: var(--rh-space-1);
 }
 
+/*
+ * How many items a tab holds. The same pill the rail draws, at the tighter inline inset a
+ * tab strip has room for — and with the same hairline's worth of block inset, so the numeral
+ * is not pressed against the border on both edges (browser detector, `cramped-padding`).
+ * Its height is still the text's: a tab strip that six tabs have to fit into cannot afford
+ * a count that sets the row height.
+ */
 .rh-research-inspector__tab-count {
+  padding-block: var(--rh-border-width);
   padding-inline: var(--rh-space-1);
   border: var(--rh-border-width) solid var(--rh-border-subtle);
   border-radius: var(--rh-radius-pill);

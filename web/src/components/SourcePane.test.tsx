@@ -20,6 +20,7 @@ import { EvidenceReviewPage } from '../views/EvidenceReview';
 import { ArtifactSourcePage } from '../views/conversation/references';
 import { CommandsProvider } from '../app/commands';
 import { FIXTURES, fakeDaemon, renderView } from '../test/harness';
+import type { FakeDaemon } from '../test/harness';
 
 const PAGE_HEIGHT = 792;
 
@@ -110,6 +111,81 @@ describe('the review screen’s span', () => {
     expect(drawn).toHaveAttribute('data-kind', 'sync');
     expect(drawn).toHaveAccessibleName('Proposed span');
     expect(screen.queryByRole('img', { name: 'Accepted span' })).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * The page block says what it is, in every state it can be in.
+ *
+ * The third critique's minor observation: on the review screen the block is an empty
+ * rectangle until pdf.js has drawn into it, and an empty rectangle beside a decision is
+ * indistinguishable from a source with nothing on it.
+ */
+describe('the review screen’s page block', () => {
+  const daemon = () =>
+    fakeDaemon({
+      gets: {
+        '/overview': FIXTURES.overview,
+        [`/candidates/${ITEM.candidate_id}`]: FIXTURES.candidate,
+        [`/blocks/${ARTIFACT}`]: FIXTURES.blocks,
+        ...BYTES,
+      },
+      capabilities: { 'review.inbox': FIXTURES.reviewInbox },
+    });
+
+  /** The same daemon with the artifact's bytes never answering: the block still waiting. */
+  function stillReading(base: FakeDaemon): FakeDaemon {
+    const fetchImpl = ((input: RequestInfo | URL, init?: RequestInit) =>
+      String(input).includes('/bytes')
+        ? new Promise<Response>(() => undefined)
+        : (base.fetch as typeof fetch)(input, init)) as unknown as typeof fetch;
+    return { ...base, fetch: fetchImpl };
+  }
+
+  it('names the page it is waiting for, in the source pane’s own words', async () => {
+    const { container } = renderView(withShell(<EvidenceReviewPage />), {
+      daemon: stillReading(daemon()),
+      route: `/review/${ITEM.candidate_id}`,
+      path: '/review/:candidateId',
+    });
+
+    const caption = await waitFor(() => {
+      const found = container.querySelector('.rh-pdf__caption');
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(caption.textContent).toMatch(/^Page \d+ of the source, rendering…$/);
+    expect(caption.closest('.rh-pdf__frame'), 'the caption is the block').not.toBeNull();
+  });
+
+  it('drops the caption once the block is the page', async () => {
+    const { container } = renderView(withShell(<EvidenceReviewPage />), {
+      daemon: daemon(),
+      route: `/review/${ITEM.candidate_id}`,
+      path: '/review/:candidateId',
+    });
+
+    await span();
+    expect(container.querySelector('.rh-pdf__caption')).toBeNull();
+  });
+
+  it('says the source has no page image when the bytes cannot be read', async () => {
+    renderView(withShell(<EvidenceReviewPage />), {
+      daemon: fakeDaemon({
+        gets: {
+          '/overview': FIXTURES.overview,
+          [`/candidates/${ITEM.candidate_id}`]: FIXTURES.candidate,
+          [`/blocks/${ARTIFACT}`]: FIXTURES.blocks,
+        },
+        capabilities: { 'review.inbox': FIXTURES.reviewInbox },
+      }),
+      route: `/review/${ITEM.candidate_id}`,
+      path: '/review/:candidateId',
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText(/^This source has no page image/)).toBeInTheDocument(),
+    );
   });
 });
 

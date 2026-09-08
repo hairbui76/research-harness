@@ -109,6 +109,24 @@ test('the overview leads with what is waiting, and states what the project holds
 
   // Every group has something to say, and each says it in words.
   await expect(page.getByRole('link', { name: '2 review items' })).toBeVisible();
+
+  // No row of zeros (third critique, minor). A surface with nothing waiting on it is not a
+  // line in the list of work; the ones that are clear are named once, in the line below it.
+  const rows = await page.locator('.rh-web-attention > li > p').allTextContents();
+  expect(rows.length, 'the waiting list has rows').toBeGreaterThan(0);
+  expect(
+    rows.filter((row) => /(^|\s)0\s/.test(row)),
+    'a group with nothing in it is not a row',
+  ).toEqual([]);
+  const clear = page.locator('.rh-web-overview__clear');
+  expect(await clear.count(), 'the clear surfaces are named at most once').toBeLessThanOrEqual(1);
+  if (await clear.count()) {
+    await expect(clear).toHaveText(/^Nothing is waiting in .+\.$/);
+    expect(
+      (await clear.textContent())!.match(/\d/),
+      'the line that names the clear surfaces prints no count',
+    ).toBeNull();
+  }
   await expect(page.getByRole('heading', { name: 'Gone stale' })).toBeVisible();
   // The stale object is named by what it is, and so is the evidence that moved under it.
   await expect(
@@ -148,18 +166,28 @@ test('the overview leads with what is waiting, and states what the project holds
   );
 
   // "Look again" says when it last looked, and only announces a read the researcher asked
-  // for: an automatic one is quiet text (critique H1).
+  // for: an automatic one is quiet text (critique H1). Beside it, from the daemon, when the
+  // project itself last changed — the returning researcher's question, which a read time
+  // cannot answer (third critique).
   const read = page.locator('.rh-web-overview__read');
+  const changed = page.locator('.rh-web-overview__changed');
+  const age = page.locator('.rh-web-overview__age');
   await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  // The words the page actually has for an age: "just now" for a project seeded seconds ago,
+  // and a counted unit for anything older. The two halves are separate elements, so each is
+  // asserted for what it holds and the line is asserted for holding both in that order.
+  await expect(changed).toHaveText(/^Changed (just now|\d+ (minute|hour|day)s? ago) · $/);
+  await expect(age).toHaveText(/^Changed .+ · Read at \d{1,2}:\d{2}/);
   expect(
-    await read.evaluate((node) => node.getAttribute('role')),
+    await age.evaluate((node) => node.getAttribute('role')),
     'an automatic read announces nothing',
   ).toBeNull();
   await page.locator('.rh-full-page__header').screenshot({
     path: info.outputPath('overview-read-at.png'),
   });
   await page.getByRole('button', { name: 'Look again' }).click();
-  await expect(read).toHaveAttribute('role', 'status');
+  // The whole line is the live region: the answer to "is this still current?" is both halves.
+  await expect(age).toHaveAttribute('role', 'status');
   await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
   // The read the press asked for lands and the page comes back; everything measured below
   // is measured on the page as it stands after it, not on the skeleton in between.

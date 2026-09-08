@@ -67,11 +67,19 @@ export function SourcePane({ artifact, context, authority, blocks, blockId }: So
     [box, authority],
   );
 
+  /*
+   * What the page block says when it is not a page.
+   *
+   * Both halves are the block's own caption rather than a note printed beside it: an empty
+   * rectangle beside an explanation is still an empty rectangle, and on this screen — where
+   * the whole promise is the source beside the decision — a reader cannot tell one from a
+   * source that simply has nothing on it (design critique, minor).
+   */
   const unavailable = bytes.error ?? (pdf.status === 'unavailable' ? pdf.error : null);
   const fallback = (
     <>
-      The page could not be rendered here{unavailable ? ` (${unavailable})` : ''}. The exact
-      source text is below, and{' '}
+      This source has no page image{unavailable ? ` (${unavailable})` : ''}. The exact source
+      text is below, and{' '}
       <a href={client.artifactBytesUrl(artifact)} target="_blank" rel="noreferrer">
         the original file
       </a>{' '}
@@ -102,6 +110,7 @@ export function SourcePane({ artifact, context, authority, blocks, blockId }: So
           scale={1.4}
           highlights={highlights}
           label={`page ${page} of ${artifact}`}
+          caption={`Page ${page} of the source, rendering…`}
           fallback={fallback}
         />
       )}

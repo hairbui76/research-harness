@@ -257,6 +257,15 @@ export function ManuscriptPage() {
     build.refresh();
   }, [build, canMutate, files, toast]);
 
+  /*
+   * Jump to the page the cursor is on.
+   *
+   * It is handed to the frame whenever a file is open, whether or not this build has a
+   * SyncTeX map: the frame refuses a jump it cannot land and says why at the moment it is
+   * asked, which is what replaced a row stating that absence for the whole session (design
+   * critique, minor). Nothing here has to test for the map — a jump that reaches this
+   * function is one the frame has already decided can land.
+   */
   const jumpToPdf = useCallback((): void => {
     if (!active) return;
     setSyncLabel(`${active.path}:${cursor.line}`);
@@ -421,7 +430,7 @@ export function ManuscriptPage() {
             onChange={files.change}
             {...(canMutate ? { onSave: () => void save() } : {})}
             {...(canMutate ? { onCompile: () => void build.compile() } : {})}
-            {...(active && synctex.available ? { onSyncForward: jumpToPdf } : {})}
+            {...(active ? { onSyncForward: jumpToPdf } : {})}
             onCursorChange={setCursor}
             onReloadFromDisk={() => void files.reloadFromDisk()}
             onKeepMine={() => void files.keepMine()}

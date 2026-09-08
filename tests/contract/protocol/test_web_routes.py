@@ -448,6 +448,49 @@ def test_a_project_with_no_recorded_research_says_so_rather_than_showing_an_empt
     assert changes.more == ""
 
 
+def test_the_overview_says_when_the_project_last_changed_not_only_when_it_read(
+    reader: TestClient, corpus: Path, registry: CapabilityRegistry
+) -> None:
+    """A returning researcher asks how old the work is; the page could only say how old the
+    reading was. The instant is the daemon's, and it is the newest of the two records the
+    change list merges."""
+    _create_claim(corpus, registry)
+    _open_a_conflict(corpus, "conf-newest", resolve=False)
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+
+    assert overview.last_changed_at, "a project that has recorded work says when it last did"
+    last = datetime.fromisoformat(overview.last_changed_at)
+    newest = max(datetime.fromisoformat(entry.at) for entry in overview.since_last_session.entries)
+    assert last == newest, "the instant is the newest change the daemon reports"
+
+
+def test_a_project_that_has_recorded_nothing_names_no_moment_rather_than_guessing(
+    bare_reader: TestClient,
+) -> None:
+    """Nothing has happened, so there is no instant, and inventing "now" would be a lie."""
+    assert OverviewReport.model_validate(bare_reader.get("/overview").json()).last_changed_at == ""
+
+
+def test_the_last_change_is_reported_even_when_it_falls_outside_the_session_window(
+    reader: TestClient, corpus: Path
+) -> None:
+    """The window bounds what is *news*; it does not bound when the project last moved.
+
+    The corpus fixture was ingested before the only session ended, so the change list holds
+    that ingestion and the window is the documented seven days — but the question "when did
+    this project last change" is answered from the record, not from the window.
+    """
+    _end_a_session(corpus, "the only sitting")
+
+    overview = OverviewReport.model_validate(reader.get("/overview").json())
+
+    assert overview.last_changed_at
+    assert datetime.fromisoformat(overview.last_changed_at) >= max(
+        datetime.fromisoformat(entry.at) for entry in overview.since_last_session.entries
+    )
+
+
 def test_the_change_list_reports_one_entry_of_each_kind_newest_first(
     reader: TestClient, corpus: Path, registry: CapabilityRegistry
 ) -> None:

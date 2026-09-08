@@ -55,6 +55,14 @@ export interface PdfPageProps {
   label?: string;
   /** Shown instead of the canvas when the page cannot be rendered. */
   fallback?: ReactNode;
+  /**
+   * What the block says about itself while the page has not been drawn into it yet.
+   *
+   * An undrawn page is an empty rectangle, and an empty rectangle on a review screen is
+   * indistinguishable from a source with nothing on it (design critique, minor). The default
+   * names the page; a caller with a surface of its own says it in that surface's words.
+   */
+  caption?: ReactNode;
 }
 
 type PageStatus = 'idle' | 'rendering' | 'ready' | 'unavailable';
@@ -69,6 +77,7 @@ export function PdfPage({
   className,
   label,
   fallback,
+  caption,
 }: PdfPageProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const textLayerRef = useRef<HTMLDivElement | null>(null);
@@ -165,6 +174,20 @@ export function PdfPage({
   const viewport = viewportRef.current;
   const name = label ?? `page ${page}`;
 
+  /*
+   * The block always says what it is.
+   *
+   * An undrawn page used to be an empty rectangle with the explanation, if any, printed
+   * underneath it — so a source pane waiting on pdf.js and a source with nothing on it drew
+   * the same blank box (design critique, minor). The words now sit *inside* the block, which
+   * is what makes them a caption rather than a note beside a mystery: which page is coming
+   * while it is coming, and why there is none when there is none.
+   *
+   * The canvas is hidden rather than unmounted in every state but `ready`, so the block sizes
+   * to its caption instead of to a 300×150 default canvas — and so the render effect always
+   * has an element to draw into, which is what lets a document that failed and then loaded
+   * (a build that has just compiled) recover without remounting the page.
+   */
   return (
     <div className={className ? `rh-pdf ${className}` : 'rh-pdf'} data-status={status}>
       <div className="rh-pdf__frame" onDoubleClick={handleDoubleClick} data-testid="pdf-frame">
@@ -184,18 +207,19 @@ export function PdfPage({
               />
             ))
           : null}
+        {status === 'unavailable' ? (
+          <p className="rh-pdf__fallback" role="status">
+            {fallback ?? (
+              <>
+                This page could not be rendered{error ? ` (${error})` : ''}. The PDF itself is
+                unchanged.
+              </>
+            )}
+          </p>
+        ) : status === 'ready' ? null : (
+          <p className="rh-pdf__caption">{caption ?? `Page ${page}, rendering…`}</p>
+        )}
       </div>
-
-      {status === 'unavailable' ? (
-        <p className="rh-pdf__fallback" role="status">
-          {fallback ?? (
-            <>
-              This page could not be rendered{error ? ` (${error})` : ''}. The PDF itself is
-              unchanged.
-            </>
-          )}
-        </p>
-      ) : null}
     </div>
   );
 }

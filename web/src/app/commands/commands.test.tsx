@@ -91,9 +91,28 @@ describe('the command palette', () => {
 
     await user.keyboard('{Control>}k{/Control}');
 
-    expect(screen.getByRole('dialog', { name: 'Go to, or do' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Command palette' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Review inbox/ })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: /Accept/ })).toBeInTheDocument();
+  });
+
+  /**
+   * The dialog is named for what it is, not for what it lets you do with it. "Go to, or do"
+   * described the two sections inside it — which the count sentence under the search box
+   * already says, in numbers — and left the one thing a first-timer needed, the object's own
+   * name, unsaid (third critique, minor).
+   */
+  it('is named for what it is', async () => {
+    const user = userEvent.setup();
+    renderShell(<Page accept={() => {}} />);
+
+    await user.keyboard('{Control>}k{/Control}');
+
+    const palette = screen.getByRole('dialog', { name: 'Command palette' });
+    expect(palette).toBeInTheDocument();
+    expect(screen.queryByText('Go to, or do')).toBeNull();
+    // What is inside it is still said, once, in the sentence that counts both halves.
+    expect(palette).toHaveTextContent(/screens? to go to, and .* on this screen\./);
   });
 
   it('files a destination under the rail’s own heading', async () => {
@@ -270,7 +289,7 @@ describe('the chords that go somewhere', () => {
 
     await user.keyboard('{Control>}k{/Control}');
     expect(
-      screen.getByRole('dialog', { name: 'Go to, or do' }).querySelectorAll('kbd'),
+      screen.getByRole('dialog', { name: 'Command palette' }).querySelectorAll('kbd'),
       'a key that would not fire is not printed as if it would',
     ).toHaveLength(0);
   });
@@ -394,7 +413,7 @@ describe('turning the single-key shortcuts off', () => {
 
     await user.keyboard('{Control>}k{/Control}');
 
-    expect(screen.getByRole('dialog', { name: 'Go to, or do' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Command palette' })).toBeInTheDocument();
   });
 
   it('leaves the help sheet reachable through the palette', async () => {
@@ -479,7 +498,7 @@ describe('when a shortcut must not fire', () => {
     await user.keyboard('{Control>}k{/Control}');
 
     expect(accept).not.toHaveBeenCalled();
-    expect(screen.queryByRole('dialog', { name: 'Go to, or do' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Command palette' })).not.toBeInTheDocument();
   });
 
   it('still works under a closed drawer, which stays in the document while hidden', async () => {

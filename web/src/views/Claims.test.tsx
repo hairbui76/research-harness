@@ -7,7 +7,7 @@
  * strengths together, and to make the override a visible Decision rather than an edit.
  */
 import { describe, expect, it } from 'vitest';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ClaimDetailPage, ClaimsPage } from './Claims';
 import { ProjectPathProvider } from '../app/projectPaths';
@@ -137,17 +137,55 @@ describe('the claim list', () => {
     expect(container.textContent).not.toMatch(/\d+ registered\./);
   });
 
-  it('links each concern to the claim itself and says what it asks against what it may', async () => {
-    renderView(
+  /**
+   * The third critique's minor observation: every row of "Every claim" opened with the id
+   * chip and the authority badge, and put the assertion itself under them in secondary ink —
+   * so machine metadata outranked the sentence the whole page exists to hold.
+   */
+  it('leads every row with the claim’s own sentence, and follows it with the id', async () => {
+    const { container } = renderView(
       <ProjectPathProvider projectId="prj_abc">
         <ClaimsPage />
       </ProjectPathProvider>,
       { daemon: daemonFor(), route: '/projects/prj_abc/claims', path: '/projects/prj_abc/claims' },
     );
 
+    await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument());
+    const claim = FIXTURES.index.claims[0]!;
+    const cell = container.querySelector('.rh-web-claims__row') as HTMLElement;
+    expect(cell.textContent?.startsWith(claim.statement), 'the sentence leads the row').toBe(true);
+    // The sentence is the link, and it is the only one in the cell: the id beside it is the
+    // identity, not a second way to the same page.
+    const links = within(cell).getAllByRole('link');
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAccessibleName(claim.statement);
+    expect(links[0]).toHaveAttribute('href', `/projects/prj_abc/claims/${claim.id}`);
+    // The id and the authority it carries follow the sentence, still on the row.
+    const identity = cell.querySelector('.rh-entity-ref') as HTMLElement;
+    expect(identity).not.toBeNull();
+    expect(identity.textContent).toContain(claim.id);
+    expect(
+      cell.compareDocumentPosition(identity) & Node.DOCUMENT_POSITION_CONTAINED_BY,
+    ).toBeTruthy();
+    expect(links[0]!.compareDocumentPosition(identity) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('links each concern to the claim itself and says what it asks against what it may', async () => {
+    const { container } = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <ClaimsPage />
+      </ProjectPathProvider>,
+      { daemon: daemonFor(), route: '/projects/prj_abc/claims', path: '/projects/prj_abc/claims' },
+    );
+
+    // Scoped to the concern list since wave 6: the table below it now leads its rows with
+    // the same sentence, so the statement is a link in two places and a page-wide query for
+    // it would match both. What is asserted is unchanged — this list's link, and its route.
     await waitFor(() =>
       expect(
-        screen.getByRole('link', { name: FIXTURES.index.claims[0]!.statement }),
+        within(container.querySelector('.rh-web-claims') as HTMLElement).getByRole('link', {
+          name: FIXTURES.index.claims[0]!.statement,
+        }),
       ).toHaveAttribute('href', '/projects/prj_abc/claims/C0001'),
     );
     expect(

@@ -37,3 +37,15 @@
   margin: 0;
   max-inline-size: var(--rh-measure-prose);
 }
+
+/*
+ * Where one disagreement is answered: the last line of the record, on every one of them.
+ *
+ * It reads as the row's own next step rather than as part of the evidence above it, so it
+ * takes the same space the stack puts between the record's parts and nothing else — no
+ * rule, no tint. A conflict is a question, and this is the sentence that says where the
+ * answer is given.
+ */
+.rh-web-conflicts__decide {
+  margin: 0;
+}

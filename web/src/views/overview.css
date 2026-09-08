@@ -19,12 +19,25 @@
 }
 
 /*
- * The groups that have something in them read heavier than the ones that are clear. Weight
- * is the whole signal: the badge beside the group already says "waiting" or "clear" in
- * words, so nothing here depends on noticing a colour.
+ * The items under a group that has work read heavier than the prose around them. Weight is
+ * the whole signal; nothing here depends on noticing a colour. Only groups with work are
+ * rows at all now, so `[data-work]` is the row's own state rather than a discriminator.
  */
 .rh-web-attention > li[data-work] .rh-web-attention__item {
   font-weight: var(--rh-type-h4-weight);
+}
+
+/*
+ * The surfaces with nothing waiting on them, in one line under the work.
+ *
+ * Quiet, and at the prose measure, because it is a sentence rather than a list: it exists so
+ * that a clear surface is stated once instead of taking a row of its own that reads like
+ * work and says "0".
+ */
+.rh-web-overview__clear {
+  margin: var(--rh-space-2) 0 0;
+  max-inline-size: var(--rh-measure-prose);
+  color: var(--rh-text-secondary);
 }
 
 .rh-web-list.rh-web-attention__items {
@@ -82,14 +95,18 @@
 }
 
 /*
- * When the page last read, beside the button that reads again.
+ * How old the work is and how old the reading is, beside the button that reads again.
  *
  * Secondary ink and the numeral face: it is a measurement a researcher glances at, and it
  * sits on the toolbar's own baseline beside the control it qualifies. The size is floored
  * the way a table cell is — it is read off the screen and acted on, so no density takes it
  * under `--rh-type-reading-min-size`.
+ *
+ * The two halves take one voice on purpose. They answer one question — how current is this —
+ * and giving the project's age a weight of its own would make the toolbar argue with the
+ * page, whose whole first screen is what needs a researcher.
  */
-.rh-web-overview__read {
+.rh-web-overview__age {
   color: var(--rh-text-secondary);
   font-family: var(--rh-font-mono);
   font-size: max(

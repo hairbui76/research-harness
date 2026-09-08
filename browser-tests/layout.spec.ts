@@ -457,3 +457,100 @@ test('the rail and Project Home offer the same project actions in the same words
   await page.screenshot({ path: info.outputPath('project-home-actions.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
+
+interface ChipBox {
+  selector: string;
+  found: boolean;
+  top?: number;
+  bottom?: number;
+  border?: number;
+  height?: number;
+  line?: number;
+}
+
+/** One count pill's own box: what is inside its border, and what its height came from. */
+async function measureChip(page: Page, selector: string): Promise<ChipBox> {
+  return page.evaluate((wanted): ChipBox => {
+    const node = document.querySelector(wanted);
+    if (!(node instanceof HTMLElement)) return { selector: wanted, found: false };
+    const style = getComputedStyle(node);
+    return {
+      selector: wanted,
+      found: true,
+      top: Number.parseFloat(style.paddingTop),
+      bottom: Number.parseFloat(style.paddingBottom),
+      border: Number.parseFloat(style.borderTopWidth),
+      // The rule the chips keep: the box is the text's own line, plus the inset and border.
+      height: node.getBoundingClientRect().height,
+      line: Number.parseFloat(style.lineHeight) || Number.parseFloat(style.fontSize),
+    };
+  }, selector);
+}
+
+/**
+ * The count pills have an inside.
+ *
+ * The browser detector's `cramped-padding` findings on the third critique were the rail's
+ * and the inspector's count chips: a numeral with a 1px border on both block edges and no
+ * inset between them, which is a pill drawn as a box around a glyph. The rule the stylesheet
+ * states — height comes from the text, because neither a 36px nav row nor a strip holding
+ * six tabs can afford a count that sets the row height — stays; what changes is that there
+ * is now one hairline's worth of room inside the border.
+ */
+test('the rail and inspector count chips are inset from their own border', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  /*
+   * A project with a queue in it, because the rail draws a count only where there is one to
+   * draw: `Layout` attaches a count to a destination when the daemon reports more than zero
+   * waiting there, so a project created seconds ago has no chip to measure. The inspector's
+   * tabs count from the overview and carry theirs either way.
+   */
+  const bootstrap = await request.get('/__test__/bootstrap');
+  expect(bootstrap.ok()).toBeTruthy();
+  const { nonce } = await bootstrap.json();
+  const seeded = await request.post('/__test__/review-queue', { timeout: 60_000 });
+  expect(seeded.ok()).toBeTruthy();
+  const queue = await seeded.json();
+  await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
+  await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+  await page.goto(new URL(queue.review_url, page.url()).pathname.replace(/\/review$/, ''));
+  await expect(page.getByRole('main', { name: 'Research workspace' })).toBeVisible();
+
+  // The rail first. Below the breakpoint it is a drawer over the page, so it is measured
+  // while it is open and closed again before anything behind it is asked for.
+  await openRail(page);
+  await expect(
+    page.locator('.rh-project-rail__nav-count').first(),
+    'the seeded queue must give the rail a count to draw',
+  ).toBeVisible();
+  const rail = await measureChip(page, '.rh-project-rail__nav-count');
+  await page.keyboard.press('Escape');
+
+  const show = page.getByRole('button', { name: 'Show the research inspector', exact: true });
+  if ((await show.count()) > 0) await show.first().click();
+  await expect(page.getByRole('region', { name: 'Research inspector' })).toBeVisible();
+  await expect(page.locator('.rh-research-inspector__tab-count').first()).toBeVisible();
+  const inspector = await measureChip(page, '.rh-research-inspector__tab-count');
+
+  for (const chip of [rail, inspector]) {
+    expect(chip.found, `${chip.selector} must be on screen to be measured`).toBe(true);
+    expect(chip.border, `${chip.selector} draws the hairline this inset answers`).toBeGreaterThan(0);
+    expect(
+      Math.min(chip.top!, chip.bottom!),
+      `${chip.selector} ran ${chip.top}px/${chip.bottom}px of block inset inside a border`,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      chip.height!,
+      `${chip.selector} must still take its height from the text`,
+    ).toBeLessThanOrEqual(chip.line! + 2 * (chip.top! + chip.border!) + 1);
+  }
+
+  await page.screenshot({ path: info.outputPath('count-chips.png'), fullPage: true });
+  expect(errors).toEqual([]);
+});
