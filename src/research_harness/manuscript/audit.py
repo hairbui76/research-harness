@@ -305,11 +305,21 @@ class _Auditor:
     # -- checks ----------------------------------------------------------------
 
     def _unregistered(self, sentence: Sentence) -> None:
+        """Say why this sentence is one the graph should account for, not what it is called.
+
+        The message used to read "substantive sentence is attached to no Claim", which is
+        the finding's own kind said a second time: a client that names the kind - the
+        cockpit prints "Unregistered claim - <message>" - then stated one fact twice and
+        added nothing a researcher could act on. What only the auditor knows is which cue
+        made the sentence substantive (:func:`is_substantive`) and what would clear the
+        finding, so that is what it says.
+        """
         self._add(
             ManuscriptFindingKind.UNREGISTERED_CLAIM,
             FindingSeverity.WARNING,
             sentence,
-            "substantive sentence is attached to no Claim",
+            f"{_substantive_cue(sentence)}; anchor it to a Claim so the manuscript stays "
+            "downstream of accepted state",
         )
 
     def _orphan_claim(self, sentence: Sentence, anchor: ManuscriptAnchor) -> None:
@@ -526,6 +536,25 @@ class _Auditor:
 
 def _where(sentence: Sentence) -> tuple[str, int, int]:
     return (sentence.file, sentence.char_start, sentence.char_end)
+
+
+def _substantive_cue(sentence: Sentence) -> str:
+    """Which of :func:`is_substantive`'s four cues made this sentence an assertion.
+
+    The cues are tested in that function's own order, so the sentence a researcher reads
+    names the same reason the audit acted on. Every branch is reachable: a sentence that
+    reaches this function passed one of them.
+    """
+    text = sentence.normalized_text
+    if sentence.citation_keys:
+        keys = ", ".join(sorted(sentence.citation_keys))
+        return f"the sentence cites {keys}"
+    numbers = numbers_in_sentence(text)
+    if numbers:
+        return f"the sentence states {numbers[0].text}"
+    if _COMPARATIVE_RE.search(text):
+        return "the sentence compares or quantifies"
+    return "the sentence states a result"
 
 
 # --------------------------------------------------------------------------------------

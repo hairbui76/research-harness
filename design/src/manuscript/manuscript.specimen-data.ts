@@ -120,7 +120,7 @@ export const findings: AuditFindingModel[] = [
     line: 88,
     sentence:
       'The pretrained encoder improves F1 by 2.57 points over the strongest baseline, and the gain is concentrated in the two rarest attack families.',
-    message: 'substantive sentence is attached to no Claim',
+    message: 'the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state',
     source: 'audit',
   },
   {

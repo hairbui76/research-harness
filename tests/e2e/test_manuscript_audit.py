@@ -89,7 +89,13 @@ def test_an_unanchored_substantive_sentence_is_an_unregistered_claim(
 ) -> None:
     message = only(report, ManuscriptFindingKind.UNREGISTERED_CLAIM)
     assert line_of(message) == UNANCHORED_LINE
-    assert "attached to no Claim" in message
+    # The message says what the kind does not. It used to read "substantive sentence is
+    # attached to no Claim", which is `unregistered_claim` spelled out a second time: every
+    # client prints the kind beside it — the cockpit's card reads "Unregistered claim -
+    # <message>" — so one fact was stated twice and no next step was offered at all.
+    assert "attached to no Claim" not in message
+    assert "the sentence" in message
+    assert "anchor it to a Claim" in message
     assert report.unanchored_substantive == 1
     assert report.anchored_sentences == len(ANCHOR_LINES)
     assert report.sentences_checked == len(ANCHOR_LINES) + 1

@@ -247,6 +247,41 @@ def test_an_unattached_substantive_sentence_is_unregistered(tmp_path: Path) -> N
     assert report.findings[0].anchor is None
 
 
+def test_the_unregistered_message_says_what_the_kind_does_not(tmp_path: Path) -> None:
+    """A finding's message must add to its kind, not spell the kind out again.
+
+    Every client prints the kind beside the message — the cockpit's finding card reads
+    "Unregistered claim - <message>" — so "substantive sentence is attached to no Claim"
+    was one fact stated twice with no next step in it. What only the auditor knows is which
+    of :func:`is_substantive`'s cues fired and what would clear the finding.
+    """
+    report = audit(tmp_path, "The encoder outperforms every tuned baseline.", attach=False)
+    message = report.findings[0].message
+    assert "attached to no Claim" not in message
+    assert "the sentence compares or quantifies" in message
+    assert message.endswith(
+        "anchor it to a Claim so the manuscript stays downstream of accepted state"
+    )
+
+
+@pytest.mark.parametrize(
+    ("body", "cue"),
+    [
+        ("The encoder improves F1 by 2.57 points under load.", "the sentence states 2.57"),
+        ("The encoder outperforms every tuned baseline.", "the sentence compares or quantifies"),
+        ("The encoder employs a twelve layer transformer stack.", "the sentence states a result"),
+        ("The encoder \\cite{cited} handles encrypted attack traffic.", "the sentence cites cited"),
+    ],
+)
+def test_the_unregistered_message_names_the_cue_that_fired(
+    tmp_path: Path, body: str, cue: str
+) -> None:
+    """The four cues of :func:`is_substantive`, each named in the auditor's own words."""
+    report = audit(tmp_path, body, attach=False)
+    assert kinds(report) == [ManuscriptFindingKind.UNREGISTERED_CLAIM]
+    assert cue in report.findings[0].message
+
+
 def test_an_anchor_naming_an_unknown_claim_is_an_error(tmp_path: Path) -> None:
     loaded = project(tmp_path, "The encoder outperforms the tuned baseline everywhere.")
     report = audit_manuscript(

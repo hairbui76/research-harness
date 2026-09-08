@@ -255,7 +255,7 @@
         "line_end": 23,
         "line_start": 23
       },
-      "message": "main.tex:23: substantive sentence is attached to no Claim: 'Our sweep shows that detection quality degrades as the offered load grows.'",
+      "message": "main.tex:23: the sentence states a result; anchor it to a Claim so the manuscript stays downstream of accepted state",
       "related": [],
       "severity": "warning"
     }

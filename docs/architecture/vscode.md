@@ -163,7 +163,8 @@ field name declared in `vscode/src/client/types.ts` appears in the response.
 One Claim, four surfaces, no duplication (Product 42 B).
 
 1. **Edit a section.** Open `manuscript/main.tex`. A substantive sentence with no Claim is
-   flagged Information — *substantive sentence is attached to no Claim*.
+   flagged Information — *the sentence states a result; anchor it to a Claim so the
+   manuscript stays downstream of accepted state*.
 2. **Create and attach a Claim.** Select the sentence, run
    `Research: Create Claim from Selection`, give it a statement, a type, and a requested scope.
    The extension calls `claim.create` with no id, attaches the `C####` the daemon allocated

@@ -36,7 +36,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
           <span
             class="rh-audit-finding__message"
           >
-            substantive sentence is attached to no Claim
+            the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state
           </span>
         </p>
         <div
@@ -576,7 +576,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
           <span
             class="rh-audit-finding__message"
           >
-            substantive sentence is attached to no Claim
+            the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state
           </span>
         </p>
         <div
@@ -1116,7 +1116,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
           <span
             class="rh-audit-finding__message"
           >
-            substantive sentence is attached to no Claim
+            the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state
           </span>
         </p>
         <div
@@ -1656,7 +1656,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
           <span
             class="rh-audit-finding__message"
           >
-            substantive sentence is attached to no Claim
+            the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state
           </span>
         </p>
         <div

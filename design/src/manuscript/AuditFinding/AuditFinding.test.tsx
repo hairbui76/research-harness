@@ -17,7 +17,7 @@ const findings: AuditFindingModel[] = [
     file: 'manuscript/main.tex',
     line: 88,
     sentence: UNANCHORED_SENTENCE,
-    message: 'substantive sentence is attached to no Claim',
+    message: 'the sentence states 2.57 points; anchor it to a Claim so the manuscript stays downstream of accepted state',
     source: 'audit',
   },
   {
