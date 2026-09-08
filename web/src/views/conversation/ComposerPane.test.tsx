@@ -422,3 +422,152 @@ describe('the composer after the disclosure', () => {
     );
   });
 });
+
+/* -- the entrance --------------------------------------------------------- */
+
+/**
+ * The conversation route's front door (wave six, third critique P2).
+ *
+ * With no session open the composer rendered as an inviting field with an accent Send,
+ * disabled, and the only explanation was a sentence in the transcript that named a control
+ * by a name it does not have. The daemon has no create-on-send — `session.send` takes a
+ * session id and reads that record before anything else — so the field cannot be the way
+ * in. One control is, with the rail's own label, and the reason it is ever missing stands
+ * where the control would have been.
+ */
+describe('the entrance', () => {
+  const NO_SESSIONS = { count: 0, sessions: [] };
+
+  function renderEmpty(options: { agentHost?: boolean } = {}) {
+    const created = {
+      ...sessions.sessions[1],
+      id: 'CS0009',
+      title: 'New session',
+      visibility: 'project',
+      defaults: {},
+      message_count: 0,
+      last_message: null,
+      last_message_at: null,
+    };
+    const daemon = fakeDaemon({
+      ...(options.agentHost
+        ? { gets: { '/overview': { ...FIXTURES.overview, principal: 'agent_host', actor: 'http' } } }
+        : {}),
+      capabilities: answers({
+        'session.list': NO_SESSIONS,
+        'session.create': { session: created },
+      }),
+    });
+    renderConversation({
+      daemon,
+      session: '',
+      ...(options.agentHost ? { token: null } : {}),
+    });
+    return daemon;
+  }
+
+  it('replaces the disabled field with one control in the rail’s words', async () => {
+    const user = userEvent.setup();
+    const daemon = renderEmpty();
+    await screen.findByText('No session open');
+
+    // Nothing to type into and no Send to disable: the slot holds the act that has to
+    // happen first, and nothing that pretends to be usable.
+    expect(screen.queryByRole('textbox', { name: 'Message' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Send' })).toBeNull();
+    const entrance = document.querySelector('.rh-web-entrance') as HTMLElement;
+    expect(within(entrance).getByRole('button', { name: 'New session' })).toBeInTheDocument();
+
+    // The same act the rail runs, asked the same way: visibility is fixed at creation.
+    await user.click(within(entrance).getByRole('button', { name: 'New session' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New session' });
+    await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
+
+    await waitFor(() =>
+      expect(
+        daemon.capabilityCalls().find((call) => call.name === 'session.create')?.request,
+      ).toEqual({ title: 'New session' }),
+    );
+    // And the caret lands in the box that was opened for it.
+    const box = await screen.findByRole('textbox', { name: 'Message' });
+    await waitFor(() => expect(box).toHaveFocus());
+  });
+
+  it('names the same control, by the same name, in the empty transcript', async () => {
+    renderEmpty();
+    await screen.findByText('No session open');
+    const sentence = screen.getByText(
+      'Choose New session below to ask a question against this project.',
+    );
+    expect(sentence).toBeInTheDocument();
+    // The name it uses is a control that is actually on this screen.
+    expect(
+      within(document.querySelector('.rh-web-entrance') as HTMLElement).getByRole('button', {
+        name: 'New session',
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it('states the reason at the control when a window may only read', async () => {
+    renderEmpty({ agentHost: true });
+    await screen.findByText('No session open');
+
+    // No control anywhere — the rail withdraws it too — and the reason is in the slot the
+    // control would have filled, not six hundred pixels away.
+    expect(screen.queryByRole('button', { name: 'New session' })).toBeNull();
+    const entrance = document.querySelector('.rh-web-entrance') as HTMLElement;
+    expect(entrance).toHaveTextContent(/may read and propose/);
+  });
+
+  it('has no automatically detectable violation with the front door on screen', async () => {
+    renderEmpty();
+    await screen.findByText('No session open');
+    await expectNoAxeViolations(document.body);
+  });
+});
+
+/* -- the chrome under the box --------------------------------------------- */
+
+describe('the index note', () => {
+  /** The key `useIndexNoteRead` writes; a project that has already been told once. */
+  function alreadyRead(degradation: string): void {
+    window.localStorage.setItem(`rh.index-note-read..${degradation}`, 'read');
+  }
+
+  function withAbsentIndex() {
+    return fakeDaemon({
+      capabilities: answers({
+        'graph.status': { status: { state: 'absent', counts: {}, built_at: null } },
+      }),
+    });
+  }
+
+  it('teaches on the first showing and folds onto the hint’s line afterwards', async () => {
+    renderConversation({ daemon: withAbsentIndex(), session: LOCAL });
+    await transcriptReady();
+
+    // First showing: the sentence that teaches, on a line of its own under the destination.
+    const note = await screen.findByText(
+      'The research index is not built yet; completing from the project listings.',
+    );
+    expect(document.querySelector('.rh-composer__footer > .rh-composer__note')).not.toBeNull();
+    expect(note.closest('.rh-composer__hints')).toBeNull();
+  });
+
+  it('shares one footer line with the keyboard hint once it has been read', async () => {
+    alreadyRead('absent');
+    renderConversation({ daemon: withAbsentIndex(), session: LOCAL });
+    await transcriptReady();
+
+    // The same state and the same action, in the shortest true form, beside the shortcut.
+    const short = await screen.findByText('Research index not built');
+    const hints = short.closest('.rh-composer__hints');
+    expect(hints).not.toBeNull();
+    expect(hints?.querySelector('.rh-composer__hint')).not.toBeNull();
+    expect(document.querySelector('.rh-composer__footer > .rh-composer__note')).toBeNull();
+    // Folding hides nothing: the rebuild the wording asks for is still one press away.
+    expect(screen.getByRole('button', { name: 'Rebuild the index' })).toBeInTheDocument();
+    // And the destination keeps a line of its own.
+    expect(document.querySelector('.rh-composer__footer > .rh-composer__destination')).not.toBeNull();
+  });
+});
