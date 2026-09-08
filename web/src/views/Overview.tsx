@@ -105,7 +105,7 @@ export function OverviewPage() {
       }
       toolbar={
         <>
-          <LastRead at={readAt} announce={announceRead} />
+          <LastRead at={readAt} changed={overview?.last_changed_at ?? ''} announce={announceRead} />
           <Button size="sm" variant="secondary" iconStart="refresh-cw" onClick={lookAgain}>
             Look again
           </Button>
@@ -275,24 +275,66 @@ export function OverviewPage() {
 }
 
 /**
- * When what is on screen was read, next to the button that reads again.
+ * How old the work is, and how old the reading is, next to the button that reads again.
  *
- * The critique's finding was that "Look again" never says when it last looked, which leaves
- * a returning researcher unable to tell a project with nothing happening from a page that
- * stopped listening. The instant is the transport's own stamp for the round trip that
- * answered — one clock for the whole window — and it is the time of day, not a date,
- * because it answers "how old is this?" over a sitting rather than over a week.
+ * The critique's first finding was that "Look again" never says when it last looked, which
+ * leaves a returning researcher unable to tell a project with nothing happening from a page
+ * that stopped listening. The third critique found the other half: "Read at 08:43" states
+ * when the *page* read, not when the *project* changed, and a researcher coming back after a
+ * week is asking the second question. Both are here now, in that order — the work first,
+ * because it is the one she came back for.
  *
- * Nothing is shown before the first answer: a page that has read nothing has no time to
- * report, and inventing one would be the opposite of the point.
+ * The instant of the read is the transport's own stamp for the round trip that answered —
+ * one clock for the whole window — as a time of day, because it answers "how old is this
+ * screen?" over a sitting. The instant of the change is the daemon's `last_changed_at`, in
+ * words, because it answers "how long since anything happened?" over a week, and a clock
+ * time cannot say whether that was today.
+ *
+ * Nothing is shown before the first answer, and nothing is shown about a change in a project
+ * that has recorded none: a page that has read nothing has no time to report, and inventing
+ * one would be the opposite of the point.
+ *
+ * The live region is the line rather than the read time, so a researcher who pressed the
+ * button hears both halves of the answer she asked for.
  */
-function LastRead({ at, announce }: { at: string | null; announce: boolean }) {
+function LastRead({
+  at,
+  changed,
+  announce,
+}: {
+  at: string | null;
+  changed: string;
+  announce: boolean;
+}) {
   if (at === null) return null;
+  const age = changed ? ageInWords(changed) : '';
   return (
-    <span className="rh-web-overview__read" {...(announce ? { role: 'status' } : {})}>
-      Read at {clockTime(at)}
+    <span className="rh-web-overview__age" {...(announce ? { role: 'status' } : {})}>
+      {age ? <span className="rh-web-overview__changed">Changed {age} · </span> : null}
+      <span className="rh-web-overview__read">Read at {clockTime(at)}</span>
     </span>
   );
+}
+
+/**
+ * How long ago an instant was, in the words a researcher says it in.
+ *
+ * Coarse on purpose: the question this answers is "did anything happen while I was away",
+ * and a minute's precision on a week-old project would be false precision about a research
+ * record. An instant this window cannot parse, or one in the future — a machine whose clock
+ * disagrees with the daemon's — says nothing rather than counting backwards.
+ */
+export function ageInWords(iso: string, now: number = Date.now()): string {
+  const at = new Date(iso).getTime();
+  if (Number.isNaN(at)) return '';
+  const seconds = Math.round((now - at) / 1000);
+  if (seconds < 0) return '';
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${counted(minutes, 'minute')} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${counted(hours, 'hour')} ago`;
+  return `${counted(Math.floor(hours / 24), 'day')} ago`;
 }
 
 /**

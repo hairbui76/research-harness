@@ -166,18 +166,23 @@ test('the overview leads with what is waiting, and states what the project holds
   );
 
   // "Look again" says when it last looked, and only announces a read the researcher asked
-  // for: an automatic one is quiet text (critique H1).
+  // for: an automatic one is quiet text (critique H1). Beside it, from the daemon, when the
+  // project itself last changed — the returning researcher's question, which a read time
+  // cannot answer (third critique).
   const read = page.locator('.rh-web-overview__read');
+  const age = page.locator('.rh-web-overview__age');
   await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  await expect(age).toHaveText(/^Changed .+ ago · Read at \d{1,2}:\d{2}/);
   expect(
-    await read.evaluate((node) => node.getAttribute('role')),
+    await age.evaluate((node) => node.getAttribute('role')),
     'an automatic read announces nothing',
   ).toBeNull();
   await page.locator('.rh-full-page__header').screenshot({
     path: info.outputPath('overview-read-at.png'),
   });
   await page.getByRole('button', { name: 'Look again' }).click();
-  await expect(read).toHaveAttribute('role', 'status');
+  // The whole line is the live region: the answer to "is this still current?" is both halves.
+  await expect(age).toHaveAttribute('role', 'status');
   await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
   // The read the press asked for lands and the page comes back; everything measured below
   // is measured on the page as it stands after it, not on the skeleton in between.

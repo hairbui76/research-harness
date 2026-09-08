@@ -454,6 +454,17 @@ class OverviewReport(BaseModel):
     """
 
     attention: tuple[AttentionGroup, ...] = ()
+    last_changed_at: str = ""
+    """When this project last changed, ISO-8601 in UTC; empty when nothing has.
+
+    A cockpit can say when it read a page; only the daemon can say when the project moved,
+    and those are different questions — "Read at 08:43" tells a researcher returning after a
+    week how old the *screen* is, not how old the *work* is. It is the newest instant of the
+    same two records `since_last_session` merges, the semantic event log and the conflict
+    store, so the two can never disagree about what counts as a change. A client says how
+    long ago that was; it never decides what changed.
+    """
+
     since_last_session: RecentChanges = Field(default_factory=RecentChanges)
     claim_health: tuple[CountEntry, ...] = ()
     open_questions: tuple[AttentionItem, ...] = ()

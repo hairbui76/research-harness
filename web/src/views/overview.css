@@ -95,14 +95,18 @@
 }
 
 /*
- * When the page last read, beside the button that reads again.
+ * How old the work is and how old the reading is, beside the button that reads again.
  *
  * Secondary ink and the numeral face: it is a measurement a researcher glances at, and it
  * sits on the toolbar's own baseline beside the control it qualifies. The size is floored
  * the way a table cell is — it is read off the screen and acted on, so no density takes it
  * under `--rh-type-reading-min-size`.
+ *
+ * The two halves take one voice on purpose. They answer one question — how current is this —
+ * and giving the project's age a weight of its own would make the toolbar argue with the
+ * page, whose whole first screen is what needs a researcher.
  */
-.rh-web-overview__read {
+.rh-web-overview__age {
   color: var(--rh-text-secondary);
   font-family: var(--rh-font-mono);
   font-size: max(

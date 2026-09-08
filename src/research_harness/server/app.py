@@ -714,6 +714,9 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
     unsupported = _unsupported_anchors(anchors, claims)
     names = _ObjectNames(repo)
     staged = _staged_candidates(inbox)
+    # One read of the conflict store for everything that needs it: the change list, and the
+    # instant the project last moved.
+    records = store.list()
     attention = (
         _group("review_items", "review item", "/review", inbox.count, _review_items(inbox)),
         _group(
@@ -752,7 +755,8 @@ def _overview(registry: CapabilityRegistry, root: Path, caller: Principal) -> Ov
         ),
         attention_summary=_attention_summary(attention),
         attention=attention,
-        since_last_session=_since_last_session(repo, store.list()),
+        last_changed_at=_last_change_at(repo, records),
+        since_last_session=_since_last_session(repo, records),
         claim_health=tuple(
             CountEntry(key=status.value, count=count)
             for status, count in (
@@ -1146,6 +1150,28 @@ def _since_last_session(
         entries=entries,
         total=len(dated),
     )
+
+
+def _last_change_at(repo: WorkspaceRepository, conflicts: Sequence[ConflictRecord]) -> str:
+    """When this project last changed, or "" when nothing has been recorded.
+
+    The Overview states it beside when the page read, because those answer two different
+    questions and only one of them was on screen: "Read at 08:43" says how old the reading
+    is, not how old the work is, which is the first thing a researcher returning after a
+    week wants to know (design critique, the returning researcher).
+
+    It is the newest instant of the same two records `_since_last_session` merges — the
+    Git-visible semantic event log and the conflict store — and it is *not* bounded by that
+    function's window: a project whose last change predates the window has still changed
+    then, and saying so is the point. One judgement, made here, so the sentence and the
+    instant can never disagree about what counts as a change.
+    """
+    moments = [event.occurred_at for event in repo.iter_events() if event.event in CHANGE_KINDS]
+    for record in conflicts:
+        moments.append(record.created_at)
+        if record.resolution is not None:
+            moments.append(record.resolution.resolved_at)
+    return max(moments).isoformat() if moments else ""
 
 
 def _change_window(repo: WorkspaceRepository) -> tuple[datetime, str]:

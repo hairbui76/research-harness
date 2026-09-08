@@ -428,6 +428,33 @@ describe('the overview inside a project', () => {
  * a manual refresh is asking for.
  */
 describe('when the overview last read', () => {
+  it('says when the project last changed, beside when the page read it', async () => {
+    /*
+     * The returning researcher's finding in the third critique: "Read at 08:43" says how old
+     * the *reading* is, and she asked how old the *work* is. The instant is the daemon's —
+     * `last_changed_at`, the newest change it holds — and the page only says how long ago
+     * that was, in words, next to the clock time it already had.
+     */
+    const hour = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const { container } = renderView(<OverviewPage />, {
+      daemon: fakeDaemon({ gets: { '/overview': overviewWith({ last_changed_at: hour }) } }),
+    });
+
+    await screen.findByText(/^Read at /);
+    const age = container.querySelector('.rh-web-overview__age') as HTMLElement;
+    expect(age.textContent).toMatch(/^Changed 2 hours ago · Read at \d{1,2}:\d{2}/);
+    expect(age.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
+  });
+
+  it('says nothing about a change in a project that has recorded none', async () => {
+    renderView(<OverviewPage />, {
+      daemon: fakeDaemon({ gets: { '/overview': overviewWith({ last_changed_at: '' }) } }),
+    });
+
+    const read = await screen.findByText(/^Read at /);
+    expect(read.parentElement?.textContent).not.toContain('Changed');
+  });
+
   it('states the time of the read beside “Look again”', async () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
@@ -453,9 +480,12 @@ describe('when the overview last read', () => {
 
     await user.click(screen.getByRole('button', { name: 'Look again' }));
 
-    // `status` is the polite one: it waits for a pause instead of interrupting.
+    // `status` is the polite one: it waits for a pause instead of interrupting. It moved
+    // from the read time to the line holding it in wave 6, because the answer to "is this
+    // still current?" is now two facts — when the project changed, and when this read — and
+    // announcing only the second of them would answer the wrong half of the question.
     await waitFor(() =>
-      expect(screen.getByText(/^Read at /)).toHaveAttribute('role', 'status'),
+      expect(screen.getByText(/^Read at /).parentElement).toHaveAttribute('role', 'status'),
     );
   });
 });
