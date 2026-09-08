@@ -35,8 +35,12 @@ from research_harness.capabilities.handlers import init_project
 from research_harness.capabilities.permissions import Principal
 from research_harness.capabilities.reads import (
     ArtifactSummary,
+    ClaimRef,
+    EvidenceSummary,
     WorkSummary,
     corpus_attention,
+    evidence_attention,
+    evidence_questions,
 )
 from research_harness.capabilities.registry import CapabilityRegistry
 from research_harness.domain.base import Provenance
@@ -77,6 +81,9 @@ WEB_RESPONSE_TYPES = {
     "CorpusAttentionGroup": "work.list",
     "CorpusAttentionItem": "work.list",
     "CorpusQuestion": "work.list",
+    "EvidenceAttentionGroup": "evidence.list",
+    "EvidenceAttentionItem": "evidence.list",
+    "EvidenceQuestion": "evidence.list",
     "QuestionList": "question.list",
     "DecisionList": "decision.list",
     "AnchorList": "anchor.list",
@@ -1010,6 +1017,116 @@ def test_a_group_the_page_can_hold_names_every_work_rather_than_a_sentence() -> 
 def test_a_corpus_every_source_of_which_can_be_read_names_nothing() -> None:
     """Four lines of zero are not an answer; the page's own empty state is."""
     assert corpus_attention((_work("W0001"), _work("W0002"))) == ()
+
+
+# -- the evidence index composes its own lead and its own questions ----------
+
+
+def _evidence(evidence_id: str, **overrides: Any) -> EvidenceSummary:
+    """One `evidence.list` row, as the daemon composes it, with one thing changed."""
+    fields: dict[str, Any] = {
+        "id": evidence_id,
+        "work": "W0001",
+        "work_title": "Structured traffic representations",
+        "artifact": "A0001-1",
+        "field": "dataset",
+        "status": "accepted",
+        "origin": "source_observed",
+        "evidence_type": "experimental_setup",
+        "strength": "direct",
+        "review_tier": 1,
+        "exact_text": "We evaluate on CICIDS2017 and report macro F1.",
+        "stale": "fresh",
+        "claims": (ClaimRef(id="C0001", title="a claim that rests on it"),),
+        "accepted": "8 September 2026",
+        "accepted_at": datetime.now(UTC).isoformat(),
+    }
+    fields.update(overrides)
+    return EvidenceSummary(**fields)
+
+
+def test_accepted_evidence_is_named_by_the_first_thing_wrong_with_it() -> None:
+    """Decay first, then the disagreement that stands, then what landed nowhere.
+
+    A stale span is also uncited more often than not, so the groups are disjoint and take
+    the first thing wrong: counting one absence twice would offer two controls that lead to
+    the same row, which is the rule the corpus already keeps.
+    """
+    groups = evidence_attention(
+        (
+            _evidence("E0001", stale="stale", status="stale", claims=()),
+            _evidence("E0002", status="superseded"),
+            _evidence("E0003", verdict="contradicted"),
+            _evidence("E0004", verdict="insufficient_evidence", claims=()),
+            _evidence("E0005", claims=()),
+            _evidence("E0006"),
+        )
+    )
+
+    assert [(group.kind, group.count) for group in groups] == [
+        ("stale", 1),
+        ("superseded", 1),
+        ("contradicted", 2),
+        ("uncited", 1),
+    ], "a fresh, supported, cited piece of evidence asks for nothing"
+    assert groups[0].label == "1 piece of evidence went stale when its source changed"
+    assert groups[3].label == "1 piece of evidence is cited by no claim"
+    # The row's own name, not its id: an index of two hundred `E0007`s is unreadable.
+    assert groups[0].items[0].label == "dataset · Structured traffic representations"
+    assert groups[0].items[0].route == "/evidence/E0001"
+    # A verifier that contradicted a reading and one that found it insufficient are two
+    # different pieces of news, and the group's own line states neither.
+    assert [item.detail for item in groups[2].items] == [
+        "the verifier contradicted it",
+        "the verifier found the evidence insufficient",
+    ]
+    # Nothing to add where the group's line already said it.
+    assert groups[0].items[0].detail == ""
+
+
+def test_an_evidence_group_larger_than_the_page_shows_says_what_it_left_out() -> None:
+    """The cap is the page's, and the sentence that admits it is the daemon's."""
+    groups = evidence_attention(
+        tuple(_evidence(f"E{index:04d}", claims=()) for index in range(1, 12))
+    )
+
+    assert groups[0].count == 11
+    assert groups[0].label == "11 pieces of evidence are cited by no claim"
+    assert len(groups[0].items) == 8
+    assert groups[0].more == "3 more are in the list below."
+
+
+def test_a_record_with_nothing_wrong_in_it_names_nothing() -> None:
+    """Four lines of zero are not an answer; the page's own empty state is."""
+    assert evidence_attention((_evidence("E0001"), _evidence("E0002"))) == ()
+
+
+def test_the_evidence_index_offers_only_the_questions_something_answers() -> None:
+    """A control that narrows a list to nothing is a dead end wearing a count of zero."""
+    now = datetime.now(UTC)
+    questions = evidence_questions(
+        (
+            _evidence("E0001", strength="derived"),
+            _evidence("E0002", origin="researcher_inferred", claims=()),
+            _evidence("E0003", accepted_at="2020-01-01T00:00:00+00:00"),
+        ),
+        now=now,
+    )
+    asked = {question.kind: question for question in questions}
+
+    # No stale, superseded or contradicted evidence in this record, so none of the three is
+    # offered as a control at all.
+    assert set(asked) == {"uncited", "derived", "interpretive", "recent"}
+    assert asked["derived"].label == "Derived, not direct"
+    assert asked["derived"].count == 1
+    assert asked["derived"].summary == (
+        "1 of 3 pieces of evidence is derived rather than read directly from a source."
+    )
+    # Two of the three were accepted just now; the third was accepted years ago.
+    assert asked["recent"].count == 2
+    assert asked["recent"].summary == (
+        "2 of 3 pieces of evidence were accepted in the last 7 days."
+    )
 
 
 def test_claim_list_filters_server_side_rather_than_handing_back_everything(

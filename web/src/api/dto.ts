@@ -26,6 +26,7 @@ export type OverviewReport = Schemas['OverviewReport'];
 export type WorkspaceIndex = Schemas['WorkspaceIndex'];
 export type WorkSummary = Schemas['WorkSummary'];
 export type ClaimSummary = Schemas['ClaimSummary'];
+export type ClaimRef = Schemas['ClaimRef'];
 export type QuestionSummary = Schemas['QuestionSummary'];
 export type DecisionSummary = Schemas['DecisionSummary'];
 export type MatrixSummary = Schemas['MatrixSummary'];
@@ -439,6 +440,8 @@ export interface AnchorList {
 export interface EvidenceSummary {
   id: string;
   work: string;
+  /** The Work's own title, so a row is read as a source rather than as `W0001`. */
+  work_title: string;
   artifact: string;
   field: string | null;
   status: string;
@@ -450,11 +453,83 @@ export interface EvidenceSummary {
   exact_text: string;
   qualification: string | null;
   stale: string;
+  /**
+   * The Claims that cite this Evidence, each with the statement a person reads it by.
+   *
+   * A Claim records the Evidence it rests on and nothing on the Evidence side records the
+   * Claims, so this edge is inverted by the daemon once for the whole read. A client never
+   * walks the claims to answer "does anything rest on this?".
+   */
+  claims: ClaimRef[];
+  /** The day this Evidence entered accepted state, in the words a person reads. */
+  accepted: string;
+  /** The same instant, ISO-8601, for a `<time datetime>` and for comparing without prose. */
+  accepted_at: string;
 }
 
+/**
+ * One piece of accepted evidence a group of the Evidence index's lead names.
+ *
+ * `label` is what the evidence is called in words — the field it answers and the source it
+ * came from — and `route` is the daemon's own cockpit path for it, exactly as a corpus
+ * attention item carries one.
+ */
+export interface EvidenceAttentionItem {
+  id: string;
+  label: string;
+  detail: string;
+  route: string;
+}
+
+/**
+ * One reason a piece of accepted evidence needs a researcher.
+ *
+ * `label` is the whole line — "4 pieces of evidence are cited by no claim" — because the
+ * judgement behind the grouping and the words for it are one decision, and it is the
+ * daemon's (Product 5 P10). A client renders this; it never re-derives a group from
+ * `stale`, `status` and `verdict`.
+ */
+export interface EvidenceAttentionGroup {
+  kind: string;
+  label: string;
+  count: number;
+  items: EvidenceAttentionItem[];
+  more: string;
+}
+
+/**
+ * One question a researcher brings to the accepted record, as a filter over the rows.
+ *
+ * What has decayed, what no claim rests on, what is derived rather than read directly,
+ * what only a researcher may accept, what came in lately — each is a line the daemon draws
+ * over canonical state, and the words for it are the daemon's too. `label` goes on the
+ * control, `summary` is read beside the narrowed list, and `count` is over the whole
+ * record, so a control says the same number whether or not it is chosen.
+ */
+export interface EvidenceQuestion {
+  kind: string;
+  label: string;
+  count: number;
+  summary: string;
+}
+
+/**
+ * The accepted record as one answer: the rows, the lead, and what it can be asked.
+ *
+ * `count` is what this answer carries and `total` is what the read is a part of, which are
+ * the same number until a question narrows the rows. `attention` and `questions` are always
+ * over the whole of it: a lead that changed with the filter under it would be describing
+ * the filter. `question` is the narrowing echoed back, so a sentence about the rows on
+ * screen is composed from the answer that produced them rather than from a request still in
+ * flight.
+ */
 export interface EvidenceList {
   count: number;
+  total: number;
+  question: string;
   evidence: EvidenceSummary[];
+  attention: EvidenceAttentionGroup[];
+  questions: EvidenceQuestion[];
 }
 
 /** `claim.list`'s filters; every one of them is optional. */
@@ -462,6 +537,19 @@ export interface ClaimFilters {
   status?: string;
   stale?: string;
   type?: string;
+}
+
+/**
+ * `evidence.list`'s filters; every one of them is optional.
+ *
+ * `question` is one of the daemon's own `EvidenceQuestion.kind` values. The cockpit never
+ * invents one: an unknown question is refused by the request schema with the ones that
+ * exist, rather than answered with an empty record.
+ */
+export interface EvidenceFilters {
+  work?: string;
+  status?: string;
+  question?: string;
 }
 
 /** `review.resolve_conflict`: the mutation the researcher's answer produced, if any. */

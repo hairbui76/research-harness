@@ -43,6 +43,7 @@ from research_harness.capabilities.registry import CapabilitySpec
 from research_harness.domain.base import utc_now
 from research_harness.domain.claim import Claim
 from research_harness.domain.enums import (
+    INTERPRETIVE_ORIGINS,
     ClaimScope,
     ClaimStatus,
     ClaimType,
@@ -62,6 +63,9 @@ __all__ = [
     "CORPUS_MONTHS",
     "CORPUS_QUESTIONS",
     "CORPUS_RECENT_WINDOW",
+    "EVIDENCE_ATTENTION",
+    "EVIDENCE_QUESTIONS",
+    "EVIDENCE_RECENT_WINDOW",
     "READ_CAPABILITY_HANDLERS",
     "AnchorList",
     "AnchorSummary",
@@ -77,7 +81,11 @@ __all__ = [
     "CorpusQuestionKind",
     "DecisionList",
     "DecisionSummary",
+    "EvidenceAttentionGroup",
+    "EvidenceAttentionItem",
     "EvidenceList",
+    "EvidenceQuestion",
+    "EvidenceQuestionKind",
     "EvidenceSummary",
     "ListAnchorsRequest",
     "ListClaimsRequest",
@@ -106,7 +114,10 @@ __all__ = [
     "claim_titles",
     "corpus_attention",
     "corpus_questions",
+    "evidence_answers_question",
+    "evidence_attention",
     "evidence_citations",
+    "evidence_questions",
     "list_anchors",
     "list_claims",
     "list_decisions",
@@ -360,10 +371,24 @@ class AnchorSummary(_Summary):
 
 
 class EvidenceSummary(_Summary):
-    """One accepted Evidence object as a list shows it, without its whole anchor."""
+    """One accepted Evidence object as a list shows it, without its whole anchor.
+
+    The anchor is one `/objects/<id>` away. What is here is identity plus the four facts an
+    index of accepted evidence is read for - which source it came from *by name*, whether
+    any Claim rests on it, when it was accepted, and whether it has decayed - and every one
+    of those is a judgement over canonical state that belongs here rather than in a client
+    (Product 5 P10).
+    """
 
     id: str
     work: str
+    work_title: str = ""
+    """The Work's own title, so a row is read as a source rather than as `W0001`.
+
+    An index of two hundred spans identified only by `E0007 · W0001` cannot be scanned; the
+    Corpus already calls that Work by its title and the two surfaces must agree.
+    """
+
     artifact: str
     field: str | None = None
     status: str
@@ -375,6 +400,20 @@ class EvidenceSummary(_Summary):
     exact_text: str
     qualification: str | None = None
     stale: str
+    claims: tuple[ClaimRef, ...] = ()
+    """The Claims that cite this Evidence, each with the statement a person reads it by.
+
+    A Claim records the Evidence it rests on; nothing on the Evidence side records the
+    Claims. So the direction this index is read in - "does anything rest on this?" - has to
+    be inverted by the daemon, once for the whole read, or a client would walk every Claim
+    again for every row.
+    """
+
+    accepted: str = ""
+    """The day this Evidence entered accepted state, in the words a person reads."""
+
+    accepted_at: str = ""
+    """The same instant, ISO-8601, so a client can sort or compare without parsing prose."""
 
 
 class CandidateView(_Summary):
@@ -585,11 +624,113 @@ class DecisionList(_Summary):
     decisions: tuple[DecisionSummary, ...] = ()
 
 
+class EvidenceAttentionItem(_Summary):
+    """One piece of accepted evidence that needs a researcher, and what is specific to it."""
+
+    id: str
+    label: str
+    """What this evidence is, in words: the field it answers and the source it came from."""
+
+    detail: str = ""
+    """What is true of this one and not of the rest of its group; empty when there is
+    nothing to add, because three copies of the group's own sentence teach nothing."""
+
+    route: str = ""
+    """Where the cockpit shows this one piece of evidence. Empty means the cockpit has no
+    screen for it and the item is text, never a link back to the list it is already in."""
+
+
+class EvidenceAttentionGroup(_Summary):
+    """One reason a piece of accepted evidence needs a researcher."""
+
+    kind: str
+    label: str
+    """The whole line, as a sentence: "4 pieces of evidence are cited by no claim". The
+    count is inside it because this page reads its own size in sentences everywhere else."""
+
+    count: int
+    items: tuple[EvidenceAttentionItem, ...] = ()
+    more: str = ""
+    """What the item cap left out, in words; empty when nothing was left out."""
+
+
+#: Every question `evidence.list` will narrow the accepted record by.
+#:
+#: Closed, so an unknown one is refused by the request model with the seven that exist
+#: rather than answered with an empty record, and so a host reads them off the published
+#: schema. `EVIDENCE_QUESTIONS` below carries the same kinds with the words for each; the
+#: contract test holds the two together.
+EvidenceQuestionKind = Literal[
+    "stale",
+    "superseded",
+    "contradicted",
+    "uncited",
+    "derived",
+    "interpretive",
+    "recent",
+]
+
+
+class EvidenceQuestion(_Summary):
+    """One question a researcher brings to the accepted record, as a filter over the rows.
+
+    An index of accepted evidence is not read record by record. It is asked things - what
+    has decayed under me, what does no claim rest on, what is derived rather than read
+    directly, what came in while I was away - and each of those is a line the daemon draws
+    over canonical state (Product 9, 37). The line and the words for it are one decision, so
+    both are here: a client renders `label` on the control and `summary` beside the narrowed
+    list, and never works out for itself which rows answer the question (Product 5 P10).
+
+    `count` is over the whole record, not over what the answer carries, so the control says
+    the same number whether or not it is the one currently chosen.
+    """
+
+    kind: str
+    label: str
+    """The words on the control: short, because it sits beside others."""
+
+    count: int
+    summary: str
+    """The whole sentence the narrowed list is read under. The count is inside it, because
+    this page reads its own size in sentences everywhere else."""
+
+
 class EvidenceList(_Summary):
-    """`evidence.list`: accepted evidence, summarised, by work or status."""
+    """`evidence.list`: accepted evidence, what in it needs a researcher, and what it can
+    be asked."""
 
     count: int = 0
+    """How many rows this answer carries: the whole record, or the ones the question
+    named."""
+
+    total: int = 0
+    """How many pieces of evidence this read is a part of, whatever it was narrowed to. A
+    narrowed list still has to be able to say what it is a part of."""
+
+    question: str = ""
+    """The question this answer was narrowed by, echoed back; empty for the whole record.
+
+    The client asked it, so it already knows - but a sentence describing the rows on screen
+    has to be composed from the answer that produced them, not from the request that is
+    still in flight.
+    """
+
     evidence: tuple[EvidenceSummary, ...] = ()
+    attention: tuple[EvidenceAttentionGroup, ...] = ()
+    """The accepted evidence that needs a researcher, in the order it decays.
+
+    Always over the whole read: this is the page's lead, and a lead that changed every time
+    the list beneath it was narrowed would be describing the filter rather than the record.
+    Only the groups with something in them are here: a record in good order answers with
+    none, and the page says so in one sentence rather than in four lines of zero.
+    """
+
+    questions: tuple[EvidenceQuestion, ...] = ()
+    """What this record can be asked, counted over the whole of it.
+
+    Only the questions at least one row answers: an empty result is not a filter, which is
+    the rule the review queue's own filters already keep.
+    """
 
 
 class AnchorList(_Summary):
@@ -645,10 +786,17 @@ class ListDecisionsRequest(CapabilityRequest):
 
 
 class ListEvidenceRequest(CapabilityRequest):
-    """`evidence.list`: accepted evidence, by work and by lifecycle status."""
+    """`evidence.list`: accepted evidence, by work, lifecycle status, or one question."""
 
     work: WorkId | None = None
     status: EvidenceStatus | None = None
+    question: EvidenceQuestionKind | None = None
+    """One of `EVIDENCE_QUESTIONS`: the narrowing is the daemon's, so the vocabulary is too.
+
+    Typed as a closed set rather than a string, so an unknown question is refused with the
+    ones that exist rather than answered with an empty record, and so every host reads the
+    list of them off the published request schema.
+    """
 
 
 class ListAnchorsRequest(CapabilityRequest):
@@ -782,9 +930,10 @@ def list_evidence(ctx: CapabilityContext, request: ListEvidenceRequest) -> Evide
     ``work`` is a filter, so naming one the corpus does not hold yields an empty list rather
     than a refusal — the same answer as a Work with no accepted evidence yet.
     """
-    works = (
-        [request.work] if request.work is not None else [work.id for work in ctx.repo.list_works()]
-    )
+    titles = {str(work.id): work.title for work in ctx.repo.list_works()}
+    works = [request.work] if request.work is not None else list(titles)
+    citations = evidence_citations(ctx.repo)
+    statements = claim_titles(ctx.repo)
     found: list[Evidence] = []
     for work in works:
         try:
@@ -796,7 +945,44 @@ def list_evidence(ctx: CapabilityContext, request: ListEvidenceRequest) -> Evide
             for item in records
             if request.status is None or item.verification.status is request.status
         )
-    return EvidenceList(count=len(found), evidence=tuple(evidence_summary(item) for item in found))
+    summaries = tuple(
+        evidence_summary(
+            item,
+            work_title=titles.get(str(item.source.work), ""),
+            claims=_citing_claims(str(item.id), citations, statements),
+        )
+        for item in found
+    )
+    now = utc_now()
+    shown = (
+        summaries
+        if request.question is None
+        else tuple(
+            item for item in summaries if evidence_answers_question(item, request.question, now=now)
+        )
+    )
+    return EvidenceList(
+        count=len(shown),
+        total=len(summaries),
+        question=request.question or "",
+        evidence=shown,
+        attention=evidence_attention(summaries),
+        questions=evidence_questions(summaries, now=now),
+    )
+
+
+def _citing_claims(
+    evidence: str, citations: Mapping[str, frozenset[str]], statements: Mapping[str, str]
+) -> tuple[ClaimRef, ...]:
+    """The Claims resting on one piece of Evidence, each by the statement it is read as.
+
+    Ordered by id, because the inverted index is a set and a list whose order changed
+    between two reads of the same unchanged record would be the daemon shuffling the page.
+    """
+    return tuple(
+        ClaimRef(id=claim, title=statements.get(claim, ""))
+        for claim in sorted(citations.get(evidence, frozenset()))
+    )
 
 
 def list_anchors(ctx: CapabilityContext, request: ListAnchorsRequest) -> AnchorList:
@@ -1111,6 +1297,285 @@ def corpus_questions(
     return tuple(found)
 
 
+#: How many pieces of evidence one attention group names before it defers to the list itself.
+#:
+#: Eight, the corpus's own cap and for its own reason: below this size the group names every
+#: row it counts and no sentence stands in for one; above it the sentence is a genuine cap
+#: rather than a dangling pointer, and the count in the group's line already says how many
+#: there are.
+EVIDENCE_ATTENTION_ITEMS = 8
+
+#: Why a piece of accepted evidence needs a researcher, in the order the record decays.
+#:
+#: Decay first - a span whose source moved under it can no longer be replayed against that
+#: source (Product 37), and one a later reading superseded is a reading the record has moved
+#: past. Then the disagreement that stands anyway: a verifier that did not support a reading
+#: is a fact about accepted state, not about a proposal (Product 20.4). Then what landed
+#: nowhere, which is work already done that nothing rests on.
+#:
+#: Each entry is the whole line the page reads - for one piece, and for several. The count
+#: lives inside the sentence because a bare number at heading size is the shape the Overview
+#: was rebuilt to leave behind, and this page follows it.
+EVIDENCE_ATTENTION: tuple[tuple[str, str, str], ...] = (
+    (
+        "stale",
+        "1 piece of evidence went stale when its source changed",
+        "{count} pieces of evidence went stale when their sources changed",
+    ),
+    (
+        "superseded",
+        "1 piece of evidence was superseded by a later reading",
+        "{count} pieces of evidence were superseded by later readings",
+    ),
+    (
+        "contradicted",
+        "1 piece of evidence stands although a verifier did not support it",
+        "{count} pieces of evidence stand although a verifier did not support them",
+    ),
+    (
+        "uncited",
+        "1 piece of evidence is cited by no claim",
+        "{count} pieces of evidence are cited by no claim",
+    ),
+)
+
+#: The verdicts that mean a verifier did not support the reading that was accepted anyway.
+#:
+#: Acceptance is the researcher's and a verifier never vetoes one (Product 24.3), so this is
+#: not a defect - it is the one thing about a row that the row itself does not say, and the
+#: reason the group exists is that it is invisible on the page otherwise.
+UNSUPPORTED_VERDICTS: Mapping[str, str] = {
+    "contradicted": "the verifier contradicted it",
+    "insufficient_evidence": "the verifier found the evidence insufficient",
+}
+
+
+def evidence_attention(
+    evidence: Sequence[EvidenceSummary],
+) -> tuple[EvidenceAttentionGroup, ...]:
+    """Which accepted evidence needs a researcher, and why, in the order the record decays.
+
+    This is the judgement the Evidence index opens with, and it is made here so no client
+    makes it: a cockpit that read `stale`, `status` and `verdict` and decided for itself
+    which readings were in trouble would be a second, disagreeing copy of Product 20.4 and
+    37 living in React (Product 5 P10).
+
+    Only the groups with something in them come back. A record nothing has decayed in and
+    everything of which a claim rests on answers with none, and the page says that in one
+    sentence rather than in four lines of zero.
+    """
+    members: dict[str, list[EvidenceSummary]] = {kind: [] for kind, _, _ in EVIDENCE_ATTENTION}
+    for item in evidence:
+        kind = _evidence_group(item)
+        if kind:
+            members[kind].append(item)
+    return tuple(
+        _evidence_group_view(kind, singular, plural, members[kind])
+        for kind, singular, plural in EVIDENCE_ATTENTION
+        if members[kind]
+    )
+
+
+def _evidence_group(item: EvidenceSummary) -> str:
+    """Which group one piece of evidence belongs to, or "" when it needs nothing.
+
+    The first thing wrong wins. A stale span is usually also uncited, and answering both
+    would count one absence twice and offer two controls that lead to the same row - the
+    rule the corpus's own grouping already keeps.
+    """
+    if item.stale == StaleState.STALE.value or item.status == EvidenceStatus.STALE.value:
+        return "stale"
+    if item.status == EvidenceStatus.SUPERSEDED.value:
+        return "superseded"
+    if item.verdict in UNSUPPORTED_VERDICTS:
+        return "contradicted"
+    if not item.claims:
+        return "uncited"
+    return ""
+
+
+def _evidence_label(item: EvidenceSummary) -> str:
+    """What one piece of evidence is called, in words rather than in ids.
+
+    The interrogation field it answers and the source it was read from: "dataset ·
+    Structured traffic representations". A span that answers no field is named by its
+    source alone, and one whose Work has no title yet falls back to the id it does have,
+    because a blank line is worse than a machine name.
+    """
+    source = item.work_title or item.work
+    return f"{item.field} · {source}" if item.field else source
+
+
+def _evidence_detail(kind: str, item: EvidenceSummary) -> str:
+    """What is true of this one piece and not of every other in its group.
+
+    Empty where there is nothing to add: three copies of the group's own sentence teach a
+    reader nothing the line above them did not already say. Only the verdicts differ inside
+    their group, and which of the two it was is the whole news.
+    """
+    if kind == "contradicted" and item.verdict is not None:
+        return UNSUPPORTED_VERDICTS.get(item.verdict, "")
+    return ""
+
+
+def _evidence_group_view(
+    kind: str, singular: str, plural: str, evidence: Sequence[EvidenceSummary]
+) -> EvidenceAttentionGroup:
+    """One group: its sentence, the first few pieces in it, and what the cap left out."""
+    shown = tuple(evidence[:EVIDENCE_ATTENTION_ITEMS])
+    rest = len(evidence) - len(shown)
+    if rest == 0:
+        more = ""
+    elif rest == 1:
+        more = "1 more is in the list below."
+    else:
+        more = f"{rest} more are in the list below."
+    return EvidenceAttentionGroup(
+        kind=kind,
+        label=singular if len(evidence) == 1 else plural.format(count=len(evidence)),
+        count=len(evidence),
+        items=tuple(
+            EvidenceAttentionItem(
+                id=item.id,
+                label=_evidence_label(item),
+                detail=_evidence_detail(kind, item),
+                # The cockpit's own path for one piece of evidence, as `GET /overview`
+                # writes one for a stale object: the daemon says where an item lives.
+                route=f"/evidence/{item.id}",
+            )
+            for item in shown
+        ),
+        more=more,
+    )
+
+
+#: How recently a reading has to have been accepted to count as new to a returning
+#: researcher.
+#:
+#: A week, the corpus's own window, stated in the question's own sentence rather than left
+#: to be guessed at. The Overview answers the neighbouring question - what changed while you
+#: were away - against a sitting; this one is a fact about the record, has to mean the same
+#: thing in a project with no conversation in it, and is worth more as a window a page can
+#: state in words than as one it would have to explain.
+EVIDENCE_RECENT_WINDOW = timedelta(days=7)
+
+#: What a researcher asks the accepted record, in the order the work arrives in.
+#:
+#: The first four are the attention groups themselves - the same line `_evidence_group`
+#: draws, so the lead's "4 pieces of evidence are cited by no claim" and the control that
+#: narrows the list to those four can never disagree about which they are or how many. The
+#: last three are questions that are not about decay: what the product may not silently show
+#: as direct (Product 9.3), what only a human may accept (Product 9.1, ADR-007), and what
+#: arrived lately.
+#:
+#: Each entry is the kind, the words on the control, and the sentence the narrowed list is
+#: read under, singular and plural.
+EVIDENCE_QUESTIONS: tuple[tuple[str, str, str, str], ...] = (
+    (
+        "stale",
+        "Went stale",
+        "1 of {total} pieces of evidence went stale when its source changed.",
+        "{count} of {total} pieces of evidence went stale when their sources changed.",
+    ),
+    (
+        "superseded",
+        "Superseded",
+        "1 of {total} pieces of evidence was superseded by a later reading.",
+        "{count} of {total} pieces of evidence were superseded by later readings.",
+    ),
+    (
+        "contradicted",
+        "Verifier did not support it",
+        "1 of {total} pieces of evidence stands although a verifier did not support it.",
+        "{count} of {total} pieces of evidence stand although a verifier did not support them.",
+    ),
+    (
+        "uncited",
+        "Cited by no claim",
+        "1 of {total} pieces of evidence is cited by no claim.",
+        "{count} of {total} pieces of evidence are cited by no claim.",
+    ),
+    (
+        "derived",
+        "Derived, not direct",
+        "1 of {total} pieces of evidence is derived rather than read directly from a source.",
+        "{count} of {total} pieces of evidence are derived rather than read directly from "
+        "their sources.",
+    ),
+    (
+        "interpretive",
+        "Interpretive origin",
+        "1 of {total} pieces of evidence has an interpretive origin, which only a researcher "
+        "may accept.",
+        "{count} of {total} pieces of evidence have interpretive origins, which only a "
+        "researcher may accept.",
+    ),
+    (
+        "recent",
+        "Accepted this week",
+        "1 of {total} pieces of evidence was accepted in the last 7 days.",
+        "{count} of {total} pieces of evidence were accepted in the last 7 days.",
+    ),
+)
+
+#: The origins whose acceptance is a researcher's interpretive judgement, as the wire spells
+#: them. `INTERPRETIVE_ORIGINS` is the domain's own set and this is the same set as strings,
+#: because a summary carries the value rather than the enum.
+INTERPRETIVE_ORIGIN_VALUES: frozenset[str] = frozenset(
+    origin.value for origin in INTERPRETIVE_ORIGINS
+)
+
+
+def evidence_answers_question(item: EvidenceSummary, kind: str, *, now: datetime) -> bool:
+    """Whether one piece of evidence is one of the pieces a question is asking about.
+
+    The four decay questions defer to `_evidence_group`, which is the record's own grouping
+    and takes the first thing wrong: a stale span is uncited more often than not, and
+    answering both would count one absence twice and offer two controls that lead to the
+    same row.
+
+    The other three stand on their own. Strength and origin are facts about the reading
+    whatever else is true of it, and "accepted this week" is the reading's own arrival.
+    """
+    if kind == "derived":
+        return item.strength == "derived"
+    if kind == "interpretive":
+        return item.origin in INTERPRETIVE_ORIGIN_VALUES
+    if kind == "recent":
+        return bool(item.accepted_at) and datetime.fromisoformat(item.accepted_at) >= now - (
+            EVIDENCE_RECENT_WINDOW
+        )
+    return _evidence_group(item) == kind
+
+
+def evidence_questions(
+    evidence: Sequence[EvidenceSummary], *, now: datetime | None = None
+) -> tuple[EvidenceQuestion, ...]:
+    """What this record can be asked, counted over the whole of it.
+
+    Only the questions at least one row answers. A control that narrows a list to nothing is
+    not a filter, it is a dead end wearing a count of zero - the same rule the review queue's
+    own filters keep - and a record in good order should offer few of these, not seven greyed
+    ones.
+    """
+    moment = now or utc_now()
+    found: list[EvidenceQuestion] = []
+    for kind, label, singular, plural in EVIDENCE_QUESTIONS:
+        count = sum(1 for item in evidence if evidence_answers_question(item, kind, now=moment))
+        if count == 0:
+            continue
+        template = singular if count == 1 else plural
+        found.append(
+            EvidenceQuestion(
+                kind=kind,
+                label=label,
+                count=count,
+                summary=template.format(count=count, total=len(evidence)),
+            )
+        )
+    return tuple(found)
+
+
 def evidence_citations(repo: WorkspaceRepository) -> Mapping[str, frozenset[str]]:
     """Which Claims cite each accepted Evidence object, read once for the whole corpus.
 
@@ -1392,11 +1857,24 @@ def decision_summary(decision: Any) -> DecisionSummary:
     )
 
 
-def evidence_summary(item: Evidence) -> EvidenceSummary:
-    """One Evidence object without its anchor; the anchor is one `/objects/<id>` away."""
+def evidence_summary(
+    item: Evidence,
+    *,
+    work_title: str = "",
+    claims: tuple[ClaimRef, ...] = (),
+) -> EvidenceSummary:
+    """One Evidence object without its anchor; the anchor is one `/objects/<id>` away.
+
+    `work_title` and `claims` are the two facts that are not on the Evidence object: the
+    Work's title lives on the Work, and the citing Claims live on the Claims. A caller that
+    has read those hands them over; one that has not gets a row that names the source by id
+    and claims nothing rests on it, which is what the object itself says.
+    """
+    reviewed = item.verification.reviewed_at or item.created_at
     return EvidenceSummary(
         id=str(item.id),
         work=str(item.source.work),
+        work_title=work_title,
         artifact=str(item.source.artifact),
         field=item.content.field,
         status=item.verification.status.value,
@@ -1408,6 +1886,12 @@ def evidence_summary(item: Evidence) -> EvidenceSummary:
         exact_text=item.content.exact_text,
         qualification=item.qualification,
         stale=item.stale.value,
+        claims=claims,
+        # When the review happened, falling back to when the object was written: an Evidence
+        # object exists because a decision created it, so the two are the same moment unless
+        # a workspace was authored by hand.
+        accepted=_human_arrival(reviewed),
+        accepted_at=reviewed.isoformat(),
     )
 
 
@@ -1586,7 +2070,10 @@ def read_specs() -> list[CapabilitySpec]:
         ),
         _read(
             "evidence.list",
-            summary="Accepted evidence by work and status; staged proposals are not listed.",
+            summary=(
+                "Accepted evidence by work, status or question, with what in it needs a "
+                "researcher; staged proposals are not listed."
+            ),
             request_model=ListEvidenceRequest,
             response_model=EvidenceList,
             handler=list_evidence,

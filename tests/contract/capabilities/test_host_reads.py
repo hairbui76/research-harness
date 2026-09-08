@@ -33,7 +33,9 @@ from research_harness.capabilities.permissions import Permission, Principal
 from research_harness.capabilities.reads import (
     CORPUS_MONTHS,
     CORPUS_QUESTIONS,
+    EVIDENCE_QUESTIONS,
     CorpusQuestionKind,
+    EvidenceQuestionKind,
     workspace_index,
 )
 from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
@@ -201,6 +203,96 @@ def test_evidence_list_filters_by_status(populated: CapabilityContext) -> None:
         principal=Principal.human(),
     )
     assert answer.count == 0  # type: ignore[attr-defined]
+
+
+# -- the questions a researcher brings to the evidence index -----------------
+
+
+def _accepted(context: CapabilityContext, request: dict[str, object] | None = None) -> object:
+    registry = build_default_registry()
+    return registry.invoke("evidence.list", context, request or {}, principal=Principal.human())
+
+
+def test_the_evidence_question_vocabulary_is_the_one_the_request_accepts() -> None:
+    """One list of questions, not two: the words and the closed type cannot drift."""
+    assert [kind for kind, *_ in EVIDENCE_QUESTIONS] == list(get_args(EvidenceQuestionKind))
+
+
+def test_an_evidence_row_names_the_work_it_came_from_and_what_rests_on_it(
+    populated: CapabilityContext, registered: Registered
+) -> None:
+    """`E0007 · W0001` is not something a researcher reads, and the daemon knows both names.
+
+    The claims are the inverted edge — a Claim records the Evidence it rests on and nothing
+    on the Evidence side records the Claim — so the index cannot answer "does anything cite
+    this?" without the daemon inverting it (Product 5 P10).
+    """
+    item = _accepted(populated).evidence[0]  # type: ignore[attr-defined]
+
+    assert item.work == str(registered.work)
+    assert item.work_title == "Structured traffic representations"
+    # Nothing rests on it yet: two claims exist and neither cites this evidence.
+    assert item.claims == ()
+    assert item.accepted_at.startswith(str(datetime.now(UTC).year))
+    # The same instant in words, as a day rather than a clock time: a column of minutes
+    # would compare two readings by when someone happened to be at the desk.
+    assert item.accepted.endswith(str(datetime.now().astimezone().year))
+    assert CORPUS_MONTHS[datetime.now().astimezone().month - 1] in item.accepted
+
+    registry = build_default_registry()
+    registry.invoke(
+        "claim.relate",
+        populated,
+        {"claim_id": "C0001", "relation": {"evidence": item.id, "relation": "supports"}},
+        principal=Principal.human(),
+    )
+    cited = _accepted(populated).evidence[0]  # type: ignore[attr-defined]
+    assert [(claim.id, claim.title) for claim in cited.claims] == [("C0001", "first")]
+
+
+def test_the_evidence_index_leads_with_what_needs_a_researcher(
+    populated: CapabilityContext,
+) -> None:
+    """The page opens with this, so the capability has to answer it (Product 5 P10)."""
+    answer = _accepted(populated)
+
+    assert [group.kind for group in answer.attention] == ["uncited"]  # type: ignore[attr-defined]
+    group = answer.attention[0]  # type: ignore[attr-defined]
+    assert group.label == "1 piece of evidence is cited by no claim"
+    assert group.items[0].route == "/evidence/E0001"
+    assert group.items[0].label == "Structured traffic representations"
+
+
+def test_an_evidence_question_narrows_the_rows_and_leaves_the_record_whole(
+    populated: CapabilityContext,
+) -> None:
+    """The lead and the counts describe the record; only the rows are narrowed."""
+    whole = _accepted(populated)
+    narrowed = _accepted(populated, {"question": "uncited"})
+    empty = _accepted(populated, {"question": "stale"})
+
+    assert narrowed.count == 1  # type: ignore[attr-defined]
+    assert narrowed.total == whole.total == 1  # type: ignore[attr-defined]
+    assert narrowed.question == "uncited"  # type: ignore[attr-defined]
+    assert narrowed.attention == whole.attention  # type: ignore[attr-defined]
+    assert narrowed.questions == whole.questions  # type: ignore[attr-defined]
+
+    # A question nothing answers is an empty list of rows, never an empty record.
+    assert empty.count == 0  # type: ignore[attr-defined]
+    assert empty.evidence == ()  # type: ignore[attr-defined]
+    assert empty.total == 1  # type: ignore[attr-defined]
+
+
+def test_an_unknown_evidence_question_is_refused_rather_than_answered_with_nothing(
+    populated: CapabilityContext,
+) -> None:
+    """A typo must not read as "nothing is accepted": the vocabulary is closed."""
+    registry = build_default_registry()
+    with pytest.raises(Exception) as refusal:
+        registry.invoke(
+            "evidence.list", populated, {"question": "unread"}, principal=Principal.human()
+        )
+    assert "unread" in str(refusal.value) or "question" in str(refusal.value)
 
 
 def test_question_and_decision_lists_answer_from_canonical_state(

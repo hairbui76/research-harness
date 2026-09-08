@@ -8735,8 +8735,29 @@
           }
         },
         "additionalProperties": false,
-        "description": "`evidence.list`: accepted evidence, by work and by lifecycle status.",
+        "description": "`evidence.list`: accepted evidence, by work, lifecycle status, or one question.",
         "properties": {
+          "question": {
+            "anyOf": [
+              {
+                "enum": [
+                  "stale",
+                  "superseded",
+                  "contradicted",
+                  "uncited",
+                  "derived",
+                  "interpretive",
+                  "recent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Question"
+          },
           "status": {
             "anyOf": [
               {
@@ -8767,13 +8788,149 @@
       },
       "response_schema": {
         "$defs": {
+          "ClaimRef": {
+            "additionalProperties": false,
+            "description": "One Claim as another object refers to it: its id, and the statement it makes.\n\nA question carries the claims that bear on it as ids, and an id is not something a\nresearcher reads. The statement is the Claim's own name — it is what the Claims page\nshows — so it is carried here rather than re-fetched by whichever surface needs it\n(Product 5 P10).",
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "title": "ClaimRef",
+            "type": "object"
+          },
+          "EvidenceAttentionGroup": {
+            "additionalProperties": false,
+            "description": "One reason a piece of accepted evidence needs a researcher.",
+            "properties": {
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "items": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/EvidenceAttentionItem"
+                },
+                "title": "Items",
+                "type": "array"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "more": {
+                "default": "",
+                "title": "More",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "label",
+              "count"
+            ],
+            "title": "EvidenceAttentionGroup",
+            "type": "object"
+          },
+          "EvidenceAttentionItem": {
+            "additionalProperties": false,
+            "description": "One piece of accepted evidence that needs a researcher, and what is specific to it.",
+            "properties": {
+              "detail": {
+                "default": "",
+                "title": "Detail",
+                "type": "string"
+              },
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "route": {
+                "default": "",
+                "title": "Route",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "title": "EvidenceAttentionItem",
+            "type": "object"
+          },
+          "EvidenceQuestion": {
+            "additionalProperties": false,
+            "description": "One question a researcher brings to the accepted record, as a filter over the rows.\n\nAn index of accepted evidence is not read record by record. It is asked things - what\nhas decayed under me, what does no claim rest on, what is derived rather than read\ndirectly, what came in while I was away - and each of those is a line the daemon draws\nover canonical state (Product 9, 37). The line and the words for it are one decision, so\nboth are here: a client renders `label` on the control and `summary` beside the narrowed\nlist, and never works out for itself which rows answer the question (Product 5 P10).\n\n`count` is over the whole record, not over what the answer carries, so the control says\nthe same number whether or not it is the one currently chosen.",
+            "properties": {
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "kind": {
+                "title": "Kind",
+                "type": "string"
+              },
+              "label": {
+                "title": "Label",
+                "type": "string"
+              },
+              "summary": {
+                "title": "Summary",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "label",
+              "count",
+              "summary"
+            ],
+            "title": "EvidenceQuestion",
+            "type": "object"
+          },
           "EvidenceSummary": {
             "additionalProperties": false,
-            "description": "One accepted Evidence object as a list shows it, without its whole anchor.",
+            "description": "One accepted Evidence object as a list shows it, without its whole anchor.\n\nThe anchor is one `/objects/<id>` away. What is here is identity plus the four facts an\nindex of accepted evidence is read for - which source it came from *by name*, whether\nany Claim rests on it, when it was accepted, and whether it has decayed - and every one\nof those is a judgement over canonical state that belongs here rather than in a client\n(Product 5 P10).",
             "properties": {
+              "accepted": {
+                "default": "",
+                "title": "Accepted",
+                "type": "string"
+              },
+              "accepted_at": {
+                "default": "",
+                "title": "Accepted At",
+                "type": "string"
+              },
               "artifact": {
                 "title": "Artifact",
                 "type": "string"
+              },
+              "claims": {
+                "default": [],
+                "items": {
+                  "$ref": "#/$defs/ClaimRef"
+                },
+                "title": "Claims",
+                "type": "array"
               },
               "evidence_type": {
                 "title": "Evidence Type",
@@ -8846,6 +9003,11 @@
               "work": {
                 "title": "Work",
                 "type": "string"
+              },
+              "work_title": {
+                "default": "",
+                "title": "Work Title",
+                "type": "string"
               }
             },
             "required": [
@@ -8865,8 +9027,16 @@
           }
         },
         "additionalProperties": false,
-        "description": "`evidence.list`: accepted evidence, summarised, by work or status.",
+        "description": "`evidence.list`: accepted evidence, what in it needs a researcher, and what it can\nbe asked.",
         "properties": {
+          "attention": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/EvidenceAttentionGroup"
+            },
+            "title": "Attention",
+            "type": "array"
+          },
           "count": {
             "default": 0,
             "title": "Count",
@@ -8879,13 +9049,31 @@
             },
             "title": "Evidence",
             "type": "array"
+          },
+          "question": {
+            "default": "",
+            "title": "Question",
+            "type": "string"
+          },
+          "questions": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/EvidenceQuestion"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
           }
         },
         "title": "EvidenceList",
         "type": "object"
       },
       "scientific_semantics": "reads canonical state; changes nothing",
-      "summary": "Accepted evidence by work and status; staged proposals are not listed."
+      "summary": "Accepted evidence by work, status or question, with what in it needs a researcher; staged proposals are not listed."
     },
     {
       "human_only": true,
