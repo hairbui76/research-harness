@@ -12,7 +12,14 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import type { ReviewItem } from '../api/dto';
-import { AUTO_ADVANCE_KEY, EvidenceReviewPage, ProposedChanges, neighbours } from './EvidenceReview';
+import {
+  AUTO_ADVANCE_KEY,
+  EvidenceReviewPage,
+  ProposedChanges,
+  neighbours,
+  panelUnder,
+  stripQuote,
+} from './EvidenceReview';
 import { CommandsProvider } from '../app/commands';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { candidateName, fieldLabel } from '../components/Feedback';
@@ -724,5 +731,139 @@ describe('the review keyboard', () => {
     expect(sheet).toHaveTextContent('Accept');
     expect(sheet).toHaveTextContent('Request more evidence');
     expect(sheet).toHaveTextContent('Next candidate');
+  });
+});
+
+// The source stays beside the decision at every width.
+//
+// The third critique's second P1: below the width where the two panes fit side by side the
+// screen stacked Proposal → Number → Verification → Decide with the source pane scrolled
+// off, so §26's "the exact source beside the proposed decision" held at 1440 and lapsed at
+// 1024. Stacking is right; deciding with the span off screen is not. A strip of the source
+// travels with the pinned decision, and the same pinned block is what the fade and the
+// covered-panel line belong to.
+// ---------------------------------------------------------------------------------------
+
+describe('the source travels with the pinned decision', () => {
+  /** The block that is pinned to the foot of the pane: the strip, and the decision. */
+  function pinned(container: HTMLElement): HTMLElement {
+    return container.querySelector('.rh-web-decide') as HTMLElement;
+  }
+
+  it('prints the quoted span and the page it was read off, inside the pinned block', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    const strip = container.querySelector('.rh-web-source-strip') as HTMLElement;
+    expect(strip).not.toBeNull();
+    expect(strip.textContent).toContain(ITEM.source_context.exact_text);
+    expect(strip.textContent).toContain(`p.${ITEM.source_context.page}`);
+    expect(pinned(container).contains(strip)).toBe(true);
+  });
+
+  it('keeps the strip above the decision, never under it', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    const strip = container.querySelector('.rh-web-source-strip') as HTMLElement;
+    const decision = screen.getByRole('heading', { name: 'Decide' });
+    // DOCUMENT_POSITION_FOLLOWING: the decision comes after the strip, so the card the
+    // decision sits in can never be drawn over the source it is checked against.
+    expect(strip.compareDocumentPosition(decision) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it('puts the rendered page back on screen rather than opening anything over it', async () => {
+    const user = userEvent.setup();
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    const strip = container.querySelector('.rh-web-source-strip') as HTMLElement;
+    const open = strip.querySelector('button') as HTMLButtonElement;
+    expect(open).toHaveAccessibleName(`Show page ${ITEM.source_context.page}, with the span drawn on it`);
+
+    await user.click(open);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(
+      (screen.getByText('Source text').closest('.rh-web-review-pane') as HTMLElement),
+    );
+  });
+
+  it('ends a span too long for a pinned strip in an ellipsis rather than pushing the decision off', () => {
+    expect(stripQuote('  a short span  ')).toBe('a short span');
+    const long = 'x'.repeat(400);
+    expect(stripQuote(long).length).toBeLessThan(long.length);
+    expect(stripQuote(long).endsWith('…')).toBe(true);
+  });
+});
+
+describe('the pinned decision names what it stands on', () => {
+  it('names the panel the card’s own opaque edge falls inside', () => {
+    const panels = [
+      { title: 'Proposal', top: 0, bottom: 100 },
+      { title: 'Number', top: 100, bottom: 260 },
+      { title: 'Verification', top: 260, bottom: 400 },
+    ];
+    expect(panelUnder(panels, 180, 400)).toBe('Number');
+    expect(panelUnder(panels, 99, 300)).toBe('Proposal');
+  });
+
+  it('names a panel the card hides whole, not only one it cuts', () => {
+    // Pinned to the foot of a stacked page the card is 300px tall, and a short panel can
+    // disappear behind it entirely. A panel nobody can see is exactly the one to name.
+    const panels = [
+      { title: 'Proposal', top: 0, bottom: 100 },
+      { title: 'Number', top: 160, bottom: 280 },
+    ];
+    expect(panelUnder(panels, 120, 400)).toBe('Number');
+  });
+
+  it('names nothing when the card stands past the end of the last panel', () => {
+    const panels = [
+      { title: 'Proposal', top: 0, bottom: 100 },
+      { title: 'Number', top: 120, bottom: 260 },
+    ];
+    expect(panelUnder(panels, 300, 600)).toBeNull();
+  });
+
+  it('reserves the line’s row whether or not there is a panel to name', async () => {
+    const { container } = renderReview();
+
+    await waitFor(() => expect(screen.getByText('Decide')).toBeInTheDocument());
+    // The card is measured against its own surface, so a line that changed the card's
+    // height would move what it measures. The slot is always in the layout.
+    expect(container.querySelector('.rh-web-decide__more')).not.toBeNull();
+  });
+});
+
+describe('auto-advance is asked for, and asked for where it is used', () => {
+  it('sits in the decision’s first row, before the six actions', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    const advance = screen.getByRole('switch', { name: /next candidate/i });
+    const accept = screen.getByRole('button', { name: 'Accept' });
+    expect(decidePanel().contains(advance)).toBe(true);
+    expect(advance.compareDocumentPosition(accept) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  /*
+   * The default stays off, and the reason is the product's rather than the screen's.
+   *
+   * An acceptance writes authority and no `review.*` capability takes one back, so the
+   * keystroke after a decision must land on the candidate the researcher was looking at,
+   * not on whichever one the queue advanced to while they were reading the outcome. The
+   * throughput complaint is answered by where the switch is, not by what it starts as.
+   */
+  it('starts off on a machine that has never been asked', async () => {
+    renderReview(daemonForQueue());
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Defer' })).toBeEnabled());
+    expect(screen.getByRole('switch', { name: /next candidate/i })).not.toBeChecked();
+    expect(window.localStorage.getItem(AUTO_ADVANCE_KEY)).toBeNull();
   });
 });
