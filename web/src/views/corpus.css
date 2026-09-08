@@ -150,6 +150,47 @@
   text-align: end;
 }
 
+/*
+ * The control on a column that can be ordered by.
+ *
+ * The same quiet control the files count in a row is: it inherits the strip's own label
+ * type and colour, so a heading row does not turn into six buttons shouting at the list
+ * under it, and it takes the ink of ordinary text on hover and focus so it is discoverable
+ * without being loud. It is inline-flex, so the two right-aligned columns keep their
+ * heading over the digits: `text-align: end` on the header cell places it.
+ */
+.rh-web-corpus__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rh-space-1);
+  min-block-size: var(--rh-control-target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  border-radius: var(--rh-radius-control);
+}
+
+.rh-web-corpus__sort:hover {
+  color: var(--rh-text-primary);
+}
+
+.rh-web-corpus__sort:focus-visible {
+  outline: var(--rh-focus-ring-width) solid var(--rh-focus-ring);
+  outline-offset: var(--rh-focus-ring-offset);
+}
+
+/* The column the corpus is read by carries the arrow, so it reads as the chosen one
+   without a second colour: the strip is one weight of ink throughout. */
+.rh-web-corpus__column[aria-sort='ascending'] .rh-web-corpus__sort,
+.rh-web-corpus__column[aria-sort='descending'] .rh-web-corpus__sort {
+  color: var(--rh-text-primary);
+}
+
 .rh-web-corpus__list {
   flex: 1 1 auto;
   min-block-size: 0;
@@ -295,8 +336,29 @@
  * would have to open a second page to read.
  */
 @container rh-page (width < 52rem) {
+  /*
+   * The strip stops being a ruler over columns that no longer exist and becomes the one
+   * thing still worth having here: the orders this corpus can be read in, wrapping. Hiding
+   * it whole — which is what it did before the heads became controls — would take sorting
+   * away from every narrow pane, and a control that exists only at desk width is a control
+   * a researcher cannot rely on.
+   */
   .rh-web-corpus__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--rh-space-1) var(--rh-space-4);
+  }
+
+  /* The two columns nothing can be ordered by go with the columns they named: on their own
+     they would be two words in a row of controls. */
+  .rh-web-corpus__head .rh-web-corpus__column:not(:has(.rh-web-corpus__sort)) {
     display: none;
+  }
+
+  .rh-web-corpus__head .rh-web-corpus__column:nth-child(4),
+  .rh-web-corpus__head .rh-web-corpus__column:nth-child(5) {
+    text-align: start;
   }
 
   .rh-web-corpus__cells {

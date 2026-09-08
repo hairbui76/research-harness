@@ -76,6 +76,7 @@ import type { EvidenceModel } from '@research-harness/design';
 import type {
   CorpusAttentionGroup,
   CorpusAttentionItem,
+  CorpusOrder,
   CorpusQuestion,
   EvidenceSummary,
   WorkList,
@@ -121,14 +122,140 @@ const WORK_ROW_HEIGHT = 68;
  * them: what is this, where does it stand, can I read it, what has it given, does anything
  * rest on it, when did it arrive.
  */
-const COLUMNS = [
-  { key: 'work', head: 'Work', label: 'Work' },
+interface CorpusColumn {
+  key: string;
+  head: string;
+  label: string;
+  /** How the corpus is read when this column is the one it is read by; absent when it is
+      not something a thousand works can be put in order of. */
+  order?: {
+    /** The daemon's own word for this order, sent as `work.list`'s `order`. */
+    kind: string;
+    /** Which end of the column a researcher wants first: the large counts, the recent
+        arrivals, the top of the alphabet. */
+    descendingFirst: boolean;
+    /** The sentence the count is read with, each way round. */
+    ascending: string;
+    descending: string;
+  };
+}
+
+const COLUMNS: readonly CorpusColumn[] = [
+  {
+    key: 'work',
+    head: 'Work',
+    label: 'Work',
+    order: {
+      kind: 'title',
+      descendingFirst: false,
+      ascending: 'In title order, A to Z.',
+      descending: 'In title order, Z to A.',
+    },
+  },
   { key: 'screening', head: 'Screening', label: 'Screening state' },
   { key: 'readable', head: 'Readable', label: 'Readable text' },
-  { key: 'evidence', head: 'Accepted', label: 'Accepted evidence' },
-  { key: 'claims', head: 'Cited by', label: 'Claims citing it' },
-  { key: 'added', head: 'Came in', label: 'Came into the corpus' },
-] as const;
+  {
+    key: 'evidence',
+    head: 'Accepted',
+    label: 'Accepted evidence',
+    order: {
+      kind: 'evidence',
+      descendingFirst: true,
+      ascending: 'Least accepted evidence first.',
+      descending: 'Most accepted evidence first.',
+    },
+  },
+  {
+    key: 'claims',
+    head: 'Cited by',
+    label: 'Claims citing it',
+    order: {
+      kind: 'claims',
+      descendingFirst: true,
+      ascending: 'Least cited first.',
+      descending: 'Most cited first.',
+    },
+  },
+  {
+    key: 'added',
+    head: 'Came in',
+    label: 'Came into the corpus',
+    order: {
+      kind: 'added',
+      descendingFirst: true,
+      ascending: 'Oldest first.',
+      descending: 'Newest first.',
+    },
+  },
+];
+
+/**
+ * Where the order a corpus is read in is remembered, per project.
+ *
+ * The same shape and the same reasoning as the conversation's last session and the review
+ * screen's auto-advance: a convenience the browser keeps, never research state, so every
+ * access is guarded and a browser that refuses site data simply reads the corpus in the
+ * daemon's own order. Per project, because two projects are two corpora and the column that
+ * matters in one says nothing about the other.
+ */
+const CORPUS_ORDER = 'research-harness.corpus.order';
+
+export function corpusOrderKey(project: string | null): string {
+  return project ? `${CORPUS_ORDER}.${project}` : CORPUS_ORDER;
+}
+
+function readCorpusOrder(project: string | null): CorpusOrder | null {
+  try {
+    const stored = window.localStorage.getItem(corpusOrderKey(project));
+    if (stored === null) return null;
+    const order = JSON.parse(stored) as Partial<CorpusOrder>;
+    // A stored order this build no longer offers is not an order: an older column name
+    // would otherwise be sent to the daemon, which would refuse the whole read.
+    if (!COLUMNS.some((column) => column.order?.kind === order.field)) return null;
+    return { field: String(order.field), descending: order.descending === true };
+  } catch {
+    return null;
+  }
+}
+
+function writeCorpusOrder(project: string | null, order: CorpusOrder | null): void {
+  try {
+    if (order) window.localStorage.setItem(corpusOrderKey(project), JSON.stringify(order));
+    else window.localStorage.removeItem(corpusOrderKey(project));
+  } catch {
+    /* a browser with storage disabled reads the corpus in the daemon's order every time */
+  }
+}
+
+/**
+ * What the next press on one column head asks for.
+ *
+ * Three states rather than two: the useful end of the column first, then the other end,
+ * then the corpus's own order again. A two-state toggle would leave a researcher who
+ * sorted a thousand works by accident with no way back to the order the daemon sent
+ * except a reload, and the corpus's own order is a real answer rather than a null state.
+ */
+export function nextCorpusOrder(
+  current: CorpusOrder | null,
+  column: CorpusColumn,
+): CorpusOrder | null {
+  const spec = column.order;
+  if (spec === undefined) return current;
+  if (current === null || current.field !== spec.kind) {
+    return { field: spec.kind, descending: spec.descendingFirst };
+  }
+  if (current.descending === spec.descendingFirst) {
+    return { field: spec.kind, descending: !spec.descendingFirst };
+  }
+  return null;
+}
+
+/** How the rows on screen are read, in the words of the column they are read by. */
+export function orderSentence(order: string, descending: boolean): string {
+  const column = COLUMNS.find((entry) => entry.order?.kind === order);
+  if (column?.order === undefined) return '';
+  return descending ? column.order.descending : column.order.ascending;
+}
 
 /** `1 file` / `2 files` — a count is only ever read inside the thing it counts. */
 function counted(count: number, singular: string, plural = `${singular}s`): string {
@@ -154,14 +281,24 @@ export function matchesWork(work: WorkSummary, query: string): boolean {
 
 export function CorpusPage() {
   const { client } = useSession();
-  const { href } = useProjectPaths();
+  const { href, projectId } = useProjectPaths();
   // Which question the corpus is being asked, or "" for the whole of it. It goes to the
   // daemon rather than into a `filter()`: which works have nothing accepted from them is a
   // judgement about scientific state, and P10 leaves those where they are made.
   const [question, setQuestion] = useState('');
+  // Which column the corpus is read by, or null for the order the daemon sends it in. It
+  // goes to the daemon for a plainer reason than the question does: `work.list` answers the
+  // whole corpus in one read and this list is windowed, so a comparator here would order
+  // the rows near the viewport and call the result the corpus. Remembered per project,
+  // because a researcher who reads their corpus by what has been accepted from it reads it
+  // that way tomorrow too.
+  const [order, setOrder] = useState<CorpusOrder | null>(() => readCorpusOrder(projectId));
   // `work.list`: the corpus, the daemon's own reading of which of these sources cannot be
   // read from yet, and what this corpus can be asked. This view needs nothing else.
-  const state = useAsync(() => client.works(null, question || null), [client, question]);
+  const state = useAsync(
+    () => client.works(null, question || null, order),
+    [client, question, order],
+  );
   const [query, setQuery] = useState('');
   // The works whose files are open, by id, held by the page rather than by the row: a row
   // scrolled out of the window is unmounted, and a researcher who scrolls back should find
@@ -194,6 +331,10 @@ export function CorpusPage() {
   // rather than from the request: while a new one is in flight the sentence beside the list
   // has to describe what is on the screen.
   const asked = questions.find((item) => item.kind === (answer?.question ?? '')) ?? null;
+  // How the rows on screen are read, taken from the answer that produced them for the same
+  // reason the question is: while the next read is in flight the sentence has to describe
+  // what a researcher is looking at.
+  const reading = orderSentence(answer?.order ?? '', answer?.descending ?? false);
   const stale = outage !== null && works.length > 0;
 
   // The daemon came back: ask again, so the page catches up without a reload.
@@ -294,6 +435,10 @@ export function CorpusPage() {
                   : query
                     ? `Showing ${shown.length} of ${total} works.`
                     : `${total} works.`}
+              {/* And how they are read, when they are read by something other than the
+                  corpus's own order. It belongs in this sentence rather than beside the
+                  column, because it is a fact about every row on screen. */}
+              {reading === '' ? null : ` ${reading}`}
             </p>
             {works.length === 0 ? (
               <Empty
@@ -319,15 +464,38 @@ export function CorpusPage() {
               </Empty>
             ) : (
               <>
-                {/* The column names, once, above the window. They are the visible half of
-                    the labels each cell carries for a screen reader, which is why they are
-                    hidden from one: read together they would say every column name twice. */}
-                <div className="rh-web-corpus__head" aria-hidden="true">
-                  {COLUMNS.map((column) => (
-                    <span key={column.key} className="rh-web-corpus__column">
-                      {column.head}
-                    </span>
-                  ))}
+                {/* The column names, once, above the window — and, for the four columns a
+                    thousand works can be put in order of, the control that asks for that
+                    order.
+
+                    It used to be hidden from a screen reader, because every cell carries
+                    its own name and reading both says each column twice. It cannot be now:
+                    an `aria-hidden` strip with four buttons in it is a control nobody using
+                    a screen reader can reach, and `aria-sort` — which is the only way the
+                    order reaches one at all — is an attribute of a column header. So the
+                    strip says what it is: a row of column headers, named for what it does,
+                    holding the orders this corpus can be read in. The works stay a list,
+                    because only a window of them exists at any moment and each cell tells
+                    a reader which column it belongs to. */}
+                <div
+                  className="rh-web-corpus__head-table"
+                  role="table"
+                  aria-label="The corpus’s columns, and the order it is read in"
+                >
+                  <div className="rh-web-corpus__head" role="row">
+                    {COLUMNS.map((column) => (
+                      <ColumnHead
+                        key={column.key}
+                        column={column}
+                        order={order}
+                        onChoose={() => {
+                          const next = nextCorpusOrder(order, column);
+                          setOrder(next);
+                          writeCorpusOrder(projectId, next);
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <VirtualList
                   className="rh-web-corpus__list"
@@ -357,6 +525,46 @@ export function CorpusPage() {
         </div>
       )}
     </FullPageWorkspace>
+  );
+}
+
+/**
+ * One column name, and — where the column is one the corpus can be put in order of — the
+ * control that asks the daemon for that order.
+ *
+ * The arrow marks the column the rows are read by and which way, and it is decorative:
+ * `aria-sort` on the header is what says the same thing to a screen reader, and the
+ * sentence beside the count says it to everyone. A column that orders nothing is the word
+ * alone, with no `aria-sort` at all — "none" would promise a control that is not there.
+ */
+function ColumnHead({
+  column,
+  order,
+  onChoose,
+}: {
+  column: CorpusColumn;
+  order: CorpusOrder | null;
+  onChoose: () => void;
+}) {
+  if (column.order === undefined) {
+    return (
+      <span className="rh-web-corpus__column" role="columnheader">
+        {column.head}
+      </span>
+    );
+  }
+  const chosen = order !== null && order.field === column.order.kind;
+  return (
+    <span
+      className="rh-web-corpus__column"
+      role="columnheader"
+      aria-sort={chosen ? (order.descending ? 'descending' : 'ascending') : 'none'}
+    >
+      <button type="button" className="rh-web-corpus__sort" onClick={onChoose}>
+        {column.head}
+        {chosen ? <Icon name={order.descending ? 'arrow-down' : 'arrow-up'} size={14} /> : null}
+      </button>
+    </span>
   );
 }
 

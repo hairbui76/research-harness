@@ -17,7 +17,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CorpusPage, EvidencePage, WorkPage } from './Corpus';
+import { CorpusPage, EvidencePage, WorkPage, corpusOrderKey } from './Corpus';
 import { ProjectPathProvider } from '../app/projectPaths';
 import { daemonReachability } from '../api/client';
 import type { WorkSummary } from '../api/dto';
@@ -1008,5 +1008,282 @@ describe('what counts as the daemon not answering', () => {
     await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Corpus' })).toBeInTheDocument());
     await waitFor(() => expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument());
     expect(daemonReachability.get()).toBeNull();
+  });
+});
+
+/**
+ * The order a corpus is read in.
+ *
+ * "Accepted" and "Cited by" are columns a thousand works share, and a column nobody can
+ * order by is a column a researcher reads by scrolling. So a column head is the control
+ * that asks for that order — and it asks the *daemon*, because `work.list` answers the
+ * whole corpus in one read and this list is windowed: a comparator in the browser would
+ * order the forty rows near the viewport and call it the corpus.
+ *
+ * The fake below sorts the way the daemon does, so an assertion about the rows on screen
+ * can only pass if the page rendered the answer rather than sorting the list it already
+ * had. The remembered order is `localStorage`, per project, beside the other preferences.
+ */
+const ORDERED_WORKS: WorkSummary[] = [
+  { ...WORK, id: 'W0001', title: 'Beta flows', evidence: 3, claims: 0, added: '1 March 2026', added_at: '2026-03-01T09:00:00+00:00' },
+  { ...WORK, id: 'W0002', title: 'alpha traffic', evidence: 1, claims: 9, added: '1 September 2026', added_at: '2026-09-01T09:00:00+00:00' },
+  { ...WORK, id: 'W0003', title: 'Gamma captures', evidence: 7, claims: 4, added: '1 January 2026', added_at: '2026-01-01T09:00:00+00:00' },
+] as WorkSummary[];
+
+interface WorksRequest {
+  question?: string;
+  order?: string;
+  descending?: boolean;
+}
+
+/** What the daemon was asked for, in the order it was asked. */
+function worksRequests(daemon: FakeDaemon): WorksRequest[] {
+  return daemon
+    .capabilityCalls()
+    .filter((call) => call.name === 'work.list')
+    .map((call) => (call.request ?? {}) as WorksRequest);
+}
+
+/**
+ * A daemon that answers `work.list` in whatever order it was asked for.
+ *
+ * It reads the same five facts the daemon reads and applies the same two rules — the works
+ * an order cannot read trail the rest, ties keep the corpus's own order — because the page
+ * is only allowed to render what came back, and a fake that ignored the order would let a
+ * page that sorted its own rows pass.
+ */
+function orderableDaemon(works: WorkSummary[] = ORDERED_WORKS): FakeDaemon {
+  const keys: Record<string, (work: WorkSummary) => string | number | null> = {
+    title: (work) => work.title.toLowerCase(),
+    year: (work) => work.year ?? null,
+    evidence: (work) => work.evidence,
+    claims: (work) => work.claims,
+    added: (work) => work.added_at || null,
+  };
+  const calls: { method: string; path: string; body: unknown }[] = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input), 'http://daemon.test');
+    const body = init?.body ? (JSON.parse(String(init.body)) as WorksRequest) : null;
+    calls.push({ method: init?.method ?? 'GET', path: url.pathname, body });
+    if (url.pathname !== '/capabilities/work.list') {
+      return new Response('not found', { status: 404 });
+    }
+    const order = body?.order ?? '';
+    const read = keys[order];
+    let answered = works;
+    if (read) {
+      const known = works.filter((work) => read(work) !== null);
+      const rest = works.filter((work) => read(work) === null);
+      const sorted = [...known].sort((left, right) => {
+        const a = read(left)!;
+        const b = read(right)!;
+        const compared = a < b ? -1 : a > b ? 1 : 0;
+        return body?.descending ? -compared : compared;
+      });
+      answered = [...sorted, ...rest];
+    }
+    return new Response(
+      JSON.stringify({
+        capability: 'work.list',
+        ok: true,
+        result: {
+          count: answered.length,
+          total: works.length,
+          question: body?.question ?? '',
+          order,
+          descending: body?.descending ?? false,
+          works: answered,
+          attention: [],
+          questions: [],
+        },
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+  return {
+    fetch: fetchImpl as unknown as typeof fetch,
+    calls: calls as never,
+    capabilityCalls: () =>
+      calls
+        .filter((call) => call.method === 'POST' && call.path.startsWith('/capabilities/'))
+        .map((call) => ({ name: call.path.slice('/capabilities/'.length), request: call.body })),
+  } as FakeDaemon;
+}
+
+/** The titles on screen, top to bottom: what the order actually did. */
+function titlesOnScreen(): string[] {
+  return within(screen.getByRole('list', { name: 'Works in the corpus' }))
+    .getAllByRole('listitem')
+    .map((row) => within(row).getAllByRole('link')[0]!.textContent ?? '');
+}
+
+function columnHead(name: string): HTMLElement {
+  return screen.getByRole('columnheader', { name });
+}
+
+describe('the order a corpus is read in', () => {
+  afterEach(() => window.localStorage.clear());
+
+  it('asks the daemon for the order a column head names, and renders what came back', async () => {
+    const user = userEvent.setup();
+    const daemon = orderableDaemon();
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    // The corpus's own order, which is the daemon's: the first request asks for none.
+    expect(worksRequests(daemon)).toEqual([{}]);
+    expect(titlesOnScreen()).toEqual(['Beta flows', 'alpha traffic', 'Gamma captures']);
+
+    await user.click(within(columnHead('Accepted')).getByRole('button', { name: 'Accepted' }));
+
+    // Most accepted evidence first: the useful end of a count is the large one, so that is
+    // the first press. The rows are the daemon's answer, not a sort of the three the page
+    // already held.
+    await waitFor(() =>
+      expect(worksRequests(daemon)).toContainEqual({ order: 'evidence', descending: true }),
+    );
+    await waitFor(() =>
+      expect(titlesOnScreen()).toEqual(['Gamma captures', 'Beta flows', 'alpha traffic']),
+    );
+  });
+
+  it('states the order in the sentence the corpus is counted in', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: orderableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    await user.click(within(columnHead('Came in')).getByRole('button', { name: 'Came in' }));
+
+    // The order is a fact about the rows on screen, so it is read where their number is.
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works. Newest first.'));
+    await user.click(within(columnHead('Came in')).getByRole('button', { name: 'Came in' }));
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works. Oldest first.'));
+  });
+
+  it('marks the column it is read by, and only that one', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: orderableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    for (const name of ['Work', 'Accepted', 'Cited by', 'Came in']) {
+      expect(columnHead(name), `${name} is orderable and unordered`).toHaveAttribute(
+        'aria-sort',
+        'none',
+      );
+    }
+
+    await user.click(within(columnHead('Cited by')).getByRole('button', { name: 'Cited by' }));
+    await waitFor(() => expect(columnHead('Cited by')).toHaveAttribute('aria-sort', 'descending'));
+    expect(columnHead('Accepted')).toHaveAttribute('aria-sort', 'none');
+
+    // The second press reads it the other way; the third gives the corpus back its own
+    // order, so the researcher never has to reload the page to undo a sort.
+    await user.click(within(columnHead('Cited by')).getByRole('button', { name: 'Cited by' }));
+    await waitFor(() => expect(columnHead('Cited by')).toHaveAttribute('aria-sort', 'ascending'));
+    await user.click(within(columnHead('Cited by')).getByRole('button', { name: 'Cited by' }));
+    await waitFor(() => expect(columnHead('Cited by')).toHaveAttribute('aria-sort', 'none'));
+    expect(corpusCount()).toHaveTextContent('3 works.');
+    expect(corpusCount()).not.toHaveTextContent('first');
+  });
+
+  it('leaves the two columns nothing can be ordered by unmarked', async () => {
+    renderView(<CorpusPage />, { daemon: orderableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    // Screening and readable text are two- and three-valued: ordering by them is grouping
+    // by them, which is what the questions above the list already do.
+    for (const name of ['Screening', 'Readable']) {
+      expect(columnHead(name)).not.toHaveAttribute('aria-sort');
+      expect(within(columnHead(name)).queryByRole('button')).toBeNull();
+    }
+  });
+
+  it('remembers the order per project and asks for it on the next visit', async () => {
+    const user = userEvent.setup();
+    const first = orderableDaemon();
+    const view = renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      { daemon: first, route: '/projects/prj_abc/corpus', path: '/projects/prj_abc/corpus' },
+    );
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    await user.click(within(columnHead('Accepted')).getByRole('button', { name: 'Accepted' }));
+    await waitFor(() =>
+      expect(worksRequests(first)).toContainEqual({ order: 'evidence', descending: true }),
+    );
+    expect(window.localStorage.getItem(corpusOrderKey('prj_abc'))).toBe(
+      '{"field":"evidence","descending":true}',
+    );
+    view.unmount();
+
+    // Coming back asks for the corpus in the order it was left in, in one read: the page
+    // never draws the corpus's own order first and then re-sorts it under the reader.
+    const second = orderableDaemon();
+    renderView(
+      <ProjectPathProvider projectId="prj_abc">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      { daemon: second, route: '/projects/prj_abc/corpus', path: '/projects/prj_abc/corpus' },
+    );
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    expect(worksRequests(second)).toEqual([{ order: 'evidence', descending: true }]);
+    expect(columnHead('Accepted')).toHaveAttribute('aria-sort', 'descending');
+  });
+
+  it('keeps one project’s order out of another’s', async () => {
+    window.localStorage.setItem(
+      corpusOrderKey('prj_abc'),
+      '{"field":"evidence","descending":true}',
+    );
+    const daemon = orderableDaemon();
+    renderView(
+      <ProjectPathProvider projectId="prj_other">
+        <CorpusPage />
+      </ProjectPathProvider>,
+      { daemon, route: '/projects/prj_other/corpus', path: '/projects/prj_other/corpus' },
+    );
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    expect(worksRequests(daemon)).toEqual([{}]);
+  });
+
+  it('composes with the question the corpus is asked and with the find', async () => {
+    const user = userEvent.setup();
+    const daemon = orderableDaemon();
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    await user.click(within(columnHead('Work')).getByRole('button', { name: 'Work' }));
+    await waitFor(() =>
+      expect(worksRequests(daemon)).toContainEqual({ order: 'title', descending: false }),
+    );
+    // Titles are read the way a shelf is read: A to Z on the first press.
+    expect(titlesOnScreen()).toEqual(['alpha traffic', 'Beta flows', 'Gamma captures']);
+
+    // The find is still the one narrowing that stays in the browser, and the sentence says
+    // both things at once: how many of the corpus are on screen, and how they are read.
+    await user.type(screen.getByRole('searchbox'), 'flows');
+    await waitFor(() =>
+      expect(corpusCount()).toHaveTextContent(
+        'Showing 1 of 3 works. In title order, A to Z.',
+      ),
+    );
+  });
+
+  it('has no automatically detectable accessibility violation while ordered', async () => {
+    const user = userEvent.setup();
+    const { container } = renderView(<CorpusPage />, {
+      daemon: orderableDaemon(),
+      route: '/corpus',
+      path: '/corpus',
+    });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    await user.click(within(columnHead('Accepted')).getByRole('button', { name: 'Accepted' }));
+    await waitFor(() => expect(columnHead('Accepted')).toHaveAttribute('aria-sort', 'descending'));
+    expect(bareNumbers(container), 'no number stands on its own').toEqual([]);
+    await expectNoAxeViolations(container);
   });
 });
