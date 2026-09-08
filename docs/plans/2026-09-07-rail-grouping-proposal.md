@@ -137,3 +137,7 @@ shortcuts and palette names.
     Build it in wave 3, or later?
 
 **Answered 2026-09-08:** A, with those three names kept, and built — shipped in wave 5.
+
+**Wave six:** *The record* now holds Evidence, between Corpus and Claims where PRODUCT §26
+lists it — the group's first addition since it was named, and the proof that a run of
+consecutive entries is a shape a new destination can join without renaming anything.
