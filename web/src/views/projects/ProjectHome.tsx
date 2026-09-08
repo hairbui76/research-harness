@@ -15,7 +15,7 @@
  *
  * Nothing on this screen deletes anything. Forget removes a row from a list.
  */
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AsyncState,
@@ -79,6 +79,7 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
   const lifecycle = useProjectLifecycle();
   const [dialog, setDialog] = useState<ProjectDialog>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const listingId = useId();
 
   const close = (): void => setDialog(null);
   const reveal = async (project: ProjectView): Promise<void> => {
@@ -93,24 +94,35 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
   return (
     <main className="rh-projects">
       <header className="rh-projects__header">
-        <div>
-          <h1 className="rh-projects__title">Your research projects</h1>
-          {/*
-            The one paragraph that defines the object this screen lists. Nothing else in
-            the product ever says it: a researcher who has not opened a project yet has
-            not met the rail, the review inbox or a claim, and a list of folder names
-            teaches none of the three. What a project *is* comes from PRODUCT §8.1 — a
-            folder holding the canonical research state — and what opening one does is
-            the sentence the rest of the cockpit is built on.
-          */}
-          <p className="rh-projects__lede">
-            A project is a folder on this machine that holds one body of research — its
-            corpus, evidence, claims, questions and manuscript — in files that stay
-            readable without this application. Opening one points the whole cockpit at
-            that folder; forgetting one removes it from this list and leaves the folder
-            exactly where it is.
-          </p>
-        </div>
+        {/*
+          The product's name, and the only place the cockpit prints it.
+
+          Every other screen is inside a workspace, where the frame says which project is
+          open and takes the name of the application for granted. This one is reached
+          before a workspace exists, so a researcher who arrives here — or a stranger
+          looking over their shoulder — has nothing to read the product's identity from.
+          There is no mark and no logotype to draw (PRODUCT, Evidence on Hand: no logo,
+          wordmark or brand asset exists, and none may be invented), so the name set in
+          the ramp's page-title role *is* the identity. The list of workspaces keeps its
+          own name one step down, where it belongs: it is a section of this screen, not
+          the screen itself.
+        */}
+        <h1 className="rh-projects__title">Research Harness</h1>
+        {/*
+          The one paragraph that defines the object this screen lists. Nothing else in
+          the product ever says it: a researcher who has not opened a project yet has
+          not met the rail, the review inbox or a claim, and a list of folder names
+          teaches none of the three. What a project *is* comes from PRODUCT §8.1 — a
+          folder holding the canonical research state — and what opening one does is
+          the sentence the rest of the cockpit is built on.
+        */}
+        <p className="rh-projects__lede">
+          A project is a folder on this machine that holds one body of research — its
+          corpus, evidence, claims, questions and manuscript — in files that stay
+          readable without this application. Opening one points the whole cockpit at
+          that folder; forgetting one removes it from this list and leaves the folder
+          exactly where it is.
+        </p>
         <div className="rh-projects__actions">
           <Button
             variant="primary"
@@ -176,38 +188,49 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
       ) : null}
 
       {host.mode !== 'loading' && host.mode !== 'error' && !host.authRequired ? (
-        host.projects.length === 0 ? (
-          <AsyncState
-            kind="empty"
-            // The title names the state in this screen's own words, so the component's
-            // generic label above it would be a kicker saying it twice.
-            hideKind
-            title="No projects yet"
-            description={
-              'Create a project to start a new workspace, or open a folder that already ' +
-              'holds one. Research Harness only ever sees folders you choose.'
-            }
-            // The pattern's third part: one real next step, and the only one that can end
-            // this state from here. It carries its own words rather than the header
-            // button's, so a researcher reading the state is never told to press a
-            // control they cannot see the name of twice over.
-            actions={[
-              {
-                label: 'Create your first project',
-                onClick: () => setDialog({ kind: 'create' }),
-                variant: 'primary',
-                iconStart: 'plus',
-                disabled: !lifecycle.ready,
-              },
-            ]}
-          />
-        ) : (
-          // The note is the list's own caption, not part of the lead: it describes what
-          // the rows are and the order they are in, which is a fact about the list.
-          <div className="rh-projects__listing">
-            <p className="rh-projects__list-note">
-              Every workspace this application has been shown, most recently opened first.
-            </p>
+        <section className="rh-projects__listing" aria-labelledby={listingId}>
+          <div className="rh-projects__list-head">
+            <div>
+              <h2 className="rh-text-h2" id={listingId}>
+                Your research projects
+              </h2>
+              {/*
+                The note is the list's own caption, not part of the lead: it describes
+                what the rows are and the order they are in, which is a fact about the
+                list.
+              */}
+              <p className="rh-projects__list-note">
+                Every workspace this application has been shown, most recently opened first.
+              </p>
+            </div>
+          </div>
+
+          {host.projects.length === 0 ? (
+            <AsyncState
+              kind="empty"
+              // The title names the state in this screen's own words, so the component's
+              // generic label above it would be a kicker saying it twice.
+              hideKind
+              title="No projects yet"
+              description={
+                'Create a project to start a new workspace, or open a folder that already ' +
+                'holds one. Research Harness only ever sees folders you choose.'
+              }
+              // The pattern's third part: one real next step, and the only one that can
+              // end this state from here. It carries its own words rather than the header
+              // button's, so a researcher reading the state is never told to press a
+              // control they cannot see the name of twice over.
+              actions={[
+                {
+                  label: 'Create your first project',
+                  onClick: () => setDialog({ kind: 'create' }),
+                  variant: 'primary',
+                  iconStart: 'plus',
+                  disabled: !lifecycle.ready,
+                },
+              ]}
+            />
+          ) : (
             <ul className="rh-projects__list" aria-label="Registered projects">
               {host.projects.map((project) => (
                 <ProjectRow
@@ -221,8 +244,8 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
                 />
               ))}
             </ul>
-          </div>
-        )
+          )}
+        </section>
       ) : null}
 
       <ProjectDialogs dialog={dialog} onClose={close} onDialog={setDialog} />

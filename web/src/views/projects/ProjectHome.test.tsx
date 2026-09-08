@@ -109,6 +109,40 @@ describe('Project Home', () => {
     expect(screen.getByText(/Create a project to start a new workspace/)).toBeInTheDocument();
   });
 
+  /*
+   * The product has a name and no mark, so the name is the identity.
+   *
+   * This is the only screen a researcher can reach before a workspace exists, and the
+   * shell that would otherwise say where they are does not exist yet either. The page's
+   * title line is therefore the product's name in the ramp's h1 role, and the registry it
+   * lists becomes a section under it with a heading of its own (PRODUCT, Brand
+   * Commitments: the name is "Research Harness", and there is no logo to draw).
+   */
+  it('names the product on its first screen, above what a project is', () => {
+    setup({ projects: [AVAILABLE] });
+
+    const title = screen.getByRole('heading', { level: 1, name: 'Research Harness' });
+    const lead = screen.getByText(/A project is a folder on this machine/);
+    const listing = screen.getByRole('heading', { level: 2, name: 'Your research projects' });
+
+    expect(title.compareDocumentPosition(lead)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(lead.compareDocumentPosition(listing)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('puts the two ways in on a row of their own, under the lead', () => {
+    setup({ projects: [AVAILABLE] });
+
+    // The lead is read at the prose measure; the buttons are pressed. Stacking them under
+    // it rather than floating them opposite it is what stops the title, the sentence and
+    // the two controls from being three columns of one short row on a wide screen.
+    const lead = screen.getByText(/A project is a folder on this machine/);
+    const create = screen.getByRole('button', { name: 'New project' });
+    const open = screen.getByRole('button', { name: 'Open folder' });
+
+    expect(lead.compareDocumentPosition(create)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(create.parentElement).toBe(open.parentElement);
+  });
+
   it('says what a project is, and what opening one does, above the list', () => {
     setup({ projects: [AVAILABLE] });
 
