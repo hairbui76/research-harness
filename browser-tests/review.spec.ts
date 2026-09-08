@@ -392,3 +392,233 @@ test('the decision is in reach without scrolling for it', async ({ page, request
 
   await page.screenshot({ path: info.outputPath('review-decision-in-reach.png') });
 });
+
+/**
+ * The source stays beside the decision at every width, and the decision cuts nothing.
+ *
+ * The third critique's second P1. Below the width where the two panes fit side by side the
+ * screen stacks — which is right — and the source pane went above the fold while the
+ * decision stayed at the bottom, so §26's "the exact source beside the proposed decision"
+ * held at 1440 and lapsed at 1024. And at 1440 the pinned card was opaque to its own top
+ * edge, so it cut the `UNIT percent` row of the Number panel in half and said nothing about
+ * it. Both are measured here, at the two project widths and at 1024×768, which is the
+ * window a laptop review is actually done in.
+ *
+ * What "not cut" can mean is worth stating, because a panel pinned to the foot of a
+ * scroller has to stand on something. It means two things, and both are asserted: the card
+ * meets content through a fade band in its own box, so a row crossing that band dissolves
+ * rather than ending at a rule; and whatever the band and the surface below it hide is
+ * named in words, so a panel the card is standing on never reads as a panel that ended.
+ */
+/**
+ * Let the pinned card finish answering the layout.
+ *
+ * What the card says it is covering is measured off its own surface after a scroll or a
+ * resize, on an animation frame, and React paints the answer on the frame after that. Three
+ * frames is the settle; without it a measurement taken in the same tick as the scroll reads
+ * the line the previous scroll position wrote.
+ */
+async function settle(page: import('@playwright/test').Page): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((done) => {
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => requestAnimationFrame(() => done())),
+        );
+      }),
+  );
+}
+
+async function decisionGeometry(page: import('@playwright/test').Page) {
+  return page.evaluate(() => {
+    const need = <T extends Element>(selector: string): T => {
+      const node = document.querySelector<T>(selector);
+      if (node === null) throw new Error(`nothing on the page matches ${selector}`);
+      return node;
+    };
+    const box = (node: Element) => {
+      const rect = node.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, height: rect.height, width: rect.width };
+    };
+    const onScreen = (rect: { top: number; bottom: number; height: number }): boolean =>
+      rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
+
+    const card = need<HTMLElement>('.rh-web-decide');
+    const surface = need<HTMLElement>('.rh-web-decide__surface');
+    const strip = document.querySelector<HTMLElement>('.rh-web-source-strip');
+    const stripShown = strip !== null && getComputedStyle(strip).display !== 'none';
+    const style = getComputedStyle(card);
+
+    // The fact rows the card can stand on, each with the panel it belongs to, so a covered
+    // row can be checked against what the card says it is covering.
+    const panels = Array.from(
+      need<HTMLElement>('.rh-web-review-pane--end').querySelectorAll<HTMLElement>('section'),
+    ).filter((section) => section.querySelector('h2') !== null && !section.contains(card));
+    const rows = panels.flatMap((section) => {
+      const title = section.querySelector('h2')?.textContent ?? '';
+      return Array.from(section.querySelectorAll<HTMLElement>('dt, dd'))
+        .map((row) => ({ panel: title, text: (row.textContent ?? '').trim().slice(0, 40), ...box(row) }))
+        .filter((row) => row.height > 0);
+    });
+
+    return {
+      view: window.innerHeight,
+      card: box(card),
+      surface: box(surface),
+      bar: box(need('.rh-review-decision-bar')),
+      advance: box(need('.rh-web-decide__advance')),
+      fade: Number.parseFloat(style.paddingBlockStart),
+      hairline: Number.parseFloat(style.borderTopWidth),
+      wash: style.backgroundImage,
+      more: (need('.rh-web-decide__more').textContent ?? '').trim(),
+      strip: stripShown && strip !== null ? box(strip) : null,
+      stripQuote: stripShown && strip !== null ? (strip.querySelector('.rh-web-quote')?.textContent ?? '') : '',
+      stripAnchor: stripShown && strip !== null ? (strip.querySelector('.rh-source-anchor__target')?.textContent ?? '') : '',
+      sourcePane: (() => {
+        const quote = document.querySelector('.rh-web-source .rh-web-quote');
+        const rendered = document.querySelector('.rh-pdf__canvas');
+        return (quote !== null && onScreen(box(quote))) || (rendered !== null && onScreen(box(rendered)));
+      })(),
+      rows,
+      barOnScreen: onScreen(box(need('.rh-review-decision-bar'))),
+      advanceOnScreen: onScreen(box(need('.rh-web-decide__advance'))),
+    };
+  });
+}
+
+/** Everything the pinned decision must be true of, at whatever width it is measured. */
+function expectSourceBesideDecision(
+  geometry: Awaited<ReturnType<typeof decisionGeometry>>,
+  where: string,
+): void {
+  // The card meets content through a fade, not through an opaque edge with a rule on it.
+  expect(geometry.fade, `${where}: the decision card has no fade band`).toBeGreaterThanOrEqual(24);
+  expect(geometry.hairline, `${where}: the card's own top edge is still a hairline`).toBe(0);
+  expect(geometry.wash, `${where}: the fade band is not a fade`).toContain('linear-gradient');
+  expect(
+    geometry.surface.top - geometry.card.top,
+    `${where}: the surface does not start below the fade`,
+  ).toBeGreaterThanOrEqual(24);
+
+  // The decision is in reach, and so is the switch that was under its fold.
+  expect(geometry.barOnScreen, `${where}: the decision controls are off screen`).toBe(true);
+  expect(
+    geometry.advanceOnScreen,
+    `${where}: the auto-advance switch needs scrolling inside a pinned panel`,
+  ).toBe(true);
+  expect(
+    geometry.advance.top < geometry.bar.top,
+    `${where}: auto-advance is not in the decision's first row`,
+  ).toBe(true);
+
+  // §26: whenever the decision is on screen, so is the source it is checked against —
+  // the strip where the panes stack, the pane itself where they do not.
+  if (geometry.strip === null) {
+    expect(geometry.sourcePane, `${where}: the source pane is not beside the decision`).toBe(true);
+  } else {
+    expect(geometry.strip.height, `${where}: the pinned source strip is not drawn`).toBeGreaterThan(0);
+    expect(geometry.stripQuote.length, `${where}: the strip carries no span`).toBeGreaterThan(0);
+    expect(geometry.stripAnchor, `${where}: the strip does not name the page`).toContain('p.');
+    expect(
+      geometry.strip.bottom <= geometry.bar.top,
+      `${where}: the decision covers the source strip`,
+    ).toBe(true);
+    expect(
+      geometry.strip.top >= geometry.surface.top,
+      `${where}: the strip is outside the pinned block`,
+    ).toBe(true);
+  }
+
+  /*
+   * No fact row is bisected.
+   *
+   * A row the card's *opaque* edge crosses must already have entered the fade — that is
+   * what makes the meeting a dissolve rather than a cut, and it is the assertion that fails
+   * if the band is ever removed or made shorter than a row of the definition list.
+   */
+  for (const row of geometry.rows) {
+    if (row.top < geometry.surface.top && row.bottom > geometry.surface.top) {
+      expect(
+        row.top >= geometry.card.top,
+        `${where}: "${row.text}" is cut by an opaque edge at ${geometry.surface.top}`,
+      ).toBe(true);
+    }
+  }
+
+  /*
+   * And nothing disappears without being named. The card hides the band between its own
+   * surface and its foot, so the panel a researcher was in the middle of when it went under
+   * is the one the card's first line has to say. Rows further down that band are inside
+   * panels below that one; naming every one of them would be a paragraph where a line is
+   * what a quiet affordance is allowed to be.
+   */
+  const hidden = geometry.rows.filter(
+    (row) => row.bottom > geometry.surface.top && row.top < geometry.card.bottom,
+  );
+  const first = hidden[0];
+  if (first !== undefined) {
+    expect(
+      geometry.more,
+      `${where}: the card hides "${first.text}" and names nothing`,
+    ).toContain(first.panel);
+  }
+}
+
+test('the source is beside the decision at every width the review is worked at', async ({ page, request }, info) => {
+  await seedQueue(page, request);
+  await page.getByRole('link', { name: /Metric result · W0001/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Metric result · W0001', level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByRole('img', { name: /^page 4 of / })).toBeVisible();
+
+  const viewport = page.viewportSize();
+  const width = `${viewport?.width}×${viewport?.height}`;
+
+  // At the project's own width, where a researcher lands. Where the panes sit side by side
+  // the decision is pinned from the first frame; where they stack it is pinned once the
+  // pane it belongs to is on screen, and a researcher still reading the source page has not
+  // asked for it yet, so the arrival check is only made when the decision is actually up.
+  await settle(page);
+  const landed = await decisionGeometry(page);
+  if (landed.barOnScreen) expectSourceBesideDecision(landed, `${width} on arrival`);
+  await page.screenshot({ path: info.outputPath('review-source-beside-decision.png') });
+
+  // And at the moment the decision is taken: `Verification` is the panel it is taken
+  // against, so scrolling it into view is where the pinned card has the most to cover.
+  await page.getByRole('heading', { name: 'Verification' }).scrollIntoViewIfNeeded();
+  await settle(page);
+  expectSourceBesideDecision(await decisionGeometry(page), `${width} at the verdict`);
+  await page.screenshot({ path: info.outputPath('review-at-the-verdict.png') });
+
+  // And at 1024×768, the window this defect was reported in, where the panes stack whatever
+  // the project's own width is.
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.getByRole('heading', { name: 'Verification' }).scrollIntoViewIfNeeded();
+  await settle(page);
+  const stacked = await decisionGeometry(page);
+  expect(
+    stacked.strip,
+    'the panes stack at 1024 and the source must travel with the decision',
+  ).not.toBeNull();
+  expectSourceBesideDecision(stacked, '1024×768 at the verdict');
+  await page.screenshot({ path: info.outputPath('review-stacked-strip.png') });
+
+  // The strip's control puts the page back on screen rather than opening anything over it.
+  await page.getByRole('button', { name: /^Show page 4/ }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const rendered = await page.evaluate(() => {
+    const canvas = document.querySelector('.rh-pdf__canvas');
+    if (canvas === null) return null;
+    const rect = canvas.getBoundingClientRect();
+    return { top: rect.top, bottom: rect.bottom, view: window.innerHeight };
+  });
+  expect(rendered, 'the source page is not rendered').not.toBeNull();
+  expect(
+    (rendered as { top: number; bottom: number; view: number }).bottom > 0 &&
+      (rendered as { top: number; bottom: number; view: number }).top <
+        (rendered as { top: number; bottom: number; view: number }).view,
+    'the strip’s control did not bring the page back on screen',
+  ).toBe(true);
+  await page.screenshot({ path: info.outputPath('review-strip-opened-page.png') });
+});
