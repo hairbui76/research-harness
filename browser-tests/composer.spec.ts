@@ -328,9 +328,15 @@ test('the conversation opens from one control, in the rail’s own words', async
       return {
         folded: folded !== null,
         standing: standing !== null,
+        // "One line" is vertical overlap, not equal tops: the note holds a button and is
+        // taller than the hint, so on one line their tops differ by the centring offset.
         sameRow:
           hint !== null && folded !== null
-            ? Math.abs(hint.getBoundingClientRect().top - folded.getBoundingClientRect().top) < 2
+            ? (() => {
+                const h = hint.getBoundingClientRect();
+                const f = folded.getBoundingClientRect();
+                return f.top < h.bottom && h.top < f.bottom;
+              })()
             : false,
       };
     });
