@@ -7,8 +7,12 @@
  * competing candidates, and the positions in any conflict. Then the six review actions.
  *
  * The two halves are a `PaneGroup`, so the split is draggable and keyboard-resizable and
- * neither half can push the other off the screen. Below 1100px they stack, and the source
- * is still first.
+ * neither half can push the other off the screen. Once this page's own container is too
+ * narrow to hold both — the page, not the window: the rail and the divider take width a
+ * viewport query cannot see — they stack, and the source is still first. Stacking alone
+ * would put the source above the fold and the decision below it, which is the one
+ * arrangement PRODUCT §26 forbids, so the pinned decision carries a strip of the source
+ * with it: the quoted span, its page, and the control that opens the page it was read off.
  *
  * Reviewing is a queue, so this screen also knows where it is in one. The order is the
  * server's — the same ranking the inbox draws — read once and remembered, so a candidate
@@ -27,6 +31,7 @@ import {
   PaneGroup,
   PaneHandle,
   REVIEW_DECISION_META,
+  SourceAnchor,
   Switch,
   humaniseResearchTokens,
   humaniseTerm,
@@ -39,7 +44,7 @@ import type {
   ReviewDecision,
 } from '@research-harness/design';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import type { CandidateView, JsonObject, ReviewItem } from '../api/dto';
+import type { CandidateView, JsonObject, ReviewItem, SourceContext } from '../api/dto';
 import {
   DataTable,
   Empty,
@@ -96,6 +101,57 @@ function writeAutoAdvance(on: boolean): void {
   }
 }
 
+/**
+ * The panel the pinned decision is standing on, if any.
+ *
+ * The card is pinned to the foot of its scroller, so at most scroll positions it stands over
+ * content the researcher has not read past yet. What the critique caught was the *silence*
+ * of that: the card's opaque edge landed inside the `Unit percent` row of the Number panel
+ * and said nothing, so the panel appeared to end at a fact that was only half drawn. The
+ * edge is soft now — the card's own fade band — and this is what names what is behind it.
+ *
+ * `panels` are boxes in viewport coordinates, in document order. `edge` is where the card
+ * stops being transparent and `floor` is where it ends, so together they are exactly the
+ * band the card hides. The first panel that reaches into that band is the one the reader
+ * was in the middle of, because a later panel cannot start above an earlier one's end.
+ */
+export function panelUnder(
+  panels: readonly { title: string; top: number; bottom: number }[],
+  edge: number,
+  floor: number,
+): string | null {
+  for (const panel of panels) {
+    if (panel.bottom > edge && panel.top < floor) return panel.title;
+  }
+  return null;
+}
+
+/** Every titled panel in the decision pane, as boxes, for `panelUnder`. */
+function panelBoxes(root: HTMLElement): { title: string; top: number; bottom: number }[] {
+  return Array.from(root.querySelectorAll<HTMLElement>('section')).flatMap((section) => {
+    const heading = section.querySelector('h2');
+    if (heading === null) return [];
+    const rect = section.getBoundingClientRect();
+    return [{ title: heading.textContent ?? '', top: rect.top, bottom: rect.bottom }];
+  });
+}
+
+/**
+ * How much of the span the pinned strip prints.
+ *
+ * The strip is a reminder of the source, not a replacement for it: the pane above it holds
+ * the block the span sits in and the page it was drawn on, and the strip's own control
+ * opens that page. A span longer than this would push the decision off the screen, which is
+ * the defect the strip exists to fix, so it ends in an ellipsis and says so by ending in one.
+ */
+const STRIP_QUOTE_LIMIT = 240;
+
+export function stripQuote(text: string): string {
+  const span = text.trim();
+  if (span.length <= STRIP_QUOTE_LIMIT) return span;
+  return `${span.slice(0, STRIP_QUOTE_LIMIT - 1).trimEnd()}\u2026`;
+}
+
 /** The candidates either side of this one, in the queue order the server sent. */
 export function neighbours(
   queue: ReviewItem[],
@@ -113,7 +169,11 @@ export function EvidenceReviewPage() {
   const navigate = useNavigate();
   const [outcome, setOutcome] = useState<string | null>(null);
   const [autoAdvance, setAutoAdvance] = useState(readAutoAdvance);
+  const [covered, setCovered] = useState<string | null>(null);
   const decideRef = useRef<HTMLDivElement | null>(null);
+  const sourceRef = useRef<HTMLDivElement | null>(null);
+  const proposalRef = useRef<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
 
   // The queue order, read once. Re-reading it on every candidate would silently re-target
   // "next" as decided proposals drop out, which is the one thing a queue must not do.
@@ -132,6 +192,43 @@ export function EvidenceReviewPage() {
 
   // An outcome belongs to the candidate that produced it, and to no other.
   useEffect(() => setOutcome(null), [candidateId]);
+
+  /*
+   * What the pinned decision is standing on.
+   *
+   * Reading order puts the proposal, the number and the verdict above the decision, and
+   * reach pins the decision to the foot of the scroller, so the two meet: the card covers
+   * the tail of whatever is on screen. The fade band makes that a dissolve rather than a
+   * cut; this makes it a *named* dissolve, so a panel the card is standing on never reads
+   * as a panel that ended. The measurement is the surface's own top — the first opaque row
+   * of the card — and it is taken off the layout rather than computed from a breakpoint,
+   * because the pane answers its own width. The card's height never depends on the answer
+   * (the line's row is reserved either way), so measuring can never move what it measures.
+   */
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    const proposal = proposalRef.current;
+    if (surface === null || proposal === null) return;
+    let frame = 0;
+    const measure = (): void => {
+      frame = 0;
+      const band = surface.getBoundingClientRect();
+      setCovered(panelUnder(panelBoxes(proposal), band.top, band.bottom));
+    };
+    const schedule = (): void => {
+      if (frame === 0) frame = window.requestAnimationFrame(measure);
+    };
+    measure();
+    // Scroll does not bubble, so the capture phase is how one listener sees every scroller
+    // this screen has: the pane when the panes sit side by side, the page when they stack.
+    window.addEventListener('scroll', schedule, true);
+    window.addEventListener('resize', schedule);
+    return () => {
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule, true);
+      window.removeEventListener('resize', schedule);
+    };
+  }, [state.data, candidateId]);
 
   const { previous, next } = neighbours(queueRef.current ?? [], candidateId);
   const openCandidate = (item: ReviewItem | null): void => {
@@ -220,7 +317,7 @@ export function EvidenceReviewPage() {
       {data && candidate ? (
         <PaneGroup direction="horizontal" defaultSizes={[50, 50]}>
           <Pane minSize={25}>
-            <div className="rh-web-review-pane">
+            <div className="rh-web-review-pane" ref={sourceRef} tabIndex={-1}>
               {/* A proposal in staging, so the span wears the accent and says so. The
                   accepted tint belongs to a decision, and none has been made here. */}
               <SourcePane
@@ -235,7 +332,9 @@ export function EvidenceReviewPage() {
           <PaneHandle label="Resize the source pane" />
           <Pane minSize={25}>
             <div className="rh-web-review-pane rh-web-review-pane--end rh-web-stack">
-              <Proposal candidate={candidate} item={item} />
+              <div className="rh-web-stack" ref={proposalRef}>
+                <Proposal candidate={candidate} item={item} />
+              </div>
 
               {/*
                   The decision stays on screen while the source does.
@@ -247,56 +346,126 @@ export function EvidenceReviewPage() {
                   find. The panel is pinned to the foot of the pane instead: its own surface
                   and hairline over whatever it covers, the outcome and the way forward
                   inside it, and the source still beside it.
+
+                  What it stands on it no longer cuts. The block opens with a fade band, so
+                  a fact row passing under the card dissolves instead of meeting an opaque
+                  edge mid-word, and the first line of the surface names the panel the edge
+                  is standing in. When the panes stack, the same block carries the source
+                  with it, above the decision and never under it.
               */}
               <div className="rh-web-decide">
-                <Panel title="Decide">
-                  <div ref={decideRef}>
-                    <ReviewActions
-                      candidate={candidate}
-                      hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
-                      onReviewed={(what) => {
-                        setOutcome(what);
-                        if (autoAdvance) openCandidate(next);
-                      }}
-                    />
-                  </div>
+                <div className="rh-web-decide__surface" ref={surfaceRef}>
+                  <p className="rh-web-decide__more rh-text-secondary">
+                    {covered === null ? null : `${covered} continues under the decision.`}
+                  </p>
 
-                  <div className="rh-web-next">
-                    {outcome ? (
-                      <p className="rh-web-next__outcome" role="status">
-                        Candidate {outcome}.
-                      </p>
-                    ) : null}
-                    <div className="rh-web-next__moves">
-                      {previous ? (
-                        <Link to={href(`/review/${previous.candidate_id}`)}>
-                          Previous: {candidateName(previous.field, previous.work)}
-                        </Link>
-                      ) : null}
-                      {next ? (
-                        <Link to={href(`/review/${next.candidate_id}`)}>
-                          Next: {candidateName(next.field, next.work)}
-                        </Link>
-                      ) : (
-                        <span className="rh-text-secondary">Last in the queue.</span>
-                      )}
+                  <SourceStrip
+                    artifact={candidate.artifact}
+                    context={sourceContext(candidate, item)}
+                    blockId={blockIdOf(candidate)}
+                    onOpenPage={() => {
+                      const pane = sourceRef.current;
+                      if (pane === null) return;
+                      // jsdom has no scroller; the focus is the part that has to happen
+                      // either way, because it is what a screen reader follows.
+                      if (typeof pane.scrollIntoView === 'function') {
+                        pane.scrollIntoView({ block: 'start' });
+                      }
+                      pane.focus({ preventScroll: true });
+                    }}
+                  />
+
+                  <Panel title="Decide">
+                    <div ref={decideRef}>
+                      <ReviewActions
+                        candidate={candidate}
+                        hasOpenConflict={(item?.conflicts.length ?? 0) > 0}
+                        onReviewed={(what) => {
+                          setOutcome(what);
+                          if (autoAdvance) openCandidate(next);
+                        }}
+                      />
                     </div>
-                    <Switch
-                      label="Open the next candidate after a decision"
-                      checked={autoAdvance}
-                      onCheckedChange={(on) => {
-                        setAutoAdvance(on);
-                        writeAutoAdvance(on);
-                      }}
-                    />
-                  </div>
-                </Panel>
+
+                    <div className="rh-web-next">
+                      {outcome ? (
+                        <p className="rh-web-next__outcome" role="status">
+                          Candidate {outcome}.
+                        </p>
+                      ) : null}
+                      <div className="rh-web-next__moves">
+                        {previous ? (
+                          <Link to={href(`/review/${previous.candidate_id}`)}>
+                            Previous: {candidateName(previous.field, previous.work)}
+                          </Link>
+                        ) : null}
+                        {next ? (
+                          <Link to={href(`/review/${next.candidate_id}`)}>
+                            Next: {candidateName(next.field, next.work)}
+                          </Link>
+                        ) : (
+                          <span className="rh-text-secondary">Last in the queue.</span>
+                        )}
+                      </div>
+                      <Switch
+                        label="Open the next candidate after a decision"
+                        checked={autoAdvance}
+                        onCheckedChange={(on) => {
+                          setAutoAdvance(on);
+                          writeAutoAdvance(on);
+                        }}
+                      />
+                    </div>
+                  </Panel>
+                </div>
               </div>
             </div>
           </Pane>
         </PaneGroup>
       ) : null}
     </FullPageWorkspace>
+  );
+}
+
+/**
+ * The source, pinned above the decision when the two panes cannot sit side by side.
+ *
+ * PRODUCT §26 asks for the exact source beside the proposed decision, and stacking is where
+ * that promise used to lapse: the pane order stayed right — source first — but a screen
+ * narrow enough to stack is a screen where the decision is at the bottom and the page it
+ * was read off is a scroll away, so the researcher decided with the source off screen. The
+ * strip travels with the pinned decision instead. It carries what a decision is actually
+ * checked against — the quoted span, and the anchor that names its page — and its control
+ * puts the rendered page back on screen rather than opening anything over it.
+ *
+ * It is drawn only when the panes stack; a container query in `styles.css` decides that,
+ * because the page pane, not the window, is what has to hold two panes. Where they do sit
+ * side by side the source pane itself is already beside the decision, and a second copy of
+ * the span would be one source too many.
+ */
+function SourceStrip({
+  artifact,
+  context,
+  blockId,
+  onOpenPage,
+}: {
+  artifact: string;
+  context: SourceContext;
+  blockId: string | null;
+  onOpenPage: () => void;
+}) {
+  const page = context.page ?? 1;
+  return (
+    <div className="rh-web-source-strip">
+      <p className="rh-web-quote rh-web-source-strip__quote">{stripQuote(context.exact_text)}</p>
+      <SourceAnchor
+        className="rh-web-source-strip__anchor"
+        variant="inline"
+        anchor={{ artifactId: artifact, page, ...(blockId ? { block: blockId } : {}) }}
+        onOpen={onOpenPage}
+        openLabel={`Show page ${page}, with the span drawn on it`}
+      />
+    </div>
   );
 }
 

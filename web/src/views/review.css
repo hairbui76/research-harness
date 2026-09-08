@@ -80,21 +80,76 @@
  * decision is made out of — but on a 1024px-tall window that order put the six actions
  * below the fold, so the one act this screen exists for was the one thing a researcher had
  * to go looking for. It stays where it reads and arrives where it is needed: the panel
- * sticks to the bottom edge of its own scroller, on the canvas it sits on and under a
- * hairline of its own, so the source stays beside the decision at every height. The outcome
- * line, the way forward and the auto-advance switch are inside it, because they are the
- * same moment.
+ * sticks to the bottom edge of its own scroller, so the source stays beside the decision at
+ * every height. The outcome line, the way forward and the auto-advance switch are inside
+ * it, because they are the same moment.
  *
- * Below 1100px the panes stack and the workspace is the scroller; the panel sticks to the
- * bottom of the window for exactly as long as the proposal it belongs to is on screen.
+ * Where the panes stack the block carries the source strip too, above the decision, so what
+ * the card covers is never the thing the decision is checked against.
+ *
+ * The card's first `--rh-space-8` are a fade, not a surface. A pinned panel over a scroller
+ * has to stand on something, and standing on it with an opaque edge and a hairline is what
+ * cut the `UNIT percent` row in half at 1440 with nothing to say it had. The band is the
+ * card's own box, so the row underneath dissolves into the surface instead of ending at a
+ * rule, and the hairline moves down to where the surface actually begins.
  */
 .rh-web-decide {
   position: sticky;
   inset-block-end: 0;
   z-index: var(--rh-z-sticky);
-  padding-block: var(--rh-space-2);
+  padding-block-start: var(--rh-space-8);
+  background-image: linear-gradient(to bottom, transparent, var(--rh-surface-canvas));
+  background-repeat: no-repeat;
+  background-size: 100% var(--rh-space-8);
+}
+
+/* Where the card stops being transparent: its own canvas, under its own hairline. */
+.rh-web-decide__surface {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  padding-block-end: var(--rh-space-2);
   border-top: var(--rh-border-width) solid var(--rh-border-subtle);
   background: var(--rh-surface-canvas);
+}
+
+/*
+ * What the card is standing on, in words.
+ *
+ * A fade says "there is more"; it does not say more of *what*, and the panel it happens to
+ * cover is the one the researcher was reading. The row is reserved whether or not there is
+ * anything to name, because the line is measured off the surface's own top and a line that
+ * changed the card's height would move the thing it measures.
+ */
+.rh-web-decide__more {
+  margin: 0;
+  min-block-size: var(--rh-space-5);
+  font-size: var(--rh-type-body-sm-size);
+}
+
+/*
+ * The source, travelling with the pinned decision when the panes stack.
+ *
+ * It is hidden where the panes sit side by side: there the source pane *is* beside the
+ * decision, and a second copy of the span would be a second source. `styles.css` turns it
+ * on inside the same container query that stacks them, so one width answers both.
+ */
+.rh-web-source-strip {
+  display: none;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  padding-block-end: var(--rh-space-2);
+  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+/* The span itself, at the quote's own measure so it stays one thing to read. */
+.rh-web-source-strip__quote {
+  font-size: var(--rh-type-body-sm-size);
+  max-inline-size: 68ch;
+}
+
+.rh-web-source-strip__anchor {
+  min-width: 0;
 }
 
 /*
