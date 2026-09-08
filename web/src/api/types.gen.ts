@@ -388,6 +388,11 @@ export interface paths {
         /**
          * Synthesis
          * @description The matrices, and the readings nobody has recorded for them (Product 7.1).
+         *
+         *     A matrix past `MATRIX_ROW_PAGE` works answers with a page of its rows and the work
+         *     to ask after for the next one; `matrix` and `after` are that next read. Without
+         *     them the answer is what it has always been, and for every matrix a project of a
+         *     few hundred works actually holds it still is.
          */
         get: operations["synthesis_synthesis_get"];
         put?: never;
@@ -1102,6 +1107,16 @@ export interface components {
             labels_from: string;
             /** Name */
             name: string;
+            /**
+             * Next Row
+             * @default
+             */
+            next_row: string;
+            /**
+             * Paged
+             * @default false
+             */
+            paged: boolean;
             /**
              * Recorded
              * @default 0
@@ -2264,7 +2279,12 @@ export interface operations {
     };
     synthesis_synthesis_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Answer with only this matrix. Empty answers with every one of them. */
+                matrix?: string;
+                /** @description Resume the rows at the work this matrix declares after this one. */
+                after?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2278,6 +2298,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SynthesisReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

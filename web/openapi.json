@@ -1350,6 +1350,16 @@
             "title": "Name",
             "type": "string"
           },
+          "next_row": {
+            "default": "",
+            "title": "Next Row",
+            "type": "string"
+          },
+          "paged": {
+            "default": false,
+            "title": "Paged",
+            "type": "boolean"
+          },
           "recorded": {
             "default": 0,
             "title": "Recorded",
@@ -2922,8 +2932,34 @@
     },
     "/synthesis": {
       "get": {
-        "description": "The matrices, and the readings nobody has recorded for them (Product 7.1).",
+        "description": "The matrices, and the readings nobody has recorded for them (Product 7.1).\n\nA matrix past `MATRIX_ROW_PAGE` works answers with a page of its rows and the work\nto ask after for the next one; `matrix` and `after` are that next read. Without\nthem the answer is what it has always been, and for every matrix a project of a\nfew hundred works actually holds it still is.",
         "operationId": "synthesis_synthesis_get",
+        "parameters": [
+          {
+            "description": "Answer with only this matrix. Empty answers with every one of them.",
+            "in": "query",
+            "name": "matrix",
+            "required": false,
+            "schema": {
+              "default": "",
+              "description": "Answer with only this matrix. Empty answers with every one of them.",
+              "title": "Matrix",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Resume the rows at the work this matrix declares after this one.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": "",
+              "description": "Resume the rows at the work this matrix declares after this one.",
+              "title": "After",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -2934,6 +2970,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Synthesis"

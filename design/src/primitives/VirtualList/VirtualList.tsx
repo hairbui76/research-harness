@@ -18,7 +18,16 @@ import type {
 } from 'react';
 import { cx } from '../../utils/cx';
 
-export type VirtualListRole = 'list' | 'grid';
+/**
+ * What the windowed container is.
+ *
+ * `grid` is the whole grid: it states its own row count and its rows are numbered from
+ * one. `rowgroup` is the body of a grid drawn around it — the shape a windowed grid takes
+ * when its heading row has to stay in view, since a row that scrolls away is not a heading
+ * a field can still be read under. The wrapper then carries the row count and `aria-label`,
+ * and `rowIndexOffset` says how many rows stand above the window.
+ */
+export type VirtualListRole = 'list' | 'grid' | 'rowgroup';
 
 export type ScrollAlignment = 'auto' | 'start' | 'center' | 'end';
 
@@ -41,8 +50,19 @@ export interface VirtualListProps<T>
   overscan?: number;
   /** Viewport height. A number also seeds measurement where there is no layout (SSR, jsdom). */
   height?: number | string;
-  /** `grid` renders rows with `aria-rowindex`; `renderItem` must then supply gridcells. */
+  /** `grid` and `rowgroup` render rows with `aria-rowindex`; `renderItem` supplies cells. */
   role?: VirtualListRole;
+  /**
+   * How many rows the grid has, when that is more than this list holds.
+   *
+   * A grid whose rows arrive a page at a time holds fewer items than the grid has rows,
+   * and counting the array would tell assistive technology that the grid ends where this
+   * client's last page did. Defaults to the number of items. `grid` only: a `rowgroup`
+   * leaves the count to the grid drawn around it.
+   */
+  rowCount?: number;
+  /** How many rows stand above this window, added to each rendered row's `aria-rowindex`. */
+  rowIndexOffset?: number;
   /** Accessible name for the list. */
   label: string;
   onVisibleRangeChange?: (range: { start: number; end: number }) => void;
@@ -70,6 +90,8 @@ function VirtualListInner<T>(
     overscan = 4,
     height,
     role = 'list',
+    rowCount,
+    rowIndexOffset = 0,
     label,
     onVisibleRangeChange,
     keyboardScrollStep,
@@ -251,6 +273,8 @@ function VirtualListInner<T>(
     }
   };
 
+  // Both grid roles number their children as rows; only `list` numbers them as a set.
+  const numbered = role !== 'list';
   const visible: ReactNode[] = [];
   for (let index = start; index < end; index += 1) {
     const item = items[index] as T;
@@ -260,12 +284,12 @@ function VirtualListInner<T>(
         key={key}
         data-rh-key={key}
         data-index={index}
-        role={role === 'grid' ? 'row' : 'listitem'}
-        aria-rowindex={role === 'grid' ? index + 1 : undefined}
+        role={numbered ? 'row' : 'listitem'}
+        aria-rowindex={numbered ? index + 1 + rowIndexOffset : undefined}
         // Only a window of the list exists in the DOM, so each item states where it sits
         // in the whole list rather than letting assistive technology count what it sees.
-        aria-setsize={role === 'grid' ? undefined : items.length}
-        aria-posinset={role === 'grid' ? undefined : index + 1}
+        aria-setsize={numbered ? undefined : items.length}
+        aria-posinset={numbered ? undefined : index + 1}
         className="rh-virtual-list__item"
       >
         {renderItem(item, index)}
@@ -278,7 +302,7 @@ function VirtualListInner<T>(
       ref={viewportRef}
       role={role}
       aria-label={label}
-      aria-rowcount={role === 'grid' ? items.length : undefined}
+      aria-rowcount={role === 'grid' ? (rowCount ?? items.length) : undefined}
       tabIndex={0}
       className={cx('rh-virtual-list', className)}
       style={{ ...style, height: typeof height === 'number' ? `${height}px` : height }}

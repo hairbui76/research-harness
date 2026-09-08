@@ -137,6 +137,50 @@ describe('VirtualList', () => {
     expect(screen.getAllByRole('row')[0]).toHaveAttribute('aria-rowindex', '1');
   });
 
+  it('states a row count the list itself does not hold, when the caller knows it', () => {
+    // A windowed grid whose rows arrive a page at a time holds fewer items than the grid
+    // has rows. Counting what is in the array would tell a screen reader the matrix ends
+    // where this client's last page did.
+    render(
+      <List
+        role="grid"
+        rowCount={1000}
+        renderItem={(item) => <span role="gridcell">{item.text}</span>}
+      />,
+    );
+
+    expect(screen.getByRole('grid', { name: 'Transcript' })).toHaveAttribute(
+      'aria-rowcount',
+      '1000',
+    );
+  });
+
+  it('is a rowgroup of a grid drawn around it, with the rows offset past its head', () => {
+    // The heading row of a windowed grid cannot scroll with the window, so it is drawn
+    // outside it and the windowed rows start after it: row 1 is the head, and the first
+    // work is row 2.
+    render(
+      <div role="grid" aria-label="Matrix" aria-rowcount={201}>
+        <div role="rowgroup">
+          <div role="row" aria-rowindex={1}>
+            <span role="columnheader">Work</span>
+          </div>
+        </div>
+        <List
+          role="rowgroup"
+          rowIndexOffset={1}
+          label="Works"
+          renderItem={(item) => <span role="gridcell">{item.text}</span>}
+        />
+      </div>,
+    );
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[0]).toHaveAttribute('aria-rowindex', '1');
+    expect(rows[1]).toHaveAttribute('aria-rowindex', '2');
+    expect(screen.getByRole('rowgroup', { name: 'Works' })).not.toHaveAttribute('aria-rowcount');
+  });
+
   it('handles an empty list', () => {
     render(<List items={[]} />);
     expect(screen.queryAllByRole('listitem')).toHaveLength(0);

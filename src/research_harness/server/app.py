@@ -34,7 +34,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -76,6 +76,7 @@ from research_harness.domain.ids import (
 from research_harness.domain.manuscript import ManuscriptAnchor
 from research_harness.domain.research import (
     Decision,
+    MatrixCell,
     SynthesisMatrix,
     Taxonomy,
     TaxonomyTerm,
@@ -167,6 +168,18 @@ Caller = Annotated[Principal, Depends(_caller)]
 
 RequestBody = Annotated[dict[str, Any] | None, Body()]
 """One capability's request object, validated by the registry rather than by the route."""
+
+MatrixQuery = Annotated[
+    str,
+    Query(description="Answer with only this matrix. Empty answers with every one of them."),
+]
+"""Which matrix a synthesis read is narrowed to, when it is asking for one grid's rows."""
+
+MatrixRowQuery = Annotated[
+    str,
+    Query(description="Resume the rows at the work this matrix declares after this one."),
+]
+"""The cursor a paged matrix hands back: a work, read in the matrix's own declared order."""
 
 
 def token_path(workspace_root: Path | str) -> Path:
@@ -360,10 +373,18 @@ def create_workspace_app(
         return _taxonomy_report(root)
 
     @app.get("/synthesis", response_model=SynthesisReport)
-    def synthesis(caller: Caller) -> SynthesisReport:
-        """The matrices, and the readings nobody has recorded for them (Product 7.1)."""
+    def synthesis(
+        caller: Caller, matrix: MatrixQuery = "", after: MatrixRowQuery = ""
+    ) -> SynthesisReport:
+        """The matrices, and the readings nobody has recorded for them (Product 7.1).
+
+        A matrix past `MATRIX_ROW_PAGE` works answers with a page of its rows and the work
+        to ask after for the next one; `matrix` and `after` are that next read. Without
+        them the answer is what it has always been, and for every matrix a project of a
+        few hundred works actually holds it still is.
+        """
         caller.authorize("synthesis", Permission.READ, human_only=False)
-        return _synthesis_report(root)
+        return _synthesis_report(root, only=matrix, after=after)
 
     register_manuscript_routes(app, root)
     register_attachment_routes(app, root)
@@ -1451,6 +1472,17 @@ STALE_TIERS: tuple[tuple[int, str, str, str, str, str], ...] = (
 #: listing them. The group's own sentence still states the whole number.
 UNCOVERED_ITEMS = 5
 
+#: How many rows of one matrix `GET /synthesis` draws before it answers in pages.
+#:
+#: A matrix costs the product of its two sides: 200 works over five fields is a thousand
+#: cells, each carrying the accepted spans it rests on, and the evidence behind them is
+#: read out of the workspace one file at a time. Below this a whole matrix is a small read
+#: and paging it would cost a researcher a round trip to save nothing; above it the answer
+#: is a first page and a cursor, and the cost of a page stops following the size of the
+#: corpus. The number is the corpus list's own — "past roughly 200 works" — so the two
+#: research surfaces that grow without a bound agree about where a few hundred starts.
+MATRIX_ROW_PAGE = 200
+
 
 def _counted(count: int, noun: str, plural: str | None = None) -> str:
     """`1 claim` / `4 claims` — a count only ever read inside the thing it counts."""
@@ -1663,23 +1695,34 @@ def _term_standing(term: TaxonomyTerm, decisions: Mapping[str, Decision]) -> tup
 # -- the matrices, and what they cannot say yet ------------------------------
 
 
-def _synthesis_report(root: Path) -> SynthesisReport:
+def _synthesis_report(root: Path, *, only: str = "", after: str = "") -> SynthesisReport:
     """Every matrix of this project, and the readings nobody has recorded for it.
 
     A matrix reads one property across works and proposes nothing. A cell with no labels
     means "not recorded", never "the work lacks the property", and novelty is never
     inferred from a gap (Product 7.1, 33) — so every sentence composed here is about the
     record, and none of them is about a work.
+
+    A matrix past `MATRIX_ROW_PAGE` works answers as a page of rows and a cursor. Only the
+    rows are a page: how many works the matrix declares, what it lines up, how much of it
+    is recorded and how every column reads down every one of them are read off the whole
+    matrix, so a client windowing its rows still states the matrix it is windowing.
+
+    `only` narrows which matrix comes back and `after` says which row to resume at, which
+    together are the next page. What the project holds is not narrowed with them: `count`,
+    `missing` and the summary are the project's on every read, so a client asking for one
+    more page of one grid never gets a smaller account of the project back.
     """
     repo = _open_repo(root)
     names = _ObjectNames(repo)
     corpus = tuple(str(work.id) for work in repo.list_works())
     matrices = repo.list_matrices()
-    spans = _cited_evidence(repo, matrices)
-    views: list[MatrixView] = []
+    if only and not any(str(matrix.id) == only for matrix in matrices):
+        raise HTTPException(status_code=404, detail=f"this project has no matrix {only}")
     groups: list[ResearchGroup] = []
     missing_total = 0
     uncovered_total = 0
+    drawn: list[tuple[SynthesisMatrix, tuple[str, ...], str, int, int]] = []
     for matrix in matrices:
         rows = tuple(str(work) for work in matrix.works)
         read = {(str(cell.work), cell.field) for cell in matrix.cells if cell.labels}
@@ -1689,23 +1732,10 @@ def _synthesis_report(root: Path) -> SynthesisReport:
         missing_total += missing
         uncovered = tuple(work for work in corpus if work not in rows)
         uncovered_total += len(uncovered)
-        views.append(
-            MatrixView(
-                id=str(matrix.id),
-                name=matrix.name,
-                taxonomy=matrix.taxonomy or "",
-                stale=matrix.stale.value,
-                works=len(rows),
-                fields=matrix.fields,
-                cells=len(matrix.cells),
-                recorded=recorded,
-                shape=_matrix_shape(len(rows), len(matrix.fields)),
-                coverage=_matrix_coverage(recorded, declared),
-                labels_from=_matrix_vocabulary(matrix.taxonomy),
-                columns=_matrix_columns(matrix),
-                rows=_matrix_rows(matrix, spans, names.title),
-            )
-        )
+        if only and str(matrix.id) != only:
+            continue
+        page, next_row = _matrix_page(rows, after=after)
+        drawn.append((matrix, page, next_row, recorded, declared))
         items = _matrix_gaps(str(matrix.id), rows, matrix.fields, read, uncovered)
         if items:
             groups.append(
@@ -1722,13 +1752,70 @@ def _synthesis_report(root: Path) -> SynthesisReport:
                     items=items,
                 )
             )
+    # The evidence index is read once for every cell this answer actually draws, and never
+    # for the rows it paged past: the cost of an answer is the page's, not the corpus's.
+    spans = _cited_evidence(
+        repo,
+        (
+            cell
+            for matrix, page, _cursor, _recorded, _declared in drawn
+            for cell in matrix.cells
+            if str(cell.work) in set(page)
+        ),
+    )
+    views = [
+        MatrixView(
+            id=str(matrix.id),
+            name=matrix.name,
+            taxonomy=matrix.taxonomy or "",
+            stale=matrix.stale.value,
+            works=len(matrix.works),
+            fields=matrix.fields,
+            cells=len(matrix.cells),
+            recorded=recorded,
+            shape=_matrix_shape(len(matrix.works), len(matrix.fields)),
+            coverage=_matrix_coverage(recorded, declared),
+            labels_from=_matrix_vocabulary(matrix.taxonomy),
+            columns=_matrix_columns(matrix),
+            rows=_matrix_rows(matrix, spans, names.title, works=page),
+            paged=len(matrix.works) > MATRIX_ROW_PAGE,
+            next_row=next_row,
+        )
+        for matrix, page, next_row, recorded, declared in drawn
+    ]
     return SynthesisReport(
-        summary=_synthesis_summary(len(views), missing_total, uncovered_total),
-        count=len(views),
+        summary=_synthesis_summary(len(matrices), missing_total, uncovered_total),
+        count=len(matrices),
         missing=missing_total,
         gaps=tuple(groups),
         matrices=tuple(views),
     )
+
+
+def _matrix_page(rows: Sequence[str], *, after: str) -> tuple[tuple[str, ...], str]:
+    """The works one answer draws, and the work to ask after for the next page.
+
+    The cursor is the last work of the page rather than a count of rows, because the order
+    a matrix is read in is the matrix's own declared order: a client that remembered "row
+    400" would be counting rows the daemon had never promised to keep in that position,
+    while "after W0400" resumes at the work the matrix declares next.
+
+    A matrix inside the page size is answered whole and carries no cursor, so the client
+    that used to read every row still reads every row.
+    """
+    if after:
+        try:
+            start = rows.index(after) + 1
+        except ValueError:
+            raise HTTPException(
+                status_code=404, detail=f"this matrix declares no row for {after}"
+            ) from None
+    elif len(rows) <= MATRIX_ROW_PAGE:
+        return tuple(rows), ""
+    else:
+        start = 0
+    page = tuple(rows[start : start + MATRIX_ROW_PAGE])
+    return page, page[-1] if page and start + len(page) < len(rows) else ""
 
 
 def _matrix_gaps(
@@ -1774,18 +1861,20 @@ def _matrix_gaps(
 
 
 def _cited_evidence(
-    repo: WorkspaceRepository, matrices: Sequence[SynthesisMatrix]
+    repo: WorkspaceRepository, cells: Iterable[MatrixCell]
 ) -> Mapping[str, Evidence]:
-    """Every accepted Evidence object some matrix cell cites, by id.
+    """Every accepted Evidence object one of these matrix cells cites, by id.
 
     A grid that opens a cell has to quote the span the reading was taken from, and the
     span lives in the evidence file rather than in the matrix. The index is read once for
     the whole page, and a project whose cells cite nothing never opens an evidence file at
     all — the same rule `_ObjectNames` follows for the marks it names.
+
+    It takes the cells rather than the matrices because an answer that draws a page of a
+    long matrix must not pay for the rows it paged past: a thousand-row matrix would
+    otherwise walk every work's evidence file to quote two hundred of them.
     """
-    cited = {
-        str(evidence) for matrix in matrices for cell in matrix.cells for evidence in cell.evidence
-    }
+    cited = {str(evidence) for cell in cells for evidence in cell.evidence}
     if not cited:
         return {}
     found: dict[str, Evidence] = {}
@@ -1878,16 +1967,22 @@ def _matrix_rows(
     matrix: SynthesisMatrix,
     spans: Mapping[str, Evidence],
     title: Callable[[str], str],
+    *,
+    works: Sequence[str] | None = None,
 ) -> tuple[MatrixRowView, ...]:
     """One row per declared work, in the matrix's own order, with a cell per declared field.
 
     Every declared field gets a cell, including the ones nobody has read: the grid's shape
     is what the matrix declares, and a row that quietly dropped its unread columns would
     show a reader a smaller matrix than the project actually built.
+
+    `works` draws one page of them, already in the matrix's order (`_matrix_page`). A row
+    is still a whole row: only how many of them this answer carries is narrowed.
     """
     cells = {(str(cell.work), cell.field): cell for cell in matrix.cells}
+    wanted = tuple(str(work) for work in matrix.works) if works is None else tuple(works)
     rows: list[MatrixRowView] = []
-    for work in (str(work) for work in matrix.works):
+    for work in wanted:
         drawn: list[MatrixCellView] = []
         recorded = 0
         for field in matrix.fields:
