@@ -834,6 +834,7 @@ def _wording_findings(
                 char_start=sentence.char_start,
                 char_end=sentence.char_end,
             ),
+            sentence=sentence.normalized_text,
         ),
     )
 
@@ -854,6 +855,7 @@ def _staleness_finding(
         location=FindingLocation(
             file=anchor.file, line_start=anchor.line_start, line_end=anchor.line_end
         ),
+        sentence=anchor.sentence,
     )
 
 
@@ -867,6 +869,7 @@ def _orphan_finding(anchor: ManuscriptAnchor) -> ManuscriptAuditFinding:
         location=FindingLocation(
             file=anchor.file, line_start=anchor.line_start, line_end=anchor.line_end
         ),
+        sentence=anchor.sentence,
     )
 
 

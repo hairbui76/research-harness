@@ -93,6 +93,7 @@ def findings_for_missing(report: CitationClosureReport) -> list[ManuscriptAuditF
                 f"citation key {missing.key!r} is not defined in the bibliography "
                 f"({missing.sentence.file}:{missing.sentence.line_start})"
             ),
+            sentence=missing.sentence.normalized_text,
         )
         for missing in report.missing_keys
     ]
