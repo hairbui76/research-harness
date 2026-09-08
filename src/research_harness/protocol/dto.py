@@ -698,6 +698,26 @@ class MatrixView(BaseModel):
     The grid is the matrix, so it is composed here: which cell belongs where, which order
     the rows and the columns are read in, and the words every cell is stated in are the
     daemon's, not a client's (Product 5 P10).
+
+    One page of them when `paged` is true, and the whole matrix when it is not. Everything
+    else on this view still describes the whole matrix: `works`, `shape`, `coverage` and
+    every column are read down every declared work, page or no page.
+    """
+
+    paged: bool = False
+    """True when `rows` is one page of a longer matrix rather than the whole of it.
+
+    A matrix draws one cell per declared work and field, so a grid over a large corpus is
+    the product of the two. Past the page size the answer carries a page and a cursor, and
+    a client that windows its rows asks for the rest as it reaches them.
+    """
+
+    next_row: str = ""
+    """The work to ask after for the next page, or "" when there is no page after this one.
+
+    The cursor is a work rather than an offset, because the order rows are read in is the
+    matrix's own: `GET /synthesis?matrix=<id>&after=<work>` resumes at the work declared
+    after this one, in that order.
     """
 
 

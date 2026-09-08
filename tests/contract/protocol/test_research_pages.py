@@ -20,7 +20,8 @@ Three properties are asserted hardest.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from contextlib import ExitStack
 from pathlib import Path
 
 import pytest
@@ -79,6 +80,7 @@ from research_harness.protocol.dto import (
     TaxonomyReport,
 )
 from research_harness.server.app import (
+    MATRIX_ROW_PAGE,
     _matrix_columns,
     _matrix_gaps,
     _matrix_rows,
@@ -141,6 +143,28 @@ def _matrix(evidence: tuple[EvidenceId, ...] = ()) -> SynthesisMatrix:
         works=(WORK,),
         fields=("tokenization", "dataset"),
         cells=(MatrixCell(work=WORK, field="tokenization", labels=("padded",), evidence=evidence),),
+        stale=StaleState.FRESH,
+        provenance=HUMAN,
+    )
+
+
+LARGE = SynthesisId("S0002")
+
+
+def _large_matrix(works: int) -> SynthesisMatrix:
+    """A matrix that declares more works than one answer is willing to draw.
+
+    Every row is declared and only the first is read: what these tests assert is how many
+    rows one answer carries and in which order, and reading more cells would only put
+    evidence I/O in front of the measurement.
+    """
+    return SynthesisMatrix(
+        id=LARGE,
+        name="Traffic shape at scale",
+        taxonomy=TAXONOMY,
+        works=tuple(WorkId(f"W{index:04d}") for index in range(1, works + 1)),
+        fields=("tokenization", "dataset"),
+        cells=(MatrixCell(work=WORK, field="tokenization", labels=("padded",)),),
         stale=StaleState.FRESH,
         provenance=HUMAN,
     )
@@ -232,6 +256,35 @@ def bare_reader(tmp_path: Path, registry: CapabilityRegistry) -> Iterator[TestCl
     with TestClient(create_app(root, registry=registry)) as test_client:
         test_client.headers["Authorization"] = f"Bearer {ensure_token(root)}"
         yield test_client
+
+
+@pytest.fixture
+def paged(tmp_path: Path, registry: CapabilityRegistry) -> Iterator[Callable[[int], TestClient]]:
+    """The daemon over a project whose one matrix declares as many works as asked for.
+
+    The page size is the boundary being asserted, so each test builds a matrix on the side
+    of it that it means to read: a factory rather than one fixture, because "200 answers
+    whole and 201 pages" is one property and it needs both.
+    """
+    with ExitStack() as stack:
+        built = 0
+
+        def build(works: int) -> TestClient:
+            nonlocal built
+            built += 1
+            root = init_project(
+                InitProjectRequest(root=tmp_path / f"paged{built}", name="paged")
+            ).root
+            put_matrix(
+                open_context(root, HUMAN_ACTOR), PutMatrixRequest(matrix=_large_matrix(works))
+            )
+            rebuild_workspace(WorkspaceRepository.open(root))
+            token = ensure_token(root)
+            client = stack.enter_context(TestClient(create_app(root, registry=registry)))
+            client.headers["Authorization"] = f"Bearer {token}"
+            return client
+
+        yield build
 
 
 # -- what went stale, and why ------------------------------------------------
@@ -586,6 +639,137 @@ def test_the_grid_says_which_vocabulary_its_labels_come_from(reader: TestClient)
     report = SynthesisReport.model_validate(reader.get("/synthesis").json())
 
     assert report.matrices[0].labels_from == "Its labels come from the traffic-shape taxonomy."
+
+
+# -- a matrix too long for one answer ----------------------------------------
+
+
+def test_a_matrix_inside_the_page_size_arrives_whole_and_says_so(reader: TestClient) -> None:
+    """Nothing changes for the matrices a project actually has: the whole grid, no cursor.
+
+    Paging is a cost a large corpus imposes and a small one must not pay. A matrix under
+    the page size answers exactly as it did before this existed, and says in the same
+    answer that there is no next page to ask for.
+    """
+    report = SynthesisReport.model_validate(reader.get("/synthesis").json())
+    matrix = report.matrices[0]
+
+    assert matrix.paged is False
+    assert matrix.next_row == ""
+    assert len(matrix.rows) == matrix.works
+
+
+def test_a_matrix_past_the_page_size_arrives_as_a_first_page_and_a_cursor(
+    paged: Callable[[int], TestClient],
+) -> None:
+    """Above the threshold the answer carries a page of rows and the way to ask for more.
+
+    Everything that describes the whole matrix still describes the whole matrix: the shape
+    and coverage sentences, the count of declared works, and every column read down every
+    one of them. Only the rows are a page.
+    """
+    client = paged(MATRIX_ROW_PAGE + 50)
+    report = SynthesisReport.model_validate(client.get("/synthesis").json())
+    matrix = report.matrices[0]
+
+    assert matrix.paged is True
+    assert len(matrix.rows) == MATRIX_ROW_PAGE
+    assert matrix.works == MATRIX_ROW_PAGE + 50
+    assert matrix.next_row == matrix.rows[-1].work
+    assert [row.work for row in matrix.rows] == [
+        f"W{index:04d}" for index in range(1, MATRIX_ROW_PAGE + 1)
+    ]
+    assert matrix.shape == f"{MATRIX_ROW_PAGE + 50} works read for 2 fields"
+    assert [column.field for column in matrix.columns] == ["tokenization", "dataset"]
+    assert matrix.columns[0].recorded == 1, "a column is read down the whole matrix, not the page"
+
+
+def test_the_next_page_continues_the_matrix_own_order_and_ends_without_a_cursor(
+    paged: Callable[[int], TestClient],
+) -> None:
+    """The cursor is a work, and the read after it resumes where the last answer stopped."""
+    client = paged(MATRIX_ROW_PAGE + 50)
+    first = SynthesisReport.model_validate(client.get("/synthesis").json()).matrices[0]
+
+    answer = client.get(f"/synthesis?matrix={LARGE}&after={first.next_row}")
+    assert answer.status_code == 200
+    rest = SynthesisReport.model_validate(answer.json()).matrices[0]
+
+    assert rest.paged is True
+    assert rest.next_row == "", "the last page says there is nothing after it"
+    assert [row.work for row in rest.rows] == [
+        f"W{index:04d}" for index in range(MATRIX_ROW_PAGE + 1, MATRIX_ROW_PAGE + 51)
+    ]
+    assert [row.work for row in first.rows] + [row.work for row in rest.rows] == [
+        f"W{index:04d}" for index in range(1, MATRIX_ROW_PAGE + 51)
+    ], "the pages read in the matrix's own declared order, with nothing dropped or repeated"
+
+
+def test_the_page_boundary_is_the_page_size_itself(
+    paged: Callable[[int], TestClient],
+) -> None:
+    """Exactly a page of works is a whole matrix; one more than a page is a first page.
+
+    The threshold has to hold at its own edge, because that is where a client would find
+    out the hard way that it had half a matrix and no cursor to ask for the rest.
+    """
+    exact = SynthesisReport.model_validate(paged(MATRIX_ROW_PAGE).get("/synthesis").json())
+    over = SynthesisReport.model_validate(paged(MATRIX_ROW_PAGE + 1).get("/synthesis").json())
+
+    assert exact.matrices[0].paged is False
+    assert exact.matrices[0].next_row == ""
+    assert len(exact.matrices[0].rows) == MATRIX_ROW_PAGE
+    assert over.matrices[0].paged is True
+    assert len(over.matrices[0].rows) == MATRIX_ROW_PAGE
+    assert over.matrices[0].next_row == f"W{MATRIX_ROW_PAGE:04d}"
+
+
+def test_a_narrowed_read_answers_one_matrix_and_still_counts_the_project(
+    paged: Callable[[int], TestClient],
+) -> None:
+    """`?matrix=` narrows which grid comes back, never what the project is said to hold."""
+    client = paged(MATRIX_ROW_PAGE + 50)
+    whole = SynthesisReport.model_validate(client.get("/synthesis").json())
+    narrowed = SynthesisReport.model_validate(client.get(f"/synthesis?matrix={LARGE}").json())
+
+    assert [matrix.id for matrix in narrowed.matrices] == [str(LARGE)]
+    assert [group.key for group in narrowed.gaps] == [str(LARGE)]
+    assert narrowed.count == whole.count
+    assert narrowed.missing == whole.missing
+    assert narrowed.summary == whole.summary
+
+
+@pytest.mark.parametrize(
+    "query",
+    ["matrix=S0404", f"matrix={LARGE}&after=W9999"],
+    ids=["no such matrix", "no such row"],
+)
+def test_a_page_of_something_the_matrix_does_not_declare_is_refused(
+    paged: Callable[[int], TestClient], query: str
+) -> None:
+    """A cursor that names nothing is a mistake, not an empty matrix: it says which."""
+    client = paged(MATRIX_ROW_PAGE + 50)
+
+    answer = client.get(f"/synthesis?{query}")
+
+    assert answer.status_code == 404
+    assert "S0404" in answer.text or "W9999" in answer.text
+
+
+def test_the_first_page_of_a_long_matrix_reads_only_the_evidence_it_draws(
+    paged: Callable[[int], TestClient],
+) -> None:
+    """A page carries the spans of its own cells and never the spans of the rows it skipped.
+
+    This is the whole point of paging: the answer's cost is the page's, not the matrix's.
+    """
+    client = paged(MATRIX_ROW_PAGE + 50)
+    matrix = SynthesisReport.model_validate(client.get("/synthesis").json()).matrices[0]
+
+    assert len(matrix.rows) == MATRIX_ROW_PAGE
+    assert all(len(row.cells) == 2 for row in matrix.rows), "every drawn row is a whole row"
+    assert matrix.rows[0].cells[0].recorded is True
+    assert matrix.rows[1].cells[0].recorded is False
 
 
 # -- the reads stay reads ----------------------------------------------------
