@@ -115,24 +115,81 @@ test('a registry of many projects groups by age and answers a find', async ({ pa
   const list = page.getByRole('list', { name: 'Registered projects' });
   await expect(list).toBeVisible();
 
+  /*
+   * The runs, read off the sequence the list is in.
+   *
+   * The registry is windowed, so a run cannot be a container: only a slice of the list is
+   * mounted at a time. A naming line, then the workspaces it names, then the next line is
+   * what carries the grouping — on screen, and in the order a reader is walked through.
+   */
+  const runs = (): Promise<{ line: string; projects: string[] }[]> =>
+    list.evaluate((root) => {
+      const found: { line: string; projects: string[] }[] = [];
+      for (const item of Array.from(root.querySelectorAll('.rh-virtual-list__item'))) {
+        const line = item.querySelector('.rh-projects__group-heading');
+        if (line !== null) {
+          found.push({ line: (line.textContent ?? '').trim(), projects: [] });
+          continue;
+        }
+        const name = item.querySelector('.rh-projects__name');
+        if (name !== null) found.at(-1)?.projects.push((name.textContent ?? '').trim());
+      }
+      return found;
+    });
+
+  const find = page.getByRole('searchbox', { name: 'Find a project by name or folder' });
+  // The find first, because other tests register projects into the same registry and only
+  // a window of it is mounted: what is asserted below is these six, all of them on screen.
+  await find.fill(tag);
+  await expect(list.getByRole('heading')).toHaveCount(projects.length);
+
   // Each seeded project under the naming line for its own age. The count on the line is
-  // the whole run's, and other tests register projects into the same registry, so the age
-  // is asserted by membership rather than by a number.
+  // the whole run's, so the age is asserted by membership rather than by a number.
+  const grouped = await runs();
   for (const project of projects) {
-    const run = list.getByRole('list', { name: new RegExp(`^${project.age} — \\d+ projects?$`) });
-    await expect(run.getByRole('heading', { name: project.name, exact: true })).toBeVisible();
+    const run = grouped.find((entry) => entry.line.startsWith(`${project.age} — `));
+    expect(run, `no run named ${project.age} on screen`).toBeTruthy();
+    expect(run?.projects, `${project.name} is not under ${project.age}`).toContain(project.name);
   }
+
+  // The workspace's name is the way in: one act per row, and no filled button repeated
+  // down a registry of forty-odd.
+  const first = list.getByRole('link', { name: projects[0]!.name, exact: true });
+  await expect(first).toHaveAttribute('href', new RegExp(`/projects/${projects[0]!.project_id}/$`));
+  await expect(list.getByRole('button', { name: 'Open', exact: true })).toHaveCount(0);
 
   // The badge is the exception now: an ordinary row says nothing about its availability.
   await expect(page.getByText('Available', { exact: true })).toHaveCount(0);
 
-  const find = page.getByRole('searchbox', { name: 'Find a project by name or folder' });
-  await find.fill(tag);
-  await expect(list.getByRole('heading')).toHaveCount(projects.length);
   await find.fill('nothing here answers to this');
   await expect(page.getByText('No project matches this find')).toBeVisible();
   await page.getByRole('button', { name: 'Clear the find' }).click();
   await expect(list.getByRole('heading', { name: projects[0]!.name, exact: true })).toBeVisible();
+
+  /*
+   * And the whole registry is a window onto itself.
+   *
+   * The list states how long it is on every item it mounts, so a reader is told where they
+   * stand in the registry rather than in the slice that happens to exist. Nothing here
+   * assumes how many projects the run's other tests have left behind: what is asserted is
+   * that no more rows are mounted than the list says it holds, and that a registry longer
+   * than the window mounts fewer than it holds.
+   */
+  const bounds = await list.evaluate((root) => {
+    const items = Array.from(root.querySelectorAll('.rh-virtual-list__item'));
+    return {
+      mounted: items.length,
+      held: Number(items[0]?.getAttribute('aria-setsize') ?? 0),
+    };
+  });
+  expect(bounds.mounted, 'the registry mounts more rows than it holds').toBeLessThanOrEqual(
+    bounds.held,
+  );
+  if (bounds.held > 40) {
+    expect(bounds.mounted, `a registry of ${bounds.held} mounted ${bounds.mounted}`).toBeLessThan(
+      bounds.held,
+    );
+  }
 
   // The two widths the cockpit claims to support, with a registry on screen at both.
   const original = page.viewportSize();

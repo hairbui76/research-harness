@@ -62,6 +62,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--rh-space-3);
+  /* The section takes what the header leaves, so the windowed list inside it has a height
+     to be a window of. */
+  flex: 1 1 auto;
+  min-block-size: 0;
 }
 
 /* The section's name and caption on one side; what narrows it on the other. */
@@ -89,37 +93,34 @@
 }
 
 /*
- * The runs, and the rows inside them. The gap between two runs is wider than the gap
- * between two rows, so the naming line belongs to what follows it rather than floating
- * between two neighbours.
+ * The runs, and the rows inside them.
+ *
+ * The list is windowed, so its rows are absolutely placed and a flex gap cannot space
+ * them: every row carries its own space below it, and a naming line carries the wider
+ * space above it, so the line still belongs to what follows it rather than floating
+ * between two neighbours. The first line takes no such space, because nothing is above it.
  */
 .rh-projects__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rh-space-5);
+  flex: 1 1 auto;
+  /* Enough of the registry to be a list on a short window; below that the page scrolls
+     rather than the list collapsing to a slot. */
+  min-block-size: 20rem;
+  /* The registry is a window onto the page, not a panel: it takes the page's own surface. */
+  background: transparent;
 }
 
-.rh-projects__group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rh-space-2);
+.rh-projects__list .rh-virtual-list__item {
+  padding-block-end: var(--rh-space-3);
 }
 
 .rh-projects__group-heading {
   margin: 0;
+  padding-block-start: var(--rh-space-4);
   font-weight: var(--rh-type-h4-weight);
 }
 
-.rh-projects__rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rh-space-3);
+.rh-projects__list .rh-virtual-list__item:first-child .rh-projects__group-heading {
+  padding-block-start: 0;
 }
 
 .rh-projects__row {
@@ -144,6 +145,11 @@
   font-size: var(--rh-type-h4-size);
   font-weight: var(--rh-type-h4-weight);
   line-height: var(--rh-type-h4-lh);
+}
+
+/* The name is the way in, so it is a link and looks like the cockpit's links. */
+.rh-projects__name a {
+  color: inherit;
 }
 
 .rh-projects__path {

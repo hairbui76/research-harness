@@ -16,7 +16,7 @@
  * Nothing on this screen deletes anything. Forget removes a row from a list.
  */
 import { useId, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   AsyncState,
   Badge,
@@ -28,6 +28,7 @@ import {
   Input,
   Menu,
   PROJECT_AVAILABILITY_META,
+  VirtualList,
   formatTimestamp,
 } from '@research-harness/design';
 import type { BadgeTone, IconName, ProjectAction } from '@research-harness/design';
@@ -157,6 +158,43 @@ export function groupByAge(
   });
 }
 
+/**
+ * One line of the registry: a run's naming line, or a workspace in it.
+ *
+ * The registry is windowed, so the runs cannot be nested lists any more: only a slice of
+ * the list exists in the DOM at a time, and a container whose contents come and go is not
+ * a group anything can be read against. The sequence is what carries the grouping — a
+ * naming line, then the workspaces it names, then the next line — which is how the list
+ * reads on screen and in what a screen reader is walked through.
+ */
+type RegistryRow =
+  | { kind: 'age'; key: string; line: string }
+  | { kind: 'project'; key: string; project: ProjectView };
+
+/** The runs, flattened into the sequence the list is read in. */
+export function registryRows(groups: readonly ProjectAgeGroup[]): RegistryRow[] {
+  return groups.flatMap((group) => [
+    {
+      kind: 'age' as const,
+      key: `age:${group.age}`,
+      line: `${group.age} — ${counted(group.projects.length, 'project')}`,
+    },
+    ...group.projects.map((project) => ({
+      kind: 'project' as const,
+      key: project.project_id,
+      project,
+    })),
+  ]);
+}
+
+/**
+ * About how tall one registry row is before it has been measured, in CSS pixels.
+ *
+ * A name, a folder, a line of facts and the gap under it. The measurement is the real
+ * answer; this is only what the window places rows by until it has one.
+ */
+const PROJECT_ROW_HEIGHT = 116;
+
 export interface ProjectHomeProps {
   /**
    * A project id from the address bar that the registry does not know — a stale bookmark,
@@ -168,7 +206,6 @@ export interface ProjectHomeProps {
 
 export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
   const host = useHost();
-  const navigate = useNavigate();
   const lifecycle = useProjectLifecycle();
   const [dialog, setDialog] = useState<ProjectDialog>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -179,6 +216,7 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
     [host.projects, query],
   );
   const groups = useMemo(() => groupByAge(shown, new Date()), [shown]);
+  const rows = useMemo(() => registryRows(groups), [groups]);
 
   const close = (): void => setDialog(null);
   const reveal = async (project: ProjectView): Promise<void> => {
@@ -361,39 +399,47 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
               No project matches this find
             </Empty>
           ) : (
-            <ul className="rh-projects__list" aria-label="Registered projects">
-              {groups.map((group, index) => (
-                <li key={group.age} className="rh-projects__group">
-                  {/*
-                    The naming line and the run's accessible name at once, the way the
-                    rail names its own runs: a researcher reads it, a screen reader is
-                    told which age it has entered, and Tab never lands on it. The count
-                    belongs on it because it is a fact about the run, and because it is
-                    the only place a researcher can see how much of the registry each
+            /*
+              The registry, windowed.
+              
+              Nothing bounded this list: every workspace this machine has ever been shown
+              was mounted, and a researcher who has opened forty-six of them paid for all
+              forty-six on every visit. It is the same instrument the Corpus and the
+              Synthesis grid use, for the same reason — the list's length is the host's
+              business, not the page's.
+              
+              The naming lines are rows of the same list rather than the headers of nested
+              ones: a group whose members are mounted and unmounted as the window moves is
+              not a container anything can be read against, and the sequence — a line, the
+              workspaces it names, the next line — is what carries the grouping on screen
+              and in the reading order.
+            */
+            <VirtualList
+              className="rh-projects__list"
+              label="Registered projects"
+              items={rows}
+              itemKey={(row) => row.key}
+              estimatedItemHeight={PROJECT_ROW_HEIGHT}
+              renderItem={(row) =>
+                row.kind === 'age' ? (
+                  /*
+                    The naming line: a researcher reads it, and Tab never lands on it. The
+                    count belongs on it because it is a fact about the run, and because it
+                    is the only place a researcher can see how much of the registry each
                     age holds without counting rows.
-                  */}
-                  <p className="rh-projects__group-heading" id={`${listingId}-age-${index}`}>
-                    {`${group.age} — ${counted(group.projects.length, 'project')}`}
-                  </p>
-                  <ul
-                    className="rh-projects__rows"
-                    aria-labelledby={`${listingId}-age-${index}`}
-                  >
-                    {group.projects.map((project) => (
-                      <ProjectRow
-                        key={project.project_id}
-                        project={project}
-                        onOpen={() => navigate(projectHref(project.project_id, '/'))}
-                        onLocate={() => setDialog({ kind: 'locate', project })}
-                        onRename={() => setDialog({ kind: 'rename', project })}
-                        onForget={() => setDialog({ kind: 'forget', project })}
-                        onReveal={() => void reveal(project)}
-                      />
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+                  */
+                  <p className="rh-projects__group-heading">{row.line}</p>
+                ) : (
+                  <ProjectRow
+                    project={row.project}
+                    onLocate={() => setDialog({ kind: 'locate', project: row.project })}
+                    onRename={() => setDialog({ kind: 'rename', project: row.project })}
+                    onForget={() => setDialog({ kind: 'forget', project: row.project })}
+                    onReveal={() => void reveal(row.project)}
+                  />
+                )
+              }
+            />
           )}
         </section>
       ) : null}
@@ -405,7 +451,6 @@ export function ProjectHome({ notFoundProjectId = null }: ProjectHomeProps) {
 
 interface ProjectRowProps {
   project: ProjectView;
-  onOpen: () => void;
   onLocate: () => void;
   onRename: () => void;
   onForget: () => void;
@@ -414,7 +459,6 @@ interface ProjectRowProps {
 
 function ProjectRow({
   project,
-  onOpen,
   onLocate,
   onRename,
   onForget,
@@ -432,7 +476,7 @@ function ProjectRow({
   };
 
   return (
-    <Card as="li" className="rh-projects__card" padding="md">
+    <Card className="rh-projects__card" padding="md">
       <div className="rh-projects__row">
         <div className="rh-projects__identity">
           {/*
@@ -442,7 +486,24 @@ function ProjectRow({
             * rail's runs are not headings either — so the outline stays three deep however
             * many ages the list is cut into.
             */}
-          <h3 className="rh-projects__name">{project.display_name}</h3>
+          {/*
+            * The workspace's name is the way into it.
+            *
+            * Every row used to carry a filled Open beside a name that did nothing, so a
+            * registry of forty-six spent the page's one loud emphasis forty-six times and
+            * said nothing by it — a button on every row is not a recommendation. The name
+            * is what a researcher is looking for and what they reach for, so it is the
+            * link, and the row has one visible act again. A workspace the host will not
+            * open is not a link at all: the badge and the host's own sentence under it say
+            * why, and Locate stands beside them where the folder merely moved.
+            */}
+          <h3 className="rh-projects__name">
+            {openable ? (
+              <Link to={projectHref(project.project_id, '/')}>{project.display_name}</Link>
+            ) : (
+              project.display_name
+            )}
+          </h3>
           <p className="rh-projects__meta">
             <span className="rh-projects__path">{project.path}</span>
           </p>
@@ -477,9 +538,6 @@ function ProjectRow({
           {project.detail ? <p className="rh-projects__detail">{project.detail}</p> : null}
         </div>
         <div className="rh-projects__row-actions">
-          <Button variant="primary" disabled={!openable} onClick={onOpen}>
-            Open
-          </Button>
           {/*
             * The one action promoted out of the menu, and only where it is the repair.
             * A folder that moved is the single failure a researcher can fix from this

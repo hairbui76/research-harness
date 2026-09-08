@@ -68,17 +68,17 @@ afterEach(() => {
 });
 
 /**
- * The project rows, and not the run each of them sits in.
+ * The project rows, and not the naming lines between them.
  *
- * Project Home groups the registry by when each project was last opened, so the list
- * named "Registered projects" holds one item per run and the rows live in a nested list
- * under each run's naming line. A row is a list item whose own list is not the outer one.
+ * Project Home groups the registry by when each project was last opened and windows it, so
+ * the list named "Registered projects" is one sequence: a run's naming line, then the
+ * workspaces it names. A row is a list item that holds a workspace card.
  */
 function rows(): HTMLElement[] {
   const list = screen.getByRole('list', { name: 'Registered projects' });
   return within(list)
     .getAllByRole('listitem')
-    .filter((item) => item.closest('ul') !== list);
+    .filter((item) => item.querySelector('.rh-projects__card') !== null);
 }
 
 function rowNames(): (string | null)[] {
@@ -150,7 +150,9 @@ describe('the multi-project application', () => {
       ]);
 
       // -- open the left project, and read its claim through the rail -------------------
-      await user.click(within(rowFor('Latency study')).getByRole('button', { name: 'Open' }));
+      // The workspace's name is the way into it: one act per row, and the page's loud
+      // emphasis kept for the two controls in its header.
+      await user.click(within(rowFor('Latency study')).getByRole('link', { name: 'Latency study' }));
       await user.click(await screen.findByRole('link', { name: /Claims/ }));
 
       expect(await screen.findByText('left claim')).toBeInTheDocument();
@@ -197,7 +199,10 @@ describe('the multi-project application', () => {
       await waitFor(() =>
         expect(within(rowFor('Reef survey')).queryByText('Unavailable')).toBeNull(),
       );
-      expect(within(rowFor('Reef survey')).getByRole('button', { name: 'Open' })).toBeEnabled();
+      expect(within(rowFor('Reef survey')).getByRole('link', { name: 'Reef survey' })).toHaveAttribute(
+        'href',
+        '/projects/prj_reef/',
+      );
       expect(within(rowFor('Reef survey')).getByText('/research/reef-survey')).toBeInTheDocument();
 
       // -- forget: a row leaves the list, and nothing leaves the disk -------------------

@@ -92,34 +92,48 @@ function setup(options: SetupOptions = {}) {
 }
 
 /**
- * The project rows, and not the run each of them sits in.
+ * The project rows, and not the naming lines between them.
  *
- * The registry is grouped by when each project was last opened, so the list named
- * "Registered projects" holds one item per run and the rows live in a nested list under
- * each run's naming line. A row is a list item whose own list is not the outer one.
+ * The registry is windowed and grouped by when each project was last opened, so the list
+ * named "Registered projects" is one sequence: a run's naming line, then the workspaces it
+ * names, then the next line. A row is a list item that holds a workspace card.
  */
 function rows(): HTMLElement[] {
   const list = screen.getByRole('list', { name: 'Registered projects' });
   return within(list)
     .getAllByRole('listitem')
-    .filter((item) => item.closest('ul') !== list);
+    .filter((item) => item.querySelector('.rh-projects__card') !== null);
 }
 
-/** Each run as a researcher reads it: its naming line, and the projects under it. */
+/**
+ * Each run as a researcher reads it: its naming line, and the projects under it.
+ *
+ * Read off the sequence rather than off a container, because the runs are no longer
+ * nested lists: only a window of the registry is mounted at a time, and a group whose
+ * members come and go as that window moves is not something a reader can be sent into.
+ */
 function groups(): { line: string; projects: (string | null)[] }[] {
   const list = screen.getByRole('list', { name: 'Registered projects' });
-  return within(list)
-    .getAllByRole('list')
-    .map((group) => ({
-      line: document.getElementById(group.getAttribute('aria-labelledby') ?? '')?.textContent ?? '',
-      projects: within(group)
-        .getAllByRole('listitem')
-        .map((row) => within(row).getByRole('heading').textContent),
-    }));
+  const runs: { line: string; projects: (string | null)[] }[] = [];
+  for (const item of within(list).getAllByRole('listitem')) {
+    const line = item.querySelector('.rh-projects__group-heading');
+    if (line !== null) {
+      runs.push({ line: line.textContent ?? '', projects: [] });
+      continue;
+    }
+    const name = within(item).getByRole('heading').textContent;
+    runs.at(-1)?.projects.push(name);
+  }
+  return runs;
 }
 
 function rowNames(): (string | null)[] {
   return rows().map((row) => within(row).getByRole('heading').textContent);
+}
+
+/** The link a row offers into its workspace, or null where the host will not open one. */
+function openLink(row: HTMLElement): HTMLElement | null {
+  return within(row).queryByRole('link');
 }
 
 /** The one field that narrows the list. Its label is hidden, so it is asked for by name. */
@@ -253,6 +267,32 @@ describe('Project Home', () => {
     }
   });
 
+  /*
+   * A registry nothing bounds.
+   *
+   * The critique photographed forty-six rows here, every one of them mounted: this screen
+   * is the one a researcher meets before any workspace exists, and the only thing that
+   * decides its length is how many folders this machine has been shown. It is windowed
+   * now, with the same instrument the Corpus and the Synthesis grid use.
+   */
+  it('windows a long registry instead of mounting every workspace', () => {
+    const many = Array.from({ length: 200 }, (_, index) =>
+      projectView({
+        project_id: `prj_${index}`,
+        display_name: `Workspace ${index}`,
+        last_opened_at: '2026-09-08T09:30:00Z',
+      }),
+    );
+    setup({ projects: many });
+
+    const mounted = rows().length;
+    expect(mounted, `a registry of 200 mounted ${mounted} rows`).toBeLessThan(40);
+    // And the list still says how long it is, so a reader is told where they are in the
+    // whole registry rather than in the slice that happens to exist.
+    const list = screen.getByRole('list', { name: 'Registered projects' });
+    expect(within(list).getAllByRole('listitem')[0]).toHaveAttribute('aria-setsize', '201');
+  });
+
   it('draws no age that has nothing in it', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-08T12:00:00Z'));
@@ -317,9 +357,12 @@ describe('Project Home', () => {
     // wears is not a state, it is wallpaper — and it made the two rows that *are* saying
     // something harder to find. Availability is still text wherever it is news.
     expect(within(available).queryByText('Available')).toBeNull();
-    expect(within(available).getByRole('button', { name: 'Open' })).toBeEnabled();
+    // Changed on purpose: the row's way in used to be a filled Open beside a name that did
+    // nothing. The name is the link now — one act per row, and the page's loud emphasis
+    // spent on the two header controls rather than on every row of the registry.
+    expect(openLink(available)).toHaveAccessibleName('Latency study');
     expect(within(busy).getByText('Busy')).toBeInTheDocument();
-    expect(within(busy).getByRole('button', { name: 'Open' })).toBeEnabled();
+    expect(openLink(busy)).toHaveAccessibleName('Thermal tolerance');
     expect(within(busy).getByText(/holding the repository lock/)).toBeInTheDocument();
   });
 
@@ -351,7 +394,9 @@ describe('Project Home', () => {
 
     const row = rows()[0] as HTMLElement;
     expect(within(row).getByText('Unavailable')).toBeInTheDocument();
-    expect(within(row).getByRole('button', { name: 'Open' })).toBeDisabled();
+    // A workspace the host will not open is not a link: the badge and the host's sentence
+    // say why, where a disabled button said only that something was wrong.
+    expect(openLink(row)).toBeNull();
     expect(within(row).getByText(/is not readable from here/)).toBeInTheDocument();
     // The rail's verb, not a second one for the same act.
     expect(within(row).getByRole('button', { name: 'Locate folder' })).toBeInTheDocument();
@@ -384,19 +429,20 @@ describe('Project Home', () => {
     setup({ projects: [AVAILABLE, BUSY] });
 
     for (const row of rows()) {
-      const buttons = within(row).getAllByRole('button');
-      expect(buttons).toHaveLength(2);
-      expect(buttons[0]).toHaveTextContent('Open');
       /*
-       * Changed on purpose: the second button used to print "Project actions" beside
-       * Open. One row read as two offers; thirty rows read as sixty, and the pair the
-       * researcher wanted — Open — was in the noise. The words are now the trigger's
-       * accessible name over its glyph, which is what the rail's own trigger has always
-       * been (`ProjectRail` renders an `IconButton` labelled "Project actions"), so the
-       * two surfaces still name the act identically.
+       * Changed on purpose, twice over. The row used to print "Project actions" beside
+       * Open — one row read as two offers, thirty read as sixty — so the words became the
+       * trigger's accessible name over its glyph, which is what the rail's own trigger has
+       * always been. Then Open went too: a filled button on every row of a registry of
+       * forty-six is the page's loudest emphasis spent forty-six times, and the name a
+       * researcher is already reading is what they reach for. So the row's one act is its
+       * name, and its one button is the overflow.
        */
-      expect(buttons[1]).toHaveAccessibleName('Project actions');
-      expect(buttons[1]).toHaveTextContent('');
+      expect(openLink(row)).toBeInTheDocument();
+      const buttons = within(row).getAllByRole('button');
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0]).toHaveAccessibleName('Project actions');
+      expect(buttons[0]).toHaveTextContent('');
     }
   });
 
@@ -419,7 +465,7 @@ describe('Project Home', () => {
 
     const row = rows()[0] as HTMLElement;
     expect(within(row).getByText(label)).toBeInTheDocument();
-    expect(within(row).getByRole('button', { name: 'Open' })).toBeDisabled();
+    expect(openLink(row)).toBeNull();
     expect(within(row).getByText('research.yaml does not parse.')).toBeInTheDocument();
     // Locating helps a folder that moved, not one whose contents the host rejected: the
     // action stays in the menu rather than being promoted beside Open.
@@ -430,7 +476,11 @@ describe('Project Home', () => {
     const user = userEvent.setup();
     setup({ projects: [AVAILABLE] });
 
-    await user.click(screen.getByRole('button', { name: 'Open' }));
+    const link = openLink(rows()[0] as HTMLElement) as HTMLElement;
+    // A real link, so it is opened the way a researcher opens one: in this tab, in a new
+    // one, or copied. A button could do none of the last two.
+    expect(link).toHaveAttribute('href', '/projects/prj_abc/');
+    await user.click(link);
 
     expect(screen.getByTestId('path')).toHaveTextContent('/projects/prj_abc/');
   });
