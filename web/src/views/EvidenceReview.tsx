@@ -376,14 +376,7 @@ export function EvidenceReviewPage() {
                     context={sourceContext(candidate, item)}
                     blockId={blockIdOf(candidate)}
                     onOpenPage={() => {
-                      const pane = sourceRef.current;
-                      if (pane === null) return;
-                      // jsdom has no scroller; the focus is the part that has to happen
-                      // either way, because it is what a screen reader follows.
-                      if (typeof pane.scrollIntoView === 'function') {
-                        pane.scrollIntoView({ block: 'start' });
-                      }
-                      pane.focus({ preventScroll: true });
+                      if (sourceRef.current !== null) revealSource(sourceRef.current);
                     }}
                   />
 
@@ -448,6 +441,42 @@ export function EvidenceReviewPage() {
       ) : null}
     </FullPageWorkspace>
   );
+}
+
+/**
+ * Put the source page back on screen, under the page header rather than behind it.
+ *
+ * `scrollIntoView` aligns to the scrollport's own top edge, and this page's header is
+ * sticky *inside* that scrollport, so aligning to it hides the first lines of the page the
+ * researcher has just asked to see — the section heading the span sits under, which is the
+ * part that says what the number is a number of. `--rh-page-header-bottom` is the viewport
+ * coordinate `FullPageWorkspace` publishes for that header's bottom edge, so the correction
+ * is the difference. Focus follows the scroll, because a screen reader follows the focus.
+ */
+function revealSource(pane: HTMLElement): void {
+  if (typeof pane.scrollIntoView === 'function') pane.scrollIntoView({ block: 'start' });
+  const headerBottom = Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--rh-page-header-bottom'),
+  );
+  const hidden = Number.isFinite(headerBottom)
+    ? headerBottom - pane.getBoundingClientRect().top
+    : 0;
+  if (hidden > 0) scrollBack(pane, hidden);
+  pane.focus({ preventScroll: true });
+}
+
+/** Give `by` pixels back to whichever ancestor is actually scrolling this pane. */
+function scrollBack(from: HTMLElement, by: number): void {
+  let node = from.parentElement;
+  while (node !== null) {
+    const overflow = getComputedStyle(node).overflowY;
+    if ((overflow === 'auto' || overflow === 'scroll') && node.scrollHeight > node.clientHeight) {
+      node.scrollTop -= by;
+      return;
+    }
+    node = node.parentElement;
+  }
+  window.scrollBy(0, -by);
 }
 
 /**

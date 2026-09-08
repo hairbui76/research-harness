@@ -604,21 +604,35 @@ test('the source is beside the decision at every width the review is worked at',
   expectSourceBesideDecision(stacked, '1024×768 at the verdict');
   await page.screenshot({ path: info.outputPath('review-stacked-strip.png') });
 
-  // The strip's control puts the page back on screen rather than opening anything over it.
+  /*
+   * The strip's control puts the page back on screen rather than opening anything over it,
+   * and it lands the page *under* the sticky page header rather than behind it: a source
+   * whose first lines are hidden by the frame is not the source shown.
+   */
   await page.getByRole('button', { name: /^Show page 4/ }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  await settle(page);
   const rendered = await page.evaluate(() => {
     const canvas = document.querySelector('.rh-pdf__canvas');
-    if (canvas === null) return null;
-    const rect = canvas.getBoundingClientRect();
-    return { top: rect.top, bottom: rect.bottom, view: window.innerHeight };
+    const header = document.querySelector('.rh-full-page__header');
+    if (canvas === null || header === null) return null;
+    const page = canvas.getBoundingClientRect();
+    return {
+      top: page.top,
+      bottom: page.bottom,
+      headerBottom: header.getBoundingClientRect().bottom,
+      view: window.innerHeight,
+    };
   });
   expect(rendered, 'the source page is not rendered').not.toBeNull();
+  const source = rendered as { top: number; bottom: number; headerBottom: number; view: number };
   expect(
-    (rendered as { top: number; bottom: number; view: number }).bottom > 0 &&
-      (rendered as { top: number; bottom: number; view: number }).top <
-        (rendered as { top: number; bottom: number; view: number }).view,
+    source.bottom > 0 && source.top < source.view,
     'the strip’s control did not bring the page back on screen',
   ).toBe(true);
+  expect(
+    source.top,
+    'the page landed behind the sticky header instead of under it',
+  ).toBeGreaterThanOrEqual(source.headerBottom - 1);
   await page.screenshot({ path: info.outputPath('review-strip-opened-page.png') });
 });
