@@ -24,6 +24,7 @@ import {
   Card,
   ErrorNotice,
   Icon,
+  IconButton,
   Input,
   Menu,
   PROJECT_AVAILABILITY_META,
@@ -484,10 +485,16 @@ function ProjectRow({
             </Button>
           ) : null}
           <Menu placement="bottom" align="end">
+            {/*
+              * The rail's trigger, verbatim: a glyph whose accessible name is the menu's
+              * own words. It used to print those words, which made every row offer two
+              * things where it has one — Open — and a registry of thirty rows print the
+              * same second offer thirty times. The menu holds the rest; the row reads
+              * once. The content still names the project it acts on, so a screen reader
+              * hears which workspace it has opened the menu for.
+              */}
             <Menu.Trigger asChild>
-              <Button variant="ghost" iconStart="more-horizontal">
-                Project actions
-              </Button>
+              <IconButton icon="more-horizontal" label="Project actions" />
             </Menu.Trigger>
             <Menu.Content aria-label={`Actions for ${project.display_name}`}>
               {PROJECT_ACTION_ITEMS.map(({ action, label, icon }) => (

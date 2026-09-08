@@ -374,11 +374,29 @@ describe('Project Home', () => {
     setup({ projects: [AVAILABLE, BUSY] });
 
     for (const row of rows()) {
-      expect(within(row).getAllByRole('button').map((button) => button.textContent)).toEqual([
-        'Open',
-        'Project actions',
-      ]);
+      const buttons = within(row).getAllByRole('button');
+      expect(buttons).toHaveLength(2);
+      expect(buttons[0]).toHaveTextContent('Open');
+      /*
+       * Changed on purpose: the second button used to print "Project actions" beside
+       * Open. One row read as two offers; thirty rows read as sixty, and the pair the
+       * researcher wanted — Open — was in the noise. The words are now the trigger's
+       * accessible name over its glyph, which is what the rail's own trigger has always
+       * been (`ProjectRail` renders an `IconButton` labelled "Project actions"), so the
+       * two surfaces still name the act identically.
+       */
+      expect(buttons[1]).toHaveAccessibleName('Project actions');
+      expect(buttons[1]).toHaveTextContent('');
     }
+  });
+
+  it('says the overflow\u2019s name once per row, and never twice on screen', () => {
+    setup({ projects: [AVAILABLE, BUSY, MOVED] });
+
+    expect(screen.getAllByRole('button', { name: 'Project actions' })).toHaveLength(3);
+    // Nothing on this screen prints the words: a menu is an affordance, not an action,
+    // and a list repeats its rows, not its furniture.
+    expect(screen.queryAllByText('Project actions')).toHaveLength(0);
   });
 
   it.each([
