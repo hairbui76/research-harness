@@ -285,12 +285,17 @@ test('the conversation opens from one control, in the rail’s own words', async
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Send' })).toHaveCount(0);
 
-  // The transcript names the control by the name the control actually wears.
-  await expect(
-    page.getByText('Choose New session below to ask a question against this project.'),
-  ).toBeVisible();
-  const entrance = page.locator('.rh-web-entrance').getByRole('button', { name: 'New session' });
+  // The state that names the absence carries the way out of it, in the rail's own words,
+  // and points at nothing: the sentence used to read "Choose New session below…" over a
+  // control in the composer slot and a third of the same name in the rail.
+  const empty = page.locator('.rh-state', { hasText: 'No session open' }).first();
+  await expect(empty).toContainText('A session is one conversation held against this project.');
+  await expect(page.getByText('below')).toHaveCount(0);
+  await expect(page.locator('.rh-web-entrance')).toHaveCount(0);
+  const entrance = empty.getByRole('button', { name: 'New session' });
   await expect(entrance).toBeVisible();
+  // One in the state, one in the rail, and none in between.
+  await expect(page.getByRole('button', { name: 'New session' })).toHaveCount(2);
   await page.screenshot({ path: info.outputPath('composer-entrance.png'), fullPage: true });
 
   // One control, the same question the rail asks, and the caret lands in the box it opened.

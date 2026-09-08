@@ -63,12 +63,12 @@
 }
 
 /*
- * The front door, where the message box goes when there is no session to type into.
+ * The slot where the message box goes, when a window may only read.
  *
- * It keeps the composer's own frame rather than leaving a hole in the pane: the slot is
- * still the place a message is written, and one control sitting in it says what has to
- * happen first. A window that may only read gets the reason in the same frame, because the
- * reason a control is missing belongs where the control would have been.
+ * It keeps the composer's own frame rather than leaving a hole in the pane, because the
+ * reason a control is missing belongs where the control would have been. A window that may
+ * write is shown nothing here at all: the way into a conversation is one control, and it
+ * sits in the transcript's own empty state beside the sentence that names the absence.
  */
 .rh-web-entrance {
   display: flex;

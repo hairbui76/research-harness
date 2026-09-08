@@ -524,35 +524,29 @@ export function ComposerPane() {
     ) : null;
 
   /**
-   * The front door, when there is no session to type into.
+   * The slot with no message box in it.
    *
-   * The composer used to render here as an inviting field with an accent Send, disabled,
-   * and the only explanation was a sentence in the transcript six hundred pixels away that
-   * named a control by a name it does not have. The daemon has no create-on-send —
-   * `session.send` takes a session id and `SendService._prepare` reads that record before
-   * anything else (`research_harness/conversation/send.py`), and creating a session is its
-   * own capability whose visibility argument cannot be taken back — so typing cannot be
-   * the way in. One control is, in the rail's own words, and the transcript's empty state
-   * names it by that name.
+   * The composer used to render here as an inviting field with an accent Send, disabled.
+   * The daemon has no create-on-send — `session.send` takes a session id and
+   * `SendService._prepare` reads that record before anything else
+   * (`research_harness/conversation/send.py`), and creating a session is its own capability
+   * whose visibility argument cannot be taken back — so typing cannot be the way in.
+   *
+   * One control is, in the rail's own words, and it sits in the transcript's own empty
+   * state: that state names the absence, so it carries the way out of it, where the eye
+   * already is. This slot drew a second copy of it under a sentence pointing down at it,
+   * which is one act offered twice and pointed at once. It draws nothing now.
    *
    * A window that may only read is offered no control at all, and the reason stands where
-   * the control would have been rather than anywhere else.
+   * the control would have been rather than anywhere else — which is here, because the
+   * missing control is the message box.
    */
   if (!sessions.activeId) {
+    if (canMutate) return null;
     return (
       <div className="rh-web-composer">
         <div className="rh-web-entrance">
-          {canMutate ? (
-            <Button
-              variant="primary"
-              iconStart="plus"
-              onClick={() => newSession.ask({ focusComposer: true })}
-            >
-              New session
-            </Button>
-          ) : (
-            <p className="rh-web-composer__note rh-text-secondary">{mutationBlockedReason}</p>
-          )}
+          <p className="rh-web-composer__note rh-text-secondary">{mutationBlockedReason}</p>
         </div>
       </div>
     );

@@ -49,6 +49,8 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
     openRef,
     showReceipt,
     sessions,
+    // The way into a conversation, offered by the state that names its absence.
+    newSession,
     attachments: files,
     renderAttachmentPage,
     // References and the graph (task W3): a deep link is resolved, not navigated.
@@ -108,10 +110,19 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
   );
 
   if (!sessions.activeId) {
-    // The control this names is the one below the transcript, and it is named by the name
-    // it actually wears — the rail called it "New session" while this sentence said
-    // "start a session in the rail", which is two names for one act and a pointer at a
-    // pane that is a drawer at 768px.
+    /*
+     * The act, where the eye already is.
+     *
+     * This state used to point at a control six hundred pixels below it — "Choose New
+     * session below…" — while the composer slot drew that control and the rail drew it a
+     * third time. One act cannot be offered twice and pointed at once. The state that
+     * names the absence carries the way out of it, which is the pattern every other empty
+     * state on this cockpit follows, and the composer slot keeps nothing but the reason a
+     * window that may only read is offered no control at all.
+     *
+     * The label is the rail's, verbatim (6E): the two places that open a session must not
+     * drift into calling the same act two things.
+     */
     return (
       <AsyncState
         kind="empty"
@@ -119,9 +130,21 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
         title="No session open"
         description={
           canMutate
-            ? 'Choose New session below to ask a question against this project.'
+            ? 'A session is one conversation held against this project. Nothing is asked of a model until you open one.'
             : (mutationBlockedReason ?? undefined)
         }
+        {...(canMutate
+          ? {
+              actions: [
+                {
+                  label: 'New session',
+                  onClick: () => newSession.ask({ focusComposer: true }),
+                  variant: 'primary' as const,
+                  iconStart: 'plus' as const,
+                },
+              ],
+            }
+          : {})}
       />
     );
   }

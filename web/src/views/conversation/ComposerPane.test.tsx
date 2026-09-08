@@ -432,8 +432,13 @@ describe('the composer after the disclosure', () => {
  * disabled, and the only explanation was a sentence in the transcript that named a control
  * by a name it does not have. The daemon has no create-on-send — `session.send` takes a
  * session id and reads that record before anything else — so the field cannot be the way
- * in. One control is, with the rail's own label, and the reason it is ever missing stands
- * where the control would have been.
+ * in. One control is, with the rail's own label.
+ *
+ * It sits in the transcript's own empty state. Fixing the sentence left the act offered
+ * twice — a control in the composer slot, under a sentence pointing down at it, under a
+ * rail button of the same name — so the state that names the absence now carries the way
+ * out of it, and the composer slot keeps nothing but the reason a window that may only
+ * read is offered no control at all.
  */
 describe('the entrance', () => {
   const NO_SESSIONS = { count: 0, sessions: [] };
@@ -469,17 +474,17 @@ describe('the entrance', () => {
   it('replaces the disabled field with one control in the rail’s words', async () => {
     const user = userEvent.setup();
     const daemon = renderEmpty();
-    await screen.findByText('No session open');
+    const empty = (await screen.findByText('No session open')).closest('.rh-state') as HTMLElement;
 
-    // Nothing to type into and no Send to disable: the slot holds the act that has to
-    // happen first, and nothing that pretends to be usable.
+    // Nothing to type into and no Send to disable, and no second copy of the act in the
+    // composer slot either: the state that names the absence holds the one way out of it.
     expect(screen.queryByRole('textbox', { name: 'Message' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Send' })).toBeNull();
-    const entrance = document.querySelector('.rh-web-entrance') as HTMLElement;
-    expect(within(entrance).getByRole('button', { name: 'New session' })).toBeInTheDocument();
+    expect(document.querySelector('.rh-web-entrance')).toBeNull();
+    expect(within(empty).getByRole('button', { name: 'New session' })).toBeInTheDocument();
 
     // The same act the rail runs, asked the same way: visibility is fixed at creation.
-    await user.click(within(entrance).getByRole('button', { name: 'New session' }));
+    await user.click(within(empty).getByRole('button', { name: 'New session' }));
     const dialog = await screen.findByRole('dialog', { name: 'New session' });
     await user.click(within(dialog).getByRole('button', { name: 'Create session' }));
 
@@ -493,19 +498,18 @@ describe('the entrance', () => {
     await waitFor(() => expect(box).toHaveFocus());
   });
 
-  it('names the same control, by the same name, in the empty transcript', async () => {
+  it('offers the act once, and points at nothing', async () => {
     renderEmpty();
-    await screen.findByText('No session open');
-    const sentence = screen.getByText(
-      'Choose New session below to ask a question against this project.',
-    );
-    expect(sentence).toBeInTheDocument();
-    // The name it uses is a control that is actually on this screen.
-    expect(
-      within(document.querySelector('.rh-web-entrance') as HTMLElement).getByRole('button', {
-        name: 'New session',
-      }),
-    ).toBeInTheDocument();
+    const empty = (await screen.findByText('No session open')).closest('.rh-state') as HTMLElement;
+
+    // The empty state teaches what a session is instead of directing the eye somewhere
+    // else on the screen; the sentence it used to print ("Choose New session below…")
+    // named a control that stood right under it and a third time in the rail.
+    expect(empty).toHaveTextContent(/A session is one conversation held against this project/);
+    expect(screen.queryByText(/below/)).toBeNull();
+    // One in the state, one in the rail, and none in between.
+    expect(screen.getAllByRole('button', { name: 'New session' })).toHaveLength(2);
+    expect(within(empty).getAllByRole('button', { name: 'New session' })).toHaveLength(1);
   });
 
   it('states the reason at the control when a window may only read', async () => {
@@ -513,7 +517,8 @@ describe('the entrance', () => {
     await screen.findByText('No session open');
 
     // No control anywhere — the rail withdraws it too — and the reason is in the slot the
-    // control would have filled, not six hundred pixels away.
+    // missing control would have filled, which for a window that may only read is the
+    // message box.
     expect(screen.queryByRole('button', { name: 'New session' })).toBeNull();
     const entrance = document.querySelector('.rh-web-entrance') as HTMLElement;
     expect(entrance).toHaveTextContent(/may read and propose/);
