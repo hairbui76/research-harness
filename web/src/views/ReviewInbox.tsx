@@ -409,7 +409,7 @@ export function ReviewInboxPage() {
                 now, in the words of the filters themselves, with the way out beside it. */}
             {restored ? (
               <p className="rh-web-inbox-remembered rh-text-secondary">
-                {`Showing ${filterSentence(filters)}, remembered from your last visit.`}{' '}
+                {`Narrowed to ${filterSentence(filters)}, remembered from your last visit.`}{' '}
                 <Button size="sm" variant="ghost" onClick={() => setFilters(NO_FILTERS)}>
                   Clear the filters
                 </Button>

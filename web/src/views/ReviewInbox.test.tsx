@@ -1030,7 +1030,7 @@ describe('the filters a researcher comes back to', () => {
     const remembered = rememberedLine();
     expect(remembered).not.toBeNull();
     expect(remembered).toHaveTextContent(
-      'Showing Routine verified candidates only, remembered from your last visit.',
+      'Narrowed to Routine verified candidates only, remembered from your last visit.',
     );
 
     await user.click(within(remembered!).getByRole('button', { name: 'Clear the filters' }));

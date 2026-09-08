@@ -429,7 +429,7 @@ test('the inbox opens on the queue the last visit left, and says what it is hidi
   await expect(page.getByText('Routine verified candidates (1)')).toBeVisible();
   const remembered = page.locator('.rh-web-inbox-remembered');
   await expect(remembered).toContainText(
-    'Showing Routine verified candidates only, remembered from your last visit.',
+    'Narrowed to Routine verified candidates only, remembered from your last visit.',
   );
 
   // And what it is keeping off the screen, group by group: a queue that hides the group the
