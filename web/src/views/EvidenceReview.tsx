@@ -223,8 +223,20 @@ export function EvidenceReviewPage() {
     // this screen has: the pane when the panes sit side by side, the page when they stack.
     window.addEventListener('scroll', schedule, true);
     window.addEventListener('resize', schedule);
+    // Scrolling is not the only thing that moves a panel under the card. The source page
+    // arrives from a PDF engine that decodes it after the screen has drawn, and where the
+    // panes stack that lands a thousand pixels of page above the proposal, which moves every
+    // panel without any scroll event to say so. Both panes are watched; neither of their
+    // heights depends on the answer, so watching them cannot make the answer oscillate.
+    // jsdom has neither a layout engine nor a `ResizeObserver`, and with no layout there is
+    // nothing to observe: the line stays empty there, which is what it should be.
+    const resized =
+      typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
+    resized?.observe(proposal);
+    if (resized !== null && sourceRef.current !== null) resized.observe(sourceRef.current);
     return () => {
       if (frame !== 0) window.cancelAnimationFrame(frame);
+      resized?.disconnect();
       window.removeEventListener('scroll', schedule, true);
       window.removeEventListener('resize', schedule);
     };
