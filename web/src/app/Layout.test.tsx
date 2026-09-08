@@ -100,6 +100,10 @@ describe('the project rail', () => {
     );
     // Taxonomy and Synthesis swapped on 2026-09-08 (roadmap 3L, option A): Taxonomy is part
     // of the record and Synthesis is an output, and a group is a run of consecutive items.
+    // Evidence joined "The record" between Corpus and Claims later the same day (wave six),
+    // where PRODUCT §26 lists it: the accepted readings are what a source gave and what a
+    // claim rests on, and until then the product's largest body of accepted state had no
+    // page. The list is one longer on purpose; no existing entry moved.
     expect(items).toEqual([
       'Conversation',
       'Overview',
@@ -107,6 +111,7 @@ describe('the project rail', () => {
       'Conflicts',
       'Stale',
       'Corpus',
+      'Evidence',
       'Claims',
       'Questions',
       'Taxonomy',
@@ -128,7 +133,7 @@ describe('the project rail', () => {
     await screen.findByRole('navigation', { name: 'Project navigation' });
     for (const [name, labels] of [
       ['Waiting', ['Review inbox', 'Conflicts', 'Stale']],
-      ['The record', ['Corpus', 'Claims', 'Questions', 'Taxonomy']],
+      ['The record', ['Corpus', 'Evidence', 'Claims', 'Questions', 'Taxonomy']],
       ['Outputs', ['Synthesis', 'Manuscript']],
     ] as const) {
       const group = screen.getByRole('list', { name });

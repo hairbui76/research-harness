@@ -61,6 +61,7 @@ export const CHORD_TIMEOUT = 1500;
  * | `g f` | Conflicts     | con**f**licts            |
  * | `g s` | Stale         | **S**tale                |
  * | `g c` | Corpus        | **C**orpus               |
+ * | `g e` | Evidence      | **E**vidence             |
  * | `g l` | Claims        | c**l**aims               |
  * | `g q` | Questions     | **Q**uestions            |
  * | `g t` | Taxonomy      | **T**axonomy             |
@@ -80,6 +81,7 @@ export const DESTINATION_CHORDS: Readonly<Record<string, string>> = {
   conflicts: 'f',
   stale: 's',
   corpus: 'c',
+  evidence: 'e',
   claims: 'l',
   questions: 'q',
   taxonomy: 't',
