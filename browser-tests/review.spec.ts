@@ -99,7 +99,7 @@ test('the queue can be searched, batched and reached from the keyboard', async (
   // which two keys get there without it, and shows that this screen has actions at all
   // before anything is typed (wave 5J).
   await page.keyboard.press('Control+k');
-  await expect(page.getByRole('dialog', { name: 'Go to, or do' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeVisible();
   await expect(page.getByRole('option', { name: /Corpus/ }).locator('kbd')).toHaveText(['g', 'c']);
   const actions = page.getByRole('group', { name: 'Actions' });
   await expect(actions).toBeVisible();

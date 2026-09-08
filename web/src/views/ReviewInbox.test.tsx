@@ -926,7 +926,7 @@ describe('the palette on the inbox', () => {
     await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     await user.keyboard('{Control>}k{/Control}');
 
-    const palette = screen.getByRole('dialog', { name: 'Go to, or do' });
+    const palette = screen.getByRole('dialog', { name: 'Command palette' });
     expect(within(palette).getByRole('option', { name: /Next candidate/ })).toBeInTheDocument();
   });
 });

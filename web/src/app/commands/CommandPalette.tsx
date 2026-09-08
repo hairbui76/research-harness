@@ -15,6 +15,11 @@
  * seeing a list of destinations with nothing saying that actions were on it at all; the
  * second section is on screen before anything is typed, and on a page that registers no
  * actions it still holds the shell's own.
+ *
+ * The dialog is named for what it is. It used to be titled "Go to, or do", which described
+ * the two sections rather than the object, and the sentence under the search box already
+ * counts both of them — so the title spent the one line a first-timer reads on something
+ * said twice, and never on the name of the thing that had appeared over their work.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogBody, DialogHeader, Input, useId } from '@research-harness/design';
@@ -104,7 +109,7 @@ export function CommandPalette() {
       data-shell-overlay=""
       initialFocusRef={inputRef}
     >
-      <DialogHeader>Go to, or do</DialogHeader>
+      <DialogHeader>Command palette</DialogHeader>
       <DialogBody className="rh-web-palette__body">
         <Input
           ref={inputRef}
