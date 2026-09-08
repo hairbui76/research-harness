@@ -540,8 +540,9 @@ and switches its whole arrangement below 960px - three columns become the file t
 one tab strip, where the source, the PDF and the audit inspector take turns over the
 document area - because on a 1024px screen the shell's rail leaves it about 768px and a
 viewport query would call that wide; the diagnostics panel inside it queries its own width
-too (`rh-diagnostics`, narrow below 34rem: a row's message takes a line of its own rather
-than a few characters beside a fixed file position). The shell keeps its viewport query
+too (`rh-diagnostics`, narrow below 34rem: a finding's foot stops pushing its act to the far
+end, so the severity, the file position and the act read as one left-aligned group once they
+wrap). The shell keeps its viewport query
 because the shell is the window. Every overlay portals to `document.body`, which is what
 makes containment safe.
 
@@ -642,6 +643,19 @@ hairline above a decision prompt. Tabs draw their 2px marker in primary ink on t
 - **Internal Padding:** small 8px 12px, medium 12px 16px, large 16px 24px, applied to each
   section; header is `h3` above a bottom hairline, footer is muted `body-sm` below a top one.
 - **Selected evidence** takes the accent edge; a stale card turns its quote rule ochre.
+- **A manuscript finding** — a compiler diagnostic or an audit finding — is a stack of
+  sentences and never a lint row of columns. The manuscript's own sentence is quoted first,
+  behind the reading surface's start rule; then the finding itself as one sentence, opening
+  with the kind in the daemon's vocabulary (`MANUSCRIPT_FINDING_META`: "Unregistered claim",
+  "Wording stronger than the Claim") in the sentence's own type, never as a chip above it;
+  then a foot holding the severity, the file position in mono muted ink, and the acts. The
+  severity is a described term — `Must fix` / `Review` / `Note`, drawn in the scientific
+  status family rather than in feedback ink, because a sentence accepted state cannot carry
+  is a statement about scientific truth — and it prints its meaning on the page to focus, to
+  a resting pointer and to a long press, like every other controlled word. The kind decides
+  which single act leads: the Claim for wording, numbers and staleness, the source for a
+  sentence attached to nothing, an unresolved citation or a broken anchor; the other act, if
+  the finding carries one, follows it as a ghost button.
 
 ### Inputs / Fields
 - **Style:** `pane` fill, 1px `strong` stroke (the edge is what locates the control), 4px
