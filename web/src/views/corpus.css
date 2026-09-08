@@ -191,6 +191,19 @@
   color: var(--rh-text-primary);
 }
 
+/*
+ * The one control the narrow pane gets instead of the strip.
+ *
+ * Both are always drawn; the container query below hides one of them outright, so exactly
+ * one is in the page and in the accessibility tree at any width. `display: none` rather
+ * than a visually-hidden class on purpose: a hidden duplicate of the corpus's order is a
+ * second control a screen reader would have to tell apart from the first.
+ */
+.rh-web-corpus__order {
+  display: none;
+  inline-size: min(22rem, 100%);
+}
+
 .rh-web-corpus__list {
   flex: 1 1 auto;
   min-block-size: 0;
@@ -337,28 +350,22 @@
  */
 @container rh-page (width < 52rem) {
   /*
-   * The strip stops being a ruler over columns that no longer exist and becomes the one
-   * thing still worth having here: the orders this corpus can be read in, wrapping. Hiding
-   * it whole — which is what it did before the heads became controls — would take sorting
-   * away from every narrow pane, and a control that exists only at desk width is a control
-   * a researcher cannot rely on.
+   * The strip goes, and the orders it held come back as one labelled control.
+   *
+   * A row of column names is a ruler over columns, and below this width there are none:
+   * the rows are a work over labelled pairs, so "Work  Accepted ↓  Cited by  Came in"
+   * standing over them read as a table head with no table under it — four words a
+   * researcher has to decode before finding that half of them are controls. Wrapping the
+   * strip, which is what it did before, only made the ruler ragged. Sorting still cannot
+   * be a desk-width-only control, so the orders themselves are asked for the way a narrow
+   * pane asks for one choice out of eight: a select that names what it does.
    */
-  .rh-web-corpus__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--rh-space-1) var(--rh-space-4);
-  }
-
-  /* The two columns nothing can be ordered by go with the columns they named: on their own
-     they would be two words in a row of controls. */
-  .rh-web-corpus__head .rh-web-corpus__column:not(:has(.rh-web-corpus__sort)) {
+  .rh-web-corpus__head-table {
     display: none;
   }
 
-  .rh-web-corpus__head .rh-web-corpus__column:nth-child(4),
-  .rh-web-corpus__head .rh-web-corpus__column:nth-child(5) {
-    text-align: start;
+  .rh-web-corpus__order {
+    display: block;
   }
 
   .rh-web-corpus__cells {

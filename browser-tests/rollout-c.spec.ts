@@ -333,6 +333,12 @@ test('a project with no corpus at all keeps its frame and offers the way in', as
  * accepted against it, and sixty synthetic sources behind it. The paper is `W0001`, so it
  * leads the corpus's own order too — which is why the ascending half of each assertion is
  * the one that matters. It is not merely last there; it is outside the window.
+ *
+ * Below the stacking breakpoint there are no columns to head, so the same orders are one
+ * labelled select instead — a strip reading "Work  Accepted ↓  Cited by  Came in" over
+ * stacked cards is a table head with no table under it. This test runs at both widths and
+ * asks for each order through whichever control the width offers; every assertion under it
+ * is about the corpus, and is the same at both.
  */
 test('the corpus columns are the orders it can be read in, and the daemon takes them', async ({
   page,
@@ -352,8 +358,48 @@ test('the corpus columns are the orders it can be read in, and the daemon takes 
   const count = page.getByRole('status').filter({ hasText: `${corpus.works} works.` });
   await expect(count).toBeVisible();
   const rows = page.locator('.rh-web-corpus__row');
-  const accepted = page.getByRole('columnheader', { name: 'Accepted' });
+  // Selected by class rather than by role, because one of the two controls is hidden at any
+  // width and a hidden element is in no accessibility tree. `aria-sort` is still asserted
+  // on the strip at both widths: it is the state, and the state is one.
+  const accepted = page.locator('.rh-web-corpus__column').filter({ hasText: 'Accepted' }).first();
+  const strip = page.locator('.rh-web-corpus__head-table');
+  const select = page.getByRole('combobox', { name: 'Order by' });
   const withEvidence = rows.filter({ has: page.getByRole('link', { name: 'W0001' }) });
+
+  /*
+   * Exactly one control for the corpus's order, chosen by the width.
+   *
+   * Both are in the page and a container query hides one outright, so a screen reader is
+   * never offered the order twice — which is the whole reason the narrow answer is a second
+   * control rather than the same strip wrapped.
+   */
+  const wide = await strip.isVisible();
+  await expect(select).toBeVisible({ visible: !wide });
+  expect(
+    await strip.getByRole('columnheader').count(),
+    'the columns this width exposes',
+  ).toBe(wide ? 6 : 0);
+
+  /** Ask for one order, through whichever control this width offers. */
+  const readBy = async (
+    column: string,
+    field: string,
+    descending: boolean | null,
+  ): Promise<void> => {
+    const wanted = descending === null ? 'none' : descending ? 'descending' : 'ascending';
+    const head = page.locator('.rh-web-corpus__column').filter({ hasText: column }).first();
+    if (!wide) {
+      await select.selectOption(descending === null ? '' : `${field}:${descending ? 'desc' : 'asc'}`);
+      return;
+    }
+    // The head cycles: the useful end of the column, the other end, then the corpus's own
+    // order. Pressing until it reports the wanted state asks for exactly that order and
+    // never more than the cycle is long.
+    for (let press = 0; press < 3; press += 1) {
+      if ((await head.getAttribute('aria-sort')) === wanted) return;
+      await page.getByRole('columnheader', { name: column }).getByRole('button').click();
+    }
+  };
 
   // Nothing is ordered until something asks: the corpus arrives in the daemon's own order,
   // and the strip says so on every column that could change it.
@@ -362,7 +408,7 @@ test('the corpus columns are the orders it can be read in, and the daemon takes 
 
   // Most accepted evidence first. The one work anything has been accepted from leads, and
   // the sentence the corpus is counted in says how it is being read.
-  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await readBy('Accepted', 'evidence', true);
   await expect(
     page.getByRole('status').filter({ hasText: 'Most accepted evidence first.' }),
   ).toBeVisible();
@@ -379,7 +425,7 @@ test('the corpus columns are the orders it can be read in, and the daemon takes 
 
   // The other way round is the half a page that never asked the daemon could not answer:
   // the work with evidence is not last on screen, it is off the window entirely.
-  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await readBy('Accepted', 'evidence', false);
   await expect(
     page.getByRole('status').filter({ hasText: 'Least accepted evidence first.' }),
   ).toBeVisible();
@@ -387,24 +433,25 @@ test('the corpus columns are the orders it can be read in, and the daemon takes 
   await expect(withEvidence).toHaveCount(0);
   await expect(rows.first().locator('.rh-web-corpus__cell').nth(3)).toContainText('0');
 
-  // And a third press gives the corpus back the order the daemon sent it in, so a sort is
-  // never something a researcher has to reload the page to undo.
-  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  // And the corpus's own order is one act away either way, so a sort is never something a
+  // researcher has to reload the page to undo.
+  await readBy('Accepted', 'evidence', null);
   await expect(count).toHaveText(`${corpus.works} works.`);
   await expect(accepted).toHaveAttribute('aria-sort', 'none');
   await expect(rows.first().getByRole('link', { name: 'W0001' })).toBeVisible();
 
   // The order outlives the visit: it is remembered per project, so the corpus opens the
   // way it was left rather than in the daemon's order followed by a re-sort.
-  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await readBy('Accepted', 'evidence', true);
   await expect(accepted).toHaveAttribute('aria-sort', 'descending');
   await page.reload();
   await expect(
     page.getByRole('status').filter({ hasText: 'Most accepted evidence first.' }),
   ).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Accepted' })).toHaveAttribute(
-    'aria-sort',
-    'descending',
-  );
+  await expect(
+    page.locator('.rh-web-corpus__column').filter({ hasText: 'Accepted' }).first(),
+  ).toHaveAttribute('aria-sort', 'descending');
+  // The control the width offers reads the order it left, in the same words the count does.
+  if (!wide) await expect(select).toHaveValue('evidence:desc');
   expect(errors).toEqual([]);
 });

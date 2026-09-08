@@ -1272,6 +1272,69 @@ describe('the order a corpus is read in', () => {
     );
   });
 
+  /*
+   * The same orders, as the control a narrow pane can be honest about.
+   *
+   * Below the stacking breakpoint the rows are a work over labelled pairs, so a strip
+   * reading "Work  Accepted ↓  Cited by  Came in" over them is a table head with no table
+   * under it. The orders themselves still have to be reachable there — a control that
+   * exists only at desk width is one a researcher cannot rely on — so both are drawn and
+   * the container query shows exactly one. What is asserted here is that they are one
+   * state: jsdom applies no container query, so both are in the page and either can be
+   * driven.
+   */
+  it('offers the same orders as one labelled control', async () => {
+    const user = userEvent.setup();
+    const daemon = orderableDaemon();
+    renderView(<CorpusPage />, { daemon, route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    const select = screen.getByRole('combobox', { name: 'Order by' });
+    // The corpus's own order is a real answer, so it leads and is what is chosen with none.
+    expect(select).toHaveValue('');
+    expect(
+      [...select.querySelectorAll('option')].map((option) => option.textContent),
+    ).toEqual([
+      'The corpus’s own order',
+      'In title order, A to Z',
+      'In title order, Z to A',
+      'Most accepted evidence first',
+      'Least accepted evidence first',
+      'Most cited first',
+      'Least cited first',
+      'Newest first',
+      'Oldest first',
+    ]);
+
+    await user.selectOptions(select, 'claims:desc');
+    await waitFor(() =>
+      expect(worksRequests(daemon)).toContainEqual({ order: 'claims', descending: true }),
+    );
+    // One state, not two ways to sort: the strip marks the column the select just chose,
+    // the sentence beside the count reads the same order, and the browser remembers it.
+    await waitFor(() => expect(columnHead('Cited by')).toHaveAttribute('aria-sort', 'descending'));
+    expect(corpusCount()).toHaveTextContent('3 works. Most cited first.');
+    expect(window.localStorage.getItem(corpusOrderKey(null))).toBe(
+      '{"field":"claims","descending":true}',
+    );
+
+    // And back, through the same control: the corpus's own order is one press away.
+    await user.selectOptions(select, '');
+    await waitFor(() => expect(columnHead('Cited by')).toHaveAttribute('aria-sort', 'none'));
+    expect(window.localStorage.getItem(corpusOrderKey(null))).toBeNull();
+  });
+
+  it('follows a column head with the select, so neither can disagree with the other', async () => {
+    const user = userEvent.setup();
+    renderView(<CorpusPage />, { daemon: orderableDaemon(), route: '/corpus', path: '/corpus' });
+
+    await waitFor(() => expect(corpusCount()).toHaveTextContent('3 works.'));
+    await user.click(within(columnHead('Came in')).getByRole('button', { name: 'Came in' }));
+    await waitFor(() =>
+      expect(screen.getByRole('combobox', { name: 'Order by' })).toHaveValue('added:desc'),
+    );
+  });
+
   it('has no automatically detectable accessibility violation while ordered', async () => {
     const user = userEvent.setup();
     const { container } = renderView(<CorpusPage />, {

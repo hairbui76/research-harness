@@ -67,6 +67,7 @@ import {
   FullPageWorkspace,
   Icon,
   Input,
+  Select,
   VirtualList,
   formatFileSize,
   humaniseResearchTokens,
@@ -497,6 +498,18 @@ export function CorpusPage() {
                     ))}
                   </div>
                 </div>
+                {/* And the same orders, as the one control that is honest below the
+                    stacking breakpoint. Both are always in the DOM and the container query
+                    shows exactly one with `display: none`, which takes the other out of the
+                    accessibility tree as well — so a screen reader is never offered the
+                    corpus's order twice. */}
+                <OrderSelect
+                  order={order}
+                  onChoose={(next) => {
+                    setOrder(next);
+                    writeCorpusOrder(projectId, next);
+                  }}
+                />
                 <VirtualList
                   className="rh-web-corpus__list"
                   label="Works in the corpus"
@@ -565,6 +578,64 @@ function ColumnHead({
         {chosen ? <Icon name={order.descending ? 'arrow-down' : 'arrow-up'} size={14} /> : null}
       </button>
     </span>
+  );
+}
+
+/**
+ * The orders this corpus can be read in, as one control.
+ *
+ * Below the stacking breakpoint there are no columns left: the row is a work over labelled
+ * pairs, and a strip reading "Work  Accepted ↓  Cited by  Came in" over it is a table head
+ * with no table under it — the shape a reader spends a moment decoding before finding that
+ * the words are controls. The orders are the half of that strip still worth having there,
+ * so they are asked for the way a narrow pane asks for one choice out of eight.
+ *
+ * It is the same state as the column heads, sent to the same `work.list` and remembered in
+ * the same place; nothing here is a second way to sort. Each option is the sentence the
+ * count already reads with, so the control and the page say the order in one set of words,
+ * and the corpus's own order leads because it is a real answer rather than a null one.
+ */
+function OrderSelect({
+  order,
+  onChoose,
+}: {
+  order: CorpusOrder | null;
+  onChoose: (order: CorpusOrder | null) => void;
+}) {
+  const options = COLUMNS.flatMap((column) =>
+    column.order === undefined
+      ? []
+      : [
+          { field: column.order.kind, descending: column.order.descendingFirst },
+          { field: column.order.kind, descending: !column.order.descendingFirst },
+        ],
+  );
+  const value = order === null ? '' : `${order.field}:${order.descending ? 'desc' : 'asc'}`;
+  return (
+    <Select
+      label="Order by"
+      size="sm"
+      fieldClassName="rh-web-corpus__order"
+      value={value}
+      onChange={(event) => {
+        const picked = event.target.value;
+        if (picked === '') return onChoose(null);
+        const [field = '', direction] = picked.split(':');
+        onChoose({ field, descending: direction === 'desc' });
+      }}
+    >
+      <option value="">The corpus’s own order</option>
+      {options.map((option) => (
+        <option
+          key={`${option.field}:${option.descending ? 'desc' : 'asc'}`}
+          value={`${option.field}:${option.descending ? 'desc' : 'asc'}`}
+        >
+          {/* The sentence without its full stop: the count reads it as a sentence, an
+              option is read as a name. */}
+          {orderSentence(option.field, option.descending).replace(/\.$/, '')}
+        </option>
+      ))}
+    </Select>
   );
 }
 
