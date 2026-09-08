@@ -298,3 +298,22 @@ check reported. Neither of the last two runs without the researcher's yes.
   asked anything — the alternative that costs nothing is an overlay, and an overlay is
   clipped by the first scrolling ancestor, so the space is the price of the promise until
   someone finds a third answer.
+- 2026-09-09 (fourth critique): dual-agent, isolated, A not told the earlier scores;
+  snapshot `web/.impeccable/critique/2026-09-08T22-48-55Z__src-app-layout-tsx.md`.
+  **31/40** (20 → 25 → 32 → 31): 1 P0, 2 P1, 2 P2. The reading moved from the language,
+  which it calls finished, to the composition: the canvas stops thinking above 1280px
+  (P0 — a 1620px card holding a 530px paragraph over 800px of void at 1920; cap the
+  column or make the width earn its keep); the one irreversible act shares a row of six
+  equal pills (P1 — Accept on its own row under the restatement it agrees to, the rest
+  behind a disclosure, a receipt after); "needs a researcher" prints eight links and "992
+  more" at scale (P1 — the panel's shape follows the count); wave six's reserved hint
+  line reads as a ~55px hole in every queue row and the Number card is cut mid-row under
+  the Decide panel (P2 — reserve on the group or render in an unclipped layer; continue
+  the cut rows under their own heading); the rail's counts vanish behind one icon at 768
+  while the path bar keeps a band (P2 — an attention strip in the narrow header). Both
+  trees scan clean; the browser detector's 39 hits are false positives but one 13px
+  gutter on the composer's destination line at 768. Wave seven's backlog is this list plus
+  the batch's: the manuscript route at 768 stating one state three ways; the inspector's
+  six tabs duplicating five rail destinations; `Readable: yes/no` as bare text; the
+  palette unadvertised; the empty Overview as five "Nothing…" cards; the toolbar badges
+  that grow their header when described; two clock formats one click apart.
