@@ -149,6 +149,28 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
   // One control is not a crowd: an overflow holding a single item hides it for nothing.
   const folded = secondaryActions === 'menu' && secondary.length > 1;
 
+  /** The runtime that answered this turn, when a runtime did. */
+  const answered =
+    message.provider === undefined && message.model === undefined
+      ? null
+      : {
+          ...(message.provider === undefined ? {} : { provider: message.provider }),
+          ...(message.model === undefined ? {} : { model: message.model }),
+        };
+
+  /**
+   * The row's identity, kept where the receipt is rather than printed above the prose.
+   *
+   * The id is how this turn is cited, deep-linked and promoted, and the attempt number is
+   * how a retried question is told apart from the one it retried — both are things a
+   * researcher goes looking for, not things they read. So they head the overflow, beside
+   * `Context used`, and "attempt 1 of 1" is never said at all.
+   */
+  const identity =
+    message.attempt !== undefined && message.attempts !== undefined && message.attempts > 1
+      ? `${message.id} · attempt ${message.attempt} of ${message.attempts}`
+      : message.id;
+
   /*
    * The act that turns a conversation into scientific state, with its name on it.
    *
@@ -196,23 +218,34 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
           <Icon name={role.icon} size={16} />
           <span className="rh-message__role-label">{message.author ?? role.label}</span>
         </span>
+        {/*
+          What the strip says, and what it stopped saying.
+
+          It used to print five machine tokens on every single row — `M0002 2026-09-08
+          01:51 scripted scripted-1 attempt 1` — which is a receipt header, not a
+          conversation. Two of those are facts a person reads: when the turn happened, and
+          which runtime answered it. The row's own identity and which attempt it is are
+          what a receipt needs rather than what a reader needs, so they moved into the
+          overflow this row already carries, one press from the receipt itself.
+        */}
         <span className="rh-message__meta">
-          <span className="rh-message__id">{message.id}</span>
           <time className="rh-message__time" dateTime={message.createdAt}>
             {formatTime(message.createdAt)}
           </time>
-          {message.provider !== undefined ? (
-            <span className="rh-message__provider">{message.provider}</span>
-          ) : null}
-          {message.model !== undefined ? (
-            <span className="rh-message__model">{message.model}</span>
-          ) : null}
-          {message.attempt !== undefined ? (
-            <span className="rh-message__attempt">
-              attempt {message.attempt}
-              {message.attempts !== undefined ? ` of ${message.attempts}` : ''}
+          {answered === null ? null : (
+            <span className="rh-message__answered">
+              Answered by{' '}
+              {answered.provider === undefined ? null : (
+                <>
+                  <span className="rh-message__provider">{answered.provider}</span>
+                  {answered.model === undefined ? null : ' · '}
+                </>
+              )}
+              {answered.model === undefined ? null : (
+                <span className="rh-message__model">{answered.model}</span>
+              )}
             </span>
-          ) : null}
+          )}
           {message.status === 'streaming' ? (
             <Badge tone="accent" icon="loader" size="sm">
               Streaming
@@ -255,15 +288,17 @@ export const Message = forwardRef<HTMLElement, MessageProps>(function Message(
               <IconButton icon="more-horizontal" label="More actions" size="sm" />
             </Menu.Trigger>
             <Menu.Content aria-label={`More actions for ${message.id}`}>
-              {secondary.map((item) => (
-                <Menu.Item
-                  key={item.key}
-                  icon={<Icon name={item.icon} size={16} />}
-                  onSelect={item.run}
-                >
-                  {item.label}
-                </Menu.Item>
-              ))}
+              <Menu.Group label={identity}>
+                {secondary.map((item) => (
+                  <Menu.Item
+                    key={item.key}
+                    icon={<Icon name={item.icon} size={16} />}
+                    onSelect={item.run}
+                  >
+                    {item.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Group>
             </Menu.Content>
           </Menu>
         ) : (

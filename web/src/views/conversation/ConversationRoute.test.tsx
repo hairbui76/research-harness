@@ -182,9 +182,12 @@ describe('reopening a session', () => {
 
     await transcriptReady();
     expect(screen.getByRole('heading', { name: 'Latency study' })).toBeInTheDocument();
-    // Both turns are there, oldest first, with their stable ids.
-    expect(screen.getByText('M0041')).toBeInTheDocument();
-    expect(screen.getByText('M0042')).toBeInTheDocument();
+    // Both turns are there, oldest first, with their stable ids. The id is no longer
+    // printed over the prose — wave six moved it into the row's own overflow, beside the
+    // receipt — so the row is identified by the group its controls belong to, which is
+    // where the id now lives on every row whether or not it has an overflow.
+    expect(screen.getByRole('group', { name: 'Actions for M0041' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Actions for M0042' })).toBeInTheDocument();
     // This session was opened private, and the workspace keeps saying so on every screen.
     expect(screen.getAllByText('Private').length).toBeGreaterThan(0);
 
@@ -742,13 +745,28 @@ describe('sending', () => {
     const user = userEvent.setup();
     renderConversation({ daemon });
 
+    /*
+     * Which attempt is on screen is still stated; it is stated where a receipt is read
+     * rather than over the prose. Wave six took `attempt 1` off every row — most rows have
+     * exactly one attempt and the line said nothing — and put the row's identity, attempt
+     * included, at the head of the overflow the receipt already sits in.
+     */
+    const shownAttempt = async (): Promise<string> => {
+      const rows = screen.getAllByRole('button', { name: 'More actions' });
+      await user.click(rows[rows.length - 1] as HTMLElement);
+      const overflow = await screen.findByRole('menu', { name: /^More actions for / });
+      const label = overflow.querySelector('.rh-menu__group-label')?.textContent ?? '';
+      await user.keyboard('{Escape}');
+      return label;
+    };
+
     // The newest attempt is the one on screen.
     await screen.findByText('Under batching the tail flattens across the whole corpus.');
-    expect(screen.getByText('attempt 2 of 2')).toBeInTheDocument();
+    expect(await shownAttempt()).toMatch(/attempt 2 of 2$/);
 
     await user.click(screen.getByRole('button', { name: 'Previous attempt' }));
     await screen.findByText('Under batching the tail flattens, but the');
-    expect(screen.getByText('attempt 1 of 2')).toBeInTheDocument();
+    expect(await shownAttempt()).toMatch(/attempt 1 of 2$/);
   });
 
   it('renders a refusal and leaves the draft untouched', async () => {

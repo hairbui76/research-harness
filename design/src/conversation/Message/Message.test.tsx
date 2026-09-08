@@ -16,13 +16,43 @@ import { Message } from './Message';
 const plain = (text: string) => <p>{text}</p>;
 
 describe('Message', () => {
-  it('records who said it, when, and with which model', () => {
+  /*
+   * The strip printed `M0042 2026-09-03 14:20 Anthropic claude-opus-5 attempt 2 of 2` over
+   * every turn — a receipt header above a paragraph of prose. Two of those five are facts
+   * a person reads, and they stay; the id and the attempt are what a receipt needs, and
+   * the assertions for them moved to the overflow that carries the receipt.
+   */
+  it('records who said it, when, and which runtime answered', () => {
     render(<Message message={SAMPLE_ASSISTANT_MESSAGE} renderMarkdown={plain} />);
     expect(screen.getByText('Assistant')).toBeInTheDocument();
-    expect(screen.getByText('M0042')).toBeInTheDocument();
+    expect(screen.getByText(/Answered by/)).toBeInTheDocument();
     expect(screen.getByText('Anthropic')).toBeInTheDocument();
     expect(screen.getByText('claude-opus-5')).toBeInTheDocument();
-    expect(screen.getByText('attempt 2 of 2')).toBeInTheDocument();
+    // Not over the prose: neither the row's id nor which attempt it is belongs there.
+    expect(screen.queryByText('M0042')).toBeNull();
+    expect(screen.queryByText(/attempt 2 of 2/)).toBeNull();
+  });
+
+  it('keeps the row’s id and attempt with the receipt, in the overflow', async () => {
+    const user = userEvent.setup();
+    render(
+      <Message
+        message={SAMPLE_ASSISTANT_MESSAGE}
+        renderMarkdown={plain}
+        secondaryActions="menu"
+        onCopy={() => undefined}
+        onRetry={() => undefined}
+        onOpenReceipt={() => undefined}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    const overflow = await screen.findByRole('menu', { name: 'More actions for M0042' });
+    // The identity heads the group the receipt sits in, so what the receipt names and what
+    // opens it are read together.
+    expect(within(overflow).getByText('M0042 · attempt 2 of 2')).toBeInTheDocument();
+    expect(
+      within(overflow).getByRole('menuitem', { name: 'Context used (CP0007)' }),
+    ).toBeInTheDocument();
   });
 
   it('formats the timestamp without depending on a locale', () => {
