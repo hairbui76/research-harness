@@ -281,6 +281,7 @@ export type {
 export {
   AuthorityBadge,
   DescribedTerm,
+  useDescribedTerm,
   EntityRef,
   SourceAnchor,
   EvidenceCard,
@@ -340,6 +341,7 @@ export {
 } from './research';
 export type {
   AuthorityBadgeProps,
+  DescribedTermParts,
   DescribedTermProps,
   EntityRefProps,
   EntityRefElement,

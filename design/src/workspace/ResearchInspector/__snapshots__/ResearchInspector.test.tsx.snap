@@ -1166,13 +1166,13 @@ exports[`ResearchInspector theme x density > matches the light / comfortable sna
             </span>
           </button>
           <button
-            aria-controls="rh-tabs-ID-panel-review"
+            aria-controls="rh-tabs-ra-panel-ID"
             aria-selected="false"
             class="rh-tabs__tab rh-research-inspector__tab"
             data-rh-roving-item=""
             data-state="idle"
             data-value="review"
-            id="rh-tabs-ID-tab-review"
+            id="rh-tabs-ra-tab-ID"
             role="tab"
             tabindex="-1"
             type="button"
@@ -1607,13 +1607,13 @@ exports[`ResearchInspector theme x density > matches the light / compact snapsho
             </span>
           </button>
           <button
-            aria-controls="rh-tabs-ID-panel-review"
+            aria-controls="rh-tabs-rb-panel-ID"
             aria-selected="false"
             class="rh-tabs__tab rh-research-inspector__tab"
             data-rh-roving-item=""
             data-state="idle"
             data-value="review"
-            id="rh-tabs-ID-tab-review"
+            id="rh-tabs-rb-tab-ID"
             role="tab"
             tabindex="-1"
             type="button"

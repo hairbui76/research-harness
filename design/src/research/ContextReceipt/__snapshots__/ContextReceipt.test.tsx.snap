@@ -14,7 +14,7 @@ exports[`ContextReceipt theme x density > matches the dark / comfortable snapsho
       class="rh-card__header"
     >
       <button
-        aria-controls="rh-context-ID-r2c-body"
+        aria-controls="rh-context-receipt-ID-body"
         aria-expanded="true"
         class="rh-context-receipt__toggle"
         type="button"
@@ -146,7 +146,7 @@ exports[`ContextReceipt theme x density > matches the dark / comfortable snapsho
     >
       <div
         class="rh-context-receipt__body"
-        id="rh-context-ID-r2c-body"
+        id="rh-context-receipt-ID-body"
       >
         <p
           class="rh-context-receipt__egress-note"
@@ -1151,7 +1151,7 @@ exports[`ContextReceipt theme x density > matches the dark / compact snapshot 1`
       class="rh-card__header"
     >
       <button
-        aria-controls="rh-context-ID-r2k-body"
+        aria-controls="rh-context-receipt-ID-body"
         aria-expanded="true"
         class="rh-context-receipt__toggle"
         type="button"
@@ -1283,7 +1283,7 @@ exports[`ContextReceipt theme x density > matches the dark / compact snapshot 1`
     >
       <div
         class="rh-context-receipt__body"
-        id="rh-context-ID-r2k-body"
+        id="rh-context-receipt-ID-body"
       >
         <p
           class="rh-context-receipt__egress-note"
@@ -2288,7 +2288,7 @@ exports[`ContextReceipt theme x density > matches the light / comfortable snapsh
       class="rh-card__header"
     >
       <button
-        aria-controls="rh-context-ID-r2s-body"
+        aria-controls="rh-context-receipt-ID-body"
         aria-expanded="true"
         class="rh-context-receipt__toggle"
         type="button"
@@ -2420,7 +2420,7 @@ exports[`ContextReceipt theme x density > matches the light / comfortable snapsh
     >
       <div
         class="rh-context-receipt__body"
-        id="rh-context-ID-r2s-body"
+        id="rh-context-receipt-ID-body"
       >
         <p
           class="rh-context-receipt__egress-note"
@@ -3425,7 +3425,7 @@ exports[`ContextReceipt theme x density > matches the light / compact snapshot 1
       class="rh-card__header"
     >
       <button
-        aria-controls="rh-context-ID-r34-body"
+        aria-controls="rh-context-receipt-ID-body"
         aria-expanded="true"
         class="rh-context-receipt__toggle"
         type="button"
@@ -3557,7 +3557,7 @@ exports[`ContextReceipt theme x density > matches the light / compact snapshot 1
     >
       <div
         class="rh-context-receipt__body"
-        id="rh-context-ID-r34-body"
+        id="rh-context-receipt-ID-body"
       >
         <p
           class="rh-context-receipt__egress-note"

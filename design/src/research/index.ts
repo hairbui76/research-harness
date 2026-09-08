@@ -8,8 +8,8 @@ export * from './labels';
 
 export { AuthorityBadge } from './AuthorityBadge';
 export type { AuthorityBadgeProps } from './AuthorityBadge';
-export { DescribedTerm } from './DescribedTerm';
-export type { DescribedTermProps } from './DescribedTerm';
+export { DescribedTerm, useDescribedTerm } from './DescribedTerm';
+export type { DescribedTermParts, DescribedTermProps } from './DescribedTerm';
 export { EntityRef } from './EntityRef';
 export type { EntityRefElement, EntityRefProps, EntityRefSize } from './EntityRef';
 export { SourceAnchor } from './SourceAnchor';
