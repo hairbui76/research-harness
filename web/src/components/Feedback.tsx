@@ -354,8 +354,41 @@ export function authorityOf(status: string, stale?: boolean): AuthorityLabel {
  * which owns their presentation. What is left is the review queue's categories, the
  * verifier's verdicts, screening states and anchor verdicts: application feedback about an
  * object, not a statement of its scientific authority.
+ *
+ * ## Green is the accepted state's, and nothing else's
+ *
+ * The feedback tones are not separate hues: `success` resolves to the same green as the
+ * accepted status family, `error` to the same red as contested, `info` to the same blue as
+ * candidate (`themes/dark.css`). So "a feedback tone on a scientific state" and "a
+ * scientific family colour on something that is not one" are, in a badge, the same defect
+ * — and DESIGN.md forbids both.
+ *
+ * Four words used to commit it by wearing `success`, and the corpus showed the cost:
+ * `Included` sat in the accepted green one column from a count of accepted evidence, so
+ * membership of the corpus and acceptance by a researcher read as the same thing. They are
+ * not the same thing, and the difference is the product's whole claim: only a persisted
+ * human decision creates authority. A verified extraction is not accepted; a supported
+ * claim is not accepted; an anchor that still replays is not accepted; a screened work is
+ * not accepted. None of them is green any more. Each keeps its own glyph, which is what
+ * told them apart in greyscale all along, and green now appears on exactly one badge in
+ * the cockpit: the one that says `Accepted`.
+ *
+ * `unverified` was the other crossing and the louder one. It is what the queue shows when
+ * *nothing has verified a candidate yet* — the resting state of every candidate ever
+ * staged — and it wore amber, the one hue the system reserves for application feedback,
+ * beside the scientific blue of `Candidate` on the same row. An absent verdict is not a
+ * warning. It is neutral, with the dashed circle that says "not settled".
+ *
+ * `unsupported` stays `error`. It is a claim's scientific state, so by the letter of the
+ * rule it should not wear a feedback tone at all — but the tone is the contested red, and
+ * `authorityOf` already paints an unsupported claim's marker in the contested family two
+ * columns away. Moving the badge into that family would be the product classifying an
+ * unsupported claim as contested, which is a scientific statement and belongs to the
+ * researcher, not to a stylesheet.
  */
-const TONES: Record<string, BadgeProps['tone']> = {
+export const TONES: Record<string, BadgeProps['tone']> = {
+  // A conflict, a broken anchor and a contradicted candidate are conditions the
+  // application is reporting about its own work, which is what a feedback tone is for.
   conflict: 'error',
   unsupported: 'error',
   error: 'error',
@@ -366,18 +399,21 @@ const TONES: Record<string, BadgeProps['tone']> = {
   warning: 'warning',
   relocated: 'warning',
   partially_supported: 'warning',
-  unverified: 'warning',
-  supported: 'success',
-  verified: 'success',
-  valid: 'success',
-  included: 'success',
   routine: 'neutral',
   info: 'info',
 };
 
+/**
+ * The glyph beside each word.
+ *
+ * It is the channel that survives greyscale, and for the words that carry no tone it is
+ * now the only channel there is: four neutral screening badges are told apart here and
+ * nowhere else.
+ */
 const ICONS: Record<string, IconName> = {
   // Screening (Product 14): where a work stands between a discovery result and the corpus.
-  // These four used to separate by tint alone, in a list that can run to a thousand rows.
+  // A discovery result, a screened candidate, a member and a rejection — four steps of one
+  // pipeline, none of which is accepted state, all of them neutral and told apart by these.
   discovered: 'search',
   screened: 'filter',
   included: 'library',
@@ -391,6 +427,8 @@ const ICONS: Record<string, IconName> = {
   relocated: 'arrow-right',
   partially_supported: 'info',
   insufficient_evidence: 'circle-help',
+  // Nothing has verified this yet: a dashed circle, because the verdict is not settled
+  // rather than bad.
   unverified: 'circle-dashed',
   supported: 'circle-check',
   verified: 'circle-check',

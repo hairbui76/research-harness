@@ -21,6 +21,7 @@ import {
   Fields,
   Loading,
   StatusBadge,
+  TONES,
   candidateName,
   fieldLabel,
 } from './Feedback';
@@ -429,6 +430,92 @@ describe('a definition row that carries a vocabulary word', () => {
       </Fields>,
     );
     await expectNoAxeViolations(container);
+  });
+});
+
+/**
+ * Which colour system a word may speak.
+ *
+ * DESIGN.md states the rule twice over — no scientific status colour on something that is
+ * not a scientific state, no feedback tone on something that is — and in a badge those are
+ * one rule, because `success`, `error` and `info` resolve to the accepted, contested and
+ * candidate families themselves. So the test is a list: every word this module tones, and
+ * what it is. A word that is a scientific state has no business here at all.
+ */
+describe('the colour a state is allowed to wear', () => {
+  /** Every toned word, and the application condition it reports. */
+  const FEEDBACK: Record<string, string> = {
+    conflict: 'a review queue category: why the queue is holding this',
+    high_risk: 'a review queue category',
+    ambiguous: 'a review queue category',
+    routine: 'a review queue category',
+    contradicted: 'a verifier’s verdict: what an independent read said',
+    partially_supported: 'a verifier’s verdict',
+    missing: 'an anchor’s replay result',
+    relocated: 'an anchor’s replay result',
+    error: 'the kind of a notice',
+    warning: 'the kind of a notice',
+    info: 'the kind of a notice',
+    unsupported:
+      'a claim’s scientific state, kept on the contested red the row’s own marker already ' +
+      'wears; moving it into that family would be the product classifying it, which is the ' +
+      'researcher’s to do',
+  };
+
+  it('tones nothing but application feedback', () => {
+    for (const value of Object.keys(TONES)) {
+      expect(FEEDBACK[value], `"${value}" wears a tone with no reason on record`).toBeTruthy();
+    }
+  });
+
+  it('spends the accepted green on accepted state and nowhere else', () => {
+    // A verified extraction, a supported claim, a valid anchor and an included work are
+    // all things a machine established. Only a persisted human decision creates authority,
+    // and green is what says so.
+    expect(Object.entries(TONES).filter(([, tone]) => tone === 'success')).toEqual([]);
+    for (const value of ['verified', 'supported', 'valid', 'included']) {
+      expect(TONES[value], `"${value}" is green again`).toBeUndefined();
+    }
+  });
+
+  it('keeps the feedback amber off a candidate that simply has no verdict yet', () => {
+    const { container } = render(
+      <StatusBadge status="unverified" vocabulary="verdict">
+        Unverified
+      </StatusBadge>,
+    );
+
+    // It sits beside the scientific blue of `Candidate` on the same row, and an absent
+    // verdict is not a warning: it is the resting state of every candidate ever staged.
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-tone', 'neutral');
+    expect(container.querySelector('[data-icon]')).toHaveAttribute('data-icon', 'circle-dashed');
+  });
+
+  /**
+   * Screening is a pipeline, not an authority: a discovery result, a screened candidate, a
+   * corpus member, a rejection. `Included` used to wear the accepted green one column from
+   * a count of accepted evidence, so a thousand-row corpus said "accepted" about
+   * membership. All four are neutral now, and the glyph is what tells them apart — which
+   * is the channel that survives greyscale anyway.
+   */
+  it.each([
+    ['discovered', 'search'],
+    ['screened', 'filter'],
+    ['included', 'library'],
+    ['excluded', 'circle-x'],
+  ])('draws screening state %s neutral, told apart by its own glyph', (state, glyph) => {
+    const { container } = render(<StatusBadge status={state} vocabulary="screeningState" />);
+
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-tone', 'neutral');
+    expect(container.querySelector('[data-icon]')).toHaveAttribute('data-icon', glyph);
+    expect(container.querySelector('.rh-badge')).not.toHaveAttribute('data-status');
+  });
+
+  it('still sends a scientific authority to its own family', () => {
+    const { container } = render(<StatusBadge status="accepted" vocabulary="evidenceStatus" />);
+
+    expect(container.querySelector('.rh-badge')).toHaveAttribute('data-status', 'accepted');
+    expect(container.querySelector('.rh-badge')).not.toHaveAttribute('data-tone');
   });
 });
 
