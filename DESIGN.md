@@ -659,14 +659,17 @@ hairline above a decision prompt. Tabs draw their 2px marker in primary ink on t
 - **Rail:** 16rem, `pane` surface, `ui` type, 8px padding. Nav items are 36px rows at
   0 8px with 6px corners, secondary ink; hover to `subtle` fill and primary ink; the current
   page takes `selected` fill, primary ink and `ui` weight. Counts sit in a mono pill with a
-  `subtle` hairline. A top hairline separates the nav from the session list; the provider's
-  standing sits in the foot in feedback ink with the word beside it.
+  `subtle` hairline, inset 1px block and 8px inline — one hairline's worth of block room, so
+  the pill has an inside while its height still comes from the text and never sets the row's.
+  A top hairline separates the nav from the session list; the provider's standing sits in the
+  foot in feedback ink with the word beside it.
 - **Tabs:** `ui` type on a 36px-minimum tab padded 8px 12px, secondary ink over a strip
   with a bottom hairline. Hover to `subtle` fill and primary ink; selected is primary ink
   with a 2px marker in that same ink on the bottom edge (right edge when vertical) — a tab
   strip is navigation, and navigation is never where the accent is spent. A strip that
   overflows fades its clipped end over 48px and shows a scroll control; the inspector's six
-  tabs wrap to two rows instead.
+  tabs wrap to two rows instead. A tab's count takes the rail's pill at the tighter inline
+  inset a strip has room for: 1px block, 4px inline.
 - **Skip link:** first in the tab order, `raised` fill with a `strong` hairline, off-canvas
   until focused.
 

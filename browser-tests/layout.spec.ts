@@ -446,3 +446,63 @@ test('the rail and Project Home offer the same project actions in the same words
   await page.screenshot({ path: info.outputPath('project-home-actions.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
+
+/**
+ * The count pills have an inside.
+ *
+ * The browser detector's `cramped-padding` findings on the third critique were the rail's
+ * and the inspector's count chips: a numeral with a 1px border on both block edges and no
+ * inset between them, which is a pill drawn as a box around a glyph. The rule the stylesheet
+ * states — height comes from the text, because neither a 36px nav row nor a strip holding
+ * six tabs can afford a count that sets the row height — stays; what changes is that there
+ * is now one hairline's worth of room inside the border.
+ */
+test('the rail and inspector count chips are inset from their own border', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await openWorkspace(page, request, info, 'Chip inset study');
+  await openRail(page);
+
+  const show = page.getByRole('button', { name: 'Show the research inspector', exact: true });
+  if ((await show.count()) > 0) await show.first().click();
+  await expect(page.getByRole('region', { name: 'Research inspector' })).toBeVisible();
+
+  const measured = await page.evaluate(() =>
+    ['.rh-project-rail__nav-count', '.rh-research-inspector__tab-count'].map((selector) => {
+      const node = document.querySelector(selector);
+      if (!(node instanceof HTMLElement)) return { selector, found: false };
+      const style = getComputedStyle(node);
+      return {
+        selector,
+        found: true,
+        top: Number.parseFloat(style.paddingTop),
+        bottom: Number.parseFloat(style.paddingBottom),
+        border: Number.parseFloat(style.borderTopWidth),
+        // The rule the chips keep: the box is the text's own line, plus the inset and border.
+        height: node.getBoundingClientRect().height,
+        line: Number.parseFloat(style.lineHeight) || Number.parseFloat(style.fontSize),
+      };
+    }),
+  );
+
+  for (const chip of measured) {
+    expect(chip.found, `${chip.selector} must be on screen to be measured`).toBe(true);
+    expect(chip.border, `${chip.selector} draws the hairline this inset answers`).toBeGreaterThan(0);
+    expect(
+      Math.min(chip.top!, chip.bottom!),
+      `${chip.selector} ran ${chip.top}px/${chip.bottom}px of block inset inside a border`,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      chip.height!,
+      `${chip.selector} must still take its height from the text`,
+    ).toBeLessThanOrEqual(chip.line! + 2 * (chip.top! + chip.border!) + 1);
+  }
+
+  await page.screenshot({ path: info.outputPath('count-chips.png'), fullPage: true });
+  expect(errors).toEqual([]);
+});
