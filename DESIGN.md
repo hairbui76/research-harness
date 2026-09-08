@@ -745,3 +745,4 @@ clipped or capped to the prose measure.
 - **Don't** use a cool grey, a bare pixel gap outside the 4px scale, a fluid `clamp()`
   size, a numeric border width, or a third motion duration.
 - **Don't** fetch anything at runtime: no remote `@import`, `url()`, font or icon.
+- **Green is the accepted state's.** A badge that reports a machine's result — included by screening, verified, supported, a valid anchor, or the absence of a verdict — is neutral, told apart by its glyph; only a persisted human acceptance wears the accepted family. Feedback tones are not separate hues, so this is one rule on a badge, not two.
