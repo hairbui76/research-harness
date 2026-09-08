@@ -92,13 +92,22 @@
 }
 
 /*
- * The destination and whatever capability note stands beside it, on one row.
+ * Everything under the box, in as few rows as it can be said in.
  *
- * They wrap onto separate lines rather than truncating: the destination keeps a line of
- * its own whenever both are present and the box is narrow, because half a destination is
- * worse than none.
+ * A column of lines rather than one wrapping row: the destination keeps a line of its own
+ * because half a destination is worse than none, and the quiet standing facts share the
+ * line below it. The inner gap is one step tighter than the composer's own, so the rows
+ * read as one block of small print rather than as three separate strips.
  */
 .rh-composer__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+  min-width: 0;
+}
+
+/* The keyboard hint and a capability note that has been read, on one line. */
+.rh-composer__hints {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

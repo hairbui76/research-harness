@@ -4,7 +4,9 @@ import type {
   DragEvent as ReactDragEvent,
   HTMLAttributes,
   KeyboardEvent as ReactKeyboardEvent,
+  MutableRefObject,
   ReactNode,
+  Ref,
 } from 'react';
 import { useId } from '../../hooks/useId';
 import { Button } from '../../primitives/Button';
@@ -106,6 +108,15 @@ export interface ComposerProps
   /** Overrides the keyboard hint under the box. */
   hint?: ReactNode;
   /**
+   * The message box itself, for a host that has to put the caret in it.
+   *
+   * The composer keeps the box's focus to itself in the ordinary course — send, stop and
+   * the reference picker all hand it back — so this exists for the one thing a host knows
+   * and this component cannot: that the researcher just opened the session they are about
+   * to type into.
+   */
+  textareaRef?: Ref<HTMLTextAreaElement>;
+  /**
    * Where an unpublished message would go, stated for as long as the composer is open.
    *
    * A standing fact, not an announcement: it keeps its own line beside the keyboard hint,
@@ -124,6 +135,16 @@ export interface ComposerProps
    * the thing that actually stopped a send.
    */
   note?: ReactNode;
+  /**
+   * Which line the capability note sits on.
+   *
+   * `standing` gives it a line of its own: an index state the researcher has not been told
+   * about yet is news, and news gets a line. `folded` puts it on the keyboard hint's line,
+   * where a fact that has already been read belongs — the two quietest things under the
+   * box share one row instead of taking one each. Nothing about the note's content or its
+   * action changes with the placement; only how much of the composer's height it costs.
+   */
+  notePlacement?: 'standing' | 'folded';
   /**
    * What the paperclip accepts, given to the paperclip.
    *
@@ -157,6 +178,7 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
     label = 'Message',
     placeholder = 'Ask about this project. Type @ to reference a work, evidence or claim.',
     maxRows = 12,
+    textareaRef: hostTextareaRef,
     disabled = false,
     blockedReasons,
     referenceResults = [],
@@ -170,6 +192,7 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
     hint,
     destination,
     note,
+    notePlacement = 'standing',
     attachHint,
     sendLabel = 'Send',
     className,
@@ -185,6 +208,20 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
   const [pickerLeft, setPickerLeft] = useState(0);
   const triggerStart = useRef<number | null>(null);
   const [dragging, setDragging] = useState(false);
+
+  /** The box, kept here and handed to the host as well when the host asked for it. */
+  const bindTextarea = useCallback(
+    (node: HTMLTextAreaElement | null): void => {
+      textareaRef.current = node;
+      if (typeof hostTextareaRef === 'function') hostTextareaRef(node);
+      // `RefObject.current` is typed read-only because React writes it; here React *is*
+      // writing it, one indirection later, which is what a merged ref is.
+      else if (hostTextareaRef) {
+        (hostTextareaRef as MutableRefObject<HTMLTextAreaElement | null>).current = node;
+      }
+    },
+    [hostTextareaRef],
+  );
 
   const blocked = blockedReasons !== undefined && blockedReasons.length > 0;
   const empty = value.text.trim().length === 0 && value.tokens.length === 0;
@@ -345,7 +382,7 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
 
       <div className="rh-composer__field">
         <Textarea
-          ref={textareaRef}
+          ref={bindTextarea}
           className="rh-composer__textarea"
           label={label}
           hideLabel
@@ -457,27 +494,40 @@ export const Composer = forwardRef<HTMLDivElement, ComposerProps>(function Compo
         </Button>
       </div>
 
-      <p className="rh-composer__hint" id={`${baseId}-hint`}>
-        {hint ?? (
-          <>
-            <Icon name="corner-down-left" size={14} />
-            <span>
-              Enter sends · Shift+Enter starts a new line · @ inserts a research reference
-            </span>
-          </>
-        )}
-      </p>
+      {/*
+        Everything the box has to say about itself, as few rows as it can say it in.
 
-      {destination === undefined && note === undefined ? null : (
-        <div className="rh-composer__footer">
-          {destination === undefined ? null : (
-            <p className="rh-composer__destination" id={`${baseId}-destination`}>
-              {destination}
-            </p>
-          )}
-          {note === undefined ? null : <div className="rh-composer__note">{note}</div>}
+        Four rows used to sit under the message box at 768px: the toolbar, the keyboard
+        hint, the destination, and the index state. The destination keeps a line of its
+        own — where an unpublished message is headed is the one fact here that changes
+        with what the researcher does. The other two are standing facts a researcher reads
+        once, so a note that has been read shares the hint's line rather than taking one.
+      */}
+      <div className="rh-composer__footer">
+        {destination === undefined ? null : (
+          <p className="rh-composer__destination" id={`${baseId}-destination`}>
+            {destination}
+          </p>
+        )}
+        {note !== undefined && notePlacement === 'standing' ? (
+          <div className="rh-composer__note">{note}</div>
+        ) : null}
+        <div className="rh-composer__hints">
+          <p className="rh-composer__hint" id={`${baseId}-hint`}>
+            {hint ?? (
+              <>
+                <Icon name="corner-down-left" size={14} />
+                {/* What `@` does is the placeholder's sentence already, and saying it twice
+                    is what made this line too long to share a row with anything. */}
+                <span>Enter sends · Shift+Enter starts a new line</span>
+              </>
+            )}
+          </p>
+          {note !== undefined && notePlacement === 'folded' ? (
+            <div className="rh-composer__note">{note}</div>
+          ) : null}
         </div>
-      )}
+      </div>
     </div>
   );
 });
