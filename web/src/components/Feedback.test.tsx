@@ -302,24 +302,31 @@ describe('a status badge', () => {
   });
 
   /*
-   * The slot, asserted as the rule it is.
+   * The slot, asserted as the rules it is.
    *
    * jsdom lays nothing out, so the browser suite is where the row is measured holding
-   * still (`browser-tests/vocabulary.spec.ts`). What can be asserted here is the rule that
-   * makes it hold: in a queue row and in a table cell, the sentence is not a box inside the
+   * still (`browser-tests/vocabulary.spec.ts`). What can be asserted here is the rules that
+   * make it hold: in a queue row and in a table cell, the sentence is not a box inside the
    * row — the wrapper disappears, and the sentence takes a full line that contributes
-   * nothing to what the row or the column asks for.
+   * nothing to what the row or the column asks for — and that line is *reserved*, so the
+   * row's box is the same whether the slot is empty or full.
    */
   it('gives a row’s sentence a line of its own, and no width of its own', () => {
     const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'styles.css'), 'utf8');
-    const wrapper =
-      /\.rh-web-row \.rh-authority-badge__described,\s*\.rh-web-row \.rh-described-term \{([^}]*)\}/.exec(
-        css,
-      )?.[1] ?? '';
-    const hint =
-      /\.rh-web-row \.rh-authority-badge__hint,\s*\.rh-web-row \.rh-described-term__hint \{([^}]*)\}/.exec(
-        css,
-      )?.[1] ?? '';
+    const rule = (selector: RegExp): string =>
+      new RegExp(`${selector.source}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+    const wrapper = rule(
+      /\.rh-web-row \.rh-authority-badge__described,\s*\.rh-web-row \.rh-described-term/,
+    );
+    const hint = rule(
+      /\.rh-web-row \.rh-authority-badge__hint,\s*\.rh-web-row \.rh-described-term__hint/,
+    );
+    const reserved = rule(
+      /\.rh-web-row:has\(> \.rh-authority-badge__described, > \.rh-described-term\)/,
+    );
+    const released = rule(
+      /\.rh-web-row:has\(\.rh-authority-badge__hint, \.rh-described-term__hint\)/,
+    );
 
     // The sentence is a member of the row, not of a box inside it that would widen.
     expect(wrapper, 'the row keeps the sentence inside a box').toContain('display: contents');
@@ -331,6 +338,29 @@ describe('a status badge', () => {
     expect(hint, 'the sentence sets a width of its own').toContain('inline-size: 0');
     // …and the percentage minimum is what gives it the whole line to be read on.
     expect(hint, 'the sentence is denied its own line').toContain('min-inline-size: 100%');
+
+    /*
+     * And the line is there before it is asked for.
+     *
+     * A line of its own held the row's first line still and pushed everything under it
+     * down — the citation, the quote, the reason and the row's own decision controls, and
+     * the next queue group with them. A row that can be asked a question carries the band
+     * from the start and hands it to the sentence that fills it, so nothing a researcher is
+     * about to press moves.
+     */
+    expect(reserved, 'a row that can be asked reserves nothing').toContain('padding-block-end');
+    expect(reserved, 'the band is not the sentence’s own type').toContain(
+      'calc(2 * var(--rh-type-body-sm-size) * var(--rh-type-body-sm-lh))',
+    );
+    // The row gap the sentence's own flex line brings with it is part of what the row
+    // grows by, so it is part of what is reserved.
+    expect(reserved, 'the slot forgets the line the sentence arrives on').toContain(
+      'calc(var(--rh-web-row-hint) + var(--rh-space-2))',
+    );
+    expect(released, 'the band is kept as well as filled').toContain('padding-block-end: 0');
+    expect(hint, 'a short sentence shrinks the row it opens in').toContain(
+      'min-block-size: var(--rh-web-row-hint)',
+    );
   });
 
   it('has no automatically detectable accessibility violation while describing itself', async () => {

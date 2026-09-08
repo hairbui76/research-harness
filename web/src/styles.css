@@ -118,14 +118,29 @@ body,
  * altogether; the sentence now opens to a pointer that rests, so the row has to hold still
  * on its own.
  *
- * It does, in three moves. The wrapper becomes `display: contents`, so the badge and its
+ * It does, in four moves. The wrapper becomes `display: contents`, so the badge and its
  * sentence are members of the row itself rather than of a box inside it. `order` sends the
  * sentence to the end, because in the source it stands between its own badge and whatever
  * follows — a second badge, the tier — and a line breaking there would push those onto the
  * next line, which is the same defect one item along. And the sentence takes a line of its
  * own: `min-inline-size: 100%` is wider than any line can hold, so the flex layout can only
- * put it on the next one, below every item already placed. The row's first line keeps its
- * height and its items keep their boxes; the row grows downward.
+ * put it on the next one, below every item already placed.
+ *
+ * The fourth move is the one wave six's finish review asked for. The first three hold the
+ * row's own line still and let the row grow downward — which was enough for the link the
+ * pointer was aiming at, and not enough for anything under it: resting on "Tier 2 — deep
+ * review" pushed the citation, the quote, the reason and `Reject / Defer / Open to decide`
+ * down 46px, and the next queue group with them. A hint may never move what a researcher
+ * is about to press, so the line is *reserved*: a row that holds a describable word always
+ * carries the band, empty until it is asked for, and gives it back to the sentence that
+ * fills it. The row's box is the same whether the slot is full or empty.
+ *
+ * The band is two lines of the sentence's own type, which is what the longest sentence in
+ * any of the cockpit's vocabularies takes at the row's reading measure; `min-block-size`
+ * keeps a shorter one from shrinking the row. A sentence that needs a third line, or two
+ * words describing themselves at once — a badge holding focus while a pointer rests on the
+ * tier — grows the row rather than overlapping what is under it. It is the honest failure
+ * of the two: nothing is ever covered, and nothing moves in the cases a researcher meets.
  *
  * Reordering is safe here and nowhere near the tab order: the sentence is `aria-hidden`
  * decoration for the eye, the words it explains are the focusable things, and the copy a
@@ -143,12 +158,26 @@ body,
   display: contents;
 }
 
+/* The reserved band, on every row that holds a word which will explain itself. The slot is
+   the sentence plus the row gap the new flex line brings with it, because both of them are
+   what the row grows by when the sentence arrives. */
+.rh-web-row:has(> .rh-authority-badge__described, > .rh-described-term) {
+  --rh-web-row-hint: calc(2 * var(--rh-type-body-sm-size) * var(--rh-type-body-sm-lh));
+  padding-block-end: calc(var(--rh-web-row-hint) + var(--rh-space-2));
+}
+
+/* And the band, given to the sentence the moment one is asked for. */
+.rh-web-row:has(.rh-authority-badge__hint, .rh-described-term__hint) {
+  padding-block-end: 0;
+}
+
 .rh-web-row .rh-authority-badge__hint,
 .rh-web-row .rh-described-term__hint {
   order: 1;
   inline-size: 0;
   min-inline-size: 100%;
   max-inline-size: none;
+  min-block-size: var(--rh-web-row-hint);
 }
 
 .rh-web-list {

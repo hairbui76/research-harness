@@ -47,9 +47,13 @@ export const DESCRIBED_TERM_PRESS_MS = 500;
  * appeared under a badge the instant a pointer crossed it moved the row's links out from
  * under the pointer — but the cost was that a mouse never learned what `Candidate` meant.
  * What answers both is the delay and the slot: the pointer has to stay
- * ({@link DESCRIBED_TERM_HOVER_MS}ms) rather than pass, and the sentence is printed where
- * it cannot reflow the row it belongs to. A pointer needs to see that there is something
- * to ask, too, so the word wears a dotted underline in its own ink and a `help` cursor.
+ * ({@link DESCRIBED_TERM_HOVER_MS}ms) rather than pass, and the sentence is printed in a
+ * slot the surface has already made room for. A caller whose row cannot grow — a queue
+ * row, a table cell — reserves the sentence's line, so it is present and empty until it is
+ * asked for and the row is the same height either way. Nothing a researcher is about to
+ * press moves because they asked what a word means. A pointer needs to see that there is
+ * something to ask, too, so the word wears a dotted underline in its own ink and a `help`
+ * cursor.
  *
  * The sentence is in flow rather than an overlay, so a scrolling pane cannot clip it, and
  * it is never a `title` — which reaches neither the keyboard nor touch.

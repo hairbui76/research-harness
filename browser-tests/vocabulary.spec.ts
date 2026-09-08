@@ -274,14 +274,21 @@ test('every word the review screen prints as a value defines itself to the keybo
 });
 
 /**
- * The row holds still while a pointer asks a badge what it means.
+ * The row holds still while a pointer asks a badge what it means — all of it.
  *
  * This is wave two's defect, written as an assertion so it cannot come back. The sentence
  * used to open inside the badge's own box, which is a column: it widened that column, the
  * row re-wrapped, and the link the pointer was aiming at moved out from under it. That is
  * why the meaning was given to the keyboard alone, and why a mouse never learned what
- * `Candidate` meant. The sentence now takes a line of its own beneath the row, so the row's
+ * `Candidate` meant. The sentence takes a line of its own beneath the row, so the row's
  * first line — the link, the two badges, the tier — keeps every box it had.
+ *
+ * That much was asserted here, and it was half the property. Wave six's finish review
+ * measured the other half: a line of its own still *added* a line, so resting on "Tier 2 —
+ * deep review" pushed the citation, the quote, the reason and `Reject / Defer / Open to
+ * decide` down 46px, and the whole next queue group with them. A hint may never move what
+ * a researcher is about to press. So the line is reserved, and what is measured below is
+ * the row entire: its words, its decision controls, and the group beneath it.
  *
  * Measured against the row's own corner rather than the viewport, because a pointer
  * arriving at a badge can scroll the page and a scrolled page moves everything equally.
@@ -324,8 +331,47 @@ test('a pointer resting on a queue badge never moves the row it is reading', asy
       });
     });
 
+  /**
+   * Everything on the row a researcher can press, and the group under it.
+   *
+   * The row's own decisions sit below its words, and the next group below those; a line
+   * inserted between the words and the citation moves all of it. The boxes are measured
+   * against the row's corner for the same reason `readRow` is — a pointer arriving at a
+   * badge can scroll the page — and the group's is measured against the row too, because
+   * what is asserted is the distance from the row to what follows it.
+   */
+  const readControls = (): Promise<{ text: string; y: number; height: number }[]> =>
+    page.evaluate(() => {
+      const link = document.querySelector('a[data-review-row]');
+      const item = link?.closest('li');
+      if (item === null || item === undefined) throw new Error('the queue shows no row');
+      const origin = item.getBoundingClientRect();
+      const groups = [...document.querySelectorAll('h2')];
+      const next = groups.find(
+        (heading) => heading.getBoundingClientRect().top > origin.bottom,
+      );
+      const boxes = [...item.querySelectorAll('button, a')];
+      return [...boxes, ...(next === undefined ? [] : [next])].map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          text: (node.textContent ?? '').trim(),
+          y: Math.round(box.y - origin.y),
+          height: Math.round(box.height),
+        };
+      });
+    });
+
   const before = await readRow();
   expect(before.length, 'the queue row shows no words to measure').toBeGreaterThan(3);
+  const controlsBefore = await readControls();
+  // The three decisions the row offers, the link it opens with, and the heading of the
+  // group under it: if this list is short, the assertion below is measuring nothing.
+  expect(
+    controlsBefore.map((control) => control.text),
+    'the queue row offers nothing to press',
+  ).toEqual(
+    expect.arrayContaining(['Reject', 'Defer', 'Open to decide']),
+  );
 
   const category = page
     .locator('.rh-badge[tabindex="0"]')
@@ -338,10 +384,15 @@ test('a pointer resting on a queue badge never moves the row it is reading', asy
   });
 
   expect(await readRow(), 'describing a badge moved the words beside it').toEqual(before);
+  expect(
+    await readControls(),
+    'describing a badge moved the controls the row is decided with',
+  ).toEqual(controlsBefore);
   await page.screenshot({ path: info.outputPath('vocabulary-inbox-hovered.png'), fullPage: true });
 
   // And the word a pointer cannot even see as a tab stop says so for itself: the tier is
-  // not a badge, and it answers the same gesture.
+  // not a badge, and it answers the same gesture. Its sentence is the longest on the row,
+  // which is what made it the review's own example.
   const tier = page
     .locator('.rh-described-term__word')
     .filter({ hasText: 'Tier 2 — deep review' })
@@ -349,7 +400,18 @@ test('a pointer resting on a queue badge never moves the row it is reading', asy
   await tier.hover();
   await expect(page.locator(HINT).first()).toContainText('Interpretation', { timeout: 15_000 });
   expect(await readRow(), 'describing the tier moved the words beside it').toEqual(before);
+  expect(
+    await readControls(),
+    'describing the tier moved the controls the row is decided with',
+  ).toEqual(controlsBefore);
   await page.screenshot({ path: info.outputPath('vocabulary-inbox-tier-hovered.png') });
+
+  // And the slot goes back to being empty rather than closing up under the pointer.
+  await page.locator('h1').first().hover();
+  await expect(page.locator(HINT)).toHaveCount(0);
+  expect(await readControls(), 'the row closed up when the sentence left').toEqual(
+    controlsBefore,
+  );
 });
 
 /**

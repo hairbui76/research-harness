@@ -24,7 +24,8 @@ export interface AuthorityBadgeProps extends Omit<BadgeProps, 'status' | 'tone' 
    * Focus, a pointer that rests on the badge and a long press all open it — see
    * `useDescribedTerm`, which owns all three. A badge sits in a row beside links a
    * researcher is aiming at, so the pointer has to stay rather than pass, and a surface
-   * whose row cannot grow gives the sentence a line of its own beneath the row. The dotted
+   * whose row cannot grow gives the sentence a line of its own beneath the row and keeps
+   * that line reserved, so asking what a word means moves nothing at all. The dotted
    * underline and the `help` cursor are what tell a pointer there is anything to ask.
    *
    * Turn it on where the status is the subject — a review screen's header, a queue row's

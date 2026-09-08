@@ -8,8 +8,14 @@
  * The sentence sits under the badge, in flow, so it can never be clipped by a scrolling
  * table or a narrow pane the way an overlay would be. Focus, a pointer that rests and a
  * long press all open it; a pointer merely crossing the row does not, because the sentence
- * waits for the pointer to stay. Where the sentence would still reflow the row it belongs
- * to — a queue row, a table cell — the surface gives it a line of its own instead.
+ * waits for the pointer to stay.
+ *
+ * Where the sentence would still reflow the row it belongs to — a queue row, a table cell
+ * — the surface gives it a line of its own *and reserves that line*, so the row is the
+ * same height whether the slot is empty or full and nothing under it moves. Giving the
+ * sentence its own line was not enough on its own: it held the row's first line still and
+ * pushed everything below it down, including the controls the row's own decision is taken
+ * with. The cockpit's `.rh-web-row` is where that reservation is written.
  */
 .rh-authority-badge__described {
   display: inline-flex;
