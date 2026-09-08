@@ -319,3 +319,92 @@ test('a project with no corpus at all keeps its frame and offers the way in', as
   await page.screenshot({ path: info.outputPath('corpus-empty.png'), fullPage: false });
   expect(errors).toEqual([]);
 });
+
+/**
+ * The columns as the orders the corpus can be read in.
+ *
+ * "Accepted" and "Cited by" were names over a thousand rows and nothing else: the only way
+ * to find the work the most has been accepted from was to scroll. Each column that can be
+ * put in order of is now the control that asks for that order, and it asks the daemon —
+ * `work.list` answers the whole corpus in one read while the page keeps a window of it, so
+ * a comparator here would order the mounted rows and call them the corpus.
+ *
+ * `/__test__/corpus-ordered` is what makes that testable: one parsed paper with a candidate
+ * accepted against it, and sixty synthetic sources behind it. The paper is `W0001`, so it
+ * leads the corpus's own order too — which is why the ascending half of each assertion is
+ * the one that matters. It is not merely last there; it is outside the window.
+ */
+test('the corpus columns are the orders it can be read in, and the daemon takes them', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(300_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  await signIn(page, request);
+  const seeded = await request.post('/__test__/corpus-ordered', { timeout: 300_000 });
+  expect(seeded.ok()).toBeTruthy();
+  const corpus = (await seeded.json()) as { corpus_url: string; works: string };
+  await page.goto(corpus.corpus_url);
+  await expect(page.getByRole('heading', { level: 1, name: 'Corpus' })).toBeVisible();
+
+  const count = page.getByRole('status').filter({ hasText: `${corpus.works} works.` });
+  await expect(count).toBeVisible();
+  const rows = page.locator('.rh-web-corpus__row');
+  const accepted = page.getByRole('columnheader', { name: 'Accepted' });
+  const withEvidence = rows.filter({ has: page.getByRole('link', { name: 'W0001' }) });
+
+  // Nothing is ordered until something asks: the corpus arrives in the daemon's own order,
+  // and the strip says so on every column that could change it.
+  await expect(accepted).toHaveAttribute('aria-sort', 'none');
+  await expect(count).toHaveText(`${corpus.works} works.`);
+
+  // Most accepted evidence first. The one work anything has been accepted from leads, and
+  // the sentence the corpus is counted in says how it is being read.
+  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Most accepted evidence first.' }),
+  ).toBeVisible();
+  await expect(accepted).toHaveAttribute('aria-sort', 'descending');
+  await expect(rows.first().getByRole('link', { name: 'W0001' })).toBeVisible();
+  await expect(rows.first().locator('.rh-web-corpus__cell').nth(3)).toContainText('1');
+
+  // Windowed still: a sort is a read, not a reason to mount sixty-one works.
+  const mounted = await rows.count();
+  expect(mounted, `an ordered corpus mounted ${mounted} rows`).toBeLessThan(40);
+  expect(await bareNumbers(page), 'no number stands on its own').toEqual([]);
+  await auditPage(page, 'the corpus ordered by accepted evidence');
+  await page.screenshot({ path: info.outputPath('corpus-ordered.png'), fullPage: false });
+
+  // The other way round is the half a page that never asked the daemon could not answer:
+  // the work with evidence is not last on screen, it is off the window entirely.
+  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Least accepted evidence first.' }),
+  ).toBeVisible();
+  await expect(accepted).toHaveAttribute('aria-sort', 'ascending');
+  await expect(withEvidence).toHaveCount(0);
+  await expect(rows.first().locator('.rh-web-corpus__cell').nth(3)).toContainText('0');
+
+  // And a third press gives the corpus back the order the daemon sent it in, so a sort is
+  // never something a researcher has to reload the page to undo.
+  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await expect(count).toHaveText(`${corpus.works} works.`);
+  await expect(accepted).toHaveAttribute('aria-sort', 'none');
+  await expect(rows.first().getByRole('link', { name: 'W0001' })).toBeVisible();
+
+  // The order outlives the visit: it is remembered per project, so the corpus opens the
+  // way it was left rather than in the daemon's order followed by a re-sort.
+  await accepted.getByRole('button', { name: 'Accepted' }).click();
+  await expect(accepted).toHaveAttribute('aria-sort', 'descending');
+  await page.reload();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Most accepted evidence first.' }),
+  ).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Accepted' })).toHaveAttribute(
+    'aria-sort',
+    'descending',
+  );
+  expect(errors).toEqual([]);
+});

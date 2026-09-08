@@ -392,3 +392,63 @@ test('the decision is in reach without scrolling for it', async ({ page, request
 
   await page.screenshot({ path: info.outputPath('review-decision-in-reach.png') });
 });
+
+/**
+ * The queue a researcher comes back to.
+ *
+ * A review inbox is worked in sittings, and the toolbar used to forget between them: the
+ * same category, verdict and search had to be said again on every arrival. They are
+ * remembered per project now — and because nobody typed a remembered filter this morning,
+ * and because the daemon ranks conflicts above everything, the toolbar has to say what is
+ * narrowing the queue, what it is keeping off the screen, and how to stop it.
+ */
+test('the inbox opens on the queue the last visit left, and says what it is hiding', async ({
+  page,
+  request,
+}, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const queue = await seedQueue(page, request);
+
+  await expect(page.getByText('3 waiting.')).toBeVisible();
+  await page.getByRole('combobox', { name: 'Category' }).selectOption('routine');
+  await expect(page.getByText('Showing 1 of 3 waiting.')).toBeVisible();
+  // Nothing calls a filter remembered while the researcher is the one applying it.
+  await expect(page.locator('.rh-web-inbox-remembered')).toHaveCount(0);
+
+  // Leave the queue for another destination and come back to it, which is the visit the
+  // critique's power user makes every morning.
+  await page.goto(`/projects/${queue.project_id}/corpus`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Corpus' })).toBeVisible();
+  await page.goto(queue.review_url);
+  await expect(page.getByRole('heading', { name: 'Review inbox', level: 1 })).toBeVisible();
+
+  // The queue is narrowed to what was left, the control agrees with it, and the toolbar
+  // says whose filter it is in the words of the filter itself.
+  await expect(page.getByRole('combobox', { name: 'Category' })).toHaveValue('routine');
+  await expect(page.getByText('Routine verified candidates (1)')).toBeVisible();
+  const remembered = page.locator('.rh-web-inbox-remembered');
+  await expect(remembered).toContainText(
+    'Showing Routine verified candidates only, remembered from your last visit.',
+  );
+
+  // And what it is keeping off the screen, group by group: a queue that hides the group the
+  // daemon ranked first behind "1 of 3" has decided for the researcher what they may see.
+  await expect(page.locator('.rh-web-inbox-count')).toContainText(
+    'The filters hide 1 in High-risk scientific claims and 1 in Ambiguous extractions.',
+  );
+  expect(await axeViolations(page), 'the inbox under a remembered filter').toEqual([]);
+  await page.screenshot({ path: info.outputPath('review-remembered-filter.png'), fullPage: true });
+
+  // The way out is in that line, and it is the whole queue that comes back.
+  await remembered.getByRole('button', { name: 'Clear the filters' }).click();
+  await expect(page.getByText('3 waiting.')).toBeVisible();
+  await expect(page.locator('.rh-web-inbox-remembered')).toHaveCount(0);
+  await expect(page.getByText('High-risk scientific claims (1)')).toBeVisible();
+
+  // Cleared is remembered too: coming back a third time opens on the whole queue.
+  await page.goto(queue.review_url);
+  await expect(page.getByText('3 waiting.')).toBeVisible();
+  await expect(page.locator('.rh-web-inbox-remembered')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});

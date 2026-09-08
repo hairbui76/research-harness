@@ -526,6 +526,48 @@ def stage_corpus_readiness(root: Path, *, needs_a_researcher: bool) -> None:
     stage_large_corpus(root, 4)
 
 
+#: How many sources sit between the one work with accepted evidence and the end of the list.
+#:
+#: Past the window, so the ordered corpus proves the two things at once: that the order is
+#: the daemon's answer rather than a comparator over the mounted rows, and that asking for
+#: one still mounts a window rather than the corpus.
+ORDERED_CORPUS_FILLER = 60
+
+
+def stage_ordered_corpus(root: Path) -> None:
+    """A corpus in which one work answers a column and the rest cannot be scrolled past.
+
+    The Corpus page reads a thousand works across shared columns, and a column nobody can
+    put in order of is a column read by scrolling. Showing that the order works needs a
+    corpus where the answer is not already on screen: one ingested and parsed paper with a
+    candidate accepted against it - the only work in the project anything has been accepted
+    from - and sixty synthetic sources behind it, which is past what the window mounts.
+
+    The paper is first in the corpus's own order, because it is `W0001`, so an assertion
+    that it leads the descending list would pass on a page that never ordered anything. The
+    ascending half is the one that cannot: it puts the paper behind sixty works, outside the
+    window entirely.
+    """
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.transitions import HUMAN_ACTOR
+
+    stage_review_queue(root)
+    registry = build_default_registry()
+    human = Principal.human()
+
+    def call(capability: str, request: dict[str, object]) -> object:
+        return registry.invoke(
+            capability, open_context(root, HUMAN_ACTOR), request, principal=human
+        )
+
+    inbox = call("review.inbox", {})
+    dataset = next(item for item in inbox.items if item["field"] == "dataset")  # type: ignore[attr-defined]
+    call("review.accept", {"candidate_id": dataset["candidate_id"]})
+    stage_large_corpus(root, ORDERED_CORPUS_FILLER)
+
+
 def stage_synthesis_grid(root: Path) -> None:
     """A matrix with every state of a cell the Synthesis grid has to draw.
 
@@ -843,6 +885,33 @@ def main() -> None:
                     "corpus_url": f"/projects/{view.project_id}/corpus",
                 }
                 readiness[needs_a_researcher] = answer
+                return answer
+
+        ordered: dict[str, dict[str, str]] = {}
+        ordered_lock = Lock()
+
+        @app.post("/__test__/corpus-ordered")
+        def corpus_ordered() -> dict[str, str]:
+            """A corpus whose one work with accepted evidence sits behind sixty others.
+
+            Shared between the viewport runs for the reason the readiness corpus is:
+            ingesting, parsing and accepting is real work that both runs only read.
+            """
+            with ordered_lock:
+                existing = ordered.get("corpus")
+                if existing is not None:
+                    return existing
+                manager: ProjectManager = backend.state.manager
+                name = f"Corpus order {next(seeded)}"
+                view = manager.create(directory, name, ReviewPolicy.STRICT)
+                stage_ordered_corpus(Path(view.path))
+                answer = {
+                    "project_id": view.project_id,
+                    "name": name,
+                    "works": str(ORDERED_CORPUS_FILLER + 1),
+                    "corpus_url": f"/projects/{view.project_id}/corpus",
+                }
+                ordered["corpus"] = answer
                 return answer
 
         @app.post("/__test__/synthesis-grid")
