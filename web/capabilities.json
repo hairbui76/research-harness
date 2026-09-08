@@ -12572,6 +12572,18 @@
                 "title": "Related",
                 "type": "array"
               },
+              "sentence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Sentence"
+              },
               "severity": {
                 "$ref": "#/$defs/FindingSeverity",
                 "default": "warning"
@@ -14180,6 +14192,18 @@
                 "title": "Related",
                 "type": "array"
               },
+              "sentence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Sentence"
+              },
               "severity": {
                 "$ref": "#/$defs/FindingSeverity",
                 "default": "warning"
@@ -15096,6 +15120,18 @@
                 },
                 "title": "Related",
                 "type": "array"
+              },
+              "sentence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Sentence"
               },
               "severity": {
                 "$ref": "#/$defs/FindingSeverity",
@@ -16029,6 +16065,18 @@
                 },
                 "title": "Related",
                 "type": "array"
+              },
+              "sentence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Sentence"
               },
               "severity": {
                 "$ref": "#/$defs/FindingSeverity",
@@ -17758,6 +17806,18 @@
                 },
                 "title": "Related",
                 "type": "array"
+              },
+              "sentence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Sentence"
               },
               "severity": {
                 "$ref": "#/$defs/FindingSeverity",

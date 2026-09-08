@@ -319,7 +319,7 @@ export const CAPABILITIES: Record<CapabilityName, CapabilityMeta> = {
     permission: "read",
     humanOnly: false,
     longRunning: false,
-    summary: "Accepted evidence by work and status; staged proposals are not listed.",
+    summary: "Accepted evidence by work, status or question, with what in it needs a researcher; staged proposals are not listed.",
     semantics: "reads canonical state; changes nothing",
   },
   "evidence.reject": {
