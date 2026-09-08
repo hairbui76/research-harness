@@ -287,6 +287,45 @@ export const CONFLICT_KIND_META: Vocabulary = {
   taxonomy_vs_classification: { label: 'Taxonomy revision against dependent classifications' },
 };
 
+/* The manuscript audit (Product 30.3) --------------------------------------------------- */
+
+/**
+ * What the manuscript audit found, in the words the product uses for the finding.
+ *
+ * The six kinds are `ManuscriptFindingKind`, and the auditor's own module states what each
+ * one detects in a sentence (`manuscript/audit.py`); those sentences are these, restated
+ * and nothing more. They matter more here than in most vocabularies: a finding card leads
+ * with the manuscript's own sentence, and the kind is the first words of the sentence that
+ * says what is wrong with it, so the word has to be the product's rather than a lint
+ * tool's.
+ */
+export const MANUSCRIPT_FINDING_META: Vocabulary = {
+  unregistered_claim: {
+    label: 'Unregistered claim',
+    description: 'A substantive sentence that is attached to no Claim.',
+  },
+  over_strong_wording: {
+    label: 'Wording stronger than the Claim',
+    description: 'A sentence that reads stronger than its Claim allows.',
+  },
+  citation_mismatch: {
+    label: 'Citation mismatch',
+    description: 'A citation key that does not exist, or that does not support the Claim.',
+  },
+  unsupported_numeric: {
+    label: 'Unsupported number',
+    description: 'A number no accepted, source-observed Evidence measures.',
+  },
+  stale_claim: {
+    label: 'Stale claim',
+    description: 'A Claim or anchor the research state moved out from under.',
+  },
+  invalid_evidence_anchor: {
+    label: 'Invalid evidence anchor',
+    description: 'Supporting Evidence that no longer opens at its source.',
+  },
+};
+
 /* The rest of the workspace ------------------------------------------------------------- */
 
 export const QUESTION_STATUS_META: Vocabulary = {
@@ -386,6 +425,7 @@ export const RESEARCH_VOCABULARIES = {
   evidenceStatus: EVIDENCE_STATUS_META,
   evidenceStrength: EVIDENCE_STRENGTH_META,
   evidenceType: EVIDENCE_TYPE_META,
+  manuscriptFinding: MANUSCRIPT_FINDING_META,
   negativeState: NEGATIVE_STATE_META,
   overturnRisk: OVERTURN_RISK_META,
   questionStatus: QUESTION_STATUS_META,
@@ -431,6 +471,11 @@ export const RESEARCH_VOCABULARY_DESCRIPTIONS: Partial<Record<VocabularyName, st
     'How much reading the question needs — a property of the question, not of the answer or of any model’s confidence.',
   // What `review.stale` reports and refuses to repair (docs/guide/review.md, ADR-008).
   anchorStatus: 'What replaying the anchor against the stored parse said.',
+  // "The manuscript should be downstream of the accepted research graph" (Product 30), and
+  // 30.3 lists what an audit of it must detect. A kind this package has not met yet still
+  // gets that much.
+  manuscriptFinding:
+    'What the manuscript claims, checked against the project’s accepted scientific state.',
 };
 
 /**

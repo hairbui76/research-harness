@@ -98,3 +98,12 @@ class ManuscriptAuditFinding(DomainModel):
     related: tuple[ResearchId, ...] = ()
     location: FindingLocation | None = None
     """Where the finding was raised. Absent only for a finding no sentence produced."""
+    sentence: str | None = None
+    """The manuscript sentence the finding is about, verbatim.
+
+    A finding with an anchor already carries its sentence through that anchor; one raised
+    against an unattached sentence carries no anchor at all, and the only record of what
+    the audit was reading was a truncated copy quoted inside the message. A reader is owed
+    their own prose before a verdict on it, so the sentence is a field like ``location`` is
+    rather than something a client has to recover from prose.
+    """

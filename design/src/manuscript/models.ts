@@ -7,6 +7,8 @@
  */
 
 import type { IconName } from '../primitives/Icon';
+import type { StatusName } from '../primitives/Badge';
+import { researchLabel, researchMeaning } from '../research/labels';
 
 /** What kind of thing a row in the file tree is. `dir` is the only branch. */
 export type FileKind = 'tex' | 'bib' | 'image' | 'pdf' | 'other' | 'dir';
@@ -77,11 +79,18 @@ export interface DiagnosticModel {
  */
 export interface AuditFindingModel {
   id: string;
-  /** e.g. `unsupported_statement`, `citation_mismatch`, `stale_claim`. */
+  /** e.g. `unregistered_claim`, `citation_mismatch`, `stale_claim`. */
   kind: string;
   severity: DiagnosticSeverity;
   file?: string;
   line?: number;
+  /**
+   * The manuscript's own sentence, verbatim — the thing the finding is about.
+   *
+   * A finding card opens with it, so a researcher reads their own prose before reading a
+   * verdict on it. Absent for a finding no single sentence produced.
+   */
+  sentence?: string;
   message: string;
   claim?: { id: string; label?: string };
   anchor?: { id: string };
@@ -173,33 +182,50 @@ export const DIAGNOSTIC_SEVERITY_META: Record<
 };
 
 /**
- * Severity words for the scientific audit. Different words on purpose: a reader glancing
- * at one list must never mistake it for the other.
+ * What an audit severity means for the manuscript, and the scientific status family it is
+ * drawn in.
+ *
+ * Different words from the compiler's on purpose: a reader glancing at one list must never
+ * mistake it for the other. The `status` is not decoration — a manuscript sentence that
+ * cannot be carried by accepted state is a statement about scientific truth, so it takes a
+ * scientific status palette and never a feedback tone (DESIGN.md). It is the same mapping
+ * the severity hairline down the side of a finding has always used.
  */
-export const AUDIT_SEVERITY_META: Record<DiagnosticSeverity, { label: string }> = {
-  error: { label: 'Must fix' },
-  warning: { label: 'Review' },
-  info: { label: 'Note' },
+export const AUDIT_SEVERITY_META: Record<
+  DiagnosticSeverity,
+  { label: string; status: StatusName; description: string }
+> = {
+  error: {
+    label: 'Must fix',
+    status: 'contested',
+    description: 'Accepted state contradicts the manuscript here. It cannot ship as it stands.',
+  },
+  warning: {
+    label: 'Review',
+    status: 'candidate',
+    description: 'A researcher has to decide about this before the manuscript ships.',
+  },
+  info: {
+    label: 'Note',
+    status: 'qualified',
+    description: 'Worth knowing. It does not stop the manuscript shipping.',
+  },
 };
 
-/** Known audit kinds from the LaTeX workspace spec §7, with their own icon family. */
-export const AUDIT_KIND_META: Record<string, { label: string; icon: IconName }> = {
-  unsupported_statement: { label: 'Unsupported statement', icon: 'circle-dashed' },
-  citation_mismatch: { label: 'Citation mismatch', icon: 'quote' },
-  stale_claim: { label: 'Stale claim', icon: 'clock' },
-  wording_stronger_than_claim: { label: 'Wording stronger than the claim', icon: 'scale' },
-  invalid_anchor: { label: 'Invalid source anchor', icon: 'link-2-off' },
-  protected_span_changed: { label: 'Protected span changed', icon: 'shield' },
-};
-
-/** `unsupported_statement` -> `Unsupported statement` for a kind nobody registered. */
-export function describeAuditKind(kind: string): { label: string; icon: IconName } {
-  const known = AUDIT_KIND_META[kind];
-  if (known) return known;
-  const words = kind.replace(/[_-]+/g, ' ').trim();
+/**
+ * The words for one audit kind: the auditor's own name for it, and what it detects.
+ *
+ * The vocabulary itself lives with every other one the daemon sends
+ * (`research/labels::MANUSCRIPT_FINDING_META`), which is what keeps this package's word for
+ * a kind the same word the rest of the cockpit uses, and what gives a kind this build has
+ * never met a readable phrase and the sentence the product states about the audit as a
+ * whole rather than a `snake_case` token.
+ */
+export function describeAuditKind(kind: string): { label: string; description?: string } {
+  const description = researchMeaning('manuscriptFinding', kind);
   return {
-    label: words.charAt(0).toUpperCase() + words.slice(1),
-    icon: 'microscope',
+    label: researchLabel('manuscriptFinding', kind),
+    ...(description === undefined ? {} : { description }),
   };
 }
 

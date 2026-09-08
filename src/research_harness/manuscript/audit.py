@@ -309,7 +309,7 @@ class _Auditor:
             ManuscriptFindingKind.UNREGISTERED_CLAIM,
             FindingSeverity.WARNING,
             sentence,
-            f"substantive sentence is attached to no Claim: {_quote(sentence)}",
+            "substantive sentence is attached to no Claim",
         )
 
     def _orphan_claim(self, sentence: Sentence, anchor: ManuscriptAnchor) -> None:
@@ -447,6 +447,7 @@ class _Auditor:
                     ),
                     anchor=anchor,
                     related=(anchor.claim,),
+                    sentence=anchor.sentence,
                 ),
             )
         )
@@ -512,6 +513,7 @@ class _Auditor:
                     anchor=anchor,
                     related=related,
                     location=sentence_location(sentence),
+                    sentence=sentence.normalized_text,
                 ),
             )
         )
@@ -520,8 +522,6 @@ class _Auditor:
 # --------------------------------------------------------------------------------------
 # messages
 # --------------------------------------------------------------------------------------
-
-_MAX_QUOTED = 88
 
 
 def _where(sentence: Sentence) -> tuple[str, int, int]:
@@ -643,13 +643,6 @@ def narrow_report(
         ),
         trace=tuple(link for link in report.trace if scope.covers_sentence(link.sentence)),
     )
-
-
-def _quote(sentence: Sentence) -> str:
-    text = sentence.normalized_text
-    if len(text) > _MAX_QUOTED:
-        text = f"{text[: _MAX_QUOTED - 3].rstrip()}..."
-    return f"{text!r}"
 
 
 def _citation_message(check: CitationKeyCheck, claim: Claim) -> str:

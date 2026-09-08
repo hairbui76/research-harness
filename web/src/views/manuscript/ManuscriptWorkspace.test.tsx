@@ -500,7 +500,9 @@ describe('compiling and the preview', () => {
     expect(screen.getByText('Compilation failed')).toBeInTheDocument();
     // The document is still on screen; the errors are about the source as it is now.
     expect(screen.getByRole('img', { name: 'manuscript page 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /notacommand/ })).toBeInTheDocument();
+    // A diagnostic row is a card whose act is named for what it does, so what proves the
+    // errors are on screen is the compiler's own sentence.
+    expect(screen.getByText(/Undefined control sequence \\notacommand/)).toBeInTheDocument();
   });
 
   it('keeps unsaved editor content across a failed compile', async () => {
@@ -560,7 +562,13 @@ describe('diagnostics', () => {
     renderWorkspace(daemon);
     await opened();
 
-    await userEvent.click(screen.getByRole('button', { name: /notacommand/ }));
+    /*
+     * The whole row used to be one button named after the compiler's sentence. The row is
+     * a card now — severity, sentence, position, then the one act — and the act says what
+     * it does and where, so three diagnostics in one file are three distinct names rather
+     * than three copies of "open".
+     */
+    await userEvent.click(screen.getByRole('button', { name: 'Open line 7' }));
 
     await waitFor(() =>
       expect(daemon.callsTo('manuscript.read_file')).toContainEqual({
@@ -576,8 +584,18 @@ describe('diagnostics', () => {
     await opened();
 
     const audit = screen.getByRole('list', { name: 'Scientific audit' });
-    expect(within(audit).getByText('Over strong wording')).toBeInTheDocument();
+    /*
+     * `over_strong_wording` used to arrive here as the humanised token "Over strong
+     * wording", because the package's audit vocabulary was keyed on four identifiers the
+     * daemon does not send. The word is the product's now — Product 30.3 calls this a
+     * manuscript sentence stronger than the accepted Claim.
+     */
+    expect(within(audit).getByText('Wording stronger than the Claim')).toBeInTheDocument();
     expect(within(audit).getByText('Must fix')).toBeInTheDocument();
+    // The card opens with the manuscript's own sentence, not with the audit's verdict.
+    expect(
+      within(audit).getByText(/All existing traffic classifiers degrade under sustained load/),
+    ).toBeInTheDocument();
     // The compiler's words are not the audit's words.
     expect(within(audit).queryByText('Error')).toBeNull();
     expect(screen.getByText('1 finding')).toBeInTheDocument();

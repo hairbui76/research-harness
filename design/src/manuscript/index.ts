@@ -16,7 +16,6 @@ export { CandidateDiff } from './CandidateDiff';
 export type { CandidateDiffProps, DiffView } from './CandidateDiff';
 
 export {
-  AUDIT_KIND_META,
   AUDIT_SEVERITY_META,
   BUILD_STATUS_META,
   DIAGNOSTIC_SEVERITY_META,

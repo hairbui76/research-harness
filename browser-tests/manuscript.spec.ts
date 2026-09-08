@@ -109,6 +109,11 @@ async function measurePanes(page: Page): Promise<PaneReport> {
   });
 }
 
+/** One line of text out of many, so a quotation can be compared with its source. */
+function flatten(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
 /**
  * How many characters wide the editor's text area is, in the editor's own font.
  *
@@ -149,6 +154,10 @@ for (const screen of SCREENS) {
     // below measures it.
     const frame = page.getByRole('region', { name: 'Manuscript source: main.tex' });
     await expect(frame, 'the entry file must open on arrival').toBeVisible();
+
+    // The manuscript's own prose, read while the editor is the view on show, so a finding
+    // card can be held to quoting it rather than to quoting itself.
+    const source = flatten(await page.locator('.cm-content').innerText());
 
     // 1. The frame: which destination this is, which file is open, and the toolbar.
     const heading = page.getByRole('heading', { level: 1, name: 'Manuscript' });
@@ -199,18 +208,57 @@ for (const screen of SCREENS) {
       `the audit's own lists must be in view once it is chosen at ${screen.label}`,
     ).toBeInViewport();
 
+    const findings = page.locator('.rh-audit-finding');
+    await expect(findings.first(), 'the seeded manuscript must produce findings').toBeVisible();
+
+    /*
+     * A finding card opens with the manuscript, not with a chip.
+     *
+     * The card used to lead with a bracketed severity in 11px uppercase over the kind —
+     * the eyebrow DESIGN.md bans, and the last one left in the product. What a researcher
+     * needs first is their own sentence, so that is what the card's first element and its
+     * first text are, and the sentence is the manuscript's: the opening of it is text that
+     * is literally in the file the editor has open.
+     */
+    const opening = await findings.first().evaluate((card) => {
+      const quote = card.querySelector('.rh-audit-finding__sentence');
+      const flat = (value: string | null | undefined): string =>
+        (value ?? '').replace(/\s+/g, ' ').trim();
+      return {
+        firstElement: card.firstElementChild?.tagName ?? '',
+        quoted: flat(quote?.textContent),
+        text: flat(card.textContent),
+      };
+    });
+    expect(
+      opening.firstElement,
+      `a finding card opened with <${opening.firstElement}> at ${screen.label}`,
+    ).toBe('BLOCKQUOTE');
+    expect(opening.quoted.length, 'a finding card quoted nothing').toBeGreaterThan(0);
+    expect(
+      opening.text.startsWith(opening.quoted),
+      `a finding card's first text was "${opening.text.slice(0, 60)}" at ${screen.label}`,
+    ).toBe(true);
+    // Normalising a sentence drops citation commands, so the opening of it is what the
+    // source can be held to; 60 characters is far more than any two sentences share.
+    expect(
+      source,
+      `the quoted sentence is not in the open manuscript at ${screen.label}`,
+    ).toContain(opening.quoted.slice(0, 60));
     /*
      * Reachable is not the same as readable.
      *
-     * A finding row puts a short kind and a fixed file position beside a long message. In
-     * a panel this narrow the fixed pair used to be paid for by the message, which came
-     * out about six characters wide and broke `sections/results.tex` across four lines.
+     * A finding row used to put a short kind and a fixed file position beside a long
+     * message, and in a panel this narrow the fixed pair was paid for by the message,
+     * which came out about six characters wide and broke `sections/results.tex` across
+     * four lines. The card gives the audit's sentence a line of its own at every width
+     * now, so what is measured is that line — the paragraph the sentence is set in, not
+     * the inline box of one run inside it, which says only how long the run happened to
+     * be.
      */
-    const findings = page.locator('.rh-audit-finding');
-    await expect(findings.first(), 'the seeded manuscript must produce findings').toBeVisible();
     const message = await page.evaluate(() => {
-      const node = document.querySelector('.rh-audit-finding__message') as HTMLElement | null;
-      if (node === null) throw new Error('no audit finding message');
+      const node = document.querySelector('.rh-audit-finding__found') as HTMLElement | null;
+      if (node === null) throw new Error('no audit finding sentence');
       const probe = document.createElement('span');
       probe.style.display = 'inline-block';
       probe.style.inlineSize = '1ch';
@@ -223,7 +271,7 @@ for (const screen of SCREENS) {
     });
     expect(
       message,
-      `an audit finding's message ran ${message.toFixed(0)} characters at ${screen.label}`,
+      `an audit finding's sentence ran ${message.toFixed(0)} characters at ${screen.label}`,
     ).toBeGreaterThanOrEqual(EDITOR_MIN_CHARACTERS);
 
     await page.screenshot({

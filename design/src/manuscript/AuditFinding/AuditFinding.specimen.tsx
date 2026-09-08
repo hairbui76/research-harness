@@ -5,7 +5,7 @@ export const title = 'AuditFinding';
 
 export const specimens = [
   {
-    name: 'Every kind, with its own severity words',
+    name: 'The sentence, what the audit found, and the one act it asks for',
     render: () => (
       <div className="gallery-block">
         <AuditFindingList
@@ -17,18 +17,21 @@ export const specimens = [
     ),
   },
   {
-    name: 'An unregistered kind still renders',
+    name: 'A finding with no sentence, and a kind this build has never met',
     render: () => (
       <div className="gallery-block">
         <AuditFindingList
           findings={[
             {
               id: 'A9',
-              kind: 'protected_span_changed',
+              kind: 'unsupported_numeric',
               severity: 'error',
-              file: 'manuscript/main.tex',
+              file: 'manuscript/sections/results.tex',
               line: 92,
-              message: 'A candidate rewrote the citation \\cite{smith2024}.',
+              sentence: 'Exfiltration recall rises from 0.42 to 0.61 on the held-out split.',
+              message:
+                "'0.61' is not measured by any accepted, source-observed Evidence behind C0041",
+              claim: { id: 'C0041' },
               source: 'audit',
             },
             {
@@ -40,6 +43,7 @@ export const specimens = [
             },
           ]}
           onOpen={() => undefined}
+          onNavigate={() => undefined}
         />
       </div>
     ),
