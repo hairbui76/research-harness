@@ -27,6 +27,7 @@ import { renderMarkdown } from '../../render';
 import type { DeepLink } from '../../render';
 import { SaveToCorpusFlow } from './attachments/SaveToCorpusFlow';
 import { useProjectPaths } from '../../app/projectPaths';
+import { useSession } from '../../app/session';
 import { groupAttempts, toMessageModel } from './mappers';
 import type { MessageTurn } from './mappers';
 import { useConversation } from './state';
@@ -39,6 +40,7 @@ export interface TranscriptProps {
 }
 
 export function Transcript({ attemptOf, onAttemptChange, onPromote }: TranscriptProps) {
+  const { canMutate, mutationBlockedReason } = useSession();
   const {
     transcript: { transcript, loading, error, reconcile, loadMore, hasMore },
     send,
@@ -106,12 +108,20 @@ export function Transcript({ attemptOf, onAttemptChange, onPromote }: Transcript
   );
 
   if (!sessions.activeId) {
+    // The control this names is the one below the transcript, and it is named by the name
+    // it actually wears — the rail called it "New session" while this sentence said
+    // "start a session in the rail", which is two names for one act and a pointer at a
+    // pane that is a drawer at 768px.
     return (
       <AsyncState
         kind="empty"
         hideKind
         title="No session open"
-        description="Start a session in the rail to ask a question against this project."
+        description={
+          canMutate
+            ? 'Choose New session below to ask a question against this project.'
+            : (mutationBlockedReason ?? undefined)
+        }
       />
     );
   }

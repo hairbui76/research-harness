@@ -62,6 +62,26 @@
   gap: var(--rh-space-1);
 }
 
+/*
+ * The front door, where the message box goes when there is no session to type into.
+ *
+ * It keeps the composer's own frame rather than leaving a hole in the pane: the slot is
+ * still the place a message is written, and one control sitting in it says what has to
+ * happen first. A window that may only read gets the reason in the same frame, because the
+ * reason a control is missing belongs where the control would have been.
+ */
+.rh-web-entrance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  min-width: 0;
+  padding: var(--rh-space-3);
+  border: var(--rh-border-width) solid var(--rh-border-default);
+  border-radius: var(--rh-radius-card);
+  background: var(--rh-surface-raised);
+}
+
 /* Why there is no model selector, when there is none. */
 .rh-web-composer__note {
   margin: 0;

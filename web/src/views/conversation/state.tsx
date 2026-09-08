@@ -49,8 +49,37 @@ import type { AttachmentWorkspace } from './attachments/useAttachments';
 import { usePdfPageRenderer } from './attachments/AttachmentViewer';
 import { useSessions } from './useSessions';
 import type { SessionsApi } from './useSessions';
+import type { SessionVisibility } from '../../api/dto';
 import { useTranscript } from './useTranscript';
 import type { TranscriptApi } from './useTranscript';
+
+/**
+ * The "New session" question, asked from the two places that offer it.
+ *
+ * The rail's button and the composer's own entrance are one control with one name: a
+ * researcher looking at the empty message box should not have to learn that the way in is
+ * somewhere else, and the two must not drift into calling the same act two things. The
+ * question itself is unchanged — visibility is fixed when a session is created and decides
+ * what it may later be bound to, so it is still asked rather than assumed.
+ */
+export interface NewSessionApi {
+  /** True while the question is on screen. */
+  asking: boolean;
+  /**
+   * Ask it. `focusComposer` says the caret belongs in the message box once the session
+   * opens — true for the composer's entrance, false for the rail, which is a place a
+   * researcher goes to *choose* rather than to start typing.
+   */
+  ask: (options?: { focusComposer?: boolean }) => void;
+  /** Close the question. Nothing is created and nothing is remembered. */
+  dismiss: () => void;
+  /** Create with the answer given; `visibility` is absent when the default was kept. */
+  create: (visibility?: SessionVisibility) => void;
+  /** True while the session that has just opened is still owed the caret. */
+  focusComposer: boolean;
+  /** The composer has taken it. */
+  focusTaken: () => void;
+}
 
 /** What the inspector is following, in the cockpit's own terms. */
 export type WorkspaceSelection =
@@ -66,6 +95,8 @@ export interface ConversationState {
   /** True while the conversation route is the one on screen. */
   active: boolean;
   sessions: SessionsApi;
+  /** Opening a session, asked in one place and offered in two. */
+  newSession: NewSessionApi;
   transcript: TranscriptApi;
   send: SendApi;
   models: ModelsApi;
@@ -205,6 +236,10 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
   const [tab, setTab] = useState<InspectorTab>('context');
   const [receipt, setReceipt] = useState<ReceiptSource | null>(null);
   const [model, setModel] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  /** Whether the asker wants the caret handed to the message box, and whether it is owed. */
+  const [askedFromComposer, setAskedFromComposer] = useState(false);
+  const [focusComposer, setFocusComposer] = useState(false);
 
   /**
    * Where the next message would actually go, for the attachment check.
@@ -273,6 +308,37 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
     [href, navigate],
   );
 
+  /**
+   * Opening a session, from the rail or from the composer's own entrance.
+   *
+   * The daemon has no create-on-send: `session.send` takes a session id and reads the
+   * record before anything else happens (`conversation/send.py::_prepare`), and creating
+   * one is its own capability whose single irreversible argument is visibility. So the
+   * front door is a control rather than a message, and this is the one place that runs it.
+   */
+  const newSession = useMemo<NewSessionApi>(
+    () => ({
+      asking,
+      ask: (options) => {
+        setAskedFromComposer(options?.focusComposer === true);
+        setAsking(true);
+      },
+      dismiss: () => setAsking(false),
+      create: (visibility) => {
+        setAsking(false);
+        const wanted = askedFromComposer;
+        void sessions.create(undefined, visibility).then((created) => {
+          // A refusal opens nothing, so there is nothing to hand the caret to; the rail
+          // renders the daemon's sentence about it exactly as it did before.
+          if (created !== null && wanted) setFocusComposer(true);
+        });
+      },
+      focusComposer,
+      focusTaken: () => setFocusComposer(false),
+    }),
+    [asking, askedFromComposer, focusComposer, sessions],
+  );
+
   const selectMessage = useCallback((messageId: string) => {
     setSelection({ kind: 'message', messageId });
   }, []);
@@ -332,6 +398,7 @@ export function ConversationProvider({ children, referenceProvider }: Conversati
   const value: ConversationState = {
     active,
     sessions,
+    newSession,
     transcript,
     send,
     models,

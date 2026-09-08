@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useState } from 'react';
+import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../../tests/axe';
 import { describeThemeDensitySnapshots } from '../../../tests/variants';
@@ -193,6 +193,41 @@ describe('Composer', () => {
     expect(described).toContain(line.id);
     // The keyboard contract keeps its own line rather than being replaced by this one.
     expect(screen.getByText(/Enter sends · Shift\+Enter starts a new line/)).toBeInTheDocument();
+  });
+
+  /*
+   * Four rows of chrome sat under the message box at 768px: the toolbar, the keyboard
+   * hint, the destination and the index state. The destination keeps its line; the two
+   * standing facts share one once the note has been read.
+   */
+  it('gives a standing note its own line and a read one the hint’s', () => {
+    const { rerender } = render(
+      <Example destination="Sends to Local small — stays on this machine" note={<span>index</span>} />,
+    );
+    const hints = document.querySelector('.rh-composer__hints') as HTMLElement;
+    expect(hints.querySelector('.rh-composer__note')).toBeNull();
+    expect(document.querySelector('.rh-composer__footer > .rh-composer__note')).not.toBeNull();
+
+    rerender(
+      <Example
+        destination="Sends to Local small — stays on this machine"
+        note={<span>index</span>}
+        notePlacement="folded"
+      />,
+    );
+    // One line under the destination now holds both: the shortcut and the index state.
+    const folded = document.querySelector('.rh-composer__hints') as HTMLElement;
+    expect(folded.querySelector('.rh-composer__note')).not.toBeNull();
+    expect(folded.querySelector('.rh-composer__hint')).not.toBeNull();
+    expect(document.querySelector('.rh-composer__footer > .rh-composer__note')).toBeNull();
+  });
+
+  it('hands the message box to a host that has to put the caret in it', () => {
+    const box = createRef<HTMLTextAreaElement>();
+    render(<Example textareaRef={box} />);
+    expect(box.current).toBe(screen.getByRole('textbox', { name: 'Message' }));
+    box.current?.focus();
+    expect(document.activeElement).toBe(box.current);
   });
 
   it('says nothing about a destination when the host states none', () => {

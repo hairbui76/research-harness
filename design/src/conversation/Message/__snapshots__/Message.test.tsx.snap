@@ -51,11 +51,6 @@ exports[`Message theme x density > matches the dark / comfortable snapshot 1`] =
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0041
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:11Z"
@@ -356,11 +351,6 @@ exports[`Message theme x density > matches the dark / comfortable snapshot 1`] =
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0042
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:38Z"
@@ -368,21 +358,21 @@ exports[`Message theme x density > matches the dark / comfortable snapshot 1`] =
             2026-09-03 14:20
           </time>
           <span
-            class="rh-message__provider"
+            class="rh-message__answered"
           >
-            Anthropic
-          </span>
-          <span
-            class="rh-message__model"
-          >
-            claude-opus-5
-          </span>
-          <span
-            class="rh-message__attempt"
-          >
-            attempt 
-            2
-             of 2
+            Answered by
+             
+            <span
+              class="rh-message__provider"
+            >
+              Anthropic
+            </span>
+             · 
+            <span
+              class="rh-message__model"
+            >
+              claude-opus-5
+            </span>
           </span>
         </span>
       </header>
@@ -614,11 +604,6 @@ exports[`Message theme x density > matches the dark / compact snapshot 1`] = `
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0041
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:11Z"
@@ -919,11 +904,6 @@ exports[`Message theme x density > matches the dark / compact snapshot 1`] = `
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0042
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:38Z"
@@ -931,21 +911,21 @@ exports[`Message theme x density > matches the dark / compact snapshot 1`] = `
             2026-09-03 14:20
           </time>
           <span
-            class="rh-message__provider"
+            class="rh-message__answered"
           >
-            Anthropic
-          </span>
-          <span
-            class="rh-message__model"
-          >
-            claude-opus-5
-          </span>
-          <span
-            class="rh-message__attempt"
-          >
-            attempt 
-            2
-             of 2
+            Answered by
+             
+            <span
+              class="rh-message__provider"
+            >
+              Anthropic
+            </span>
+             · 
+            <span
+              class="rh-message__model"
+            >
+              claude-opus-5
+            </span>
           </span>
         </span>
       </header>
@@ -1177,11 +1157,6 @@ exports[`Message theme x density > matches the light / comfortable snapshot 1`] 
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0041
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:11Z"
@@ -1482,11 +1457,6 @@ exports[`Message theme x density > matches the light / comfortable snapshot 1`] 
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0042
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:38Z"
@@ -1494,21 +1464,21 @@ exports[`Message theme x density > matches the light / comfortable snapshot 1`] 
             2026-09-03 14:20
           </time>
           <span
-            class="rh-message__provider"
+            class="rh-message__answered"
           >
-            Anthropic
-          </span>
-          <span
-            class="rh-message__model"
-          >
-            claude-opus-5
-          </span>
-          <span
-            class="rh-message__attempt"
-          >
-            attempt 
-            2
-             of 2
+            Answered by
+             
+            <span
+              class="rh-message__provider"
+            >
+              Anthropic
+            </span>
+             · 
+            <span
+              class="rh-message__model"
+            >
+              claude-opus-5
+            </span>
           </span>
         </span>
       </header>
@@ -1740,11 +1710,6 @@ exports[`Message theme x density > matches the light / compact snapshot 1`] = `
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0041
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:11Z"
@@ -2045,11 +2010,6 @@ exports[`Message theme x density > matches the light / compact snapshot 1`] = `
         <span
           class="rh-message__meta"
         >
-          <span
-            class="rh-message__id"
-          >
-            M0042
-          </span>
           <time
             class="rh-message__time"
             datetime="2026-09-03T14:20:38Z"
@@ -2057,21 +2017,21 @@ exports[`Message theme x density > matches the light / compact snapshot 1`] = `
             2026-09-03 14:20
           </time>
           <span
-            class="rh-message__provider"
+            class="rh-message__answered"
           >
-            Anthropic
-          </span>
-          <span
-            class="rh-message__model"
-          >
-            claude-opus-5
-          </span>
-          <span
-            class="rh-message__attempt"
-          >
-            attempt 
-            2
-             of 2
+            Answered by
+             
+            <span
+              class="rh-message__provider"
+            >
+              Anthropic
+            </span>
+             · 
+            <span
+              class="rh-message__model"
+            >
+              claude-opus-5
+            </span>
           </span>
         </span>
       </header>

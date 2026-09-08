@@ -45,6 +45,7 @@ import type {
   ModelOption,
   ModelOptionGroup,
 } from '@research-harness/design';
+import { useProjectPaths } from '../../app/projectPaths';
 import { useSession } from '../../app/session';
 import { ATTACHMENT_HINT, AttachmentTrayPane } from './attachments/AttachmentTrayPane';
 import {
@@ -54,7 +55,7 @@ import {
   parseRuntimeOptionId,
   toProjectDefaultOption,
 } from './mappers';
-import { GraphStatusNote, ReferenceMarks } from './references';
+import { GraphStatusNote, ReferenceMarks, useIndexNoteRead } from './references';
 import { useConversation } from './state';
 import type { RuntimeDestination } from './useModels';
 
@@ -155,12 +156,25 @@ export function ComposerPane() {
     // said about each token in the draft.
     graph,
     draftReferences,
+    newSession,
   } = useConversation();
+  const { projectId } = useProjectPaths();
   const session = sessions.active;
   /** The runtime pick waiting on the egress disclosure, when one is. */
   const [pending, setPending] = useState<{ runtime: string; model: string } | null>(null);
   /** The daemon's sentence about a binding it would not store, beside the control that asked. */
   const [refusal, setRefusal] = useState<string | null>(null);
+  /** The message box, so a session opened from this pane's own entrance takes the caret. */
+  const box = useRef<HTMLTextAreaElement>(null);
+
+  /**
+   * Whether this project has already been told, in full, what its research index is doing.
+   *
+   * The index state is a standing capability fact rather than news, so it is read once in
+   * its teaching form and folds onto the keyboard hint's line afterwards. Nothing about
+   * what it says or what it offers changes with the fold.
+   */
+  const indexNoteRead = useIndexNoteRead(projectId, graph.degradation);
 
   /**
    * Both of those are about *this* session, so neither survives a move to another one: a
@@ -179,6 +193,19 @@ export function ComposerPane() {
     setPending(null);
     setRefusal(null);
   }, [sessionId]);
+
+  /**
+   * The caret lands where the researcher was already looking.
+   *
+   * Only for a session opened from this pane's entrance: choosing one in the rail is a
+   * different act, and moving focus out of the list a researcher is reading would be the
+   * cockpit deciding what they meant.
+   */
+  useEffect(() => {
+    if (sessionId === null || !newSession.focusComposer) return;
+    newSession.focusTaken();
+    box.current?.focus();
+  }, [newSession, sessionId]);
 
   const sendState: ComposerSendState = send.sending
     ? 'sending'
@@ -496,6 +523,55 @@ export function ComposerPane() {
       <p className="rh-web-composer__note rh-text-secondary">{models.unavailable}</p>
     ) : null;
 
+  /**
+   * The front door, when there is no session to type into.
+   *
+   * The composer used to render here as an inviting field with an accent Send, disabled,
+   * and the only explanation was a sentence in the transcript six hundred pixels away that
+   * named a control by a name it does not have. The daemon has no create-on-send —
+   * `session.send` takes a session id and `SendService._prepare` reads that record before
+   * anything else (`research_harness/conversation/send.py`), and creating a session is its
+   * own capability whose visibility argument cannot be taken back — so typing cannot be
+   * the way in. One control is, in the rail's own words, and the transcript's empty state
+   * names it by that name.
+   *
+   * A window that may only read is offered no control at all, and the reason stands where
+   * the control would have been rather than anywhere else.
+   */
+  if (!sessions.activeId) {
+    return (
+      <div className="rh-web-composer">
+        <div className="rh-web-entrance">
+          {canMutate ? (
+            <Button
+              variant="primary"
+              iconStart="plus"
+              onClick={() => newSession.ask({ focusComposer: true })}
+            >
+              New session
+            </Button>
+          ) : (
+            <p className="rh-web-composer__note rh-text-secondary">{mutationBlockedReason}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Why the box cannot be typed in, on the box.
+   *
+   * A session the URL names and the history has not produced is either still arriving or
+   * gone. Either way the disabled field says which, in its own hint line, instead of
+   * looking like a field that simply does not work.
+   */
+  const closedReason =
+    session !== null
+      ? null
+      : sessions.loading
+        ? 'Opening this session…'
+        : `${sessions.activeId} is not in this project's session history.`;
+
   return (
     <div className="rh-web-composer">
       {/* References and the graph (task W3). Every token in the draft is resolved against
@@ -514,7 +590,9 @@ export function ComposerPane() {
         onSend={onSend}
         onStop={() => void send.stop()}
         sendState={sendState}
+        textareaRef={box}
         disabled={session === null}
+        {...(closedReason === null ? {} : { hint: closedReason })}
         {...(blockedReasons.length > 0 ? { blockedReasons } : {})}
         {...(attachments.files.canAttach
           ? { onAttach: (files: File[]) => void attachments.files.attach(files) }
@@ -586,6 +664,7 @@ export function ComposerPane() {
         ...(graph.degradation === null
           ? {}
           : {
+              notePlacement: indexNoteRead ? ('folded' as const) : ('standing' as const),
               note: (
                 <GraphStatusNote
                   degradation={graph.degradation}
@@ -593,6 +672,7 @@ export function ComposerPane() {
                   onRecheck={graph.recheck}
                   rebuilding={graph.rebuilding}
                   rebuildError={graph.rebuildError}
+                  folded={indexNoteRead}
                   {...(canMutate ? { onRebuild: graph.rebuild } : {})}
                 />
               ),

@@ -145,7 +145,6 @@ function Shell() {
   const { projectId } = useProjectPaths();
   const [railOpen, setRailOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newSessionOpen, setNewSessionOpen] = useState(false);
   const routeRailClick = useRailRouting();
 
   // The multi-project host, or null for `research serve` and for a shell mounted on its own.
@@ -223,7 +222,7 @@ function Shell() {
     // control; the history below it is a read and stays. The click asks first: visibility
     // is fixed at creation and decides what the session may later be bound to, so it is
     // not a choice to make on someone's behalf.
-    ...(canMutate ? { onNewSession: () => setNewSessionOpen(true) } : {}),
+    ...(canMutate ? { onNewSession: () => conversation.newSession.ask() } : {}),
     sessionList: <SessionListPane />,
   };
 
@@ -285,10 +284,14 @@ function Shell() {
         }
       />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {/* One question, wherever it was asked from: the rail's button and the composer's
+          own entrance are the same control with the same name (wave six). */}
       <NewSessionDialog
-        open={newSessionOpen}
-        onOpenChange={setNewSessionOpen}
-        onCreate={(visibility) => void conversation.sessions.create(undefined, visibility)}
+        open={conversation.newSession.asking}
+        onOpenChange={(open) => {
+          if (!open) conversation.newSession.dismiss();
+        }}
+        onCreate={conversation.newSession.create}
       />
     </CommandsProvider>
   );

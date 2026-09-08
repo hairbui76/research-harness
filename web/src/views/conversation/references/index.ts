@@ -20,7 +20,7 @@ import './references.css';
 export { ArtifactSourcePage } from './ArtifactSourceRoute';
 export { GraphContextPanel } from './ContextTab';
 export { DeepLinkNotice } from './DeepLinkNotice';
-export { GraphStatusNote } from './GraphStatusNote';
+export { GraphStatusNote, useIndexNoteRead } from './GraphStatusNote';
 export { ReferenceMarks } from './ReferenceMarks';
 export { ReferenceDetails } from './ReferenceDetails';
 export { followable, routeForResolvedLink, useDeepLinks, MANUSCRIPT_PATH, SOURCE_PATH } from './deepLinks';

@@ -181,36 +181,44 @@ exports[`Composer theme x density > matches the dark / comfortable snapshot 1`] 
         </span>
       </button>
     </div>
-    <p
-      class="rh-composer__hint"
-      id="rh-composer-ID-hint"
+    <div
+      class="rh-composer__footer"
     >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-corner-down-left rh-icon"
-        data-icon="corner-down-left"
-        fill="none"
-        focusable="false"
-        height="14"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="14"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        class="rh-composer__hints"
       >
-        <path
-          d="M20 4v7a4 4 0 0 1-4 4H4"
-        />
-        <path
-          d="m9 10-5 5 5 5"
-        />
-      </svg>
-      <span>
-        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
-      </span>
-    </p>
+        <p
+          class="rh-composer__hint"
+          id="rh-composer-ID-hint"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-corner-down-left rh-icon"
+            data-icon="corner-down-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 4v7a4 4 0 0 1-4 4H4"
+            />
+            <path
+              d="m9 10-5 5 5 5"
+            />
+          </svg>
+          <span>
+            Enter sends · Shift+Enter starts a new line
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -396,36 +404,44 @@ exports[`Composer theme x density > matches the dark / compact snapshot 1`] = `
         </span>
       </button>
     </div>
-    <p
-      class="rh-composer__hint"
-      id="rh-composer-ID-hint"
+    <div
+      class="rh-composer__footer"
     >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-corner-down-left rh-icon"
-        data-icon="corner-down-left"
-        fill="none"
-        focusable="false"
-        height="14"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="14"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        class="rh-composer__hints"
       >
-        <path
-          d="M20 4v7a4 4 0 0 1-4 4H4"
-        />
-        <path
-          d="m9 10-5 5 5 5"
-        />
-      </svg>
-      <span>
-        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
-      </span>
-    </p>
+        <p
+          class="rh-composer__hint"
+          id="rh-composer-ID-hint"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-corner-down-left rh-icon"
+            data-icon="corner-down-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 4v7a4 4 0 0 1-4 4H4"
+            />
+            <path
+              d="m9 10-5 5 5 5"
+            />
+          </svg>
+          <span>
+            Enter sends · Shift+Enter starts a new line
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -611,36 +627,44 @@ exports[`Composer theme x density > matches the light / comfortable snapshot 1`]
         </span>
       </button>
     </div>
-    <p
-      class="rh-composer__hint"
-      id="rh-composer-ID-hint"
+    <div
+      class="rh-composer__footer"
     >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-corner-down-left rh-icon"
-        data-icon="corner-down-left"
-        fill="none"
-        focusable="false"
-        height="14"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="14"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        class="rh-composer__hints"
       >
-        <path
-          d="M20 4v7a4 4 0 0 1-4 4H4"
-        />
-        <path
-          d="m9 10-5 5 5 5"
-        />
-      </svg>
-      <span>
-        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
-      </span>
-    </p>
+        <p
+          class="rh-composer__hint"
+          id="rh-composer-ID-hint"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-corner-down-left rh-icon"
+            data-icon="corner-down-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 4v7a4 4 0 0 1-4 4H4"
+            />
+            <path
+              d="m9 10-5 5 5 5"
+            />
+          </svg>
+          <span>
+            Enter sends · Shift+Enter starts a new line
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -826,36 +850,44 @@ exports[`Composer theme x density > matches the light / compact snapshot 1`] = `
         </span>
       </button>
     </div>
-    <p
-      class="rh-composer__hint"
-      id="rh-composer-ID-hint"
+    <div
+      class="rh-composer__footer"
     >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-corner-down-left rh-icon"
-        data-icon="corner-down-left"
-        fill="none"
-        focusable="false"
-        height="14"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="14"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        class="rh-composer__hints"
       >
-        <path
-          d="M20 4v7a4 4 0 0 1-4 4H4"
-        />
-        <path
-          d="m9 10-5 5 5 5"
-        />
-      </svg>
-      <span>
-        Enter sends · Shift+Enter starts a new line · @ inserts a research reference
-      </span>
-    </p>
+        <p
+          class="rh-composer__hint"
+          id="rh-composer-ID-hint"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-corner-down-left rh-icon"
+            data-icon="corner-down-left"
+            fill="none"
+            focusable="false"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 4v7a4 4 0 0 1-4 4H4"
+            />
+            <path
+              d="m9 10-5 5 5 5"
+            />
+          </svg>
+          <span>
+            Enter sends · Shift+Enter starts a new line
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;

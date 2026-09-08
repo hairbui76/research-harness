@@ -31,6 +31,7 @@
  * the sentence: `state.index` is a capability name, and the researcher's word for what it
  * holds is "the project listings" (2E).
  */
+import { useEffect, useState } from 'react';
 import { Button, Icon } from '@research-harness/design';
 import type { IconName } from '@research-harness/design';
 import type { GraphDegradation } from './graphReferenceProvider';
@@ -53,23 +54,75 @@ export interface GraphStatusNoteProps {
   rebuilding?: boolean;
   /** The daemon's own sentence about a rebuild it refused or could not finish. */
   rebuildError?: string | null;
+  /**
+   * Whether this state has already been read once in this project.
+   *
+   * A folded note says the same thing in its shortest true form and keeps the same action,
+   * so that it can share the composer's footer line with the keyboard hint instead of
+   * taking a row of its own. Nothing is hidden by folding: the state is still named and
+   * the rebuild is still one press away.
+   */
+  folded?: boolean;
 }
 
-/** What each degradation is, in one sentence, with the icon that is not a spinner. */
-const WORDING: Record<GraphDegradation, { icon: IconName; line: string }> = {
+/**
+ * What each degradation is, with the icon that is not a spinner.
+ *
+ * `line` is what it says the first time, which is the sentence that has to teach: the
+ * state, and what is answering instead of the index. `short` is what it says afterwards —
+ * the same state, without the clause the researcher has already read — so that a standing
+ * fact costs the composer half a row rather than a whole one.
+ */
+const WORDING: Record<GraphDegradation, { icon: IconName; line: string; short: string }> = {
   rebuilding: {
     icon: 'refresh-cw',
     line: 'Rebuilding the research index; completing from the project listings.',
+    short: 'Rebuilding the research index',
   },
   absent: {
     icon: 'hard-drive',
     line: 'The research index is not built yet; completing from the project listings.',
+    short: 'Research index not built',
   },
   unreadable: {
     icon: 'hard-drive',
     line: 'The research index is not answering; completing from the project listings.',
+    short: 'Research index not answering',
   },
 };
+
+/** Where this browser remembers that a project has been told about its index once. */
+const READ_PREFIX = 'rh.index-note-read.';
+
+/**
+ * Whether this project has already been shown this index state, in full.
+ *
+ * The same shape as the composer's egress disclosure: a convenience in `localStorage`, and
+ * a storage that throws simply means the long form is shown again — which is the safe way
+ * for this to fail, because the long form is the one that teaches. A *different*
+ * degradation is news again and gets its own long showing; nothing folds a state the
+ * researcher has never seen.
+ */
+export function useIndexNoteRead(
+  project: string | null,
+  degradation: GraphDegradation | null,
+): boolean {
+  const key = degradation === null ? null : `${READ_PREFIX}${project ?? ''}.${degradation}`;
+  const [read, setRead] = useState(false);
+  useEffect(() => {
+    if (key === null) {
+      setRead(false);
+      return;
+    }
+    try {
+      setRead(window.localStorage.getItem(key) !== null);
+      window.localStorage.setItem(key, 'read');
+    } catch {
+      setRead(false);
+    }
+  }, [key]);
+  return read;
+}
 
 export function GraphStatusNote({
   degradation,
@@ -78,6 +131,7 @@ export function GraphStatusNote({
   onRebuild,
   rebuilding = false,
   rebuildError = null,
+  folded = false,
 }: GraphStatusNoteProps) {
   if (degradation === null) return null;
   const wording = WORDING[degradation];
@@ -88,11 +142,12 @@ export function GraphStatusNote({
       className="rh-web-graph-note"
       data-degradation={degradation}
       data-answering={answering}
+      data-folded={folded || undefined}
       role="status"
       {...(degradation === 'rebuilding' ? { 'aria-busy': true } : {})}
     >
       <Icon name={wording.icon} size={14} />
-      <span className="rh-web-graph-note__line">{wording.line}</span>
+      <span className="rh-web-graph-note__line">{folded ? wording.short : wording.line}</span>
       {offerRebuild ? (
         <Button
           size="sm"

@@ -62,10 +62,21 @@
   font-size: var(--rh-type-body-sm-size);
 }
 
-.rh-message__id,
+/*
+ * The two facts a person reads off a turn: when, and what answered.
+ *
+ * "Answered by" is prose and takes the meta's own body face; the runtime and the model it
+ * names are provenance, so they keep the mono the rest of the cockpit gives an identifier
+ * — and so do the digits of the timestamp, which are read as a column.
+ */
+.rh-message__answered {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 .rh-message__time,
-.rh-message__model,
-.rh-message__attempt {
+.rh-message__provider,
+.rh-message__model {
   font-family: var(--rh-font-mono);
   font-size: calc(var(--rh-type-mono-size) * var(--rh-density-font-scale));
 }

@@ -60,7 +60,13 @@ test('the composer keeps saying where an unpublished message goes', async ({
   // which is the kind of session a CLI runtime may be bound to at all.
   const narrow = info.project.name === NARROW;
   if (narrow) await page.getByRole('button', { name: 'Project navigation', exact: true }).click();
-  await page.getByRole('button', { name: 'New session', exact: true }).click();
+  // Scoped to the rail: with no session open the composer offers the same control, by the
+  // same name, in the same window — which is the point of the front door and the reason
+  // this locator has to say which of the two it means.
+  await page
+    .getByRole('navigation', { name: 'Project navigation' })
+    .getByRole('button', { name: 'New session', exact: true })
+    .click();
   const dialog = page.getByRole('dialog', { name: 'New session' });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('combobox', { name: 'Visibility' })).toHaveValue('project');
@@ -235,6 +241,104 @@ test('the composer keeps saying where an unpublished message goes', async ({
   await expect(page.locator('.rh-session-list__binding').first()).toHaveText(
     `session:${current.runtime}/${current.model}`,
   );
+
+  expect(errors).toEqual([]);
+});
+
+/**
+ * The front door, in a real browser, at both widths the suite runs.
+ *
+ * A project created a moment ago has no session, and that is the first screen a newcomer
+ * to the conversation route meets. It used to be a message box with an accent Send,
+ * disabled, and a sentence six hundred pixels above it naming a control called something
+ * else. The daemon has no create-on-send — `session.send` takes a session id and
+ * `SendService._prepare` reads that record before anything happens — so the way in is one
+ * control, in the rail's words, in the slot the message box will occupy.
+ */
+test('the conversation opens from one control, in the rail’s own words', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(180_000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+
+  const bootstrap = await request.get('/__test__/bootstrap');
+  expect(bootstrap.ok()).toBeTruthy();
+  const { nonce, parent } = await bootstrap.json();
+  await page.goto(`/?bootstrap=${encodeURIComponent(nonce)}`);
+  await expect(page.getByRole('heading', { name: 'Your research projects' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
+  await page.getByLabel('Project name', { exact: true }).fill(`Entrance study ${info.project.name}`);
+  await page.getByRole('button', { name: 'Choose parent folder' }).click();
+  await page.getByLabel('Parent folder path').fill(parent);
+  const created = page.waitForResponse(
+    (r) => r.url().endsWith('/api/projects/create') && r.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Create project', exact: true }).click();
+  expect((await created).ok()).toBeTruthy();
+  await page.waitForURL(/\/projects\/[^/?#]+/);
+
+  // Nothing to type into, and no Send pretending it could be pressed.
+  await expect(page.getByText('No session open')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Message' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Send' })).toHaveCount(0);
+
+  // The transcript names the control by the name the control actually wears.
+  await expect(
+    page.getByText('Choose New session below to ask a question against this project.'),
+  ).toBeVisible();
+  const entrance = page.locator('.rh-web-entrance').getByRole('button', { name: 'New session' });
+  await expect(entrance).toBeVisible();
+  await page.screenshot({ path: info.outputPath('composer-entrance.png'), fullPage: true });
+
+  // One control, the same question the rail asks, and the caret lands in the box it opened.
+  await entrance.click();
+  const dialog = page.getByRole('dialog', { name: 'New session' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Visibility' })).toHaveValue('project');
+  await dialog.getByRole('button', { name: 'Create session', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  const box = page.getByRole('textbox', { name: 'Message' });
+  await expect(box).toBeVisible();
+  await expect(box).toBeFocused();
+
+  expect(await axeViolations(page), 'the conversation route with no session and with one').toEqual(
+    [],
+  );
+
+  /*
+   * The chrome under the box, measured rather than assumed.
+   *
+   * Four rows sat here at 768: the toolbar, the keyboard hint, the destination and the
+   * index state. The destination keeps a line of its own; the two standing facts share one
+   * once the index state has been read, which is what the reload below is for.
+   */
+  await page.reload();
+  // Enabled, not merely present: a box that is still waiting for its session record renders
+  // disabled with its own reason, and measuring the footer mid-boot measures nothing.
+  await expect(page.getByRole('textbox', { name: 'Message' })).toBeEnabled({ timeout: 30_000 });
+  const note = page.locator('.rh-composer__note');
+  if ((await note.count()) > 0) {
+    const rows = await page.evaluate(() => {
+      const hint = document.querySelector('.rh-composer__hints .rh-composer__hint');
+      const folded = document.querySelector('.rh-composer__hints .rh-composer__note');
+      const standing = document.querySelector('.rh-composer__footer > .rh-composer__note');
+      return {
+        folded: folded !== null,
+        standing: standing !== null,
+        sameRow:
+          hint !== null && folded !== null
+            ? Math.abs(hint.getBoundingClientRect().top - folded.getBoundingClientRect().top) < 2
+            : false,
+      };
+    });
+    expect(rows.standing, 'a read index note must not keep a row of its own').toBeFalsy();
+    expect(rows.folded, 'a read index note folds into the composer footer').toBeTruthy();
+    expect(rows.sameRow, 'the keyboard hint and the read index note share one line').toBeTruthy();
+  }
+  await page.screenshot({ path: info.outputPath('composer-footer.png'), fullPage: true });
 
   expect(errors).toEqual([]);
 });

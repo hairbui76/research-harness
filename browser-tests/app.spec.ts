@@ -46,7 +46,13 @@ test('project creation and rename persist through the real API and reload', asyn
     await page.getByRole('button', { name: 'Project navigation', exact: true }).click();
   }
   await expect(page.getByRole('button', { name: new RegExp(`Project: ${name} revised\\.`) })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'New session', exact: true })).toBeEnabled();
+  // Scoped to the rail: with no session open the composer offers the same control, by the
+  // same name, in the same window (wave six's front door).
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Project navigation' })
+      .getByRole('button', { name: 'New session', exact: true }),
+  ).toBeEnabled();
   await page.screenshot({ path: info.outputPath('workspace.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
