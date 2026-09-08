@@ -21,16 +21,42 @@
  * column it names is marked in place rather than answered underneath. The grid takes the
  * full width and scrolls inside its own named region; the sentences stay at the measure.
  *
+ * A matrix over a large corpus is drawn as a window. The grid's cost is the product of its
+ * two sides, so a project of a thousand works would have sent and mounted every declared
+ * cell before the first row could be read. Past the daemon's page size (`MATRIX_ROW_PAGE`,
+ * 200 works — the corpus list's own threshold) `GET /synthesis` answers with a page of rows
+ * and the work to ask after for the next, and the grid keeps only what is near the viewport
+ * in the DOM, asking for the next page as the window reaches it. Rows are windowed and
+ * cells never are: a row is drawn whole or not at all, because half a row is a reading
+ * without the work it was read for.
+ *
+ * Windowing costs the browser's own find, and the page says so rather than pretending
+ * otherwise: it carries a find of its own over the works it has loaded, states how many of
+ * the matrix are not loaded yet, and does not intercept Ctrl/Cmd+F — the same bargain the
+ * corpus list struck. The heading strip stands outside the window so a column keeps its
+ * name while a thousand rows scroll under it, and the work stays at the inline start so a
+ * reading is never read against a row nobody can see.
+ *
  * Nothing on this page is composed here. Which cell belongs where, which order the rows and
  * columns are read in, how much of a column is recorded and which labels are on record for
  * how many works are all the daemon's (`GET /synthesis`), for the reason every research page
  * follows: a client that decided any of it could disagree with the record (PRODUCT §5 P10).
  */
-import { Fragment, useState } from 'react';
+
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Combobox, FullPageWorkspace, humaniseResearchTokens } from '@research-harness/design';
+import {
+  Button,
+  Combobox,
+  FullPageWorkspace,
+  Input,
+  Skeleton,
+  VirtualList,
+  humaniseResearchTokens,
+  useId,
+} from '@research-harness/design';
 import type { ComboboxItem } from '@research-harness/design';
-import type { MatrixCellView, MatrixView, ResearchGroup } from '../api/dto';
+import type { MatrixCellView, MatrixColumnView, MatrixRowView, MatrixView, ResearchGroup } from '../api/dto';
 import {
   DataTable,
   Empty,
@@ -44,6 +70,24 @@ import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
 import './synthesis.css';
+
+/**
+ * About how tall one row of a windowed matrix is before it has been measured, in CSS pixels.
+ *
+ * A work's title over its id and how much of its row is recorded, beside cells of one or two
+ * lines. The measurement is the real answer; this is only what the window places rows by
+ * until it has one.
+ */
+const MATRIX_ROW_HEIGHT = 76;
+
+/**
+ * How close to the end of what is loaded the window comes before the next page is asked for.
+ *
+ * Far enough ahead that a researcher scrolling steadily never waits at the bottom of the
+ * loaded rows, and short enough that opening a matrix does not fetch pages nobody asked to
+ * see. One page is 200 rows, so this is a fifth of one.
+ */
+const ROWS_AHEAD = 40;
 
 export function SynthesisPage() {
   const { client } = useSession();
@@ -168,13 +212,23 @@ function MatrixPanel({ matrix, explain }: { matrix: MatrixView; explain: boolean
       </p>
       <p className="rh-web-synthesis__lead rh-text-secondary">{matrix.labels_from}</p>
       <FieldPicker matrix={matrix} marked={marked} onMark={setMarked} />
-      <MatrixGrid
-        matrix={matrix}
-        marked={marked}
-        opened={opened}
-        onMark={setMarked}
-        onOpen={setOpened}
-      />
+      {matrix.paged ? (
+        <PagedMatrixGrid
+          matrix={matrix}
+          marked={marked}
+          opened={opened}
+          onMark={setMarked}
+          onOpen={setOpened}
+        />
+      ) : (
+        <MatrixGrid
+          matrix={matrix}
+          marked={marked}
+          opened={opened}
+          onMark={setMarked}
+          onOpen={setOpened}
+        />
+      )}
       <p className="rh-web-synthesis__reading" role="status">
         {column ? `${fieldLabel(column.field)} — ${column.reading}` : ''}
       </p>
@@ -352,6 +406,348 @@ function MatrixGrid({
           );
         })}
       </DataTable>
+    </div>
+  );
+}
+
+/**
+ * Whether one row of a matrix answers what was typed into the grid's find field.
+ *
+ * Over the work: its title and the id it is stored under. The readings are not searched,
+ * because a field is read down its column with the picker above the grid and a find that
+ * also matched labels would quietly answer a different question with the same box.
+ */
+function matchesRow(row: MatrixRowView, query: string): boolean {
+  const wanted = query.trim().toLowerCase();
+  if (wanted === '') return true;
+  return `${row.title} ${row.work}`.toLowerCase().includes(wanted);
+}
+
+/**
+ * The rows of one paged matrix this client has loaded, and the way to ask for the next.
+ *
+ * The daemon answers a matrix past its page size with a page of rows and the work to ask
+ * after (`MatrixView.next_row`). Pages are appended in the order they arrive, which is the
+ * matrix's own declared order, so the row at index n is the matrix's row n whatever the
+ * window is showing. Nothing here reorders, dedupes or completes what the daemon sent: a
+ * client that did would be composing a grid the record did not (PRODUCT §5 P10).
+ */
+function useMatrixRows(matrix: MatrixView): {
+  rows: MatrixRowView[];
+  awaiting: boolean;
+  failed: string | null;
+  more: () => void;
+  reached: (end: number) => void;
+} {
+  const { client } = useSession();
+  const [rows, setRows] = useState<MatrixRowView[]>(matrix.rows);
+  const [cursor, setCursor] = useState(matrix.next_row);
+  const [awaiting, setAwaiting] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
+  // How far down the matrix the window has come. It starts at nothing, which is why a
+  // matrix whose first page is shorter than the window asks for the next one on sight.
+  const [reach, setReach] = useState(0);
+  const inFlight = useRef(false);
+
+  // A re-read of the page replaces the matrix, and the window starts from its first page
+  // again rather than appending a second copy of the rows underneath the first.
+  useEffect(() => {
+    inFlight.current = false;
+    setRows(matrix.rows);
+    setCursor(matrix.next_row);
+    setAwaiting(false);
+    setFailed(null);
+    setReach(0);
+  }, [matrix]);
+
+  const more = useCallback(() => {
+    if (inFlight.current || cursor === '') return;
+    inFlight.current = true;
+    setAwaiting(true);
+    setFailed(null);
+    client
+      .matrixRows(matrix.id, cursor)
+      .then((report) => {
+        const answered = report.matrices.find((entry) => entry.id === matrix.id);
+        setRows((current) => [...current, ...(answered?.rows ?? [])]);
+        setCursor(answered?.next_row ?? '');
+      })
+      .catch((error: unknown) => {
+        setFailed(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        inFlight.current = false;
+        setAwaiting(false);
+      });
+  }, [client, cursor, matrix.id]);
+
+  useEffect(() => {
+    if (cursor === '' || failed !== null) return;
+    if (reach + ROWS_AHEAD < rows.length) return;
+    more();
+  }, [cursor, failed, more, reach, rows.length]);
+
+  return { rows, awaiting, failed, more, reached: setReach };
+}
+
+/**
+ * How much of a paged matrix is on screen, and how much of it is not here yet.
+ *
+ * The find is the browser's, so it can only reach the rows this client has loaded, and the
+ * sentence says exactly that instead of leaving a researcher to conclude from an empty
+ * result that the matrix has no such work in it.
+ */
+function loadedSentence(total: number, loaded: number, shown: number, finding: boolean): string {
+  const missing = total - loaded;
+  if (!finding) {
+    return missing > 0
+      ? `${loaded} of ${total} works loaded. The rest load as the window reaches them; the find below reaches what is loaded.`
+      : `All ${total} works are loaded.`;
+  }
+  return missing > 0
+    ? `Showing ${shown} of the ${loaded} works loaded. ${missing} more have not been loaded yet, and the find does not reach them.`
+    : `Showing ${shown} of ${total} works.`;
+}
+
+/**
+ * A matrix too long for one answer, drawn as a window over its rows.
+ *
+ * The grid is a `grid` with two row groups: the heading strip, which stands outside the
+ * window so a column keeps its name however far the rows have scrolled, and the window
+ * itself, which holds only the rows near the viewport. `aria-rowcount` and `aria-rowindex`
+ * state the whole matrix rather than the window, so a screen reader is never told the
+ * matrix ends where this client's last page did.
+ *
+ * The two row groups scroll sideways together: the window is the scroller, and the strip
+ * follows it, which is what keeps a cell under its own column head. The work itself stays
+ * at the inline start, because a reading read against a row nobody can see is not a reading
+ * of anything.
+ */
+function PagedMatrixGrid({
+  matrix,
+  marked,
+  opened,
+  onMark,
+  onOpen,
+}: {
+  matrix: MatrixView;
+  marked: string | null;
+  opened: string | null;
+  onMark: (field: string | null) => void;
+  onOpen: (key: string | null) => void;
+}) {
+  const { rows, awaiting, failed, more, reached } = useMatrixRows(matrix);
+  const [query, setQuery] = useState('');
+  const head = useRef<HTMLDivElement | null>(null);
+  const detailId = `matrix-cell-${matrix.id}`;
+  const findId = useId();
+
+  const shown = useMemo(() => rows.filter((row) => matchesRow(row, query)), [query, rows]);
+  const finding = query.trim() !== '';
+  // The page in flight is a row of the matrix that has not arrived, so it stands where it
+  // will stand: at the end of the loaded rows, in the window, shaped like its neighbours.
+  const items: (MatrixRowView | null)[] = awaiting && !finding ? [...shown, null] : shown;
+  // A find narrows what the grid presents, so the count it states is the count of what it
+  // presents. With no find that is the matrix itself, which is the case this exists for.
+  const rowCount = (finding ? shown.length : matrix.works) + 1;
+  const tracks = { gridTemplateColumns: `var(--rh-web-matrix-work) repeat(${matrix.columns.length}, minmax(var(--rh-web-matrix-cell), 1fr))` };
+
+  return (
+    <div className="rh-web-stack rh-web-stack--tight">
+      <Input
+        id={findId}
+        label="Find a work in this matrix"
+        hideLabel
+        size="sm"
+        type="search"
+        iconStart="search"
+        placeholder="Title or id of a work"
+        fieldClassName="rh-web-matrix__find"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      <p className="rh-text-secondary" role="status">
+        {loadedSentence(matrix.works, rows.length, shown.length, finding)}
+      </p>
+      {failed !== null ? <ErrorBox error={failed} retry={more} /> : null}
+      {shown.length === 0 ? (
+        <Empty
+          description="The find only hides. Every work this matrix declares is still in it underneath, and the rows nobody has loaded yet are not searched at all."
+          action={
+            <Button size="sm" variant="secondary" onClick={() => setQuery('')}>
+              Clear the find
+            </Button>
+          }
+        >
+          No loaded work matches this find
+        </Empty>
+      ) : (
+        <div
+          className="rh-web-matrix rh-web-matrix__paged"
+          role="grid"
+          aria-label={`The ${matrix.name} matrix`}
+          aria-rowcount={rowCount}
+        >
+          <div className="rh-web-matrix__strip" role="rowgroup" ref={head}>
+            <div className="rh-web-matrix__grid-row" role="row" aria-rowindex={1} style={tracks}>
+              <span role="columnheader" className="rh-web-matrix__grid-work">
+                Work
+              </span>
+              {matrix.columns.map((column) => (
+                <span
+                  role="columnheader"
+                  key={column.field}
+                  className="rh-web-matrix__grid-cell"
+                  data-marked={column.field === marked ? 'true' : undefined}
+                  {...(column.field === marked ? { 'aria-current': 'true' as const } : {})}
+                >
+                  <button
+                    type="button"
+                    className="rh-web-matrix__head"
+                    aria-pressed={column.field === marked}
+                    onClick={() => onMark(column.field === marked ? null : column.field)}
+                  >
+                    {fieldLabel(column.field)}
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+          <VirtualList<MatrixRowView | null>
+            className="rh-web-matrix__window"
+            role="rowgroup"
+            rowIndexOffset={1}
+            label={`Works in the ${matrix.name} matrix`}
+            items={items}
+            itemKey={(row, index) => row?.work ?? `awaiting-${index}`}
+            estimatedItemHeight={MATRIX_ROW_HEIGHT}
+            onVisibleRangeChange={(range) => reached(range.end)}
+            onScroll={(event) => {
+              if (head.current) head.current.scrollLeft = event.currentTarget.scrollLeft;
+            }}
+            renderItem={(row) =>
+              row === null ? (
+                <AwaitingRow columns={matrix.columns} tracks={tracks} />
+              ) : (
+                <PagedRow
+                  row={row}
+                  tracks={tracks}
+                  marked={marked}
+                  opened={opened}
+                  detailId={detailId}
+                  onOpen={onOpen}
+                />
+              )
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * One work of a windowed matrix: the work at the inline start, then its cells.
+ *
+ * The cells are the same controls the whole grid draws — the reading, or the words "Not
+ * recorded", never a tint and never an empty box — and an opened cell puts its evidence
+ * inside the row rather than in a row of its own, so reading what a cell rests on never
+ * moves the rows under it.
+ */
+function PagedRow({
+  row,
+  tracks,
+  marked,
+  opened,
+  detailId,
+  onOpen,
+}: {
+  row: MatrixRowView;
+  tracks: { gridTemplateColumns: string };
+  marked: string | null;
+  opened: string | null;
+  detailId: string;
+  onOpen: (key: string | null) => void;
+}) {
+  const { href } = useProjectPaths();
+  const open = row.cells.find((cell) => cellKey(cell.work, cell.field) === opened) ?? null;
+  return (
+    <div className="rh-web-matrix__grid-row" style={tracks}>
+      <span role="rowheader" className="rh-web-matrix__grid-work">
+        {row.route ? (
+          <Link to={href(row.route)}>{row.title || row.work}</Link>
+        ) : (
+          (row.title || row.work)
+        )}{' '}
+        <code className="rh-web-object-id">{row.work}</code>
+        <span className="rh-web-matrix__row-summary">{row.summary}</span>
+      </span>
+      {row.cells.map((cell) => {
+        const key = cellKey(cell.work, cell.field);
+        return (
+          <span
+            role="gridcell"
+            key={cell.field}
+            className="rh-web-matrix__grid-cell"
+            data-marked={cell.field === marked ? 'true' : undefined}
+            data-state={cell.recorded ? 'recorded' : 'not-recorded'}
+          >
+            <button
+              type="button"
+              className="rh-web-matrix__cell"
+              aria-expanded={key === opened}
+              {...(key === opened ? { 'aria-controls': detailId } : {})}
+              onClick={() => onOpen(key === opened ? null : key)}
+            >
+              {cell.recorded ? (
+                <>
+                  <span className="rh-web-matrix__reading">{cell.reading}</span>
+                  {cell.measurement ? (
+                    <span className="rh-web-matrix__measure">{cell.measurement}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span className="rh-web-matrix__blank">Not recorded</span>
+              )}
+            </button>
+          </span>
+        );
+      })}
+      {open ? (
+        <span role="gridcell" className="rh-web-matrix__grid-detail" id={detailId}>
+          <CellEvidence cell={open} />
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The row of the matrix the daemon is still sending, shaped like the rows around it.
+ *
+ * A skeleton rather than a spinner: the researcher is waiting for a row of this grid, and
+ * a placeholder shaped like one says which row and how wide it will be. It stands at the
+ * position it will occupy, so nothing moves when it becomes a work.
+ */
+function AwaitingRow({
+  columns,
+  tracks,
+}: {
+  columns: readonly MatrixColumnView[];
+  tracks: { gridTemplateColumns: string };
+}) {
+  return (
+    <div className="rh-web-matrix__grid-row" style={tracks}>
+      <span
+        role="gridcell"
+        className="rh-web-matrix__grid-detail"
+        aria-label="The next works of this matrix are on their way"
+      >
+        <Skeleton
+          direction="row"
+          widths={['12rem', ...columns.map(() => '6rem')]}
+        />
+      </span>
     </div>
   );
 }

@@ -348,6 +348,18 @@ export class HarnessClient {
     return this.get<SynthesisReport>('/synthesis');
   }
 
+  /**
+   * The next page of one matrix's rows, resuming after the work the last page ended on.
+   *
+   * A matrix past the daemon's page size answers with a page of rows and a cursor
+   * (`MatrixView.next_row`), so a grid over a large corpus draws a window instead of every
+   * declared cell. The order is the matrix's own; this only asks for more of it.
+   */
+  matrixRows(matrix: string, after: string): Promise<SynthesisReport> {
+    const query = new URLSearchParams({ matrix, after });
+    return this.get<SynthesisReport>(`/synthesis?${query.toString()}`);
+  }
+
   object(objectId: string): Promise<ObjectView> {
     return this.get<ObjectView>(`/objects/${encodeURIComponent(objectId)}`);
   }

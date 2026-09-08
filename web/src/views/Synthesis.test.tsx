@@ -175,6 +175,121 @@ function renderSynthesis(report: unknown = REPORT) {
   );
 }
 
+
+/**
+ * One page of a long matrix's rows, in the matrix's own declared order.
+ *
+ * Every odd work is read for `tokenization` and none is read for `dataset`, so a window
+ * over the page still holds both states of a cell and the grid can be asserted on what a
+ * researcher would actually see in it.
+ */
+function pagedRows(from: number, count: number) {
+  return Array.from({ length: count }, (_unused, offset) => {
+    const index = from + offset;
+    const work = `W${String(index).padStart(4, '0')}`;
+    const read = index % 2 === 1;
+    return {
+      work,
+      title: `Synthetic corpus study ${String(index).padStart(4, '0')}`,
+      route: `/corpus/${work}`,
+      summary: read ? '1 of 2 readings recorded' : 'no reading recorded yet',
+      cells: [
+        {
+          work,
+          field: 'tokenization',
+          recorded: read,
+          reading: read ? 'padded' : '',
+          measurement: '',
+          detail: read ? 'Read from 1 accepted evidence span.' : BLANK,
+          evidence: [],
+        },
+        { work, field: 'dataset', recorded: false, reading: '', measurement: '', detail: BLANK, evidence: [] },
+      ],
+    };
+  });
+}
+
+/** A matrix the daemon answered in pages: a thousand works, three of them sent so far. */
+const PAGED = {
+  ...MATRIX,
+  id: 'S0002',
+  name: 'Traffic shape at scale',
+  works: 1000,
+  shape: '1000 works read for 2 fields',
+  coverage: '500 of 2000 readings recorded',
+  rows: pagedRows(1, 3),
+  paged: true,
+  next_row: 'W0003',
+};
+
+function pagedReport(matrix: unknown = PAGED) {
+  return {
+    summary: '1500 readings these matrices declare have not been recorded yet.',
+    count: 1,
+    missing: 1500,
+    gaps: [],
+    matrices: [matrix],
+  };
+}
+
+/**
+ * A daemon that answers `/synthesis` whole and `?matrix=&after=` with the next page.
+ *
+ * `fakeDaemon` keys on the path alone, and paging is entirely in the query, so this one
+ * reads the search parameters and records them: what is being asserted is that the page
+ * asks for the rows after the cursor it was given, in the matrix's own order.
+ */
+function pagingDaemon(options: {
+  works: number;
+  pages: number[];
+  stall?: boolean;
+}): FakeDaemon & { asked: string[] } {
+  const asked: string[] = [];
+  const sizes = options.pages;
+  let sent = 0;
+  const answer = (index: number) => {
+    const size = sizes[index] ?? 0;
+    const rows = pagedRows(sent + 1, size);
+    sent += size;
+    return pagedReport({
+      ...PAGED,
+      works: options.works,
+      rows,
+      next_row: sent < options.works ? (rows[rows.length - 1]?.work ?? '') : '',
+    });
+  };
+  const first = answer(0);
+  let page = 1;
+  const fetchImpl = (async (input: RequestInfo | URL) => {
+    const url = new URL(String(input), 'http://daemon.test');
+    if (url.pathname !== '/synthesis') return new Response('not found', { status: 404 });
+    const after = url.searchParams.get('after') ?? '';
+    if (after === '') {
+      return new Response(JSON.stringify(first), {
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+    asked.push(after);
+    if (options.stall) return new Promise<Response>(() => undefined);
+    const body = answer(page);
+    page += 1;
+    return new Response(JSON.stringify(body), {
+      headers: { 'content-type': 'application/json' },
+    });
+  }) as unknown as typeof fetch;
+  return { fetch: fetchImpl, calls: [], capabilityCalls: () => [], asked };
+}
+
+function renderPaged(daemon: FakeDaemon) {
+  return renderView(
+    <ProjectPathProvider projectId="prj_abc">
+      <SynthesisPage />
+    </ProjectPathProvider>,
+    { daemon, route: '/projects/prj_abc/synthesis', path: '/projects/prj_abc/synthesis' },
+  );
+}
+
+
 describe('the synthesis page', () => {
   it('keeps its heading, and draws the grid that is coming, while the read is in flight', () => {
     const { container } = renderView(<SynthesisPage />, { daemon: pendingDaemon() });
@@ -407,6 +522,101 @@ describe('the synthesis page', () => {
     fireEvent.click(head);
     expect(head).toHaveAttribute('aria-pressed', 'false');
     expect(screen.queryByText(/do not all record the same label/)).not.toBeInTheDocument();
+  });
+
+  it('leaves a matrix inside the daemon\u2019s page size the table it has always been', async () => {
+    // Windowing is a cost a corpus of a few hundred works imposes; a matrix under the
+    // threshold arrives whole and is still drawn whole, with no find and no window.
+    renderSynthesis();
+
+    await waitFor(() =>
+      expect(screen.getByRole('columnheader', { name: 'Work' })).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('table')).toHaveLength(1);
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
+  it('windows a paged matrix and still states the whole of it to a screen reader', async () => {
+    // Only the rows near the viewport exist, so the grid states how many rows the matrix
+    // has rather than letting assistive technology count the ones this client has loaded.
+    renderPaged(pagingDaemon({ works: 1000, pages: [3], stall: true }));
+
+    const grid = await screen.findByRole('grid', {
+      name: 'The Traffic shape at scale matrix',
+    });
+    expect(grid).toHaveAttribute('aria-rowcount', '1001');
+    expect(
+      screen.getAllByRole('columnheader').map((node) => (node.textContent ?? '').trim()),
+    ).toEqual(['Work', 'Tokenization', 'Dataset']);
+    const rows = screen.getAllByRole('row');
+    expect(rows[0]).toHaveAttribute('aria-rowindex', '1');
+    expect(rows[1]).toHaveAttribute('aria-rowindex', '2');
+    expect(rows.length, 'a window, not a thousand rows').toBeLessThan(20);
+    expect(
+      screen.getByRole('rowheader', { name: /Synthetic corpus study 0001/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('says how much of the matrix is not loaded, and draws a skeleton row rather than a spinner', async () => {
+    const { container } = renderPaged(pagingDaemon({ works: 1000, pages: [3], stall: true }));
+
+    await screen.findByRole('grid', { name: 'The Traffic shape at scale matrix' });
+    expect(
+      screen.getByText(
+        '3 of 1000 works loaded. The rest load as the window reaches them; the find below reaches what is loaded.',
+      ),
+    ).toBeInTheDocument();
+    // The page in flight is a row shaped like the rows around it, never a spinner.
+    expect(container.querySelector('.rh-skeleton')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('asks the daemon for the rows after the cursor as the window reaches them', async () => {
+    const daemon = pagingDaemon({ works: 6, pages: [3, 3] });
+    renderPaged(daemon);
+
+    await screen.findByRole('rowheader', { name: /Synthetic corpus study 0004/ });
+    expect(daemon.asked, 'the cursor is the work the last page ended on').toEqual(['W0003']);
+    expect(screen.getByText('All 6 works are loaded.')).toBeInTheDocument();
+  });
+
+  it('finds a work in what is loaded, and says how far the find reaches', async () => {
+    const user = userEvent.setup();
+    renderPaged(pagingDaemon({ works: 1000, pages: [3], stall: true }));
+
+    await screen.findByRole('grid', { name: 'The Traffic shape at scale matrix' });
+    const find = screen.getByRole('searchbox', { name: 'Find a work in this matrix' });
+    await user.type(find, '0002');
+
+    expect(
+      screen.getByRole('rowheader', { name: /Synthetic corpus study 0002/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Synthetic corpus study 0001')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Showing 1 of the 3 works loaded. 997 more have not been loaded yet, and the find does not reach them.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('opens a cell of a windowed row onto the same evidence a whole matrix opens', async () => {
+    renderPaged(pagingDaemon({ works: 1000, pages: [3], stall: true }));
+
+    await screen.findByRole('grid', { name: 'The Traffic shape at scale matrix' });
+    fireEvent.click(screen.getAllByText('Not recorded')[0]!);
+
+    expect(await screen.findByText(BLANK)).toBeInTheDocument();
+  });
+
+  it('has no accessibility violations while it windows a matrix', async () => {
+    const { container } = renderPaged(pagingDaemon({ works: 1000, pages: [3], stall: true }));
+
+    await screen.findByRole('grid', { name: 'The Traffic shape at scale matrix' });
+    // With the skeleton row in it: the state a researcher meets while a page is on its way
+    // is the one most likely to have an unnamed control or an orphan row in it.
+    await waitFor(() => expect(container.querySelector('.rh-skeleton')).toBeInTheDocument());
+    await expectNoAxeViolations(container);
   });
 
   it('says so when there is nothing left unrecorded, without saying anything about the works', async () => {

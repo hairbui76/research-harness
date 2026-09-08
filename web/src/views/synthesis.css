@@ -172,3 +172,110 @@
 .rh-web-matrix__opened {
   max-inline-size: var(--rh-measure-prose);
 }
+
+/* The matrix a large corpus makes too long to draw ----------------------------------- */
+
+/*
+ * A paged matrix is a windowed grid rather than a table: only the rows near the viewport
+ * exist, so a table's own layout — every cell measured against every other — is not
+ * available to it. The tracks are declared instead, once, and the heading strip and every
+ * row take the same ones. That is what keeps a cell under its own column head while a
+ * thousand rows scroll past; nothing here is a second opinion about the grid's shape.
+ */
+.rh-web-matrix__paged {
+  --rh-web-matrix-work: minmax(14rem, 20rem);
+  --rh-web-matrix-cell: 9rem;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  border: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+}
+
+/*
+ * The column names, above the window rather than inside it. A heading row that scrolled
+ * away with the rows would be the recall this page exists to remove: a reading in the
+ * fourth column of the six-hundredth row has to still say which field it is a reading of.
+ *
+ * It is scrolled by the window under it rather than by hand, and it keeps the gutter the
+ * window's scrollbar takes so the two sets of tracks stay over each other. The gutter is
+ * transparent: it reserves width, it does not draw a second scrollbar.
+ */
+.rh-web-matrix__strip {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  flex: 0 0 auto;
+  border-block-end: var(--rh-border-width) solid var(--rh-border-subtle);
+  background: var(--rh-surface-raised);
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.rh-web-matrix__strip::-webkit-scrollbar {
+  width: var(--rh-space-2);
+}
+
+.rh-web-matrix__strip::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/*
+ * The window. It is the scroller on both axes — the row head sticks to the inline start of
+ * this box, so this box has to be the one that scrolls sideways — and it is bounded in
+ * height, because a window as tall as its content is not a window.
+ */
+.rh-web-matrix .rh-web-matrix__window {
+  overflow-x: auto;
+  block-size: min(60vh, 34rem);
+  background: transparent;
+}
+
+/*
+ * One row of the grid, heading strip included. `max-content` lets a matrix with many fields
+ * run wider than the pane and scroll inside it; `100%` keeps a narrow one filling the pane
+ * instead of trailing off into empty space. An opened cell wraps onto its own line, which
+ * is what the last track's `1 / -1` needs the row to allow.
+ */
+.rh-web-matrix__grid-row {
+  display: grid;
+  align-items: start;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  border-block-end: var(--rh-border-width) solid var(--rh-border-subtle);
+}
+
+/*
+ * The work, kept at the inline start while its readings scroll past. Without it a wide
+ * matrix asks a researcher to remember which row they are on, which is the recall this
+ * page is fixing. The fill is the card's own, so a scrolled cell passes under it.
+ */
+.rh-web-matrix__grid-work {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  padding: var(--rh-space-2);
+  background: var(--rh-surface-raised);
+  color: var(--rh-text-primary);
+}
+
+.rh-web-matrix__grid-cell {
+  min-inline-size: 0;
+  padding: var(--rh-space-2);
+}
+
+/* What a cell rests on, opened inside the row it belongs to rather than under it. */
+.rh-web-matrix__grid-detail {
+  grid-column: 1 / -1;
+  padding: var(--rh-space-2);
+  background: var(--rh-surface-subtle);
+}
+
+/* The same selection surface the table grid takes: never a scientific colour. */
+.rh-web-matrix__grid-cell[data-marked='true'] {
+  background: var(--rh-surface-selected);
+}
+
+/* The find sits at the width of the words it holds, not at the width of the grid. */
+.rh-web-matrix__find {
+  inline-size: min(24rem, 100%);
+}
