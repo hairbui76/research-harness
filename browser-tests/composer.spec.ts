@@ -316,7 +316,9 @@ test('the conversation opens from one control, in the rail’s own words', async
    * once the index state has been read, which is what the reload below is for.
    */
   await page.reload();
-  await expect(page.getByRole('textbox', { name: 'Message' })).toBeVisible();
+  // Enabled, not merely present: a box that is still waiting for its session record renders
+  // disabled with its own reason, and measuring the footer mid-boot measures nothing.
+  await expect(page.getByRole('textbox', { name: 'Message' })).toBeEnabled({ timeout: 30_000 });
   const note = page.locator('.rh-composer__note');
   if ((await note.count()) > 0) {
     const rows = await page.evaluate(() => {

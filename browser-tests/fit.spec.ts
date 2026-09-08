@@ -102,7 +102,12 @@ async function openWorkspace(
   // Below the shell's breakpoint the rail — and the control that opens a session — is a
   // drawer, so it has to be opened, and closed again before anything is measured.
   if (narrow) await page.getByRole('button', { name: 'Project navigation', exact: true }).click();
-  await page.getByRole('button', { name: 'New session', exact: true }).click();
+  // Scoped to the rail: with no session open the composer offers the same control, by the
+  // same name, in the same window (wave six's front door).
+  await page
+    .getByRole('navigation', { name: 'Project navigation' })
+    .getByRole('button', { name: 'New session', exact: true })
+    .click();
   const dialog = page.getByRole('dialog', { name: 'New session' });
   await expect(dialog).toBeVisible();
   await dialog.getByRole('button', { name: 'Create session', exact: true }).click();
