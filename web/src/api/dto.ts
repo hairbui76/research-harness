@@ -220,6 +220,13 @@ export interface ManuscriptAuditFinding {
   anchor?: ManuscriptAnchorRecord | null;
   related?: string[];
   location?: FindingLocation | null;
+  /**
+   * The manuscript sentence the finding is about, verbatim.
+   *
+   * A finding card opens with it. A finding raised against an unattached sentence carries
+   * no anchor, so this is the only structured record of what the audit was reading.
+   */
+  sentence?: string | null;
 }
 
 /** `manuscript.audit`: findings, coverage, and the trace behind each anchored sentence. */

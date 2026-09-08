@@ -258,6 +258,25 @@ function auditSeverity(severity: string): DiagnosticSeverity {
   return severity === 'error' || severity === 'info' ? severity : 'warning';
 }
 
+/**
+ * The audit's own sentence, without the position the card draws beside it.
+ *
+ * The auditor writes `"<file>:<line>: "` in front of every message and keeps it there
+ * deliberately — it is the fallback for a client older than `location`, and the VS Code
+ * contract pins it. The cockpit is not that client: a finding card prints the position
+ * itself, from `location`, so the same fact arriving twice is only noise. It is removed
+ * where it matches the structured value character for character and nowhere else; nothing
+ * here parses prose to *find* a fact the daemon did not already answer.
+ */
+function auditMessage(finding: ManuscriptAuditFinding): string {
+  const location = finding.location;
+  if (!location) return finding.message;
+  const prefix = `${location.file}:${location.line_start}: `;
+  return finding.message.startsWith(prefix)
+    ? finding.message.slice(prefix.length)
+    : finding.message;
+}
+
 /** Scientific audit findings, placed by their own structured `location` (Product 30.3). */
 export function auditFindingsFrom(
   findings: readonly ManuscriptAuditFinding[],
@@ -269,13 +288,18 @@ export function auditFindingsFrom(
     const file = location?.file ?? anchor?.file;
     const line = location?.line_start ?? anchor?.line_start;
     const claim = anchor?.claim ?? (finding.related ?? []).find((id) => /^C\d+$/.test(id));
+    // The anchor carries the sentence for a finding raised against an anchored one; the
+    // finding's own field is what an unattached sentence has, and what a daemon too old to
+    // send it has not.
+    const sentence = finding.sentence ?? anchor?.sentence;
     return {
       id: `${idPrefix}-${index}`,
       kind: finding.kind,
       severity: auditSeverity(finding.severity),
-      message: finding.message,
+      message: auditMessage(finding),
       ...(file ? { file } : {}),
       ...(line ? { line } : {}),
+      ...(sentence ? { sentence } : {}),
       ...(claim ? { claim: { id: claim } } : {}),
       // A `ManuscriptAnchor` is a tracked object with no id of its own; `file:line` is the
       // key the anchor store and `AnchorImpact.anchor_key` both use.

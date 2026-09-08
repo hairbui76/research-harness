@@ -144,6 +144,46 @@ describe('the two lists', () => {
     });
   });
 
+  /**
+   * A finding card opens with the manuscript's own sentence, so the sentence has to reach
+   * it. An anchored finding carries it through the anchor; one raised against a sentence
+   * attached to nothing carries no anchor at all and answers with its own field.
+   */
+  it('carries the manuscript sentence each finding is about', () => {
+    const [anchored, unattached] = auditFindingsFrom(SUCCEEDED.audit_findings);
+
+    expect(anchored?.sentence).toBe(
+      'All existing traffic classifiers degrade under sustained load, and no prior work ' +
+        'reports the size of the gap \\cite{kraus2019}.',
+    );
+    expect(unattached?.sentence).toBe(
+      'No prior work reports the size of the gap \\cite{kraus2019}.',
+    );
+  });
+
+  /**
+   * The auditor writes `"<file>:<line>: "` in front of every message and keeps it there on
+   * purpose, as the fallback for a client older than `location`. The cockpit draws the
+   * position from `location`, so the card would otherwise say where twice.
+   */
+  it('drops the position the message repeats, and only where it matches', () => {
+    const [anchored] = auditFindingsFrom(SUCCEEDED.audit_findings);
+    expect(anchored?.message).toBe(
+      'sentence reads above C0001: the Claim allows corpus-level wording, the sentence ' +
+        'asserts it universally',
+    );
+
+    const unprefixed = auditFindingsFrom([
+      {
+        kind: 'stale_claim',
+        severity: 'warning',
+        message: 'C0001 needs review before this sentence ships',
+        location: { file: 'sections/intro.tex', line_start: 9, line_end: 9 },
+      },
+    ]);
+    expect(unprefixed[0]?.message).toBe('C0001 needs review before this sentence ships');
+  });
+
   it('says so plainly when no sentence produced a finding', () => {
     expect(whereOf({ kind: 'stale_claim', severity: 'warning', message: 'x' })).toBe(
       'whole project',
