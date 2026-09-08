@@ -8,7 +8,12 @@ export * from './labels';
 
 export { AuthorityBadge } from './AuthorityBadge';
 export type { AuthorityBadgeProps } from './AuthorityBadge';
-export { DescribedTerm, useDescribedTerm } from './DescribedTerm';
+export {
+  DESCRIBED_TERM_HOVER_MS,
+  DESCRIBED_TERM_PRESS_MS,
+  DescribedTerm,
+  useDescribedTerm,
+} from './DescribedTerm';
 export type { DescribedTermParts, DescribedTermProps } from './DescribedTerm';
 export { EntityRef } from './EntityRef';
 export type { EntityRefElement, EntityRefProps, EntityRefSize } from './EntityRef';

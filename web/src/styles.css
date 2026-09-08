@@ -108,6 +108,40 @@ body,
   min-block-size: var(--rh-control-target-min);
 }
 
+/*
+ * Where a described word's sentence goes when the thing it sits in cannot grow.
+ *
+ * A badge or a term that explains itself draws the sentence under the word, which is right
+ * in a `<dd>` and wrong in a row: the wrapper is a column, so a sentence opening inside it
+ * widens that column and re-wraps the row, and the row's own link — what the pointer was
+ * aiming at — moves. That is the defect wave two answered by refusing the pointer
+ * altogether; the sentence now opens to a pointer that rests, so the row has to hold still
+ * on its own.
+ *
+ * It does, in two moves. The wrapper becomes `display: contents`, so the badge and its
+ * sentence are members of the row itself rather than of a box inside it. The sentence then
+ * takes a line of its own — `min-inline-size: 100%` is wider than any line can hold, so the
+ * flex layout can only put it on the next one, below every item already placed. The row's
+ * first line keeps its height and its items keep their boxes; the row grows downward.
+ *
+ * `inline-size: 0` is what keeps it from widening anything: a definite width contributes
+ * exactly that much to intrinsic sizing, so the sentence adds nothing to what the row (or,
+ * below, a table column shared by every other row) asks for, while the percentage minimum
+ * still gives it the full width to be read at. The reading measure is the row's here
+ * rather than 52ch, because the row is what the sentence belongs to.
+ */
+.rh-web-row .rh-authority-badge__described,
+.rh-web-row .rh-described-term {
+  display: contents;
+}
+
+.rh-web-row .rh-authority-badge__hint,
+.rh-web-row .rh-described-term__hint {
+  inline-size: 0;
+  min-inline-size: 100%;
+  max-inline-size: none;
+}
+
 .rh-web-list {
   list-style: none;
   margin: 0;
@@ -204,6 +238,27 @@ body,
     calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale))
   );
   line-height: var(--rh-type-body-sm-lh);
+}
+
+/*
+ * The same slot inside a table cell, for the same reason twice over: a sentence opening
+ * inside a cell grows the cell's column, and a column belongs to every row of the table,
+ * so one badge explaining itself would move every claim on the page. The cell is a block
+ * container rather than a flex row, so the sentence needs no line of its own — a block
+ * after an inline badge already starts one — but it still must contribute nothing to the
+ * column's width.
+ */
+.rh-web-table .rh-authority-badge__described,
+.rh-web-table .rh-described-term {
+  display: contents;
+}
+
+.rh-web-table .rh-authority-badge__hint,
+.rh-web-table .rh-described-term__hint {
+  display: block;
+  inline-size: 0;
+  min-inline-size: 100%;
+  max-inline-size: none;
 }
 
 .rh-web-table th,

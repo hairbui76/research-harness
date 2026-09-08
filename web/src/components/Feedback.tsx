@@ -35,7 +35,6 @@
  * `StatusBadge` never signals with colour alone: every badge renders the daemon's own word
  * beside its glyph (DS spec §12.6).
  */
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   AsyncState,
@@ -52,7 +51,7 @@ import {
   researchDescription,
   researchLabel,
   researchMeaning,
-  useId,
+  useDescribedTerm,
 } from '@research-harness/design';
 import type {
   AuthorityLabel,
@@ -412,9 +411,10 @@ export interface StatusBadgeProps {
   size?: 'sm' | 'md';
   /**
    * Put the vocabulary's one-line meaning on the page: the badge takes a tab stop, is
-   * `aria-describedby` that sentence, and prints it underneath while it has focus. Turn it
-   * on where the status is the subject of the row or the screen; leave it off where the
-   * status is incidental, and where the sentence would repeat one already on screen.
+   * `aria-describedby` that sentence, and prints it underneath when a reader asks — with
+   * focus, with a pointer that rests on it, or with a long press. Turn it on where the
+   * status is the subject of the row or the screen; leave it off where the status is
+   * incidental, and where the sentence would repeat one already on screen.
    */
   describe?: boolean;
   /** Override the visible wording. The vocabulary still supplies the meaning. */
@@ -436,8 +436,11 @@ export function StatusBadge({
   describe = false,
   children,
 }: StatusBadgeProps) {
-  const descriptionId = useId(undefined, 'rh-web-status');
-  const [shown, setShown] = useState(false);
+  const description = vocabulary === undefined ? undefined : researchDescription(vocabulary, status);
+  // The package's own hook, so the three gestures that open a meaning — focus, a pointer
+  // that rests, a long press — are decided in one place for every word in the cockpit. It
+  // is called unconditionally, above the authority branch, because it is a hook.
+  const term = useDescribedTerm(describe ? description : undefined);
 
   const label = children ?? (vocabulary === undefined ? undefined : researchLabel(vocabulary, status));
   if (isAuthority(status)) {
@@ -451,38 +454,29 @@ export function StatusBadge({
     );
   }
 
-  const description = vocabulary === undefined ? undefined : researchDescription(vocabulary, status);
-  const describing = describe && description !== undefined;
   const icon = ICONS[status];
   const badge = (
     <Badge
       tone={TONES[status] ?? 'neutral'}
       size={size}
       {...(icon ? { icon } : { icon: null })}
-      {...(describing
-        ? {
-            tabIndex: 0,
-            'aria-describedby': descriptionId,
-            onFocus: () => setShown(true),
-            onBlur: () => setShown(false),
-          }
-        : {})}
+      {...term.word}
     >
       {label ?? humaniseTerm(status)}
     </Badge>
   );
-  if (!describing) return badge;
+  if (term.named === null) return badge;
 
   // The Design System's describable badge, reused rather than restated: these two classes
   // are how the package draws a badge with its meaning under it, and a second shape for
-  // the same idea would be a second design.
+  // the same idea would be a second design. Where a row cannot grow — a queue row, a table
+  // cell — the cockpit's stylesheet hands the sentence a line of its own beneath the row
+  // by these same names, so the row's own links never move.
   return (
     <span className="rh-authority-badge__described">
       {badge}
-      <span id={descriptionId} className="rh-visually-hidden">
-        {description}
-      </span>
-      {shown ? (
+      {term.named}
+      {term.shown ? (
         <span className="rh-authority-badge__hint" aria-hidden="true">
           {description}
         </span>

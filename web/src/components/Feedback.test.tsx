@@ -9,9 +9,10 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DESCRIBED_TERM_HOVER_MS, DESCRIBED_TERM_PRESS_MS } from '@research-harness/design';
 import {
   DataTable,
   Empty,
@@ -24,6 +25,39 @@ import {
   fieldLabel,
 } from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
+
+/**
+ * A pointer that rests on a word, and a finger that holds it.
+ *
+ * React derives `pointerenter` from `pointerover`, and jsdom has no `PointerEvent` to
+ * carry `pointerType` — the property that tells a long press from a click — so the touch
+ * events are built by hand. The clock is the test's, because what is asserted is a delay.
+ */
+function pointerRestsOn(element: Element, ms: number) {
+  fireEvent.pointerOver(element, { pointerType: 'mouse' });
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
+function pointerLeaves(element: Element) {
+  act(() => {
+    fireEvent.pointerOut(element, { pointerType: 'mouse' });
+  });
+}
+
+function fingerHolds(element: Element, ms: number) {
+  const down = new Event('pointerdown', { bubbles: true, cancelable: true });
+  Object.defineProperty(down, 'pointerType', { value: 'touch' });
+  fireEvent(element, down);
+  act(() => {
+    vi.advanceTimersByTime(ms);
+  });
+}
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('waiting for a read', () => {
   it('announces the wait once, politely, and draws no spinner', () => {
@@ -211,7 +245,8 @@ describe('a status badge', () => {
 
     expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
     // A pointer only passing over the badge leaves the row where it was: the sentence
-    // opens on focus, and clicking the badge is what focuses it.
+    // waits for a pointer that stays, so one crossing the row on its way to a link opens
+    // nothing.
     await user.hover(badge);
     expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
 
@@ -221,9 +256,80 @@ describe('a status badge', () => {
     );
   });
 
+  it('makes the meaning reachable to a pointer that rests on the badge', () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <StatusBadge status="partially_supported" vocabulary="verdict" describe />,
+    );
+    const badge = container.querySelector('.rh-badge')!;
+
+    // One rest, watched across the moment it becomes a rest: a pointer crossing the row
+    // is gone before this, and a pointer asking the question is still here after it.
+    pointerRestsOn(badge, DESCRIBED_TERM_HOVER_MS - 1);
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /confirmed part of it/,
+    );
+
+    pointerLeaves(badge);
+    expect(container.querySelector('.rh-authority-badge__hint')).toBeNull();
+  });
+
+  it('answers a long press, which is the only gesture a finger has', () => {
+    vi.useFakeTimers();
+    const { container } = render(
+      <StatusBadge status="partially_supported" vocabulary="verdict" describe />,
+    );
+    const badge = container.querySelector('.rh-badge')!;
+
+    fingerHolds(badge, DESCRIBED_TERM_PRESS_MS);
+    // The press focuses the badge, so a finger and a Tab key leave one state behind them.
+    expect(badge).toHaveFocus();
+    expect(container.querySelector('.rh-authority-badge__hint')).toHaveTextContent(
+      /confirmed part of it/,
+    );
+  });
+
   it('stays out of the tab order when it is not describing itself', () => {
     const { container } = render(<StatusBadge status="routine" vocabulary="reviewCategory" />);
     expect(container.querySelector('.rh-badge')).not.toHaveAttribute('tabindex');
+  });
+
+  /*
+   * The slot, asserted as the rule it is.
+   *
+   * jsdom lays nothing out, so the browser suite is where the row is measured holding
+   * still (`browser-tests/vocabulary.spec.ts`). What can be asserted here is the rule that
+   * makes it hold: in a queue row and in a table cell, the sentence is not a box inside the
+   * row — the wrapper disappears, and the sentence takes a full line that contributes
+   * nothing to what the row or the column asks for.
+   */
+  it('gives a row’s sentence a line of its own, and no width of its own', () => {
+    const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'styles.css'), 'utf8');
+
+    for (const container of ['.rh-web-row', '.rh-web-table']) {
+      const wrapper = new RegExp(
+        `\\${container} \\.rh-authority-badge__described,\\s*\\${container} \\.rh-described-term \\{([^}]*)\\}`,
+      ).exec(css)?.[1] ?? '';
+      const hint = new RegExp(
+        `\\${container} \\.rh-authority-badge__hint,\\s*\\${container} \\.rh-described-term__hint \\{([^}]*)\\}`,
+      ).exec(css)?.[1] ?? '';
+
+      expect(wrapper, `${container} keeps the sentence inside a box`).toContain(
+        'display: contents',
+      );
+      // A definite width contributes exactly that much to intrinsic sizing, so the
+      // sentence widens neither the row nor a column every other row shares…
+      expect(hint, `${container} lets the sentence set a width`).toContain('inline-size: 0');
+      // …and the percentage minimum is what gives it the whole line to be read on.
+      expect(hint, `${container} denies the sentence its own line`).toContain(
+        'min-inline-size: 100%',
+      );
+    }
   });
 
   it('has no automatically detectable accessibility violation while describing itself', async () => {
@@ -280,7 +386,8 @@ describe('a definition row that carries a vocabulary word', () => {
     expect(container.querySelector(`#${describedBy}`)).toHaveTextContent(/audited conclusion/);
 
     expect(container.querySelector('.rh-described-term__hint')).toBeNull();
-    // A pointer only passing over the word leaves the panel where it was.
+    // A pointer only passing over the word leaves the panel where it was: the sentence
+    // waits for a pointer that stays.
     await user.hover(word);
     expect(container.querySelector('.rh-described-term__hint')).toBeNull();
 
