@@ -78,13 +78,22 @@
   margin-inline-start: auto;
 }
 
+/*
+ * The answer to a jump that could not land: one quiet line inside the toolbar, present only
+ * while it has something to say.
+ *
+ * It used to be a permanent strip under the toolbar with a rule of its own, stating an
+ * absence that matters for one keystroke — chrome the manuscript route could not spend
+ * (design critique, minor). It takes the toolbar's whole width so it reads as a line rather
+ * than as a third item on the control row, and it carries no rule: the toolbar's own bottom
+ * hairline already closes the block.
+ */
 .rh-source-editor__note {
   display: flex;
   align-items: center;
   gap: var(--rh-space-2);
+  flex-basis: 100%;
   margin: 0;
-  padding: var(--rh-space-2) var(--rh-space-3);
-  border-bottom: var(--rh-border-width) solid var(--rh-border-subtle);
   color: var(--rh-text-secondary);
   font-size: var(--rh-type-body-sm-size);
 }

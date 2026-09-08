@@ -636,14 +636,23 @@ describe('SyncTeX', () => {
     await waitFor(() => expect(screen.getByText('Ln 4, Col 3')).toBeInTheDocument());
   });
 
-  it('disables both directions with the daemon’s reason when there is no map', async () => {
+  /**
+   * The daemon's reason still reaches the researcher; when it reaches her changed in wave 6.
+   * It used to hold a row above the editor for the whole session whether or not anyone tried
+   * to jump (third critique, minor), so the two assertions that encoded that permanent row —
+   * a disabled control and a standing sentence — are now an answer to the attempt.
+   */
+  it('answers a jump the build has no map for, with the daemon’s reason', async () => {
     renderWorkspace(manuscriptDaemon({ build: buildFailed }));
     await opened();
 
-    expect(screen.getByRole('button', { name: 'Jump to PDF' })).toBeDisabled();
+    expect(screen.queryByText(/^Jump to PDF has nothing to point at/)).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Jump to PDF' }));
+
     expect(
-      screen.getByText(/Source-to-PDF navigation is unavailable: no SyncTeX file at main\.synctex\.gz/),
+      screen.getByText(/^Jump to PDF has nothing to point at: no SyncTeX file at main\.synctex\.gz/),
     ).toBeInTheDocument();
+    // The other direction is the preview's own state, and it still states itself there.
     expect(
       screen.getByText('PDF-to-source navigation is unavailable for this build.'),
     ).toBeInTheDocument();

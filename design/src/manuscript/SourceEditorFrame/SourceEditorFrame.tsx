@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cx } from '../../utils/cx';
 import { useId } from '../../hooks/useId';
@@ -36,6 +36,20 @@ interface StatusChip {
   text: string;
   tone: 'dirty' | 'conflict' | 'read-only' | 'saved';
   detail?: string;
+}
+
+/**
+ * Why Save cannot be pressed, named by the chip that already says it.
+ *
+ * Save used to be offered on a buffer whose own chip read "Saved" — an act with nothing to
+ * act on (design critique, minor). Disabling it raises the question the critique asks of
+ * every disabled control: *why*. The answer is on screen already, one row up, so the button
+ * points at that chip rather than growing a second sentence beside it. Read-only outranks
+ * "nothing to save": a host that may not write cannot save a dirty buffer either.
+ */
+function saveBlockedBy(state: EditorFrameState): StatusChip['key'] | null {
+  if (state.readOnly) return 'read-only';
+  return state.dirty ? null : 'saved';
 }
 
 function chipsFor(state: EditorFrameState): StatusChip[] {
@@ -94,6 +108,23 @@ export const SourceEditorFrame = forwardRef<HTMLDivElement, SourceEditorFramePro
     const syncReasonId = `${baseId}-sync-reason`;
     const syncBlocked = synctex !== 'available';
     const chips = chipsFor(state);
+    const chipId = (key: string): string => `${baseId}-chip-${key}`;
+    const saveBlocked = saveBlockedBy(state);
+
+    /*
+     * Why a jump did nothing, said when one is attempted and not before.
+     *
+     * "Source-to-PDF navigation is unavailable" held a row above the editor for the whole
+     * session, whether or not anyone ever asked to jump — a permanent statement of an
+     * absence that matters for one keystroke (design critique, minor). The control stays
+     * pressable so it can answer, because a disabled button with no reason at it is the
+     * defect this replaces rather than a fix for it, and the answer clears itself the moment
+     * the build has a map.
+     */
+    const [syncNote, setSyncNote] = useState<string | null>(null);
+    useEffect(() => {
+      if (!syncBlocked) setSyncNote(null);
+    }, [syncBlocked]);
 
     return (
       <section
@@ -114,7 +145,12 @@ export const SourceEditorFrame = forwardRef<HTMLDivElement, SourceEditorFramePro
 
           <div className="rh-source-editor__chips">
             {chips.map((chip) => (
-              <span key={chip.key} className="rh-source-editor__chip" data-tone={chip.tone}>
+              <span
+                key={chip.key}
+                id={chipId(chip.key)}
+                className="rh-source-editor__chip"
+                data-tone={chip.tone}
+              >
                 <Icon name={chip.icon} size={14} />
                 <span>{chip.detail ? `${chip.text}: ${chip.detail}` : chip.text}</span>
               </span>
@@ -127,7 +163,8 @@ export const SourceEditorFrame = forwardRef<HTMLDivElement, SourceEditorFramePro
               variant="secondary"
               iconStart="save"
               loading={saving}
-              disabled={!onSave || state.readOnly}
+              disabled={!onSave || saveBlocked !== null}
+              {...(saveBlocked === null ? {} : { 'aria-describedby': chipId(saveBlocked) })}
               aria-keyshortcuts="Control+S Meta+S"
               onClick={onSave}
             >
@@ -147,24 +184,31 @@ export const SourceEditorFrame = forwardRef<HTMLDivElement, SourceEditorFramePro
               size="sm"
               variant="ghost"
               iconStart="crosshair"
-              disabled={!onSyncForward || syncBlocked}
-              aria-describedby={syncBlocked ? syncReasonId : undefined}
-              onClick={onSyncForward}
+              disabled={!onSyncForward}
+              aria-describedby={syncNote ? syncReasonId : undefined}
+              onClick={() => {
+                if (syncBlocked) {
+                  setSyncNote(
+                    `Jump to PDF has nothing to point at: ${
+                      synctexReason ?? 'this build recorded no SyncTeX map'
+                    }.`,
+                  );
+                  return;
+                }
+                onSyncForward?.();
+              }}
             >
               Jump to PDF
             </Button>
           </div>
-        </div>
 
-        {syncBlocked ? (
-          <p id={syncReasonId} className="rh-source-editor__note">
-            <Icon name="info" size={14} />
-            <span>
-              Source-to-PDF navigation is unavailable
-              {synctexReason ? `: ${synctexReason}` : '.'}
-            </span>
-          </p>
-        ) : null}
+          {syncNote ? (
+            <p id={syncReasonId} className="rh-source-editor__note" role="status">
+              <Icon name="info" size={14} />
+              <span>{syncNote}</span>
+            </p>
+          ) : null}
+        </div>
 
         {state.conflict ? (
           <AsyncState

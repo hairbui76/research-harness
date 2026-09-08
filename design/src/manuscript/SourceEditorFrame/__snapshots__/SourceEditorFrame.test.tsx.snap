@@ -58,6 +58,7 @@ exports[`SourceEditorFrame theme x density > matches the dark / comfortable snap
         <span
           class="rh-source-editor__chip"
           data-tone="dirty"
+          id="rh-editorframe-ID-chip-dirty"
         >
           <svg
             aria-hidden="true"
@@ -321,6 +322,7 @@ exports[`SourceEditorFrame theme x density > matches the dark / compact snapshot
         <span
           class="rh-source-editor__chip"
           data-tone="dirty"
+          id="rh-editorframe-ID-chip-dirty"
         >
           <svg
             aria-hidden="true"
@@ -584,6 +586,7 @@ exports[`SourceEditorFrame theme x density > matches the light / comfortable sna
         <span
           class="rh-source-editor__chip"
           data-tone="dirty"
+          id="rh-editorframe-ID-chip-dirty"
         >
           <svg
             aria-hidden="true"
@@ -847,6 +850,7 @@ exports[`SourceEditorFrame theme x density > matches the light / compact snapsho
         <span
           class="rh-source-editor__chip"
           data-tone="dirty"
+          id="rh-editorframe-ID-chip-dirty"
         >
           <svg
             aria-hidden="true"
