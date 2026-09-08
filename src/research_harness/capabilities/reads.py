@@ -1397,13 +1397,26 @@ def _evidence_group(item: EvidenceSummary) -> str:
 def _evidence_label(item: EvidenceSummary) -> str:
     """What one piece of evidence is called, in words rather than in ids.
 
-    The interrogation field it answers and the source it was read from: "dataset ·
-    Structured traffic representations". A span that answers no field is named by its
-    source alone, and one whose Work has no title yet falls back to the id it does have,
-    because a blank line is worse than a machine name.
+    The interrogation field it answers and the source it was read from: "Dataset ·
+    Structured traffic representations". A span that answers no field is named by its source
+    alone, and one whose Work has no title yet falls back to the id it does have, because a
+    blank line is worse than a machine name.
     """
     source = item.work_title or item.work
-    return f"{item.field} · {source}" if item.field else source
+    return f"{_human_field(item.field)} · {source}" if item.field else source
+
+
+def _human_field(field: str) -> str:
+    """One interrogation field in the words a person reads: `metric_result` → `Metric result`.
+
+    The same spelling every cockpit surface gives it. The Design System publishes a label
+    for each field the baseline schema declares (`CANDIDATE_FIELD_META`) and falls back to
+    exactly this humanisation for a domain plugin's own field, so a name composed here and
+    a name rendered there are the same words - which is the point of composing it here at
+    all (Product 5 P10).
+    """
+    spaced = field.replace("_", " ").strip()
+    return spaced[:1].upper() + spaced[1:]
 
 
 def _evidence_detail(kind: str, item: EvidenceSummary) -> str:

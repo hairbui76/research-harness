@@ -1072,7 +1072,7 @@ def test_accepted_evidence_is_named_by_the_first_thing_wrong_with_it() -> None:
     assert groups[0].label == "1 piece of evidence went stale when its source changed"
     assert groups[3].label == "1 piece of evidence is cited by no claim"
     # The row's own name, not its id: an index of two hundred `E0007`s is unreadable.
-    assert groups[0].items[0].label == "dataset · Structured traffic representations"
+    assert groups[0].items[0].label == "Dataset · Structured traffic representations"
     assert groups[0].items[0].route == "/evidence/E0001"
     # A verifier that contradicted a reading and one that found it insufficient are two
     # different pieces of news, and the group's own line states neither.
