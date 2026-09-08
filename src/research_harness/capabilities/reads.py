@@ -30,7 +30,7 @@ React the raw lists.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime, timedelta
 from typing import Any, Literal
 
@@ -60,6 +60,7 @@ from research_harness.workspace.repository import ObjectNotFoundError, Workspace
 
 __all__ = [
     "CORPUS_MONTHS",
+    "CORPUS_ORDERS",
     "CORPUS_QUESTIONS",
     "CORPUS_RECENT_WINDOW",
     "READ_CAPABILITY_HANDLERS",
@@ -73,6 +74,7 @@ __all__ = [
     "ClaimSummary",
     "CorpusAttentionGroup",
     "CorpusAttentionItem",
+    "CorpusOrderKind",
     "CorpusQuestion",
     "CorpusQuestionKind",
     "DecisionList",
@@ -114,6 +116,7 @@ __all__ = [
     "list_questions",
     "list_search_runs",
     "list_works",
+    "order_works",
     "question_groups",
     "question_summary",
     "read_candidate",
@@ -231,6 +234,21 @@ CorpusQuestionKind = Literal[
     "unread",
     "uncited",
     "recent",
+]
+
+
+#: Every order `work.list` will read the corpus in.
+#:
+#: Closed for the same reason the questions are: an unknown order is refused with the five
+#: that exist rather than answered in the default one, and a host reads them off the
+#: published request schema. `CORPUS_ORDERS` below carries the same kinds with the field of
+#: the row each one reads; the contract test holds the two together.
+CorpusOrderKind = Literal[
+    "title",
+    "year",
+    "evidence",
+    "claims",
+    "added",
 ]
 
 
@@ -492,6 +510,17 @@ class WorkList(_Summary):
     still in flight.
     """
 
+    order: str = ""
+    """The order these rows were read in, echoed back; empty for the corpus's own order.
+
+    Echoed for the reason `question` is: the sentence beside the list says how the rows on
+    screen are ordered, and it has to be composed from the answer that produced them rather
+    than from a request that is still in flight.
+    """
+
+    descending: bool = False
+    """Whether `order` was read backwards; false, and meaningless, without one."""
+
     works: tuple[WorkSummary, ...] = ()
     attention: tuple[CorpusAttentionGroup, ...] = ()
     """The sources that cannot yet be read from, in the order a researcher meets them.
@@ -610,7 +639,7 @@ class SearchRunList(_Summary):
 
 
 class ListWorksRequest(CapabilityRequest):
-    """`work.list`: the corpus, optionally narrowed to one screening state or one question."""
+    """`work.list`: the corpus, narrowed to one screening state or question, read in order."""
 
     screening: str | None = None
     question: CorpusQuestionKind | None = None
@@ -620,6 +649,18 @@ class ListWorksRequest(CapabilityRequest):
     ones that exist rather than answered with an empty corpus, and so every host reads the
     list of them off the published request schema.
     """
+
+    order: CorpusOrderKind | None = None
+    """One of `CORPUS_ORDERS`: which fact of the row the corpus is read by.
+
+    Unset is the daemon's own order and is the default, so every caller that never asks
+    for one is answered exactly as it was before this parameter existed. The whole corpus
+    is answered in a single read and a client may hold only a window of it, so an order
+    over a thousand works is only true if it is taken here, over all of them.
+    """
+
+    descending: bool = False
+    """Read `order` backwards. Meaningless, and ignored, without one."""
 
 
 class ListClaimsRequest(CapabilityRequest):
@@ -697,6 +738,11 @@ def list_works(ctx: CapabilityContext, request: ListWorksRequest) -> WorkList:
     computed over all of it and stay still while a researcher moves between questions.
     Only `works` is narrowed, and `question` says by what.
 
+    An order is taken last, over the rows the question left, and changes only how they are
+    read: `count`, `total`, the lead and the question counts are the same numbers either
+    way. Without one the corpus keeps the order the repository lists it in, which is the
+    answer every caller written before this parameter existed still gets.
+
     The citation index is built once for the whole read rather than per Work: asking "does
     any Claim rest on this?" a thousand times would walk the claims a thousand times.
     """
@@ -713,10 +759,14 @@ def list_works(ctx: CapabilityContext, request: ListWorksRequest) -> WorkList:
         if request.question is None
         else tuple(work for work in summaries if answers_question(work, request.question, now=now))
     )
+    if request.order is not None:
+        shown = order_works(shown, request.order, descending=request.descending)
     return WorkList(
         count=len(shown),
         total=len(summaries),
         question=request.question or "",
+        order=request.order or "",
+        descending=request.descending,
         works=shown,
         attention=corpus_attention(summaries),
         questions=corpus_questions(summaries, now=now),
@@ -1109,6 +1159,61 @@ def corpus_questions(
             )
         )
     return tuple(found)
+
+
+#: What a corpus may be read in order of, and the fact of the row each order reads.
+#:
+#: Five, because five of the row's facts are comparable across a thousand works: what the
+#: work is called, when it was published, how much has been accepted from it, how many
+#: Claims rest on it, and when it came in. Screening and readable text are not here - they
+#: are two- and three-valued, so ordering by them is grouping by them, and the questions
+#: above already group by them and say how many are in each.
+#:
+#: The order is taken here rather than in a client for the same reason the questions are,
+#: though for a plainer reason than P10: `work.list` answers the whole corpus in one read
+#: and a windowed client holds only the rows near its viewport, so an order taken in the
+#: browser would be an order over whatever happened to be mounted.
+CORPUS_ORDERS: tuple[tuple[str, str], ...] = (
+    ("title", "title"),
+    ("year", "year"),
+    ("evidence", "evidence"),
+    ("claims", "claims"),
+    ("added", "added_at"),
+)
+
+#: How each order reads one row. `None` is "this row has no such fact", never a low value.
+_ORDER_KEYS: Mapping[str, Callable[[WorkSummary], str | int | None]] = {
+    # Case folded: a corpus sorted by capitalisation is a corpus sorted by nothing a
+    # researcher can see.
+    "title": lambda work: work.title.casefold(),
+    "year": lambda work: work.year,
+    "evidence": lambda work: work.evidence,
+    "claims": lambda work: work.claims,
+    # The ISO instant rather than the words, which are a day in a local time zone and sort
+    # alphabetically by month name.
+    "added": lambda work: work.added_at or None,
+}
+
+
+def order_works(
+    works: Sequence[WorkSummary], kind: str, *, descending: bool = False
+) -> tuple[WorkSummary, ...]:
+    """The same works, read in order of one of the facts the corpus is read across.
+
+    Two rules the caller cannot see from the sort alone. A work the order cannot read - no
+    year recorded, no arrival stored - trails the ones it can, whichever way the rest is
+    read: a missing year is not the smallest year, and sorting it as a zero would put a
+    work nobody has dated at the head of the list as though someone had. And works the
+    order cannot tell apart keep the daemon's own order, because the sort is stable and it
+    is given the corpus in that order: a tie is not a licence to shuffle the rows a
+    researcher just read.
+    """
+    read = _ORDER_KEYS[kind]
+    keyed = [(read(work), work) for work in works]
+    known = [(key, work) for key, work in keyed if key is not None]
+    known.sort(key=lambda pair: pair[0], reverse=descending)
+    unreadable = tuple(work for key, work in keyed if key is None)
+    return tuple(work for _key, work in known) + unreadable
 
 
 def evidence_citations(repo: WorkspaceRepository) -> Mapping[str, frozenset[str]]:
