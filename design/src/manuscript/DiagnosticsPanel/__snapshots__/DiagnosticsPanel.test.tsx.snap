@@ -265,7 +265,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rd"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -307,7 +307,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rd"
+                  id="rh-described-term-ID"
                 >
                   Accepted state contradicts the manuscript here. It cannot ship as it stands.
                 </span>
@@ -352,7 +352,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-re"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -409,7 +409,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-re"
+                  id="rh-described-term-ID"
                 >
                   A researcher has to decide about this before the manuscript ships.
                 </span>
@@ -688,7 +688,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rg"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -730,7 +730,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rg"
+                  id="rh-described-term-ID"
                 >
                   Accepted state contradicts the manuscript here. It cannot ship as it stands.
                 </span>
@@ -775,7 +775,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rh"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -832,7 +832,7 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rh"
+                  id="rh-described-term-ID"
                 >
                   A researcher has to decide about this before the manuscript ships.
                 </span>
@@ -1111,7 +1111,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rj"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -1153,7 +1153,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rj"
+                  id="rh-described-term-ID"
                 >
                   Accepted state contradicts the manuscript here. It cannot ship as it stands.
                 </span>
@@ -1198,7 +1198,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rk"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -1255,7 +1255,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rk"
+                  id="rh-described-term-ID"
                 >
                   A researcher has to decide about this before the manuscript ships.
                 </span>
@@ -1534,7 +1534,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rm"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -1576,7 +1576,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rm"
+                  id="rh-described-term-ID"
                 >
                   Accepted state contradicts the manuscript here. It cannot ship as it stands.
                 </span>
@@ -1621,7 +1621,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
                 class="rh-described-term rh-audit-finding__severity"
               >
                 <span
-                  aria-describedby="rh-described-term-rn"
+                  aria-describedby="rh-described-term-ID"
                   class="rh-described-term__word"
                   tabindex="0"
                 >
@@ -1678,7 +1678,7 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
                 </span>
                 <span
                   class="rh-visually-hidden"
-                  id="rh-described-term-rn"
+                  id="rh-described-term-ID"
                 >
                   A researcher has to decide about this before the manuscript ships.
                 </span>
