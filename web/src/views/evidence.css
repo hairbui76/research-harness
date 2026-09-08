@@ -1,0 +1,303 @@
+/*
+ * Layout for the Evidence index: what needs a researcher, the questions the record can be
+ * asked, and the readings themselves.
+ *
+ * This is the longest list in the product. `evidence.list` answers the whole record in a
+ * single read — the daemon imposes no page size and PRODUCT §5 P10 forbids the cockpit
+ * inventing one — and PRODUCT §26's own example project holds 186 accepted readings against
+ * 42 works. So the list is windowed (`VirtualList`), and windowing needs exactly one thing
+ * from CSS that the page frame does not already give it: a height to window against.
+ *
+ * `FullPageWorkspace` is the scroller for a research page and it stays the scroller here.
+ * The lead takes the height it needs, the list takes what is left and scrolls inside it, so
+ * the page does not also scroll: one scroller, in the place a researcher already found it.
+ *
+ * The readings are read across columns, and a windowed list cannot use a table to align
+ * them: only a window of rows exists at any moment and each one is its own element. So the
+ * track sizes live in one custom property that the heading strip and every row share, which
+ * is what makes a column a column here — the same mechanism the corpus uses, because the
+ * two record pages must not teach two different reading orders. Below the width those
+ * tracks need, the row stops pretending to be a table and becomes what it is on a phone: a
+ * name, a quote, and the same facts as labelled pairs.
+ *
+ * There is deliberately no rule here that makes a count large, and none that tints a type,
+ * a strength or an origin. Every number on this page is inside a sentence, a control, or a
+ * cell under the column that names it; scientific status colour stays on scientific state,
+ * where `StatusBadge` puts it.
+ *
+ * Colour, spacing and type are the Design System's; `check-tokens.mjs` scans `web/src` and
+ * fails the lint on a literal.
+ */
+
+.rh-web-evidence {
+  display: flex;
+  flex-direction: column;
+  /* Generous between the lead and the record, so the heading below has more room above it
+     than under it and the two parts of the page read as two things. */
+  gap: var(--rh-space-6);
+  min-block-size: 0;
+  block-size: 100%;
+
+  /*
+   * The record's columns, in one place because two things have to agree about them: the
+   * strip that names them and every row under it. The reading takes what is left; the five
+   * facts take what their own words need and no more — the widest of them are the type and
+   * the origin, whose vocabularies run to "Representation description" and "External
+   * metadata".
+   */
+  --rh-web-evidence-columns: minmax(18rem, 1fr) 9rem 5.5rem 8.5rem 9rem 7.5rem;
+}
+
+/*
+ * The readings, under their own heading: the instrument the lead points into.
+ *
+ * It is the part that flexes, so the lead above it is never compressed and the list below
+ * it always has a height to window against.
+ */
+.rh-web-evidence__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+/*
+ * One group in the lead, and the readings named under it.
+ *
+ * The same shape the Overview's attention groups and the corpus's keep: the line that names
+ * the group and the first reading beneath it belong to each other, and the readings are
+ * indented by one space unit so the group reads as one block rather than as five lines.
+ */
+.rh-web-evidence__attention > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-evidence__group {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+  max-inline-size: var(--rh-measure-prose);
+}
+
+/*
+ * The readings a group names, indented under it by one space unit. The two-class selector
+ * is deliberate: `.rh-web-list` zeroes the margin of every list in the cockpit and would
+ * otherwise win on source order.
+ */
+.rh-web-evidence__attention .rh-web-evidence__group-items {
+  margin-inline-start: var(--rh-space-4);
+}
+
+/* What the group's cap left out, in the daemon's words: quiet, and in line with the
+   readings it did show. */
+.rh-web-evidence__more {
+  margin: 0;
+  margin-inline-start: var(--rh-space-4);
+  color: var(--rh-text-secondary);
+}
+
+/*
+ * The questions this record can be asked, as the controls that ask them.
+ *
+ * They wrap rather than scroll: a control a researcher has to scroll a strip to find is one
+ * they will not know exists.
+ */
+.rh-web-evidence__questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2);
+}
+
+/*
+ * The chosen question, in the surface the cockpit already uses for a chosen thing. The
+ * others keep the ordinary control's own border: a filter that looks like a line of text is
+ * one a researcher has to discover by hovering over the page.
+ */
+.rh-web-evidence__questions .rh-button[aria-pressed='true'] {
+  background: var(--rh-surface-selected);
+  color: var(--rh-text-primary);
+  box-shadow: inset 0 0 0 var(--rh-border-width) var(--rh-border-strong);
+}
+
+/*
+ * The column names, once, above the window.
+ *
+ * Label type, on the page's own surface rather than on a band of its own: the rule under it
+ * is what separates it from the first row, and a filled header bar would be a second
+ * surface on a page that already has one.
+ */
+.rh-web-evidence__head {
+  display: grid;
+  grid-template-columns: var(--rh-web-evidence-columns);
+  gap: var(--rh-space-4);
+  align-items: end;
+  padding: var(--rh-space-1) var(--rh-space-2);
+  border-block-end: var(--rh-border-width) solid var(--rh-border-default);
+  font-size: var(--rh-type-label-size);
+  line-height: var(--rh-type-label-lh);
+  font-weight: var(--rh-type-label-weight);
+  letter-spacing: var(--rh-type-label-ls);
+  color: var(--rh-text-secondary);
+}
+
+.rh-web-evidence__list {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  /* The list is a window onto the page, not a panel: it takes the page's own surface. */
+  background: transparent;
+}
+
+/*
+ * One reading, inside the window.
+ *
+ * Rows are contiguous and separated by a rule rather than by a gap: a record is read by
+ * running an eye down a column, and space between rows breaks the column into a stack of
+ * cards again. The rule is 1px on the shared border token, and nothing here is a coloured
+ * edge.
+ */
+.rh-web-evidence__row {
+  padding: var(--rh-space-2);
+  border-block-end: var(--rh-border-width) solid var(--rh-border-subtle);
+  border-radius: var(--rh-radius-control);
+}
+
+.rh-web-evidence__row:hover {
+  background: var(--rh-surface-subtle);
+}
+
+.rh-web-evidence__cells {
+  display: grid;
+  grid-template-columns: var(--rh-web-evidence-columns);
+  gap: var(--rh-space-4);
+  align-items: start;
+}
+
+.rh-web-evidence__cell {
+  min-inline-size: 0;
+  font-size: var(--rh-type-body-sm-size);
+  line-height: var(--rh-type-body-sm-lh);
+  overflow-wrap: anywhere;
+}
+
+.rh-web-evidence__cell--evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+/* The claims resting on a reading are a list of links, so they stack in their own cell
+   rather than running together as one line of statements. */
+.rh-web-evidence__cell--claims > .rh-web-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-1);
+}
+
+.rh-web-evidence__name {
+  font-weight: var(--rh-type-h4-weight);
+}
+
+/*
+ * The line under the name: the reference a researcher writes down, and the state of the
+ * reading when it is not simply accepted.
+ */
+.rh-web-evidence__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-1) var(--rh-space-3);
+}
+
+/*
+ * The span itself, as the source wrote it.
+ *
+ * The cockpit's quotation rule, at the row's own size: the product never paraphrases a
+ * source, and the rule is how every surface says which words are the source's. It wraps
+ * rather than truncating — a quotation cut short is a claim about what the source said, and
+ * that claim would be false — and it is capped at the reading measure so a long span stays
+ * readable instead of running the width of the column.
+ */
+.rh-web-evidence__quote {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: var(--rh-border-width-strong) solid var(--rh-border-strong);
+  font-family: var(--rh-font-serif);
+  color: var(--rh-text-secondary);
+  max-inline-size: var(--rh-measure-prose);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Each cell's own name.
+ *
+ * Hidden the way the package hides a label, but under this page's own class so the columns
+ * can give it back when they collapse. Reading it out is the point: only a window of the
+ * list exists, so a screen reader is told what a cell is by the cell rather than by a
+ * heading row it may never reach.
+ */
+.rh-web-evidence__label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The find field sits in the page toolbar and takes a readable share of it. */
+.rh-web-evidence__find {
+  inline-size: min(22rem, 100%);
+}
+
+/*
+ * A pane too narrow for six columns.
+ *
+ * The row stops pretending to be a table: the reading takes the width, the five facts
+ * become labelled pairs that wrap, and the strip that named the columns goes with them.
+ * Nothing is dropped — a fact that only fits on a wide screen is a fact a researcher on a
+ * narrow one would have to open a second page to read.
+ */
+@container rh-page (width < 62rem) {
+  .rh-web-evidence__head {
+    display: none;
+  }
+
+  .rh-web-evidence__cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rh-space-1) var(--rh-space-4);
+  }
+
+  .rh-web-evidence__cell--evidence {
+    flex: 1 0 100%;
+  }
+
+  /* The claims run along the line with the other labelled pairs once the columns are
+     gone: a stacked list inside a row of pairs would read as a new section. */
+  .rh-web-evidence__cell--claims > .rh-web-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--rh-space-1) var(--rh-space-3);
+  }
+
+  .rh-web-evidence__label {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    color: var(--rh-text-secondary);
+  }
+
+  /* A label and its value are a pair once they are on the same line as four other pairs;
+     without the colon "Claims citing it Nothing yet" reads as a sentence that stopped. */
+  .rh-web-evidence__label::after {
+    content: ': ';
+  }
+}
