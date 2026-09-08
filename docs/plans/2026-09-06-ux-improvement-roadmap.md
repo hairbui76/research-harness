@@ -229,3 +229,22 @@ check reported. Neither of the last two runs without the researcher's yes.
   to the Overview. Logged for a later wave: the index has no column sort, which is the
   persona flag Alex still carries, and the daemon composes no group for evidence a
   researcher qualified on acceptance.
+- 2026-09-08/09 (wave 6): the third critique's backlog, as nine agents from `main`. An
+  Evidence index joined The record between Corpus and Claims (server-composed groups and
+  questions on `evidence.list`, chord `g e`, and a not-found state for an unknown address);
+  the source stays beside the decision at every width (a pinned strip below 52rem, a fade
+  on the sticky card that names the panel it covers, auto-advance above the fold with its
+  safety default kept); the twenty-one vocabularies answer a resting pointer and a long
+  press in a slot that cannot move the row, and every machine-reported badge is neutral —
+  green is the accepted state's; Project Home names the product, filters and groups by
+  last opened; the conversation's front door works and the transcript row reads in words;
+  the Synthesis grid pages its rows past 200 works; the manuscript's finding cards open
+  with the manuscript's own sentence; the corpus sorts by its columns through the daemon
+  and the inbox remembers its filters per project; and the critique's minor observations
+  — zero rows, "Changed … · Read at", conflict deep links, the source pane's caption, the
+  palette's name, claims rows leading with the sentence, the manuscript's Save and
+  jump notices, the count chips' inset — each landed as its own commit. Two branches were
+  merged without their agents' final reports after the account's session limit ended
+  them; the integration gate covers them. Logged: a per-group anchor in the inbox for
+  routeless conflicts; a per-position source on provider disagreements; the year order
+  has no corpus control.
