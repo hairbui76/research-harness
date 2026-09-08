@@ -433,16 +433,22 @@ test('the rail and Project Home offer the same project actions in the same words
 
   const list = page.getByRole('list', { name: 'Registered projects' });
   await expect(list).toBeVisible();
-  // The registry is cut into runs by how recently each project was last opened, so the
-  // outer list's items are the runs and the rows live in a nested list under each run's
-  // naming line. The first row is therefore the first item of the first run.
-  const row = list.getByRole('list').first().getByRole('listitem').first();
-  // One visible act per row — the one that opens the workspace — and the rest behind the
-  // rail's own trigger: a glyph whose accessible name is the menu's words. Changed on
-  // purpose from `toHaveText(['Open', 'Project actions'])`: printing the second name on
-  // every row made the pair read twice down a long registry, so the words moved into the
-  // accessible name and the assertion moved with them.
-  await expect(row.getByRole('button')).toHaveText(['Open', '']);
+  // The registry is cut into runs by how recently each project was last opened and is
+  // windowed, so it is one sequence: a run's naming line, then the workspaces it names.
+  // The first row is the first item of that sequence holding a workspace card.
+  const row = list.getByRole('listitem').filter({ has: page.locator('.rh-projects__card') }).first();
+  /*
+   * One visible act per row, and it is the workspace's own name.
+   *
+   * Changed on purpose, twice. It was `toHaveText(['Open', 'Project actions'])` until
+   * printing the second name on every row made the pair read twice down a long registry,
+   * so those words moved into the trigger's accessible name. Then Open went too: a filled
+   * button on every row of a registry of forty-six is the page's loudest emphasis spent
+   * forty-six times, and the name a researcher is already reading is what they reach for.
+   * So the row's act is a link, and its one button is the overflow.
+   */
+  await expect(row.getByRole('link')).toHaveCount(1);
+  await expect(row.getByRole('button')).toHaveText(['']);
   await expect(row.getByRole('button', { name: 'Project actions', exact: true })).toBeVisible();
   await expect(row.getByText('Project actions')).toHaveCount(0);
 
