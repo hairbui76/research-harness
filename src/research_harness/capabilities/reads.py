@@ -930,8 +930,9 @@ def list_evidence(ctx: CapabilityContext, request: ListEvidenceRequest) -> Evide
     ``work`` is a filter, so naming one the corpus does not hold yields an empty list rather
     than a refusal — the same answer as a Work with no accepted evidence yet.
     """
-    titles = {str(work.id): work.title for work in ctx.repo.list_works()}
-    works = [request.work] if request.work is not None else list(titles)
+    corpus = ctx.repo.list_works()
+    titles = {str(work.id): work.title for work in corpus}
+    works = [request.work] if request.work is not None else [work.id for work in corpus]
     citations = evidence_citations(ctx.repo)
     statements = claim_titles(ctx.repo)
     found: list[Evidence] = []

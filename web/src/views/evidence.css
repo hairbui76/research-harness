@@ -277,8 +277,19 @@
     flex: 1 0 100%;
   }
 
-  /* The claims run along the line with the other labelled pairs once the columns are
-     gone: a stacked list inside a row of pairs would read as a new section. */
+  /*
+   * The claims take a line of their own once the columns are gone.
+   *
+   * A claim is named by its whole statement, so it is the one value on the row that will
+   * not sit on a shared line: wrapped in among the other pairs it left "Claims citing it:"
+   * at the end of one line and its statement at the start of the next, with "Accepted"
+   * filling the gap between them — a label orphaned from its value. On its own line the
+   * label and every claim under it stay together.
+   */
+  .rh-web-evidence__cell--claims {
+    flex: 1 0 100%;
+  }
+
   .rh-web-evidence__cell--claims > .rh-web-list {
     flex-direction: row;
     flex-wrap: wrap;
