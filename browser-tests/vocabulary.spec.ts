@@ -240,24 +240,31 @@ test('every word the review screen prints as a value defines itself to the keybo
    * keyboard walk aimed at a moving target and the eye lost its place. The sentence now
    * spans its own row beneath the terms, and the terms hold position.
    */
-  const factWords = page.locator('.rh-evidence-card__facts .rh-described-term__word');
-  const before = await factWords.evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const box = node.getBoundingClientRect();
-      return { text: (node.textContent ?? '').trim(), x: Math.round(box.x), y: Math.round(box.y) };
-    }),
-  );
+  // Measured against the grid's own corner, not the viewport: clicking a term scrolls it
+  // into view at the narrow width, and a scrolled page moves everything equally. What is
+  // being asserted is the layout, so the origin is the layout's.
+  const readTerms = (): Promise<{ text: string; x: number; y: number }[]> =>
+    page.evaluate(() => {
+      const facts = document.querySelector('.rh-evidence-card__facts');
+      if (facts === null) throw new Error('the review card shows no facts grid');
+      const origin = facts.getBoundingClientRect();
+      return [...facts.querySelectorAll('.rh-described-term__word')].map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          text: (node.textContent ?? '').trim(),
+          x: Math.round(box.x - origin.x),
+          y: Math.round(box.y - origin.y),
+        };
+      });
+    });
+
+  const before = await readTerms();
   expect(before.length, 'the review card must show described facts').toBeGreaterThan(2);
 
   await page.getByText('Direct', { exact: true }).first().click();
   await expect(page.locator(HINT).first()).toContainText('How directly the source supports');
 
-  const after = await factWords.evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const box = node.getBoundingClientRect();
-      return { text: (node.textContent ?? '').trim(), x: Math.round(box.x), y: Math.round(box.y) };
-    }),
-  );
+  const after = await readTerms();
   expect(
     after.filter((term) => term.text !== 'Direct'),
     'describing one term moved the terms beside it',

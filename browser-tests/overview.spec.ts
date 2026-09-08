@@ -140,8 +140,11 @@ test('the overview leads with what is waiting, and states what the project holds
   // Unattributed is not subjectless. Every other row here begins "You …"; a verb-initial
   // fragment among them reads as an instruction, so the entry with no actor is passive and
   // its subject is the conflict — which says no more about who than the record does.
+  // Lower case in the text: the list capitalises the first letter of every row with
+  // `::first-letter`, which is how the daemon's verb-initial sentences read as sentences
+  // without this package rewriting a word of them. The subject is what is asserted here.
   await expect(opened.locator('.rh-change-list__what')).toHaveText(
-    /^A conflict was opened: the staged F1 differs/,
+    /^a conflict was opened: the staged F1 differs/,
   );
 
   // "Look again" says when it last looked, and only announces a read the researcher asked
