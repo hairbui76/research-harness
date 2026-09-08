@@ -340,9 +340,10 @@ test('an address the cockpit serves no page at says so instead of showing anothe
   await expect(
     page.getByRole('heading', { level: 1, name: 'There is no page at this address' }),
   ).toBeVisible();
-  await expect(
-    page.getByText(`Nothing is served at ${record.workspace_url}/evidenc`),
-  ).toBeVisible();
+  // The address alone: the heading above already states the absence, and stating it again
+  // inside the card is one absence said twice (wave three's ruling).
+  await expect(page.getByText(`${record.workspace_url}/evidenc`, { exact: true })).toBeVisible();
+  await expect(page.getByText(/Nothing is served at/)).toHaveCount(0);
   await expect(page.getByText(/Nothing about the project has changed/)).toBeVisible();
 
   await auditPage(page, 'an unknown address');

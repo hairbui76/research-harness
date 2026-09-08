@@ -8,10 +8,12 @@
  *
  * So the frame stays — this is a research page like any other, and every state of one keeps
  * its heading — and the page says the one true thing it knows: nothing is served at this
- * address. The frame states the condition and the state under it states the address, which
- * is the half a reader cannot see anywhere else and the half a mistyped URL is corrected by
- * seeing. The one way on is the Overview, which is where a researcher with no particular
- * destination belongs.
+ * address. The frame states the condition, once; the state under it states nothing but the
+ * address, which is the half a reader cannot see anywhere else and the half a mistyped URL
+ * is corrected by seeing. It used to restate the condition too — an h1 reading "There is no
+ * page at this address" over a card titled "Nothing is served at /projects/…" — which is
+ * one absence said twice (wave three's ruling). The one way on is the Overview, which is
+ * where a researcher with no particular destination belongs.
  *
  * No suggestions and no guessing: the cockpit has no index of what a researcher meant, and
  * a wrong guess offered as a link is how a stale bookmark becomes a wrong page again.
@@ -41,12 +43,15 @@ export function NotFoundPage({ overview }: NotFoundPageProps) {
       description="A link may have outlived the screen it pointed at, or the address may have been mistyped."
     >
       {/* The frame names the condition; the state names the address, which is the half a
-          reader cannot see anywhere else on the screen. Neither says the other's sentence. */}
+          reader cannot see anywhere else on the screen. Neither says the other's sentence.
+          The address stands on its own, as the string a reader compares character for
+          character with what they typed or followed, rather than wrapped in a second
+          sentence about absence. */}
       <Empty
         description="Nothing about the project has changed: only the address is wrong. Every screen the cockpit does serve is listed in the rail."
         action={<Link to={href(overview)}>Go to the Overview</Link>}
       >
-        {`Nothing is served at ${pathname}`}
+        {pathname}
       </Empty>
     </FullPageWorkspace>
   );
