@@ -273,6 +273,59 @@ def stage_large_corpus(root: Path, works: int) -> None:
                 tx.store_artifact_bytes(artifact, payload)
 
 
+def stage_large_matrix(root: Path, works: int) -> None:
+    """A matrix over a corpus far longer than any screen, read for two of its three fields.
+
+    Synthesis is the second research surface whose length nothing bounds: a matrix draws one
+    cell per declared work and field, so a grid over a thousand works is thousands of cells
+    and the page used to mount every one of them. Showing that it no longer does needs a
+    matrix well past the few hundred works a real project reaches.
+
+    The cells carry labels and no evidence, which is what a reading recorded without an
+    accepted span behind it looks like and what the grid already says in words. Nothing here
+    is accepted scientific state: no evidence, no claim and no decision is written, and the
+    corpus underneath is the same one the resilience suite seeds.
+    """
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.dto import PutMatrixRequest
+    from research_harness.capabilities.handlers import put_matrix
+    from research_harness.domain.base import Provenance
+    from research_harness.domain.enums import StaleState
+    from research_harness.domain.ids import SynthesisId, WorkId
+    from research_harness.domain.research import MatrixCell, SynthesisMatrix
+    from research_harness.domain.transitions import HUMAN_ACTOR
+    from research_harness.projection.rebuild import rebuild_workspace
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    stage_large_corpus(root, works)
+    declared = tuple(WorkId(f"W{index:04d}") for index in range(1, works + 1))
+    # Two labels down the tokenization column, so the column reads as a difference in the
+    # record rather than as one label repeated a thousand times, and a third of the works
+    # read for the dataset — enough that a window anywhere in the grid holds both a
+    # recorded cell and one nobody has read.
+    cells = tuple(
+        MatrixCell(work=work, field="tokenization", labels=("padded" if index % 2 else "unpadded",))
+        for index, work in enumerate(declared)
+    ) + tuple(
+        MatrixCell(work=work, field="dataset", labels=("cicids2017",)) for work in declared[::3]
+    )
+    put_matrix(
+        open_context(root, HUMAN_ACTOR),
+        PutMatrixRequest(
+            matrix=SynthesisMatrix(
+                id=SynthesisId("S0001"),
+                name="Traffic representation at scale",
+                works=declared,
+                fields=("tokenization", "dataset", "metric_result"),
+                cells=cells,
+                stale=StaleState.FRESH,
+                provenance=Provenance.human(HUMAN_ACTOR),
+            )
+        ),
+    )
+    rebuild_workspace(WorkspaceRepository.open(root))
+
+
 def stage_rollout_project(root: Path) -> None:
     """Fill a fresh workspace with the work the three rolled-out research pages lead with.
 
@@ -860,6 +913,36 @@ def main() -> None:
                 "name": name,
                 "workspace_url": f"/projects/{view.project_id}",
             }
+
+        matrices: dict[int, dict[str, str]] = {}
+        matrix_lock = Lock()
+
+        @app.post("/__test__/large-matrix")
+        def large_matrix(works: int = 1000) -> dict[str, str]:
+            """A registered project whose one matrix is longer than any screen.
+
+            Shared between callers asking for the same size, like the large corpus: a
+            thousand works and the matrix over them are a minute of durable writes, the
+            Synthesis screen only reads them, and building one per viewport would double
+            the cost of the run to prove nothing. The lock is because FastAPI runs a plain
+            `def` handler on a threadpool and the two viewport runs arrive together.
+            """
+            with matrix_lock:
+                existing = matrices.get(works)
+                if existing is not None:
+                    return existing
+                manager: ProjectManager = backend.state.manager
+                name = f"Large matrix {next(seeded)}"
+                view = manager.create(directory, name, ReviewPolicy.STRICT)
+                stage_large_matrix(Path(view.path), works)
+                answer = {
+                    "project_id": view.project_id,
+                    "name": name,
+                    "works": str(works),
+                    "synthesis_url": f"/projects/{view.project_id}/synthesis",
+                }
+                matrices[works] = answer
+                return answer
 
         @app.post("/__test__/manuscript-project")
         def manuscript_project() -> dict[str, str]:

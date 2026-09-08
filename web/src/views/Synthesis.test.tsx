@@ -564,7 +564,7 @@ describe('the synthesis page', () => {
     await screen.findByRole('grid', { name: 'The Traffic shape at scale matrix' });
     expect(
       screen.getByText(
-        '3 of 1000 works loaded. The rest load as the window reaches them; the find below reaches what is loaded.',
+        '3 of 1000 works loaded. The rest load as the window reaches them, and the find only reaches the works that are loaded.',
       ),
     ).toBeInTheDocument();
     // The page in flight is a row shaped like the rows around it, never a spinner.

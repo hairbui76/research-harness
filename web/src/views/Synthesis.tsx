@@ -501,7 +501,7 @@ function loadedSentence(total: number, loaded: number, shown: number, finding: b
   const missing = total - loaded;
   if (!finding) {
     return missing > 0
-      ? `${loaded} of ${total} works loaded. The rest load as the window reaches them; the find below reaches what is loaded.`
+      ? `${loaded} of ${total} works loaded. The rest load as the window reaches them, and the find only reaches the works that are loaded.`
       : `All ${total} works are loaded.`;
   }
   return missing > 0
@@ -554,10 +554,11 @@ function PagedMatrixGrid({
 
   return (
     <div className="rh-web-stack rh-web-stack--tight">
+      {/* Labelled where it is read, the way the field picker above it is: two text boxes
+          side by side, one of them nameless, is a control a researcher has to guess at. */}
       <Input
         id={findId}
         label="Find a work in this matrix"
-        hideLabel
         size="sm"
         type="search"
         iconStart="search"
