@@ -19,6 +19,7 @@ import {
   EVIDENCE_ORIGIN_META,
   EVIDENCE_STRENGTH_META,
   EVIDENCE_TYPE_META,
+  MANUSCRIPT_FINDING_META,
   NEGATIVE_STATE_META,
   RESEARCH_VOCABULARIES,
   RESEARCH_VOCABULARY_DESCRIPTIONS,
@@ -133,6 +134,15 @@ const DAEMON_VALUES: Record<string, readonly string[]> = {
     'taxonomy_vs_classification',
   ],
   candidateField: ['dataset', 'metric_result', 'method_summary', 'author_limitation', 'baseline'],
+  // `ManuscriptFindingKind`, which the audit inspector reads out on every finding card.
+  manuscriptFinding: [
+    'unregistered_claim',
+    'over_strong_wording',
+    'citation_mismatch',
+    'unsupported_numeric',
+    'stale_claim',
+    'invalid_evidence_anchor',
+  ],
 };
 
 describe('every vocabulary the daemon exposes', () => {
@@ -223,6 +233,34 @@ describe('the words themselves', () => {
     );
     expect(termDescription(EVIDENCE_ORIGIN_META, 'author_claimed')).toMatch(/authors assert/);
     expect(termDescription(EVIDENCE_ORIGIN_META, 'external_metadata')).toMatch(/provenance/);
+  });
+
+  /**
+   * The audit inspector used to spell its own six kinds, and four of the six words it had
+   * were for identifiers the daemon does not send (`unsupported_statement`,
+   * `wording_stronger_than_claim`, `invalid_anchor`, `protected_span_changed`). A real
+   * finding therefore arrived as a humanised token. The words are the auditor's own now,
+   * keyed on the kinds it actually raises.
+   */
+  it('names every manuscript audit kind the auditor raises, and says what it detects', () => {
+    expect(termLabel(MANUSCRIPT_FINDING_META, 'unregistered_claim')).toBe('Unregistered claim');
+    expect(termLabel(MANUSCRIPT_FINDING_META, 'over_strong_wording')).toBe(
+      'Wording stronger than the Claim',
+    );
+    expect(termLabel(MANUSCRIPT_FINDING_META, 'unsupported_numeric')).toBe('Unsupported number');
+    expect(termDescription(MANUSCRIPT_FINDING_META, 'unregistered_claim')).toMatch(
+      /attached to no Claim/,
+    );
+    expect(termDescription(MANUSCRIPT_FINDING_META, 'invalid_evidence_anchor')).toMatch(
+      /no longer opens at its source/,
+    );
+  });
+
+  it('still teaches something about a manuscript finding kind it has never met', () => {
+    expect(researchLabel('manuscriptFinding', 'future_rule')).toBe('Future rule');
+    expect(researchMeaning('manuscriptFinding', 'future_rule')).toMatch(
+      /checked against the project’s accepted scientific state/,
+    );
   });
 
   it('says what a valid anchor is, beside what a stale one is', () => {
