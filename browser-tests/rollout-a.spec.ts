@@ -93,6 +93,16 @@ test('the three rolled-out pages lead with what needs a researcher', async ({
   await expect(
     page.getByText('Asks for L3 Field generalization; its evidence allows L0 Individual.'),
   ).toBeVisible();
+  // Every row of the table below leads with what the claim asserts; the id and the authority
+  // it carries follow it (third critique, minor). Measured rather than asserted from markup:
+  // what the finding was about is which of the two a reader's eye reaches first.
+  const row = page.locator('.rh-web-claims__row').first();
+  const sentence = (await row.getByRole('link').first().boundingBox())!;
+  const identity = (await row.locator('.rh-entity-ref').first().boundingBox())!;
+  expect(sentence.y, 'the assertion is read before the id it is filed under').toBeLessThan(
+    identity.y,
+  );
+  await expect(row.getByRole('link')).toHaveCount(1);
   await auditPage(page, 'the claims');
   await page.screenshot({ path: info.outputPath('claims.png'), fullPage: true });
 

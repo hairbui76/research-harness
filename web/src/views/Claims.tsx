@@ -27,6 +27,7 @@ import {
   Button,
   ClaimCard,
   Combobox,
+  EntityRef,
   FullPageWorkspace,
   Input,
   ProvenancePath,
@@ -58,7 +59,6 @@ import {
   authorityOf,
   fieldLabel,
 } from '../components/Feedback';
-import { ObjectRef } from '../components/ObjectRef';
 import { useSession } from '../app/session';
 import { useProjectPaths } from '../app/projectPaths';
 import { useAsync } from '../app/useAsync';
@@ -177,14 +177,26 @@ export function ClaimsPage() {
             >
               {claims.map((claim: ClaimSummary) => (
                 <tr key={claim.id}>
-                  <th scope="row">
-                    <ObjectRef
-                      id={claim.id}
-                      kind="claim"
-                      to={href(`/claims/${claim.id}`)}
-                      authority={authorityOf(claim.status, claim.stale === 'stale')}
+                  {/*
+                    The assertion leads. This cell used to open with the id chip and its
+                    authority badge and put the sentence under them in secondary ink, so the
+                    machine identity outranked the thing the claim actually says (design
+                    critique, minor). The id still travels with it — a researcher copies and
+                    types it — but it follows the sentence, and it is the identity rather
+                    than a second link to the page the sentence already opens.
+                  */}
+                  <th scope="row" className="rh-web-claims__row">
+                    <Link to={href(`/claims/${claim.id}`)}>{claim.statement}</Link>
+                    <EntityRef
+                      size="sm"
+                      describe={false}
+                      entity={{
+                        id: claim.id,
+                        kind: 'claim',
+                        resolution: 'resolved',
+                        authority: authorityOf(claim.status, claim.stale === 'stale'),
+                      }}
                     />
-                    <div className="rh-text-secondary">{claim.statement}</div>
                   </th>
                   <td>
                     <StatusBadge status={claim.status} vocabulary="claimStatus" describe />
