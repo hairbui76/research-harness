@@ -18,7 +18,7 @@
  * The frame is mounted before the read resolves, so the project's name, the description and
  * the toolbar are on screen while the report is arriving and after a refusal.
  */
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -86,6 +86,11 @@ export function OverviewPage() {
   const navigate = useNavigate();
 
   const waiting = (overview?.attention ?? []).filter((group) => group.surface !== 'stale');
+  // A surface with nothing waiting on it is not work, so it is not a row in a list of work
+  // (third critique, minor: "0 unsupported manuscript claims — nothing waiting here" states
+  // a zero and then states it again). The ones that are clear are named once, below.
+  const working = waiting.filter((group) => group.count > 0);
+  const clear = waiting.filter((group) => group.count === 0);
   const stale = (overview?.attention ?? []).find((group) => group.surface === 'stale');
   const changes = overview?.since_last_session ?? NO_CHANGES;
 
@@ -125,12 +130,15 @@ export function OverviewPage() {
       ) : (
         <div className="rh-web-stack">
           <Panel title="Waiting for a decision">
-            {waiting.some((group) => group.count > 0) ? (
-              <ul className="rh-web-list rh-web-attention">
-                {waiting.map((group) => (
-                  <WaitingGroup key={group.kind} group={group} />
-                ))}
-              </ul>
+            {working.length > 0 ? (
+              <>
+                <ul className="rh-web-list rh-web-attention">
+                  {working.map((group) => (
+                    <WaitingGroup key={group.kind} group={group} />
+                  ))}
+                </ul>
+                <Clear groups={clear} />
+              </>
             ) : (
               <Empty
                 flat
@@ -288,23 +296,47 @@ function LastRead({ at, announce }: { at: string | null; announce: boolean }) {
 }
 
 /**
+ * The surfaces with nothing waiting on them, named once, under the ones that have work.
+ *
+ * Each of them used to be a row of its own reading "0 conflicts — nothing waiting here":
+ * the fact stated as a number and then stated again as a phrase, on a line that looked
+ * exactly like work. One line for all of them says the same thing once, and keeps every
+ * route the daemon gave, so nothing on this page becomes unreachable by being clear.
+ *
+ * The noun is the daemon's own `kind` read as words — the same token the label counts —
+ * because a client that invented a second name for a surface would give the cockpit two
+ * words for one page.
+ */
+function Clear({ groups }: { groups: AttentionGroup[] }) {
+  const { href } = useProjectPaths();
+  if (groups.length === 0) return null;
+  return (
+    <p className="rh-web-overview__clear">
+      Nothing is waiting in{' '}
+      {groups.map((group, index) => (
+        <Fragment key={group.kind}>
+          {index === 0 ? '' : index === groups.length - 1 ? ' or ' : ', '}
+          <Link to={href(group.route)}>{humaniseTerm(group.kind).toLowerCase()}</Link>
+        </Fragment>
+      ))}
+      .
+    </p>
+  );
+}
+
+/**
  * One surface that is waiting: the daemon's own count in words, and its first few items.
  *
- * The count is in the label the daemon composed — "2 review items", "0 conflicts" — so a
- * `waiting` chip beside it repeated the card's own title and a `clear` chip repeated the
- * zero. Two badge vocabularies for something already said in words, in a card that also
- * carries the described status badges; the one that says something the label does not is
- * the sentence a group with nothing in it gets.
+ * The count is in the label the daemon composed — "2 review items" — so a `waiting` chip
+ * beside it repeated the card's own title. Only groups that have work reach this component;
+ * `data-work` stays because the stylesheet reads the group's state from it.
  */
 function WaitingGroup({ group }: { group: AttentionGroup }) {
   const { href } = useProjectPaths();
   return (
-    <li data-work={group.count > 0 ? '' : undefined}>
+    <li data-work="">
       <p className="rh-web-row">
         <Link to={href(group.route)}>{group.label}</Link>
-        {group.count > 0 ? null : (
-          <span className="rh-text-secondary">— nothing waiting here</span>
-        )}
       </p>
       {group.items.length > 0 ? (
         <ul className="rh-web-list rh-web-list--tight rh-web-attention__items">

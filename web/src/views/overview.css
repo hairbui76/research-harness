@@ -19,12 +19,25 @@
 }
 
 /*
- * The groups that have something in them read heavier than the ones that are clear. Weight
- * is the whole signal: the badge beside the group already says "waiting" or "clear" in
- * words, so nothing here depends on noticing a colour.
+ * The items under a group that has work read heavier than the prose around them. Weight is
+ * the whole signal; nothing here depends on noticing a colour. Only groups with work are
+ * rows at all now, so `[data-work]` is the row's own state rather than a discriminator.
  */
 .rh-web-attention > li[data-work] .rh-web-attention__item {
   font-weight: var(--rh-type-h4-weight);
+}
+
+/*
+ * The surfaces with nothing waiting on them, in one line under the work.
+ *
+ * Quiet, and at the prose measure, because it is a sentence rather than a list: it exists so
+ * that a clear surface is stated once instead of taking a row of its own that reads like
+ * work and says "0".
+ */
+.rh-web-overview__clear {
+  margin: var(--rh-space-2) 0 0;
+  max-inline-size: var(--rh-measure-prose);
+  color: var(--rh-text-secondary);
 }
 
 .rh-web-list.rh-web-attention__items {

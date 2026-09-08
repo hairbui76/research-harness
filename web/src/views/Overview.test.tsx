@@ -74,9 +74,11 @@ describe('the overview', () => {
     const rendered = Array.from(
       container.querySelectorAll('.rh-web-attention > li > p > a'),
     ).map((node) => node.textContent);
+    // `count > 0` joined this filter in wave 6: a group with nothing in it is no longer a
+    // row at all, so the rows are exactly the decision surfaces that have work.
     expect(rendered).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => group.label),
     );
   });
@@ -87,6 +89,11 @@ describe('the overview', () => {
      * neutral "clear" one. The daemon's own label already states the count — "2 review
      * items", "0 conflicts" — and the card is titled "Waiting for a decision", so both
      * chips repeated something already on screen. What a zero needs is a sentence.
+     *
+     * The assertion that a zero group printed "— nothing waiting here" was deleted here on
+     * purpose in wave 6: that phrase only existed on a row whose own text was "0 conflicts",
+     * and the third critique's finding is that the row should not be printed at all. What a
+     * zero says now is asserted below, in one line for all of them.
      */
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
@@ -95,7 +102,44 @@ describe('the overview', () => {
     expect(within(attention).queryByText('waiting')).toBeNull();
     expect(within(attention).queryByText('clear')).toBeNull();
     expect(attention.querySelectorAll('.rh-badge')).toHaveLength(0);
-    expect(within(attention).getAllByText('— nothing waiting here').length).toBeGreaterThan(0);
+  });
+
+  it('prints no row for a group with nothing in it', async () => {
+    /*
+     * The third critique's minor observation: "0 unsupported manuscript claims — nothing
+     * waiting here" is a row that states a zero and then states it again. A surface with
+     * nothing waiting is not work, so it is not a line in a list of work.
+     */
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Waiting for a decision')).toBeInTheDocument());
+    const rows = Array.from(container.querySelectorAll('.rh-web-attention > li')).map(
+      (node) => node.textContent ?? '',
+    );
+    expect(rows.length, 'only the groups with work are rows').toBe(1);
+    expect(rows.every((row) => !/(^|\s)0\s/.test(row)), 'no row of zeros').toBe(true);
+  });
+
+  it('names the surfaces with nothing waiting once, in one line under the work', async () => {
+    const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
+
+    await waitFor(() => expect(screen.getByText('Waiting for a decision')).toBeInTheDocument());
+    const clear = container.querySelector('.rh-web-overview__clear') as HTMLElement;
+    expect(clear).not.toBeNull();
+    // The daemon reported `conflicts` and `unsupported_manuscript_claims` at zero; `stale`
+    // has its own panel and is never named here.
+    expect(clear).toHaveTextContent(
+      'Nothing is waiting in conflicts or unsupported manuscript claims.',
+    );
+    expect(clear.textContent).not.toContain('stale');
+    // Each one keeps the route the daemon gave it, so the page loses no way in.
+    expect(within(clear).getByRole('link', { name: 'conflicts' })).toHaveAttribute(
+      'href',
+      '/conflicts',
+    );
+    expect(
+      within(clear).getByRole('link', { name: 'unsupported manuscript claims' }),
+    ).toHaveAttribute('href', '/manuscript');
   });
 
   it('leads with the group that has work in it', async () => {
@@ -310,9 +354,11 @@ describe('the overview inside a project', () => {
     const hrefs = Array.from(container.querySelectorAll('.rh-web-attention > li > p > a')).map(
       (node) => node.getAttribute('href'),
     );
+    // Only the groups with work are rows now; the ones that are clear keep their routes in
+    // the one line below the list, which the list test above asserts.
     expect(hrefs).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => `/projects/prj_abc${group.route}`),
     );
   });
@@ -365,7 +411,7 @@ describe('the overview inside a project', () => {
     );
     expect(hrefs).toEqual(
       FIXTURES.overview.attention
-        .filter((group) => group.surface === 'decide')
+        .filter((group) => group.surface === 'decide' && group.count > 0)
         .map((group) => group.route),
     );
   });

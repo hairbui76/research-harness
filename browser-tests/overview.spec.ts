@@ -109,6 +109,24 @@ test('the overview leads with what is waiting, and states what the project holds
 
   // Every group has something to say, and each says it in words.
   await expect(page.getByRole('link', { name: '2 review items' })).toBeVisible();
+
+  // No row of zeros (third critique, minor). A surface with nothing waiting on it is not a
+  // line in the list of work; the ones that are clear are named once, in the line below it.
+  const rows = await page.locator('.rh-web-attention > li > p').allTextContents();
+  expect(rows.length, 'the waiting list has rows').toBeGreaterThan(0);
+  expect(
+    rows.filter((row) => /(^|\s)0\s/.test(row)),
+    'a group with nothing in it is not a row',
+  ).toEqual([]);
+  const clear = page.locator('.rh-web-overview__clear');
+  expect(await clear.count(), 'the clear surfaces are named at most once').toBeLessThanOrEqual(1);
+  if (await clear.count()) {
+    await expect(clear).toHaveText(/^Nothing is waiting in .+\.$/);
+    expect(
+      (await clear.textContent())!.match(/\d/),
+      'the line that names the clear surfaces prints no count',
+    ).toBeNull();
+  }
   await expect(page.getByRole('heading', { name: 'Gone stale' })).toBeVisible();
   // The stale object is named by what it is, and so is the evidence that moved under it.
   await expect(
