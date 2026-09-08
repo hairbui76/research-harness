@@ -18,12 +18,20 @@
   overflow-y: auto;
 }
 
+/*
+ * The name, the sentence and the two ways in, in that order down the page.
+ *
+ * The header used to be a row: the title and the lead on the left, the buttons floated
+ * opposite them. On a wide screen that put a 68ch paragraph and two controls at either
+ * end of one short band and left the rest of the canvas to itself. A column reads in the
+ * order the page is understood in — what this is, what a project is, how to make one —
+ * and the buttons keep a line of their own at every width.
+ */
 .rh-projects__header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--rh-space-3);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rh-space-4);
 }
 
 .rh-projects__title {
@@ -35,7 +43,7 @@
 
 /* The one sentence on this screen that is read rather than scanned. */
 .rh-projects__lede {
-  margin: var(--rh-space-1) 0 0;
+  margin: calc(var(--rh-space-2) - var(--rh-space-4)) 0 0;
   max-inline-size: var(--rh-measure-prose);
   color: var(--rh-text-muted);
 }
@@ -56,15 +64,56 @@
   gap: var(--rh-space-3);
 }
 
+/* The section's name and caption on one side; what narrows it on the other. */
+.rh-projects__list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--rh-space-3);
+}
+
+
 .rh-projects__list-note {
-  margin: 0;
+  margin: var(--rh-space-1) 0 0;
   max-inline-size: var(--rh-measure-prose);
   color: var(--rh-text-muted);
   font-size: var(--rh-type-body-sm-size);
   line-height: var(--rh-type-body-sm-lh);
 }
 
+/* The field that narrows the list, beside the section it narrows. */
+.rh-projects__find {
+  inline-size: 18rem;
+  max-inline-size: 100%;
+}
+
+/*
+ * The runs, and the rows inside them. The gap between two runs is wider than the gap
+ * between two rows, so the naming line belongs to what follows it rather than floating
+ * between two neighbours.
+ */
 .rh-projects__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-5);
+}
+
+.rh-projects__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rh-space-2);
+}
+
+.rh-projects__group-heading {
+  margin: 0;
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-projects__rows {
   list-style: none;
   margin: 0;
   padding: 0;

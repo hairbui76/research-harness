@@ -433,9 +433,18 @@ test('the rail and Project Home offer the same project actions in the same words
 
   const list = page.getByRole('list', { name: 'Registered projects' });
   await expect(list).toBeVisible();
-  const row = list.getByRole('listitem').first();
-  // One visible act per row — the one that opens the workspace — and the rest in the menu.
-  await expect(row.getByRole('button')).toHaveText(['Open', 'Project actions']);
+  // The registry is cut into runs by how recently each project was last opened, so the
+  // outer list's items are the runs and the rows live in a nested list under each run's
+  // naming line. The first row is therefore the first item of the first run.
+  const row = list.getByRole('list').first().getByRole('listitem').first();
+  // One visible act per row — the one that opens the workspace — and the rest behind the
+  // rail's own trigger: a glyph whose accessible name is the menu's words. Changed on
+  // purpose from `toHaveText(['Open', 'Project actions'])`: printing the second name on
+  // every row made the pair read twice down a long registry, so the words moved into the
+  // accessible name and the assertion moved with them.
+  await expect(row.getByRole('button')).toHaveText(['Open', '']);
+  await expect(row.getByRole('button', { name: 'Project actions', exact: true })).toBeVisible();
+  await expect(row.getByText('Project actions')).toHaveCount(0);
 
   const fromHome = await projectActionLabels(
     page,
