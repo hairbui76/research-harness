@@ -5,6 +5,7 @@ from __future__ import annotations
 import itertools
 import os
 import sys
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -16,7 +17,9 @@ from fastapi import FastAPI
 from research_harness.domain.enums import ReviewPolicy
 from research_harness.local_app.auth import BootstrapStore
 from research_harness.local_app.manager import ProjectManager
+from research_harness.local_app.paths import registry_path
 from research_harness.local_app.pickers.base import ManualFolderPicker
+from research_harness.local_app.registry import ProjectRegistry
 from research_harness.server.multi_app import create_multi_project_app
 
 
@@ -750,6 +753,53 @@ def main() -> None:
                 "name": name,
                 "overview_url": f"/projects/{view.project_id}/overview",
             }
+
+        @app.post("/__test__/aged-projects")
+        def aged_projects() -> dict[str, object]:
+            """Six registered projects spanning the three ages Project Home groups by.
+
+            Project Home cuts the registry into Today, This week and Earlier. The daemon
+            stamps `last_opened_at` at the moment a project is created, so six projects
+            made inside one browser run can only ever produce one age, and the grouping
+            could not be photographed or asserted. The ages are written afterwards through
+            `ProjectRegistry.replace` - the same call `locate` and `rename` already make -
+            so the registry the cockpit reads is the registry the daemon wrote, and nothing
+            here reaches production code.
+
+            Each call builds its own six, tagged with the batch number, so the two viewport
+            runs never share a project and a find can name exactly one run's worth.
+            """
+            manager: ProjectManager = backend.state.manager
+            store = ProjectRegistry(registry_path(Path(backend.state.data_dir)))
+            now = datetime.now(UTC)
+            # Anchored to midnight rather than counted back from the clock: the cockpit
+            # reads these ages by UTC calendar day, so "six hours ago" is yesterday for
+            # anyone who runs the suite in the morning, and the run would be flaky by
+            # timezone. Every instant below names a day, not a distance.
+            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            tag = f"aged{next(seeded)}"
+            ages: dict[str, tuple[datetime, ...]] = {
+                "Today": (now, midnight + timedelta(minutes=1)),
+                "This week": (
+                    midnight - timedelta(days=2) + timedelta(hours=12),
+                    midnight - timedelta(days=5) + timedelta(hours=12),
+                ),
+                "Earlier": (
+                    midnight - timedelta(days=30),
+                    midnight - timedelta(days=200),
+                ),
+            }
+            made: list[dict[str, str]] = []
+            for age, openings in ages.items():
+                word = age.split()[-1].lower()
+                for index, opened_at in enumerate(openings, start=1):
+                    name = f"{tag.capitalize()} {word} {index}"
+                    view = manager.create(directory, name, ReviewPolicy.STRICT)
+                    record = store.get(view.project_id)
+                    if record is not None:
+                        store.replace(record.model_copy(update={"last_opened_at": opened_at}))
+                    made.append({"project_id": view.project_id, "name": name, "age": age})
+            return {"tag": tag, "projects": made}
 
         large: dict[int, dict[str, str]] = {}
         large_lock = Lock()
