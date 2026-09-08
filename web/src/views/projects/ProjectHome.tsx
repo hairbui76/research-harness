@@ -57,7 +57,12 @@ const PROJECT_ACTION_ITEMS: readonly { action: ProjectAction; label: string; ico
   { action: 'forget', label: 'Forget project', icon: 'trash-2' },
 ];
 
-/** What each availability is called on this screen. The rail's `null` means "available". */
+/**
+ * What each availability is called on this screen.
+ *
+ * The rail's `null` means "available", which this screen never prints: a row that can be
+ * opened says so by offering Open. The fallback keeps the function total.
+ */
 export function availabilityLabel(availability: ProjectAvailability): string {
   return PROJECT_AVAILABILITY_META[availability].label ?? 'Available';
 }
@@ -434,13 +439,26 @@ function ProjectRow({
             <span className="rh-projects__path">{project.path}</span>
           </p>
           <p className="rh-projects__meta">
-            <Badge
-              size="sm"
-              tone={availabilityTone(project.availability)}
-              icon={PROJECT_AVAILABILITY_META[project.availability].icon}
-            >
-              {availabilityLabel(project.availability)}
-            </Badge>
+            {/*
+              * Availability badges the exception and nothing else.
+              *
+              * Spec §4.2 asks for availability in words rather than in colour, and it is:
+              * every state that stops or qualifies an opening keeps its word, its glyph
+              * and the host's sentence under it. What it does not ask for is a badge on
+              * the ordinary case. "Available" on every row of a healthy registry is a
+              * constant — it says nothing about the row it sits on, and it hides the two
+              * rows that were trying to say something. The row that can simply be opened
+              * makes its claim with the Open button beside it.
+              */}
+            {project.availability === 'available' ? null : (
+              <Badge
+                size="sm"
+                tone={availabilityTone(project.availability)}
+                icon={PROJECT_AVAILABILITY_META[project.availability].icon}
+              >
+                {availabilityLabel(project.availability)}
+              </Badge>
+            )}
             {project.active_runs > 0 ? (
               <Badge size="sm" tone="info" icon="loader">
                 {`${project.active_runs} active`}

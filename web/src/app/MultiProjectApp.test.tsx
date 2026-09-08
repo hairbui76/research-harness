@@ -191,8 +191,11 @@ describe('the multi-project application', () => {
           path: '/research/reef-survey',
         }),
       );
+      // Changed on purpose: this used to wait for an "Available" badge. Project Home
+      // badges an availability only where it is not simply available, so a located folder
+      // is proved by the refusal leaving the row, not by a new word arriving on it.
       await waitFor(() =>
-        expect(within(rowFor('Reef survey')).getByText('Available')).toBeInTheDocument(),
+        expect(within(rowFor('Reef survey')).queryByText('Unavailable')).toBeNull(),
       );
       expect(within(rowFor('Reef survey')).getByRole('button', { name: 'Open' })).toBeEnabled();
       expect(within(rowFor('Reef survey')).getByText('/research/reef-survey')).toBeInTheDocument();

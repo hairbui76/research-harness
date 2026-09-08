@@ -303,11 +303,37 @@ describe('Project Home', () => {
     setup({ projects: [AVAILABLE, BUSY] });
 
     const [available, busy] = rows() as [HTMLElement, HTMLElement];
-    expect(within(available).getByText('Available')).toBeInTheDocument();
+    // Changed on purpose: this row used to assert an "Available" badge. A badge every row
+    // wears is not a state, it is wallpaper — and it made the two rows that *are* saying
+    // something harder to find. Availability is still text wherever it is news.
+    expect(within(available).queryByText('Available')).toBeNull();
     expect(within(available).getByRole('button', { name: 'Open' })).toBeEnabled();
     expect(within(busy).getByText('Busy')).toBeInTheDocument();
     expect(within(busy).getByRole('button', { name: 'Open' })).toBeEnabled();
     expect(within(busy).getByText(/holding the repository lock/)).toBeInTheDocument();
+  });
+
+  /*
+   * The badge is for the exception, and the row still says everything else.
+   *
+   * Spec §4.2 requires availability to be *text* and not colour, which it still is: what
+   * changed is that a project a researcher can simply open makes no claim about it at
+   * all — pressing Open is the claim — while every state that stops or qualifies an
+   * opening keeps its word and its sentence.
+   */
+  it('badges an availability only where it is not simply available', () => {
+    setup({ projects: [AVAILABLE, BUSY, MOVED] });
+
+    const [available, busy, moved] = rows() as [HTMLElement, HTMLElement, HTMLElement];
+    expect(within(available).queryByText('Available')).toBeNull();
+    expect(within(available).getByText('/research/latency-study')).toBeInTheDocument();
+    expect(within(available).getByText(/Last opened 2026-09-01/)).toBeInTheDocument();
+
+    expect(within(busy).getByText('Busy')).toBeInTheDocument();
+    expect(within(busy).getByText(/holding the repository lock/)).toBeInTheDocument();
+
+    expect(within(moved).getByText('Unavailable')).toBeInTheDocument();
+    expect(within(moved).getByText(/is not readable from here/)).toBeInTheDocument();
   });
 
   it('refuses to open an unavailable project and offers to locate it instead', () => {
