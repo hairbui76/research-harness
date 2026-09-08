@@ -435,7 +435,14 @@ function ProjectRow({
     <Card as="li" className="rh-projects__card" padding="md">
       <div className="rh-projects__row">
         <div className="rh-projects__identity">
-          <h2 className="rh-projects__name">{project.display_name}</h2>
+          {/*
+            * A row sits inside the registry's section, which is itself inside the page
+            * the product's name titles: h1 the product, h2 the registry, h3 a workspace
+            * in it. The run's naming line above this is deliberately not a heading — the
+            * rail's runs are not headings either — so the outline stays three deep however
+            * many ages the list is cut into.
+            */}
+          <h3 className="rh-projects__name">{project.display_name}</h3>
           <p className="rh-projects__meta">
             <span className="rh-projects__path">{project.path}</span>
           </p>

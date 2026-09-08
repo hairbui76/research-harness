@@ -159,6 +159,16 @@ describe('Project Home', () => {
     expect(lead.compareDocumentPosition(listing)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
+  it('keeps one outline: the product, the registry, and a workspace in it', () => {
+    setup({ projects: [AVAILABLE] });
+
+    // Three levels and no fourth. The run's naming line is a paragraph on purpose — the
+    // rail's runs are paragraphs too — so cutting the list into ages adds no heading.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Research Harness');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Your research projects');
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Latency study');
+  });
+
   it('puts the two ways in on a row of their own, under the lead', () => {
     setup({ projects: [AVAILABLE] });
 
