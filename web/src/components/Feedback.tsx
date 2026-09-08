@@ -148,16 +148,27 @@ export function ErrorBox({ error, retry }: { error: string; retry?: () => void }
 }
 
 /**
- * A time of day, in the reader's own locale, for a sentence about how old something is.
+ * A time of day, on the one clock this cockpit reads.
  *
  * The clock and not the date: an outage lasts minutes and a researcher reads "14:32", not
  * an ISO instant. A time this window cannot parse is printed as it came rather than as
  * "Invalid Date".
+ *
+ * The twenty-four-hour form is the daemon's. Every change the daemon stamps is composed
+ * server-side as "9 September, 01:50" (`server/app.py::_human_moment`), and the Overview
+ * prints those stamps a few hundred pixels under its own header — which read "Read at
+ * 01:50 AM" on an en-US machine, so one page carried two clocks for the same minute. The
+ * hour cycle is pinned rather than left to the locale; the rest of the format still is the
+ * reader's, because the separator and the digits are not what disagreed.
  */
 export function clockTime(iso: string): string {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return iso;
-  return at.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return at.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
 }
 
 /**

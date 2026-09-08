@@ -172,12 +172,12 @@ test('the overview leads with what is waiting, and states what the project holds
   const read = page.locator('.rh-web-overview__read');
   const changed = page.locator('.rh-web-overview__changed');
   const age = page.locator('.rh-web-overview__age');
-  await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  await expect(read).toHaveText(/^Read at \d{2}:\d{2}$/);
   // The words the page actually has for an age: "just now" for a project seeded seconds ago,
   // and a counted unit for anything older. The two halves are separate elements, so each is
   // asserted for what it holds and the line is asserted for holding both in that order.
   await expect(changed).toHaveText(/^Changed (just now|\d+ (minute|hour|day)s? ago) · $/);
-  await expect(age).toHaveText(/^Changed .+ · Read at \d{1,2}:\d{2}/);
+  await expect(age).toHaveText(/^Changed .+ · Read at \d{2}:\d{2}$/);
   expect(
     await age.evaluate((node) => node.getAttribute('role')),
     'an automatic read announces nothing',
@@ -188,7 +188,7 @@ test('the overview leads with what is waiting, and states what the project holds
   await page.getByRole('button', { name: 'Look again' }).click();
   // The whole line is the live region: the answer to "is this still current?" is both halves.
   await expect(age).toHaveAttribute('role', 'status');
-  await expect(read).toHaveText(/^Read at \d{1,2}:\d{2}/);
+  await expect(read).toHaveText(/^Read at \d{2}:\d{2}$/);
   // The read the press asked for lands and the page comes back; everything measured below
   // is measured on the page as it stands after it, not on the skeleton in between.
   await expect(page.getByRole('heading', { name: 'Waiting for a decision' })).toBeVisible();

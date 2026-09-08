@@ -23,6 +23,7 @@ import {
   StatusBadge,
   TONES,
   candidateName,
+  clockTime,
   fieldLabel,
 } from './Feedback';
 import { expectNoAxeViolations } from '../test/harness';
@@ -526,5 +527,26 @@ describe('what a staged candidate is called', () => {
 
   it('humanises a field a project’s own schema declared', () => {
     expect(fieldLabel('traffic_representation_family')).toBe('Traffic representation family');
+  });
+});
+
+/**
+ * One clock for the whole cockpit.
+ *
+ * The daemon composes every change stamp server-side on a twenty-four-hour clock
+ * (`server/app.py::_human_moment` — "9 September, 01:50"), and the Overview prints those
+ * a few hundred pixels under a header that read "Read at 01:50 AM" on an en-US machine.
+ * One page, one minute, two clocks. The hour cycle is pinned so the two can never disagree
+ * again, wherever the reader's locale would have put the meridiem.
+ */
+describe('the clock a sentence about age reads', () => {
+  it('reads twenty-four hours, whatever the locale would have done', () => {
+    expect(clockTime('2026-09-09T01:50:00Z')).toMatch(/^\d{2}:\d{2}$/);
+    expect(clockTime('2026-09-09T13:50:00Z')).toMatch(/^\d{2}:\d{2}$/);
+    expect(clockTime('2026-09-09T01:50:00Z')).not.toMatch(/[AP]M/i);
+  });
+
+  it('prints an instant it cannot parse as it came', () => {
+    expect(clockTime('not an instant')).toBe('not an instant');
   });
 });

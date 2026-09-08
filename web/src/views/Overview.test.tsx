@@ -442,7 +442,10 @@ describe('when the overview last read', () => {
 
     await screen.findByText(/^Read at /);
     const age = container.querySelector('.rh-web-overview__age') as HTMLElement;
-    expect(age.textContent).toMatch(/^Changed 2 hours ago · Read at \d{1,2}:\d{2}/);
+    // The 24-hour clock, exactly: the change entries under this header are stamped
+    // "9 September, 01:50" by the daemon, and a header reading "01:50 AM" beside them
+    // put two clocks on one page for the same minute.
+    expect(age.textContent).toMatch(/^Changed 2 hours ago · Read at \d{2}:\d{2}$/);
     expect(age.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
   });
 
@@ -459,7 +462,7 @@ describe('when the overview last read', () => {
     const { container } = renderView(<OverviewPage />, { daemon: fakeDaemon() });
 
     await waitFor(() => expect(screen.getByText(FIXTURES.overview.project)).toBeInTheDocument());
-    const read = await screen.findByText(/^Read at \d{1,2}:\d{2}/);
+    const read = await screen.findByText(/^Read at \d{2}:\d{2}$/);
     expect(read.closest('.rh-full-page__toolbar'), 'it sits in the toolbar').not.toBeNull();
     expect(container.querySelector('.rh-web-overview__read')).toBe(read);
   });
