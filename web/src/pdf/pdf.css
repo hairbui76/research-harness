@@ -25,9 +25,18 @@
   overflow: hidden;
 }
 
+/*
+ * The drawn page. It is hidden rather than unmounted until there is something on it, so the
+ * block sizes to the caption saying which page is coming instead of to a canvas's 300×150
+ * default — and so the render effect always has an element to draw into.
+ */
 .rh-pdf__canvas {
-  display: block;
+  display: none;
   max-width: 100%;
+}
+
+.rh-pdf[data-status='ready'] .rh-pdf__canvas {
+  display: block;
 }
 
 /* pdf.js positions each run absolutely inside this layer; it is transparent, selectable
@@ -79,9 +88,20 @@
   background: var(--rh-highlight-on-paper-match);
 }
 
+/*
+ * What the block says about itself when it is not a page: which page is arriving, or why
+ * there is none. Both sit inside the frame, because a rectangle with an explanation printed
+ * beside it is still a blank rectangle — the caption has to be the block's own content.
+ *
+ * Paper's own ink, not the theme's: this text is on the page surface, which keeps its near-
+ * white in both themes.
+ */
+.rh-pdf__caption,
 .rh-pdf__fallback {
   margin: 0;
-  color: var(--rh-text-secondary);
+  padding: var(--rh-space-3);
+  max-inline-size: var(--rh-measure-prose);
+  color: var(--rh-text-on-paper-secondary);
   font-family: var(--rh-font-sans);
   font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
   line-height: var(--rh-type-body-sm-lh);

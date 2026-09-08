@@ -179,6 +179,17 @@ describe('usePdfDocument', () => {
   });
 });
 
+/** A document that has answered nothing yet: the state the empty block is drawn in. */
+function idle(): PdfDocumentState {
+  return {
+    status: 'idle',
+    numPages: 0,
+    error: null,
+    getPage: () => Promise.reject(new Error('no document')),
+    reload: () => undefined,
+  };
+}
+
 /** The document a `PdfPage` is given, driven by the hook. */
 function useDocument(source: string | null = '/pdf'): PdfDocumentState {
   return usePdfDocument(source);
@@ -291,6 +302,46 @@ describe('PdfPage', () => {
     render(<Harness textLayer />);
     await waitFor(() => expect(engine.textLayers).toHaveLength(1));
     expect(await screen.findByText('a line of the page')).toBeInTheDocument();
+  });
+
+  /**
+   * The third critique's minor observation, on the review screen's source pane: the page
+   * block is an empty rectangle until pdf.js has drawn into it, and an empty rectangle says
+   * nothing about what it is or why it is empty.
+   */
+  it('says what the empty block is while the page has not been drawn', async () => {
+    render(<PdfPage document={{ ...idle() }} index={4} />);
+
+    const caption = screen.getByText('Page 4, rendering…');
+    expect(caption.closest('.rh-pdf__frame'), 'the caption is the block').not.toBeNull();
+  });
+
+  it('lets the caller say it in that surface’s own words', async () => {
+    render(
+      <PdfPage document={idle()} index={4} caption="Page 4 of the source, rendering…" />,
+    );
+
+    expect(screen.getByText('Page 4 of the source, rendering…')).toBeInTheDocument();
+  });
+
+  it('puts the reason inside the block, not under it, when there is no page', async () => {
+    render(
+      <PdfPage
+        document={{
+          status: 'unavailable',
+          numPages: 0,
+          error: 'the build has no PDF yet',
+          getPage: () => Promise.reject(new Error('no document')),
+          reload: () => undefined,
+        }}
+        index={1}
+        fallback={<>No PDF for this build yet.</>}
+      />,
+    );
+
+    const said = await screen.findByRole('status');
+    expect(said).toHaveTextContent('No PDF for this build yet.');
+    expect(said.closest('.rh-pdf__frame'), 'the block is what carries the words').not.toBeNull();
   });
 
   it('falls back to text when the document could not be loaded', async () => {
