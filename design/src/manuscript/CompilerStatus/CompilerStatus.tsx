@@ -72,14 +72,36 @@ export const CompilerStatus = forwardRef<HTMLDivElement, CompilerStatusProps>(
             <dt>Build</dt>
             <dd>{build.buildId ?? 'none yet'}</dd>
           </div>
-          <div>
-            <dt>Started</dt>
-            <dd>{formatTimestamp(build.startedAt)}</dd>
-          </div>
-          <div>
-            <dt>Finished</dt>
-            <dd>{build.finishedAt ? formatTimestamp(build.finishedAt) : 'still running'}</dd>
-          </div>
+          {/*
+            A build that never started has no clock to read.
+
+            These two rows used to run unconditionally, so a workspace with no LaTeX
+            toolchain printed "STARTED unknown time · FINISHED still running" — the second
+            of which is a claim about a build that does not exist, and the pair of which is
+            one absence stated twice. The absence is already stated once, by the build's own
+            row ("none yet"), so the clocks stand down until there is a build to time.
+          */}
+          {build.startedAt === undefined ? null : (
+            <>
+              <div>
+                <dt>Started</dt>
+                <dd>{formatTimestamp(build.startedAt)}</dd>
+              </div>
+              <div>
+                <dt>Finished</dt>
+                {/* "Still running" is the running build's own word. A build that stopped
+                    without recording an end — killed, or the record lost — says that
+                    instead of borrowing it. */}
+                <dd>
+                  {build.finishedAt
+                    ? formatTimestamp(build.finishedAt)
+                    : running
+                      ? 'still running'
+                      : 'not recorded'}
+                </dd>
+              </div>
+            </>
+          )}
           {duration ? (
             <div>
               <dt>Took</dt>

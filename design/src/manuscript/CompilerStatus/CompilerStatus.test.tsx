@@ -70,6 +70,44 @@ describe('CompilerStatus', () => {
     expect(screen.getByText('Last successful PDF: 2026-09-03 09:41 UTC')).toBeInTheDocument();
   });
 
+  /*
+   * A workspace with no LaTeX toolchain has never compiled anything, and the panel used to
+   * report that as "STARTED unknown time · FINISHED still running": one clock reading a
+   * value it does not have, and one asserting that a build nobody started is in progress.
+   * The build's own row says the absence once; the clocks say nothing until there is a
+   * build to time.
+   */
+  it('reads no clock over a build that never started', () => {
+    render(
+      <CompilerStatus
+        build={{
+          status: 'failed',
+          synctex: 'unavailable',
+          setupGuidance: 'Install a LaTeX engine and add it to research.yaml.',
+        }}
+      />,
+    );
+    expect(screen.getByText('none yet')).toBeInTheDocument();
+    expect(screen.queryByText('still running')).toBeNull();
+    expect(screen.queryByText('unknown time')).toBeNull();
+    expect(screen.queryByText('Started')).toBeNull();
+    expect(screen.queryByText('Finished')).toBeNull();
+  });
+
+  /*
+   * "Still running" belongs to the build that is running. A build that stopped without
+   * recording an end — killed, or its record lost — is not running, and saying so would be
+   * the same lie one state along.
+   */
+  it('does not call a stopped build with no end time a running one', () => {
+    render(
+      <CompilerStatus build={{ ...succeeded, status: 'failed', finishedAt: undefined }} />,
+    );
+    expect(screen.getByText('2026-09-03 09:59 UTC')).toBeInTheDocument();
+    expect(screen.getByText('not recorded')).toBeInTheDocument();
+    expect(screen.queryByText('still running')).toBeNull();
+  });
+
   it('has no axe violations', async () => {
     const { container } = render(
       <CompilerStatus build={{ ...succeeded, status: 'running' }} onStop={vi.fn()} />,
