@@ -285,11 +285,13 @@ test('the rail names its three groups without adding a tab stop', async ({
   await openWorkspace(page, request, info, 'Grouping study');
   await openRail(page);
 
-  // Roadmap 3L, option A: three visible headings over eight of the eleven destinations, and
-  // the two ways in above them with no heading at all.
+  // Roadmap 3L, option A: three visible headings over ten of the twelve destinations, and
+  // the two ways in above them with no heading at all. Evidence joined "The record" in wave
+  // six, between Corpus and Claims where PRODUCT §26 lists it, so that group is one longer
+  // than it was; the grouping itself is unchanged.
   for (const [name, labels] of [
     ['Waiting', ['Review inbox', 'Conflicts', 'Stale']],
-    ['The record', ['Corpus', 'Claims', 'Questions', 'Taxonomy']],
+    ['The record', ['Corpus', 'Evidence', 'Claims', 'Questions', 'Taxonomy']],
     ['Outputs', ['Synthesis', 'Manuscript']],
   ] as const) {
     const group = page.getByRole('list', { name });

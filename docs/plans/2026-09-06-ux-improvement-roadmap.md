@@ -210,3 +210,22 @@ check reported. Neither of the last two runs without the researcher's yes.
   them, binding the manuscript's bar control to its inspector view below the breakpoint on
   the way. Logged for a later wave: windowing the Synthesis grid past a few hundred works,
   and the manuscript inspector's chip-headed finding cards.
+- 2026-09-08 (wave 6, 6A): the third critique's first P1 — the product's largest body of
+  accepted state had no page — is answered by an Evidence index under *The record*, between
+  Corpus and Claims. `docs/plans/2026-09-08-evidence-index-brief.md` shapes it first: the six
+  questions a researcher brings to accepted evidence, and what may never appear on the page
+  (no confidence number, no seventh status family, no sort, no second review queue).
+  `evidence.list` gained the shape `work.list` took in wave five — rows naming the source by
+  title, the claims resting on each reading, when it was accepted, an `attention` lead in the
+  order the record decays (stale, superseded, a verifier that did not support a reading
+  standing anyway, then what no claim cites), and `questions` as the filters, counted over
+  the whole record. The page follows Corpus exactly: the lead first, then rows across six
+  shared columns with the quoted span on the row, the questions as the controls that narrow
+  it, a windowed list with its own find, and every empty state in the shared pattern. A row
+  opens the reading at its exact span; nothing on the page decides anything, because
+  acceptance happened beside the source and there is no undo. The same wave took the
+  critique's minor observation in `routes.tsx`: an unknown URL rendered the Overview
+  silently, and now says nothing is served at that address, inside the frame, with one link
+  to the Overview. Logged for a later wave: the index has no column sort, which is the
+  persona flag Alex still carries, and the daemon composes no group for evidence a
+  researcher qualified on acceptance.

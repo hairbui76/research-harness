@@ -23,7 +23,7 @@ export function ShortcutHelp() {
   const bound = commands.filter((command) => command.shortcut !== undefined);
   const groups = singleKeys ? groupCommands(bound) : [];
   // The chords, under one heading of their own: they all do the same kind of thing, and
-  // the rail's three groups are a shape for browsing rather than for learning eleven keys.
+  // the rail's three groups are a shape for browsing rather than for learning twelve keys.
   const going = singleKeys ? commands.filter((command) => command.chord !== undefined) : [];
   // Only the chord survives the switch being off, so only the chord is listed.
   const anywhere = SHELL_SHORTCUTS.filter(

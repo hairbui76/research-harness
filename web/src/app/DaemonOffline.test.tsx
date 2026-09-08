@@ -102,7 +102,7 @@ describe('the daemon stops answering', () => {
     renderShell(silentDaemon());
 
     await waitFor(() => expect(notice()).toBeInTheDocument());
-    // The skip link, the rail with all eleven destinations, and `main`: an outage does not
+    // The skip link, the rail with all twelve destinations, and `main`: an outage does not
     // take the cockpit away, and every screen is still one click from here.
     expect(screen.getByRole('link', { name: /Skip to/i })).toBeInTheDocument();
     const rail = screen.getByRole('navigation', { name: 'Project navigation' });

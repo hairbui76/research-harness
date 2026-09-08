@@ -2,7 +2,7 @@
  * Whether every destination fits the two small screens the cockpit claims to support.
  *
  * The rest of the suite proves the wide cases: 1920px for the reading measure, 1440px and
- * the shell's own 768px breakpoint for everything else. Nothing proved that the eleven
+ * the shell's own 768px breakpoint for everything else. Nothing proved that the twelve
  * rail destinations survive a 1024x768 laptop or a 768x1024 tablet held upright, and
  * "fits" is four separate claims, none of which a unit test can make:
  *
@@ -29,7 +29,7 @@ import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
 import { axeViolations } from './axe';
 
 /**
- * The eleven rail destinations of PRODUCT §26, conversation first. `''` is the root.
+ * The twelve rail destinations of PRODUCT §26, conversation first. `''` is the root.
  *
  * `label` is the word the rail calls the destination — and, below the shell's breakpoint,
  * the word the collapsed bar has to call it too, because the rail saying it is behind a
@@ -43,6 +43,7 @@ const DESTINATIONS = [
   { path: 'conflicts', name: 'conflicts', label: 'Conflicts' },
   { path: 'stale', name: 'stale', label: 'Stale' },
   { path: 'corpus', name: 'corpus', label: 'Corpus' },
+  { path: 'evidence', name: 'evidence', label: 'Evidence' },
   { path: 'claims', name: 'claims', label: 'Claims' },
   { path: 'questions', name: 'questions', label: 'Questions' },
   { path: 'synthesis', name: 'synthesis', label: 'Synthesis' },

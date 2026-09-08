@@ -45,6 +45,7 @@ import type {
   ConversationSession,
   DecisionList,
   DecisionSummary,
+  EvidenceFilters,
   EvidenceList,
   EvidenceSummary,
   FileSnapshot,
@@ -504,10 +505,25 @@ export class HarnessClient {
 
   /** Accepted evidence, by work and lifecycle status; staged proposals are not listed. */
   async evidence(work?: string | null, status?: string | null): Promise<EvidenceSummary[]> {
+    return (await this.evidenceList({ ...(work ? { work } : {}), ...(status ? { status } : {}) }))
+      .evidence;
+  }
+
+  /**
+   * The same read, with the lead and the questions the daemon composed around it.
+   *
+   * The Evidence index needs those; a work's own page needs only the rows, so `evidence()`
+   * above stays the shorter call. Neither re-derives anything: which accepted evidence has
+   * decayed, which no claim rests on, and how many answer each question are the daemon's
+   * judgements, and this hands them over whole (principle P10) — so the narrowing is a
+   * request rather than a `filter()`.
+   */
+  async evidenceList(filters: EvidenceFilters = {}): Promise<EvidenceList> {
     const request: Record<string, Json> = {};
-    if (work) request.work = work;
-    if (status) request.status = status;
-    return (await this.call<EvidenceList>('evidence.list', request)).evidence;
+    if (filters.work) request.work = filters.work;
+    if (filters.status) request.status = filters.status;
+    if (filters.question) request.question = filters.question;
+    return await this.call<EvidenceList>('evidence.list', request);
   }
 
   // -- the six review actions of Product 24.3 --------------------------------

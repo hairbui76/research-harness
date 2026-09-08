@@ -26,6 +26,11 @@ describe('navigationForProject', () => {
       '/conflicts',
       '/stale',
       '/corpus',
+      // Evidence joined "The record" on 2026-09-08 (wave six), between Corpus and Claims,
+      // where PRODUCT §26 lists it: the accepted readings are what a source gave and what
+      // a claim rests on. The list length changed on purpose; nothing else about an entry
+      // moved.
+      '/evidence',
       '/claims',
       '/questions',
       '/taxonomy',
@@ -68,6 +73,7 @@ describe('navigationForProject', () => {
       ['conflicts', 'Waiting'],
       ['stale', 'Waiting'],
       ['corpus', 'The record'],
+      ['evidence', 'The record'],
       ['claims', 'The record'],
       ['questions', 'The record'],
       ['taxonomy', 'The record'],

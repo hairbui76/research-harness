@@ -25,8 +25,10 @@ import { ConversationPage } from '../views/conversation/ConversationRoute';
 import { ArtifactSourcePage } from '../views/conversation/references';
 import { ConflictsPage } from '../views/Conflicts';
 import { CorpusPage, EvidencePage, WorkPage } from '../views/Corpus';
+import { EvidenceIndexPage } from '../views/Evidence';
 import { EvidenceReviewPage } from '../views/EvidenceReview';
 import { ManuscriptPage } from '../views/manuscript/ManuscriptWorkspace';
+import { NotFoundPage } from '../views/NotFound';
 import { OverviewPage } from '../views/Overview';
 import { QuestionsPage } from '../views/Questions';
 import { ReviewInboxPage } from '../views/ReviewInbox';
@@ -62,7 +64,7 @@ export interface NavigationEntry {
 /**
  * The research navigation of PRODUCT §26, in the order the rail lists it.
  *
- * Eleven destinations under three headings — the flow of a session, from what is waiting
+ * Twelve destinations under three headings — the flow of a session, from what is waiting
  * through what the project holds to what it produces (roadmap 3L, option A of
  * `docs/plans/2026-09-07-rail-grouping-proposal.md`). Conversation and Overview carry no
  * group: they are the ways in, not a category. Every label, route, icon, count and `end`
@@ -85,6 +87,12 @@ export const NAVIGATION: NavigationEntry[] = [
   },
   { id: 'stale', label: 'Stale', to: '/stale', icon: 'clock', group: 'Waiting' },
   { id: 'corpus', label: 'Corpus', to: '/corpus', icon: 'library', group: 'The record' },
+  // Between Corpus and Claims, where PRODUCT §26 puts it: the accepted readings are what a
+  // source gave and what a claim rests on, so the record is read left to right in that
+  // order. `/evidence/:evidenceId` was reachable long before this list held an index, which
+  // is what the third critique's first P1 named — the largest body of accepted state in the
+  // product with no page to browse it from.
+  { id: 'evidence', label: 'Evidence', to: '/evidence', icon: 'quote', group: 'The record' },
   { id: 'claims', label: 'Claims', to: '/claims', icon: 'scale', group: 'The record' },
   {
     id: 'questions',
@@ -132,6 +140,7 @@ export function AppRoutes() {
         <Route path="stale" element={<StalePage />} />
         <Route path="corpus" element={<CorpusPage />} />
         <Route path="corpus/:workId" element={<WorkPage />} />
+        <Route path="evidence" element={<EvidenceIndexPage />} />
         <Route path="evidence/:evidenceId" element={<EvidencePage />} />
         {/* Where an artifact deep link lands (task W3): `rh://artifact/A0017-3?page=6&
             block=B0081` resolves to `/source/A0017-3?page=6&block=B0081`, which opens the
@@ -145,9 +154,11 @@ export function AppRoutes() {
         <Route path="synthesis" element={<SynthesisPage />} />
         <Route path="taxonomy" element={<TaxonomyPage />} />
         <Route path="manuscript" element={<ManuscriptPage />} />
-        {/* An unknown path lands on "what needs attention" rather than on an inert
-            conversation: the root is a session, and a mistyped URL names none. */}
-        <Route path="*" element={<OverviewPage />} />
+        {/* An unknown path used to land on the Overview, so a stale bookmark showed a
+            plausible wrong page and said nothing about it (critique 2026-09-08). It now
+            says what is true — nothing is served here — inside the frame, with the one way
+            on that needs no guess about what the reader meant. */}
+        <Route path="*" element={<NotFoundPage overview={OVERVIEW_PATH} />} />
       </Route>
     </Routes>
   );
