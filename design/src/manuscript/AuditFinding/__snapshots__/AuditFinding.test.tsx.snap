@@ -46,7 +46,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r18"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -88,7 +88,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r18"
+              id="rh-described-term-ID"
             >
               Accepted state contradicts the manuscript here. It cannot ship as it stands.
             </span>
@@ -176,7 +176,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r19"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -233,7 +233,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r19"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -355,7 +355,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1a"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -399,7 +399,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1a"
+              id="rh-described-term-ID"
             >
               Worth knowing. It does not stop the manuscript shipping.
             </span>
@@ -471,7 +471,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1b"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -528,7 +528,7 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1b"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -586,7 +586,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1c"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -628,7 +628,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1c"
+              id="rh-described-term-ID"
             >
               Accepted state contradicts the manuscript here. It cannot ship as it stands.
             </span>
@@ -716,7 +716,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1d"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -773,7 +773,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1d"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -895,7 +895,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1e"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -939,7 +939,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1e"
+              id="rh-described-term-ID"
             >
               Worth knowing. It does not stop the manuscript shipping.
             </span>
@@ -1011,7 +1011,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1f"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1068,7 +1068,7 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1f"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -1126,7 +1126,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1g"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1168,7 +1168,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1g"
+              id="rh-described-term-ID"
             >
               Accepted state contradicts the manuscript here. It cannot ship as it stands.
             </span>
@@ -1256,7 +1256,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1h"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1313,7 +1313,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1h"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -1435,7 +1435,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1i"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1479,7 +1479,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1i"
+              id="rh-described-term-ID"
             >
               Worth knowing. It does not stop the manuscript shipping.
             </span>
@@ -1551,7 +1551,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1j"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1608,7 +1608,7 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1j"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -1666,7 +1666,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1k"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1708,7 +1708,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1k"
+              id="rh-described-term-ID"
             >
               Accepted state contradicts the manuscript here. It cannot ship as it stands.
             </span>
@@ -1796,7 +1796,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1l"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -1853,7 +1853,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1l"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
@@ -1975,7 +1975,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1m"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -2019,7 +2019,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1m"
+              id="rh-described-term-ID"
             >
               Worth knowing. It does not stop the manuscript shipping.
             </span>
@@ -2091,7 +2091,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             class="rh-described-term rh-audit-finding__severity"
           >
             <span
-              aria-describedby="rh-described-term-r1n"
+              aria-describedby="rh-described-term-ID"
               class="rh-described-term__word"
               tabindex="0"
             >
@@ -2148,7 +2148,7 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
             </span>
             <span
               class="rh-visually-hidden"
-              id="rh-described-term-r1n"
+              id="rh-described-term-ID"
             >
               A researcher has to decide about this before the manuscript ships.
             </span>
