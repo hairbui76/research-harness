@@ -140,17 +140,28 @@ test('the three rolled-out pages lead with what needs a researcher', async ({
     new RegExp(`^${project.workspace_url}/review/cand_`),
   );
   await expect(page.getByText(/cand_[0-9a-f]{16}/)).toHaveCount(0);
-  // The record that kept neither the fields nor the positions says so once, and offers the
-  // one act this page cannot perform.
+  // The record that kept neither the fields nor the positions says so once.
   await expect(
     page.getByText(
       'The record kept neither the fields the two sides differ on nor their answers side by side',
     ),
   ).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Decide it in the review inbox' })).toHaveAttribute(
+  // Every disagreement — the one with a table of positions included — says where it is
+  // answered, and says it as a deep link (third critique, H3 and the returning researcher).
+  // The assertion that this page offered "Decide it in the review inbox" changed on purpose:
+  // the daemon names a route for both of these subjects, and pointing a researcher at the
+  // whole queue when the row she wants is one click away was the finding.
+  await expect(page.getByRole('link', { name: 'Decide it beside the source' })).toHaveAttribute(
     'href',
-    `${project.workspace_url}/review`,
+    new RegExp(`^${project.workspace_url}/review/cand_`),
   );
+  await expect(page.getByRole('link', { name: 'Read it on its own page' })).toHaveAttribute(
+    'href',
+    `${project.workspace_url}/claims/C0001`,
+  );
+  const actions = await page.locator('.rh-web-conflicts__decide').count();
+  const records = await page.locator('.rh-web-conflicts__items > li').count();
+  expect(actions, 'every conflict offers one next step').toBe(records);
   await auditPage(page, 'the conflicts');
   await page.screenshot({ path: info.outputPath('conflicts.png'), fullPage: true });
 

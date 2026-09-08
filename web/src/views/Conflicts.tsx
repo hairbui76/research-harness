@@ -136,7 +136,6 @@ function ConflictGroup({
  * never the id the conflict was recorded against. The id is in the route.
  */
 function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: ConflictView }) {
-  const { href } = useProjectPaths();
   return (
     <li className="rh-web-stack rh-web-stack--tight">
       <p className="rh-web-row">
@@ -154,9 +153,7 @@ function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: Confli
       {/*
         The sides, compared. A table earns its place here and nowhere else on this page: N
         answers read against the same three columns is the reading a table exists for. A
-        record that kept no positions has nothing to compare, so where the table would have
-        been it offers the one act this page cannot perform: a disagreement is answered
-        where the staged candidate is decided, and that is the review queue.
+        record that kept no positions has nothing to compare, and says so above.
       */}
       {conflict.positions.length > 0 ? (
         <DataTable
@@ -177,14 +174,37 @@ function ConflictRow({ item, conflict }: { item: AttentionItem; conflict: Confli
             </tr>
           ))}
         </DataTable>
-      ) : (
-        <p className="rh-web-row">
-          <Link to={href('/review')}>Decide it in the review inbox</Link>
-        </p>
-      )}
+      ) : null}
       <ProposedChanges changes={conflict.proposed_changes as JsonObject[]} />
+      <p className="rh-web-row rh-web-conflicts__decide">
+        <Decide route={item.route} />
+      </p>
     </li>
   );
+}
+
+/**
+ * The one act this page cannot perform, on every disagreement rather than on some of them.
+ *
+ * It used to appear only where the record kept no positions, so a provider-against-provider
+ * conflict — the one kind that always keeps its positions — read as two answers side by side
+ * and nothing to do about either (third critique, H3 and the minor observations). Every
+ * conflict is a question for a researcher, so every one of them says where it is answered.
+ *
+ * Where that is comes from the daemon (`_conflict_route`): a staged candidate is decided on
+ * its own review screen, beside the source it was read from; a conflict over an object that
+ * already exists is read on that object's page. Only a subject the cockpit has no screen for
+ * falls back to the queue, and it says the queue rather than pretending to a deep link — the
+ * returning researcher's complaint was a page that offered the inbox and no way into the row
+ * she wanted.
+ */
+function Decide({ route }: { route: string }) {
+  const { href } = useProjectPaths();
+  if (route.startsWith('/review/')) {
+    return <Link to={href(route)}>Decide it beside the source</Link>;
+  }
+  if (route) return <Link to={href(route)}>Read it on its own page</Link>;
+  return <Link to={href('/review')}>Decide it in the review inbox</Link>;
 }
 
 /**
