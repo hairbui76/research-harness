@@ -43,6 +43,7 @@ import type {
   ContextPreviewRequest,
   ConversationReadCapability,
   ConversationSession,
+  CorpusOrder,
   DecisionList,
   DecisionSummary,
   EvidenceFilters,
@@ -473,10 +474,22 @@ export class HarnessClient {
    * `screening`, `parsed` and its own arithmetic, which is the one thing a client must not
    * do — so the narrowing is a request rather than a `filter()`.
    */
-  async works(screening?: string | null, question?: string | null): Promise<WorkList> {
+  async works(
+    screening?: string | null,
+    question?: string | null,
+    order?: CorpusOrder | null,
+  ): Promise<WorkList> {
     const request: Record<string, Json> = {};
     if (screening) request.screening = screening;
     if (question) request.question = question;
+    // The order goes with the request for the plainer reason that `work.list` answers the
+    // whole corpus in one read and the cockpit windows it: a sort taken here would order
+    // the rows that happen to be mounted. `descending` is sent only beside an order,
+    // because without one it says nothing.
+    if (order) {
+      request.order = order.field;
+      request.descending = order.descending;
+    }
     return await this.call<WorkList>('work.list', request);
   }
 

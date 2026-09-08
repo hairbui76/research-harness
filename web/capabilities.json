@@ -33914,8 +33914,32 @@
       "permission": "read",
       "request_schema": {
         "additionalProperties": false,
-        "description": "`work.list`: the corpus, optionally narrowed to one screening state or one question.",
+        "description": "`work.list`: the corpus, narrowed to one screening state or question, read in order.",
         "properties": {
+          "descending": {
+            "default": false,
+            "title": "Descending",
+            "type": "boolean"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "enum": [
+                  "title",
+                  "year",
+                  "evidence",
+                  "claims",
+                  "added"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order"
+          },
           "question": {
             "anyOf": [
               {
@@ -34208,6 +34232,16 @@
             "default": 0,
             "title": "Count",
             "type": "integer"
+          },
+          "descending": {
+            "default": false,
+            "title": "Descending",
+            "type": "boolean"
+          },
+          "order": {
+            "default": "",
+            "title": "Order",
+            "type": "string"
           },
           "question": {
             "default": "",

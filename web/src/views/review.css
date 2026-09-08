@@ -182,6 +182,23 @@
 }
 
 /*
+ * That the queue is narrowed by something the last sitting left, and the way out of it.
+ *
+ * It sits under the count it explains, on the toolbar's own gap, and takes the same quiet
+ * ink: it is a note about the controls above it, not a notice about the queue. The control
+ * inside it is part of the sentence, so the line is a flex row that wraps rather than a
+ * paragraph with a button stranded under it.
+ */
+.rh-web-inbox-remembered {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rh-space-2);
+  margin: 0;
+  flex: 1 1 100%;
+}
+
+/*
  * The batch's own controls, beside the filters that narrow the queue. They keep to the end
  * of the toolbar row so the two controls a researcher reaches for constantly stay first.
  */

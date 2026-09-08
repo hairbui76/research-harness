@@ -399,9 +399,25 @@ export interface WorkList {
   count: number;
   total: number;
   question: string;
+  /** The order these rows were read in, echoed back; empty for the corpus's own order. */
+  order: string;
+  /** Whether that order was read backwards; false, and meaningless, without one. */
+  descending: boolean;
   works: WorkSummary[];
   attention: CorpusAttentionGroup[];
   questions: CorpusQuestion[];
+}
+
+/**
+ * One order `work.list` will read the corpus in: the fact of the row, and which way.
+ *
+ * `field` is one of the daemon's five closed kinds. The whole corpus arrives in one read
+ * and the cockpit keeps only a window of it in the DOM, so an order is a request rather
+ * than a comparator: sorting in the browser would sort the rows that happen to be mounted.
+ */
+export interface CorpusOrder {
+  field: string;
+  descending: boolean;
 }
 
 /**

@@ -32,10 +32,14 @@ from research_harness.capabilities.handlers import (
 from research_harness.capabilities.permissions import Permission, Principal
 from research_harness.capabilities.reads import (
     CORPUS_MONTHS,
+    CORPUS_ORDERS,
     CORPUS_QUESTIONS,
     EVIDENCE_QUESTIONS,
+    CorpusOrderKind,
     CorpusQuestionKind,
     EvidenceQuestionKind,
+    WorkSummary,
+    order_works,
     workspace_index,
 )
 from research_harness.capabilities.registry import CapabilityRegistry, build_default_registry
@@ -52,6 +56,7 @@ from research_harness.domain.enums import (
     ClaimType,
     EvidenceStatus,
     QuestionStatus,
+    ScreeningState,
     StaleState,
     VerificationVerdict,
 )
@@ -423,6 +428,159 @@ def test_a_claim_that_rests_on_a_work_takes_it_out_of_the_uncited_question(
     after = _works(populated)
     assert after.works[0].claims == 1  # type: ignore[attr-defined]
     assert "uncited" not in {question.kind for question in after.questions}  # type: ignore[attr-defined]
+
+
+# -- the orders a corpus may be read in --------------------------------------
+
+
+def _corpus_of(*rows: tuple[str, str, int | None, int, int, str]) -> tuple[WorkSummary, ...]:
+    """A corpus in the daemon's own order - by id - with the facts an order reads.
+
+    Built by hand rather than through the repository because what is under test is the
+    ordering itself: five works with the same title spelling would need five ingested PDFs
+    to say anything about ties, and the summaries are what `order_works` is given.
+    """
+    return tuple(
+        WorkSummary(
+            id=work_id,
+            title=title,
+            screening=ScreeningState.INCLUDED.value,
+            year=year,
+            evidence=evidence,
+            claims=claims,
+            added=added[:10],
+            added_at=added,
+        )
+        for work_id, title, year, evidence, claims, added in rows
+    )
+
+
+#: One corpus, read five different ways by the tests below.
+#:
+#: Deliberately disagreeing: the alphabetical first work is the newest, the most cited work
+#: has the least accepted evidence, so an assertion can only pass by reading the fact its
+#: order names.
+ORDERED_CORPUS = _corpus_of(
+    ("W0001", "Beta flows", 2021, 3, 0, "2026-03-01T09:00:00+00:00"),
+    ("W0002", "alpha traffic", 2024, 1, 9, "2026-09-01T09:00:00+00:00"),
+    ("W0003", "Gamma captures", 2019, 7, 4, "2026-01-01T09:00:00+00:00"),
+)
+
+
+def test_the_order_vocabulary_is_the_one_the_request_accepts() -> None:
+    """One list of orders, not two: the words and the closed type cannot drift."""
+    assert [kind for kind, _fact in CORPUS_ORDERS] == list(get_args(CorpusOrderKind))
+
+
+@pytest.mark.parametrize(
+    ("kind", "ascending"),
+    [
+        ("title", ["W0002", "W0001", "W0003"]),
+        ("year", ["W0003", "W0001", "W0002"]),
+        ("evidence", ["W0002", "W0001", "W0003"]),
+        ("claims", ["W0001", "W0003", "W0002"]),
+        ("added", ["W0003", "W0001", "W0002"]),
+    ],
+)
+def test_each_order_reads_the_corpus_by_the_fact_it_names(kind: str, ascending: list[str]) -> None:
+    """Each order reads one fact of the row, and reverses whole when it is reversed.
+
+    Title is compared with case folded, because a corpus sorted by capitalisation is a
+    corpus sorted by nothing a researcher can see.
+    """
+    ordered = order_works(ORDERED_CORPUS, kind)
+    assert [work.id for work in ordered] == ascending
+    assert [work.id for work in order_works(ORDERED_CORPUS, kind, descending=True)] == list(
+        reversed(ascending)
+    )
+
+
+def test_a_work_the_order_cannot_read_stays_at_the_end_either_way() -> None:
+    """A missing year is not the smallest year: it is no year at all.
+
+    Sorting it as a zero would put a work nobody has recorded a year for at the head of the
+    ascending list, which is a claim about the paper. So the works the order cannot read
+    trail the ones it can, in the daemon's own order, whichever way the rest is read.
+    """
+    corpus = ORDERED_CORPUS + _corpus_of(
+        ("W0004", "Undated notes", None, 0, 0, ""),
+        ("W0005", "Also undated", None, 0, 0, ""),
+    )
+
+    for descending in (False, True):
+        by_year = order_works(corpus, "year", descending=descending)
+        assert [work.id for work in by_year][-2:] == ["W0004", "W0005"]
+        by_arrival = order_works(corpus, "added", descending=descending)
+        assert [work.id for work in by_arrival][-2:] == ["W0004", "W0005"]
+
+
+def test_works_an_order_cannot_tell_apart_keep_the_daemon_s_own_order() -> None:
+    """A tie is not a licence to shuffle: equal rows stay in the order they arrived in."""
+    corpus = _corpus_of(
+        ("W0001", "One", 2024, 0, 0, "2026-01-01T09:00:00+00:00"),
+        ("W0002", "Two", 2024, 0, 0, "2026-01-01T09:00:00+00:00"),
+        ("W0003", "Three", 2024, 0, 0, "2026-01-01T09:00:00+00:00"),
+    )
+
+    assert [work.id for work in order_works(corpus, "evidence")] == ["W0001", "W0002", "W0003"]
+    assert [work.id for work in order_works(corpus, "evidence", descending=True)] == [
+        "W0001",
+        "W0002",
+        "W0003",
+    ]
+
+
+def test_the_corpus_keeps_the_daemon_s_order_when_nothing_asks_for_one(
+    populated: CapabilityContext,
+) -> None:
+    """The default is the daemon's own order, and the answer says so by saying nothing."""
+    answer = _works(populated)
+
+    assert answer.order == ""  # type: ignore[attr-defined]
+    assert answer.descending is False  # type: ignore[attr-defined]
+    assert answer.works == workspace_index(populated.repo).works  # type: ignore[attr-defined]
+
+
+def test_an_order_is_echoed_back_and_narrows_nothing(populated: CapabilityContext) -> None:
+    """An order says how the rows are read, never which rows there are.
+
+    The sentence beside the list has to be composed from the answer that produced the rows
+    on screen rather than from a request still in flight, which is why the order is echoed
+    the way the question already is.
+    """
+    answer = _works(populated, {"order": "evidence", "descending": True})
+    whole = _works(populated)
+
+    assert answer.order == "evidence"  # type: ignore[attr-defined]
+    assert answer.descending is True  # type: ignore[attr-defined]
+    assert answer.count == whole.count  # type: ignore[attr-defined]
+    assert answer.total == whole.total  # type: ignore[attr-defined]
+    assert answer.attention == whole.attention  # type: ignore[attr-defined]
+    assert answer.questions == whole.questions  # type: ignore[attr-defined]
+
+
+def test_an_order_composes_with_the_question_it_is_read_under(
+    populated: CapabilityContext,
+) -> None:
+    """Asking the corpus something and reading the answer in an order are two decisions."""
+    answer = _works(populated, {"question": "unparsed", "order": "title"})
+
+    assert answer.question == "unparsed"  # type: ignore[attr-defined]
+    assert answer.order == "title"  # type: ignore[attr-defined]
+    assert [work.id for work in answer.works] == [  # type: ignore[attr-defined]
+        work.id
+        for work in _works(populated, {"question": "unparsed"}).works  # type: ignore[attr-defined]
+    ]
+
+
+def test_an_unknown_order_is_refused_rather_than_read_in_the_default_one(
+    populated: CapabilityContext,
+) -> None:
+    """A typo must not read as "the corpus's own order": the vocabulary is closed."""
+    registry = build_default_registry()
+    with pytest.raises(Exception) as refusal:
+        registry.invoke("work.list", populated, {"order": "relevance"}, principal=Principal.human())
+    assert "relevance" in str(refusal.value) or "order" in str(refusal.value)
 
 
 def test_the_index_and_work_list_still_return_identical_work_summaries(
