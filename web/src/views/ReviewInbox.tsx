@@ -127,6 +127,95 @@ export interface InboxFilters {
 
 export const NO_FILTERS: InboxFilters = { text: '', category: '', verdict: '' };
 
+/** Whether anything is being hidden at all. */
+export function anyFilter(filters: InboxFilters): boolean {
+  return filters.text !== '' || filters.category !== '' || filters.verdict !== '';
+}
+
+/**
+ * Where a project's inbox filters are remembered.
+ *
+ * A queue is worked in sittings, and the same researcher narrows it to the same thing every
+ * morning; a toolbar that forgot between visits made them say it again each time. So this
+ * is the same convenience the conversation's last session and the review screen's
+ * auto-advance already are — `localStorage`, guarded at every access, never research state,
+ * and per project, because two projects are two queues.
+ *
+ * What is deliberately *not* here is the batch's scope. That control sits in the same
+ * toolbar, but it is the first half of a write: restoring a scope a researcher chose
+ * yesterday would aim an acceptance at a work they have not looked at today.
+ */
+const INBOX_FILTERS = 'research-harness.review.filters';
+
+export function reviewFiltersKey(project: string | null): string {
+  return project ? `${INBOX_FILTERS}.${project}` : INBOX_FILTERS;
+}
+
+export function readInboxFilters(project: string | null): InboxFilters {
+  try {
+    const stored = window.localStorage.getItem(reviewFiltersKey(project));
+    if (stored === null) return NO_FILTERS;
+    const filters = JSON.parse(stored) as Partial<InboxFilters>;
+    const category = String(filters.category ?? '');
+    return {
+      text: String(filters.text ?? ''),
+      // A word this build no longer knows is not a category: it would hide the whole queue
+      // behind a filter no control on the page could name.
+      category: (CATEGORY_ORDER as readonly string[]).includes(category) ? category : '',
+      verdict: String(filters.verdict ?? ''),
+    };
+  } catch {
+    return NO_FILTERS;
+  }
+}
+
+function writeInboxFilters(project: string | null, filters: InboxFilters): void {
+  try {
+    if (anyFilter(filters)) {
+      window.localStorage.setItem(reviewFiltersKey(project), JSON.stringify(filters));
+    } else {
+      window.localStorage.removeItem(reviewFiltersKey(project));
+    }
+  } catch {
+    /* a browser with storage disabled opens on the whole queue every time */
+  }
+}
+
+/**
+ * What a set of filters is showing, in the words of the filters themselves.
+ *
+ * The daemon's own vocabulary for the two it knows, and the researcher's own text for the
+ * one it does not. It exists so the toolbar can say what a restored filter is doing rather
+ * than leaving a smaller number to be discovered.
+ */
+export function filterSentence(filters: InboxFilters): string {
+  const parts: string[] = [];
+  if (filters.category) parts.push(`${categoryLabel(filters.category)} only`);
+  if (filters.verdict) parts.push(`${researchLabel('verdict', filters.verdict)} only`);
+  if (filters.text) parts.push(`what matches “${filters.text}”`);
+  return parts.join(', ');
+}
+
+/**
+ * What the filters are keeping off the screen, group by group.
+ *
+ * "Showing 1 of 3" says a number; it does not say that the two that went were the conflict
+ * the daemon ranked first and an ambiguous extraction. A filter a researcher set a minute
+ * ago is one they remember, but one restored from a previous sitting is not, and a queue
+ * whose order is a scientific judgement must not quietly drop the top of it.
+ */
+export function hiddenSentence(items: ReviewItem[], filters: InboxFilters): string {
+  const hidden = CATEGORY_ORDER.map((category) => {
+    const group = items.filter((item) => item.category === category);
+    const kept = group.filter((item) => matchesFilters(item, filters)).length;
+    return [category, group.length - kept] as const;
+  }).filter(([, count]) => count > 0);
+  if (hidden.length === 0) return '';
+  const parts = hidden.map(([category, count]) => `${count} in ${categoryLabel(category)}`);
+  const last = parts.pop() as string;
+  return `The filters hide ${parts.length > 0 ? `${parts.join(', ')} and ${last}` : last}.`;
+}
+
 /** Group the items the server already ordered, keeping its order inside each group. */
 export function groupByCategory(items: ReviewItem[]): [string, ReviewItem[]][] {
   return CATEGORY_ORDER.map((category) => [
@@ -163,9 +252,19 @@ export function inboxGroups(items: ReviewItem[], filters: InboxFilters): [string
 
 export function ReviewInboxPage() {
   const { client, canMutate, refresh } = useSession();
-  const { href } = useProjectPaths();
+  const { href, projectId } = useProjectPaths();
   const state = useAsync(() => client.reviewInbox(), [client]);
-  const [filters, setFilters] = useState<InboxFilters>(NO_FILTERS);
+  const [filters, setFiltersState] = useState<InboxFilters>(() => readInboxFilters(projectId));
+  // Whether what is narrowing the queue is what the last sitting left, rather than what
+  // this one just asked for. It starts true and survives only until the researcher touches
+  // a control: after that the filters are theirs, and a line calling them remembered would
+  // be describing the wrong visit.
+  const [remembered, setRemembered] = useState(true);
+  const setFilters = (next: InboxFilters): void => {
+    setFiltersState(next);
+    setRemembered(false);
+    writeInboxFilters(projectId, next);
+  };
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const items = useMemo(() => state.data?.items ?? [], [state.data]);
@@ -176,7 +275,9 @@ export function ReviewInboxPage() {
   const batch = useBatchAccept(items, reread);
   const groups = useMemo(() => inboxGroups(items, filters), [items, filters]);
   const showing = groups.reduce((total, [, group]) => total + group.length, 0);
-  const filtered = filters.text !== '' || filters.category !== '' || filters.verdict !== '';
+  const filtered = anyFilter(filters);
+  // Whether the toolbar is about to say that this filter came from a previous sitting.
+  const restored = remembered && filtered;
 
   /** The rows as they are drawn: the daemon's order, minus whatever the filters hide. */
   const onScreen = useMemo(
@@ -299,7 +400,21 @@ export function ReviewInboxPage() {
               {filtered
                 ? `Showing ${showing} of ${items.length} waiting.`
                 : `${items.length} waiting.`}
+              {/* And which groups went. The daemon ranks conflicts above everything, so a
+                  queue that hides one behind a number is a queue that decided for the
+                  researcher what they are allowed to see first. */}
+              {filtered ? ` ${hiddenSentence(items, filters)}` : ''}
             </p>
+            {/* That the queue is narrowed by something the researcher is not doing right
+                now, in the words of the filters themselves, with the way out beside it. */}
+            {restored ? (
+              <p className="rh-web-inbox-remembered rh-text-secondary">
+                {`Showing ${filterSentence(filters)}, remembered from your last visit.`}{' '}
+                <Button size="sm" variant="ghost" onClick={() => setFilters(NO_FILTERS)}>
+                  Clear the filters
+                </Button>
+              </p>
+            ) : null}
             {/* The one control that acts on the queue rather than on a candidate in it,
                 beside the two that narrow it. It is offered only to a window that may
                 accept, and the policy gate is still the daemon's. */}
@@ -339,11 +454,18 @@ export function ReviewInboxPage() {
           ) : showing === 0 ? (
             <Empty
               description="Nothing has left the queue. The filters only hide, and the daemon’s order is unchanged underneath them."
-              action={
-                <Button size="sm" variant="secondary" onClick={() => setFilters(NO_FILTERS)}>
-                  Clear the filters
-                </Button>
-              }
+              // The way out is offered once. When the toolbar is already saying that a
+              // remembered filter is what emptied the screen, it carries the control, and
+              // repeating it here would put the same act on the page twice.
+              {...(restored
+                ? {}
+                : {
+                    action: (
+                      <Button size="sm" variant="secondary" onClick={() => setFilters(NO_FILTERS)}>
+                        Clear the filters
+                      </Button>
+                    ),
+                  })}
             >
               No candidate matches these filters
             </Empty>
@@ -394,10 +516,20 @@ interface FilterBarProps {
  * scientific ranking.
  */
 function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
-  const categories = CATEGORY_ORDER.filter((category) =>
-    items.some((item) => item.category === category),
+  // What the queue holds — and, when a filter restored from a previous sitting names
+  // something today's queue does not, that word too. A select whose value is not among its
+  // options draws an empty box, and a filter a researcher cannot see is one they cannot
+  // clear; so the word stays, saying that nothing is waiting under it.
+  const waiting = (category: string): boolean => items.some((item) => item.category === category);
+  const categories = CATEGORY_ORDER.filter(
+    (category) => waiting(category) || category === filters.category,
   );
-  const verdicts = Array.from(new Set(items.map((item) => item.verdict ?? 'unverified')));
+  const present = new Set(items.map((item) => item.verdict ?? 'unverified'));
+  const verdicts = Array.from(
+    filters.verdict && !present.has(filters.verdict)
+      ? [...present, filters.verdict]
+      : present,
+  );
 
   return (
     <div className="rh-web-row rh-web-inbox-filters">
@@ -421,7 +553,7 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
         <option value="">Every category</option>
         {categories.map((category) => (
           <option key={category} value={category}>
-            {categoryLabel(category)}
+            {waiting(category) ? categoryLabel(category) : `${categoryLabel(category)} (none waiting)`}
           </option>
         ))}
       </Select>
@@ -435,7 +567,9 @@ function InboxFilterBar({ items, filters, onChange }: FilterBarProps) {
         <option value="">Every verdict</option>
         {verdicts.map((verdict) => (
           <option key={verdict} value={verdict}>
-            {researchLabel('verdict', verdict)}
+            {present.has(verdict)
+              ? researchLabel('verdict', verdict)
+              : `${researchLabel('verdict', verdict)} (none waiting)`}
           </option>
         ))}
       </Select>

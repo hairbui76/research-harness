@@ -25,6 +25,7 @@ import {
   groupByCategory,
   inboxGroups,
   matchesFilters,
+  reviewFiltersKey,
 } from './ReviewInbox';
 import { REVIEW_DECISIONS, REVIEW_DECISION_META } from '@research-harness/design';
 import { ROW_DECISIONS } from '../components/QueueDecision';
@@ -54,6 +55,11 @@ function renderInbox(daemon: FakeDaemon, token: string | null = 'local-token') {
 function queueDaemon(overrides: Record<string, unknown> = {}) {
   return fakeDaemon({ capabilities: { 'review.inbox': QUEUE, ...overrides } });
 }
+
+// The toolbar now remembers what it was narrowed to, per project, so a test that narrows
+// the queue leaves something behind for the next one to open on. Clearing it between tests
+// is what keeps each of them a statement about one visit.
+afterEach(() => window.localStorage.clear());
 
 describe('grouping', () => {
   it('keeps the queue order of Product 24.2 and drops the empty groups', () => {
@@ -945,5 +951,193 @@ describe('outside the shell', () => {
     await waitFor(() => expect(screen.getByText('Metric result')).toBeInTheDocument());
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
+  });
+});
+
+/**
+ * The queue a researcher comes back to.
+ *
+ * A review inbox is worked in sittings: the same researcher narrows it to the same thing
+ * every morning, and a toolbar that forgot between visits made them type it again each
+ * time. So the filters are remembered per project, exactly as the conversation remembers
+ * its last session and the review screen its auto-advance — a convenience in
+ * `localStorage`, never research state.
+ *
+ * What that must not become is a queue that quietly hides the conflicts the daemon ranked
+ * first. So a restored filter says so in the toolbar, in the words of the filter itself,
+ * with the way out beside it; and the count line names what the filters are hiding, group
+ * by group. Nothing here reorders anything: the order is the daemon's (Product 5 P8).
+ */
+function renderInboxIn(project: string, daemon: FakeDaemon) {
+  return renderView(
+    withShell(
+      <ProjectPathProvider projectId={project}>
+        <ReviewInboxPage />
+      </ProjectPathProvider>,
+    ),
+    {
+      daemon,
+      route: `/projects/${project}/review`,
+      path: `/projects/${project}/review`,
+    },
+  );
+}
+
+/** The toolbar's own sentence about what is waiting and what is hidden. */
+function inboxCount(): HTMLElement {
+  return document.querySelector('.rh-web-inbox-count') as HTMLElement;
+}
+
+/** The line that says a filter was restored, or null when nothing was. */
+function rememberedLine(): HTMLElement | null {
+  return document.querySelector('.rh-web-inbox-remembered');
+}
+
+describe('the filters a researcher comes back to', () => {
+  it('remembers the filters per project and restores them on the next visit', async () => {
+    const user = userEvent.setup();
+    const first = renderInboxIn('prj_abc', queueDaemon());
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    await user.selectOptions(screen.getByRole('combobox', { name: /Category/ }), 'routine');
+    await waitFor(() =>
+      expect(screen.getByText('Routine verified candidates (1)')).toBeInTheDocument(),
+    );
+    expect(window.localStorage.getItem(reviewFiltersKey('prj_abc'))).toBe(
+      '{"text":"","category":"routine","verdict":""}',
+    );
+    first.unmount();
+
+    renderInboxIn('prj_abc', queueDaemon());
+    await waitFor(() =>
+      expect(screen.getByText('Routine verified candidates (1)')).toBeInTheDocument(),
+    );
+    // The control agrees with the queue under it: a filter a researcher cannot see is a
+    // queue that is lying about how much is waiting.
+    expect(screen.getByRole('combobox', { name: /Category/ })).toHaveValue('routine');
+    expect(screen.queryByText(/High-risk scientific claims \(/)).not.toBeInTheDocument();
+  });
+
+  it('says in the toolbar that a remembered filter is applied, and clears it', async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: 'routine', verdict: '' }),
+    );
+    renderInboxIn('prj_abc', queueDaemon());
+
+    await waitFor(() => expect(screen.getByText(/Showing 1 of 3 waiting/)).toBeInTheDocument());
+    const remembered = rememberedLine();
+    expect(remembered).not.toBeNull();
+    expect(remembered).toHaveTextContent(
+      'Showing Routine verified candidates only, remembered from your last visit.',
+    );
+
+    await user.click(within(remembered!).getByRole('button', { name: 'Clear the filters' }));
+    await waitFor(() => expect(screen.getByText(/^3 waiting\.$/)).toBeInTheDocument());
+    expect(rememberedLine()).toBeNull();
+    expect(window.localStorage.getItem(reviewFiltersKey('prj_abc'))).toBeNull();
+    expect(screen.getByText('High-risk scientific claims (1)')).toBeInTheDocument();
+  });
+
+  it('names what the filters are hiding, group by group', async () => {
+    const user = userEvent.setup();
+    renderInbox(queueDaemon());
+
+    await waitFor(() => expect(screen.getByText(/3 waiting/)).toBeInTheDocument());
+    await user.selectOptions(screen.getByRole('combobox', { name: /Category/ }), 'routine');
+
+    // A queue that answers "showing 1 of 3" and stops has hidden two groups without
+    // saying which — and the daemon ranked one of them above the one on screen.
+    await waitFor(() =>
+      expect(inboxCount()).toHaveTextContent(
+        'Showing 1 of 3 waiting. The filters hide 1 in High-risk scientific claims and ' +
+          '1 in Ambiguous extractions.',
+      ),
+    );
+  });
+
+  it('stops calling a filter remembered once the researcher has changed it', async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: 'routine', verdict: '' }),
+    );
+    renderInboxIn('prj_abc', queueDaemon());
+
+    await waitFor(() => expect(rememberedLine()).not.toBeNull());
+    await user.selectOptions(screen.getByRole('combobox', { name: /Category/ }), 'ambiguous');
+
+    // It is still a filter, and still remembered for next time; it is no longer something
+    // the last visit left, which is the only thing that line claims.
+    await waitFor(() => expect(rememberedLine()).toBeNull());
+    expect(window.localStorage.getItem(reviewFiltersKey('prj_abc'))).toBe(
+      '{"text":"","category":"ambiguous","verdict":""}',
+    );
+  });
+
+  it('keeps one project’s filters out of another’s', async () => {
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: 'routine', verdict: '' }),
+    );
+    renderInboxIn('prj_other', queueDaemon());
+
+    await waitFor(() => expect(screen.getByText(/^3 waiting\.$/)).toBeInTheDocument());
+    expect(rememberedLine()).toBeNull();
+  });
+
+  it('offers a remembered filter the queue no longer holds rather than hiding behind it', async () => {
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: 'conflict', verdict: '' }),
+    );
+    renderInboxIn('prj_abc', queueDaemon());
+
+    await waitFor(() =>
+      expect(screen.getByText('No candidate matches these filters')).toBeInTheDocument(),
+    );
+    // Nothing in this queue is a conflict today. The control still offers the word it is
+    // set to — a select whose value is not among its options shows an empty box, and a
+    // researcher cannot clear a filter they cannot see — and says nothing is waiting in it.
+    expect(screen.getByRole('combobox', { name: /Category/ })).toHaveValue('conflict');
+    expect(
+      within(screen.getByRole('combobox', { name: /Category/ })).getByRole('option', {
+        name: 'Conflicts (none waiting)',
+      }),
+    ).toBeInTheDocument();
+    // The way out is said once: the toolbar's line carries it, so the empty state below
+    // does not repeat the same control under a second name.
+    expect(screen.getAllByRole('button', { name: 'Clear the filters' })).toHaveLength(1);
+  });
+
+  it('never reorders the queue a remembered filter is applied to', async () => {
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: '', verdict: 'supported' }),
+    );
+    const daemon = queueDaemon();
+    renderInboxIn('prj_abc', daemon);
+
+    await waitFor(() => expect(screen.getByText(/Showing 2 of 3 waiting/)).toBeInTheDocument());
+    // The two that survive are still in the daemon's order, and the read that produced
+    // them asked for nothing but the queue.
+    expect(
+      screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['High-risk scientific claims (1)', 'Routine verified candidates (1)']);
+    expect(daemon.capabilityCalls().filter((call) => call.name === 'review.inbox')).toEqual([
+      { name: 'review.inbox', request: {} },
+    ]);
+  });
+
+  it('has no automatically detectable accessibility violation while remembering', async () => {
+    window.localStorage.setItem(
+      reviewFiltersKey('prj_abc'),
+      JSON.stringify({ text: '', category: 'routine', verdict: '' }),
+    );
+    const { container } = renderInboxIn('prj_abc', queueDaemon());
+
+    await waitFor(() => expect(rememberedLine()).not.toBeNull());
+    await expectNoAxeViolations(container);
   });
 });
