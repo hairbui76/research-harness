@@ -248,3 +248,53 @@ check reported. Neither of the last two runs without the researcher's yes.
   them; the integration gate covers them. Logged: a per-group anchor in the inbox for
   routeless conflicts; a per-position source on provider disagreements; the year order
   has no corpus control.
+- 2026-09-09 (wave 6, finish review): the review ruled *fix* on the merged wave-six tree,
+  from 14 of the 208 captures and the web side only. Its rulings: (a) the resting-pointer
+  hint holds the row still against a crossing pointer and against nothing else — the review
+  screen's facts are safe under the pinned Decide card, the queue rows and the Claims cell
+  are not, so wave two's ruling reopens until they are; (b) auto-advance in the Decide
+  card's first row, off by default, is enough, and stays as built; (c) 6E holds up — one act
+  in the rail's words, the reason where the control would have been, the folded footer
+  keeping the destination line its own line — and only its placement needed answering;
+  (d) Corpus and Evidence are one family and Claims is the outlier; (e) the Overview still
+  names work before size, and only its clock was wrong; (f) the twelve pages largely read as
+  one product, and the machine-shaped remainder is wave seven's list. Seven findings, all
+  answered in one batch. A queue row now *reserves* the line its sentence will need — two
+  lines of the sentence's own type plus the flex line it arrives on — so resting on "Tier 2
+  — deep review" no longer pushes the citation, the quote, the reason, `Reject / Defer /
+  Open to decide` and the next group down 46px; the same rule covers the Claims status cell,
+  and the browser test measures the row's controls and the group under it, which is the
+  assertion it had been leaving out. (The `.rh-web-claims__row` the review named is the
+  sentence-and-id cell, whose `EntityRef` is `describe={false}`; the defect was in the status
+  `<td>` beside it.) Below the corpus's stacking breakpoint the column strip — a table head
+  with no table under it — becomes one labelled "Order by" select carrying the same orders,
+  the same `work.list` and the same per-project memory, with the container query showing
+  exactly one of the two so neither is a duplicate in the accessibility tree. A build that
+  never started stops reading "STARTED unknown time · FINISHED still running": the clocks
+  stand down until there is a build to time, and a stopped build with no end says "not
+  recorded" rather than borrowing the running one's word. The Overview keeps one clock —
+  `clockTime` is pinned to a 24-hour cycle, which is the form the daemon composes every
+  change stamp in. The conversation's front door is offered once: the transcript's empty
+  state carries the control, in the rail's words, and the composer slot keeps only 6E's
+  reason for a window that may not write. Project Home spends no primary emphasis on its
+  rows — the workspace's name is the link, `Open` is gone, and the registry is windowed with
+  the same `VirtualList` the Corpus and the Synthesis grid use, which cost the runs their
+  nested lists and left the sequence to carry the grouping. The not-found card drops its
+  title and keeps the address, the explanation and the link. 6H's two items landed with
+  them: DESIGN.md's `rh-diagnostics` paragraph now describes the finding card that shipped
+  (the manuscript's sentence first, the kind in `MANUSCRIPT_FINDING_META`'s words, the
+  severity as a described term in the scientific status family, one act per kind) and the
+  container query's real effect, `.impeccable/design.json` carrying neither fact; and the
+  daemon's unregistered-claim message stops restating its own kind, naming instead which of
+  `is_substantive`'s cues fired and what would clear the finding. Logged for wave seven,
+  from the review: Claims should take the questions strip (Corpus and Evidence are one
+  family; Claims has no question chips or find field, and its rows carry two vocabularies —
+  `Unverified` in Status and `Candidate` under the sentence); the Corpus attention group
+  prints eight identical titles then "52 more are in the list below"; `S0001` floats bare in
+  the Synthesis matrix card header; the "Connected as unknown" panel wears a danger frame
+  for a merely read-only window; Project Home is still shaped like an editor's
+  recent-folders list. Logged by this batch: the reserved hint slot costs every describable
+  row about 46px of standing space, which reads as a gap on a queue row that is not being
+  asked anything — the alternative that costs nothing is an overlay, and an overlay is
+  clipped by the first scrolling ancestor, so the space is the price of the promise until
+  someone finds a third answer.

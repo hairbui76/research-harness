@@ -294,8 +294,13 @@ test('the conversation opens from one control, in the rail’s own words', async
   await expect(page.locator('.rh-web-entrance')).toHaveCount(0);
   const entrance = empty.getByRole('button', { name: 'New session' });
   await expect(entrance).toBeVisible();
-  // One in the state, one in the rail, and none in between.
-  await expect(page.getByRole('button', { name: 'New session' })).toHaveCount(2);
+  // Once in the state, and nowhere in the composer slot under it. The rail offers the same
+  // act in the same words, which is 6E's ruling and stays; below 960px it is a drawer and
+  // offers nothing until it is opened, so what is asserted is the conversation pane.
+  await expect(empty.getByRole('button', { name: 'New session' })).toHaveCount(1);
+  await expect(
+    page.locator('.rh-web-composer').getByRole('button', { name: 'New session' }),
+  ).toHaveCount(0);
   await page.screenshot({ path: info.outputPath('composer-entrance.png'), fullPage: true });
 
   // One control, the same question the rail asks, and the caret lands in the box it opened.
