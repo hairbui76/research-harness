@@ -104,41 +104,56 @@ export const diagnostics: DiagnosticModel[] = [
   },
 ];
 
+/*
+ * Four findings the auditor actually raises, in its own kinds and its own words.
+ *
+ * Each carries the manuscript sentence it is about, because that is what a finding card
+ * opens with; the messages are the auditor's, with the `"<file>:<line>: "` prefix the
+ * cockpit removes already off, since the card draws the position itself.
+ */
 export const findings: AuditFindingModel[] = [
   {
     id: 'A1',
-    kind: 'unsupported_statement',
-    severity: 'error',
-    file: 'manuscript/main.tex',
+    kind: 'unregistered_claim',
+    severity: 'warning',
+    file: 'manuscript/sections/results.tex',
     line: 88,
-    message: 'No accepted Evidence supports "the effect doubles under load".',
+    sentence:
+      'The pretrained encoder improves F1 by 2.57 points over the strongest baseline, and the gain is concentrated in the two rarest attack families.',
+    message: 'substantive sentence is attached to no Claim',
     source: 'audit',
   },
   {
     id: 'A2',
-    kind: 'wording_stronger_than_claim',
+    kind: 'over_strong_wording',
     severity: 'warning',
-    file: 'manuscript/main.tex',
+    file: 'manuscript/sections/results.tex',
     line: 91,
-    message: '"proves" overstates C0041, which is qualified to one dataset.',
+    sentence: 'This proves that pretraining transfers to every rare family.',
+    message:
+      "sentence reads L4 universal or absence via 'every', but C0041 allows only L2 corpus pattern; the defensible wording is 'in the two families we measured'",
     claim: { id: 'C0041' },
     source: 'audit',
   },
   {
     id: 'A3',
     kind: 'citation_mismatch',
-    severity: 'warning',
+    severity: 'error',
     file: 'manuscript/main.tex',
     line: 44,
-    message: 'The key "smith2024" is cited but missing from refs.bib.',
+    sentence: 'Earlier sweeps report the same ordering on held-out traffic~\\cite{smith2024}.',
+    message: "citation key 'smith2024' is not defined in the bibliography",
     source: 'audit',
   },
   {
     id: 'A4',
-    kind: 'invalid_anchor',
+    kind: 'invalid_evidence_anchor',
     severity: 'info',
-    message: 'The anchor recorded for E0482 no longer resolves in A0017-3.',
-    anchor: { id: 'AN0012' },
+    sentence: 'The held-out split is the only evidence that the encoder generalises.',
+    message:
+      'E0482 no longer opens at its source, so C0005 is unprovenanced: anchor validation reports stale - the artifact bytes changed',
+    claim: { id: 'C0005' },
+    anchor: { id: 'manuscript/main.tex:12' },
     source: 'audit',
   },
 ];

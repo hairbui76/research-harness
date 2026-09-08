@@ -15,259 +15,433 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
     >
       <li
         class="rh-audit-finding"
-        data-kind="unsupported_statement"
+        data-kind="unregistered_claim"
         data-severity="error"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Must fix
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          The pretrained encoder improves F1 by 2.57 points over the strongest baseline.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-circle-dashed rh-icon"
-            data-icon="circle-dashed"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.1 2.182a10 10 0 0 1 3.8 0"
-            />
-            <path
-              d="M13.9 21.818a10 10 0 0 1-3.8 0"
-            />
-            <path
-              d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
-            />
-            <path
-              d="M2.182 13.9a10 10 0 0 1 0-3.8"
-            />
-            <path
-              d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
-            />
-            <path
-              d="M21.818 10.1a10 10 0 0 1 0 3.8"
-            />
-            <path
-              d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
-            />
-            <path
-              d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Unsupported statement
+            Unregistered claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            No accepted Evidence supports "the effect doubles under load".
+            substantive sentence is attached to no Claim
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r18"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-contested"
+                data-status="contested"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert rh-icon"
+                  data-icon="alert-triangle"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Must fix
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r18"
+            >
+              Accepted state contradicts the manuscript here. It cannot ship as it stands.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 88
           </span>
-        </button>
+          <button
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="wording_stronger_than_claim"
+        data-kind="over_strong_wording"
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Review
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          This proves that pretraining transfers to every rare family.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-scale rh-icon"
-            data-icon="scale"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 3v18"
-            />
-            <path
-              d="m19 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
-            />
-            <path
-              d="m5 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M7 21h10"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Wording stronger than the claim
+            Wording stronger than the Claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            "proves" overstates C0041, which is qualified to one dataset.
+            sentence reads L4 universal or absence via 'every', but C0041 allows only L2
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r19"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r19"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 91
           </span>
-        </button>
-        <span
-          class="rh-audit-finding__refs"
-        >
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-bookmark rh-icon"
-              data-icon="bookmark"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-              />
-            </svg>
-            C0041
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-bookmark rh-icon"
+                data-icon="bookmark"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open C0041
+              </span>
+            </span>
           </button>
-        </span>
+          <button
+            class="rh-button rh-button--ghost rh-button--sm"
+            data-variant="ghost"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="invalid_anchor"
+        data-kind="invalid_evidence_anchor"
         data-severity="info"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Note
-        </span>
-        <span
-          class="rh-audit-finding__button"
+          The held-out split is the only evidence that the encoder generalises.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-link2-off lucide-link-2-off rh-icon"
-            data-icon="link-2-off"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 17H7A5 5 0 0 1 7 7"
-            />
-            <path
-              d="M15 7h2a5 5 0 0 1 4 8"
-            />
-            <line
-              x1="8"
-              x2="12"
-              y1="12"
-              y2="12"
-            />
-            <line
-              x1="2"
-              x2="22"
-              y1="2"
-              y2="22"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Invalid source anchor
+            Invalid evidence anchor
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            The anchor for E0482 no longer resolves in A0017-3.
+            E0482 no longer opens at its source, so C0005 is unprovenanced
           </span>
-        </span>
-        <span
-          class="rh-audit-finding__refs"
+        </p>
+        <div
+          class="rh-audit-finding__foot"
         >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1a"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Note
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1a"
+            >
+              Worth knowing. It does not stop the manuscript shipping.
+            </span>
+          </span>
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-link rh-icon"
-              data-icon="link"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              />
-              <path
-                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              />
-            </svg>
-            AN0012
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-link rh-icon"
+                data-icon="link"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the anchored sentence
+              </span>
+            </span>
           </button>
-        </span>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
@@ -275,59 +449,91 @@ exports[`AuditFindingList theme x density > matches the dark / comfortable snaps
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <p
+          class="rh-audit-finding__found"
         >
-          Review
-        </span>
-        <span
-          class="rh-audit-finding__button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-microscope rh-icon"
-            data-icon="microscope"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 18h8"
-            />
-            <path
-              d="M3 22h18"
-            />
-            <path
-              d="M14 22a7 7 0 1 0 0-14h-1"
-            />
-            <path
-              d="M9 14h2"
-            />
-            <path
-              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
-            />
-            <path
-              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
             Novel rule from the daemon
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
             An audit kind this package has never heard of still renders.
           </span>
-        </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1b"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1b"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
+          </span>
+        </div>
       </li>
     </ul>
   </div>
@@ -349,259 +555,433 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
     >
       <li
         class="rh-audit-finding"
-        data-kind="unsupported_statement"
+        data-kind="unregistered_claim"
         data-severity="error"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Must fix
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          The pretrained encoder improves F1 by 2.57 points over the strongest baseline.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-circle-dashed rh-icon"
-            data-icon="circle-dashed"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.1 2.182a10 10 0 0 1 3.8 0"
-            />
-            <path
-              d="M13.9 21.818a10 10 0 0 1-3.8 0"
-            />
-            <path
-              d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
-            />
-            <path
-              d="M2.182 13.9a10 10 0 0 1 0-3.8"
-            />
-            <path
-              d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
-            />
-            <path
-              d="M21.818 10.1a10 10 0 0 1 0 3.8"
-            />
-            <path
-              d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
-            />
-            <path
-              d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Unsupported statement
+            Unregistered claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            No accepted Evidence supports "the effect doubles under load".
+            substantive sentence is attached to no Claim
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1c"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-contested"
+                data-status="contested"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert rh-icon"
+                  data-icon="alert-triangle"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Must fix
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1c"
+            >
+              Accepted state contradicts the manuscript here. It cannot ship as it stands.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 88
           </span>
-        </button>
+          <button
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="wording_stronger_than_claim"
+        data-kind="over_strong_wording"
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Review
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          This proves that pretraining transfers to every rare family.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-scale rh-icon"
-            data-icon="scale"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 3v18"
-            />
-            <path
-              d="m19 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
-            />
-            <path
-              d="m5 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M7 21h10"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Wording stronger than the claim
+            Wording stronger than the Claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            "proves" overstates C0041, which is qualified to one dataset.
+            sentence reads L4 universal or absence via 'every', but C0041 allows only L2
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1d"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1d"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 91
           </span>
-        </button>
-        <span
-          class="rh-audit-finding__refs"
-        >
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-bookmark rh-icon"
-              data-icon="bookmark"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-              />
-            </svg>
-            C0041
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-bookmark rh-icon"
+                data-icon="bookmark"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open C0041
+              </span>
+            </span>
           </button>
-        </span>
+          <button
+            class="rh-button rh-button--ghost rh-button--sm"
+            data-variant="ghost"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="invalid_anchor"
+        data-kind="invalid_evidence_anchor"
         data-severity="info"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Note
-        </span>
-        <span
-          class="rh-audit-finding__button"
+          The held-out split is the only evidence that the encoder generalises.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-link2-off lucide-link-2-off rh-icon"
-            data-icon="link-2-off"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 17H7A5 5 0 0 1 7 7"
-            />
-            <path
-              d="M15 7h2a5 5 0 0 1 4 8"
-            />
-            <line
-              x1="8"
-              x2="12"
-              y1="12"
-              y2="12"
-            />
-            <line
-              x1="2"
-              x2="22"
-              y1="2"
-              y2="22"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Invalid source anchor
+            Invalid evidence anchor
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            The anchor for E0482 no longer resolves in A0017-3.
+            E0482 no longer opens at its source, so C0005 is unprovenanced
           </span>
-        </span>
-        <span
-          class="rh-audit-finding__refs"
+        </p>
+        <div
+          class="rh-audit-finding__foot"
         >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1e"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Note
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1e"
+            >
+              Worth knowing. It does not stop the manuscript shipping.
+            </span>
+          </span>
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-link rh-icon"
-              data-icon="link"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              />
-              <path
-                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              />
-            </svg>
-            AN0012
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-link rh-icon"
+                data-icon="link"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the anchored sentence
+              </span>
+            </span>
           </button>
-        </span>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
@@ -609,59 +989,91 @@ exports[`AuditFindingList theme x density > matches the dark / compact snapshot 
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <p
+          class="rh-audit-finding__found"
         >
-          Review
-        </span>
-        <span
-          class="rh-audit-finding__button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-microscope rh-icon"
-            data-icon="microscope"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 18h8"
-            />
-            <path
-              d="M3 22h18"
-            />
-            <path
-              d="M14 22a7 7 0 1 0 0-14h-1"
-            />
-            <path
-              d="M9 14h2"
-            />
-            <path
-              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
-            />
-            <path
-              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
             Novel rule from the daemon
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
             An audit kind this package has never heard of still renders.
           </span>
-        </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1f"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1f"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
+          </span>
+        </div>
       </li>
     </ul>
   </div>
@@ -683,259 +1095,433 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
     >
       <li
         class="rh-audit-finding"
-        data-kind="unsupported_statement"
+        data-kind="unregistered_claim"
         data-severity="error"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Must fix
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          The pretrained encoder improves F1 by 2.57 points over the strongest baseline.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-circle-dashed rh-icon"
-            data-icon="circle-dashed"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.1 2.182a10 10 0 0 1 3.8 0"
-            />
-            <path
-              d="M13.9 21.818a10 10 0 0 1-3.8 0"
-            />
-            <path
-              d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
-            />
-            <path
-              d="M2.182 13.9a10 10 0 0 1 0-3.8"
-            />
-            <path
-              d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
-            />
-            <path
-              d="M21.818 10.1a10 10 0 0 1 0 3.8"
-            />
-            <path
-              d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
-            />
-            <path
-              d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Unsupported statement
+            Unregistered claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            No accepted Evidence supports "the effect doubles under load".
+            substantive sentence is attached to no Claim
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1g"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-contested"
+                data-status="contested"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert rh-icon"
+                  data-icon="alert-triangle"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Must fix
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1g"
+            >
+              Accepted state contradicts the manuscript here. It cannot ship as it stands.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 88
           </span>
-        </button>
+          <button
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="wording_stronger_than_claim"
+        data-kind="over_strong_wording"
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Review
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          This proves that pretraining transfers to every rare family.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-scale rh-icon"
-            data-icon="scale"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 3v18"
-            />
-            <path
-              d="m19 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
-            />
-            <path
-              d="m5 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M7 21h10"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Wording stronger than the claim
+            Wording stronger than the Claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            "proves" overstates C0041, which is qualified to one dataset.
+            sentence reads L4 universal or absence via 'every', but C0041 allows only L2
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1h"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1h"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 91
           </span>
-        </button>
-        <span
-          class="rh-audit-finding__refs"
-        >
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-bookmark rh-icon"
-              data-icon="bookmark"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-              />
-            </svg>
-            C0041
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-bookmark rh-icon"
+                data-icon="bookmark"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open C0041
+              </span>
+            </span>
           </button>
-        </span>
+          <button
+            class="rh-button rh-button--ghost rh-button--sm"
+            data-variant="ghost"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="invalid_anchor"
+        data-kind="invalid_evidence_anchor"
         data-severity="info"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Note
-        </span>
-        <span
-          class="rh-audit-finding__button"
+          The held-out split is the only evidence that the encoder generalises.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-link2-off lucide-link-2-off rh-icon"
-            data-icon="link-2-off"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 17H7A5 5 0 0 1 7 7"
-            />
-            <path
-              d="M15 7h2a5 5 0 0 1 4 8"
-            />
-            <line
-              x1="8"
-              x2="12"
-              y1="12"
-              y2="12"
-            />
-            <line
-              x1="2"
-              x2="22"
-              y1="2"
-              y2="22"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Invalid source anchor
+            Invalid evidence anchor
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            The anchor for E0482 no longer resolves in A0017-3.
+            E0482 no longer opens at its source, so C0005 is unprovenanced
           </span>
-        </span>
-        <span
-          class="rh-audit-finding__refs"
+        </p>
+        <div
+          class="rh-audit-finding__foot"
         >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1i"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Note
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1i"
+            >
+              Worth knowing. It does not stop the manuscript shipping.
+            </span>
+          </span>
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-link rh-icon"
-              data-icon="link"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              />
-              <path
-                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              />
-            </svg>
-            AN0012
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-link rh-icon"
+                data-icon="link"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the anchored sentence
+              </span>
+            </span>
           </button>
-        </span>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
@@ -943,59 +1529,91 @@ exports[`AuditFindingList theme x density > matches the light / comfortable snap
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <p
+          class="rh-audit-finding__found"
         >
-          Review
-        </span>
-        <span
-          class="rh-audit-finding__button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-microscope rh-icon"
-            data-icon="microscope"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 18h8"
-            />
-            <path
-              d="M3 22h18"
-            />
-            <path
-              d="M14 22a7 7 0 1 0 0-14h-1"
-            />
-            <path
-              d="M9 14h2"
-            />
-            <path
-              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
-            />
-            <path
-              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
             Novel rule from the daemon
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
             An audit kind this package has never heard of still renders.
           </span>
-        </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1j"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1j"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
+          </span>
+        </div>
       </li>
     </ul>
   </div>
@@ -1017,259 +1635,433 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
     >
       <li
         class="rh-audit-finding"
-        data-kind="unsupported_statement"
+        data-kind="unregistered_claim"
         data-severity="error"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Must fix
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          The pretrained encoder improves F1 by 2.57 points over the strongest baseline.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-circle-dashed rh-icon"
-            data-icon="circle-dashed"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.1 2.182a10 10 0 0 1 3.8 0"
-            />
-            <path
-              d="M13.9 21.818a10 10 0 0 1-3.8 0"
-            />
-            <path
-              d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
-            />
-            <path
-              d="M2.182 13.9a10 10 0 0 1 0-3.8"
-            />
-            <path
-              d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
-            />
-            <path
-              d="M21.818 10.1a10 10 0 0 1 0 3.8"
-            />
-            <path
-              d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
-            />
-            <path
-              d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Unsupported statement
+            Unregistered claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            No accepted Evidence supports "the effect doubles under load".
+            substantive sentence is attached to no Claim
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1k"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-contested"
+                data-status="contested"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert rh-icon"
+                  data-icon="alert-triangle"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Must fix
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1k"
+            >
+              Accepted state contradicts the manuscript here. It cannot ship as it stands.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 88
           </span>
-        </button>
+          <button
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="wording_stronger_than_claim"
+        data-kind="over_strong_wording"
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Review
-        </span>
-        <button
-          class="rh-audit-finding__button"
-          type="button"
+          This proves that pretraining transfers to every rare family.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-scale rh-icon"
-            data-icon="scale"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 3v18"
-            />
-            <path
-              d="m19 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"
-            />
-            <path
-              d="m5 8 3 8a5 5 0 0 1-6 0zV7"
-            />
-            <path
-              d="M7 21h10"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Wording stronger than the claim
+            Wording stronger than the Claim
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            "proves" overstates C0041, which is qualified to one dataset.
+            sentence reads L4 universal or absence via 'every', but C0041 allows only L2
+          </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1l"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1l"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
           </span>
           <span
             class="rh-audit-finding__position"
           >
             manuscript/main.tex, line 91
           </span>
-        </button>
-        <span
-          class="rh-audit-finding__refs"
-        >
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-bookmark rh-icon"
-              data-icon="bookmark"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-              />
-            </svg>
-            C0041
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-bookmark rh-icon"
+                data-icon="bookmark"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open C0041
+              </span>
+            </span>
           </button>
-        </span>
+          <button
+            class="rh-button rh-button--ghost rh-button--sm"
+            data-variant="ghost"
+            type="button"
+          >
+            <span
+              class="rh-button__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-file-code rh-icon"
+                data-icon="file-code"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                />
+                <path
+                  d="M14 2v5a1 1 0 0 0 1 1h5"
+                />
+                <path
+                  d="M10 12.5 8 15l2 2.5"
+                />
+                <path
+                  d="m14 12.5 2 2.5-2 2.5"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the sentence
+              </span>
+            </span>
+          </button>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
-        data-kind="invalid_anchor"
+        data-kind="invalid_evidence_anchor"
         data-severity="info"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <blockquote
+          class="rh-audit-finding__sentence"
         >
-          Note
-        </span>
-        <span
-          class="rh-audit-finding__button"
+          The held-out split is the only evidence that the encoder generalises.
+        </blockquote>
+        <p
+          class="rh-audit-finding__found"
         >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-link2-off lucide-link-2-off rh-icon"
-            data-icon="link-2-off"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 17H7A5 5 0 0 1 7 7"
-            />
-            <path
-              d="M15 7h2a5 5 0 0 1 4 8"
-            />
-            <line
-              x1="8"
-              x2="12"
-              y1="12"
-              y2="12"
-            />
-            <line
-              x1="2"
-              x2="22"
-              y1="2"
-              y2="22"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
-            Invalid source anchor
+            Invalid evidence anchor
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
-            The anchor for E0482 no longer resolves in A0017-3.
+            E0482 no longer opens at its source, so C0005 is unprovenanced
           </span>
-        </span>
-        <span
-          class="rh-audit-finding__refs"
+        </p>
+        <div
+          class="rh-audit-finding__foot"
         >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1m"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-qualified"
+                data-status="qualified"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info rh-icon"
+                  data-icon="info"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Note
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1m"
+            >
+              Worth knowing. It does not stop the manuscript shipping.
+            </span>
+          </span>
           <button
-            class="rh-audit-finding__ref"
+            class="rh-button rh-button--secondary rh-button--sm"
+            data-variant="secondary"
             type="button"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-link rh-icon"
-              data-icon="link"
-              fill="none"
-              focusable="false"
-              height="14"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="14"
-              xmlns="http://www.w3.org/2000/svg"
+            <span
+              class="rh-button__content"
             >
-              <path
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              />
-              <path
-                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              />
-            </svg>
-            AN0012
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-link rh-icon"
+                data-icon="link"
+                fill="none"
+                focusable="false"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                />
+              </svg>
+              <span
+                class="rh-button__label"
+              >
+                Open the anchored sentence
+              </span>
+            </span>
           </button>
-        </span>
+        </div>
       </li>
       <li
         class="rh-audit-finding"
@@ -1277,59 +2069,91 @@ exports[`AuditFindingList theme x density > matches the light / compact snapshot
         data-severity="warning"
         data-source="audit"
       >
-        <span
-          class="rh-audit-finding__severity"
+        <p
+          class="rh-audit-finding__found"
         >
-          Review
-        </span>
-        <span
-          class="rh-audit-finding__button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-microscope rh-icon"
-            data-icon="microscope"
-            fill="none"
-            focusable="false"
-            height="16"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 18h8"
-            />
-            <path
-              d="M3 22h18"
-            />
-            <path
-              d="M14 22a7 7 0 1 0 0-14h-1"
-            />
-            <path
-              d="M9 14h2"
-            />
-            <path
-              d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"
-            />
-            <path
-              d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"
-            />
-          </svg>
           <span
             class="rh-audit-finding__kind"
           >
             Novel rule from the daemon
           </span>
+           — 
           <span
             class="rh-audit-finding__message"
           >
             An audit kind this package has never heard of still renders.
           </span>
-        </span>
+        </p>
+        <div
+          class="rh-audit-finding__foot"
+        >
+          <span
+            class="rh-described-term rh-audit-finding__severity"
+          >
+            <span
+              aria-describedby="rh-described-term-r1n"
+              class="rh-described-term__word"
+              tabindex="0"
+            >
+              <span
+                class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                data-status="candidate"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-dashed rh-icon"
+                  data-icon="circle-dashed"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                  />
+                  <path
+                    d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                  />
+                  <path
+                    d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                  />
+                  <path
+                    d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                  />
+                  <path
+                    d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                  />
+                  <path
+                    d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                  />
+                  <path
+                    d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                  />
+                  <path
+                    d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                  />
+                </svg>
+                <span
+                  class="rh-badge__label"
+                >
+                  Review
+                </span>
+              </span>
+            </span>
+            <span
+              class="rh-visually-hidden"
+              id="rh-described-term-r1n"
+            >
+              A researcher has to decide about this before the manuscript ships.
+            </span>
+          </span>
+        </div>
       </li>
     </ul>
   </div>

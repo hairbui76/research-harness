@@ -1,6 +1,7 @@
 import { forwardRef, useMemo } from 'react';
 import type { HTMLAttributes } from 'react';
 import { cx } from '../../utils/cx';
+import { Button } from '../../primitives/Button';
 import { Icon } from '../../primitives/Icon';
 import { AsyncState } from '../../states/AsyncState';
 import { DIAGNOSTIC_SEVERITY_META } from '../models';
@@ -22,22 +23,21 @@ function positionText(diagnostic: DiagnosticModel, hideFile: boolean): string {
   return parts.join(', ');
 }
 
-/** One line of compiler output: severity word, message, position, and the compiler's code. */
+/**
+ * One line of compiler output, in the shape the audit beside it uses.
+ *
+ * What the compiler said is a sentence and the severity is its first word, in the
+ * sentence's own type — never an 11px chip over it (DESIGN.md, the Label Is Not a Kicker
+ * Rule). The tone is the feedback palette and not a scientific status: a missing brace is
+ * an application telling you it failed, not a statement about what is true. Where the
+ * finding beside it quotes the manuscript, this quotes the engine: the position it named
+ * and the code it raised, under the sentence, beside the one act they lead to.
+ */
 export const CompilerDiagnostic = forwardRef<HTMLLIElement, CompilerDiagnosticProps>(
   function CompilerDiagnostic({ diagnostic, onOpen, hideFile = false, className, ...rest }, ref) {
     const meta = DIAGNOSTIC_SEVERITY_META[diagnostic.severity];
     const position = positionText(diagnostic, hideFile);
     const openable = onOpen !== undefined && diagnostic.file !== undefined;
-
-    const body = (
-      <>
-        <Icon name={meta.icon} size={16} />
-        <span className="rh-diagnostic__severity">{meta.label}</span>
-        <span className="rh-diagnostic__message">{diagnostic.message}</span>
-        {position ? <span className="rh-diagnostic__position">{position}</span> : null}
-        {diagnostic.code ? <code className="rh-diagnostic__code">{diagnostic.code}</code> : null}
-      </>
-    );
 
     return (
       <li
@@ -47,19 +47,27 @@ export const CompilerDiagnostic = forwardRef<HTMLLIElement, CompilerDiagnosticPr
         data-source="compiler"
         {...rest}
       >
-        {openable ? (
-          <button
-            type="button"
-            className="rh-diagnostic__button"
-            onClick={() => onOpen(diagnostic.file as string, diagnostic.line ?? 1)}
-          >
-            {body}
-          </button>
-        ) : (
-          <span className="rh-diagnostic__button" aria-disabled="true">
-            {body}
-          </span>
-        )}
+        <p className="rh-diagnostic__found">
+          <Icon name={meta.icon} size={16} />
+          <span className="rh-diagnostic__severity">{meta.label}</span>
+          {' — '}
+          <span className="rh-diagnostic__message">{diagnostic.message}</span>
+        </p>
+        <div className="rh-diagnostic__foot">
+          {position ? <span className="rh-diagnostic__position">{position}</span> : null}
+          {diagnostic.code ? <code className="rh-diagnostic__code">{diagnostic.code}</code> : null}
+          {openable ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              iconStart="file-code"
+              onClick={() => onOpen(diagnostic.file as string, diagnostic.line ?? 1)}
+            >
+              {diagnostic.line === undefined ? 'Open the file' : `Open line ${diagnostic.line}`}
+            </Button>
+          ) : null}
+        </div>
       </li>
     );
   },

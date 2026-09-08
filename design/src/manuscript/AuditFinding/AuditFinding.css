@@ -10,22 +10,24 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rh-space-1);
+  gap: var(--rh-space-3);
 }
 
 /*
- * An audit row is visibly a different kind of row from a compiler diagnostic: it leads
- * with a bracketed severity chip on the scientific-status palette rather than a compiler
- * severity word on the feedback palette.
+ * A finding is a card in the shape of the reading: the manuscript's sentence, what the
+ * audit found about it, and the one thing to do next. It is visibly a different kind of
+ * row from a compiler diagnostic — the severity word is on the scientific-status palette
+ * rather than the feedback one, because a sentence accepted state cannot carry is a
+ * statement about scientific truth.
  */
 .rh-audit-finding {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
   gap: var(--rh-space-2);
   min-width: 0;
-  padding: var(--rh-space-1) var(--rh-space-2);
+  padding: var(--rh-space-2) var(--rh-space-3);
   /* A hairline, like every other coloured edge in the system: the severity is already a
-     word in a chip beside it, so the stripe only has to locate the row. */
+     word in a badge inside the card, so the stripe only has to locate it. */
   border-inline-start: var(--rh-border-width) solid var(--rh-status-candidate-border);
   border-radius: var(--rh-radius-control);
   font-size: var(--rh-type-body-sm-size);
@@ -39,63 +41,40 @@
   border-inline-start-color: var(--rh-status-qualified-border);
 }
 
-.rh-audit-finding__severity {
-  flex: none;
-  padding-inline: var(--rh-space-2);
-  border: var(--rh-border-width) solid var(--rh-status-candidate-border);
-  border-radius: var(--rh-radius-pill);
-  background: var(--rh-status-candidate-bg);
-  color: var(--rh-status-candidate-fg);
-  font-family: var(--rh-font-mono);
-  font-size: var(--rh-type-label-size);
-  letter-spacing: var(--rh-type-label-ls);
-  text-transform: uppercase;
+/*
+ * The manuscript's own words, in the treatment this system already gives quoted words on
+ * the review screen: serif, the 2px quotation rule, never clipped. It is the subject of
+ * the card, so it is set at reading size while the audit's own sentence under it is not.
+ */
+.rh-audit-finding__sentence {
+  margin: 0;
+  padding-inline-start: var(--rh-space-3);
+  border-inline-start: var(--rh-border-width-strong) solid var(--rh-border-default);
+  font-family: var(--rh-font-serif);
+  font-size: var(--rh-type-body-size);
+  line-height: var(--rh-type-body-lh);
+  overflow-wrap: anywhere;
 }
 
-.rh-audit-finding[data-severity='error'] .rh-audit-finding__severity {
-  border-color: var(--rh-status-contested-border);
-  background: var(--rh-status-contested-bg);
-  color: var(--rh-status-contested-fg);
-}
-
-.rh-audit-finding[data-severity='info'] .rh-audit-finding__severity {
-  border-color: var(--rh-status-qualified-border);
-  background: var(--rh-status-qualified-bg);
-  color: var(--rh-status-qualified-fg);
-}
-
-.rh-audit-finding__button {
-  display: flex;
-  align-items: baseline;
-  gap: var(--rh-space-2);
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--rh-text-primary);
-  font: inherit;
-  text-align: start;
-}
-
-button.rh-audit-finding__button {
-  cursor: pointer;
-}
-
-button.rh-audit-finding__button:hover .rh-audit-finding__kind {
-  text-decoration: underline;
-}
-
-.rh-audit-finding__kind {
-  flex: none;
-  font-weight: var(--rh-type-h4-weight);
-}
-
-.rh-audit-finding__message {
-  flex: 1 1 auto;
+.rh-audit-finding__found {
+  margin: 0;
   min-width: 0;
   color: var(--rh-text-secondary);
   overflow-wrap: anywhere;
+}
+
+/* The kind is the first words of the sentence, in the sentence's own type. */
+.rh-audit-finding__kind {
+  color: var(--rh-text-primary);
+  font-weight: var(--rh-type-h4-weight);
+}
+
+.rh-audit-finding__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--rh-space-2);
+  min-width: 0;
 }
 
 .rh-audit-finding__position {
@@ -105,49 +84,26 @@ button.rh-audit-finding__button:hover .rh-audit-finding__kind {
   color: var(--rh-text-muted);
 }
 
-.rh-audit-finding__refs {
-  display: inline-flex;
-  gap: var(--rh-space-1);
-  flex: none;
+/* The action ends the card, so it is what a wrapping foot pushes to its own line last. */
+.rh-audit-finding__foot .rh-button {
+  margin-inline-start: auto;
 }
 
-.rh-audit-finding__ref {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--rh-space-1);
-  padding-inline: var(--rh-space-2);
-  border: var(--rh-border-width) solid var(--rh-border-subtle);
-  border-radius: var(--rh-radius-pill);
-  background: transparent;
-  color: var(--rh-text-secondary);
-  font-family: var(--rh-font-mono);
-  font-size: var(--rh-type-mono-size);
-  cursor: pointer;
-}
-
-.rh-audit-finding__ref:disabled {
-  cursor: default;
-  color: var(--rh-text-muted);
-}
-
-.rh-audit-finding__ref:not(:disabled):hover {
-  background: var(--rh-surface-subtle);
-  color: var(--rh-text-primary);
+.rh-audit-finding__foot .rh-button ~ .rh-button {
+  margin-inline-start: 0;
 }
 
 /*
- * In a narrow panel the message takes a line of its own.
+ * In a narrow panel the foot is a stack, not a row.
  *
- * The kind and the file position are short and fixed; the message is the long part, and
- * a row that keeps all three on one line pays for the fixed pair by shrinking the message
- * to a column a few characters wide. Vertical room is the cheaper currency here.
+ * The message already takes a line of its own here, because the card is a stack of
+ * sentences rather than a lint row of columns. What is still fought over below 34rem is
+ * the foot: the severity, the position and the act do not fit on one line, and the act
+ * pushed to the far end leaves a hole beside them once they wrap. Left-aligned, the
+ * wrapped foot reads as one group.
  */
 @container rh-diagnostics (max-width: 34rem) {
-  .rh-audit-finding__button {
-    flex-wrap: wrap;
-  }
-
-  .rh-audit-finding__message {
-    flex-basis: 100%;
+  .rh-audit-finding__foot .rh-button {
+    margin-inline-start: 0;
   }
 }

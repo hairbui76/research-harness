@@ -48,7 +48,13 @@ describe('CompilerDiagnosticList', () => {
     expect(screen.getByRole('heading', { name: /manuscript\/refs\.bib/ })).toBeInTheDocument();
   });
 
-  it('says the severity in words and opens the exact position', async () => {
+  /**
+   * The whole row used to be one button whose accessible name was the compiler's sentence,
+   * which named the diagnostic rather than the act. The row is a card now, in the shape the
+   * audit beside it uses, and the act at the end of it says what it does — and says it
+   * differently for each row, so three diagnostics in one file are three distinct names.
+   */
+  it('says the severity in words and ends in the act that opens the position', async () => {
     const user = userEvent.setup();
     const onOpen = vi.fn();
     render(<CompilerDiagnosticList diagnostics={diagnostics} onOpen={onOpen} />);
@@ -57,8 +63,20 @@ describe('CompilerDiagnosticList', () => {
     expect(screen.getByText('Warning')).toBeInTheDocument();
     expect(screen.getByText('line 120, column 3')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Undefined control sequence/ }));
+    await user.click(screen.getByRole('button', { name: 'Open line 120' }));
     expect(onOpen).toHaveBeenCalledWith('manuscript/main.tex', 120);
+    expect(screen.getByRole('button', { name: 'Open line 210' })).toBeInTheDocument();
+  });
+
+  it('sets the severity as the first word of the sentence, never as a chip over it', () => {
+    const { container } = render(<CompilerDiagnosticList diagnostics={diagnostics} />);
+    const [first] = container.querySelectorAll('.rh-diagnostic');
+
+    // The severity opens the sentence the compiler wrote, in that sentence's own type.
+    expect(first?.querySelector('.rh-diagnostic__found')?.textContent).toBe(
+      'Error — Undefined control sequence \\includegraph.',
+    );
+    expect(first?.querySelector('.rh-text-label')).toBeNull();
   });
 
   it('is static text when the host cannot open a position', () => {

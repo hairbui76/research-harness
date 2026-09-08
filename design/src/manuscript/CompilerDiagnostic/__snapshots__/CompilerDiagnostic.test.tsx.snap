@@ -61,9 +61,8 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
           data-severity="error"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -103,11 +102,16 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
             >
               Error
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Undefined control sequence \\includegraph.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
@@ -118,16 +122,58 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
             >
               Undefined control sequence
             </code>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 120
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
         <li
           class="rh-diagnostic"
           data-severity="warning"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -159,17 +205,65 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
             >
               Warning
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Overfull \\hbox (12.4pt too wide).
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 210
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 210
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -225,9 +319,8 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
           data-severity="info"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -261,17 +354,65 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / comfortable
             >
               Info
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Entry "smith2024" has no year field.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 8
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 8
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -340,9 +481,8 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
           data-severity="error"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -382,11 +522,16 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
             >
               Error
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Undefined control sequence \\includegraph.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
@@ -397,16 +542,58 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
             >
               Undefined control sequence
             </code>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 120
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
         <li
           class="rh-diagnostic"
           data-severity="warning"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -438,17 +625,65 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
             >
               Warning
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Overfull \\hbox (12.4pt too wide).
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 210
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 210
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -504,9 +739,8 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
           data-severity="info"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -540,17 +774,65 @@ exports[`CompilerDiagnosticList theme x density > matches the dark / compact sna
             >
               Info
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Entry "smith2024" has no year field.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 8
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 8
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -619,9 +901,8 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
           data-severity="error"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -661,11 +942,16 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
             >
               Error
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Undefined control sequence \\includegraph.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
@@ -676,16 +962,58 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
             >
               Undefined control sequence
             </code>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 120
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
         <li
           class="rh-diagnostic"
           data-severity="warning"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -717,17 +1045,65 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
             >
               Warning
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Overfull \\hbox (12.4pt too wide).
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 210
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 210
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -783,9 +1159,8 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
           data-severity="info"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -819,17 +1194,65 @@ exports[`CompilerDiagnosticList theme x density > matches the light / comfortabl
             >
               Info
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Entry "smith2024" has no year field.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 8
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 8
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -898,9 +1321,8 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
           data-severity="error"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -940,11 +1362,16 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
             >
               Error
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Undefined control sequence \\includegraph.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
@@ -955,16 +1382,58 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
             >
               Undefined control sequence
             </code>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 120
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
         <li
           class="rh-diagnostic"
           data-severity="warning"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -996,17 +1465,65 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
             >
               Warning
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Overfull \\hbox (12.4pt too wide).
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 210
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 210
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -1062,9 +1579,8 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
           data-severity="info"
           data-source="compiler"
         >
-          <button
-            class="rh-diagnostic__button"
-            type="button"
+          <p
+            class="rh-diagnostic__found"
           >
             <svg
               aria-hidden="true"
@@ -1098,17 +1614,65 @@ exports[`CompilerDiagnosticList theme x density > matches the light / compact sn
             >
               Info
             </span>
+             — 
             <span
               class="rh-diagnostic__message"
             >
               Entry "smith2024" has no year field.
             </span>
+          </p>
+          <div
+            class="rh-diagnostic__foot"
+          >
             <span
               class="rh-diagnostic__position"
             >
               line 8
             </span>
-          </button>
+            <button
+              class="rh-button rh-button--secondary rh-button--sm"
+              data-variant="secondary"
+              type="button"
+            >
+              <span
+                class="rh-button__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-file-code rh-icon"
+                  data-icon="file-code"
+                  fill="none"
+                  focusable="false"
+                  height="14"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="14"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  />
+                  <path
+                    d="M14 2v5a1 1 0 0 0 1 1h5"
+                  />
+                  <path
+                    d="M10 12.5 8 15l2 2.5"
+                  />
+                  <path
+                    d="m14 12.5 2 2.5-2 2.5"
+                  />
+                </svg>
+                <span
+                  class="rh-button__label"
+                >
+                  Open line 8
+                </span>
+              </span>
+            </button>
+          </div>
         </li>
       </ul>
     </div>

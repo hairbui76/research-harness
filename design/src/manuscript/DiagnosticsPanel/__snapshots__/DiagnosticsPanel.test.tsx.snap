@@ -106,9 +106,8 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
               data-severity="error"
               data-source="compiler"
             >
-              <span
-                aria-disabled="true"
-                class="rh-diagnostic__button"
+              <p
+                class="rh-diagnostic__found"
               >
                 <svg
                   aria-hidden="true"
@@ -148,17 +147,22 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
                 >
                   Error
                 </span>
+                 — 
                 <span
                   class="rh-diagnostic__message"
                 >
                   Undefined control sequence.
                 </span>
+              </p>
+              <div
+                class="rh-diagnostic__foot"
+              >
                 <span
                   class="rh-diagnostic__position"
                 >
                   line 120
                 </span>
-              </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -234,52 +238,86 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
             data-severity="error"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Must fix
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              Earlier sweeps report the same ordering on held-out traffic.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-quote rh-icon"
-                data-icon="quote"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-                <path
-                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Citation mismatch
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                The key "smith2024" is cited but missing from refs.bib.
+                the key "smith2024" is cited but missing from refs.bib
+              </span>
+            </p>
+            <div
+              class="rh-audit-finding__foot"
+            >
+              <span
+                class="rh-described-term rh-audit-finding__severity"
+              >
+                <span
+                  aria-describedby="rh-described-term-rd"
+                  class="rh-described-term__word"
+                  tabindex="0"
+                >
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-contested"
+                    data-status="contested"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-triangle-alert rh-icon"
+                      data-icon="alert-triangle"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                      />
+                      <path
+                        d="M12 9v4"
+                      />
+                      <path
+                        d="M12 17h.01"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Must fix
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rd"
+                >
+                  Accepted state contradicts the manuscript here. It cannot ship as it stands.
+                </span>
               </span>
               <span
                 class="rh-audit-finding__position"
               >
                 manuscript/main.tex, line 44
               </span>
-            </span>
+            </div>
           </li>
           <li
             class="rh-audit-finding"
@@ -287,79 +325,96 @@ exports[`DiagnosticsPanel theme x density > matches the dark / comfortable snaps
             data-severity="warning"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Review
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              The gain is concentrated in the two rarest attack families.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-clock rh-icon"
-                data-icon="clock"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-                <path
-                  d="M12 6v6l4 2"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Stale claim
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                C0041 moved since this paragraph was written.
+                C0041 moved since this paragraph was written
               </span>
-            </span>
-            <span
-              class="rh-audit-finding__refs"
+            </p>
+            <div
+              class="rh-audit-finding__foot"
             >
-              <button
-                class="rh-audit-finding__ref"
-                disabled=""
-                type="button"
+              <span
+                class="rh-described-term rh-audit-finding__severity"
               >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-bookmark rh-icon"
-                  data-icon="bookmark"
-                  fill="none"
-                  focusable="false"
-                  height="14"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="14"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-describedby="rh-described-term-re"
+                  class="rh-described-term__word"
+                  tabindex="0"
                 >
-                  <path
-                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-                  />
-                </svg>
-                C0041
-              </button>
-            </span>
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                    data-status="candidate"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-circle-dashed rh-icon"
+                      data-icon="circle-dashed"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                      />
+                      <path
+                        d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                      />
+                      <path
+                        d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                      />
+                      <path
+                        d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                      />
+                      <path
+                        d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                      />
+                      <path
+                        d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                      />
+                      <path
+                        d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                      />
+                      <path
+                        d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Review
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-re"
+                >
+                  A researcher has to decide about this before the manuscript ships.
+                </span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
@@ -474,9 +529,8 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
               data-severity="error"
               data-source="compiler"
             >
-              <span
-                aria-disabled="true"
-                class="rh-diagnostic__button"
+              <p
+                class="rh-diagnostic__found"
               >
                 <svg
                   aria-hidden="true"
@@ -516,17 +570,22 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
                 >
                   Error
                 </span>
+                 — 
                 <span
                   class="rh-diagnostic__message"
                 >
                   Undefined control sequence.
                 </span>
+              </p>
+              <div
+                class="rh-diagnostic__foot"
+              >
                 <span
                   class="rh-diagnostic__position"
                 >
                   line 120
                 </span>
-              </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -602,52 +661,86 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
             data-severity="error"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Must fix
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              Earlier sweeps report the same ordering on held-out traffic.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-quote rh-icon"
-                data-icon="quote"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-                <path
-                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Citation mismatch
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                The key "smith2024" is cited but missing from refs.bib.
+                the key "smith2024" is cited but missing from refs.bib
+              </span>
+            </p>
+            <div
+              class="rh-audit-finding__foot"
+            >
+              <span
+                class="rh-described-term rh-audit-finding__severity"
+              >
+                <span
+                  aria-describedby="rh-described-term-rg"
+                  class="rh-described-term__word"
+                  tabindex="0"
+                >
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-contested"
+                    data-status="contested"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-triangle-alert rh-icon"
+                      data-icon="alert-triangle"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                      />
+                      <path
+                        d="M12 9v4"
+                      />
+                      <path
+                        d="M12 17h.01"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Must fix
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rg"
+                >
+                  Accepted state contradicts the manuscript here. It cannot ship as it stands.
+                </span>
               </span>
               <span
                 class="rh-audit-finding__position"
               >
                 manuscript/main.tex, line 44
               </span>
-            </span>
+            </div>
           </li>
           <li
             class="rh-audit-finding"
@@ -655,79 +748,96 @@ exports[`DiagnosticsPanel theme x density > matches the dark / compact snapshot 
             data-severity="warning"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Review
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              The gain is concentrated in the two rarest attack families.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-clock rh-icon"
-                data-icon="clock"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-                <path
-                  d="M12 6v6l4 2"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Stale claim
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                C0041 moved since this paragraph was written.
+                C0041 moved since this paragraph was written
               </span>
-            </span>
-            <span
-              class="rh-audit-finding__refs"
+            </p>
+            <div
+              class="rh-audit-finding__foot"
             >
-              <button
-                class="rh-audit-finding__ref"
-                disabled=""
-                type="button"
+              <span
+                class="rh-described-term rh-audit-finding__severity"
               >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-bookmark rh-icon"
-                  data-icon="bookmark"
-                  fill="none"
-                  focusable="false"
-                  height="14"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="14"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-describedby="rh-described-term-rh"
+                  class="rh-described-term__word"
+                  tabindex="0"
                 >
-                  <path
-                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-                  />
-                </svg>
-                C0041
-              </button>
-            </span>
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                    data-status="candidate"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-circle-dashed rh-icon"
+                      data-icon="circle-dashed"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                      />
+                      <path
+                        d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                      />
+                      <path
+                        d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                      />
+                      <path
+                        d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                      />
+                      <path
+                        d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                      />
+                      <path
+                        d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                      />
+                      <path
+                        d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                      />
+                      <path
+                        d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Review
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rh"
+                >
+                  A researcher has to decide about this before the manuscript ships.
+                </span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
@@ -842,9 +952,8 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
               data-severity="error"
               data-source="compiler"
             >
-              <span
-                aria-disabled="true"
-                class="rh-diagnostic__button"
+              <p
+                class="rh-diagnostic__found"
               >
                 <svg
                   aria-hidden="true"
@@ -884,17 +993,22 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
                 >
                   Error
                 </span>
+                 — 
                 <span
                   class="rh-diagnostic__message"
                 >
                   Undefined control sequence.
                 </span>
+              </p>
+              <div
+                class="rh-diagnostic__foot"
+              >
                 <span
                   class="rh-diagnostic__position"
                 >
                   line 120
                 </span>
-              </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -970,52 +1084,86 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
             data-severity="error"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Must fix
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              Earlier sweeps report the same ordering on held-out traffic.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-quote rh-icon"
-                data-icon="quote"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-                <path
-                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Citation mismatch
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                The key "smith2024" is cited but missing from refs.bib.
+                the key "smith2024" is cited but missing from refs.bib
+              </span>
+            </p>
+            <div
+              class="rh-audit-finding__foot"
+            >
+              <span
+                class="rh-described-term rh-audit-finding__severity"
+              >
+                <span
+                  aria-describedby="rh-described-term-rj"
+                  class="rh-described-term__word"
+                  tabindex="0"
+                >
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-contested"
+                    data-status="contested"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-triangle-alert rh-icon"
+                      data-icon="alert-triangle"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                      />
+                      <path
+                        d="M12 9v4"
+                      />
+                      <path
+                        d="M12 17h.01"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Must fix
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rj"
+                >
+                  Accepted state contradicts the manuscript here. It cannot ship as it stands.
+                </span>
               </span>
               <span
                 class="rh-audit-finding__position"
               >
                 manuscript/main.tex, line 44
               </span>
-            </span>
+            </div>
           </li>
           <li
             class="rh-audit-finding"
@@ -1023,79 +1171,96 @@ exports[`DiagnosticsPanel theme x density > matches the light / comfortable snap
             data-severity="warning"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Review
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              The gain is concentrated in the two rarest attack families.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-clock rh-icon"
-                data-icon="clock"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-                <path
-                  d="M12 6v6l4 2"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Stale claim
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                C0041 moved since this paragraph was written.
+                C0041 moved since this paragraph was written
               </span>
-            </span>
-            <span
-              class="rh-audit-finding__refs"
+            </p>
+            <div
+              class="rh-audit-finding__foot"
             >
-              <button
-                class="rh-audit-finding__ref"
-                disabled=""
-                type="button"
+              <span
+                class="rh-described-term rh-audit-finding__severity"
               >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-bookmark rh-icon"
-                  data-icon="bookmark"
-                  fill="none"
-                  focusable="false"
-                  height="14"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="14"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-describedby="rh-described-term-rk"
+                  class="rh-described-term__word"
+                  tabindex="0"
                 >
-                  <path
-                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-                  />
-                </svg>
-                C0041
-              </button>
-            </span>
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                    data-status="candidate"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-circle-dashed rh-icon"
+                      data-icon="circle-dashed"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                      />
+                      <path
+                        d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                      />
+                      <path
+                        d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                      />
+                      <path
+                        d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                      />
+                      <path
+                        d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                      />
+                      <path
+                        d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                      />
+                      <path
+                        d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                      />
+                      <path
+                        d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Review
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rk"
+                >
+                  A researcher has to decide about this before the manuscript ships.
+                </span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
@@ -1210,9 +1375,8 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
               data-severity="error"
               data-source="compiler"
             >
-              <span
-                aria-disabled="true"
-                class="rh-diagnostic__button"
+              <p
+                class="rh-diagnostic__found"
               >
                 <svg
                   aria-hidden="true"
@@ -1252,17 +1416,22 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
                 >
                   Error
                 </span>
+                 — 
                 <span
                   class="rh-diagnostic__message"
                 >
                   Undefined control sequence.
                 </span>
+              </p>
+              <div
+                class="rh-diagnostic__foot"
+              >
                 <span
                   class="rh-diagnostic__position"
                 >
                   line 120
                 </span>
-              </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -1338,52 +1507,86 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
             data-severity="error"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Must fix
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              Earlier sweeps report the same ordering on held-out traffic.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-quote rh-icon"
-                data-icon="quote"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-                <path
-                  d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Citation mismatch
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                The key "smith2024" is cited but missing from refs.bib.
+                the key "smith2024" is cited but missing from refs.bib
+              </span>
+            </p>
+            <div
+              class="rh-audit-finding__foot"
+            >
+              <span
+                class="rh-described-term rh-audit-finding__severity"
+              >
+                <span
+                  aria-describedby="rh-described-term-rm"
+                  class="rh-described-term__word"
+                  tabindex="0"
+                >
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-contested"
+                    data-status="contested"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-triangle-alert rh-icon"
+                      data-icon="alert-triangle"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                      />
+                      <path
+                        d="M12 9v4"
+                      />
+                      <path
+                        d="M12 17h.01"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Must fix
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rm"
+                >
+                  Accepted state contradicts the manuscript here. It cannot ship as it stands.
+                </span>
               </span>
               <span
                 class="rh-audit-finding__position"
               >
                 manuscript/main.tex, line 44
               </span>
-            </span>
+            </div>
           </li>
           <li
             class="rh-audit-finding"
@@ -1391,79 +1594,96 @@ exports[`DiagnosticsPanel theme x density > matches the light / compact snapshot
             data-severity="warning"
             data-source="audit"
           >
-            <span
-              class="rh-audit-finding__severity"
+            <blockquote
+              class="rh-audit-finding__sentence"
             >
-              Review
-            </span>
-            <span
-              class="rh-audit-finding__button"
+              The gain is concentrated in the two rarest attack families.
+            </blockquote>
+            <p
+              class="rh-audit-finding__found"
             >
-              <svg
-                aria-hidden="true"
-                class="lucide lucide-clock rh-icon"
-                data-icon="clock"
-                fill="none"
-                focusable="false"
-                height="16"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-                <path
-                  d="M12 6v6l4 2"
-                />
-              </svg>
               <span
                 class="rh-audit-finding__kind"
               >
                 Stale claim
               </span>
+               — 
               <span
                 class="rh-audit-finding__message"
               >
-                C0041 moved since this paragraph was written.
+                C0041 moved since this paragraph was written
               </span>
-            </span>
-            <span
-              class="rh-audit-finding__refs"
+            </p>
+            <div
+              class="rh-audit-finding__foot"
             >
-              <button
-                class="rh-audit-finding__ref"
-                disabled=""
-                type="button"
+              <span
+                class="rh-described-term rh-audit-finding__severity"
               >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-bookmark rh-icon"
-                  data-icon="bookmark"
-                  fill="none"
-                  focusable="false"
-                  height="14"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="14"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-describedby="rh-described-term-rn"
+                  class="rh-described-term__word"
+                  tabindex="0"
                 >
-                  <path
-                    d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"
-                  />
-                </svg>
-                C0041
-              </button>
-            </span>
+                  <span
+                    class="rh-badge rh-badge--sm rh-badge--status-candidate"
+                    data-status="candidate"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-circle-dashed rh-icon"
+                      data-icon="circle-dashed"
+                      fill="none"
+                      focusable="false"
+                      height="14"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="14"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                      />
+                      <path
+                        d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                      />
+                      <path
+                        d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                      />
+                      <path
+                        d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                      />
+                      <path
+                        d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                      />
+                      <path
+                        d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                      />
+                      <path
+                        d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                      />
+                      <path
+                        d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                      />
+                    </svg>
+                    <span
+                      class="rh-badge__label"
+                    >
+                      Review
+                    </span>
+                  </span>
+                </span>
+                <span
+                  class="rh-visually-hidden"
+                  id="rh-described-term-rn"
+                >
+                  A researcher has to decide about this before the manuscript ships.
+                </span>
+              </span>
+            </div>
           </li>
         </ul>
       </div>
