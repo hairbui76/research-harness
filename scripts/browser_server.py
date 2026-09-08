@@ -526,6 +526,97 @@ def stage_corpus_readiness(root: Path, *, needs_a_researcher: bool) -> None:
     stage_large_corpus(root, 4)
 
 
+def stage_evidence_record(root: Path) -> None:
+    """A record of accepted evidence with something in it for a researcher to see.
+
+    The Evidence index opens with what needs a researcher among the accepted readings, and
+    that is a fact about the record rather than about the screen: a span whose source moved
+    under it can no longer be replayed against that source (Product 37), and a reading no
+    Claim rests on is work that has not landed anywhere. Both are built here through the
+    daemon's own services, so the browser test reads a page composed from real state.
+
+    Three candidates are accepted through the review queue — the three the Gate P11 fixtures
+    stage, one per interrogation field. One Claim is created and related to the first, so it
+    is cited and the other two are not. The third is marked stale, the way the staleness pass
+    marks one: an appended record of the same Evidence with `stale` set, which is what
+    `evidence.jsonl` being append-only means. That gives the page two groups, in the order
+    the daemon puts them in, and the questions that narrow to each.
+    """
+    from tests.e2e.test_web_gate import WORK
+
+    from research_harness.capabilities.context import open_context
+    from research_harness.capabilities.permissions import Principal
+    from research_harness.capabilities.registry import build_default_registry
+    from research_harness.domain.enums import EvidenceStatus, ResearchEventType
+    from research_harness.domain.research import ResearchEvent
+    from research_harness.domain.transitions import HUMAN_ACTOR, transition_evidence
+    from research_harness.projection.rebuild import rebuild_workspace
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    stage_review_queue(root)
+    registry = build_default_registry()
+    human = Principal.human()
+
+    def call(capability: str, request: dict[str, object]) -> object:
+        return registry.invoke(
+            capability, open_context(root, HUMAN_ACTOR), request, principal=human
+        )
+
+    inbox = call("review.inbox", {})
+    accepted: dict[str, str] = {}
+    for field in ("dataset", "metric_result", "method_summary"):
+        staged = next(item for item in inbox.items if item["field"] == field)  # type: ignore[attr-defined]
+        outcome = call("review.accept", {"candidate_id": staged["candidate_id"]})
+        accepted[field] = str(outcome.evidence)  # type: ignore[attr-defined]
+
+    call(
+        "claim.create",
+        {
+            "claim": {
+                "statement": "TrafficLM is evaluated on CICIDS2017",
+                "type": "descriptive",
+                "semantics": {
+                    "subject": "TrafficLM",
+                    "predicate": "is evaluated on",
+                    "object": "CICIDS2017",
+                },
+                "scope": {"level": "individual", "corpus": "encrypted traffic classifiers"},
+                "assessment": {
+                    "requested_strength": "individual",
+                    "allowed_strength": "individual",
+                },
+                "provenance": {"source": "human", "actor": HUMAN_ACTOR},
+            }
+        },
+    )
+    call(
+        "claim.relate",
+        {
+            "claim_id": "C0001",
+            "relation": {"evidence": accepted["dataset"], "relation": "supports"},
+        },
+    )
+
+    # One reading whose source moved under it. The transition is the domain's own - the same
+    # `accepted -> stale` move the staleness pass makes (Product 37) - written in one
+    # transaction with the event that records it, so the fixture never hand-writes a state
+    # the domain would have refused.
+    repo = WorkspaceRepository.open(root)
+    stale = next(
+        item for item in repo.iter_evidence(WORK) if str(item.id) == accepted["method_summary"]
+    )
+    marked = transition_evidence(stale, EvidenceStatus.STALE, actor=HUMAN_ACTOR)
+    event = ResearchEvent(
+        event=ResearchEventType.EVIDENCE_STALE,
+        subjects=(marked.id, marked.source.work, marked.source.artifact),
+        actor=HUMAN_ACTOR,
+        summary=f"{marked.id} went stale: its source changed under the accepted span",
+    )
+    with repo.transaction(event, HUMAN_ACTOR) as tx:
+        tx.append_evidence(marked)
+    rebuild_workspace(repo)
+
+
 def stage_synthesis_grid(root: Path) -> None:
     """A matrix with every state of a cell the Synthesis grid has to draw.
 
@@ -843,6 +934,36 @@ def main() -> None:
                     "corpus_url": f"/projects/{view.project_id}/corpus",
                 }
                 readiness[needs_a_researcher] = answer
+                return answer
+
+        record: dict[int, dict[str, str]] = {}
+        record_lock = Lock()
+
+        @app.post("/__test__/evidence-record")
+        def evidence_record() -> dict[str, str]:
+            """A project whose accepted evidence the index has something to say about.
+
+            Shared between callers, like the large corpus and the readiness one: ingesting
+            and parsing a paper and accepting three candidates is real work, this screen
+            only reads what it leaves behind, and building one project per viewport would
+            double the cost of the run to prove nothing. The lock is because FastAPI runs a
+            plain `def` handler on a threadpool and the two viewport runs arrive together.
+            """
+            with record_lock:
+                existing = record.get(0)
+                if existing is not None:
+                    return existing
+                manager: ProjectManager = backend.state.manager
+                name = f"Evidence record {next(seeded)}"
+                view = manager.create(directory, name, ReviewPolicy.POLICY_BATCH)
+                stage_evidence_record(Path(view.path))
+                answer = {
+                    "project_id": view.project_id,
+                    "name": name,
+                    "workspace_url": f"/projects/{view.project_id}",
+                    "evidence_url": f"/projects/{view.project_id}/evidence",
+                }
+                record[0] = answer
                 return answer
 
         @app.post("/__test__/synthesis-grid")

@@ -25,11 +25,11 @@ describe('an address the cockpit serves no page at', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'There is no page at this address' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('No page at this address')).toBeInTheDocument();
-    // The address a researcher typed or followed, so a typo is corrected by seeing it.
-    expect(screen.getByText(/The cockpit serves no page at \/corpuss\./)).toBeInTheDocument();
+    // The address a researcher typed or followed, so a typo is corrected by seeing it —
+    // and it is the half the heading above does not say, rather than the same sentence twice.
+    expect(screen.getByText('Nothing is served at /corpuss')).toBeInTheDocument();
     // No claim about the project: only the address is wrong.
-    expect(screen.getByText(/nothing about the project has changed/)).toBeInTheDocument();
+    expect(screen.getByText(/Nothing about the project has changed/)).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

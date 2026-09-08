@@ -8,8 +8,9 @@
  *
  * So the frame stays — this is a research page like any other, and every state of one keeps
  * its heading — and the page says the one true thing it knows: nothing is served at this
- * address. The path is quoted back because a mistyped URL is usually corrected by seeing
- * it, and the one way on is the Overview, which is where a researcher with no particular
+ * address. The frame states the condition and the state under it states the address, which
+ * is the half a reader cannot see anywhere else and the half a mistyped URL is corrected by
+ * seeing. The one way on is the Overview, which is where a researcher with no particular
  * destination belongs.
  *
  * No suggestions and no guessing: the cockpit has no index of what a researcher meant, and
@@ -37,13 +38,15 @@ export function NotFoundPage({ overview }: NotFoundPageProps) {
   return (
     <FullPageWorkspace
       title="There is no page at this address"
-      description="Nothing in the cockpit is served here."
+      description="A link may have outlived the screen it pointed at, or the address may have been mistyped."
     >
+      {/* The frame names the condition; the state names the address, which is the half a
+          reader cannot see anywhere else on the screen. Neither says the other's sentence. */}
       <Empty
-        description={`The cockpit serves no page at ${pathname}. A link may have outlived the screen it pointed at, or the address may have been mistyped; nothing about the project has changed either way.`}
+        description="Nothing about the project has changed: only the address is wrong. Every screen the cockpit does serve is listed in the rail."
         action={<Link to={href(overview)}>Go to the Overview</Link>}
       >
-        No page at this address
+        {`Nothing is served at ${pathname}`}
       </Empty>
     </FullPageWorkspace>
   );
