@@ -17,9 +17,10 @@ jobs:
   verify:
     name: Verify (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # The gate runs every suite and then the browser suite against the real daemon; the
-    # Windows runner takes about half an hour to reach the browser step alone.
-    timeout-minutes: 100
+    # The gate runs every suite and then the browser suite against the real daemon. The
+    # Windows runner takes half an hour to reach the browser step and three quarters of an
+    # hour to run it, and the whole job has to fit under this.
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -38,7 +39,9 @@ jobs:
       - run: uv sync --locked
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run task:check
+      # The gate's own per-check limit defaults to 1200s, which the browser suite exceeds on
+      # the Windows runner (about 45 minutes) and approaches on Ubuntu (about 16).
+      - run: pnpm run task:check --timeout 3600
       - uses: actions/upload-artifact@v4
         if: always()
         with:
