@@ -17,7 +17,9 @@ jobs:
   verify:
     name: Verify (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # The gate runs every suite and then the browser suite against the real daemon; the
+    # Windows runner takes about half an hour to reach the browser step alone.
+    timeout-minutes: 100
     strategy:
       fail-fast: false
       matrix:

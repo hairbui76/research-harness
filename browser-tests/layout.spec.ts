@@ -157,13 +157,25 @@ test('every inspector tab is reachable from the keyboard at both widths', async 
 
     // "Show" exists only while the inspector is closed, so its presence is the question.
     const show = page.getByRole('button', { name: 'Show the research inspector', exact: true });
-    if ((await show.count()) > 0) await show.first().click();
+    const opened = (await show.count()) > 0;
+    if (opened) await show.first().click();
 
     const inspector = page.getByRole('region', { name: 'Research inspector' });
     await expect(inspector).toBeVisible();
     const tabs = inspector.getByRole('tab');
     await expect(tabs, `six tabs at ${width}px`).toHaveCount(6);
 
+    // Below the breakpoint the inspector opens as a drawer, and a drawer moves focus in to
+    // its first control once it has painted. Focusing a tab before that lands means the
+    // drawer takes the focus straight back, and an arrow key then has nothing to move.
+    // Above it, "Show" only reopens a pane, which moves no focus.
+    const drawer = page.getByRole('dialog', { name: 'Research inspector' });
+    if (opened && (await drawer.count()) > 0) {
+      await expect(
+        drawer.getByRole('button', { name: 'Close research inspector' }),
+        `the drawer takes focus when it opens at ${width}px`,
+      ).toBeFocused();
+    }
     await tabs.first().focus();
     for (let index = 0; index < 6; index += 1) {
       const tab = tabs.nth(index);

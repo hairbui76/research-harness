@@ -234,14 +234,24 @@ test('a matrix over a thousand works draws a window, not a thousand rows', async
   await window_.evaluate((element) => {
     element.scrollLeft = element.scrollWidth;
   });
-  const aligned = await page.evaluate(() => {
-    const strip = document.querySelector('.rh-web-matrix__strip');
-    const rows = document.querySelector('.rh-web-matrix__window');
-    if (!(strip instanceof HTMLElement) || !(rows instanceof HTMLElement)) return null;
-    return { strip: strip.scrollLeft, rows: rows.scrollLeft, scrolled: rows.scrollLeft > 0 };
-  });
-  expect(aligned, 'the windowed grid draws a heading strip and a window').not.toBeNull();
-  expect(aligned?.strip, 'the column heads follow the rows sideways').toBe(aligned?.rows);
+  // The strip follows through the window's scroll event, which the browser delivers on
+  // its next frame, not inside the assignment above; the read waits for it to land.
+  const alignment = () =>
+    page.evaluate(() => {
+      const strip = document.querySelector('.rh-web-matrix__strip');
+      const rows = document.querySelector('.rh-web-matrix__window');
+      if (!(strip instanceof HTMLElement) || !(rows instanceof HTMLElement)) return null;
+      return { strip: strip.scrollLeft, rows: rows.scrollLeft };
+    });
+  expect(await alignment(), 'the windowed grid draws a heading strip and a window').not.toBeNull();
+  // Whether there is anything to scroll is the pane's width's business: at 1440 the whole
+  // matrix fits and both stay at zero, and the strip following is still the contract.
+  await expect
+    .poll(async () => {
+      const aligned = await alignment();
+      return aligned === null ? null : aligned.strip - aligned.rows;
+    }, 'the column heads follow the rows sideways')
+    .toBe(0);
 
   // -- the column head is still there to read the field under ----------------
   // A heading that scrolled away with the rows would be exactly the recall this page exists

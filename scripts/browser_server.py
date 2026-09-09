@@ -93,6 +93,29 @@ def stage_conversation(root: Path) -> str:
     return str(session.id)
 
 
+def stage_provider_table(root: Path) -> None:
+    """Give a workspace one routable model that needs no credential and no CLI.
+
+    A `local_openai_compatible` entry is listed by `provider.list` from its declaration
+    alone: nothing is probed and no key is read, which is exactly what the unit and contract
+    suites rely on when they seed the same table. The write goes through the repository so
+    the file is the one a researcher would have edited, validated the same way.
+    """
+    from research_harness.workspace.repository import WorkspaceRepository
+
+    WorkspaceRepository.open(root).update_providers(
+        [
+            {
+                "name": "house-local",
+                "kind": "local_openai_compatible",
+                "model": "qwen3",
+                "priority": 10,
+                "tags": ["local"],
+            }
+        ]
+    )
+
+
 def stage_overview_project(root: Path) -> None:
     """Fill a fresh workspace with everything the Overview groups its screen into.
 
@@ -900,18 +923,26 @@ def main() -> None:
             }
 
         @app.post("/__test__/session-with-turn")
-        def session_with_turn() -> dict[str, str]:
+        def session_with_turn(providers: bool = False) -> dict[str, str]:
             """A registered project holding one session with a question and an answer.
 
             The transcript's own row — its reference chips, its toolbar and the overflow
             behind *More actions* — cannot be photographed without one, and no capability
             reachable from the browser can write an assistant turn without a model provider.
             Each call builds its own project, so the two viewport runs never share a session.
+
+            `?providers=true` also writes a `providers:` table into the project's
+            `research.yaml`, the way a researcher would, so the composer has a catalogue to
+            offer whether or not the machine running the suite has a CLI runtime installed.
+            Without it the model cluster exists only where the daemon's scan finds one, and a
+            test that measures the cluster passes on a workstation and fails on a runner.
             """
             manager: ProjectManager = backend.state.manager
             name = f"Transcript {next(seeded)}"
             view = manager.create(directory, name, ReviewPolicy.STRICT)
             session = stage_conversation(Path(view.path))
+            if providers:
+                stage_provider_table(Path(view.path))
             return {
                 "project_id": view.project_id,
                 "name": name,

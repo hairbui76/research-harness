@@ -274,7 +274,12 @@ test('the conversation panes answer their own width, not the window’s', async 
   const bootstrap = await request.get('/__test__/bootstrap');
   expect(bootstrap.ok()).toBeTruthy();
   const { nonce } = await bootstrap.json();
-  const seeded = await request.post('/__test__/session-with-turn', { timeout: 60_000 });
+  // The cluster is offered from the project's provider catalogue or from the daemon's scan
+  // of installed CLIs. The suite must not depend on which CLIs the machine happens to have,
+  // so the project is seeded with a catalogue entry of its own.
+  const seeded = await request.post('/__test__/session-with-turn?providers=true', {
+    timeout: 60_000,
+  });
   expect(seeded.ok()).toBeTruthy();
   const conversation = await seeded.json();
 
