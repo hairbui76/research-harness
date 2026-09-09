@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import shutil
+import time
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,19 @@ RUN_FILENAME = "run.json"
 
 _TEMP_PREFIX = ".tmp-"
 _SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+# The stream checkpoint is rewritten on every streamed delta -- once per token, in the
+# worst case many times a second -- so it is the file most likely to collide with
+# something else that briefly opened it: antivirus real-time scanning, a search indexer,
+# or a cloud-sync client (Windows backs up a user's Downloads folder to OneDrive by
+# default, and a project kept there is exactly this kind of frequently-rewritten small
+# file). Windows reports that collision as `PermissionError` (WinError 5 or 32) from the
+# rename itself, not from anything this process did; POSIX never raises this for a
+# rename over an open file, so the retry below is a no-op everywhere else. The bound is
+# generous against a scan that runs long, not a real fault: a lock that outlives it is
+# treated as one.
+_REPLACE_RETRIES = 20
+_REPLACE_RETRY_DELAY_S = 0.05
 
 
 class RunStoreError(Exception):
@@ -194,11 +208,23 @@ def _atomic_write_text(path: Path, text: str) -> None:
             handle.write(text)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temp, path)
+        _replace_past_a_transient_lock(temp, path)
     except Exception:
         temp.unlink(missing_ok=True)
         raise
     _fsync_dir(directory)
+
+
+def _replace_past_a_transient_lock(temp: Path, path: Path) -> None:
+    """`os.replace(temp, path)`, riding out a lock some other process holds briefly."""
+    for attempt in range(_REPLACE_RETRIES):
+        try:
+            os.replace(temp, path)
+            return
+        except PermissionError:
+            if attempt == _REPLACE_RETRIES - 1:
+                raise
+            time.sleep(_REPLACE_RETRY_DELAY_S)
 
 
 def _fsync_dir(directory: Path) -> None:
