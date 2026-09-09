@@ -529,6 +529,48 @@ def test_a_future_schema_version_fails_closed_naming_both_versions(
     assert "Upgrade the harness" in message
 
 
+def test_probe_answers_the_declared_version_of_a_workspace_this_build_can_open(
+    repo: WorkspaceRepository,
+) -> None:
+    assert WorkspaceRepository.probe(repo.root) == CURRENT_SCHEMA_VERSION
+
+
+def test_probe_names_the_missing_file_when_a_folder_is_no_longer_a_workspace(
+    repo: WorkspaceRepository,
+) -> None:
+    repo.layout.research_file.unlink()
+    with pytest.raises(WorkspaceNotFoundError, match=r"research\.yaml"):
+        WorkspaceRepository.probe(repo.root)
+
+
+def test_probe_fails_closed_on_a_future_schema_version_with_the_same_words_as_open(
+    repo: WorkspaceRepository,
+) -> None:
+    config = repo.config.model_copy(update={"schema_version": CURRENT_SCHEMA_VERSION + 7})
+    repo.layout.research_file.write_text(dump_yaml(config), encoding="utf-8")
+    with pytest.raises(UnsupportedSchemaVersionError, match="Upgrade the harness"):
+        WorkspaceRepository.probe(repo.root)
+
+
+def test_probe_does_not_verify_what_open_verifies(repo: WorkspaceRepository) -> None:
+    """A listing says whether a project can be opened, not whether its record is intact.
+
+    The consistency check is what opening is for; paying it once per registered project
+    on every page load is what made a long registry on a slow disk unlistable.
+    """
+    with repo.transaction(_event(ResearchEventType.CLAIM_CREATED, "create C0041")) as tx:
+        tx.put(make_claim())
+    path = repo.layout.claim_file(ClaimId("C0041"))
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("Existing systems employ", "Every system employs"),
+        encoding="utf-8",
+    )
+
+    assert WorkspaceRepository.probe(repo.root) == CURRENT_SCHEMA_VERSION
+    with pytest.raises(WorkspaceInconsistentError):
+        WorkspaceRepository.open(repo.root)
+
+
 def test_a_workspace_without_a_declared_schema_version_is_refused(
     repo: WorkspaceRepository,
 ) -> None:

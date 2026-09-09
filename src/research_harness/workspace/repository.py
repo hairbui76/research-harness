@@ -327,6 +327,28 @@ class WorkspaceRepository:
             lock_timeout=lock_timeout,
         )
 
+    @classmethod
+    def probe(cls, root: Path | str) -> int:
+        """Say whether `root` is a workspace this build can open, without opening it.
+
+        The application lists every registered project on every page load, and a listing
+        must not pay for what `open` does — the lock, recovery, migration and the event-log
+        check — once per project: on a slow disk that cost grows with the registry until
+        the list itself times out. This reads exactly what a listing needs, that
+        `research.yaml` is there and declares a version this build supports, and raises
+        the same errors `open` raises for the same faults, so the availability derived
+        from it is the one an open would report. What it does not do is prove the
+        workspace consistent; that still happens when the project is opened.
+        """
+        layout = WorkspaceLayout(root)
+        if not layout.research_file.is_file():
+            raise WorkspaceNotFoundError(
+                f"no research workspace at {layout.root}: {layout.research_file.name} is missing"
+            )
+        version = _declared_schema_version(layout)
+        check_schema_version(version)
+        return version
+
     # -- state ---------------------------------------------------------------
 
     @property

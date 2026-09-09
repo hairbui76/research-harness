@@ -106,3 +106,10 @@
   font-size: calc(var(--rh-type-body-sm-size) * var(--rh-density-font-scale));
   line-height: var(--rh-type-body-sm-lh);
 }
+
+/* The notice sits on the paper surface, which keeps its own ink in both themes; a link
+   in the app's link colour is set for the app's ground and fails contrast on paper. */
+.rh-pdf__fallback a {
+  color: var(--rh-text-on-paper);
+  text-decoration-color: currentColor;
+}

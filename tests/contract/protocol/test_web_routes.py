@@ -20,6 +20,7 @@ field the daemon actually publishes — so a rename fails here rather than in a 
 from __future__ import annotations
 
 import hashlib
+import mimetypes
 import re
 from collections.abc import Iterator
 from datetime import UTC, datetime
@@ -823,6 +824,29 @@ def test_no_bundle_means_no_mount_and_a_json_api_that_still_answers(
     with TestClient(create_app(corpus, registry=registry)) as client:
         assert client.get("/health").json()["ok"] is True
         assert client.get("/does-not-exist").status_code == 404
+
+
+def test_the_bundle_serves_a_module_script_as_javascript_whatever_the_host_thinks(
+    corpus: Path, registry: CapabilityRegistry, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """pdf.js's worker is an `.mjs` module, and a browser refuses one served as text.
+
+    Python takes its MIME table from the platform — on Windows from the registry, where
+    `.mjs` can be `text/plain` — so the daemon declares the type itself. The host's wrong
+    answer is simulated here; without the declaration the worker never loads and the review
+    screen has no page image.
+    """
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><title>cockpit</title>", encoding="utf-8")
+    (dist / "assets" / "pdf.worker.mjs").write_text("export {};\n", encoding="utf-8")
+    monkeypatch.setenv(WEB_DIST_ENV, str(dist))
+    monkeypatch.setitem(mimetypes.types_map, ".mjs", "text/plain")
+
+    with TestClient(create_app(corpus, registry=registry)) as client:
+        response = client.get("/assets/pdf.worker.mjs")
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/javascript")
 
 
 def test_a_built_bundle_is_served_at_the_root_with_a_single_page_fallback(

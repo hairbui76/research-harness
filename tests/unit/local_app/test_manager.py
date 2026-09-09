@@ -294,6 +294,25 @@ def test_active_runs_make_a_project_busy(tmp_path: Path) -> None:
     assert listed.active_runs == 2
 
 
+def test_listing_asks_whether_a_project_can_be_opened_without_opening_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The list is read on every page load; opening runs recovery and the consistency check.
+
+    On a slow disk that cost, paid once per registered project, grows with the registry
+    until the list itself times out, so availability is derived from a probe instead.
+    """
+    manager = manager_at(tmp_path)
+    manager.create(tmp_path, "Listed", ReviewPolicy.STRICT)
+
+    def refuse(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("listing a project must not open its workspace")
+
+    monkeypatch.setattr(WorkspaceRepository, "open", refuse)
+    listed = manager.list_projects()[0]
+    assert listed.availability is ProjectAvailability.available
+
+
 def test_one_broken_project_does_not_hide_the_others(tmp_path: Path) -> None:
     import shutil
 

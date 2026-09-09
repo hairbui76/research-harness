@@ -25,6 +25,7 @@ the built bundle itself. They widen what a client can *see*, never what it can w
 from __future__ import annotations
 
 import logging
+import mimetypes
 import os
 import secrets
 import threading
@@ -2223,6 +2224,12 @@ def _serve_bundle(app: FastAPI) -> None:
     if directory is None:
         logger.debug("no built web bundle found; serving the API only")
         return
+    # The bundle's pdf.js worker is an `.mjs` module, and a browser refuses a module script
+    # served as anything but JavaScript. Python takes MIME types from the platform — on
+    # Windows from the registry, where `.mjs` can be `text/plain` — so the two types the
+    # bundle needs beyond the common ones are declared here rather than trusted to the host.
+    mimetypes.add_type("text/javascript", ".mjs")
+    mimetypes.add_type("application/wasm", ".wasm")
     app.mount("/", SpaStaticFiles(directory=directory, html=True), name="web")
 
 

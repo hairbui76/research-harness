@@ -262,7 +262,10 @@ class ProjectManager:
                 record, availability=ProjectAvailability.unavailable, detail="Folder not found"
             )
         try:
-            WorkspaceRepository.open(record.canonical_root)
+            # A listing asks whether the folder is a workspace this build can open; it
+            # does not open it. Opening runs recovery and the consistency check, and a
+            # registry of many projects on a slow disk would pay that on every page load.
+            WorkspaceRepository.probe(record.canonical_root)
             active = tuple(self._active_runs(record.project_id))
         except FileNotFoundError:
             return ProjectView.from_record(
