@@ -39,8 +39,9 @@ jobs:
       - run: uv sync --locked
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      # The gate's own per-check limit defaults to 1200s, which the browser suite exceeds on
-      # the Windows runner (about 45 minutes) and approaches on Ubuntu (about 16).
+      # The gate's own per-check limit now defaults to 3600s (it was 1200s, which the
+      # browser suite exceeded on the Windows runner and approached on Ubuntu); the flag
+      # stays explicit here so the workflow does not depend on that default silently.
       - run: pnpm run task:check --timeout 3600
       - uses: actions/upload-artifact@v4
         if: always()

@@ -168,7 +168,7 @@ def execute(
             return 124
 
 
-def check_repository(root: Path, *, checks: Sequence[Check] = CHECKS, timeout: float = 1200) -> int:
+def check_repository(root: Path, *, checks: Sequence[Check] = CHECKS, timeout: float = 3600) -> int:
     """Run the full gate; only publish success for a tree unchanged during the run."""
     directory = root / ".task-gate"
     directory.mkdir(exist_ok=True)
@@ -238,7 +238,7 @@ def loop(
     agent: Sequence[str],
     *,
     rounds: int = 3,
-    timeout: float = 1200,
+    timeout: float = 3600,
     checks: Sequence[Check] = CHECKS,
 ) -> int:
     """Run an explicitly selected adapter, verify, and feed failures back within a budget."""
@@ -340,7 +340,7 @@ def main() -> int:
         "--agent-file", type=Path, help="JSON array of argv; task/feedback arrives on stdin"
     )
     parser.add_argument("--rounds", type=int, default=3)
-    parser.add_argument("--timeout", type=float, default=1200)
+    parser.add_argument("--timeout", type=float, default=3600)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     if args.timeout <= 0 or not 1 <= args.rounds <= 5:

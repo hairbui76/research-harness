@@ -46,8 +46,9 @@ pnpm run task:loop --task-file .task-gate/task.txt --agent-file .task-gate/agent
 
 The controller runs the agent, then the full gate. On failure it gives the adapter the
 task and the paths of the failure report/logs, then verifies again. The default budget is
-three agent rounds (maximum five), with a 1,200-second timeout per command. `--timeout`
-changes that bound. No source change during a repair ends the loop early. Agent logs are
+three agent rounds (maximum five), with a 3,600-second timeout per command -- the browser
+suite alone can run past twenty minutes. `--timeout` changes that bound. No source change
+during a repair ends the loop early. Agent logs are
 `.task-gate/agent-N.log`; the latest verification overwrites the numbered check logs.
 Exit zero means verified, never pushed. `TASK_GATE_ACTIVE` prevents nested Claude Stop
 hooks from recursively verifying while the outer controller owns the checks.
